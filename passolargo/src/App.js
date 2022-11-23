@@ -5,6 +5,7 @@ import Navbar from 'react-bootstrap/Navbar';
 import NavDropdown from 'react-bootstrap/NavDropdown';
 import Button from 'react-bootstrap/Button';
 import Row from 'react-bootstrap/Row';
+import Col from 'react-bootstrap/Col';
 
 function App() {
   return (
@@ -38,9 +39,11 @@ function App() {
         </Navbar.Collapse>
       </Container>
     </Navbar>
-   
-    <Row>
-       <Button variant="baitola">Botãozin</Button>{' '}
+    
+    <Row className="justify-content-center">
+      <Col xs="auto">
+        <Button variant="baitola">Botãozin</Button>{' '}
+      </Col>
     </Row>
     </div>
   );
