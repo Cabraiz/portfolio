@@ -6,9 +6,12 @@ import Form from 'react-bootstrap/Form';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
 import NavDropdown from 'react-bootstrap/NavDropdown';
+import Carousel from 'react-bootstrap/Carousel';
+import Row from 'react-bootstrap/Row';
 
 function App() {
   return (
+    <>
     <Navbar bg="light" expand="lg">
       <Container fluid>
         <Navbar.Brand href="#">Navbar scroll</Navbar.Brand>
@@ -40,13 +43,18 @@ function App() {
               type="search"
               placeholder="Search"
               className="me-2"
-              aria-label="Search"
-            />
+              aria-label="Search" />
             <Button variant="outline-success">Search</Button>
           </Form>
         </Navbar.Collapse>
       </Container>
     </Navbar>
+    <Container>
+      <Row>
+        <Button variant="primary">Primary</Button>{' '}
+      </Row>
+    </Container>
+    </>
   );
 }
 
