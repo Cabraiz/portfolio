@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import "./App.css";
 import Button from "react-bootstrap/Button";
 import Container from "react-bootstrap/Container";
@@ -10,6 +10,17 @@ import Col from "react-bootstrap/Col";
 import Row from "react-bootstrap/Row";
 
 function App() {
+  const [site, setSite] = useState<string>("");
+
+  function handleBlur() {
+    if (/[a-zA-Z]/.test(site)) {
+      if (!site.startsWith("www.") && !site.includes(".")) {
+        setSite("www." + site.split(".").pop());
+      } else {
+        setSite("www." + site);
+      }
+    }
+  }
   return (
     <>
       <Navbar bg="light" expand="lg">
@@ -54,7 +65,13 @@ function App() {
         style={{ marginTop: "15px", paddingLeft: "30px", marginRight: "30px" }}
       >
         <Col sm={12} md={8} lg={6}>
-          <Form.Control type="email" placeholder="Enter CPF" />
+          <Form.Control
+            value={site}
+            onChange={(e) => setSite(e.target.value)}
+            onBlur={handleBlur}
+            type="email"
+            placeholder="Enter Website"
+          />
         </Col>
         <Col sm={12} md={4} lg={6}>
           <Form.Control type="password" placeholder="Enter E-mail" />
