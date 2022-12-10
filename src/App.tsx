@@ -50,7 +50,9 @@ function App() {
           </Navbar.Collapse>
         </Container>
       </Navbar>
-      <Row style={{ marginTop: "15px" }}>
+      <Row
+        style={{ marginTop: "15px", paddingLeft: "30px", marginRight: "30px" }}
+      >
         <Col sm={12} md={8} lg={6}>
           <Form.Control type="email" placeholder="Enter CPF" />
         </Col>
