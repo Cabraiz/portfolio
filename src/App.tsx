@@ -61,20 +61,24 @@ function App() {
           </Navbar.Collapse>
         </Container>
       </Navbar>
-      <Row
-        style={{ marginTop: "15px", paddingLeft: "30px", marginRight: "30px" }}
-      >
-        <Col sm={12} md={8} lg={6}>
+      <Row>
+        <Col sm={12}>
           <Form.Control
             value={site}
             onChange={(e) => setSite(e.target.value)}
             onBlur={handleBlur}
-            type="email"
             placeholder="Enter Website"
           />
         </Col>
-        <Col sm={12} md={4} lg={6}>
-          <Form.Control type="password" placeholder="Enter E-mail" />
+      </Row>
+      <Row className="justify-content-md-center">
+        <Col sm={12}>
+          <Form.Control type="email" placeholder="Enter E-mail" />
+        </Col>
+      </Row>
+      <Row>
+        <Col sm={12}>
+          <Form.Control type="password" placeholder="Enter Password" />
         </Col>
       </Row>
       <Row className="justify-content-md-center" style={{ marginTop: "15px" }}>
