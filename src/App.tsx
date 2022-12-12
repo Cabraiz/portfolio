@@ -9,16 +9,60 @@ import NavDropdown from "react-bootstrap/NavDropdown";
 import Col from "react-bootstrap/Col";
 import Row from "react-bootstrap/Row";
 
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 function App() {
   const [site, setSite] = useState<string>("");
 
+  const notifySucesso = () => {
+    toast.success("🦄 Website é Website", {
+      position: "bottom-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "colored",
+    });
+  };
+
+  const notifyError = () => {
+    toast.warning("❌ Website Não é Website", {
+      position: "bottom-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "colored",
+    });
+  };
+
   function handleBlur() {
-    if (/[a-zA-Z]/.test(site)) {
-      if (!site.startsWith("www.") && !site.includes(".")) {
-        setSite("www." + site.split(".").pop());
-      } else {
-        setSite("www." + site);
+    let urlPattern = new RegExp(
+      "^(https?:\\/\\/)?" + // validate protocol
+        "((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|" + // validate domain name
+        "((\\d{1,3}\\.){3}\\d{1,3}))" + // validate OR ip (v4) address
+        "(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*" + // validate port and path
+        "(\\?[;&a-z\\d%_.~+=-]*)?" + // validate query string
+        "(\\#[-a-z\\d_]*)?$",
+      "i"
+    ); // validate fragment locator
+
+    if (/[A-Za-z0-9]/.test(site) && !site.startsWith("www.")) {
+      let aux = site;
+      while (!/[A-Za-z0-9]/.test(aux.charAt(0))) {
+        aux = aux.substring(1);
       }
+      setSite("www." + aux);
+    }
+    if (urlPattern.test(site)) {
+      notifySucesso();
+    } else {
+      notifyError();
     }
   }
   return (
@@ -86,9 +130,18 @@ function App() {
           <Button variant="primary">Botão</Button>{" "}
         </Col>
       </Row>
-      <Row>
-        <Form.Text className="text-muted">Desconhecido</Form.Text>
-      </Row>
+      <ToastContainer
+        position="bottom-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
+      />
     </>
   );
 }
