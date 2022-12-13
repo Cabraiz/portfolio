@@ -65,7 +65,7 @@ function App() {
   }
   return (
     <>
-      <Row style={{ margin: "0px", padding: "0px" }}>
+      <Row>
         <Col sm={12}>
           <Form.Control
             value={site}
@@ -75,7 +75,7 @@ function App() {
           />
         </Col>
       </Row>
-      <Row style={{ marginTop: "15px" }}>
+      <Row>
         <Col sm="auto">
           <Button variant="primary">Botão</Button>{" "}
         </Col>
