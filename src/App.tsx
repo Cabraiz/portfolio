@@ -1,11 +1,7 @@
 import React, { useState } from "react";
 import "./App.css";
 import Button from "react-bootstrap/Button";
-import Container from "react-bootstrap/Container";
 import Form from "react-bootstrap/Form";
-import Nav from "react-bootstrap/Nav";
-import Navbar from "react-bootstrap/Navbar";
-import NavDropdown from "react-bootstrap/NavDropdown";
 import Col from "react-bootstrap/Col";
 import Row from "react-bootstrap/Row";
 
@@ -69,7 +65,7 @@ function App() {
   }
   return (
     <>
-      <Row>
+      <Row style={{ margin: "0px", padding: "0px" }}>
         <Col sm={12}>
           <Form.Control
             value={site}
@@ -79,12 +75,7 @@ function App() {
           />
         </Col>
       </Row>
-      <Row>
-        <Col sm={12}>
-          <Form.Control placeholder="Enter Password" />
-        </Col>
-      </Row>
-      <Row className="justify-content-md-center" style={{ marginTop: "15px" }}>
+      <Row style={{ marginTop: "15px" }}>
         <Col sm="auto">
           <Button variant="primary">Botão</Button>{" "}
         </Col>
