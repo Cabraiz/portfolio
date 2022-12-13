@@ -79,11 +79,6 @@ function App() {
           />
         </Col>
       </Row>
-      <Row className="justify-content-md-center">
-        <Col sm={12}>
-          <Form.Control type="email" placeholder="Enter E-mail" />
-        </Col>
-      </Row>
       <Row>
         <Col sm={12}>
           <Form.Control type="password" placeholder="Enter Password" />
