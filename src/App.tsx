@@ -15,6 +15,16 @@ import "react-toastify/dist/ReactToastify.css";
 function App() {
   const [site, setSite] = useState<string>("");
 
+  let urlPattern = new RegExp(
+    "^(https?:\\/\\/)?" + // validate protocol
+      "((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|" + // validate domain name
+      "((\\d{1,3}\\.){3}\\d{1,3}))" + // validate OR ip (v4) address
+      "(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*" + // validate port and path
+      "(\\?[;&a-z\\d%_.~+=-]*)?" + // validate query string
+      "(\\#[-a-z\\d_]*)?$",
+    "i"
+  );
+
   const notifySucesso = () => {
     toast.success("🦄 Website é Website", {
       position: "bottom-right",
@@ -42,16 +52,7 @@ function App() {
   };
 
   function handleBlur() {
-    let urlPattern = new RegExp(
-      "^(https?:\\/\\/)?" + // validate protocol
-        "((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|" + // validate domain name
-        "((\\d{1,3}\\.){3}\\d{1,3}))" + // validate OR ip (v4) address
-        "(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*" + // validate port and path
-        "(\\?[;&a-z\\d%_.~+=-]*)?" + // validate query string
-        "(\\#[-a-z\\d_]*)?$",
-      "i"
-    ); // validate fragment locator
-
+    //VALIDAÇÃO
     if (/[A-Za-z0-9]/.test(site) && !site.startsWith("www.")) {
       let aux = site;
       while (!/[A-Za-z0-9]/.test(aux.charAt(0))) {
@@ -59,6 +60,7 @@ function App() {
       }
       setSite("www." + aux);
     }
+    //VALIDAÇÃO
     if (urlPattern.test(site)) {
       notifySucesso();
     } else {
