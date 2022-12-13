@@ -81,7 +81,7 @@ function App() {
       </Row>
       <Row>
         <Col sm={12}>
-          <Form.Control type="password" placeholder="Enter Password" />
+          <Form.Control placeholder="Enter Password" />
         </Col>
       </Row>
       <Row className="justify-content-md-center" style={{ marginTop: "15px" }}>
