@@ -76,8 +76,10 @@ function App() {
         </Col>
       </Row>
       <Row>
-        <Col sm="auto">
-          <Button variant="primary">Botão</Button>{" "}
+        <Col sm={1}>
+          <Button className="full-width" variant="primary">
+            Botão
+          </Button>{" "}
         </Col>
       </Row>
       <ToastContainer

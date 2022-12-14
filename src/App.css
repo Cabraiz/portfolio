@@ -1,5 +1,12 @@
+@media (max-width: 576px) {
+  button.full-width {
+    width: 100%;
+  }
+}
+
 .row {
   justify-content: center;
   margin-top: 20px;
-  margin-inline: 200px;
+  padding-left: 10vw;
+  padding-right: 10vw;
 }
