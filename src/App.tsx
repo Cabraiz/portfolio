@@ -86,7 +86,7 @@ function App() {
       <Row>
         <Col sm={1}>
           <Button className="full-width" variant="primary">
-            Botão
+            Confirmar
           </Button>{" "}
         </Col>
       </Row>
