@@ -8,7 +8,10 @@ import Row from "react-bootstrap/Row";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
+import { Helmet, HelmetProvider } from "react-helmet-async";
+
 function App() {
+  const [title] = useState("May & Mat");
   const [site, setSite] = useState<string>("");
 
   let urlPattern = new RegExp(
@@ -65,6 +68,11 @@ function App() {
   }
   return (
     <>
+      <HelmetProvider>
+        <Helmet>
+          <title>{title ? title : "No title"}</title>
+        </Helmet>
+      </HelmetProvider>
       <Row>
         <Col sm={12}>
           <Form.Control
