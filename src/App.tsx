@@ -1,9 +1,20 @@
+//yarn upgrade-interactive --latest
 import React, { useState } from "react";
 import "./App.css";
-import Button from "react-bootstrap/Button";
-import Form from "react-bootstrap/Form";
-import Col from "react-bootstrap/Col";
-import Row from "react-bootstrap/Row";
+
+import {
+  Button,
+  Container,
+  Form,
+  Nav,
+  Navbar,
+  NavDropdown,
+  Col,
+  Row,
+  Image,
+} from "react-bootstrap";
+
+import logo1 from "./images/icones/4.png";
 
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -73,23 +84,56 @@ function App() {
           <title>{title ? title : "No title"}</title>
         </Helmet>
       </HelmetProvider>
-      <Row>
-        <Col sm={12}>
-          <Form.Control
-            value={site}
-            onChange={(e) => setSite(e.target.value)}
-            onBlur={handleBlur}
-            placeholder="Enter Website"
-          />
-        </Col>
-      </Row>
-      <Row>
-        <Col sm={1}>
-          <Button className="full-width" variant="primary">
-            Confirmar
-          </Button>{" "}
-        </Col>
-      </Row>
+      <Navbar
+        style={{
+          backgroundColor: "#ffffff",
+          fontWeight: "600",
+          margin: "0px",
+          padding: "0px",
+        }}
+        expand="lg"
+      >
+        <Image
+          className="ms-5"
+          src={logo1}
+          width="100vw"
+          style={{ marginTop: "26px" }}
+        />
+        <Navbar.Toggle aria-controls="navbarScroll" />
+        <Navbar.Collapse
+          id="navbarScroll"
+          style={{ justifyContent: "end", margin: "0px" }}
+        >
+          <Nav navbarScroll>
+            <Row
+              style={{
+                marginTop: "20px",
+                marginLeft: "12px",
+                color: "#B6B1A9",
+              }}
+            >
+              <Col>
+                <Nav.Link href="#action1">HOME</Nav.Link>
+              </Col>
+              <Col>
+                <Nav.Link href="#action1">ABOUT</Nav.Link>
+              </Col>
+              <Col>
+                <Nav.Link href="#action1">GALLERY</Nav.Link>
+              </Col>
+              <Col>
+                <Nav.Link href="#action1">PORTRAITURE</Nav.Link>
+              </Col>
+              <Col>
+                <Nav.Link href="#action1">STORE</Nav.Link>
+              </Col>
+              <Col>
+                <Nav.Link href="#action1">CONTACT</Nav.Link>
+              </Col>
+            </Row>
+          </Nav>
+        </Navbar.Collapse>
+      </Navbar>
       <ToastContainer
         position="bottom-right"
         autoClose={5000}

@@ -10,3 +10,10 @@
   padding-left: 10vw;
   padding-right: 10vw;
 }
+
+.nav-link {
+  padding: 4px !important;
+}
+.nav-link:hover {
+  color: red !important;
+}
