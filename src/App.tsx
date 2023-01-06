@@ -134,6 +134,22 @@ function App() {
           </Nav>
         </Navbar.Collapse>
       </Navbar>
+      <Row style={{ minHeight: "40vw" }}>
+        <Col
+          className="col-sm-6 align-items-center"
+          style={{ backgroundColor: "red", marginTop: "10vw" }}
+        >
+          <Row style={{ backgroundColor: "blue" }}>OI</Row>
+          OI2
+          <Row>OI3</Row>
+          <Row>OI4</Row>
+          OI5
+          <Row>OI6</Row>
+        </Col>
+        <Col className="col-sm-6" style={{ backgroundColor: "blue" }}>
+          <Row style={{ backgroundColor: "red" }}>OI</Row>
+        </Col>
+      </Row>
       <ToastContainer
         position="bottom-right"
         autoClose={5000}
