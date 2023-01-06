@@ -1,18 +1,10 @@
 //yarn upgrade-interactive --latest
 import React, { useState } from "react";
 import "./App.css";
+import { ReactComponent as SvgEye } from "./images/icones/svg_eye.svg";
+import "./fonts/Brutal/Brutal-Type-Medium.ttf";
 
-import {
-  Button,
-  Container,
-  Form,
-  Nav,
-  Navbar,
-  NavDropdown,
-  Col,
-  Row,
-  Image,
-} from "react-bootstrap";
+import { Nav, Navbar, Col, Row, Image } from "react-bootstrap";
 
 import logo1 from "./images/icones/4.png";
 
@@ -136,17 +128,24 @@ function App() {
       </Navbar>
       <Row style={{ minHeight: "40vw" }}>
         <Col
-          className="col-sm-6 align-items-center"
-          style={{ backgroundColor: "red", marginTop: "10vw" }}
+          className="col-sm-5 align-items-center"
+          style={{ marginTop: "10.6vw" }}
         >
-          <Row style={{ backgroundColor: "blue" }}>OI</Row>
-          OI2
-          <Row>OI3</Row>
-          <Row>OI4</Row>
-          OI5
-          <Row>OI6</Row>
+          <Row>
+            <SvgEye
+              className="col-sm-12 align-items-center"
+              style={{ height: "6vw" }}
+            />
+          </Row>
+          <Row className="font-face-gm text-nowrap">MAYARA LIMA BIO</Row>
+          <Row style={{ marginTop: "2vw", marginBottom: "2vw" }}>ENTER</Row>
+          <Row>
+            <Col className="col-sm-4">FACEBOOK</Col>
+            <Col className="col-sm-4">INSTAGRAM</Col>
+            <Col className="col-sm-4">TWITTER</Col>
+          </Row>
         </Col>
-        <Col className="col-sm-6" style={{ backgroundColor: "blue" }}>
+        <Col className="col-sm-7" style={{ backgroundColor: "blue" }}>
           <Row style={{ backgroundColor: "red" }}>OI</Row>
         </Col>
       </Row>
