@@ -91,40 +91,6 @@ function App() {
           width="100vw"
           style={{ marginTop: "26px" }}
         />
-        <Navbar.Toggle aria-controls="navbarScroll" />
-        <Navbar.Collapse
-          id="navbarScroll"
-          style={{ justifyContent: "end", margin: "0px" }}
-        >
-          <Nav navbarScroll>
-            <Row
-              style={{
-                marginTop: "20px",
-                marginLeft: "12px",
-                color: "#B6B1A9",
-              }}
-            >
-              <Col>
-                <Nav.Link href="#action1">HOME</Nav.Link>
-              </Col>
-              <Col>
-                <Nav.Link href="#action1">ABOUT</Nav.Link>
-              </Col>
-              <Col>
-                <Nav.Link href="#action1">GALLERY</Nav.Link>
-              </Col>
-              <Col>
-                <Nav.Link href="#action1">PORTRAITURE</Nav.Link>
-              </Col>
-              <Col>
-                <Nav.Link href="#action1">STORE</Nav.Link>
-              </Col>
-              <Col>
-                <Nav.Link href="#action1">CONTACT</Nav.Link>
-              </Col>
-            </Row>
-          </Nav>
-        </Navbar.Collapse>
       </Navbar>
       <Row style={{ minHeight: "40vw" }}>
         <Col
