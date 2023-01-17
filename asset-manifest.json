@@ -1,18 +1,18 @@
 {
   "files": {
-    "main.css": "/PassoLar/static/css/main.add404f6.css",
-    "main.js": "/PassoLar/static/js/main.9beb6163.js",
-    "static/js/496.13f41535.chunk.js": "/PassoLar/static/js/496.13f41535.chunk.js",
-    "static/media/4.png": "/PassoLar/static/media/4.1a5aa88cfb8d16b9b6a5.png",
-    "static/media/Brutal-Type-Medium.ttf": "/PassoLar/static/media/Brutal-Type-Medium.c9565f55635b259358c3.ttf",
-    "static/media/svg_eye.svg": "/PassoLar/static/media/svg_eye.6faccaf044d8be44ba288f5ff3414c06.svg",
-    "index.html": "/PassoLar/index.html",
-    "main.add404f6.css.map": "/PassoLar/static/css/main.add404f6.css.map",
-    "main.9beb6163.js.map": "/PassoLar/static/js/main.9beb6163.js.map",
-    "496.13f41535.chunk.js.map": "/PassoLar/static/js/496.13f41535.chunk.js.map"
+    "main.css": "/passo-lar/static/css/main.230f3853.css",
+    "main.js": "/passo-lar/static/js/main.bc75e18f.js",
+    "static/js/496.13f41535.chunk.js": "/passo-lar/static/js/496.13f41535.chunk.js",
+    "static/media/4.png": "/passo-lar/static/media/4.1a5aa88cfb8d16b9b6a5.png",
+    "static/media/Brutal-Type-Medium.ttf": "/passo-lar/static/media/Brutal-Type-Medium.c9565f55635b259358c3.ttf",
+    "static/media/svg_eye.svg": "/passo-lar/static/media/svg_eye.6faccaf044d8be44ba288f5ff3414c06.svg",
+    "index.html": "/passo-lar/index.html",
+    "main.230f3853.css.map": "/passo-lar/static/css/main.230f3853.css.map",
+    "main.bc75e18f.js.map": "/passo-lar/static/js/main.bc75e18f.js.map",
+    "496.13f41535.chunk.js.map": "/passo-lar/static/js/496.13f41535.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.add404f6.css",
-    "static/js/main.9beb6163.js"
+    "static/css/main.230f3853.css",
+    "static/js/main.bc75e18f.js"
   ]
 }
