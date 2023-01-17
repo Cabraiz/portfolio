@@ -105,7 +105,7 @@ function App() {
               }}
             >
               <Col>
-                <Nav.Link href="#action1">HOME2</Nav.Link>
+                <Nav.Link href="#action1">HOME</Nav.Link>
               </Col>
               <Col>
                 <Nav.Link href="#action1">ABOUT</Nav.Link>
