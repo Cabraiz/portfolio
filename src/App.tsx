@@ -4,7 +4,7 @@ import "./App.css";
 import { ReactComponent as SvgEye } from "./images/icones/svg_eye.svg";
 import "./fonts/Brutal/Brutal-Type-Medium.ttf";
 
-import { Nav, Navbar, Col, Row, Image } from "react-bootstrap";
+import { Navbar, Col, Row, Image } from "react-bootstrap";
 
 import logo1 from "./images/icones/4.png";
 
@@ -53,6 +53,7 @@ function App() {
     });
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   function handleBlur() {
     //VALIDAÇÃO
     if (/[A-Za-z0-9]/.test(site) && !site.startsWith("www.")) {
@@ -91,6 +92,7 @@ function App() {
           width="100vw"
           style={{ marginTop: "26px" }}
         />
+        <Row className="font-face-gm text-nowrap">0.0v</Row>
       </Navbar>
       <Row style={{ minHeight: "40vw" }}>
         <Col
