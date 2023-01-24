@@ -1,0 +1,31 @@
+@media (max-width: 576px) {
+  button.full-width {
+    width: 100%;
+  }
+}
+
+@font-face {
+  font-family: "Brutal";
+  src: local("Brutal"), url("../../fonts/Brutal/Brutal-Type-Medium.ttf");
+}
+
+.font-face-gm {
+  font-family: "Brutal";
+  letter-spacing: 5px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.row {
+  justify-content: center;
+  margin-top: 10px;
+  padding-left: 10vw;
+  padding-right: 10vw;
+}
+
+.nav-link {
+  padding: 4px !important;
+}
+.nav-link:hover {
+  color: red !important;
+}

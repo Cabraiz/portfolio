@@ -1,10 +1,9 @@
 //yarn upgrade-interactive --latest
 import React, { useState } from "react";
 import "./App.css";
-import { ReactComponent as SvgEye } from "./images/icones/svg_eye.svg";
 import "./fonts/Brutal/Brutal-Type-Medium.ttf";
 
-import { Navbar, Col, Row, Image } from "react-bootstrap";
+import { Navbar, Row, Image } from "react-bootstrap";
 
 import logo1 from "./images/icones/4.png";
 
@@ -13,8 +12,12 @@ import "react-toastify/dist/ReactToastify.css";
 
 import { Helmet, HelmetProvider } from "react-helmet-async";
 
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import May from "./pages/May/May";
+import Mateus from "./pages/Mateus/Mateus";
+
 function App() {
-  const [title] = useState("May & Mat");
+  const [title] = useState("Bem Vindo! 🤝");
   const [site, setSite] = useState<string>("");
 
   let urlPattern = new RegExp(
@@ -92,31 +95,15 @@ function App() {
           width="100vw"
           style={{ marginTop: "26px" }}
         />
-        <Row className="font-face-gm text-nowrap">0.0v</Row>
+        <Row className="font-face-gm text-nowrap">0.1v</Row>
       </Navbar>
-      <Row style={{ minHeight: "40vw" }}>
-        <Col
-          className="col-sm-5 align-items-center"
-          style={{ marginTop: "10.6vw" }}
-        >
-          <Row>
-            <SvgEye
-              className="col-sm-12 align-items-center"
-              style={{ height: "6vw" }}
-            />
-          </Row>
-          <Row className="font-face-gm text-nowrap">MAYARA LIMA BIO</Row>
-          <Row style={{ marginTop: "2vw", marginBottom: "2vw" }}>ENTER</Row>
-          <Row>
-            <Col className="col-sm-4">FACEBOOK</Col>
-            <Col className="col-sm-4">INSTAGRAM</Col>
-            <Col className="col-sm-4">TWITTER</Col>
-          </Row>
-        </Col>
-        <Col className="col-sm-7" style={{ backgroundColor: "blue" }}>
-          <Row style={{ backgroundColor: "red" }}>OI</Row>
-        </Col>
-      </Row>
+
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Mateus />} />
+        </Routes>
+      </BrowserRouter>
+
       <ToastContainer
         position="bottom-right"
         autoClose={5000}
