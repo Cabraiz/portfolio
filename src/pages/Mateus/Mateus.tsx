@@ -1,15 +1,20 @@
 import React from "react";
 import "./Mateus.css";
 import { Col, Row, Image } from "react-bootstrap";
-import { ReactComponent as SvgEye } from "../../images/icones/svg_eye.svg";
-import perfil from "../../images/Mateus/perfil.png";
+import perfil from "../../images/Mateus/perfil.webp";
 
 function Mateus() {
   return (
     <Row>
-      <Col className="col-sm-6">OI</Col>
-      <Col className="col-sm-6">
-        <Image className="mt-5" src={perfil} width="90%" />
+      <Col className="col-sm-7">
+        Full Stack <br></br>Developer
+      </Col>
+      <Col className="col-sm-5">
+        <Image
+          src={perfil}
+          width="360vw"
+          style={{ marginTop: "2.5vw", marginLeft: "2vw" }}
+        />
       </Col>
     </Row>
   );

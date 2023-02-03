@@ -5,7 +5,7 @@ import "./fonts/Brutal/Brutal-Type-Medium.ttf";
 
 import { Navbar, Row, Image } from "react-bootstrap";
 
-import logo1 from "./images/icones/4.png";
+import logo from "./images/icones/logo.svg";
 
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -82,7 +82,6 @@ function App() {
       </HelmetProvider>
       <Navbar
         style={{
-          backgroundColor: "#ffffff",
           fontWeight: "600",
           margin: "0px",
           padding: "0px",
@@ -90,12 +89,14 @@ function App() {
         expand="lg"
       >
         <Image
-          className="ms-5"
-          src={logo1}
-          width="100vw"
-          style={{ marginTop: "26px" }}
+          src={logo}
+          style={{
+            marginTop: "3vw",
+            marginLeft: "8vw",
+            width: "4vw",
+            height: "4vw",
+          }}
         />
-        <Row className="font-face-gm text-nowrap">0.1v</Row>
       </Navbar>
 
       <BrowserRouter>

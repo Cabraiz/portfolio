@@ -8,7 +8,14 @@
   font-family: "Brutal";
   src: local("Brutal"), url("./fonts/Brutal/Brutal-Type-Medium.ttf");
 }
-
+html {
+  height: 100%;
+}
+body {
+  background: linear-gradient(#fe6559 30%, #f88078 90%) left 0/73%,
+    linear-gradient(#00b9b3 30%, #00faf2 90%) right;
+  background-repeat: no-repeat;
+}
 .font-face-gm {
   font-family: "Brutal";
   letter-spacing: 5px;
