@@ -12,9 +12,10 @@ import "react-toastify/dist/ReactToastify.css";
 
 import { Helmet, HelmetProvider } from "react-helmet-async";
 
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { HashRouter, Routes, Route } from "react-router-dom";
 import May from "./pages/May/May";
 import Mateus from "./pages/Mateus/Mateus";
+import Surprise from "./pages/Surprise/Surprise";
 
 function App() {
   const [title] = useState("Bem Vindo! 🤝");
@@ -82,6 +83,7 @@ function App() {
       </HelmetProvider>
       <Navbar
         style={{
+          height: "10vh",
           fontWeight: "600",
           margin: "0px",
           padding: "0px",
@@ -91,19 +93,21 @@ function App() {
         <Image
           src={logo}
           style={{
-            marginTop: "3vw",
-            marginLeft: "8vw",
-            width: "4vw",
-            height: "4vw",
+            marginTop: "4vh",
+            marginLeft: "4vh",
+            width: "8vh",
+            height: "8vh",
           }}
         />
       </Navbar>
-
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Mateus />} />
-        </Routes>
-      </BrowserRouter>
+      <React.StrictMode>
+        <HashRouter>
+          <Routes>
+            <Route path="/" element={<Mateus />} />
+            <Route path="/aniver" element={<Surprise />} />
+          </Routes>
+        </HashRouter>
+      </React.StrictMode>
 
       <ToastContainer
         position="bottom-right"

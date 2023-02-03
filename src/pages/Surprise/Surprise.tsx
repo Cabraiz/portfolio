@@ -1,20 +1,19 @@
 import React from "react";
+import { motion } from "framer-motion";
 import "./Surprise.css";
 import { Col, Row, Image } from "react-bootstrap";
-import perfil from "../../images/Mateus/perfil.webp";
+
+import icognita from "../../images/Surprise/Icognita.png";
 
 function Surprise() {
   return (
-    <Row>
-      <Col className="col-sm-7">
-        Full Stack <br></br>Developer
-      </Col>
-      <Col className="col-sm-5">
-        <Image
-          src={perfil}
-          width="360vw"
-          style={{ marginTop: "2.5vw", marginLeft: "2vw" }}
-        />
+    <Row className="justify-content-sm-start m-0 p-0 ">
+      <Col className="p-0" style={{ marginTop: "5vh" }}>
+        <Image src={icognita} style={{ height: "85vh" }}></Image>
+        <Image src={icognita} style={{ height: "85vh" }}></Image>
+        <Image src={icognita} style={{ height: "85vh" }}></Image>
+        <Image src={icognita} style={{ height: "85vh" }}></Image>
+        <Image src={icognita} style={{ height: "85vh" }}></Image>
       </Col>
     </Row>
   );
