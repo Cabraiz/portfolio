@@ -12,7 +12,7 @@ import "react-toastify/dist/ReactToastify.css";
 
 import { Helmet, HelmetProvider } from "react-helmet-async";
 
-import { HashRouter, Routes, Route } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import May from "./pages/May/May";
 import Mateus from "./pages/Mateus/Mateus";
 import Surprise from "./pages/Surprise/Surprise";
@@ -100,14 +100,10 @@ function App() {
           }}
         />
       </Navbar>
-      <React.StrictMode>
-        <HashRouter>
-          <Routes>
-            <Route path="/" element={<Mateus />} />
-            <Route path="/aniver" element={<Surprise />} />
-          </Routes>
-        </HashRouter>
-      </React.StrictMode>
+      <Routes>
+        <Route path="/" element={<Mateus />} />
+        <Route path="/aniver" element={<Surprise />} />
+      </Routes>
 
       <ToastContainer
         position="bottom-right"

@@ -7,7 +7,7 @@ function Mateus() {
   return (
     <Row>
       <Col className="col-sm-7">
-        Full Stack <br></br>Developer
+        Full Stack2 <br></br>Developer
       </Col>
       <Col className="col-sm-5">
         <Image
