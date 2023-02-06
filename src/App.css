@@ -1,15 +1,9 @@
-@media (max-width: 576px) {
-  button.full-width {
-    width: 100%;
-  }
-}
-
 @font-face {
   font-family: "Brutal";
   src: local("Brutal"), url("./fonts/Brutal/Brutal-Type-Medium.ttf");
 }
 html {
-  height: 100%;
+  height: auto;
 }
 body {
   background: linear-gradient(#fe6559 30%, #f88078 90%) left 0/73%,
@@ -22,14 +16,12 @@ body {
   font-size: 14px;
   font-weight: 500;
 }
-
 .row {
   justify-content: center;
   margin-top: 10px;
   padding-left: 10vw;
   padding-right: 10vw;
 }
-
 .nav-link {
   padding: 4px !important;
 }
