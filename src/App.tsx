@@ -93,8 +93,8 @@ function App() {
         <Image
           src={logo}
           style={{
-            marginTop: "4vh",
-            marginLeft: "4vh",
+            marginTop: "2vh",
+            marginLeft: "14vw",
             width: "8vh",
             height: "8vh",
           }}

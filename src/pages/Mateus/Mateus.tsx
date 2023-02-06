@@ -5,15 +5,15 @@ import perfil from "../../images/Mateus/perfil.webp";
 
 function Mateus() {
   return (
-    <Row>
-      <Col className="col-sm-7">
+    <Row className="p-0 m-0">
+      <Col className="col-6">
         Full Stack2 <br></br>Developer
       </Col>
-      <Col className="col-sm-5">
+      <Col className="col-6 m-0">
         <Image
           src={perfil}
-          width="360vw"
-          style={{ marginTop: "2.5vw", marginLeft: "2vw" }}
+          width="57%"
+          style={{ marginTop: "12vh", marginLeft: "7vw" }}
         />
       </Col>
     </Row>
