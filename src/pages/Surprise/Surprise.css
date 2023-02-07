@@ -3,8 +3,5 @@
 }
 .card {
   display: inline-block;
-  min-width: 100px;
-}
-img {
-  border-radius: 0%;
+  min-width: 120px;
 }

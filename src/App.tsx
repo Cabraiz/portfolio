@@ -1,5 +1,5 @@
-//yarn upgrade-interactive --latest
 import React, { useState } from "react";
+
 import "./App.css";
 import "./fonts/Brutal/Brutal-Type-Medium.ttf";
 
@@ -16,6 +16,9 @@ import { Routes, Route } from "react-router-dom";
 import May from "./pages/May/May";
 import Mateus from "./pages/Mateus/Mateus";
 import Surprise from "./pages/Surprise/Surprise";
+
+import "./pages/Mateus/Mateus.css";
+import "./pages/Surprise/Surprise.css";
 
 function App() {
   const [title] = useState("Bem Vindo! 🤝");
@@ -93,6 +96,7 @@ function App() {
         <Image
           src={logo}
           style={{
+            borderRadius: "20%",
             marginTop: "2vh",
             marginLeft: "14vw",
             width: "8vh",

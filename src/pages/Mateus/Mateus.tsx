@@ -1,5 +1,4 @@
 import React from "react";
-import "./Mateus.css";
 import { Col, Row, Image } from "react-bootstrap";
 import perfil from "../../images/Mateus/perfil.webp";
 
