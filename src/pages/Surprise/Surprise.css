@@ -1,7 +1,15 @@
 .row {
   overflow: auto !important;
 }
-.card {
+.form-control {
+  height: 85vh;
+  width: 10vw;
   display: inline-block;
-  min-width: 120px;
+  min-width: 140px;
+  pointer-events: none;
+  color: blue;
+  font-size: calc(120px + 18vw);
+  text-align: center;
+}
+.form-control:hover {
 }
