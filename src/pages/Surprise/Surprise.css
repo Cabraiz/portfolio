@@ -8,6 +8,6 @@
   min-width: 140px;
   pointer-events: none;
   color: blue;
-  font-size: calc(120px + 18vw);
+  font-size: calc(200px + 2.4vw);
   text-align: center;
 }
