@@ -1,13 +1,16 @@
 .row {
   overflow: auto !important;
 }
-.form-control {
+.btn {
   height: 85vh;
-  width: 10vw;
+  width: 13vw;
   display: inline-block;
   min-width: 140px;
-  pointer-events: none;
   color: blue;
   font-size: calc(200px + 2.4vw);
   text-align: center;
+}
+
+.btn:hover {
+  background-color: rgb(40, 40, 40) !important;
 }
