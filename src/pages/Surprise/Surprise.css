@@ -2,8 +2,6 @@
   overflow: auto !important;
 }
 .btn {
-  height: 85vh;
-  width: 18vw;
   display: inline-block;
   min-width: 140px;
   color: blue;
@@ -13,8 +11,4 @@
 
 .inline {
   display: inline-block;
-}
-
-.btn:hover {
-  background-color: rgb(40, 40, 40) !important;
 }
