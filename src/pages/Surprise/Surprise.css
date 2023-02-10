@@ -3,12 +3,16 @@
 }
 .btn {
   height: 85vh;
-  width: 13vw;
+  width: 18vw;
   display: inline-block;
   min-width: 140px;
   color: blue;
   font-size: calc(200px + 2.4vw);
   text-align: center;
+}
+
+.inline {
+  display: inline-block;
 }
 
 .btn:hover {
