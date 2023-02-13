@@ -7,7 +7,7 @@ import icognita from "../../images/Surprise/Icognita.png";
 import icognitaBlock from "../../images/Surprise/IcognitaBlock.png";
 
 const vh = 85;
-const vw = 44;
+const vw = 42;
 const percRasp = 90;
 function Surprise() {
   const [allColor, setColor] = useState(["20", "20", "20", "20", "20"]);
@@ -76,7 +76,10 @@ function Surprise() {
           className="p-0 ms-0 me-0 mb-0 text-nowrap"
           style={{ marginTop: "5vh" }}
         >
-          <div className="inline" style={{ marginRight: "-0.2vw" }}>
+          <div
+            className="inline"
+            style={{ pointerEvents: "none", marginRight: "-0.2vw" }}
+          >
             <ScratchCard
               width={convertVwToPx(vw, 0)}
               height={convertVhToPx(vh)}
