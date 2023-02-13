@@ -1,4 +1,6 @@
 import React, { useRef, useState } from "react";
+import AudioPlayer from "react-h5-audio-player";
+import "react-h5-audio-player/lib/styles.css";
 import { Col, Row, Image, Button, Modal } from "react-bootstrap";
 import { isMobile } from "react-device-detect";
 import ScratchCard from "react-scratchcard-v2";
@@ -6,8 +8,10 @@ import ScratchCard from "react-scratchcard-v2";
 import icognita from "../../images/Surprise/Icognita.png";
 import icognitaBlock from "../../images/Surprise/IcognitaBlock.png";
 
+const backgroundSong = require("../../song/Surprise/backgroundSong.ogg");
+
 const vh = 85;
-const vw = 42;
+const vw = 46;
 const percRasp = 90;
 function Surprise() {
   const [allColor, setColor] = useState(["20", "20", "20", "20", "20"]);
@@ -46,7 +50,7 @@ function Surprise() {
     const oneVhInPx = window.innerWidth / 100;
     let temp = oneVhInPx * vw;
     if (!isMobile) {
-      temp = temp / 3;
+      temp = temp / 3.3;
     }
     if (temp < 140) {
       temp = 140;
@@ -178,6 +182,11 @@ function Surprise() {
           </Button>
         </Modal.Footer>
       </Modal>
+      <AudioPlayer
+        autoPlay
+        src={backgroundSong}
+        onPlay={(e) => console.log("onPlay")}
+      />
     </>
   );
 }
