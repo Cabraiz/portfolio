@@ -91,7 +91,6 @@ function App() {
           margin: "0px",
           padding: "0px",
         }}
-        expand="lg"
       >
         <Image
           src={logo}

@@ -1,7 +1,7 @@
 .row {
   overflow: auto !important;
 }
-.btn {
+.btnImage {
   display: inline-block;
   min-width: 140px;
   color: blue;
@@ -11,4 +11,10 @@
 
 .inline {
   display: inline-block;
+}
+
+.porBaixo {
+  marginleft: 0.1vw;
+  height: 100%;
+  width: 99%;
 }
