@@ -11,8 +11,8 @@ function Mateus() {
       <Col className="col-6 m-0">
         <Image
           src={perfil}
-          width="54%"
-          style={{ marginTop: "9vh", marginLeft: "3vw" }}
+          width="53%"
+          style={{ marginTop: "12vh", marginLeft: "3vw" }}
         />
       </Col>
     </Row>
