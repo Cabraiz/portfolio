@@ -182,11 +182,14 @@ function Surprise() {
           </Button>
         </Modal.Footer>
       </Modal>
-      <AudioPlayer
-        autoPlay
-        src={backgroundSong}
-        onPlay={(e) => console.log("onPlay")}
-      />
+      <Modal show={show} onHide={handleClose}>
+        <AudioPlayer
+          autoPlay
+          src={backgroundSong}
+          onPlay={(e) => console.log("onPlay")}
+          loop={true}
+        />
+      </Modal>
     </>
   );
 }

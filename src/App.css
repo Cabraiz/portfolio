@@ -6,8 +6,8 @@ html {
   height: auto;
 }
 body {
-  background: linear-gradient(#fe6559 30%, #f88078 90%) left 0/73%,
-    linear-gradient(#00b9b3 30%, #00faf2 90%) right;
+  background: linear-gradient(#ed3173 30%, #eb1a64 90%) left 0/67.5%,
+    linear-gradient(#71dffb 30%, #61dbfb 90%) right;
   background-repeat: no-repeat;
 }
 .font-face-gm {
