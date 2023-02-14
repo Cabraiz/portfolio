@@ -63,15 +63,20 @@ function Surprise() {
   const [show, setShow] = useState([false, false]);
 
   const handleStatus = (a: number, b: boolean) => {
+    console.log(show);
+    console.log(show[0]);
+    console.log(show[1]);
+    console.log("OI");
     setShow(
       update(show, {
-        show: {
-          [a]: {
-            $set: b,
-          },
+        [a]: {
+          $set: b,
         },
       })
     );
+    console.log(show);
+    console.log(show[0]);
+    console.log(show[1]);
   };
 
   return (
