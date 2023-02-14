@@ -3,7 +3,6 @@
 }
 .btnImage {
   display: inline-block;
-  min-width: 200px;
   color: blue;
   font-size: calc(200px + 2.4vw);
   text-align: center;
@@ -15,6 +14,6 @@
 
 .porBaixo {
   margin-left: 0.1vw;
-  height: 100%;
+  height: 99.8%;
   width: 99%;
 }

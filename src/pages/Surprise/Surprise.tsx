@@ -63,10 +63,6 @@ function Surprise() {
   const [show, setShow] = useState([false, false]);
 
   const handleStatus = (a: number, b: boolean) => {
-    console.log(show);
-    console.log(show[0]);
-    console.log(show[1]);
-    console.log("OI");
     setShow(
       update(show, {
         [a]: {
@@ -74,9 +70,6 @@ function Surprise() {
         },
       })
     );
-    console.log(show);
-    console.log(show[0]);
-    console.log(show[1]);
   };
 
   return (
@@ -189,12 +182,22 @@ function Surprise() {
         </Modal.Footer>
       </Modal>
       <Modal show={show[1]} onHide={() => handleStatus(1, false)}>
-        <AudioPlayer
-          autoPlay
-          src={backgroundSong}
-          onPlay={(e) => console.log("onPlay")}
-          loop={true}
-        />
+        <Modal.Header closeButton>
+          <AudioPlayer
+            autoPlay
+            src={backgroundSong}
+            onPlay={(e) => console.log("onPlay")}
+            loop={true}
+          />
+        </Modal.Header>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => handleStatus(0, false)}>
+            Close
+          </Button>
+          <Button variant="primary" onClick={() => handleStatus(0, false)}>
+            Save Changes
+          </Button>
+        </Modal.Footer>
       </Modal>
     </>
   );
