@@ -6,24 +6,8 @@ import update from "react-addons-update";
 import { isMobile } from "react-device-detect";
 import ScratchCard from "react-scratchcard-v2";
 
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-
 import icognita from "../../images/Surprise/Icognita.png";
 import icognitaBlock from "../../images/Surprise/IcognitaBlock.png";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyCvNrjvRncZqzUnH1uBgfWy0BsBusacCXU",
-  authDomain: "cabraiz.firebaseapp.com",
-  projectId: "cabraiz",
-  storageBucket: "cabraiz.appspot.com",
-  messagingSenderId: "223470266905",
-  appId: "1:223470266905:web:d6b545f72e039d53769888",
-  measurementId: "G-X86XGVXD4C",
-};
-
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
 
 const backgroundSong = require("../../song/Surprise/backgroundSong.ogg");
 
