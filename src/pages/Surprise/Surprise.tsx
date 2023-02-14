@@ -6,8 +6,24 @@ import update from "react-addons-update";
 import { isMobile } from "react-device-detect";
 import ScratchCard from "react-scratchcard-v2";
 
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+
 import icognita from "../../images/Surprise/Icognita.png";
 import icognitaBlock from "../../images/Surprise/IcognitaBlock.png";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCvNrjvRncZqzUnH1uBgfWy0BsBusacCXU",
+  authDomain: "cabraiz.firebaseapp.com",
+  projectId: "cabraiz",
+  storageBucket: "cabraiz.appspot.com",
+  messagingSenderId: "223470266905",
+  appId: "1:223470266905:web:d6b545f72e039d53769888",
+  measurementId: "G-X86XGVXD4C",
+};
+
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
 
 const backgroundSong = require("../../song/Surprise/backgroundSong.ogg");
 
@@ -100,7 +116,7 @@ function Surprise() {
               height={convertVhToPx(vh)}
               image={icognita}
               finishPercent={percRasp}
-              onComplete={() => handleStatus(0, true)}
+              onComplete={() => handleStatus(1, true)}
             >
               <Button className="btnImage porBaixo">?</Button>
             </ScratchCard>
@@ -182,14 +198,15 @@ function Surprise() {
         </Modal.Footer>
       </Modal>
       <Modal show={show[1]} onHide={() => handleStatus(1, false)}>
-        <Modal.Header closeButton>
+        <Modal.Header closeButton>oieeeeeeeeeeeeeeeee</Modal.Header>
+        <Modal.Body>
           <AudioPlayer
             autoPlay
             src={backgroundSong}
             onPlay={(e) => console.log("onPlay")}
             loop={true}
           />
-        </Modal.Header>
+        </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={() => handleStatus(0, false)}>
             Close
