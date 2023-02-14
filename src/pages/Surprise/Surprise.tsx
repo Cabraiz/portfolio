@@ -2,6 +2,7 @@ import React, { useRef, useState } from "react";
 import AudioPlayer from "react-h5-audio-player";
 import "react-h5-audio-player/lib/styles.css";
 import { Col, Row, Image, Button, Modal } from "react-bootstrap";
+import update from "react-addons-update";
 import { isMobile } from "react-device-detect";
 import ScratchCard from "react-scratchcard-v2";
 
@@ -58,20 +59,20 @@ function Surprise() {
     return temp;
   };
 
-  function mudarCorEnter(a: number) {
-    allColor[a] = "40";
-    console.log(allColor);
-  }
-  function mudarCorLeave(a: number) {
-    allColor[a] = "20";
-    console.log(allColor);
-  }
-
   //MODAL
-  const [show, setShow] = useState(false);
+  const [show, setShow] = useState([false, false]);
 
-  const handleClose = () => setShow(false);
-  const handleShow = () => setShow(true);
+  const handleStatus = (a: number, b: boolean) => {
+    setShow(
+      update(show, {
+        show: {
+          [a]: {
+            $set: b,
+          },
+        },
+      })
+    );
+  };
 
   return (
     <>
@@ -89,7 +90,7 @@ function Surprise() {
               height={convertVhToPx(vh)}
               image={icognitaBlock}
               finishPercent={percRasp}
-              onComplete={handleShow}
+              onComplete={() => handleStatus(0, true)}
             >
               <Image className="porBaixo"></Image>
             </ScratchCard>
@@ -101,7 +102,7 @@ function Surprise() {
               height={convertVhToPx(vh)}
               image={icognita}
               finishPercent={percRasp}
-              onComplete={() => console.log("complete")}
+              onComplete={() => handleStatus(0, true)}
             >
               <Button className="btnImage porBaixo">?</Button>
             </ScratchCard>
@@ -168,21 +169,21 @@ function Surprise() {
           </div>
         </Col>
       </Row>
-      <Modal show={show} onHide={handleClose}>
+      <Modal show={show[0]} onHide={() => handleStatus(0, false)}>
         <Modal.Header closeButton>
           <Modal.Title>Modal heading</Modal.Title>
         </Modal.Header>
         <Modal.Body>Woohoo, you're reading this text in a modal!</Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={handleClose}>
+          <Button variant="secondary" onClick={() => handleStatus(0, false)}>
             Close
           </Button>
-          <Button variant="primary" onClick={handleClose}>
+          <Button variant="primary" onClick={() => handleStatus(0, false)}>
             Save Changes
           </Button>
         </Modal.Footer>
       </Modal>
-      <Modal show={show} onHide={handleClose}>
+      <Modal show={show[1]} onHide={() => handleStatus(1, false)}>
         <AudioPlayer
           autoPlay
           src={backgroundSong}

@@ -3,7 +3,7 @@
 }
 .btnImage {
   display: inline-block;
-  min-width: 140px;
+  min-width: 200px;
   color: blue;
   font-size: calc(200px + 2.4vw);
   text-align: center;
