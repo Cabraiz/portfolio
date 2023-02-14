@@ -2,7 +2,7 @@ import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCvNrjvRncZqzUnH1uBgfWy0BsBusacCXU",
+  apiKey: process.env.API_KEY,
   authDomain: "cabraiz.firebaseapp.com",
   projectId: "cabraiz",
   storageBucket: "cabraiz.appspot.com",
