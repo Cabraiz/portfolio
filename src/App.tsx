@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import "./App.css";
 import "./fonts/Brutal/Brutal-Type-Medium.ttf";
@@ -20,12 +20,26 @@ import Surprise from "./pages/Surprise/Surprise";
 import "./pages/Mateus/Mateus.css";
 import "./pages/Surprise/Surprise.css";
 
-import "./firebase/firebase.tsx";
+import { auth, provider } from "./Firebase/Firebase";
+import { signInWithPopup } from "firebase/auth";
 
 function App() {
+  const [value, setValue] = useState("");
   const SignInWithFirebase = () => {
-    //var google_provider = new firebase.auth.GoogleAuthProvider();
+    console.log(auth, provider);
+    signInWithPopup(auth, provider).then((result) => {
+      // This gives you a Google Access Token. You can use it to access the Google API.
+      //const credential = GoogleAuthProvider.credentialFromResult(result);
+      //const token = credential?.accessToken;
+      // The signed-in user info.
+      //const user = result.user;
+      // IdP data available using getAdditionalUserInfo(result)
+    });
   };
+
+  useEffect(() => {
+    //setValue(localStorage.getItem("email"));
+  }, []);
 
   const [title] = useState("Bem Vindo! 🤝");
   const [site, setSite] = useState<string>("");

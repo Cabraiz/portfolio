@@ -1,15 +1,19 @@
 import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
+import { getAuth, GoogleAuthProvider } from "firebase/auth";
 
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_API_KEY,
-  authDomain: "cabraiz.firebaseapp.com",
-  projectId: "cabraiz",
-  storageBucket: "cabraiz.appspot.com",
-  messagingSenderId: "223470266905",
-  appId: "1:223470266905:web:d6b545f72e039d53769888",
-  measurementId: "G-X86XGVXD4C",
+  authDomain: process.env.REACT_APP_AUTH_DOMAIN,
+  projectId: process.env.REACT_APP_PROJECT_ID,
+  storageBucket: process.env.REACT_APP_STORAGE_BUCKET,
+  messagingSenderId: process.env.REACT_APP_MESSAGING_SENDER_ID,
+  appId: process.env.REACT_APP_APP_ID,
+  measurementId: process.env.REACT_APP_MEASUREMENT_ID,
 };
 
+//inicializar
 const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
+const auth = getAuth(app);
+auth.languageCode = "it";
+const provider = new GoogleAuthProvider();
+export { auth, provider };
