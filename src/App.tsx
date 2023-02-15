@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import "./App.css";
 import "./fonts/Brutal/Brutal-Type-Medium.ttf";
 
-import { Navbar, Row, Image } from "react-bootstrap";
+import { Navbar, Row, Image, Button } from "react-bootstrap";
 
 import logo from "./images/icones/logo.svg";
 
@@ -20,7 +20,13 @@ import Surprise from "./pages/Surprise/Surprise";
 import "./pages/Mateus/Mateus.css";
 import "./pages/Surprise/Surprise.css";
 
+import "./firebase/firebase.tsx";
+
 function App() {
+  const SignInWithFirebase = () => {
+    //var google_provider = new firebase.auth.GoogleAuthProvider();
+  };
+
   const [title] = useState("Bem Vindo! 🤝");
   const [site, setSite] = useState<string>("");
 
@@ -86,8 +92,11 @@ function App() {
       </HelmetProvider>
       <Navbar
         style={{
+          justifyContent: "space-between",
           height: "10vh",
           fontWeight: "600",
+          marginRight: "5vw",
+          marginTop: "2vh",
           margin: "0px",
           padding: "0px",
         }}
@@ -96,12 +105,12 @@ function App() {
           src={logo}
           style={{
             borderRadius: "20%",
-            marginTop: "2vh",
             marginLeft: "14vw",
             width: "8vh",
             height: "8vh",
           }}
         />
+        <Button onClick={SignInWithFirebase}> Sign In with Google </Button>
       </Navbar>
       <Routes>
         <Route path="/" element={<Mateus />} />

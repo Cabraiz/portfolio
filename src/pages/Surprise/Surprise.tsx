@@ -182,7 +182,7 @@ function Surprise() {
         </Modal.Footer>
       </Modal>
       <Modal show={show[1]} onHide={() => handleStatus(1, false)}>
-        <Modal.Header closeButton>oieeeeeeeeeeeeeeeee</Modal.Header>
+        <Modal.Header closeButton>Foto</Modal.Header>
         <Modal.Body>
           <AudioPlayer
             autoPlay
