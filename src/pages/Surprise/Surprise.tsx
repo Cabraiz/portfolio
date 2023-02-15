@@ -182,7 +182,9 @@ function Surprise() {
         </Modal.Footer>
       </Modal>
       <Modal show={show[1]} onHide={() => handleStatus(1, false)}>
-        <Modal.Header closeButton>Foto</Modal.Header>
+        <Modal.Header closeButton>
+          Aperte&nbsp;<strong>(▷)</strong>&nbsp;Para Ver Seu Prêmio
+        </Modal.Header>
         <Modal.Body>
           <AudioPlayer
             autoPlay

@@ -20,20 +20,32 @@ import Surprise from "./pages/Surprise/Surprise";
 import "./pages/Mateus/Mateus.css";
 import "./pages/Surprise/Surprise.css";
 
+import { isMobile } from "react-device-detect";
 import { auth, provider } from "./Firebase/Firebase";
 import { signInWithPopup } from "firebase/auth";
 
 function App() {
   const [value, setValue] = useState("");
   const SignInWithFirebase = () => {
-    signInWithPopup(auth, provider).then((result) => {
-      // This gives you a Google Access Token. You can use it to access the Google API.
-      //const credential = GoogleAuthProvider.credentialFromResult(result);
-      //const token = credential?.accessToken;
-      // The signed-in user info.
-      //const user = result.user;
-      // IdP data available using getAdditionalUserInfo(result)
-    });
+    signInWithPopup(auth, provider)
+      .then((result) => {
+        // This gives you a Google Access Token. You can use it to access the Google API.
+        //const credential = GoogleAuthProvider.credentialFromResult(result);
+        //const token = credential?.accessToken;
+        // The signed-in user info.
+        //const user = result.user;
+        // IdP data available using getAdditionalUserInfo(result)
+      })
+      .catch((error) => {
+        // Handle Errors here.
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        // The email of the user's account used.
+        const email = error.customData.email;
+        // The AuthCredential type that was used.
+        //const credential = GoogleAuthProvider.credentialFromError(error);
+        // ...
+      });
   };
 
   useEffect(() => {
@@ -123,7 +135,10 @@ function App() {
             height: "8vh",
           }}
         />
-        <Button onClick={SignInWithFirebase}> Sign In with Google </Button>
+        <Button className="me-5" onClick={SignInWithFirebase}>
+          {" "}
+          Sign In with Google{" "}
+        </Button>
       </Navbar>
       <Routes>
         <Route path="/" element={<Mateus />} />
