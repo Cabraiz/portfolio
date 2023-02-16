@@ -26,6 +26,13 @@ import { auth, provider } from "./Firebase/Firebase";
 import { signInWithPopup, signInWithRedirect } from "firebase/auth";
 
 function App() {
+  const convertVwToPx = (a: number) => {
+    const oneVhInPx = window.innerWidth / 100;
+    let temp = oneVhInPx * a;
+    temp = temp * temp;
+    return temp;
+  };
+
   const [value, setValue] = useState("");
   const SignInWithFirebase = async () => {
     if (!isMobile) {
@@ -137,7 +144,7 @@ function App() {
           src={logo}
           style={{
             borderRadius: "20%",
-            marginLeft: "14vw",
+            marginLeft: `${convertVwToPx(1)}px`,
             width: "8vh",
             height: "8vh",
           }}
