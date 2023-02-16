@@ -14,8 +14,8 @@ function Mateus() {
           style={{
             marginTop: "12vh",
             marginLeft: "3vw",
-            width: "calc(200px + 20vh)",
-            height: "calc(200px + 20vh)",
+            width: "calc(100px + 27vh)",
+            height: "calc(100px + 27vh)",
           }}
         />
       </Col>

@@ -23,31 +23,15 @@ import "./pages/Surprise/Surprise.css";
 
 import { isMobile } from "react-device-detect";
 import { auth, provider } from "./Firebase/Firebase";
-import { signInWithPopup } from "firebase/auth";
+import { signInWithPopup, signInWithRedirect } from "firebase/auth";
 
 function App() {
   const [value, setValue] = useState("");
-  const SignInWithFirebase = () => {
-    if (isMobile) {
-      signInWithPopup(auth, provider)
-        .then((result) => {
-          // This gives you a Google Access Token. You can use it to access the Google API.
-          //const credential = GoogleAuthProvider.credentialFromResult(result);
-          //const token = credential?.accessToken;
-          // The signed-in user info.
-          //const user = result.user;
-          // IdP data available using getAdditionalUserInfo(result)
-        })
-        .catch((error) => {
-          // Handle Errors here.
-          const errorCode = error.code;
-          const errorMessage = error.message;
-          // The email of the user's account used.
-          const email = error.customData.email;
-          // The AuthCredential type that was used.
-          //const credential = GoogleAuthProvider.credentialFromError(error);
-          // ...
-        });
+  const SignInWithFirebase = async () => {
+    if (!isMobile) {
+      signInWithRedirect(auth, provider)
+        .then((result) => {})
+        .catch((error) => {});
     } else {
       signInWithPopup(auth, provider)
         .then((result) => {
@@ -162,7 +146,7 @@ function App() {
           style={{
             paddingTop: "1.1vh",
             marginRight: "4vw",
-            width: "calc(200px + 2.4vw)",
+            width: "calc(200px + 1.6vw)",
             height: "6vh",
             fontSize: "1rem",
             backgroundColor: "white",
