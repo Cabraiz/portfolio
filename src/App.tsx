@@ -6,6 +6,7 @@ import "./fonts/Brutal/Brutal-Type-Medium.ttf";
 import { Navbar, Row, Image, Button } from "react-bootstrap";
 
 import logo from "./images/icones/logo.svg";
+import logoGmail from "./images/icones/7.svg";
 
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -159,19 +160,27 @@ function App() {
         />
         <Button
           style={{
+            paddingTop: "1.1vh",
             marginRight: "4vw",
-            width: "13vw",
+            width: "calc(200px + 2.4vw)",
             height: "6vh",
             fontSize: "1rem",
             backgroundColor: "white",
-            color: "gray",
+            color: "rgba(100, 100, 100)",
             fontWeight: "500",
             borderColor: "white",
           }}
           onClick={SignInWithFirebase}
         >
-          {" "}
-          Sign in with Google{" "}
+          <Image
+            src={logoGmail}
+            style={{
+              marginTop: "-0.5vh",
+              width: "calc(15px + 0.3vw)",
+              height: "100%",
+            }}
+          ></Image>
+          &nbsp; Sign in with Google
         </Button>
       </Navbar>
       <Routes>
