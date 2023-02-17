@@ -19,8 +19,7 @@ auth.languageCode = "it";
 const provider = new GoogleAuthProvider();
 provider.addScope("https://www.googleapis.com/auth/contacts.readonly");
 
-// Export firestore database
-// It will be imported into your react app whenever it is needed
+// Initialize Cloud Firestore and get a reference to the service
 const db = getFirestore(app);
 
 export { auth, provider, db };

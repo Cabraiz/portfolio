@@ -30,31 +30,30 @@ import {
   signInWithRedirect,
   User,
 } from "firebase/auth";
-import { collection, getDocs, setDoc, doc } from "firebase/firestore";
+import { collection, getDocs, addDoc, doc } from "firebase/firestore";
 
 function App() {
   const [todo, setTodo] = useState("");
   const [todos, setTodos] = useState<{ id: string }[]>([]);
   //const [user, setUser] = useState<User | null>();
 
-  const addTodo = () => {
-    setDoc(doc(db, "cities", "LA"), {
-      name: "Los Angeles",
-      state: "CA",
-      country: "USA",
-    });
-
-    console.log(auth.currentUser);
+  const addTodo = async () => {
+    try {
+      const docRef = await addDoc(collection(db, "users"), {
+        first: "Ada",
+        last: "Lovelace",
+        born: 1815,
+      });
+      console.log("Document written with ID: ", docRef.id);
+    } catch (e) {
+      console.error("Error adding document: ", e);
+    }
   };
 
   const fetchPost = async () => {
-    await getDocs(collection(db, "todos")).then((querySnapshot) => {
-      const newData = querySnapshot.docs.map((doc) => ({
-        ...doc.data(),
-        id: doc.id,
-      }));
-      setTodos(newData);
-      console.log(todos, newData);
+    const querySnapshot = await getDocs(collection(db, "users"));
+    querySnapshot.forEach((doc) => {
+      console.log(`${doc.id} => ${doc.data()}`);
     });
   };
 
@@ -225,7 +224,7 @@ function App() {
             height: "9vh",
           }}
         />
-        <Button onClick={addTodo}>OIEE</Button>
+        <Button onClick={fetchPost}>OIEE</Button>
         <Button
           style={{
             paddingTop: "1.1vh",
