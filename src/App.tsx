@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import "./App.css";
 import "./fonts/Brutal/Brutal-Type-Medium.ttf";
 
-import { Navbar, Row, Image, Button } from "react-bootstrap";
+import { Navbar, Image, Button } from "react-bootstrap";
 
 import logo from "./images/icones/logo.svg";
 import logoGmail from "./images/icones/7.svg";
@@ -22,10 +22,60 @@ import "./pages/Mateus/Mateus.css";
 import "./pages/Surprise/Surprise.css";
 
 import { isMobile } from "react-device-detect";
-import { auth, provider } from "./Firebase/Firebase";
-import { signInWithPopup, signInWithRedirect } from "firebase/auth";
+import { auth, provider, db } from "./Firebase/Firebase";
+import {
+  GoogleAuthProvider,
+  onAuthStateChanged,
+  signInWithPopup,
+  signInWithRedirect,
+  User,
+} from "firebase/auth";
+import { collection, getDocs, setDoc, doc } from "firebase/firestore";
 
 function App() {
+  const [todo, setTodo] = useState("");
+  const [todos, setTodos] = useState<{ id: string }[]>([]);
+  //const [user, setUser] = useState<User | null>();
+
+  const addTodo = () => {
+    setDoc(doc(db, "cities", "LA"), {
+      name: "Los Angeles",
+      state: "CA",
+      country: "USA",
+    });
+
+    console.log(auth.currentUser);
+  };
+
+  const fetchPost = async () => {
+    await getDocs(collection(db, "todos")).then((querySnapshot) => {
+      const newData = querySnapshot.docs.map((doc) => ({
+        ...doc.data(),
+        id: doc.id,
+      }));
+      setTodos(newData);
+      console.log(todos, newData);
+    });
+  };
+
+  useEffect(() => {
+    const response = async () => {
+      await signInWithRedirect(auth, provider);
+    };
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        // User is signed in, see docs for a list of available properties
+        // https://firebase.google.com/docs/reference/js/firebase.User
+        //setUser(auth.currentUser);
+        const uid = user.uid;
+      } else {
+        response();
+        // User is signed out
+      }
+    });
+    //fetchPost();
+  }, []);
+
   const convertVwToPx = (a: number) => {
     const oneVhInPx = window.innerWidth / 100;
     let temp = oneVhInPx * a;
@@ -33,21 +83,17 @@ function App() {
     return temp;
   };
 
-  const [value, setValue] = useState("");
   const SignInWithFirebase = async () => {
     if (!isMobile) {
       signInWithRedirect(auth, provider)
-        .then((result) => {})
-        .catch((error) => {});
-    } else {
-      signInWithPopup(auth, provider)
-        .then((result) => {
+        .then((result: any) => {
           // This gives you a Google Access Token. You can use it to access the Google API.
-          //const credential = GoogleAuthProvider.credentialFromResult(result);
-          //const token = credential?.accessToken;
+          const credential = GoogleAuthProvider.credentialFromResult(result);
+          const token = credential?.accessToken;
           // The signed-in user info.
-          //const user = result.user;
+          //setUser(result.user);
           // IdP data available using getAdditionalUserInfo(result)
+          // ...
         })
         .catch((error) => {
           // Handle Errors here.
@@ -56,15 +102,44 @@ function App() {
           // The email of the user's account used.
           const email = error.customData.email;
           // The AuthCredential type that was used.
-          //const credential = GoogleAuthProvider.credentialFromError(error);
+          const credential = GoogleAuthProvider.credentialFromError(error);
+          // ...
+        });
+    } else {
+      signInWithPopup(auth, provider)
+        .then((result: any) => {
+          // This gives you a Google Access Token. You can use it to access the Google API.
+          const credential = GoogleAuthProvider.credentialFromResult(result);
+          const token = credential?.accessToken;
+          // The signed-in user info.
+          //setUser(result.user);
+          // IdP data available using getAdditionalUserInfo(result)
+          // ...
+        })
+        .catch((error) => {
+          // Handle Errors here.
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          // The email of the user's account used.
+          const email = error.customData.email;
+          // The AuthCredential type that was used.
+          const credential = GoogleAuthProvider.credentialFromError(error);
           // ...
         });
     }
   };
 
-  useEffect(() => {
-    //setValue(localStorage.getItem("email"));
-  }, []);
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      // User is signed in, see docs for a list of available properties
+      // https://firebase.google.com/docs/reference/js/firebase.User
+      const uid = user.uid;
+      // ...
+    } else {
+      // User is signed out
+      // ...
+    }
+  });
 
   const [title] = useState("Bem Vindo! 🤝");
   const [site, setSite] = useState<string>("");
@@ -131,12 +206,13 @@ function App() {
       </HelmetProvider>
       <Navbar
         style={{
+          borderBottom: "1.2px solid",
+          borderColor: "#80808053",
           justifyContent: "space-between",
           height: "10vh",
           fontWeight: "600",
-          marginRight: "5vw",
-          marginTop: "2vh",
-          margin: "0px",
+          marginInline: "0px",
+          marginTop: "0.8vh",
           padding: "0px",
         }}
       >
@@ -145,10 +221,11 @@ function App() {
           style={{
             borderRadius: "20%",
             marginLeft: `${convertVwToPx(1)}px`,
-            width: "8vh",
-            height: "8vh",
+            width: "9vh",
+            height: "9vh",
           }}
         />
+        <Button onClick={addTodo}>OIEE</Button>
         <Button
           style={{
             paddingTop: "1.1vh",

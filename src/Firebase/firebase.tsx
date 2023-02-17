@@ -1,5 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: `${process.env.REACT_APP_API_KEY}`,
@@ -17,4 +18,9 @@ const auth = getAuth(app);
 auth.languageCode = "it";
 const provider = new GoogleAuthProvider();
 provider.addScope("https://www.googleapis.com/auth/contacts.readonly");
-export { auth, provider };
+
+// Export firestore database
+// It will be imported into your react app whenever it is needed
+const db = getFirestore(app);
+
+export { auth, provider, db };
