@@ -30,7 +30,7 @@ import {
   signInWithRedirect,
   User,
 } from "firebase/auth";
-import { collection, getDocs, addDoc, doc } from "firebase/firestore";
+import { collection, getDoc, addDoc, setDoc, doc } from "firebase/firestore";
 
 function App() {
   const [todo, setTodo] = useState("");
@@ -38,23 +38,22 @@ function App() {
   //const [user, setUser] = useState<User | null>();
 
   const addTodo = async () => {
-    try {
-      const docRef = await addDoc(collection(db, "users"), {
-        first: "Ada",
-        last: "Lovelace",
-        born: 1815,
-      });
-      console.log("Document written with ID: ", docRef.id);
-    } catch (e) {
-      console.error("Error adding document: ", e);
-    }
+    await setDoc(doc(db, "cities", "SF"), {
+      name: "Los Angeles",
+      state: "CA",
+      country: "USA",
+    });
   };
 
   const fetchPost = async () => {
-    const querySnapshot = await getDocs(collection(db, "users"));
-    querySnapshot.forEach((doc) => {
-      console.log(`${doc.id} => ${doc.data()}`);
-    });
+    const docRef = doc(db, "cities", "SF");
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      console.log("Document data:", docSnap.data());
+    } else {
+      // doc.data() will be undefined in this case
+      console.log("No such document!");
+    }
   };
 
   useEffect(() => {
@@ -224,7 +223,8 @@ function App() {
             height: "9vh",
           }}
         />
-        <Button onClick={fetchPost}>OIEE</Button>
+        <Button onClick={fetchPost}>fetchPost</Button>
+        <Button onClick={addTodo}>addTodo</Button>
         <Button
           style={{
             paddingTop: "1.1vh",
