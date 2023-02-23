@@ -28,11 +28,24 @@ import {
   onAuthStateChanged,
   signInWithPopup,
   signInWithRedirect,
-  User,
+  signOut,
 } from "firebase/auth";
-import { collection, getDoc, addDoc, setDoc, doc } from "firebase/firestore";
+import { getDoc, setDoc, doc } from "firebase/firestore";
 
 function App() {
+  const [signInStatus, setsignInStatus] = useState([
+    "Sign in with Google",
+    true,
+  ]);
+
+  const returnSignWidth = () => {
+    if (signInStatus[1]) {
+      return "calc(200px + 1.6vw)";
+    } else {
+      return "calc(100px + 1.6vw)";
+    }
+  };
+
   const [todo, setTodo] = useState("");
   const [todos, setTodos] = useState<{ id: string }[]>([]);
   //const [user, setUser] = useState<User | null>();
@@ -40,7 +53,7 @@ function App() {
   const addTodo = async () => {
     await setDoc(doc(db, "cities", "SF"), {
       name: "Los Angeles",
-      state: "CA",
+      state: "AC",
       country: "USA",
     });
   };
@@ -57,17 +70,16 @@ function App() {
   };
 
   useEffect(() => {
-    const response = async () => {
-      await signInWithRedirect(auth, provider);
-    };
+    //const response = async () => {
+    //  await signInWithRedirect(auth, provider);
+    //};
     onAuthStateChanged(auth, (user) => {
       if (user) {
-        // User is signed in, see docs for a list of available properties
-        // https://firebase.google.com/docs/reference/js/firebase.User
         //setUser(auth.currentUser);
+        setsignInStatus(["Sign Out", false]);
         const uid = user.uid;
       } else {
-        response();
+        //response();
         // User is signed out
       }
     });
@@ -81,49 +93,53 @@ function App() {
     return temp;
   };
 
-  const SignInWithFirebase = async () => {
-    if (!isMobile) {
-      signInWithRedirect(auth, provider)
-        .then((result: any) => {
-          // This gives you a Google Access Token. You can use it to access the Google API.
-          const credential = GoogleAuthProvider.credentialFromResult(result);
-          const token = credential?.accessToken;
-          // The signed-in user info.
-          //setUser(result.user);
-          // IdP data available using getAdditionalUserInfo(result)
-          // ...
+  const SignFirebase = async () => {
+    if (!signInStatus[1]) {
+      signOut(auth)
+        .then(() => {
+          // Sign-out successful.
+          window.location.reload();
         })
         .catch((error) => {
-          // Handle Errors here.
-          const errorCode = error.code;
-          const errorMessage = error.message;
-          // The email of the user's account used.
-          const email = error.customData.email;
-          // The AuthCredential type that was used.
-          const credential = GoogleAuthProvider.credentialFromError(error);
-          // ...
+          // An error happened.
         });
     } else {
-      signInWithPopup(auth, provider)
-        .then((result: any) => {
-          // This gives you a Google Access Token. You can use it to access the Google API.
-          const credential = GoogleAuthProvider.credentialFromResult(result);
-          const token = credential?.accessToken;
-          // The signed-in user info.
-          //setUser(result.user);
-          // IdP data available using getAdditionalUserInfo(result)
-          // ...
-        })
-        .catch((error) => {
-          // Handle Errors here.
-          const errorCode = error.code;
-          const errorMessage = error.message;
-          // The email of the user's account used.
-          const email = error.customData.email;
-          // The AuthCredential type that was used.
-          const credential = GoogleAuthProvider.credentialFromError(error);
-          // ...
-        });
+      if (!isMobile) {
+        signInWithRedirect(auth, provider)
+          .then((result: any) => {
+            AfterSignIn(true);
+          })
+          .catch((error) => {
+            AfterSignIn(false);
+          });
+      } else {
+        signInWithPopup(auth, provider)
+          .then((result: any) => {
+            AfterSignIn(true);
+          })
+          .catch((error) => {
+            AfterSignIn(false, error);
+          });
+      }
+    }
+  };
+
+  const AfterSignIn = (b: boolean, e?: any) => {
+    if (b) {
+      //window.location.reload();
+      // This gives you a Google Access Token. You can use it to access the Google API.
+      //const credential = GoogleAuthProvider.credentialFromResult(result);
+      //const token = credential?.accessToken;
+      // The signed-in user info.
+      //setUser(result.user);
+      // IdP data available using getAdditionalUserInfo(result)
+    } else {
+      const errorCode = e.code;
+      const errorMessage = e.message;
+      // The email of the user's account used.
+      const email = e.customData.email;
+      // The AuthCredential type that was used.
+      const credential = GoogleAuthProvider.credentialFromError(e);
     }
   };
 
@@ -229,7 +245,7 @@ function App() {
           style={{
             paddingTop: "1.1vh",
             marginRight: "4vw",
-            width: "calc(200px + 1.6vw)",
+            width: returnSignWidth(),
             height: "6vh",
             fontSize: "1rem",
             backgroundColor: "white",
@@ -237,7 +253,7 @@ function App() {
             fontWeight: "500",
             borderColor: "white",
           }}
-          onClick={SignInWithFirebase}
+          onClick={SignFirebase}
         >
           <Image
             src={logoGmail}
@@ -247,7 +263,7 @@ function App() {
               height: "100%",
             }}
           ></Image>
-          &nbsp; Sign in with Google
+          &nbsp; {signInStatus}
         </Button>
       </Navbar>
       <Routes>
