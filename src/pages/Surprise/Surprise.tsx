@@ -9,11 +9,14 @@ import ScratchCard from "react-scratchcard-v2";
 import icognita from "../../images/Surprise/Icognita.png";
 import icognitaBlock from "../../images/Surprise/IcognitaBlock.png";
 
+import { auth, db } from "../../Firebase/Firebase";
+import { getDoc, setDoc, doc } from "firebase/firestore";
+
 const backgroundSong = require("../../song/Surprise/backgroundSong.ogg");
 
 const vh = 85;
 const vw = 46;
-const percRasp = 90;
+const percRasp = 1;
 function Surprise() {
   const [allColor, setColor] = useState(["20", "20", "20", "20", "20"]);
   const [finalizados, setFinalizado] = useState([
@@ -36,7 +39,41 @@ function Surprise() {
     false,
   ]);
 
+  function getStringValue(value: any): string {
+    return String(value);
+  }
+
+  const addTodo = async () => {
+    const temp = getStringValue(auth.currentUser?.uid);
+    if (temp !== undefined) {
+      await setDoc(doc(db, temp, "bloqueados"), {
+        0: false,
+        1: false,
+        2: false,
+        3: false,
+        4: false,
+        5: false,
+        6: false,
+      });
+    }
+  };
+
+  const fetchPost = async () => {
+    const docRef = doc(db, "cities", "SF");
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      console.log("Document data:", docSnap.data());
+    } else {
+      // doc.data() will be undefined in this case
+      console.log("No such document!");
+    }
+  };
+
   const ref = useRef<ScratchCard>(null);
+
+  const icognitaStatus = () => {
+    return icognitaBlock;
+  };
 
   const onClickReset = () => {
     ref.current && ref.current.reset();
@@ -63,6 +100,7 @@ function Surprise() {
   const [show, setShow] = useState([false, false]);
 
   const handleStatus = (a: number, b: boolean) => {
+    addTodo();
     setShow(
       update(show, {
         [a]: {
@@ -79,14 +117,11 @@ function Surprise() {
           className="p-0 ms-0 me-0 mb-0 text-nowrap"
           style={{ marginTop: "5vh" }}
         >
-          <div
-            className="inline"
-            style={{ pointerEvents: "none", marginRight: "-0.2vw" }}
-          >
+          <div className="inline" style={{ marginRight: "-0.2vw" }}>
             <ScratchCard
               width={convertVwToPx(vw, 0)}
               height={convertVhToPx(vh)}
-              image={icognitaBlock}
+              image={icognitaStatus()}
               finishPercent={percRasp}
               onComplete={() => handleStatus(0, true)}
             >

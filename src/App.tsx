@@ -14,7 +14,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { Helmet, HelmetProvider } from "react-helmet-async";
 
 import { Routes, Route } from "react-router-dom";
-import May from "./pages/May/May";
+//import May from "./pages/May/May";
 import Mateus from "./pages/Mateus/Mateus";
 import Surprise from "./pages/Surprise/Surprise";
 
@@ -22,7 +22,7 @@ import "./pages/Mateus/Mateus.css";
 import "./pages/Surprise/Surprise.css";
 
 import { isMobile } from "react-device-detect";
-import { auth, provider, db } from "./Firebase/Firebase";
+import { auth, provider } from "./Firebase/Firebase";
 import {
   GoogleAuthProvider,
   onAuthStateChanged,
@@ -30,44 +30,9 @@ import {
   signInWithRedirect,
   signOut,
 } from "firebase/auth";
-import { getDoc, setDoc, doc } from "firebase/firestore";
 
 function App() {
-  const [signInStatus, setsignInStatus] = useState([
-    "Sign in with Google",
-    true,
-  ]);
-
-  const returnSignWidth = () => {
-    if (signInStatus[1]) {
-      return "calc(200px + 1.6vw)";
-    } else {
-      return "calc(100px + 1.6vw)";
-    }
-  };
-
-  const [todo, setTodo] = useState("");
-  const [todos, setTodos] = useState<{ id: string }[]>([]);
-  //const [user, setUser] = useState<User | null>();
-
-  const addTodo = async () => {
-    await setDoc(doc(db, "cities", "SF"), {
-      name: "Los Angeles",
-      state: "AC",
-      country: "USA",
-    });
-  };
-
-  const fetchPost = async () => {
-    const docRef = doc(db, "cities", "SF");
-    const docSnap = await getDoc(docRef);
-    if (docSnap.exists()) {
-      console.log("Document data:", docSnap.data());
-    } else {
-      // doc.data() will be undefined in this case
-      console.log("No such document!");
-    }
-  };
+  const [signInStatus, setsignInStatus] = useState(["", false]);
 
   useEffect(() => {
     //const response = async () => {
@@ -79,8 +44,7 @@ function App() {
         setsignInStatus(["Sign Out", false]);
         const uid = user.uid;
       } else {
-        //response();
-        // User is signed out
+        setsignInStatus(["Sign In With Google", true]);
       }
     });
     //fetchPost();
@@ -142,18 +106,6 @@ function App() {
       const credential = GoogleAuthProvider.credentialFromError(e);
     }
   };
-
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-      // User is signed in, see docs for a list of available properties
-      // https://firebase.google.com/docs/reference/js/firebase.User
-      const uid = user.uid;
-      // ...
-    } else {
-      // User is signed out
-      // ...
-    }
-  });
 
   const [title] = useState("Bem Vindo! 🤝");
   const [site, setSite] = useState<string>("");
@@ -239,13 +191,11 @@ function App() {
             height: "9vh",
           }}
         />
-        <Button onClick={fetchPost}>fetchPost</Button>
-        <Button onClick={addTodo}>addTodo</Button>
         <Button
           style={{
             paddingTop: "1.1vh",
             marginRight: "4vw",
-            width: returnSignWidth(),
+            width: "auto",
             height: "6vh",
             fontSize: "1rem",
             backgroundColor: "white",
