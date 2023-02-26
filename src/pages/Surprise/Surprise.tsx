@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import AudioPlayer from "react-h5-audio-player";
 import "react-h5-audio-player/lib/styles.css";
 import { Col, Row, Image, Button, Modal } from "react-bootstrap";
@@ -17,7 +17,22 @@ const backgroundSong = require("../../song/Surprise/backgroundSong.ogg");
 const vh = 85;
 const vw = 46;
 const percRasp = 1;
+
 function Surprise() {
+  const [data, setData] = useState(new Date());
+
+  useEffect(() => {
+    const getRealTime = async () => {
+      const response = await fetch(
+        "http://worldtimeapi.org/api/timezone/America/Fortaleza"
+      );
+      const temp = await response.json();
+      setData(new Date(temp.datetime));
+    };
+
+    getRealTime();
+  }, []);
+
   const [allColor, setColor] = useState(["20", "20", "20", "20", "20"]);
   const [finalizados, setFinalizado] = useState([
     false,
