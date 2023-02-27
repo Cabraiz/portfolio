@@ -22,7 +22,8 @@ import "./pages/Mateus/Mateus.css";
 import "./pages/Surprise/Surprise.css";
 
 import { isMobile } from "react-device-detect";
-import { auth, provider } from "./Firebase/Firebase";
+import { db, auth, provider } from "./Firebase/Firebase";
+import { doc, setDoc } from "firebase/firestore";
 import {
   onAuthStateChanged,
   signInWithPopup,
@@ -46,8 +47,26 @@ function App() {
         setsignInStatus(["Sign In With Google", true]);
       }
     });
-    //fetchPost();
   }, []);
+
+  function getStringValue(value: any): string {
+    return String(value);
+  }
+
+  const addTodo = async () => {
+    const temp = getStringValue(auth.currentUser?.uid);
+    if (temp !== undefined) {
+      await setDoc(doc(db, temp, "bloqueados"), {
+        0: false,
+        1: false,
+        2: false,
+        3: false,
+        4: false,
+        5: false,
+        6: false,
+      });
+    }
+  };
 
   const convertVwToPx = (a: number) => {
     const oneVhInPx = window.innerWidth / 100;
@@ -89,6 +108,7 @@ function App() {
 
   const AfterSignIn = (b: boolean, e?: any) => {
     if (b) {
+      addTodo();
       //window.location.reload();
       // This gives you a Google Access Token. You can use it to access the Google API.
       //const credential = GoogleAuthProvider.credentialFromResult(result);

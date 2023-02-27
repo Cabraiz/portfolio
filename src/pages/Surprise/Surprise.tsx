@@ -16,10 +16,11 @@ const backgroundSong = require("../../song/Surprise/backgroundSong.ogg");
 
 const vh = 85;
 const vw = 46;
-const percRasp = 1;
+const percRasp = 99;
 
 function Surprise() {
-  const [data, setData] = useState(new Date());
+  const [data, setData] = useState(25);
+  const startHorarios = [15, 16, 18, 18, 20, 23];
 
   const person = {
     finalizados: false,
@@ -27,11 +28,11 @@ function Surprise() {
   };
 
   const [finalizados, setFinalizado] = useState(
-    Array(7).fill(Object.create(person))
+    Array(5).fill(Object.create(person))
   );
 
   const [bloqueados, setBloqueado] = useState(
-    Array(7).fill(Object.create(person))
+    Array(5).fill(Object.create(person))
   );
 
   useEffect(() => {
@@ -40,7 +41,7 @@ function Surprise() {
         "http://worldtimeapi.org/api/timezone/America/Fortaleza"
       );
       const temp = await response.json();
-      setData(new Date(temp.datetime));
+      setData(+new Date(temp.datetime));
     };
 
     getRealTime();
@@ -50,7 +51,7 @@ function Surprise() {
     return String(value);
   }
 
-  const addTodo = async () => {
+  const setTodo = async () => {
     const temp = getStringValue(auth.currentUser?.uid);
     if (temp !== undefined) {
       await setDoc(doc(db, temp, "bloqueados"), {
@@ -78,7 +79,10 @@ function Surprise() {
 
   const ref = useRef<ScratchCard>(null);
 
-  const icognitaStatus = () => {
+  const icognitaStatus = (b: number) => {
+    if (startHorarios[b] < data) {
+      return icognita;
+    }
     return icognitaBlock;
   };
 
@@ -107,7 +111,6 @@ function Surprise() {
   const [show, setShow] = useState([false, false]);
 
   const handleStatus = (a: number, b: boolean) => {
-    addTodo();
     setShow(
       update(show, {
         [a]: {
@@ -117,6 +120,13 @@ function Surprise() {
     );
   };
 
+  const stringStyle = {
+    borderStyle: "solid",
+    borderColor: "white",
+    borderWidth: "5px 5px 5px 0",
+    borderRadius: "5px",
+  };
+
   return (
     <>
       <Row className="m-0 p-0">
@@ -124,11 +134,11 @@ function Surprise() {
           className="p-0 ms-0 me-0 mb-0 text-nowrap"
           style={{ marginTop: "5vh" }}
         >
-          <div className="inline" style={{ marginRight: "-0.2vw" }}>
+          <div className="inline" style={stringStyle}>
             <ScratchCard
               width={convertVwToPx(vw, 0)}
               height={convertVhToPx(vh)}
-              image={icognitaStatus()}
+              image={icognitaStatus(0)}
               finishPercent={percRasp}
               onComplete={() => handleStatus(0, true)}
             >
@@ -136,11 +146,11 @@ function Surprise() {
             </ScratchCard>
           </div>
 
-          <div className="inline" style={{ marginRight: "-0.2vw" }}>
+          <div className="inline" style={stringStyle}>
             <ScratchCard
               width={convertVwToPx(vw, 1)}
               height={convertVhToPx(vh)}
-              image={icognita}
+              image={icognitaStatus(1)}
               finishPercent={percRasp}
               onComplete={() => handleStatus(1, true)}
             >
@@ -148,11 +158,11 @@ function Surprise() {
             </ScratchCard>
           </div>
 
-          <div className="inline" style={{ marginRight: "-0.2vw" }}>
+          <div className="inline" style={stringStyle}>
             <ScratchCard
               width={convertVwToPx(vw, 2)}
               height={convertVhToPx(vh)}
-              image={icognita}
+              image={icognitaStatus(2)}
               finishPercent={percRasp}
               onComplete={() => console.log("complete")}
             >
@@ -160,11 +170,11 @@ function Surprise() {
             </ScratchCard>
           </div>
 
-          <div className="inline" style={{ marginRight: "-0.2vw" }}>
+          <div className="inline" style={stringStyle}>
             <ScratchCard
               width={convertVwToPx(vw, 3)}
               height={convertVhToPx(vh)}
-              image={icognita}
+              image={icognitaStatus(3)}
               finishPercent={percRasp}
               onComplete={() => console.log("complete")}
             >
@@ -172,11 +182,11 @@ function Surprise() {
             </ScratchCard>
           </div>
 
-          <div className="inline" style={{ marginRight: "-0.2vw" }}>
+          <div className="inline" style={stringStyle}>
             <ScratchCard
               width={convertVwToPx(vw, 4)}
               height={convertVhToPx(vh)}
-              image={icognita}
+              image={icognitaStatus(4)}
               finishPercent={percRasp}
               onComplete={() => console.log("complete")}
             >
@@ -184,23 +194,11 @@ function Surprise() {
             </ScratchCard>
           </div>
 
-          <div className="inline" style={{ marginRight: "-0.2vw" }}>
+          <div className="inline" style={stringStyle}>
             <ScratchCard
               width={convertVwToPx(vw, 5)}
               height={convertVhToPx(vh)}
-              image={icognita}
-              finishPercent={percRasp}
-              onComplete={() => console.log("complete")}
-            >
-              <Button className="btnImage porBaixo">?</Button>
-            </ScratchCard>
-          </div>
-
-          <div className="inline" style={{ marginRight: "-0.2vw" }}>
-            <ScratchCard
-              width={convertVwToPx(vw, 6)}
-              height={convertVhToPx(vh)}
-              image={icognita}
+              image={icognitaStatus(5)}
               finishPercent={percRasp}
               onComplete={() => console.log("complete")}
             >
