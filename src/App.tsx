@@ -63,7 +63,6 @@ function App() {
         3: false,
         4: false,
         5: false,
-        6: false,
       });
     }
   };

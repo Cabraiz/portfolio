@@ -8,6 +8,7 @@ import ScratchCard from "react-scratchcard-v2";
 
 import icognita from "../../images/Surprise/Icognita.png";
 import icognitaBlock from "../../images/Surprise/IcognitaBlock.png";
+import circle from "../../images/Surprise/circle.png";
 
 import { auth, db } from "../../Firebase/Firebase";
 import { getDoc, setDoc, doc } from "firebase/firestore";
@@ -61,7 +62,6 @@ function Surprise() {
         3: false,
         4: false,
         5: false,
-        6: false,
       });
     }
   };
@@ -120,11 +120,16 @@ function Surprise() {
     );
   };
 
-  const stringStyle = {
+  const stringCustomStyle = {
     borderStyle: "solid",
     borderColor: "white",
     borderWidth: "5px 5px 5px 0",
     borderRadius: "5px",
+  };
+  const cardCustomStyle = {
+    image: circle,
+    width: 15,
+    height: 15,
   };
 
   return (
@@ -134,19 +139,20 @@ function Surprise() {
           className="p-0 ms-0 me-0 mb-0 text-nowrap"
           style={{ marginTop: "5vh" }}
         >
-          <div className="inline" style={stringStyle}>
+          <div className="inline" style={stringCustomStyle}>
             <ScratchCard
               width={convertVwToPx(vw, 0)}
               height={convertVhToPx(vh)}
               image={icognitaStatus(0)}
               finishPercent={percRasp}
               onComplete={() => handleStatus(0, true)}
+              customBrush={cardCustomStyle}
             >
               <Image className="porBaixo"></Image>
             </ScratchCard>
           </div>
 
-          <div className="inline" style={stringStyle}>
+          <div className="inline" style={stringCustomStyle}>
             <ScratchCard
               width={convertVwToPx(vw, 1)}
               height={convertVhToPx(vh)}
@@ -158,7 +164,7 @@ function Surprise() {
             </ScratchCard>
           </div>
 
-          <div className="inline" style={stringStyle}>
+          <div className="inline" style={stringCustomStyle}>
             <ScratchCard
               width={convertVwToPx(vw, 2)}
               height={convertVhToPx(vh)}
@@ -170,7 +176,7 @@ function Surprise() {
             </ScratchCard>
           </div>
 
-          <div className="inline" style={stringStyle}>
+          <div className="inline" style={stringCustomStyle}>
             <ScratchCard
               width={convertVwToPx(vw, 3)}
               height={convertVhToPx(vh)}
@@ -182,7 +188,7 @@ function Surprise() {
             </ScratchCard>
           </div>
 
-          <div className="inline" style={stringStyle}>
+          <div className="inline" style={stringCustomStyle}>
             <ScratchCard
               width={convertVwToPx(vw, 4)}
               height={convertVhToPx(vh)}
@@ -194,7 +200,7 @@ function Surprise() {
             </ScratchCard>
           </div>
 
-          <div className="inline" style={stringStyle}>
+          <div className="inline" style={stringCustomStyle}>
             <ScratchCard
               width={convertVwToPx(vw, 5)}
               height={convertVhToPx(vh)}
