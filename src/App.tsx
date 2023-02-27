@@ -24,7 +24,6 @@ import "./pages/Surprise/Surprise.css";
 import { isMobile } from "react-device-detect";
 import { auth, provider } from "./Firebase/Firebase";
 import {
-  GoogleAuthProvider,
   onAuthStateChanged,
   signInWithPopup,
   signInWithRedirect,
@@ -42,7 +41,7 @@ function App() {
       if (user) {
         //setUser(auth.currentUser);
         setsignInStatus(["Sign Out", false]);
-        const uid = user.uid;
+        //const uid = user.uid;
       } else {
         setsignInStatus(["Sign In With Google", true]);
       }
@@ -98,12 +97,10 @@ function App() {
       //setUser(result.user);
       // IdP data available using getAdditionalUserInfo(result)
     } else {
-      const errorCode = e.code;
+      //const errorCode = e.code;
       const errorMessage = e.message;
       // The email of the user's account used.
       const email = e.customData.email;
-      // The AuthCredential type that was used.
-      const credential = GoogleAuthProvider.credentialFromError(e);
     }
   };
 

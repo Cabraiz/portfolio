@@ -21,6 +21,19 @@ const percRasp = 1;
 function Surprise() {
   const [data, setData] = useState(new Date());
 
+  const person = {
+    finalizados: false,
+    horarios: 0,
+  };
+
+  const [finalizados, setFinalizado] = useState(
+    Array(7).fill(Object.create(person))
+  );
+
+  const [bloqueados, setBloqueado] = useState(
+    Array(7).fill(Object.create(person))
+  );
+
   useEffect(() => {
     const getRealTime = async () => {
       const response = await fetch(
@@ -32,27 +45,6 @@ function Surprise() {
 
     getRealTime();
   }, []);
-
-  const [allColor, setColor] = useState(["20", "20", "20", "20", "20"]);
-  const [finalizados, setFinalizado] = useState([
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-  ]);
-
-  const [bloqueados, setBloqueado] = useState([
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-  ]);
 
   function getStringValue(value: any): string {
     return String(value);
