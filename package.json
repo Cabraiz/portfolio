@@ -36,7 +36,7 @@
     "web-vitals": "^3.1.0"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "yarn upgrade && react-scripts start",
     "build": "set \"GENERATE_SOURCEMAP=false\" && react-scripts build",
     "postbuild": "rimraf build/**/*.map",
     "test": "react-scripts test",
