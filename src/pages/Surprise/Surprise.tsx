@@ -12,12 +12,13 @@ import circle from "../../images/Surprise/circle.png";
 
 import { auth, db } from "../../Firebase/Firebase";
 import { getDoc, setDoc, doc } from "firebase/firestore";
+import "animate.css";
 
 const backgroundSong = require("../../song/Surprise/backgroundSong.ogg");
 
 const vh = 85;
 const vw = 46;
-const percRasp = 99;
+const percRasp = 1;
 
 function Surprise() {
   const [data, setData] = useState(25);
@@ -104,7 +105,7 @@ function Surprise() {
     if (temp < 140) {
       temp = 140;
     }
-    return temp;
+    return Math.ceil(temp);
   };
 
   //MODAL
@@ -121,6 +122,7 @@ function Surprise() {
   };
 
   const stringCustomStyle = {
+    borderRightWidth: "inherit",
     borderStyle: "solid",
     borderColor: "white",
     borderWidth: "5px 5px 5px 0",
@@ -213,7 +215,11 @@ function Surprise() {
           </div>
         </Col>
       </Row>
-      <Modal show={show[0]} onHide={() => handleStatus(0, false)}>
+      <Modal
+        className="animate__bounceIn"
+        show={show[0]}
+        onHide={() => handleStatus(0, false)}
+      >
         <Modal.Header closeButton>
           <Modal.Title>Modal heading</Modal.Title>
         </Modal.Header>
