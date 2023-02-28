@@ -8,34 +8,31 @@ import ScratchCard from "react-scratchcard-v2";
 
 import icognita from "../../images/Surprise/Icognita.png";
 import icognitaBlock from "../../images/Surprise/IcognitaBlock.png";
+import icognitaDone from "../../images/Surprise/icognitaDone.png";
 import circle from "../../images/Surprise/circle.png";
 
 import { auth, db } from "../../Firebase/Firebase";
 import { getDoc, setDoc, doc } from "firebase/firestore";
 import "animate.css";
+import { onAuthStateChanged } from "firebase/auth";
 
 const backgroundSong = require("../../song/Surprise/backgroundSong.ogg");
 
 const vh = 85;
 const vw = 46;
 const percRasp = 1;
+let load = false;
 
 function Surprise() {
   const [data, setData] = useState(25);
+  const [getimage, setImage] = useState(Array(6).fill(icognita));
+
   const startHorarios = [15, 16, 18, 18, 20, 23];
+  let finalizados = Array(6).fill(false);
 
-  const person = {
-    finalizados: false,
-    horarios: 0,
-  };
-
-  const [finalizados, setFinalizado] = useState(
-    Array(5).fill(Object.create(person))
-  );
-
-  const [bloqueados, setBloqueado] = useState(
-    Array(5).fill(Object.create(person))
-  );
+  //const [bloqueados, setBloqueado] = useState(
+  //  Array(5).fill(false)
+  //);
 
   useEffect(() => {
     const getRealTime = async () => {
@@ -46,32 +43,49 @@ function Surprise() {
       setData(+new Date(temp.datetime));
     };
 
-    getRealTime();
-  }, []);
+    onAuthStateChanged(auth, (user) => {
+      if (user && !load) {
+        load = true;
+        getRealTime();
+        fetchPost();
+      }
+    });
+
+    const setTodo = async () => {
+      const temp = getStringValue(auth.currentUser?.uid);
+      if (temp !== undefined) {
+        await setDoc(doc(db, temp, "bloqueados"), {
+          0: false,
+          1: false,
+          2: false,
+          3: false,
+          4: false,
+          5: false,
+        });
+      }
+    };
+  }, [getimage]);
 
   function getStringValue(value: any): string {
     return String(value);
   }
 
-  const setTodo = async () => {
-    const temp = getStringValue(auth.currentUser?.uid);
-    if (temp !== undefined) {
-      await setDoc(doc(db, temp, "bloqueados"), {
-        0: false,
-        1: false,
-        2: false,
-        3: false,
-        4: false,
-        5: false,
-      });
-    }
-  };
-
   const fetchPost = async () => {
-    const docRef = doc(db, "cities", "SF");
+    const temp = getStringValue(auth.currentUser?.uid);
+    const docRef = doc(db, temp, "bloqueados");
     const docSnap = await getDoc(docRef);
     if (docSnap.exists()) {
-      console.log("Document data:", docSnap.data());
+      let temp = [];
+      for (const element of Object.values(docSnap.data())) {
+        temp.push(element);
+      }
+      finalizados = temp;
+      temp = [];
+      for (let i = 0; i < finalizados.length; i++) {
+        temp.push(icognitaStatus(i));
+      }
+      setImage(temp);
+      console.log(getimage);
     } else {
       // doc.data() will be undefined in this case
       console.log("No such document!");
@@ -81,6 +95,9 @@ function Surprise() {
   const ref = useRef<ScratchCard>(null);
 
   const icognitaStatus = (b: number) => {
+    if (finalizados[b]) {
+      return icognitaDone;
+    }
     if (startHorarios[b] < data) {
       return icognita;
     }
@@ -112,6 +129,7 @@ function Surprise() {
   const [show, setShow] = useState([false, false]);
 
   const handleStatus = (a: number, b: boolean) => {
+    console.log(getimage);
     setShow(
       update(show, {
         [a]: {
@@ -145,7 +163,7 @@ function Surprise() {
             <ScratchCard
               width={convertVwToPx(vw, 0)}
               height={convertVhToPx(vh)}
-              image={icognitaStatus(0)}
+              image={getimage[0]}
               finishPercent={percRasp}
               onComplete={() => handleStatus(0, true)}
               customBrush={cardCustomStyle}
@@ -158,7 +176,7 @@ function Surprise() {
             <ScratchCard
               width={convertVwToPx(vw, 1)}
               height={convertVhToPx(vh)}
-              image={icognitaStatus(1)}
+              image={getimage[1]}
               finishPercent={percRasp}
               onComplete={() => handleStatus(1, true)}
             >
@@ -170,7 +188,7 @@ function Surprise() {
             <ScratchCard
               width={convertVwToPx(vw, 2)}
               height={convertVhToPx(vh)}
-              image={icognitaStatus(2)}
+              image={getimage[2]}
               finishPercent={percRasp}
               onComplete={() => console.log("complete")}
             >
@@ -182,7 +200,7 @@ function Surprise() {
             <ScratchCard
               width={convertVwToPx(vw, 3)}
               height={convertVhToPx(vh)}
-              image={icognitaStatus(3)}
+              image={getimage[3]}
               finishPercent={percRasp}
               onComplete={() => console.log("complete")}
             >
@@ -194,7 +212,7 @@ function Surprise() {
             <ScratchCard
               width={convertVwToPx(vw, 4)}
               height={convertVhToPx(vh)}
-              image={icognitaStatus(4)}
+              image={getimage[4]}
               finishPercent={percRasp}
               onComplete={() => console.log("complete")}
             >
@@ -206,7 +224,7 @@ function Surprise() {
             <ScratchCard
               width={convertVwToPx(vw, 5)}
               height={convertVhToPx(vh)}
-              image={icognitaStatus(5)}
+              image={getimage[5]}
               finishPercent={percRasp}
               onComplete={() => console.log("complete")}
             >
