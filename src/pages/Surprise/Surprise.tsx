@@ -42,39 +42,52 @@ function Surprise() {
   //  Array(5).fill(false)
   //);
 
+  const getRealTime = async () => {
+    const response = await fetch(
+      "http://worldtimeapi.org/api/timezone/America/Fortaleza"
+    );
+    const temp = await response.json();
+    setData(new Date(temp.datetime).getHours());
+  };
+
   const fetchPost = async () => {
     const temp = getStringValue(auth.currentUser?.uid);
     const docRef = doc(db, temp, "bloqueados");
     const docSnap = await getDoc(docRef);
+    await getRealTime();
     if (docSnap.exists()) {
-      let temp = [];
+      let tempBooleanos = [];
+      console.log(docSnap.data());
       for (const element of Object.values(docSnap.data())) {
-        temp.push(element);
+        tempBooleanos.push(element);
       }
-      setFinalizados([
-        <Block>
-          <Image className="porBaixo" src={Done_1}></Image>
-        </Block>,
-      ]);
+      setFinalizados([returnFetchPost(Done_1, tempBooleanos[0])]);
     } else {
       // doc.data() will be undefined in this case
       console.log("No such document!");
     }
   };
 
-  useEffect(() => {
-    const getRealTime = async () => {
-      const response = await fetch(
-        "http://worldtimeapi.org/api/timezone/America/Fortaleza"
+  const returnFetchPost = (a: string, b: boolean) => {
+    console.log(b);
+    if (b) {
+      return (
+        <Done>
+          <Image className="porBaixo" src={Done_1}></Image>
+        </Done>
       );
-      const temp = await response.json();
-      setData(+new Date(temp.datetime));
-    };
+    }
+    return (
+      <Block>
+        <Image className="porBaixo" src={Done_1}></Image>
+      </Block>
+    );
+  };
 
+  useEffect(() => {
     onAuthStateChanged(auth, (user) => {
       if (user && !load) {
         load = true;
-        getRealTime();
         fetchPost();
       }
     });
@@ -108,10 +121,6 @@ function Surprise() {
       return icognita;
     }
     return icognitaBlock;
-  };
-
-  const onClickReset = () => {
-    ref.current && ref.current.reset();
   };
 
   const convertVhToPx = (vh: number) => {

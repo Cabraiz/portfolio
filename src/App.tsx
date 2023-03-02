@@ -23,7 +23,7 @@ import "./pages/Surprise/Surprise.css";
 
 import { isMobile } from "react-device-detect";
 import { db, auth, provider } from "./Firebase/Firebase";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc } from "firebase/firestore";
 import {
   onAuthStateChanged,
   signInWithPopup,
@@ -55,15 +55,19 @@ function App() {
 
   const addTodo = async () => {
     const temp = getStringValue(auth.currentUser?.uid);
-    if (temp !== undefined) {
-      await setDoc(doc(db, temp, "bloqueados"), {
-        0: false,
-        1: false,
-        2: false,
-        3: false,
-        4: false,
-        5: false,
-      });
+    const docRef = doc(db, temp, "bloqueados");
+    const docSnap = await getDoc(docRef);
+    if (!docSnap.exists()) {
+      if (temp !== undefined) {
+        await setDoc(doc(db, temp, "bloqueados"), {
+          0: false,
+          1: false,
+          2: false,
+          3: false,
+          4: false,
+          5: false,
+        });
+      }
     }
   };
 

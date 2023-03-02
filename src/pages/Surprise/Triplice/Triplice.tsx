@@ -2,7 +2,9 @@ import React from "react";
 import { isMobile } from "react-device-detect";
 import ScratchCard from "react-scratchcard-v2";
 
+import icognita from "../../../images/Surprise/Icognita.png";
 import icognitaBlock from "../../../images/Surprise/IcognitaBlock.png";
+import icognitaDone from "../../../images/Surprise/icognitaDone.png";
 import circle from "../../../images/Surprise/circle.png";
 
 import "animate.css";
@@ -57,7 +59,7 @@ export const Done = (props: ContainerProps) => {
     <ScratchCard
       width={convertVwToPx(vw, 0)}
       height={convertVhToPx(vh)}
-      image={icognitaBlock}
+      image={icognitaDone}
       finishPercent={percRasp}
       customBrush={cardCustomStyle}
     >
@@ -71,7 +73,7 @@ export const Default = (props: ContainerProps) => {
     <ScratchCard
       width={convertVwToPx(vw, 0)}
       height={convertVhToPx(vh)}
-      image={icognitaBlock}
+      image={icognita}
       finishPercent={percRasp}
       customBrush={cardCustomStyle}
     >
