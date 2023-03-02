@@ -61,26 +61,40 @@ function Surprise() {
       for (const element of Object.values(docSnap.data())) {
         tempBooleanos.push(element);
       }
-      setFinalizados([returnFetchPost(Done_1, tempBooleanos[0])]);
+      setFinalizados([
+        returnFetchPost(0, tempBooleanos[0]),
+        returnFetchPost(1, tempBooleanos[1]),
+        returnFetchPost(2, tempBooleanos[2]),
+        returnFetchPost(3, tempBooleanos[3]),
+        returnFetchPost(4, tempBooleanos[4]),
+        returnFetchPost(5, tempBooleanos[5]),
+      ]);
     } else {
       // doc.data() will be undefined in this case
       console.log("No such document!");
     }
   };
 
-  const returnFetchPost = (a: string, b: boolean) => {
-    console.log(b);
+  const imagensAcervo = [Done_1, Done_2, Done_3, Done_4, Done_5, Done_6];
+  const returnFetchPost = (a: number, b: boolean) => {
     if (b) {
       return (
         <Done>
-          <Image className="porBaixo" src={Done_1}></Image>
+          <Image className="porBaixo" src={imagensAcervo[a]}></Image>
         </Done>
       );
     }
+    if (startHorarios[a] < data) {
+      return (
+        <Block>
+          <Image className="porBaixo" src={imagensAcervo[a]}></Image>
+        </Block>
+      );
+    }
     return (
-      <Block>
-        <Image className="porBaixo" src={Done_1}></Image>
-      </Block>
+      <Default>
+        <Image className="porBaixo" src={imagensAcervo[a]}></Image>
+      </Default>
     );
   };
 
@@ -186,68 +200,23 @@ function Surprise() {
           </div>
 
           <div className="inline" style={stringCustomStyle}>
-            <ScratchCard
-              width={convertVwToPx(vw, 1)}
-              height={convertVhToPx(vh)}
-              image={getImage(1)}
-              finishPercent={percRasp}
-              onComplete={() => handleStatus(1, true)}
-              customBrush={cardCustomStyle}
-            >
-              <Image className="porBaixo" src={Done_2}></Image>
-            </ScratchCard>
+            {finalizados[1]}
           </div>
 
           <div className="inline" style={stringCustomStyle}>
-            <ScratchCard
-              width={convertVwToPx(vw, 2)}
-              height={convertVhToPx(vh)}
-              image={getImage(2)}
-              finishPercent={percRasp}
-              onComplete={() => console.log("complete")}
-              customBrush={cardCustomStyle}
-            >
-              <Image className="porBaixo" src={Done_3}></Image>
-            </ScratchCard>
+            {finalizados[2]}
           </div>
 
           <div className="inline" style={stringCustomStyle}>
-            <ScratchCard
-              width={convertVwToPx(vw, 3)}
-              height={convertVhToPx(vh)}
-              image={getImage(3)}
-              finishPercent={percRasp}
-              onComplete={() => console.log("complete")}
-              customBrush={cardCustomStyle}
-            >
-              <Image className="porBaixo" src={Done_4}></Image>
-            </ScratchCard>
+            {finalizados[3]}
           </div>
 
           <div className="inline" style={stringCustomStyle}>
-            <ScratchCard
-              width={convertVwToPx(vw, 4)}
-              height={convertVhToPx(vh)}
-              image={getImage(4)}
-              finishPercent={percRasp}
-              onComplete={() => console.log("complete")}
-              customBrush={cardCustomStyle}
-            >
-              <Image className="porBaixo" src={Done_5}></Image>
-            </ScratchCard>
+            {finalizados[4]}
           </div>
 
           <div className="inline" style={stringCustomStyle}>
-            <ScratchCard
-              width={convertVwToPx(vw, 5)}
-              height={convertVhToPx(vh)}
-              image={getImage(5)}
-              finishPercent={percRasp}
-              onComplete={() => console.log("complete")}
-              customBrush={cardCustomStyle}
-            >
-              <Image className="porBaixo" src={Done_6}></Image>
-            </ScratchCard>
+            {finalizados[5]}
           </div>
         </Col>
       </Row>
