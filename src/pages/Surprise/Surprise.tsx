@@ -11,6 +11,13 @@ import icognitaBlock from "../../images/Surprise/IcognitaBlock.png";
 import icognitaDone from "../../images/Surprise/icognitaDone.png";
 import circle from "../../images/Surprise/circle.png";
 
+import Done_1 from "../../images/Surprise/Done_1.png";
+import Done_2 from "../../images/Surprise/Done_2.png";
+import Done_3 from "../../images/Surprise/Done_3.png";
+import Done_4 from "../../images/Surprise/Done_4.png";
+import Done_5 from "../../images/Surprise/Done_5.png";
+import Done_6 from "../../images/Surprise/Done_6.png";
+
 import { auth, db } from "../../Firebase/Firebase";
 import { getDoc, setDoc, doc } from "firebase/firestore";
 import "animate.css";
@@ -25,10 +32,9 @@ let load = false;
 
 function Surprise() {
   const [data, setData] = useState(25);
-  const [getimage, setImage] = useState(Array(6).fill(icognita));
 
   const startHorarios = [15, 16, 18, 18, 20, 23];
-  let finalizados = Array(6).fill(false);
+  const [finalizados, setFinalizados] = useState<any>([]);
 
   //const [bloqueados, setBloqueado] = useState(
   //  Array(5).fill(false)
@@ -64,7 +70,7 @@ function Surprise() {
         });
       }
     };
-  }, [getimage]);
+  }, []);
 
   function getStringValue(value: any): string {
     return String(value);
@@ -79,13 +85,8 @@ function Surprise() {
       for (const element of Object.values(docSnap.data())) {
         temp.push(element);
       }
-      finalizados = temp;
-      temp = [];
-      for (let i = 0; i < finalizados.length; i++) {
-        temp.push(icognitaStatus(i));
-      }
-      setImage(temp);
-      console.log(getimage);
+      setFinalizados(temp);
+      console.log("fetchPost", finalizados);
     } else {
       // doc.data() will be undefined in this case
       console.log("No such document!");
@@ -117,7 +118,7 @@ function Surprise() {
     const oneVhInPx = window.innerWidth / 100;
     let temp = oneVhInPx * vw;
     if (!isMobile) {
-      temp = temp / 3.3;
+      temp = temp / 3.6;
     }
     if (temp < 140) {
       temp = 140;
@@ -129,7 +130,7 @@ function Surprise() {
   const [show, setShow] = useState([false, false]);
 
   const handleStatus = (a: number, b: boolean) => {
-    console.log(getimage);
+    console.log(finalizados);
     setShow(
       update(show, {
         [a]: {
@@ -152,6 +153,13 @@ function Surprise() {
     height: 15,
   };
 
+  const getImage = (a: number) => {
+    if (startHorarios[a] < data) {
+      return icognita;
+    }
+    return icognitaBlock;
+  };
+
   return (
     <>
       <Row className="m-0 p-0">
@@ -163,12 +171,12 @@ function Surprise() {
             <ScratchCard
               width={convertVwToPx(vw, 0)}
               height={convertVhToPx(vh)}
-              image={getimage[0]}
+              image={getImage(0)}
               finishPercent={percRasp}
               onComplete={() => handleStatus(0, true)}
               customBrush={cardCustomStyle}
             >
-              <Image className="porBaixo"></Image>
+              <Image className="porBaixo" src={Done_1}></Image>
             </ScratchCard>
           </div>
 
@@ -176,11 +184,12 @@ function Surprise() {
             <ScratchCard
               width={convertVwToPx(vw, 1)}
               height={convertVhToPx(vh)}
-              image={getimage[1]}
+              image={getImage(1)}
               finishPercent={percRasp}
               onComplete={() => handleStatus(1, true)}
+              customBrush={cardCustomStyle}
             >
-              <Button className="btnImage porBaixo">?</Button>
+              <Image className="porBaixo" src={Done_2}></Image>
             </ScratchCard>
           </div>
 
@@ -188,11 +197,12 @@ function Surprise() {
             <ScratchCard
               width={convertVwToPx(vw, 2)}
               height={convertVhToPx(vh)}
-              image={getimage[2]}
+              image={getImage(2)}
               finishPercent={percRasp}
               onComplete={() => console.log("complete")}
+              customBrush={cardCustomStyle}
             >
-              <Image className="porBaixo"></Image>
+              <Image className="porBaixo" src={Done_3}></Image>
             </ScratchCard>
           </div>
 
@@ -200,11 +210,12 @@ function Surprise() {
             <ScratchCard
               width={convertVwToPx(vw, 3)}
               height={convertVhToPx(vh)}
-              image={getimage[3]}
+              image={getImage(3)}
               finishPercent={percRasp}
               onComplete={() => console.log("complete")}
+              customBrush={cardCustomStyle}
             >
-              <Button className="btnImage porBaixo">?</Button>
+              <Image className="porBaixo" src={Done_4}></Image>
             </ScratchCard>
           </div>
 
@@ -212,11 +223,12 @@ function Surprise() {
             <ScratchCard
               width={convertVwToPx(vw, 4)}
               height={convertVhToPx(vh)}
-              image={getimage[4]}
+              image={getImage(4)}
               finishPercent={percRasp}
               onComplete={() => console.log("complete")}
+              customBrush={cardCustomStyle}
             >
-              <Button className="btnImage porBaixo">?</Button>
+              <Image className="porBaixo" src={Done_5}></Image>
             </ScratchCard>
           </div>
 
@@ -224,11 +236,12 @@ function Surprise() {
             <ScratchCard
               width={convertVwToPx(vw, 5)}
               height={convertVhToPx(vh)}
-              image={getimage[5]}
+              image={getImage(5)}
               finishPercent={percRasp}
               onComplete={() => console.log("complete")}
+              customBrush={cardCustomStyle}
             >
-              <Button className="btnImage porBaixo">?</Button>
+              <Image className="porBaixo" src={Done_6}></Image>
             </ScratchCard>
           </div>
         </Col>
