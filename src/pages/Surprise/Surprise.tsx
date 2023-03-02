@@ -27,9 +27,6 @@ import { Done, Default, Block } from "./Triplice/Triplice";
 
 const backgroundSong = require("../../song/Surprise/backgroundSong.ogg");
 
-const vh = 85;
-const vw = 46;
-const percRasp = 1;
 let load = false;
 
 function Surprise() {
@@ -125,35 +122,6 @@ function Surprise() {
     return String(value);
   }
 
-  const ref = useRef<ScratchCard>(null);
-
-  const icognitaStatus = (b: number) => {
-    if (finalizados[b]) {
-      return icognitaDone;
-    }
-    if (startHorarios[b] < data) {
-      return icognita;
-    }
-    return icognitaBlock;
-  };
-
-  const convertVhToPx = (vh: number) => {
-    const oneVhInPx = window.innerHeight / 100;
-    return oneVhInPx * vh;
-  };
-
-  const convertVwToPx = (vw: number, a: number) => {
-    const oneVhInPx = window.innerWidth / 100;
-    let temp = oneVhInPx * vw;
-    if (!isMobile) {
-      temp = temp / 3.6;
-    }
-    if (temp < 140) {
-      temp = 140;
-    }
-    return Math.ceil(temp);
-  };
-
   //MODAL
   const [show, setShow] = useState([false, false]);
 
@@ -167,6 +135,9 @@ function Surprise() {
       })
     );
   };
+  const stringCustomStylePointer = {
+    pointerEvents: "none" as React.CSSProperties["pointerEvents"],
+  };
 
   const stringCustomStyle = {
     borderRightWidth: "inherit",
@@ -174,18 +145,6 @@ function Surprise() {
     borderColor: "white",
     borderWidth: "5px 5px 5px 0",
     borderRadius: "5px",
-  };
-  const cardCustomStyle = {
-    image: circle,
-    width: 15,
-    height: 15,
-  };
-
-  const getImage = (a: number) => {
-    if (startHorarios[a] < data) {
-      return icognita;
-    }
-    return icognitaBlock;
   };
 
   return (
@@ -195,7 +154,14 @@ function Surprise() {
           className="p-0 ms-0 me-0 mb-0 text-nowrap"
           style={{ marginTop: "5vh" }}
         >
-          <div className="inline" style={stringCustomStyle}>
+          <div
+            className="inline"
+            style={Object.assign(
+              {},
+              stringCustomStyle,
+              stringCustomStylePointer
+            )}
+          >
             {finalizados[0]}
           </div>
 
