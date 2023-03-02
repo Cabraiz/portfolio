@@ -23,6 +23,8 @@ import { getDoc, setDoc, doc } from "firebase/firestore";
 import "animate.css";
 import { onAuthStateChanged } from "firebase/auth";
 
+import { Done, Default, Block } from "./Triplice/Triplice";
+
 const backgroundSong = require("../../song/Surprise/backgroundSong.ogg");
 
 const vh = 85;
@@ -39,6 +41,26 @@ function Surprise() {
   //const [bloqueados, setBloqueado] = useState(
   //  Array(5).fill(false)
   //);
+
+  const fetchPost = async () => {
+    const temp = getStringValue(auth.currentUser?.uid);
+    const docRef = doc(db, temp, "bloqueados");
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      let temp = [];
+      for (const element of Object.values(docSnap.data())) {
+        temp.push(element);
+      }
+      setFinalizados([
+        <Block>
+          <Image className="porBaixo" src={Done_1}></Image>
+        </Block>,
+      ]);
+    } else {
+      // doc.data() will be undefined in this case
+      console.log("No such document!");
+    }
+  };
 
   useEffect(() => {
     const getRealTime = async () => {
@@ -75,23 +97,6 @@ function Surprise() {
   function getStringValue(value: any): string {
     return String(value);
   }
-
-  const fetchPost = async () => {
-    const temp = getStringValue(auth.currentUser?.uid);
-    const docRef = doc(db, temp, "bloqueados");
-    const docSnap = await getDoc(docRef);
-    if (docSnap.exists()) {
-      let temp = [];
-      for (const element of Object.values(docSnap.data())) {
-        temp.push(element);
-      }
-      setFinalizados(temp);
-      console.log("fetchPost", finalizados);
-    } else {
-      // doc.data() will be undefined in this case
-      console.log("No such document!");
-    }
-  };
 
   const ref = useRef<ScratchCard>(null);
 
@@ -168,16 +173,7 @@ function Surprise() {
           style={{ marginTop: "5vh" }}
         >
           <div className="inline" style={stringCustomStyle}>
-            <ScratchCard
-              width={convertVwToPx(vw, 0)}
-              height={convertVhToPx(vh)}
-              image={getImage(0)}
-              finishPercent={percRasp}
-              onComplete={() => handleStatus(0, true)}
-              customBrush={cardCustomStyle}
-            >
-              <Image className="porBaixo" src={Done_1}></Image>
-            </ScratchCard>
+            {finalizados[0]}
           </div>
 
           <div className="inline" style={stringCustomStyle}>
