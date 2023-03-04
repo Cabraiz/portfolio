@@ -1,7 +1,7 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import AudioPlayer from "react-h5-audio-player";
 import "react-h5-audio-player/lib/styles.css";
-import { Col, Row, Image, Button, Modal } from "react-bootstrap";
+import { Col, Row, Image, Modal } from "react-bootstrap";
 import update from "react-addons-update";
 
 import Done_1 from "../../images/Surprise/Done_1.png";
@@ -215,30 +215,29 @@ function Surprise() {
         show={show[0]}
         onHide={() => handleStatus(0, false)}
       >
-        <Modal.Header closeButton>
+        <Modal.Header className="text-center" closeButton>
+          Ei Gatinha, vamos ver um filme lá em casa?
+        </Modal.Header>
+        <Modal.Body>
           <Image
             src={imagensAcervo[0]}
             style={{ borderRadius: "0%", height: "66vh", width: "22vh" }}
           ></Image>
-        </Modal.Header>
-        <Modal.Body>Woohoo, you're reading this text in a modal!</Modal.Body>
+        </Modal.Body>
       </Modal>
 
-      <Modal show={show[1]} onHide={() => handleStatus(1, false)}>
-        <Modal.Header closeButton>
+      <Modal
+        className="animate__bounceIn"
+        show={show[1]}
+        onHide={() => handleStatus(1, false)}
+      >
+        <Modal.Header closeButton></Modal.Header>
+        <Modal.Body>
           <Image
             className="modalImage"
             src={imagensAcervo[1]}
             style={{ borderRadius: "0%", height: "66vh", width: "22vh" }}
           ></Image>
-        </Modal.Header>
-        <Modal.Body>
-          <AudioPlayer
-            autoPlay
-            src={backgroundSong}
-            onPlay={(e) => console.log("onPlay")}
-            loop={true}
-          />
         </Modal.Body>
       </Modal>
 
@@ -247,13 +246,13 @@ function Surprise() {
         show={show[2]}
         onHide={() => handleStatus(2, false)}
       >
-        <Modal.Header closeButton>
+        <Modal.Header closeButton></Modal.Header>
+        <Modal.Body>
           <Image
             src={imagensAcervo[2]}
             style={{ borderRadius: "0%", height: "66vh", width: "22vh" }}
           ></Image>
-        </Modal.Header>
-        <Modal.Body>Woohoo, you're reading this text in a modal!</Modal.Body>
+        </Modal.Body>
       </Modal>
 
       <Modal
@@ -261,13 +260,14 @@ function Surprise() {
         show={show[3]}
         onHide={() => handleStatus(3, false)}
       >
-        <Modal.Header closeButton>
+        <Modal.Header closeButton></Modal.Header>
+        <Modal.Body>
+          {" "}
           <Image
             src={imagensAcervo[3]}
             style={{ borderRadius: "0%", height: "66vh", width: "22vh" }}
           ></Image>
-        </Modal.Header>
-        <Modal.Body>Woohoo, you're reading this text in a modal!</Modal.Body>
+        </Modal.Body>
       </Modal>
 
       <Modal
@@ -281,7 +281,12 @@ function Surprise() {
             style={{ borderRadius: "0%", height: "66vh", width: "22vh" }}
           ></Image>
         </Modal.Header>
-        <Modal.Body>Woohoo, you're reading this text in a modal!</Modal.Body>
+        <Modal.Body>
+          <Image
+            src={imagensAcervo[4]}
+            style={{ borderRadius: "0%", height: "66vh", width: "22vh" }}
+          ></Image>
+        </Modal.Body>
       </Modal>
 
       <Modal
@@ -289,13 +294,13 @@ function Surprise() {
         show={show[5]}
         onHide={() => handleStatus(5, false)}
       >
-        <Modal.Header closeButton>
+        <Modal.Header closeButton></Modal.Header>
+        <Modal.Body>
           <Image
             src={imagensAcervo[5]}
             style={{ borderRadius: "0%", height: "66vh", width: "22vh" }}
           ></Image>
-        </Modal.Header>
-        <Modal.Body>Woohoo, you're reading this text in a modal!</Modal.Body>
+        </Modal.Body>
       </Modal>
     </>
   );
