@@ -25,6 +25,7 @@ let load = false;
 function Surprise() {
   const startHorarios = [15, 16, 18, 18, 20, 23];
   const [finalizados, setFinalizados] = useState<any>([]);
+  let finalizadosBool: any[] = [];
 
   const [cssCombine] = useState<any>([]);
 
@@ -46,6 +47,7 @@ function Surprise() {
       for (const element of Object.values(docSnap.data())) {
         tempBooleanos.push(element);
       }
+      finalizadosBool = tempBooleanos;
       setFinalizados([
         returnFetchPost(0, tempBooleanos[0], hora),
         returnFetchPost(1, tempBooleanos[1], hora),
@@ -65,7 +67,7 @@ function Surprise() {
     if (b) {
       cssCombine.push({});
       return (
-        <Done onComplete={() => handleStatus(0, true)}>
+        <Done onComplete={() => handleStatus(a, true)}>
           <Image className="porBaixo" src={imagensAcervo[a]}></Image>
         </Done>
       );
@@ -95,20 +97,6 @@ function Surprise() {
         fetchPost();
       }
     });
-
-    const setTodo = async () => {
-      const temp = getStringValue(auth.currentUser?.uid);
-      if (temp !== undefined) {
-        await setDoc(doc(db, temp, "bloqueados"), {
-          0: false,
-          1: false,
-          2: false,
-          3: false,
-          4: false,
-          5: false,
-        });
-      }
-    };
   }, []);
 
   function getStringValue(value: any): string {
@@ -118,7 +106,42 @@ function Surprise() {
   //MODAL
   const [show, setShow] = useState([false, false]);
 
+  const setTodo = async (auxArr: boolean[]) => {
+    console.log("enviou", auxArr);
+    const temp = getStringValue(auth.currentUser?.uid);
+    if (temp !== undefined) {
+      await setDoc(doc(db, temp, "bloqueados"), {
+        0: auxArr[0],
+        1: auxArr[1],
+        2: auxArr[2],
+        3: auxArr[3],
+        4: auxArr[4],
+        5: auxArr[5],
+      });
+    }
+  };
+
   const handleStatus = (a: number, b: boolean) => {
+    if (b) {
+      let temp = [];
+      for (let i = 0; i < 6; i++) {
+        if (i < a + 1) {
+          temp.push(true);
+        } else {
+          if (finalizadosBool[i]) {
+            temp.push(true);
+          } else {
+            temp.push(false);
+          }
+        }
+      }
+      if (temp.length - 1 !== a) {
+        if (!temp[a + 1]) {
+          setTodo(temp);
+        }
+      }
+    }
+
     setShow(
       update(show, {
         [a]: {
@@ -193,22 +216,21 @@ function Surprise() {
         onHide={() => handleStatus(0, false)}
       >
         <Modal.Header closeButton>
-          <Image className="modalImage" src={imagensAcervo[0]}></Image>
+          <Image
+            src={imagensAcervo[0]}
+            style={{ borderRadius: "0%", height: "66vh", width: "22vh" }}
+          ></Image>
         </Modal.Header>
         <Modal.Body>Woohoo, you're reading this text in a modal!</Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => handleStatus(0, false)}>
-            Close
-          </Button>
-          <Button variant="primary" onClick={() => handleStatus(0, false)}>
-            Save Changes
-          </Button>
-        </Modal.Footer>
       </Modal>
 
       <Modal show={show[1]} onHide={() => handleStatus(1, false)}>
         <Modal.Header closeButton>
-          Aperte&nbsp;<strong>(▷)</strong>&nbsp;Para Ver Seu Prêmio
+          <Image
+            className="modalImage"
+            src={imagensAcervo[1]}
+            style={{ borderRadius: "0%", height: "66vh", width: "22vh" }}
+          ></Image>
         </Modal.Header>
         <Modal.Body>
           <AudioPlayer
@@ -218,14 +240,62 @@ function Surprise() {
             loop={true}
           />
         </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => handleStatus(0, false)}>
-            Close
-          </Button>
-          <Button variant="primary" onClick={() => handleStatus(0, false)}>
-            Save Changes
-          </Button>
-        </Modal.Footer>
+      </Modal>
+
+      <Modal
+        className="animate__bounceIn"
+        show={show[2]}
+        onHide={() => handleStatus(2, false)}
+      >
+        <Modal.Header closeButton>
+          <Image
+            src={imagensAcervo[2]}
+            style={{ borderRadius: "0%", height: "66vh", width: "22vh" }}
+          ></Image>
+        </Modal.Header>
+        <Modal.Body>Woohoo, you're reading this text in a modal!</Modal.Body>
+      </Modal>
+
+      <Modal
+        className="animate__bounceIn"
+        show={show[3]}
+        onHide={() => handleStatus(3, false)}
+      >
+        <Modal.Header closeButton>
+          <Image
+            src={imagensAcervo[3]}
+            style={{ borderRadius: "0%", height: "66vh", width: "22vh" }}
+          ></Image>
+        </Modal.Header>
+        <Modal.Body>Woohoo, you're reading this text in a modal!</Modal.Body>
+      </Modal>
+
+      <Modal
+        className="animate__bounceIn"
+        show={show[4]}
+        onHide={() => handleStatus(4, false)}
+      >
+        <Modal.Header closeButton>
+          <Image
+            src={imagensAcervo[4]}
+            style={{ borderRadius: "0%", height: "66vh", width: "22vh" }}
+          ></Image>
+        </Modal.Header>
+        <Modal.Body>Woohoo, you're reading this text in a modal!</Modal.Body>
+      </Modal>
+
+      <Modal
+        className="animate__bounceIn"
+        show={show[5]}
+        onHide={() => handleStatus(5, false)}
+      >
+        <Modal.Header closeButton>
+          <Image
+            src={imagensAcervo[5]}
+            style={{ borderRadius: "0%", height: "66vh", width: "22vh" }}
+          ></Image>
+        </Modal.Header>
+        <Modal.Body>Woohoo, you're reading this text in a modal!</Modal.Body>
       </Modal>
     </>
   );

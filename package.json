@@ -37,6 +37,7 @@
   },
   "scripts": {
     "start": "yarn upgrade && react-scripts start",
+    "vamola": "react-scripts start",
     "build": "set \"GENERATE_SOURCEMAP=false\" && react-scripts build",
     "postbuild": "rimraf build/**/*.map",
     "test": "react-scripts test",
