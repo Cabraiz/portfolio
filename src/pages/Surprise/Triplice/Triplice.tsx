@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Component } from "react";
 import { isMobile } from "react-device-detect";
 import ScratchCard from "react-scratchcard-v2";
 
@@ -8,10 +8,6 @@ import icognitaDone from "../../../images/Surprise/icognitaDone.png";
 import circle from "../../../images/Surprise/circle.png";
 
 import "animate.css";
-
-type ContainerProps = {
-  children: React.ReactNode;
-};
 
 const convertVhToPx = (vh: number) => {
   const oneVhInPx = window.innerHeight / 100;
@@ -38,7 +34,12 @@ const cardCustomStyle = {
 
 const vh = 85;
 const vw = 46;
-const percRasp = 1;
+const percRasp = 20;
+
+type ContainerProps = {
+  children: React.ReactNode;
+  onComplete?: () => void;
+};
 
 export const Block = (props: ContainerProps) => {
   return (
@@ -48,6 +49,7 @@ export const Block = (props: ContainerProps) => {
       image={icognitaBlock}
       finishPercent={percRasp}
       customBrush={cardCustomStyle}
+      onComplete={props.onComplete}
     >
       {props.children}
     </ScratchCard>
@@ -62,6 +64,7 @@ export const Done = (props: ContainerProps) => {
       image={icognitaDone}
       finishPercent={percRasp}
       customBrush={cardCustomStyle}
+      onComplete={props.onComplete}
     >
       {props.children}
     </ScratchCard>
@@ -76,6 +79,7 @@ export const Default = (props: ContainerProps) => {
       image={icognita}
       finishPercent={percRasp}
       customBrush={cardCustomStyle}
+      onComplete={props.onComplete}
     >
       {props.children}
     </ScratchCard>

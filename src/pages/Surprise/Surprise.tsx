@@ -3,13 +3,6 @@ import AudioPlayer from "react-h5-audio-player";
 import "react-h5-audio-player/lib/styles.css";
 import { Col, Row, Image, Button, Modal } from "react-bootstrap";
 import update from "react-addons-update";
-import { isMobile } from "react-device-detect";
-import ScratchCard from "react-scratchcard-v2";
-
-import icognita from "../../images/Surprise/Icognita.png";
-import icognitaBlock from "../../images/Surprise/IcognitaBlock.png";
-import icognitaDone from "../../images/Surprise/icognitaDone.png";
-import circle from "../../images/Surprise/circle.png";
 
 import Done_1 from "../../images/Surprise/Done_1.png";
 import Done_2 from "../../images/Surprise/Done_2.png";
@@ -20,8 +13,8 @@ import Done_6 from "../../images/Surprise/Done_6.png";
 
 import { auth, db } from "../../Firebase/Firebase";
 import { getDoc, setDoc, doc } from "firebase/firestore";
-import "animate.css";
 import { onAuthStateChanged } from "firebase/auth";
+import "animate.css";
 
 import { Done, Default, Block } from "./Triplice/Triplice";
 
@@ -30,41 +23,36 @@ const backgroundSong = require("../../song/Surprise/backgroundSong.ogg");
 let load = false;
 
 function Surprise() {
-  const [data, setData] = useState(25);
-
   const startHorarios = [15, 16, 18, 18, 20, 23];
   const [finalizados, setFinalizados] = useState<any>([]);
 
-  //const [bloqueados, setBloqueado] = useState(
-  //  Array(5).fill(false)
-  //);
+  const [cssCombine] = useState<any>([]);
 
   const getRealTime = async () => {
     const response = await fetch(
       "http://worldtimeapi.org/api/timezone/America/Fortaleza"
     );
     const temp = await response.json();
-    setData(new Date(temp.datetime).getHours());
+    return new Date(temp.datetime).getHours();
   };
 
   const fetchPost = async () => {
     const temp = getStringValue(auth.currentUser?.uid);
     const docRef = doc(db, temp, "bloqueados");
     const docSnap = await getDoc(docRef);
-    await getRealTime();
+    const hora = await getRealTime();
     if (docSnap.exists()) {
       let tempBooleanos = [];
-      console.log(docSnap.data());
       for (const element of Object.values(docSnap.data())) {
         tempBooleanos.push(element);
       }
       setFinalizados([
-        returnFetchPost(0, tempBooleanos[0]),
-        returnFetchPost(1, tempBooleanos[1]),
-        returnFetchPost(2, tempBooleanos[2]),
-        returnFetchPost(3, tempBooleanos[3]),
-        returnFetchPost(4, tempBooleanos[4]),
-        returnFetchPost(5, tempBooleanos[5]),
+        returnFetchPost(0, tempBooleanos[0], hora),
+        returnFetchPost(1, tempBooleanos[1], hora),
+        returnFetchPost(2, tempBooleanos[2], hora),
+        returnFetchPost(3, tempBooleanos[3], hora),
+        returnFetchPost(4, tempBooleanos[4], hora),
+        returnFetchPost(5, tempBooleanos[5], hora),
       ]);
     } else {
       // doc.data() will be undefined in this case
@@ -73,21 +61,26 @@ function Surprise() {
   };
 
   const imagensAcervo = [Done_1, Done_2, Done_3, Done_4, Done_5, Done_6];
-  const returnFetchPost = (a: number, b: boolean) => {
+  const returnFetchPost = (a: number, b: boolean, data: number) => {
     if (b) {
+      cssCombine.push({});
       return (
-        <Done>
+        <Done onComplete={() => handleStatus(0, true)}>
           <Image className="porBaixo" src={imagensAcervo[a]}></Image>
         </Done>
       );
     }
-    if (startHorarios[a] < data) {
+    if (startHorarios[a] > data) {
+      cssCombine.push({
+        pointerEvents: "none" as React.CSSProperties["pointerEvents"],
+      });
       return (
         <Block>
           <Image className="porBaixo" src={imagensAcervo[a]}></Image>
         </Block>
       );
     }
+    cssCombine.push({});
     return (
       <Default>
         <Image className="porBaixo" src={imagensAcervo[a]}></Image>
@@ -126,7 +119,6 @@ function Surprise() {
   const [show, setShow] = useState([false, false]);
 
   const handleStatus = (a: number, b: boolean) => {
-    console.log(finalizados);
     setShow(
       update(show, {
         [a]: {
@@ -134,9 +126,6 @@ function Surprise() {
         },
       })
     );
-  };
-  const stringCustomStylePointer = {
-    pointerEvents: "none" as React.CSSProperties["pointerEvents"],
   };
 
   const stringCustomStyle = {
@@ -156,43 +145,55 @@ function Surprise() {
         >
           <div
             className="inline"
-            style={Object.assign(
-              {},
-              stringCustomStyle,
-              stringCustomStylePointer
-            )}
+            style={Object.assign({}, stringCustomStyle, cssCombine[0])}
           >
             {finalizados[0]}
           </div>
 
-          <div className="inline" style={stringCustomStyle}>
+          <div
+            className="inline"
+            style={Object.assign({}, stringCustomStyle, cssCombine[1])}
+          >
             {finalizados[1]}
           </div>
 
-          <div className="inline" style={stringCustomStyle}>
+          <div
+            className="inline"
+            style={Object.assign({}, stringCustomStyle, cssCombine[2])}
+          >
             {finalizados[2]}
           </div>
 
-          <div className="inline" style={stringCustomStyle}>
+          <div
+            className="inline"
+            style={Object.assign({}, stringCustomStyle, cssCombine[3])}
+          >
             {finalizados[3]}
           </div>
 
-          <div className="inline" style={stringCustomStyle}>
+          <div
+            className="inline"
+            style={Object.assign({}, stringCustomStyle, cssCombine[4])}
+          >
             {finalizados[4]}
           </div>
 
-          <div className="inline" style={stringCustomStyle}>
+          <div
+            className="inline"
+            style={Object.assign({}, stringCustomStyle, cssCombine[5])}
+          >
             {finalizados[5]}
           </div>
         </Col>
       </Row>
+
       <Modal
         className="animate__bounceIn"
         show={show[0]}
         onHide={() => handleStatus(0, false)}
       >
         <Modal.Header closeButton>
-          <Modal.Title>Modal heading</Modal.Title>
+          <Image className="modalImage" src={imagensAcervo[0]}></Image>
         </Modal.Header>
         <Modal.Body>Woohoo, you're reading this text in a modal!</Modal.Body>
         <Modal.Footer>
@@ -204,6 +205,7 @@ function Surprise() {
           </Button>
         </Modal.Footer>
       </Modal>
+
       <Modal show={show[1]} onHide={() => handleStatus(1, false)}>
         <Modal.Header closeButton>
           Aperte&nbsp;<strong>(▷)</strong>&nbsp;Para Ver Seu Prêmio
