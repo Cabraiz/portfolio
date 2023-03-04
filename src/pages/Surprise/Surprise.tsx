@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import Confetti from "react-confetti";
 import AudioPlayer from "react-h5-audio-player";
 import "react-h5-audio-player/lib/styles.css";
 import { Col, Row, Image, Modal } from "react-bootstrap";
@@ -105,6 +106,7 @@ function Surprise() {
 
   //MODAL
   const [show, setShow] = useState([false, false]);
+  let confettiBool = 0;
 
   const setTodo = async (auxArr: boolean[]) => {
     console.log("enviou", auxArr);
@@ -163,7 +165,7 @@ function Surprise() {
     <>
       <Row className="m-0 p-0">
         <Col
-          className="p-0 ms-0 me-0 mb-0 text-nowrap"
+          className="p-0 ms-0 mt-0 me-0 mb-0 text-nowrap"
           style={{ marginTop: "5vh" }}
         >
           <div
@@ -216,12 +218,15 @@ function Surprise() {
         onHide={() => handleStatus(0, false)}
       >
         <Modal.Header className="text-center" closeButton>
-          Ei Gatinha, vamos ver um filme lá em casa?
+          <Modal.Title style={{ fontSize: "1.3em", textAlign: "center" }}>
+            {" "}
+            Hey Broto, vamos ver um filme lá em casa?{" "}
+          </Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Image
             src={imagensAcervo[0]}
-            style={{ borderRadius: "0%", height: "66vh", width: "22vh" }}
+            style={{ borderRadius: "0%", height: "81vh", width: "27vh" }}
           ></Image>
         </Modal.Body>
       </Modal>
@@ -231,12 +236,17 @@ function Surprise() {
         show={show[1]}
         onHide={() => handleStatus(1, false)}
       >
-        <Modal.Header closeButton></Modal.Header>
+        <Modal.Header closeButton>
+          <Modal.Title style={{ fontSize: "1em", textAlign: "center" }}>
+            {" "}
+            NÃO TEM MORTE DE NENHUM ANIMAL EU PESQUISEI{" "}
+          </Modal.Title>
+        </Modal.Header>
         <Modal.Body>
           <Image
             className="modalImage"
             src={imagensAcervo[1]}
-            style={{ borderRadius: "0%", height: "66vh", width: "22vh" }}
+            style={{ borderRadius: "0%", height: "81vh", width: "27vh" }}
           ></Image>
         </Modal.Body>
       </Modal>
@@ -246,13 +256,19 @@ function Surprise() {
         show={show[2]}
         onHide={() => handleStatus(2, false)}
       >
-        <Modal.Header closeButton></Modal.Header>
+        <Modal.Header closeButton>
+          <Modal.Title style={{ fontSize: "1.3em", textAlign: "center" }}>
+            {" "}
+            SURPRESAAAAAAAAA!!!!! Espero que sirva :)
+          </Modal.Title>
+        </Modal.Header>
         <Modal.Body>
           <Image
             src={imagensAcervo[2]}
-            style={{ borderRadius: "0%", height: "66vh", width: "22vh" }}
+            style={{ borderRadius: "0%", height: "81vh", width: "24vh" }}
           ></Image>
         </Modal.Body>
+        <Confetti width={window.innerWidth / 2.7} height={window.innerHeight} />
       </Modal>
 
       <Modal
@@ -260,12 +276,16 @@ function Surprise() {
         show={show[3]}
         onHide={() => handleStatus(3, false)}
       >
-        <Modal.Header closeButton></Modal.Header>
+        <Modal.Header closeButton>
+          <Modal.Title style={{ fontSize: "1.3em", textAlign: "center" }}>
+            {" "}
+            Vamos beber e ficar que nem esse episódio?{" "}
+          </Modal.Title>
+        </Modal.Header>
         <Modal.Body>
-          {" "}
           <Image
             src={imagensAcervo[3]}
-            style={{ borderRadius: "0%", height: "66vh", width: "22vh" }}
+            style={{ borderRadius: "0%", height: "81vh", width: "27vh" }}
           ></Image>
         </Modal.Body>
       </Modal>
@@ -276,17 +296,18 @@ function Surprise() {
         onHide={() => handleStatus(4, false)}
       >
         <Modal.Header closeButton>
-          <Image
-            src={imagensAcervo[4]}
-            style={{ borderRadius: "0%", height: "66vh", width: "22vh" }}
-          ></Image>
+          <Modal.Title style={{ fontSize: "1.5em", textAlign: "center" }}>
+            {" "}
+            PIN PIN PIN, GANHOU +1 RODADA!{" "}
+          </Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Image
             src={imagensAcervo[4]}
-            style={{ borderRadius: "0%", height: "66vh", width: "22vh" }}
+            style={{ borderRadius: "0%", height: "81vh", width: "27vh" }}
           ></Image>
         </Modal.Body>
+        <Confetti width={window.innerWidth / 2.7} height={window.innerHeight} />
       </Modal>
 
       <Modal
@@ -294,13 +315,23 @@ function Surprise() {
         show={show[5]}
         onHide={() => handleStatus(5, false)}
       >
-        <Modal.Header closeButton></Modal.Header>
+        <Modal.Header closeButton>
+          <Modal.Title style={{ fontSize: "1.3em", textAlign: "center" }}>
+            {" "}
+            Ganhou um Gift Card bem ilustrativo... 👻{" "}
+          </Modal.Title>
+        </Modal.Header>
         <Modal.Body>
           <Image
             src={imagensAcervo[5]}
-            style={{ borderRadius: "0%", height: "66vh", width: "22vh" }}
+            style={{ borderRadius: "0%", height: "81vh", width: "27vh" }}
           ></Image>
         </Modal.Body>
+        <Confetti
+          width={window.innerWidth / 2.7}
+          height={window.innerHeight}
+          numberOfPieces={50}
+        />
       </Modal>
     </>
   );

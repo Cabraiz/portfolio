@@ -1,6 +1,7 @@
 .row {
   overflow: auto !important;
 }
+
 .btnImage {
   display: inline-block;
   color: blue;
@@ -16,4 +17,8 @@
   border-radius: 0%;
   height: 100%;
   width: 100%;
+}
+
+.modal {
+  text-align: center;
 }
