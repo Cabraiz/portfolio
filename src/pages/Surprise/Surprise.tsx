@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Confetti from "react-confetti";
+import { isMobile } from "react-device-detect";
 import AudioPlayer from "react-h5-audio-player";
 import "react-h5-audio-player/lib/styles.css";
 import { Col, Row, Image, Modal } from "react-bootstrap";
@@ -220,7 +221,7 @@ function Surprise() {
         <Modal.Header className="text-center" closeButton>
           <Modal.Title style={{ fontSize: "1.3em", textAlign: "center" }}>
             {" "}
-            Hey Broto, vamos ver um filme lá em casa?{" "}
+            Hey Broto, vamos ver um filme lá em casa? 👀{" "}
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
@@ -239,7 +240,7 @@ function Surprise() {
         <Modal.Header closeButton>
           <Modal.Title style={{ fontSize: "1em", textAlign: "center" }}>
             {" "}
-            NÃO TEM MORTE DE NENHUM ANIMAL EU PESQUISEI{" "}
+            NÃO TEM MORTE DE NENHUM. ANIMAL EU PESQUISEI! 🍿{" "}
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
@@ -257,9 +258,9 @@ function Surprise() {
         onHide={() => handleStatus(2, false)}
       >
         <Modal.Header closeButton>
-          <Modal.Title style={{ fontSize: "1.3em", textAlign: "center" }}>
+          <Modal.Title style={{ fontSize: "1.2em", textAlign: "center" }}>
             {" "}
-            SURPRESAAAAAAAAA!!!!! Espero que sirva :)
+            SURPRESAAAAAAAAA!!!!! Espero que sirva :) 🥳
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
@@ -268,7 +269,7 @@ function Surprise() {
             style={{ borderRadius: "0%", height: "81vh", width: "24vh" }}
           ></Image>
         </Modal.Body>
-        <Confetti width={window.innerWidth / 2.7} height={window.innerHeight} />
+        <Confetti width={window.innerWidth} height={window.innerHeight} />
       </Modal>
 
       <Modal
@@ -279,7 +280,7 @@ function Surprise() {
         <Modal.Header closeButton>
           <Modal.Title style={{ fontSize: "1.3em", textAlign: "center" }}>
             {" "}
-            Vamos beber e ficar que nem esse episódio?{" "}
+            Vamos beber e ficar que nem esse episódio? 🥃🧉🍹🍷{" "}
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
@@ -298,7 +299,7 @@ function Surprise() {
         <Modal.Header closeButton>
           <Modal.Title style={{ fontSize: "1.5em", textAlign: "center" }}>
             {" "}
-            PIN PIN PIN, GANHOU +1 RODADA!{" "}
+            PIN PIN PIN, GANHOU +1 RODADA! 🤪{" "}
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
@@ -307,7 +308,7 @@ function Surprise() {
             style={{ borderRadius: "0%", height: "81vh", width: "27vh" }}
           ></Image>
         </Modal.Body>
-        <Confetti width={window.innerWidth / 2.7} height={window.innerHeight} />
+        <Confetti width={window.innerWidth} height={window.innerHeight} />
       </Modal>
 
       <Modal
@@ -318,7 +319,7 @@ function Surprise() {
         <Modal.Header closeButton>
           <Modal.Title style={{ fontSize: "1.3em", textAlign: "center" }}>
             {" "}
-            Ganhou um Gift Card bem ilustrativo... 👻{" "}
+            Ganhou um Gift Card bem ilustrativo... 🤫👻{" "}
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
@@ -328,7 +329,7 @@ function Surprise() {
           ></Image>
         </Modal.Body>
         <Confetti
-          width={window.innerWidth / 2.7}
+          width={window.innerWidth}
           height={window.innerHeight}
           numberOfPieces={50}
         />
