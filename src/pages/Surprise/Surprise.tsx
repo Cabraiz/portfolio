@@ -33,7 +33,7 @@ function Surprise() {
 
   const getRealTime = async () => {
     const response = await fetch(
-      "http://worldtimeapi.org/api/timezone/America/Fortaleza"
+      "https://worldtimeapi.org/api/timezone/America/Fortaleza"
     );
     const temp = await response.json();
     return new Date(temp.datetime).getHours();
@@ -58,6 +58,7 @@ function Surprise() {
         returnFetchPost(4, tempBooleanos[4], hora),
         returnFetchPost(5, tempBooleanos[5], hora),
       ]);
+      console.log("finalizados", finalizados);
     } else {
       // doc.data() will be undefined in this case
       console.log("No such document!");
@@ -86,7 +87,7 @@ function Surprise() {
     }
     cssCombine.push({});
     return (
-      <Default>
+      <Default onComplete={() => handleStatus(a, true)}>
         <Image className="porBaixo" src={imagensAcervo[a]}></Image>
       </Default>
     );
@@ -106,7 +107,7 @@ function Surprise() {
   }
 
   //MODAL
-  const [show, setShow] = useState([false, false]);
+  const [show, setShow] = useState([false, false, false, false, false, false]);
   let confettiBool = 0;
 
   const setTodo = async (auxArr: boolean[]) => {
@@ -145,6 +146,7 @@ function Surprise() {
       }
     }
 
+    console.log("Show", a, b, show);
     setShow(
       update(show, {
         [a]: {
