@@ -108,10 +108,8 @@ function Surprise() {
 
   //MODAL
   const [show, setShow] = useState([false, false, false, false, false, false]);
-  let confettiBool = 0;
 
   const setTodo = async (auxArr: boolean[]) => {
-    console.log("enviou", auxArr);
     const temp = getStringValue(auth.currentUser?.uid);
     if (temp !== undefined) {
       await setDoc(doc(db, temp, "bloqueados"), {
@@ -242,7 +240,7 @@ function Surprise() {
         <Modal.Header closeButton>
           <Modal.Title style={{ fontSize: "1em", textAlign: "center" }}>
             {" "}
-            NÃO TEM MORTE DE NENHUM. ANIMAL EU PESQUISEI! 🍿{" "}
+            NÃO TEM MORTE DE NENHUMA DE ANIMAL EU PESQUISEI! 🍿{" "}
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
@@ -282,7 +280,7 @@ function Surprise() {
         <Modal.Header closeButton>
           <Modal.Title style={{ fontSize: "1.3em", textAlign: "center" }}>
             {" "}
-            Vamos beber e ficar que nem esse episódio? 🥃🧉🍹🍷{" "}
+            🥃🧉🍹🍷{" "}
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
