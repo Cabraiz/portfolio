@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/static/css/main.24cb5271.css",
-    "main.js": "/static/js/main.fef94cdd.js",
+    "main.js": "/static/js/main.a6acfca8.js",
     "static/js/522.142ceb05.chunk.js": "/static/js/522.142ceb05.chunk.js",
     "static/media/backgroundSong.ogg": "/static/media/backgroundSong.1ea806a6c5c054d31447.ogg",
     "static/media/Done_2.png": "/static/media/Done_2.8f12d203cee90d02fd15.png",
@@ -9,7 +9,7 @@
     "static/media/Done_1.png": "/static/media/Done_1.a0c9bd6bbce84f25d926.png",
     "static/media/Done_5.png": "/static/media/Done_5.e3d980285bc191530def.png",
     "static/media/perfil.webp": "/static/media/perfil.0569782bdbd8cb90fc02.webp",
-    "static/media/Done_6.png": "/static/media/Done_6.c5070138d66e73f018bc.png",
+    "static/media/Done_6.png": "/static/media/Done_6.b395bbc9592b1fa9b500.png",
     "static/media/icognitaDone.png": "/static/media/icognitaDone.5bf75b23f399c51ca38d.png",
     "static/media/Done_3.png": "/static/media/Done_3.d03f5810f30411ef7266.png",
     "static/media/Brutal-Type-Medium.ttf": "/static/media/Brutal-Type-Medium.c9565f55635b259358c3.ttf",
@@ -21,6 +21,6 @@
   },
   "entrypoints": [
     "static/css/main.24cb5271.css",
-    "static/js/main.fef94cdd.js"
+    "static/js/main.a6acfca8.js"
   ]
 }
