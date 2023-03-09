@@ -21,3 +21,14 @@ body {
   padding-left: 10vw;
   padding-right: 10vw;
 }
+.border-gradient-green {
+  border: solid;
+  border-image: linear-gradient(
+      to left,
+      #ffffff00 0%,
+      #ffffff33 10%,
+      #ffffffbd 80%,
+      #ffffff00 105%
+    )
+    100% 0 100% 0/0.3vh 0 0.3vh 0 stretch;
+}

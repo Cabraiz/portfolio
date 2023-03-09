@@ -191,22 +191,23 @@ function App() {
         </Helmet>
       </HelmetProvider>
       <Navbar
+        className="border-gradient-green"
         style={{
-          borderBottom: "1.2px solid",
-          borderColor: "#80808053",
           justifyContent: "space-between",
-          height: "10vh",
+          height: "auto",
           fontWeight: "600",
           marginInline: "0px",
-          marginTop: "0.8vh",
-          padding: "0px",
+          marginTop: "0.1vh",
+          paddingTop: "0.5vh",
+          paddingBottom: "0.5vh",
+          paddingInline: "0px",
         }}
       >
         <Image
           src={logo}
           style={{
             borderRadius: "20%",
-            marginLeft: `${convertVwToPx(1)}px`,
+            marginLeft: `${convertVwToPx(1.2)}px`,
             width: "9vh",
             height: "9vh",
           }}
