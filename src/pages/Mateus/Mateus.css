@@ -1,3 +1,16 @@
+@font-face {
+  font-family: "Sequel";
+  src: local("Sequel"), url("../../fonts/Sequel/sequel-sans-heavy-disp.ttf");
+}
+.font-face-gm {
+  filter: blur(0.35px);
+  text-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+  color: #61dbfb;
+  font-family: "Sequel";
+  font-size: 2rem;
+  letter-spacing: 1.2px;
+  line-height: 115%;
+}
 img {
   border-radius: 6%;
 }
