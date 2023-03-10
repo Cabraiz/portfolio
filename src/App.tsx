@@ -198,8 +198,8 @@ function App() {
           fontWeight: "600",
           marginInline: "0px",
           marginTop: "0.1vh",
-          paddingTop: "1.1vh",
-          padding: "0px",
+          marginBottom: "0",
+          paddingTop: "0.5vh",
         }}
       >
         <Image
@@ -207,8 +207,8 @@ function App() {
           style={{
             borderRadius: "20%",
             marginLeft: `${convertVwToPx(1.2)}px`,
-            width: "9vh",
-            height: "9vh",
+            width: "8.5vh",
+            height: "8.5vh",
           }}
         />
         <Button

@@ -6,8 +6,8 @@ html {
   height: auto;
 }
 body {
-  background: linear-gradient(#ed3173 30%, #eb1a64 90%) left 0/67%,
-    linear-gradient(#71dffb 30%, #61dbfb 90%) right;
+  background: linear-gradient(#ed3173 50%, #eb1a64 90%) left 0/67%,
+    linear-gradient(#50d7fb 50%, #61dbfb 90%) right;
   background-repeat: no-repeat;
 }
 .font-face-gm {
@@ -25,9 +25,10 @@ body {
   border: solid;
   border-image: linear-gradient(
       to left,
-      #ffffff00 0%,
+      #ffffff00 -10%,
       #ffffff33 10%,
-      #ffffffbd 80%,
+      #ffffff33 40%,
+      #ffffffbd 85%,
       #ffffff00 105%
     )
     100% 0 100% 0/0.3vh 0 0.3vh 0 stretch;

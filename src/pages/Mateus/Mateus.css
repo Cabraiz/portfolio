@@ -2,14 +2,16 @@
   font-family: "Sequel";
   src: local("Sequel"), url("../../fonts/Sequel/sequel-sans-heavy-disp.ttf");
 }
+@font-face {
+  font-family: "Sequel_2";
+  src: local("Sequel"), url("../../fonts/Sequel/sequel-sans-heavy-disp-2.otf");
+}
 .font-sequel {
-  filter: blur(0.35px);
-  text-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
   color: #61dbfb;
-  font-family: "Sequel";
-  font-size: 2rem;
+  font-family: "Sequel_2";
+  font-size: 3.8rem;
   letter-spacing: 1.2px;
-  line-height: 115%;
+  line-height: 110%;
 }
 img {
   border-radius: 6%;
