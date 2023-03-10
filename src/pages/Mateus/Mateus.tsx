@@ -21,7 +21,7 @@ function Mateus() {
           src={dotsArray}
           style={{
             marginLeft: "-2.2vw",
-            marginTop: "6vh",
+            marginTop: "4vh",
             position: "absolute",
             width: "20vh",
             height: "20vh",
@@ -30,7 +30,7 @@ function Mateus() {
         <Image
           src={perfil}
           style={{
-            marginTop: "14vh",
+            marginTop: "12vh",
             marginLeft: "3vw",
             width: "calc(28vmin + 22vh)",
             height: "calc(28vmin + 22vh)",

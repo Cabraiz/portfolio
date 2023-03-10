@@ -194,7 +194,7 @@ function App() {
         className="border-gradient-green"
         style={{
           justifyContent: "space-between",
-          height: "auto",
+          height: "11vh",
           fontWeight: "600",
           marginInline: "0px",
           marginTop: "0.1vh",
@@ -205,6 +205,7 @@ function App() {
         <Image
           src={logo}
           style={{
+            marginTop: "0.5vh",
             borderRadius: "20%",
             marginLeft: `${convertVwToPx(1.2)}px`,
             width: "8.5vh",

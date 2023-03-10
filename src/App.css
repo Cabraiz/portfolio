@@ -25,11 +25,11 @@ body {
   border: solid;
   border-image: linear-gradient(
       to left,
-      #ffffff00 -10%,
-      #ffffff33 10%,
-      #ffffff33 40%,
-      #ffffffbd 85%,
-      #ffffff00 105%
+      #ffffff00 -20%,
+      #ffffff33 60%,
+      #ffffffbd 75%,
+      #ffffffbd 80%,
+      #ffffff00 100%
     )
     100% 0 100% 0/0.3vh 0 0.3vh 0 stretch;
 }
