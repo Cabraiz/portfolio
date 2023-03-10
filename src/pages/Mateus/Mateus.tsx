@@ -8,7 +8,7 @@ function Mateus() {
   return (
     <Row className="p-0 m-0">
       <Col
-        className="col-6 font-face-gm"
+        className="col-6 font-sequel"
         style={{
           paddingTop: "18vh",
           paddingLeft: "7vw",

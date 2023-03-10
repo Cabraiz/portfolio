@@ -2,9 +2,9 @@
   font-family: "Sequel";
   src: local("Sequel"), url("../../fonts/Sequel/sequel-sans-heavy-disp.ttf");
 }
-.font-face-gm {
+.font-sequel {
   filter: blur(0.35px);
-  text-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+  text-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
   color: #61dbfb;
   font-family: "Sequel";
   font-size: 2rem;

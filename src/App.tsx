@@ -207,18 +207,16 @@ function App() {
           src={logo}
           style={{
             borderRadius: "20%",
-            marginLeft: `${convertVwToPx(1.2)}px`,
+            marginLeft: `${convertVwToPx(1.7)}px`,
             width: "9vh",
             height: "9vh",
           }}
         />
         <Button
           style={{
-            paddingTop: "1.1vh",
+            padding: "0.5vh 1vw 0.5vh 1vw",
             marginRight: "4vw",
-            width: "auto",
-            height: "6vh",
-            fontSize: "1rem",
+            fontSize: "0.55rem",
             backgroundColor: "white",
             color: "rgba(100, 100, 100)",
             fontWeight: "500",
@@ -229,9 +227,10 @@ function App() {
           <Image
             src={logoGmail}
             style={{
-              marginTop: "-0.5vh",
+              marginBottom: "0.1vh",
+              padding: "0",
               width: "calc(15px + 0.3vw)",
-              height: "100%",
+              height: "calc(10px + 0.3vh)",
             }}
           ></Image>
           &nbsp; {signInStatus}
