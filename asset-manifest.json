@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/static/css/main.be1c3a83.css",
-    "main.js": "/static/js/main.2fd2d510.js",
+    "main.css": "/static/css/main.84f07234.css",
+    "main.js": "/static/js/main.15c85907.js",
     "static/js/522.142ceb05.chunk.js": "/static/js/522.142ceb05.chunk.js",
     "static/media/backgroundSong.ogg": "/static/media/backgroundSong.1ea806a6c5c054d31447.ogg",
     "static/media/Done_2.png": "/static/media/Done_2.8f12d203cee90d02fd15.png",
@@ -13,6 +13,7 @@
     "static/media/icognitaDone.png": "/static/media/icognitaDone.5bf75b23f399c51ca38d.png",
     "static/media/Done_3.png": "/static/media/Done_3.d03f5810f30411ef7266.png",
     "static/media/Brutal-Type-Medium.ttf": "/static/media/Brutal-Type-Medium.c9565f55635b259358c3.ttf",
+    "static/media/sequel-sans-heavy-disp-2.otf": "/static/media/sequel-sans-heavy-disp-2.cda4066004836451d306.otf",
     "static/media/sequel-sans-heavy-disp.ttf": "/static/media/sequel-sans-heavy-disp.096e43b9cdb60beeaada.ttf",
     "static/media/logo.svg": "/static/media/logo.54801486249a90cf805ca985e06956ef.svg",
     "static/media/IcognitaBlock.png": "/static/media/IcognitaBlock.61a398f65880d7885b5c.png",
@@ -22,7 +23,7 @@
     "static/media/7.svg": "/static/media/7.a45b46e964c34094185e40d691917f1b.svg"
   },
   "entrypoints": [
-    "static/css/main.be1c3a83.css",
-    "static/js/main.2fd2d510.js"
+    "static/css/main.84f07234.css",
+    "static/js/main.15c85907.js"
   ]
 }
