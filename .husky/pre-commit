@@ -1,5 +1,4 @@
 #!/usr/bin/env sh
-PATH=$PATH:"/c/Program Files/Git/usr/bin"
 . "$(dirname -- "$0")/_/husky.sh"
 
 npx lint-staged
