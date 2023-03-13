@@ -7,14 +7,11 @@ import dotsArray from "../../images/icones/svg_dotsArray.svg";
 function Mateus() {
   return (
     <Row className="p-0 m-0">
-      <Col
-        className="col-6 font-sequel"
-        style={{
-          paddingTop: "18vh",
-          paddingLeft: "7vw",
-        }}
-      >
-        Full Stack <br></br>Developer.
+      <Col className="col-6 font-sequel" style={{ paddingTop: "18vh",
+          paddingLeft: "7vw", height: "85vh"}}>
+        <Row className="p-0 m-0" >
+          Full Stack <br></br>Developer.
+        </Row>
       </Col>
       <Col className="col-6 m-0">
         <Image

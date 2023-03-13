@@ -32,6 +32,7 @@ import {
 } from "firebase/auth";
 
 function App() {
+  const [windowSize, setWindowSize] = useState(getWindowSize());
   const [signInStatus, setsignInStatus] = useState(["", false]);
 
   useEffect(() => {
@@ -47,6 +48,17 @@ function App() {
         setsignInStatus(["Sign In With Google", true]);
       }
     });
+
+
+    function handleWindowResize() {
+      setWindowSize(getWindowSize());
+    }
+
+    window.addEventListener('resize', handleWindowResize);
+
+    return () => {
+      window.removeEventListener('resize', handleWindowResize);
+    };
   }, []);
 
   function getStringValue(value: any): string {
@@ -71,10 +83,17 @@ function App() {
     }
   };
 
-  const convertVwToPx = (a: number) => {
-    const oneVhInPx = window.innerWidth / 100;
-    let temp = oneVhInPx * a;
-    temp = temp * temp;
+  function getWindowSize() {
+    const {innerWidth, innerHeight} = window;
+    return {innerWidth, innerHeight};
+  }
+
+  const convertMultiplyVwToPx = () => {
+    let temp;
+    if(!isMobile)
+      temp = (windowSize.innerWidth / 100) * 14;
+    else
+      temp = (windowSize.innerWidth / 100) * 14;
     return temp;
   };
 
@@ -207,7 +226,7 @@ function App() {
           style={{
             marginTop: "0.5vh",
             borderRadius: "20%",
-            marginLeft: `${convertVwToPx(1.2)}px`,
+            marginLeft: `${convertMultiplyVwToPx()}px`,
             width: "8.5vh",
             height: "8.5vh",
           }}
