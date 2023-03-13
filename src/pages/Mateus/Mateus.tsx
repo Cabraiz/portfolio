@@ -7,10 +7,32 @@ import dotsArray from "../../images/icones/svg_dotsArray.svg";
 function Mateus() {
   return (
     <Row className="p-0 m-0">
-      <Col className="col-6 font-sequel" style={{ paddingTop: "18vh",
-          paddingLeft: "7vw", height: "85vh"}}>
-        <Row className="p-0 m-0" >
+      <Col
+        className="col-6 m-0"
+        style={{
+          padding: "18vh 0 0 8vw",
+          height: "85vh",
+        }}
+      >
+        <Row
+          className="p-0 m-0 font-sequel"
+          style={{
+            height: "23vh",
+            justifyContent: "start",
+          }}
+        >
           Full Stack <br></br>Developer.
+        </Row>
+        <Row
+          className="p-0 m-0 font-sequel-underline"
+          style={{
+            height: "22vh",
+            justifyContent: "start",
+          }}
+        >
+          In my experience as a developer, I have found that optimism <br></br>
+          and a positive mindset are essential ingredients for <br></br>
+          success and innovation.
         </Row>
       </Col>
       <Col className="col-6 m-0">
