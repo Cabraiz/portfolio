@@ -49,8 +49,8 @@ function Mateus() {
             marginLeft: "-2.2vw",
             marginTop: "4vh",
             position: "absolute",
-            width: "20vh",
-            height: "20vh",
+            width: "10vw",
+            height: "10vw",
           }}
         />
         <Image
