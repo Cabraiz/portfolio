@@ -45,7 +45,7 @@
     "eject": "react-scripts eject",
     "deploy": "yarn build && gh-pages -d build",
     "lint": "tsc && eslint \"src/**/*.{js,ts,tsx}\" --quiet --fix",
-    "pre-commit": "npx lint-staged"
+    "pre-commit": "npx lint-staged -d"
   },
   "eslintConfig": {
     "extends": [
