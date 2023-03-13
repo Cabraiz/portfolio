@@ -10,7 +10,7 @@ function Mateus() {
       <Col
         className="col-6 m-0"
         style={{
-          padding: "17vh 0 0 8vw",
+          padding: "18vh 0 0 7.5vw",
           height: "85vh",
         }}
       >
