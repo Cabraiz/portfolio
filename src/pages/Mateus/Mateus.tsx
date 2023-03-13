@@ -34,6 +34,14 @@ function Mateus() {
           and a positive mindset are essential ingredients for <br></br>
           success and innovation.
         </Row>
+        <Row
+          className="p-0 m-0"
+          style={{
+            height: "22vh",
+            justifyContent: "start",
+          }}
+        >
+        </Row>
       </Col>
       <Col className="col-6 m-0">
         <Image
