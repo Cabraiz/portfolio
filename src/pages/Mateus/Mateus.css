@@ -7,16 +7,19 @@
   src: local("Sequel"), url("../../fonts/Sequel/sequel-sans-heavy-disp-2.otf");
 }
 .font-sequel {
-  color: #61dbfb;
+  background: linear-gradient(90deg, rgba(97,219,251,1) 0%, rgba(97,219,251,1) 64%, rgba(235,26,100,1) 64%, rgba(235,26,100,1) 100%);
+  background-clip: text;
+  color:transparent;
   font-family: "Sequel_2";
-  font-size: 4.5vw;
+  font-size: 9vh;
   letter-spacing: 1.2px;
   line-height: 110%;
 }
 .font-sequel-underline {
   color: white;
+  width: calc(180px + 22vw);
   font-family: "Sequel_Light";
-  font-size: 1.2vw;
+  font-size: 2.4vh;
   letter-spacing: 1.2px;
   line-height: 140%;
 }

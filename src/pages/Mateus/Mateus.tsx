@@ -1,17 +1,24 @@
 import React from "react";
 import { Col, Row, Image } from "react-bootstrap";
-import perfil from "../../images/Mateus/perfil.webp";
 
+import perfil from "../../images/Mateus/perfil.webp";
 import dotsArray from "../../images/icones/svg_dotsArray.svg";
 
+import { isMobile } from "react-device-detect";
+
 function Mateus() {
+
+  function getMobileSettings(a: number): string {
+    return "4.5vw 17vw 0 2.5vw";
+  }
+
   return (
     <Row className="p-0 m-0">
       <Col
-        className="col-6 m-0"
+        className="col-sm-12 col-md-6 m-0"
         style={{
-          padding: "18vh 0 0 7.5vw",
-          height: "85vh",
+          padding: "calc(6vh + 6vw) 0 0 7.5vw",
+          height: "60vh",
         }}
       >
         <Row
@@ -30,38 +37,29 @@ function Mateus() {
             justifyContent: "start",
           }}
         >
-          In my experience as a developer, I have found that optimism <br></br>
-          and a positive mindset are essential ingredients for <br></br>
-          success and innovation.
+          In my experience as a developer, I have found that optimism and a positive mindset are essential ingredients for success and innovation.
         </Row>
         <Row
           className="p-0 m-0"
           style={{
-            height: "22vh",
+            height: "20vh",
             justifyContent: "start",
           }}
         ></Row>
       </Col>
-      <Col className="col-6 m-0">
-        <Image
-          src={dotsArray}
+      <Col className="col-sm-12 col-md-6 m-0">
+        <Row className="m-0" 
           style={{
-            marginLeft: "-2.2vw",
-            marginTop: "4vh",
-            position: "absolute",
-            width: "10vw",
-            height: "10vw",
-          }}
-        />
-        <Image
-          src={perfil}
-          style={{
-            marginTop: "12vh",
-            marginLeft: "3vw",
-            width: "calc(28vmin + 22vh)",
-            height: "calc(28vmin + 22vh)",
-          }}
-        />
+            padding: `${getMobileSettings(0)}`,
+          }}>
+          <Image
+            src={perfil}
+            style={{
+              width: "auto",
+              height: "auto",
+            }}
+          />
+        </Row>
       </Col>
     </Row>
   );
