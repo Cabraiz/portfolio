@@ -24,6 +24,7 @@ function Mateus() {
         <Row
           className="p-0 m-0 font-sequel"
           style={{
+            backgroundImage: 'linear-gradient(90deg, rgba(97,219,251,1) 0%, rgba(97,219,251,1) 64%, rgba(235,26,100,1) 64%, rgba(235,26,100,1) 100%)',
             height: "23vh",
             justifyContent: "start",
           }}
