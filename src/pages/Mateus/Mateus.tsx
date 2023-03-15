@@ -75,17 +75,17 @@ function Mateus() {
               height: "auto",
             }}
           />
-          <Row className="justify-content-center" style={{ padding: "2vh 0 0 0"}}>
-            <Col className="col-2">
+          <Row className="m-0" style={{ padding: "2vh 0 0 0"}}>
+            <Col className="col-auto">
               <Image className="imagesize" src={IconGmail} />
             </Col>
-            <Col className="col-2">
+            <Col className="col-auto">
               <Image className="imagesize" src={IconInsta} />
             </Col>
-            <Col className="col-2">
+            <Col className="col-auto">
               <Image className="imagesize" src={IconLinkendin} />
             </Col>
-            <Col className="col-2">
+            <Col className="col-auto">
               <Image className="imagesize" src={IconTiktok} />
             </Col>
           </Row>

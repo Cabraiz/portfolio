@@ -23,8 +23,9 @@
   line-height: 140%;
 }
 .imagesize {
+  padding: 0 1vh 0 0;
   filter: grayscale(100%) contrast(130%);
-  height: 4vh;
+  height: 5vh;
 }
 img {
   border-radius: 6%;
