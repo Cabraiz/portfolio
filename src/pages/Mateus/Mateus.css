@@ -28,6 +28,18 @@
   height: 5vh;
   transition: 0.5s;
 }
+.btn-trasn{
+  margin: 0;
+  padding: 0;
+  background-color:transparent;
+  width: auto;
+  height: auto;
+  border: none;
+}
+.btn-trasn:hover{
+  background-color:transparent;
+  border: none;
+}
 .imagesize:hover{
   filter: none;
 }
