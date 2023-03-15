@@ -221,7 +221,8 @@ function Surprise() {
         <Modal.Header className="text-center" closeButton>
           <Modal.Title style={{ fontSize: "1.3em", textAlign: "center" }}>
             {" "}
-            Hey Broto, vamos ver um filme lá em casa? 👀{" "}
+            Vamos ver um filme? 🚗
+            {" "}
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
@@ -239,8 +240,7 @@ function Surprise() {
       >
         <Modal.Header closeButton>
           <Modal.Title style={{ fontSize: "1em", textAlign: "center" }}>
-            {" "}
-            NÃO TEM MORTE DE NENHUMA DE ANIMAL EU PESQUISEI! 🍿{" "}
+            {" "} 🍿🍿🍿🍿🍿🍿🍿🍿🍿 {" "}
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
@@ -299,7 +299,7 @@ function Surprise() {
         <Modal.Header closeButton>
           <Modal.Title style={{ fontSize: "1.5em", textAlign: "center" }}>
             {" "}
-            PIN PIN PIN, GANHOU +1 RODADA! 🤪{" "}
+            PIN PIN PIN, GANHOU +1 RODADA! 🥃{" "}
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
@@ -319,7 +319,8 @@ function Surprise() {
         <Modal.Header closeButton>
           <Modal.Title style={{ fontSize: "1.3em", textAlign: "center" }}>
             {" "}
-            Ganhou um Gift Card bem ilustrativo... 🤫👻{" "}
+            E por hoje é só isso!👻
+            {" "}
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
