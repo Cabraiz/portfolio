@@ -31,7 +31,7 @@ function Mateus() {
       <Col
         className="col-sm-12 col-md-6 m-0"
         style={{
-          padding: "calc(6vh + 6vw) 0 0 7.5vw",
+          padding: "calc(20px + 8vw) 0 0 7.5vw",
           height: "60vh",
         }}
       >
