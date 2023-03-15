@@ -73,7 +73,7 @@ function Mateus() {
               height: "auto",
             }}
           />
-          <Row className="m-0" style={{ padding: "2vh 0 0 2.5vh", justifyContent: "start"}}>
+          <Row className="m-0" style={{ padding: "2vh 0 0 0", justifyContent: "center", maxWidth: "340px",}}>
             <Col className="col-auto">
               <Button className="btn-trasn" href="https://www.linkedin.com/in/cabraiz/">
                 <Image className="imagesize" src={IconLinkendin}></Image>
