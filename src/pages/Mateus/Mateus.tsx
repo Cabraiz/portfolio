@@ -22,10 +22,6 @@ function Mateus() {
     return scrollY;
   }
 
-  function getMobileSettings(a: number): string {
-    return "4.5vw 17vw 0 2.5vw";
-  }
-
   return (
     <Row className="p-0 m-0">
       <Col
@@ -65,17 +61,19 @@ function Mateus() {
       <Col className="col-sm-12 col-md-6 m-0">
         <Row className="m-0" 
           style={{
-            padding: `${getMobileSettings(0)}`,
+            padding: "4.5vw 0 0 3.5vw",
+            justifyContent: "start",
           }}>
           <Image
             className="p-0"
             src={perfil}
             style={{
+              maxWidth: "340px",
               width: "auto",
               height: "auto",
             }}
           />
-          <Row className="m-0" style={{ padding: "2vh 0 0 0"}}>
+          <Row className="m-0" style={{ padding: "2vh 0 0 2.5vh", justifyContent: "start"}}>
             <Col className="col-auto">
               <Button className="btn-trasn" href="https://www.linkedin.com/in/cabraiz/">
                 <Image className="imagesize" src={IconLinkendin}></Image>
