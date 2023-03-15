@@ -22,6 +22,10 @@
   letter-spacing: 1.2px;
   line-height: 140%;
 }
+.imagesize {
+  filter: grayscale(100%) contrast(130%);
+  height: 4vh;
+}
 img {
   border-radius: 6%;
 }

@@ -1,12 +1,26 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Col, Row, Image } from "react-bootstrap";
 
 import perfil from "../../images/Mateus/perfil.webp";
 import dotsArray from "../../images/icones/svg_dotsArray.svg";
 
+import IconGmail from "../../images/Mateus/IconGmail.png";
+import IconInsta from "../../images/Mateus/IconInsta.png";
+import IconLinkendin from "../../images/Mateus/IconLinkendin.png";
+import IconTiktok from "../../images/Mateus/IconTiktok.png";
+
 import { isMobile } from "react-device-detect";
 
 function Mateus() {
+  const [scrollY, setScrollY] = useState(0);
+
+  useEffect(() => {
+    setScrollY(window.scrollY);
+  }, []);
+
+  function getScrollYPosition(): number {
+    return scrollY;
+  }
 
   function getMobileSettings(a: number): string {
     return "4.5vw 17vw 0 2.5vw";
@@ -54,12 +68,27 @@ function Mateus() {
             padding: `${getMobileSettings(0)}`,
           }}>
           <Image
+            className="p-0"
             src={perfil}
             style={{
               width: "auto",
               height: "auto",
             }}
           />
+          <Row className="justify-content-center" style={{ padding: "2vh 0 0 0"}}>
+            <Col className="col-2">
+              <Image className="imagesize" src={IconGmail} />
+            </Col>
+            <Col className="col-2">
+              <Image className="imagesize" src={IconInsta} />
+            </Col>
+            <Col className="col-2">
+              <Image className="imagesize" src={IconLinkendin} />
+            </Col>
+            <Col className="col-2">
+              <Image className="imagesize" src={IconTiktok} />
+            </Col>
+          </Row>
         </Row>
       </Col>
     </Row>
