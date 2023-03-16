@@ -7,6 +7,7 @@ import "./Hublocal.css";
 
 import { tokenReceived } from '../../redux/feature/auth/authSlice';
 import { useLoginMutation } from '../../redux/app/services/auth';
+import { AxiosError } from "axios";
 
 function Hublocal() {
     const userRef = useRef<HTMLDivElement>(null)
@@ -28,9 +29,9 @@ function Hublocal() {
         setErrMsg('')
     },[user, pwd])
  
-    const handleSubmit = async (e) => {
-        e.preventDefault()
-
+    const handleSubmit = async (e: { preventDefault: () => void; }) => {
+        e.preventDefault();
+        
         try{
             const userData = await login({ user, pwd }).unwrap()
             dispatch(tokenReceived({ ...userData, user }))
@@ -38,7 +39,7 @@ function Hublocal() {
             setPwd('')
             navigate('/welcome')
 
-        }catch (err) {
+        }catch (err: any) {
             if(!err?.response) {
                 setErrMsg('No Sever Response')
             } else if (!err.response?.status === 400){
