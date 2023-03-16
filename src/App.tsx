@@ -14,7 +14,9 @@ import "react-toastify/dist/ReactToastify.css";
 import { Helmet, HelmetProvider } from "react-helmet-async";
 
 import { Routes, Route } from "react-router-dom";
-//import May from "./pages/May/May";
+
+import Hublocal from "./pages/Hublocal/Hublocal";
+
 import Mateus from "./pages/Mateus/Mateus";
 import Surprise from "./pages/Surprise/Surprise";
 
@@ -259,7 +261,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Mateus />} />
         <Route path="/aniver" element={<Surprise />} />
-        <Route path="/hublocal" element={<Surprise />} />
+        <Route path="/hublocal" element={<Hublocal />} />
       </Routes>
 
       <ToastContainer

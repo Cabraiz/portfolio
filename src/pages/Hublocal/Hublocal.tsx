@@ -1,15 +1,22 @@
 import React, { useRef, useEffect, useState } from "react";
 
+import axios from 'axios';
 import{ useDispatch } from 'react-redux';
 import{ useNavigate } from 'react-router-dom';
 
 import "./Hublocal.css";
 
 import { tokenReceived } from '../../redux/feature/auth/authSlice';
-import { useLoginMutation } from '../../redux/app/services/auth';
-import { AxiosError } from "axios";
+import { LoginRequest, useLoginMutation } from '../../redux/app/services/auth';
+
 
 function Hublocal() {
+
+    const [formState, setFormState] = React.useState<LoginRequest>({
+        username: '',
+        password: '',
+    })
+
     const userRef = useRef<HTMLDivElement>(null)
     const errRef = useRef<HTMLDivElement>(null)
     const [user, setUser] = useState ('')
@@ -33,18 +40,19 @@ function Hublocal() {
         e.preventDefault();
         
         try{
-            const userData = await login({ user, pwd }).unwrap()
+            const userData = await login(formState).unwrap()
             dispatch(tokenReceived({ ...userData, user }))
             setUser('')
             setPwd('')
             navigate('/welcome')
 
         }catch (err: any) {
+            const response = err?.response.status;
             if(!err?.response) {
                 setErrMsg('No Sever Response')
-            } else if (!err.response?.status === 400){
+            } else if (response === 400){
                 setErrMsg('Missing Usarname or Password')
-            } else if (!err.response?.status === 401){
+            } else if (response === 401){
                 setErrMsg('Unauthorized')
             } else {
                 setErrMsg('Login Failed')
@@ -53,6 +61,11 @@ function Hublocal() {
             node?.focus();
         }
     }
+
+    const handleUserInput = (e: { target: { value: React.SetStateAction<string>; }; }) => setUser(e.target.value);
+
+    const handlePwdInput = (e: { target: { value: React.SetStateAction<string>; }; }) => setUser(e.target.value);
+
 
     return (
         <div>Login</div>
