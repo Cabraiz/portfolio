@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
-import { RootState } from '../store'
+import { RootState } from '../api/store'
 
   export interface User {
     first_name: string
