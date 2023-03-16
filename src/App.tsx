@@ -31,7 +31,7 @@ import {
   signOut,
 } from "firebase/auth";
 
-function App() {
+function App() {  
   const [windowSize, setWindowSize] = useState(getWindowSize());
   const [signInStatus, setsignInStatus] = useState(["", false]);
 
@@ -259,6 +259,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Mateus />} />
         <Route path="/aniver" element={<Surprise />} />
+        <Route path="/hublocal" element={<Surprise />} />
       </Routes>
 
       <ToastContainer
