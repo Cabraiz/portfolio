@@ -6,7 +6,7 @@ import type {
 } from '@reduxjs/toolkit/query'
 import { tokenReceived, loggedOut } from '../../feature/auth/authSlice'
 import { Mutex } from 'async-mutex'
-import { RootState } from '../../store  '
+import { RootState } from '../../store'
 
   export interface User {
     first_name: string
