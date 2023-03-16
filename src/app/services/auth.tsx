@@ -6,7 +6,7 @@ import type {
 } from '@reduxjs/toolkit/query'
 import { tokenReceived, loggedOut } from '../../feature/auth/authSlice'
 import { Mutex } from 'async-mutex'
-import { RootState } from '../api/store'
+import { RootState } from '../store'
 
   export interface User {
     first_name: string
@@ -78,11 +78,11 @@ const baseQueryWithReauth: BaseQueryFn<
 export const api = createApi({
   baseQuery: baseQueryWithReauth,
   endpoints: (builder) => ({
-    login: builder.mutation<UserResponse, LoginRequest>({
+    login: builder.mutation <UserResponse, LoginRequest> ({
       query: (credentials) => ({
-        url: 'login',
+        url: '/auth',
         method: 'POST',
-        body: credentials,
+        body: { ...credentials }
       }),
     }),
     protected: builder.mutation<{ message: string }, void>({
