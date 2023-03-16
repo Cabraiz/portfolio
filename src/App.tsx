@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import "./App.css";
 import "./fonts/Brutal/Brutal-Type-Medium.ttf";
 
-import { Navbar, Image, Button } from "react-bootstrap";
+import { Row, Navbar, Image, Button } from "react-bootstrap";
 
 import logo from "./images/icones/logo.svg";
 import logoGmail from "./images/icones/7.svg";
@@ -235,7 +235,6 @@ function App() {
         />
         <Button
           style={{
-            paddingTop: "1.1vh",
             marginRight: "4vw",
             width: "auto",
             height: "6vh",
@@ -246,17 +245,17 @@ function App() {
             borderColor: "white",
           }}
           onClick={SignFirebase}
-        >
-          <Image
-            src={logoGmail}
-            style={{
-              width: "calc(15px + 0.3vw)",
-              margin: "0",
-              padding: "0",
-              height: "100%",
-            }}
-          ></Image>
-          &nbsp; {signInStatus}
+        ><Row className="m-0 ps-0 pe-0" style={{alignItems: "center",}}>
+            <Image
+              src={logoGmail}
+              style={{
+                width: "calc(15px + 0.3vw)",
+                margin: "0",
+                padding: "0",
+                height: "100%",
+              }}
+            ></Image>&nbsp;&nbsp;{signInStatus}
+          </Row>
         </Button>
       </Navbar>
       <Routes>
