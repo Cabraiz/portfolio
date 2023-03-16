@@ -9,8 +9,8 @@ import { tokenReceived } from '../../redux/feature/auth/authSlice';
 import { useLoginMutation } from '../../redux/app/services/auth';
 
 function Hublocal() {
-    const userRef = useRef()
-    const errRef = useRef ()
+    const userRef = useRef<HTMLDivElement>(null)
+    const errRef = useRef<HTMLDivElement>(null)
     const [user, setUser] = useState ('')
     const [pwd, setPwd] = useState('')
     const [errMsg, setErrMsg] = useState('')
@@ -20,7 +20,8 @@ function Hublocal() {
     const dispatch = useDispatch()
 
     useEffect(() => {
-        userRef.current.focus()
+        const node = userRef.current
+        node?.focus();
     },[])
 
     useEffect(() => {
@@ -31,15 +32,24 @@ function Hublocal() {
         e.preventDefault()
 
         try{
-
             const userData = await login({ user, pwd }).unwrap()
             dispatch(tokenReceived({ ...userData, user }))
             setUser('')
             setPwd('')
-            navigate('welcome')
+            navigate('/welcome')
 
         }catch (err) {
-
+            if(!err?.response) {
+                setErrMsg('No Sever Response')
+            } else if (!err.response?.status === 400){
+                setErrMsg('Missing Usarname or Password')
+            } else if (!err.response?.status === 401){
+                setErrMsg('Unauthorized')
+            } else {
+                setErrMsg('Login Failed')
+            }
+            const node = errRef.current
+            node?.focus();
         }
     }
 
