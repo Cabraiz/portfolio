@@ -1,6 +1,5 @@
 import React, { useRef, useEffect, useState } from "react";
 
-import axios from 'axios';
 import{ useDispatch } from 'react-redux';
 import{ useNavigate } from 'react-router-dom';
 
