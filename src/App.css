@@ -3,11 +3,10 @@
   src: local("Brutal"), url("./fonts/Brutal/Brutal-Type-Medium.ttf");
 }
 html {
-  height: auto;
+  height: auto !important;
 }
 body {
-  background: linear-gradient(#ed3173 50%, #eb1a64 90%) left 0/67%,
-    linear-gradient(#50d7fb 50%, #61dbfb 90%) right;
+  background: linear-gradient(90deg, rgba(235,26,100,1) 0%, rgba(235,26,100,1) 66%, rgba(97,219,251,1) 66%, rgba(97,219,251,1) 100%) !important;
   background-repeat: no-repeat;
 }
 .font-face-gm {

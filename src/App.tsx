@@ -250,8 +250,9 @@ function App() {
           <Image
             src={logoGmail}
             style={{
-              marginTop: "-0.5vh",
               width: "calc(15px + 0.3vw)",
+              margin: "0",
+              padding: "0",
               height: "100%",
             }}
           ></Image>
