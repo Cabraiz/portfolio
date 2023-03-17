@@ -1,10 +1,12 @@
 import React, { useRef, useEffect, useState } from "react";
 
 import Login_Logo from "../../images/HubLocal/Login_Logo.png";
+import Login_Image from "../../images/HubLocal/Login_Image.png";
 
 import {
     Flex,
-    Heading,
+    Grid,
+    GridItem,
     Input,
     Button,
     InputGroup,
@@ -92,93 +94,110 @@ function Hublocal() {
 
     const handlePwdInput = (e: { target: { value: React.SetStateAction<string>; }; }) => setUser(e.target.value);
 
+    const textoTitle = "Junte-se a vários clientes satisfeitos."
+    const textoSubtitle = "Cliente HubLocal ganha mais relevância, autoridade e visibilidade. Mais de 7.000 marcas confiam na nossa plataforma. Seja uma delas!"
+
 
     return (
-        <Flex
-      flexDirection="column"
-      width="50vw"
-      height="100vh"
-      backgroundColor="white"
-      justifyContent="center"
-      alignItems="center"
-    >
-      <Stack
-        flexDir="column"
-        mb="2"
-        justifyContent="center"
-        alignItems="center"
+      <Flex
+        flexDirection="column"
+        backgroundColor="white"
       >
-        
-        <Image
-          padding="0 1vw 0 1vw"
-          minWidth="200px"
-          width="23vw"
-          src={Login_Logo}
-        />
-        <Box minW={{ base: "90%", md: "30vw" }}>
-          <form>
-            <Stack
-              spacing={4}
-              p="1rem"
-              backgroundColor="whiteAlpha.900"
-            >
-              <FormControl >
-                <Text className="letter-spacing-text" fontSize='md' style={{fontWeight: "500", paddingBottom: "5px"}}>Email</Text>
-                <InputGroup>
-                  <InputLeftElement
-                    height="100%"
-                    pointerEvents="none"
-                    children={<CFaUserAlt color="gray.300" />}
-                  />
-                  <Input type="email" placeholder="E-mail" size='lg' style={{borderColor: "#0385FD", borderWidth: "2px"}} />
-                </InputGroup>
-              </FormControl>
-              <FormControl style={{marginTop: "1vh"}}>
-                <Text fontSize='md' className="letter-spacing-text" style={{fontWeight: "500", padding: "0 0 5px 0"}}>Senha</Text>
-                <InputGroup style={{alignItems: "center"}}>
-                  <InputLeftElement
-                    height="100%"
-                    pointerEvents="none"
-                    children={<CFaLock color="gray.300" />}
-                  />
-                  <Input
-                    type={showPassword ? "text" : "password"}
-                    placeholder="Senha"
+      <Grid templateColumns='repeat(2, 1fr)' gap={0}>
+        <GridItem h="100vh" w="50vw" style={{backgroundColor: "#0485FF"}}>
+          <Stack h="100vh" w="50vw"
+            justifyContent="center"
+            alignItems="center"
+          >
+          <Image
+            h="76vh"
+            paddingTop="14vh"
+            objectFit="cover"
+            src={Login_Image}
+          />
+          <Box h="24vh" style={{ backgroundColor: "#00CC99", width: "50vw", marginTop: "0", padding: "1.3vh 8vw 0 8vw" }}>
+            <Text fontSize='xx-large' className="frase-imagem-logo" style={{ padding: "0 4vw 2vh 4vw" }}>{textoTitle}</Text>
+            <Text fontSize='md' className="letter-spacing-text subfrase-imagem-logo">{textoSubtitle}</Text>
+          </Box>
+          </Stack>
+        </GridItem>  
+        <GridItem>
+          <Stack h="100vh" w="50vw"
+            justifyContent="center"
+            alignItems="center"
+          >
+            <Image
+              padding="0 1vw 0 1vw"
+              minWidth="200px"
+              w="23vw"
+              src={Login_Logo}
+            />
+            <Box minW={{ base: "90%", md: "30vw" }}>
+              <form>
+                <Stack
+                  spacing={4}
+                  p="1rem"
+                  backgroundColor="whiteAlpha.900"
+                >
+                  <FormControl >
+                    <Text className="letter-spacing-text" fontSize='md' style={{fontWeight: "500", paddingBottom: "5px"}}>Email</Text>
+                    <InputGroup>
+                      <InputLeftElement
+                        h="100%"
+                        pointerEvents="none"
+                        children={<CFaUserAlt color="gray.300" />}
+                      />
+                      <Input type="email" placeholder="E-mail" size='lg' style={{borderColor: "#0385FD", borderWidth: "2px"}} />
+                    </InputGroup>
+                  </FormControl>
+                  <FormControl style={{marginTop: "1vh"}}>
+                    <Text fontSize='md' className="letter-spacing-text" style={{fontWeight: "500", padding: "0 0 5px 0"}}>Senha</Text>
+                    <InputGroup style={{alignItems: "center"}}>
+                      <InputLeftElement
+                        h="100%"
+                        pointerEvents="none"
+                        children={<CFaLock color="gray.300" />}
+                      />
+                      <Input
+                        type={showPassword ? "text" : "password"}
+                        placeholder="Senha"
+                        size='lg'
+                        style={{borderColor: "#0385FD", borderWidth: "2px"}}
+                      />
+                      <InputRightElement width="5rem" height="100%">
+                        <Button h="1.75rem" size="sm" onClick={handleShowClick}>
+                          {showPassword ? "Ocultar" : "Mostrar"}
+                        </Button>
+                      </InputRightElement>
+                    </InputGroup>
+                  </FormControl>
+                  <Button
+                    className="letter-spacing-text"
+                    type="submit"
+                    variant="solid"
+                    h="7vh"
+                    w="full"
                     size='lg'
-                    style={{borderColor: "#0385FD", borderWidth: "2px"}}
-                  />
-                  <InputRightElement width="5rem" height="100%">
-                    <Button h="1.75rem" size="sm" onClick={handleShowClick}>
-                      {showPassword ? "Ocultar" : "Mostrar"}
-                    </Button>
-                  </InputRightElement>
-                </InputGroup>
-              </FormControl>
-              <Button
-                className="letter-spacing-text"
-                type="submit"
-                variant="solid"
-                height="7vh"
-                width="full"
-                size='lg'
-                style={{backgroundColor: "#0385FD", color: "#FFFFFF",  fontWeight: "700"}}
-              >
-              <Text className="letter-spacing-button" fontSize='md' style={{fontWeight: "700"}}>LOGAR</Text>
-              </Button>
-              <Button
-                type="submit"
-                variant="solid"
-                height="7vh"
-                width="full"
-                size='lg'
-                style={{backgroundColor: "#00CC99", color: "#FFFFFF",  fontWeight: "700"}}
-              >
-              <Text className="letter-spacing-button" fontSize='md' style={{fontWeight: "700"}}>CRIAR CONTA</Text>
-              </Button>
-            </Stack>
-          </form>
-        </Box>
-      </Stack>
+                    style={{backgroundColor: "#0385FD", color: "#FFFFFF",  fontWeight: "700"}}
+                  >
+                  <Text className="letter-spacing-button" fontSize='md' style={{fontWeight: "700"}}>LOGAR</Text>
+                  </Button>
+                  <Button
+                    type="submit"
+                    variant="solid"
+                    h="7vh"
+                    w="full"
+                    size='lg'
+                    style={{backgroundColor: "#00CC99", color: "#FFFFFF",  fontWeight: "700"}}
+                  >
+                  <Text className="letter-spacing-button" fontSize='md' style={{fontWeight: "700"}}>CRIAR CONTA</Text>
+                  </Button>
+                </Stack>
+              </form>
+            </Box>
+          </Stack>
+        </GridItem>
+      </Grid>
     </Flex>
     )
 

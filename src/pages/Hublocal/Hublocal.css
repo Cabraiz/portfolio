@@ -1,7 +1,26 @@
+@font-face {
+    font-family: "Poppins";
+    src: local("Poppins"), url("../../fonts/Poppins/Poppins-Bold.ttf");
+}
+
 .letter-spacing-text{
     letter-spacing: 0.4px;
 }
 
 .letter-spacing-button{
     letter-spacing: 1px;
+}
+
+.frase-imagem-logo{
+    letter-spacing: 0.5px;
+    color: white;
+    font-family: 'Poppins', sans-serif;
+    line-height: 100%;
+    vertical-align: top;
+    align-items: center;
+    font-weight: bolder;
+}
+
+.subfrase-imagem-logo{
+    
 }
