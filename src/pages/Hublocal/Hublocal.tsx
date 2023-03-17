@@ -1,5 +1,7 @@
 import React, { useRef, useEffect, useState } from "react";
 
+import Login_Logo from "../../images/HubLocal/Login_Logo.png";
+
 import {
     Flex,
     Heading,
@@ -10,7 +12,7 @@ import {
     InputLeftElement,
     chakra,
     Box,
-    Avatar,
+    Image,
     FormControl,
     Text,
     InputRightElement
@@ -106,8 +108,13 @@ function Hublocal() {
         justifyContent="center"
         alignItems="center"
       >
-        <Avatar bg="teal.500" />
-        <Heading color="teal.400">Welcome</Heading>
+        
+        <Image
+          padding="0 1vw 0 1vw"
+          minWidth="200px"
+          width="23vw"
+          src={Login_Logo}
+        />
         <Box minW={{ base: "90%", md: "30vw" }}>
           <form>
             <Stack
@@ -116,18 +123,18 @@ function Hublocal() {
               backgroundColor="whiteAlpha.900"
             >
               <FormControl >
-                <Text fontSize='md' style={{letterSpacing: "0.8px", fontWeight: "500", paddingBottom: "5px"}}>Email</Text>
+                <Text className="letter-spacing-text" fontSize='md' style={{fontWeight: "500", paddingBottom: "5px"}}>Email</Text>
                 <InputGroup>
                   <InputLeftElement
                     height="100%"
                     pointerEvents="none"
                     children={<CFaUserAlt color="gray.300" />}
                   />
-                  <Input type="email" placeholder="email address" size='lg' style={{borderColor: "#0385FD", borderWidth: "2px"}} />
+                  <Input type="email" placeholder="E-mail" size='lg' style={{borderColor: "#0385FD", borderWidth: "2px"}} />
                 </InputGroup>
               </FormControl>
               <FormControl style={{marginTop: "1vh"}}>
-                <Text fontSize='md' style={{letterSpacing: "0.8px", fontWeight: "500", padding: "0 0 5px 0"}}>Senha</Text>
+                <Text fontSize='md' className="letter-spacing-text" style={{fontWeight: "500", padding: "0 0 5px 0"}}>Senha</Text>
                 <InputGroup style={{alignItems: "center"}}>
                   <InputLeftElement
                     height="100%"
@@ -136,26 +143,27 @@ function Hublocal() {
                   />
                   <Input
                     type={showPassword ? "text" : "password"}
-                    placeholder="Password"
+                    placeholder="Senha"
                     size='lg'
                     style={{borderColor: "#0385FD", borderWidth: "2px"}}
                   />
-                  <InputRightElement width="4.5rem" height="100%">
+                  <InputRightElement width="5rem" height="100%">
                     <Button h="1.75rem" size="sm" onClick={handleShowClick}>
-                      {showPassword ? "Hide" : "Show"}
+                      {showPassword ? "Ocultar" : "Mostrar"}
                     </Button>
                   </InputRightElement>
                 </InputGroup>
               </FormControl>
               <Button
+                className="letter-spacing-text"
                 type="submit"
                 variant="solid"
                 height="7vh"
                 width="full"
                 size='lg'
-                style={{backgroundColor: "#0385FD", color: "#FFFFFF", letterSpacing: "0.8px", fontWeight: "700"}}
+                style={{backgroundColor: "#0385FD", color: "#FFFFFF",  fontWeight: "700"}}
               >
-              <Text fontSize='md' style={{letterSpacing: "0.8px", fontWeight: "700"}}>LOGAR</Text>
+              <Text className="letter-spacing-button" fontSize='md' style={{fontWeight: "700"}}>LOGAR</Text>
               </Button>
               <Button
                 type="submit"
@@ -163,9 +171,9 @@ function Hublocal() {
                 height="7vh"
                 width="full"
                 size='lg'
-                style={{backgroundColor: "#00CC99", color: "#FFFFFF", letterSpacing: "0.8px", fontWeight: "700"}}
+                style={{backgroundColor: "#00CC99", color: "#FFFFFF",  fontWeight: "700"}}
               >
-              <Text fontSize='md' style={{letterSpacing: "0.8px", fontWeight: "700"}}>CRIAR CONTA</Text>
+              <Text className="letter-spacing-button" fontSize='md' style={{fontWeight: "700"}}>CRIAR CONTA</Text>
               </Button>
             </Stack>
           </form>
