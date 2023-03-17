@@ -10,10 +10,9 @@ import {
     InputLeftElement,
     chakra,
     Box,
-    Link,
     Avatar,
     FormControl,
-    FormHelperText,
+    Text,
     InputRightElement
 } from "@chakra-ui/react";
 import { FaUserAlt, FaLock } from "react-icons/fa";
@@ -25,6 +24,7 @@ import "./Hublocal.css";
 
 import { tokenReceived } from '../../redux/feature/auth/authSlice';
 import { LoginRequest, useLoginMutation } from '../../redux/app/services/auth';
+import { Buttons } from "@testing-library/user-event/dist/types/system/pointer/buttons";
 
 
 function Hublocal() {
@@ -94,9 +94,9 @@ function Hublocal() {
     return (
         <Flex
       flexDirection="column"
-      width="100wh"
+      width="50vw"
       height="100vh"
-      backgroundColor="gray.200"
+      backgroundColor="white"
       justifyContent="center"
       alignItems="center"
     >
@@ -108,63 +108,69 @@ function Hublocal() {
       >
         <Avatar bg="teal.500" />
         <Heading color="teal.400">Welcome</Heading>
-        <Box minW={{ base: "90%", md: "468px" }}>
+        <Box minW={{ base: "90%", md: "30vw" }}>
           <form>
             <Stack
               spacing={4}
               p="1rem"
               backgroundColor="whiteAlpha.900"
-              boxShadow="md"
             >
-              <FormControl>
+              <FormControl >
+                <Text fontSize='md' style={{letterSpacing: "0.8px", fontWeight: "500", paddingBottom: "5px"}}>Email</Text>
                 <InputGroup>
                   <InputLeftElement
+                    height="100%"
                     pointerEvents="none"
                     children={<CFaUserAlt color="gray.300" />}
                   />
-                  <Input type="email" placeholder="email address" />
+                  <Input type="email" placeholder="email address" size='lg' style={{borderColor: "#0385FD", borderWidth: "2px"}} />
                 </InputGroup>
               </FormControl>
-              <FormControl>
-                <InputGroup>
+              <FormControl style={{marginTop: "1vh"}}>
+                <Text fontSize='md' style={{letterSpacing: "0.8px", fontWeight: "500", padding: "0 0 5px 0"}}>Senha</Text>
+                <InputGroup style={{alignItems: "center"}}>
                   <InputLeftElement
+                    height="100%"
                     pointerEvents="none"
-                    color="gray.300"
                     children={<CFaLock color="gray.300" />}
                   />
                   <Input
                     type={showPassword ? "text" : "password"}
                     placeholder="Password"
+                    size='lg'
+                    style={{borderColor: "#0385FD", borderWidth: "2px"}}
                   />
-                  <InputRightElement width="4.5rem">
+                  <InputRightElement width="4.5rem" height="100%">
                     <Button h="1.75rem" size="sm" onClick={handleShowClick}>
                       {showPassword ? "Hide" : "Show"}
                     </Button>
                   </InputRightElement>
                 </InputGroup>
-                <FormHelperText textAlign="right">
-                  <Link>forgot password?</Link>
-                </FormHelperText>
               </FormControl>
               <Button
-                borderRadius={0}
                 type="submit"
                 variant="solid"
-                colorScheme="teal"
+                height="7vh"
                 width="full"
+                size='lg'
+                style={{backgroundColor: "#0385FD", color: "#FFFFFF", letterSpacing: "0.8px", fontWeight: "700"}}
               >
-                Login
+              <Text fontSize='md' style={{letterSpacing: "0.8px", fontWeight: "700"}}>LOGAR</Text>
+              </Button>
+              <Button
+                type="submit"
+                variant="solid"
+                height="7vh"
+                width="full"
+                size='lg'
+                style={{backgroundColor: "#00CC99", color: "#FFFFFF", letterSpacing: "0.8px", fontWeight: "700"}}
+              >
+              <Text fontSize='md' style={{letterSpacing: "0.8px", fontWeight: "700"}}>CRIAR CONTA</Text>
               </Button>
             </Stack>
           </form>
         </Box>
       </Stack>
-      <Box>
-        New to us?{" "}
-        <Link color="teal.500" href="#">
-          Sign Up
-        </Link>
-      </Box>
     </Flex>
     )
 
