@@ -13,7 +13,7 @@ import "react-toastify/dist/ReactToastify.css";
 
 import { Helmet, HelmetProvider } from "react-helmet-async";
 
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 
 import Hublocal from "./pages/Hublocal/Hublocal";
 
@@ -204,6 +204,9 @@ function App() {
       notifyError();
     }
   }
+
+  const { pathname } = useLocation();
+
   return (
     <>
       <HelmetProvider>
@@ -211,7 +214,7 @@ function App() {
           <title>{title ? title : "No title"}</title>
         </Helmet>
       </HelmetProvider>
-      <Navbar
+      { pathname === "/hublocal" ? null : <Navbar
         className="border-gradient-green"
         style={{
           justifyContent: "space-between",
@@ -257,7 +260,7 @@ function App() {
             ></Image>&nbsp;&nbsp;{signInStatus}
           </Row>
         </Button>
-      </Navbar>
+      </Navbar> }
       <Routes>
         <Route path="/" element={<Mateus />} />
         <Route path="/aniver" element={<Surprise />} />
