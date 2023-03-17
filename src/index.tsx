@@ -5,8 +5,6 @@ import "./index.css";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 
-import "@fontsource/poppins";
-
 import { BrowserRouter, HashRouter } from "react-router-dom";
 
 import { store } from './redux/store';

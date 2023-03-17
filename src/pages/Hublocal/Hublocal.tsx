@@ -110,14 +110,14 @@ function Hublocal() {
             alignItems="center"
           >
           <Image
-            h="76vh"
+            h="90vh"
             paddingTop="14vh"
             objectFit="cover"
             src={Login_Image}
           />
-          <Box h="24vh" style={{ backgroundColor: "#00CC99", width: "50vw", marginTop: "0", padding: "1.3vh 8vw 0 8vw" }}>
-            <Text fontSize='xx-large' className="frase-imagem-logo" style={{ padding: "0 4vw 2vh 4vw" }}>{textoTitle}</Text>
-            <Text fontSize='md' className="letter-spacing-text subfrase-imagem-logo">{textoSubtitle}</Text>
+          <Box h="auto" style={{ backgroundColor: "#00CC99", width: "50vw", marginTop: "0", padding: "2.2vh 5.5vw 2.2vh 5.5vw", alignItems: "center" }}>
+            <Text fontSize='x-large' className="frase-imagem-logo" style={{ padding: "0 3vw 1vh 3vw" }}>{textoTitle}</Text>
+            <Text fontSize='smaller' className="subfrase-imagem-logo letter-spacing-text ">{textoSubtitle}</Text>
           </Box>
           </Stack>
         </GridItem>  
@@ -140,7 +140,7 @@ function Hublocal() {
                   backgroundColor="whiteAlpha.900"
                 >
                   <FormControl >
-                    <Text className="letter-spacing-text" fontSize='md' style={{fontWeight: "500", paddingBottom: "5px"}}>Email</Text>
+                    <Text fontSize='sm' className="letter-spacing-text poppins-text-label" style={{ paddingBottom: "5px"}}>Email</Text>
                     <InputGroup>
                       <InputLeftElement
                         h="100%"
@@ -151,7 +151,7 @@ function Hublocal() {
                     </InputGroup>
                   </FormControl>
                   <FormControl style={{marginTop: "1vh"}}>
-                    <Text fontSize='md' className="letter-spacing-text" style={{fontWeight: "500", padding: "0 0 5px 0"}}>Senha</Text>
+                    <Text fontSize='sm' className="letter-spacing-text poppins-text-label" style={{ padding: "0 0 5px 0"}}>Senha</Text>
                     <InputGroup style={{alignItems: "center"}}>
                       <InputLeftElement
                         h="100%"
@@ -180,7 +180,7 @@ function Hublocal() {
                     size='lg'
                     style={{backgroundColor: "#0385FD", color: "#FFFFFF",  fontWeight: "700"}}
                   >
-                  <Text className="letter-spacing-button" fontSize='md' style={{fontWeight: "700"}}>LOGAR</Text>
+                  <Text className="letter-spacing-button poppins-text-button" fontSize='md'>LOGAR</Text>
                   </Button>
                   <Button
                     type="submit"
@@ -190,7 +190,7 @@ function Hublocal() {
                     size='lg'
                     style={{backgroundColor: "#00CC99", color: "#FFFFFF",  fontWeight: "700"}}
                   >
-                  <Text className="letter-spacing-button" fontSize='md' style={{fontWeight: "700"}}>CRIAR CONTA</Text>
+                  <Text className="letter-spacing-button poppins-text-button" fontSize='md' >CRIAR CONTA</Text>
                   </Button>
                 </Stack>
               </form>
