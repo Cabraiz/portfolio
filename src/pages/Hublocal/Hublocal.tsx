@@ -3,6 +3,8 @@ import React, { useRef, useEffect, useState } from "react";
 import Login_Logo from "../../images/HubLocal/Login_Logo.png";
 import Login_Image from "../../images/HubLocal/Login_Image.png";
 
+import { ToastContainer, toast } from "react-toastify";
+
 import {
     Flex,
     Grid,
@@ -18,8 +20,8 @@ import {
     FormControl,
     Text,
     InputRightElement,
-    useMediaQuery
 } from "@chakra-ui/react";
+
 import { FaUserAlt, FaLock } from "react-icons/fa";
 
 import{ useDispatch } from 'react-redux';
@@ -46,8 +48,8 @@ function Hublocal() {
         password: '',
     })
 
-    const userRef = useRef<HTMLDivElement>(null)
-    const errRef = useRef<HTMLDivElement>(null)
+    const userRef = useRef<HTMLInputElement>(null)
+    const errRef = useRef<HTMLInputElement>(null)
     const [user, setUser] = useState ('')
     const [pwd, setPwd] = useState('')
     const [errMsg, setErrMsg] = useState('')
@@ -55,6 +57,43 @@ function Hublocal() {
 
     const [login, { isLoading }] = useLoginMutation()
     const dispatch = useDispatch()
+
+    const [isDesktop, setIsDesktop] = useState(false);
+
+    const notifySucesso = () => {
+      toast.success("🦄 Website é Website", {
+        position: "bottom-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+      });
+    };
+  
+    const notifyError = () => {
+      toast.warning("❌ Website Não é Website", {
+        position: "bottom-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+      });
+    };
+
+    useEffect(() => {
+      const media = window.matchMedia('(max-width:700px)');
+      const listener = () => setIsDesktop(media.matches);
+      listener();
+      window.addEventListener('resize', listener);
+  
+      return () => window.removeEventListener('resize', listener);
+    }, [isDesktop]);
 
     useEffect(() => {
         const node = userRef.current
@@ -98,7 +137,6 @@ function Hublocal() {
     const textoTitle = "Junte-se a vários clientes satisfeitos."
     const textoSubtitle = "Cliente HubLocal ganha mais relevância, autoridade e visibilidade. Mais de 7.000 marcas confiam na nossa plataforma. Seja uma delas!"
 
-    const [isLargerThan800] = useMediaQuery('(max-width:700px)');
 
     return (
       <Flex
@@ -106,7 +144,7 @@ function Hublocal() {
         backgroundColor="white"
       >
       <Grid className="column" templateColumns='minmax(100px, 1fr)' autoFlow='column'>
-        <GridItem h="100vh" display = {isLargerThan800 ? "none" : "flex"} style={{backgroundColor: "#0485FF"}}>
+        <GridItem h="100vh" display = {isDesktop ? "none" : "flex"} style={{backgroundColor: "#0485FF"}}>
           <Stack h="100vh"
             justifyContent="center"
             alignItems="center"
@@ -130,16 +168,18 @@ function Hublocal() {
           >
             <Image
               padding="0 1vw 0 1vw"
-              minWidth="200px"
+              minW="200px"
               w="23vw"
               src={Login_Logo}
             />
-            <Box minW={{ base: "90%", md: "30vw" }}>
-              <form>
+            <Box minW={{ md: "30vw" }} >
+              <form onSubmit={handleSubmit}>
                 <Stack
+                  w = {isDesktop ? "100vw" : "auto"}
                   spacing={4}
                   p="1rem"
                   backgroundColor="whiteAlpha.900"
+                  style={{ paddingBottom: "0" }}
                 >
                   <FormControl >
                     <Text fontSize='sm' className="letter-spacing-text poppins-text-label" style={{ paddingBottom: "5px"}}>Email</Text>
@@ -149,7 +189,18 @@ function Hublocal() {
                         pointerEvents="none"
                         children={<CFaUserAlt color="gray.300" />}
                       />
-                      <Input type="email" placeholder="E-mail" size='lg' style={{borderColor: "#0385FD", borderWidth: "2px"}} />
+                      <Input 
+                        onChange={handleUserInput} 
+                        value={user}
+                        ref={userRef}
+                        autoComplete="off"
+                        id="username"
+                        required
+
+                        type="email"
+                        placeholder="E-mail" 
+                        size='lg' 
+                        style={{borderColor: "#0385FD", borderWidth: "2px"}} />
                     </InputGroup>
                   </FormControl>
                   <FormControl style={{marginTop: "1vh"}}>
@@ -161,6 +212,11 @@ function Hublocal() {
                         children={<CFaLock color="gray.300" />}
                       />
                       <Input
+                        onChange={handlePwdInput}
+                        value={pwd}
+                        id="password"
+                        required
+
                         type={showPassword ? "text" : "password"}
                         placeholder="Senha"
                         size='lg'
@@ -192,7 +248,7 @@ function Hublocal() {
                     size='lg'
                     style={{backgroundColor: "#00CC99", color: "#FFFFFF",  fontWeight: "700"}}
                   >
-                  <Text className="letter-spacing-button poppins-text-button" fontSize='md' >CRIAR CONTA</Text>
+                  <Text className="letter-spacing-button poppins-text-button" fontSize='md'>CRIAR CONTA</Text>
                   </Button>
                 </Stack>
               </form>
@@ -200,9 +256,20 @@ function Hublocal() {
           </Stack>
         </GridItem>
       </Grid>
+      <ToastContainer
+        position="bottom-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
+      />
     </Flex>
     )
-
 }
 
 export default Hublocal;
