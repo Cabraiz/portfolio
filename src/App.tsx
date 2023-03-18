@@ -13,12 +13,12 @@ import "react-toastify/dist/ReactToastify.css";
 
 import { Helmet, HelmetProvider } from "react-helmet-async";
 
-import { Routes, Route, useLocation } from "react-router-dom";
+import { Routes, Route, useLocation, Link } from "react-router-dom";
 
 import Hublocal from "./pages/Hublocal/Hublocal";
 
 import Mateus from "./pages/Mateus/Mateus";
-import Surprise from "./pages/Surprise/Surprise";
+import Firebase from "./pages/Surprise/Surprise";
 
 import "./pages/Mateus/Mateus.css";
 import "./pages/Surprise/Surprise.css";
@@ -262,11 +262,13 @@ function App() {
         </Button>
       </Navbar> }
       <Routes>
+        {/* public routes */}
         <Route path="/" element={<Mateus />} />
-        <Route path="/aniver" element={<Surprise />} />
+        <Route path="/firebase" element={<Firebase />} />
+
+        {/* protected routes */}
         <Route path="/hublocal" element={<Hublocal />} />
       </Routes>
-
       <ToastContainer
         position="bottom-right"
         autoClose={5000}

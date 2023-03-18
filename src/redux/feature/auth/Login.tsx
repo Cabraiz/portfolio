@@ -30,7 +30,7 @@ import{ useNavigate } from 'react-router-dom';
 import "./Login.css";
 
 import { tokenReceived } from './authSlice';
-import { LoginRequest, useLoginMutation } from '../../app/services/auth';
+import { LoginRequest, useLoginMutation } from '../../feature/auth/authApiSlice';
 import { Buttons } from "@testing-library/user-event/dist/types/system/pointer/buttons";
 
 

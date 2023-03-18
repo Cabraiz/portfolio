@@ -1,27 +1,16 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
+import { tokenReceived, loggedOut } from '../../feature/auth/authSlice'
+
+import { RootState } from '../../store'
+
 import type {
   BaseQueryFn,
   FetchArgs,
   FetchBaseQueryError,
 } from '@reduxjs/toolkit/query'
-import { tokenReceived, loggedOut } from '../../feature/auth/authSlice'
+
 import { Mutex } from 'async-mutex'
-import { RootState } from '../../store'
 
-  export interface User {
-    first_name: string
-    last_name: string
-  }
-
-  export interface UserResponse {
-    user: User
-    token: string
-  }
-
-  export interface LoginRequest {
-    username: string
-    password: string
-  }
 
 // create a new mutex
 const mutex = new Mutex()
@@ -75,20 +64,7 @@ const baseQueryWithReauth: BaseQueryFn<
 }
 
 
-export const api = createApi({
+export const apiSlice = createApi({
   baseQuery: baseQueryWithReauth,
-  endpoints: (builder) => ({
-    login: builder.mutation <UserResponse, LoginRequest> ({
-      query: (credentials) => ({
-        url: '/auth',
-        method: 'POST',
-        body: { ...credentials }
-      }),
-    }),
-    protected: builder.mutation<{ message: string }, void>({
-      query: () => 'protected',
-    }),
-  }),
+  endpoints: (builder) => ({}),
 })
-
-export const { useLoginMutation, useProtectedMutation } = api
