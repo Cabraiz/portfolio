@@ -38,14 +38,9 @@ function App() {
   const [signInStatus, setsignInStatus] = useState(["", false]);
 
   useEffect(() => {
-    //const response = async () => {
-    //  await signInWithRedirect(auth, provider);
-    //};
     onAuthStateChanged(auth, (user) => {
       if (user) {
-        //setUser(auth.currentUser);
         setsignInStatus(["Sign Out", false]);
-        //const uid = user.uid;
       } else {
         setsignInStatus(["Sign In With Google", true]);
       }
@@ -133,17 +128,8 @@ function App() {
   const AfterSignIn = (b: boolean, e?: any) => {
     if (b) {
       addTodo();
-      //window.location.reload();
-      // This gives you a Google Access Token. You can use it to access the Google API.
-      //const credential = GoogleAuthProvider.credentialFromResult(result);
-      //const token = credential?.accessToken;
-      // The signed-in user info.
-      //setUser(result.user);
-      // IdP data available using getAdditionalUserInfo(result)
     } else {
-      //const errorCode = e.code;
       const errorMessage = e.message;
-      // The email of the user's account used.
       const email = e.customData.email;
     }
   };
@@ -161,33 +147,6 @@ function App() {
     "i"
   );
 
-  const notifySucesso = () => {
-    toast.success("🦄 Website é Website", {
-      position: "bottom-right",
-      autoClose: 5000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-      theme: "colored",
-    });
-  };
-
-  const notifyError = () => {
-    toast.warning("❌ Website Não é Website", {
-      position: "bottom-right",
-      autoClose: 5000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-      theme: "colored",
-    });
-  };
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   function handleBlur() {
     //VALIDAÇÃO
     if (/[A-Za-z0-9]/.test(site) && !site.startsWith("www.")) {
@@ -196,12 +155,6 @@ function App() {
         aux = aux.substring(1);
       }
       setSite("www." + aux);
-    }
-    //VALIDAÇÃO
-    if (urlPattern.test(site)) {
-      notifySucesso();
-    } else {
-      notifyError();
     }
   }
 
