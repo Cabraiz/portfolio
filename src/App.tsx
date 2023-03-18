@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 
 import "./App.css";
-import "./fonts/Brutal/Brutal-Type-Medium.ttf";
 
 import { Row, Navbar, Image, Button } from "react-bootstrap";
 
@@ -13,9 +12,10 @@ import "react-toastify/dist/ReactToastify.css";
 
 import { Helmet, HelmetProvider } from "react-helmet-async";
 
-import { Routes, Route, useLocation, Link } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 
-import Hublocal from "./pages/Login_Hublocal/Login";
+import LoginHubLocal from "./pages/Login_Hublocal/Login";
+import Hublocal from "./pages/Hublocal/Hublocal";
 
 import Mateus from "./pages/Mateus/Mateus";
 import Firebase from "./pages/Surprise/Surprise";
@@ -33,6 +33,7 @@ import {
   signOut,
 } from "firebase/auth";
 
+
 function App() {  
   const [windowSize, setWindowSize] = useState(getWindowSize());
   const [signInStatus, setsignInStatus] = useState(["", false]);
@@ -45,7 +46,6 @@ function App() {
         setsignInStatus(["Sign In With Google", true]);
       }
     });
-
 
     function handleWindowResize() {
       setWindowSize(getWindowSize());
@@ -98,11 +98,9 @@ function App() {
     if (!signInStatus[1]) {
       signOut(auth)
         .then(() => {
-          // Sign-out successful.
           window.location.reload();
         })
         .catch((error) => {
-          // An error happened.
         });
     } else {
       if (!isMobile) {
@@ -136,27 +134,6 @@ function App() {
 
   const [title] = useState("Bem Vindo! 🤝");
   const [site, setSite] = useState<string>("");
-
-  let urlPattern = new RegExp(
-    "^(https?:\\/\\/)?" + // validate protocol
-      "((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|" + // validate domain name
-      "((\\d{1,3}\\.){3}\\d{1,3}))" + // validate OR ip (v4) address
-      "(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*" + // validate port and path
-      "(\\?[;&a-z\\d%_.~+=-]*)?" + // validate query string
-      "(\\#[-a-z\\d_]*)?$",
-    "i"
-  );
-
-  function handleBlur() {
-    //VALIDAÇÃO
-    if (/[A-Za-z0-9]/.test(site) && !site.startsWith("www.")) {
-      let aux = site;
-      while (!/[A-Za-z0-9]/.test(aux.charAt(0))) {
-        aux = aux.substring(1);
-      }
-      setSite("www." + aux);
-    }
-  }
 
   const { pathname } = useLocation();
 
@@ -221,6 +198,7 @@ function App() {
 
         {/* protected routes */}
         <Route path="/hublocal" element={<Hublocal />} />
+        <Route path="/LoginHubLocal" element={<LoginHubLocal />} />
       </Routes>
       <ToastContainer
         position="bottom-right"

@@ -8,13 +8,13 @@
 @font-face {
     font-family: "Poppins";
     src: local("Poppins"), url("../../fonts/Poppins/Poppins-Regular.ttf");
-    font-style: normal;
+    font-weight: 400;
 }
 
 @font-face {
     font-family: "Poppins";
     src: local("Poppins"), url("../../fonts/Poppins/Poppins-Medium.ttf");
-    font-style: medium;
+    font-weight: 500;
 }
 
 .letter-spacing-text{
@@ -27,13 +27,10 @@
 
 .poppins-text-label{
     font-family: 'Poppins', sans-serif;
-    font-style: medium;
-    font-weight: "500";
 }
 
 .poppins-text-button{
     font-family: 'Poppins', sans-serif;
-    font-style: normal;
     font-weight: bold;
     font-weight: "700";
 }
@@ -54,7 +51,6 @@
     font-style: 'Regular';
     color: white;
     line-height: 120%;
-    font-weight: 400;
     text-align: center;
 }
 
