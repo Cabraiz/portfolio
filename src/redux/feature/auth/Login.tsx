@@ -27,14 +27,14 @@ import { FaUserAlt, FaLock } from "react-icons/fa";
 import{ useDispatch } from 'react-redux';
 import{ useNavigate } from 'react-router-dom';  
 
-import "./Hublocal.css";
+import "./Login.css";
 
-import { tokenReceived } from '../../redux/feature/auth/authSlice';
-import { LoginRequest, useLoginMutation } from '../../redux/app/services/auth';
+import { tokenReceived } from './authSlice';
+import { LoginRequest, useLoginMutation } from '../../app/services/auth';
 import { Buttons } from "@testing-library/user-event/dist/types/system/pointer/buttons";
 
 
-function Hublocal() {
+function Login() {
 
     const CFaUserAlt = chakra(FaUserAlt);
     const CFaLock = chakra(FaLock);
@@ -272,4 +272,4 @@ function Hublocal() {
     )
 }
 
-export default Hublocal;
+export default Login;
