@@ -15,7 +15,7 @@ import { Helmet, HelmetProvider } from "react-helmet-async";
 
 import { Routes, Route, useLocation, Link } from "react-router-dom";
 
-import Hublocal from "./pages/Hublocal/Hublocal";
+import Hublocal from "./pages/Login_Hublocal/Login";
 
 import Mateus from "./pages/Mateus/Mateus";
 import Firebase from "./pages/Surprise/Surprise";

@@ -29,8 +29,8 @@ import{ useNavigate } from 'react-router-dom';
 
 import "./Login.css";
 
-import { tokenReceived } from './authSlice';
-import { LoginRequest, useLoginMutation } from '../../feature/auth/authApiSlice';
+import { tokenReceived } from '../../redux/feature/auth/authSlice';
+import { LoginRequest, useLoginMutation } from '../../redux/feature/auth/authApiSlice';
 import { Buttons } from "@testing-library/user-event/dist/types/system/pointer/buttons";
 
 
@@ -138,7 +138,7 @@ function Login() {
     const textoSubtitle = "Cliente HubLocal ganha mais relevância, autoridade e visibilidade. Mais de 7.000 marcas confiam na nossa plataforma. Seja uma delas!"
 
 
-    return (
+    const content = isLoading ? <h1>Loading...</h1> : (
       <Flex
         flexDirection="column"
         backgroundColor="white"
@@ -270,6 +270,9 @@ function Login() {
       />
     </Flex>
     )
+
+    return content
+
 }
 
 export default Login;

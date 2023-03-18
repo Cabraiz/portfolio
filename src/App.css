@@ -10,7 +10,7 @@ body {
   background-repeat: no-repeat;
 }
 .font-face-gm {
-  font-family: "Brutal";
+  font-family: "Brutal", sans-serif;
   letter-spacing: 5px;
   font-size: 14px;
   font-weight: 500;
