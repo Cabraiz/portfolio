@@ -17,7 +17,8 @@ import {
     Image,
     FormControl,
     Text,
-    InputRightElement
+    InputRightElement,
+    useMediaQuery
 } from "@chakra-ui/react";
 import { FaUserAlt, FaLock } from "react-icons/fa";
 
@@ -97,15 +98,16 @@ function Hublocal() {
     const textoTitle = "Junte-se a vários clientes satisfeitos."
     const textoSubtitle = "Cliente HubLocal ganha mais relevância, autoridade e visibilidade. Mais de 7.000 marcas confiam na nossa plataforma. Seja uma delas!"
 
+    const [isLargerThan800] = useMediaQuery('(max-width:700px)');
 
     return (
       <Flex
         flexDirection="column"
         backgroundColor="white"
       >
-      <Grid templateColumns='repeat(2, 1fr)' gap={0}>
-        <GridItem h="100vh" w="50vw" style={{backgroundColor: "#0485FF"}}>
-          <Stack h="100vh" w="50vw"
+      <Grid className="column" templateColumns='minmax(100px, 1fr)' autoFlow='column'>
+        <GridItem h="100vh" display = {isLargerThan800 ? "none" : "flex"} style={{backgroundColor: "#0485FF"}}>
+          <Stack h="100vh"
             justifyContent="center"
             alignItems="center"
           >
@@ -115,13 +117,13 @@ function Hublocal() {
             objectFit="cover"
             src={Login_Image}
           />
-          <Box h="auto" style={{ backgroundColor: "#00CC99", width: "50vw", marginTop: "0", padding: "2.2vh 5.5vw 2.2vh 5.5vw", alignItems: "center" }}>
+          <Box h="auto" style={{ backgroundColor: "#00CC99", width: "50vw", marginTop: "0", padding: "2.6vh 5.5vw 3vh 5.5vw", alignItems: "center" }}>
             <Text fontSize='x-large' className="frase-imagem-logo" style={{ padding: "0 3vw 1vh 3vw" }}>{textoTitle}</Text>
             <Text fontSize='smaller' className="subfrase-imagem-logo letter-spacing-text ">{textoSubtitle}</Text>
           </Box>
           </Stack>
         </GridItem>  
-        <GridItem>
+        <GridItem className="column columnB">
           <Stack h="100vh" w="50vw"
             justifyContent="center"
             alignItems="center"

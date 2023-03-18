@@ -57,3 +57,13 @@
     font-weight: 400;
     text-align: center;
 }
+
+.column {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.columnB {
+    grid-column:span 2; /* B takes 2 columns */
+} 
