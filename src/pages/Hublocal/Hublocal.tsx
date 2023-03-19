@@ -3,6 +3,8 @@ import { selectCurrentUser, selectCurrentToken } from "../../redux/feature/auth/
 import Perfil_Image from "../../images/HubLocal/Perfil_Image.png";
 import { Link } from "react-router-dom";
 
+import { ProtectedComponent } from '../../redux/feature/auth/ProtectedComponent'
+
 import {
     Flex,
     Grid,
@@ -74,9 +76,7 @@ const Hublocal = () => {
                         <Text fontSize='smaller' className="subfrase-imagem-logo">Ola</Text>
                     </GridItem>
                 </Grid>
-                
-                
-                
+                <ProtectedComponent />
             </Box> 
         </Flex>
     )

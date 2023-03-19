@@ -1,7 +1,7 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import { tokenReceived, loggedOut } from '../../feature/auth/authSlice'
 
-import { RootState } from '../../store'
+import { RootState } from '../../hooks/store'
 
 import type {
   BaseQueryFn,
