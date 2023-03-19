@@ -144,7 +144,7 @@ function Login() {
         backgroundColor="white"
       >
       <Grid className="column" templateColumns='minmax(100px, 1fr)' autoFlow='column'>
-        <GridItem w="50vw" h="100vh" display = {isDesktop ? "none" : "flex"} style={{backgroundColor: "#0485FF"}}>
+        <GridItem w="50vw" h="100vh" display = {isDesktop ? "none" : "flex"} style={{backgroundColor: "#0485FF", alignItems: "end"}}>
           <Stack 
             justifyContent="center"
             alignItems="center"
