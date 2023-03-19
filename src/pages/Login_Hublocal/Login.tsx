@@ -169,19 +169,19 @@ function Login() {
             <Image
               paddingBottom="3.3vh"
               minW="200px"
-              w="29vw"
+              w="24vw"
               src={Login_Logo}
             />
-            <Box minW={{ md: "30vw" }} >
+            <Box minW={{ md: "30.8vw" }} >
               <form onSubmit={handleSubmit}>
                 <Stack
                   w = {isDesktop ? "100vw" : "auto"}
-                  spacing={4}
+                  spacing={6}
                   backgroundColor="whiteAlpha.900"
                   style={{ paddingBottom: "0" }}
                 >
                   <FormControl >
-                    <Text fontSize='sm' className="letter-spacing-text poppins-text-label" style={{ paddingBottom: "5px"}}>Email</Text>
+                    <Text fontSize='sm' className="letter-spacing-text poppins-text-label" style={{ paddingBottom: "2px"}}>Email</Text>
                     <InputGroup>
                       <InputLeftElement
                         h="100%"
@@ -203,7 +203,7 @@ function Login() {
                     </InputGroup>
                   </FormControl>
                   <FormControl style={{marginTop: "0"}}>
-                    <Text fontSize='sm' className="letter-spacing-text poppins-text-label" style={{ padding: "9px 0 5px 0"}}>Senha</Text>
+                    <Text fontSize='sm' className="letter-spacing-text poppins-text-label" style={{ padding: "8px 0 2px 0"}}>Senha</Text>
                     <InputGroup style={{alignItems: "center"}}>
                       <InputLeftElement
                         h="100%"
