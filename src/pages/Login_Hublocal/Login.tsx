@@ -155,8 +155,8 @@ function Login() {
             objectFit="cover"
             src={Login_Image}
           />
-          <Box h="auto" style={{ backgroundColor: "#00CC99", width: "50vw", marginTop: "0", padding: "2.5vh 6vw 3.7vh 6vw", alignItems: "center" }}>
-            <Text fontSize='x-large' className="frase-imagem-logo" style={{ padding: "0 3vw 1vh 3vw" }}>{textoTitle}</Text>
+          <Box h="auto" style={{ backgroundColor: "#00CC99", width: "50vw", marginTop: "0", padding: "21px 9vw 31px 9vw", alignItems: "center" }}>
+            <Text fontSize='x-large' className="frase-imagem-logo" style={{ padding: "0 3vw 10px 3vw" }}>{textoTitle}</Text>
             <Text fontSize='smaller' className="subfrase-imagem-logo letter-spacing-text ">{textoSubtitle}</Text>
           </Box>
           </Stack>
@@ -167,9 +167,9 @@ function Login() {
             alignItems="center"
           >
             <Image
-              padding="0 1vw 0 1vw"
+              paddingBottom="3.3vh"
               minW="200px"
-              w="23vw"
+              w="29vw"
               src={Login_Logo}
             />
             <Box minW={{ md: "30vw" }} >
@@ -177,7 +177,6 @@ function Login() {
                 <Stack
                   w = {isDesktop ? "100vw" : "auto"}
                   spacing={4}
-                  p="1rem"
                   backgroundColor="whiteAlpha.900"
                   style={{ paddingBottom: "0" }}
                 >
@@ -203,8 +202,8 @@ function Login() {
                         style={{borderColor: "#0385FD", borderWidth: "2px"}} />
                     </InputGroup>
                   </FormControl>
-                  <FormControl style={{marginTop: "1vh"}}>
-                    <Text fontSize='sm' className="letter-spacing-text poppins-text-label" style={{ padding: "0 0 5px 0"}}>Senha</Text>
+                  <FormControl style={{marginTop: "0"}}>
+                    <Text fontSize='sm' className="letter-spacing-text poppins-text-label" style={{ padding: "9px 0 5px 0"}}>Senha</Text>
                     <InputGroup style={{alignItems: "center"}}>
                       <InputLeftElement
                         h="100%"
