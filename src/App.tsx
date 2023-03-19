@@ -199,6 +199,7 @@ function App() {
         {/* public routes */}
         <Route path="/LoginHubLocal" element={<LoginHubLocal />} />
         <Route path="/firebase" element={<Firebase />} />
+        <Route path="/Mateus" element={<Mateus />} />
 
         <Route path="/" element={<PrivateOutlet />}>
           
