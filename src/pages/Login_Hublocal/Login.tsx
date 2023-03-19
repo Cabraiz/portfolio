@@ -150,11 +150,12 @@ function Login() {
             alignItems="center"
           >
           <Image
+            h="80vh"
             objectFit="cover"
             src={Login_Image}
           />
-          <Box style={{ backgroundColor: "#00CC99", marginTop: "0", padding: "21px 9vw 31px 9vw", alignItems: "center" }}>
-            <Text fontSize='x-large' className="frase-imagem-logo" style={{ padding: "0 3vw 10px 3vw" }}>{textoTitle}</Text>
+          <Box style={{ backgroundColor: "#00CC99", marginTop: "0", padding: "2.5vh 9vw 0 9vw"}}>
+            <Text fontSize='x-large' className="frase-imagem-logo" style={{ padding: "0 3vw 1.2vh 3vw" }}>{textoTitle}</Text>
             <Text fontSize='smaller' className="subfrase-imagem-logo letter-spacing-text ">{textoSubtitle}</Text>
           </Box>
           </Stack>
@@ -179,7 +180,7 @@ function Login() {
                   style={{ paddingBottom: "0" }}
                 >
                   <FormControl >
-                    <Text fontSize='sm' className="letter-spacing-text poppins-text-label" style={{ paddingBottom: "1px"}}>Email</Text>
+                    <Text fontSize='sm' className="letter-spacing-text poppins-text-label" style={{ paddingBottom: "5px"}}>Email</Text>
                     <InputGroup>
                       <InputLeftElement
                         h="100%"
@@ -201,7 +202,7 @@ function Login() {
                     </InputGroup>
                   </FormControl>
                   <FormControl style={{marginTop: "0"}}>
-                    <Text fontSize='sm' className="letter-spacing-text poppins-text-label" style={{ padding: "8px 0 2px 0"}}>Senha</Text>
+                    <Text fontSize='sm' className="letter-spacing-text poppins-text-label" style={{ padding: "10px 0 5px 0"}}>Senha</Text>
                     <InputGroup style={{alignItems: "center"}}>
                       <InputLeftElement
                         h="100%"
@@ -219,8 +220,8 @@ function Login() {
                         placeholder="Senha"
                         style={{borderColor: "#0385FD", borderWidth: "2px"}}
                       />
-                      <InputRightElement width="5rem" height="100%">
-                        <Button h="1.75rem" size="sm" onClick={handleShowClick}>
+                      <InputRightElement w="auto" height="100%" paddingRight="8px">
+                        <Button h="70%" size="sm" onClick={handleShowClick}>
                           {showPassword ? "Ocultar" : "Mostrar"}
                         </Button>
                       </InputRightElement>
