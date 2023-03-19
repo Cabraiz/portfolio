@@ -39,12 +39,6 @@ const Hublocal = () => {
             backgroundColor="white"
             justifyContent="space-between"
         >
-            <Stack
-                justifyContent="center"
-                alignItems="center"
-                w="auto"
-                h="9.6vh"
-            >
             <Box w="auto" style={{ backgroundColor: "#00CC99", alignItems: "center", padding: "2vh 2vw 2vh 2vw" }}>
                 <Grid className="column" autoFlow='column'>
                     <GridItem style={{paddingRight: "10px"}}>
@@ -63,7 +57,6 @@ const Hublocal = () => {
                     </GridItem>
                 </Grid>
             </Box>
-            </Stack>
             <Box w="auto" style={{ backgroundColor: "#00CC99", alignItems: "center", padding: "2vh 2vw 2vh 2vw" }}>
                 <Grid className="column" autoFlow='column'>
                     <GridItem style={{paddingRight: "10px"}}>
