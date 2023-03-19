@@ -25,6 +25,7 @@
     "firebase": "^9.17.1",
     "framer-motion": "^10.3.2",
     "gh-pages": "^4.0.0",
+    "msw": "^1.1.0",
     "react": "^18.2.0",
     "react-addons-update": "^15.6.3",
     "react-audio-player": "^0.17.0",
