@@ -53,7 +53,7 @@ const Hublocal = () => {
                         <Text fontSize='x-large' className="titulo-esquerda">Minhas Empresas</Text>
                     </GridItem>
                     <GridItem>
-                        <Text fontSize='smaller' className="subfrase-imagem-logo letter-spacing-text ">Ola</Text>
+                        <Text fontSize='smaller' className="subfrase-imagem-logo">Ola</Text>
                     </GridItem>
                 </Grid>
             </Box>
@@ -71,7 +71,7 @@ const Hublocal = () => {
                         <Text fontSize='x-large' className="frase-imagem-logo">Nome</Text>
                     </GridItem>
                     <GridItem>
-                        <Text fontSize='smaller' className="subfrase-imagem-logo letter-spacing-text ">Ola</Text>
+                        <Text fontSize='smaller' className="subfrase-imagem-logo">Ola</Text>
                     </GridItem>
                 </Grid>
                 

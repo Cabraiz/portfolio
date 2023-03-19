@@ -181,7 +181,7 @@ function Login() {
                   style={{ paddingBottom: "0" }}
                 >
                   <FormControl >
-                    <Text fontSize='sm' className="letter-spacing-text poppins-text-label" style={{ paddingBottom: "2px"}}>Email</Text>
+                    <Text fontSize='sm' className="letter-spacing-text poppins-text-label" style={{ paddingBottom: "1px"}}>Email</Text>
                     <InputGroup>
                       <InputLeftElement
                         h="100%"
@@ -196,9 +196,9 @@ function Login() {
                         id="username"
                         required
 
+                        className="buttonHeight"
                         type="email"
                         placeholder="E-mail" 
-                        size='lg' 
                         style={{borderColor: "#0385FD", borderWidth: "2px"}} />
                     </InputGroup>
                   </FormControl>
@@ -216,9 +216,9 @@ function Login() {
                         id="password"
                         required
 
+                        className="buttonHeight"
                         type={showPassword ? "text" : "password"}
                         placeholder="Senha"
-                        size='lg'
                         style={{borderColor: "#0385FD", borderWidth: "2px"}}
                       />
                       <InputRightElement width="5rem" height="100%">
@@ -229,22 +229,19 @@ function Login() {
                     </InputGroup>
                   </FormControl>
                   <Button
-                    className="letter-spacing-text"
+                    className="buttonHeight"
                     type="submit"
                     variant="solid"
-                    h="7vh"
                     w="full"
-                    size='lg'
                     style={{backgroundColor: "#0385FD", color: "#FFFFFF",  fontWeight: "700"}}
                   >
                   <Text className="letter-spacing-button poppins-text-button" fontSize='md'>LOGAR</Text>
                   </Button>
                   <Button
+                    className="buttonHeight"
                     type="submit"
-                    variant="solid"
-                    h="7vh"
+                    variant="solid" 
                     w="full"
-                    size='lg'
                     style={{backgroundColor: "#00CC99", color: "#FFFFFF",  fontWeight: "700"}}
                   >
                   <Text className="letter-spacing-button poppins-text-button" fontSize='md'>CRIAR CONTA</Text>

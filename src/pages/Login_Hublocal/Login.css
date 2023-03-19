@@ -65,3 +65,7 @@
 .columnB {
     grid-column:span 2; /* B takes 2 columns */
 } 
+
+.buttonHeight {
+    height: 8.5vh !important;
+}
