@@ -1,32 +1,33 @@
 {
   "files": {
-    "main.css": "/static/css/main.af560b9f.css",
-    "main.js": "/static/js/main.0d0f64ec.js",
-    "static/js/522.f3ad6849.chunk.js": "/static/js/522.f3ad6849.chunk.js",
+    "main.css": "/static/css/main.573146c1.css",
+    "main.js": "/static/js/main.1d1162b8.js",
+    "static/js/522.3ec76d36.chunk.js": "/static/js/522.3ec76d36.chunk.js",
     "static/media/backgroundSong.ogg": "/static/media/backgroundSong.1ea806a6c5c054d31447.ogg",
+    "static/media/Login_Image.png": "/static/media/Login_Image.2af2be0ab25dfc31828e.png",
     "static/media/Done_2.png": "/static/media/Done_2.8f12d203cee90d02fd15.png",
     "static/media/Done_4.png": "/static/media/Done_4.a52945d5f14a64e4210a.png",
     "static/media/Done_1.png": "/static/media/Done_1.a0c9bd6bbce84f25d926.png",
     "static/media/Done_5.png": "/static/media/Done_5.e3d980285bc191530def.png",
-    "static/media/perfil.webp": "/static/media/perfil.0569782bdbd8cb90fc02.webp",
     "static/media/Done_6.png": "/static/media/Done_6.b395bbc9592b1fa9b500.png",
     "static/media/icognitaDone.png": "/static/media/icognitaDone.5bf75b23f399c51ca38d.png",
+    "static/media/Poppins-Regular.ttf": "/static/media/Poppins-Regular.35d26b781dc5fda684cc.ttf",
     "static/media/Done_3.png": "/static/media/Done_3.d03f5810f30411ef7266.png",
-    "static/media/IconGmail.png": "/static/media/IconGmail.c486455f1124bd99423a.png",
+    "static/media/Poppins-Medium.ttf": "/static/media/Poppins-Medium.673ed42382ab264e0bf5.ttf",
+    "static/media/Poppins-Bold.ttf": "/static/media/Poppins-Bold.cdb29a5d7ccf57ff05a3.ttf",
+    "static/media/Login_Logo.png": "/static/media/Login_Logo.765f2139a5ed90e08d2b.png",
     "static/media/Brutal-Type-Medium.ttf": "/static/media/Brutal-Type-Medium.c9565f55635b259358c3.ttf",
     "static/media/sequel-sans-light-disp.otf": "/static/media/sequel-sans-light-disp.72a2687c3450204b7d49.otf",
     "static/media/sequel-sans-heavy-disp-2.otf": "/static/media/sequel-sans-heavy-disp-2.cda4066004836451d306.otf",
     "static/media/logo.svg": "/static/media/logo.54801486249a90cf805ca985e06956ef.svg",
+    "static/media/Perfil_Image.png": "/static/media/Perfil_Image.5be83810b45eed986b78.png",
     "static/media/IcognitaBlock.png": "/static/media/IcognitaBlock.61a398f65880d7885b5c.png",
-    "static/media/IconInsta.png": "/static/media/IconInsta.d67d6208638407d8db10.png",
-    "static/media/IconTiktok.png": "/static/media/IconTiktok.48a67b6acca4d7532fcc.png",
-    "static/media/IconLinkendin.png": "/static/media/IconLinkendin.a5b21c7347ec31d79da6.png",
     "static/media/Icognita.png": "/static/media/Icognita.ed95410fce0a38014340.png",
     "index.html": "/index.html",
     "static/media/7.svg": "/static/media/7.a45b46e964c34094185e40d691917f1b.svg"
   },
   "entrypoints": [
-    "static/css/main.af560b9f.css",
-    "static/js/main.0d0f64ec.js"
+    "static/css/main.573146c1.css",
+    "static/js/main.1d1162b8.js"
   ]
 }
