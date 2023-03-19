@@ -233,7 +233,7 @@ function Login() {
                     w="full"
                     style={{backgroundColor: "#0385FD", color: "#FFFFFF",  fontWeight: "700"}}
                   >
-                  <Text className="letter-spacing-button poppins-text-button" fontSize='2xl'>LOGAR</Text>
+                  <Text className="letter-spacing-button poppins-text-button" fontSize='larger'>LOGAR</Text>
                   </Button>
                   <Button
                     className="buttonHeight"
@@ -242,7 +242,7 @@ function Login() {
                     w="full"
                     style={{backgroundColor: "#00CC99", color: "#FFFFFF",  fontWeight: "700"}}
                   >
-                  <Text className="letter-spacing-button poppins-text-button" fontSize='2xl'>CRIAR CONTA</Text>
+                  <Text className="letter-spacing-button poppins-text-button" fontSize='larger'>CRIAR CONTA</Text>
                   </Button>
                 </Stack>
               </form>
