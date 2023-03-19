@@ -150,13 +150,14 @@ function Login() {
             alignItems="center"
           >
           <Image
-            h="80vh"
+            marginBlock= "-6px"
+            h="70vh"
             objectFit="cover"
             src={Login_Image}
           />
-          <Box style={{ backgroundColor: "#00CC99", marginTop: "0", padding: "2.5vh 9vw 0 9vw"}}>
-            <Text fontSize='x-large' className="frase-imagem-logo" style={{ padding: "0 3vw 1.2vh 3vw" }}>{textoTitle}</Text>
-            <Text fontSize='smaller' className="subfrase-imagem-logo letter-spacing-text ">{textoSubtitle}</Text>
+          <Box style={{ backgroundColor: "#00CC99", marginTop: "0", padding: "2.5vh 5.2vw 3.75vh 5.2vw"}}>
+            <Text fontSize='4xl' className="frase-imagem-logo" style={{ padding: "0 3.55vw 1.2vh 3.55vw" }}>{textoTitle}</Text>
+            <Text fontSize='md' className="subfrase-imagem-logo letter-spacing-text ">{textoSubtitle}</Text>
           </Box>
           </Stack>
         </GridItem>  
