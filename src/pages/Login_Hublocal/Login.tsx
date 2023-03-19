@@ -31,17 +31,52 @@ import "./Login.css";
 
 import { tokenReceived } from '../../redux/feature/auth/authSlice';
 import { LoginRequest, useLoginMutation } from '../../redux/feature/auth/authApiSlice';
-import { Buttons } from "@testing-library/user-event/dist/types/system/pointer/buttons";
 
+import { ProtectedComponent } from '../../redux/feature/auth/ProtectedComponent'
+
+function PasswordInput({
+  name,
+  onChange,
+}: {
+  name: string
+  onChange: (event: React.ChangeEvent<HTMLInputElement>) => void
+}) {
+  const CFaLock = chakra(FaLock);
+  const [showPassword, setShowPassword] = useState(false);
+
+  
+  const handleShowClick = () => setShowPassword(!showPassword)
+
+  return (
+    <InputGroup size="md">
+      <InputLeftElement
+        h="100%"
+        pointerEvents="none"
+        children={<CFaLock color="gray.300" />}
+      />
+      <Input
+        name={name}
+        onChange={onChange}
+        id="password"
+        required
+
+        className="buttonHeight"
+        type={showPassword ? "text" : "password"}
+        placeholder="Senha"
+        style={{borderColor: "#0385FD", borderWidth: "2px"}}
+      />
+      <InputRightElement w="auto" height="100%" paddingRight="8px">
+        <Button h="70%" size="sm" onClick={handleShowClick}>
+          {showPassword ? "Ocultar" : "Mostrar"}
+        </Button>
+      </InputRightElement>
+    </InputGroup>
+  )
+}
 
 function Login() {
 
     const CFaUserAlt = chakra(FaUserAlt);
-    const CFaLock = chakra(FaLock);
-
-    const [showPassword, setShowPassword] = useState(false);
-
-    const handleShowClick = () => setShowPassword(!showPassword);
 
     const [formState, setFormState] = React.useState<LoginRequest>({
         username: '',
@@ -103,6 +138,7 @@ function Login() {
     useEffect(() => {
         setErrMsg('')
     },[user, pwd])
+    
  
     const handleSubmit = async (e: { preventDefault: () => void; }) => {
         e.preventDefault();
@@ -130,8 +166,12 @@ function Login() {
         }
     }
 
-    const handleUserInput = (e: { target: { value: React.SetStateAction<string>; }; }) => setUser(e.target.value);
+    const handleChange = ({
+      target: { name, value },
+    }: React.ChangeEvent<HTMLInputElement>) =>
+      setFormState((prev) => ({ ...prev, [name]: value }))
 
+    const handleUserInput = (e: { target: { value: React.SetStateAction<string>; }; }) => setUser(e.target.value);
     const handlePwdInput = (e: { target: { value: React.SetStateAction<string>; }; }) => setUser(e.target.value);
 
     const textoTitle = "Junte-se a vários clientes satisfeitos."
@@ -207,27 +247,7 @@ function Login() {
                   <FormControl style={{marginTop: "0"}}>
                     <Text fontSize='sm' className="letter-spacing-text poppins-text-label" style={{ padding: "10px 0 5px 0"}}>Senha</Text>
                     <InputGroup style={{alignItems: "center"}}>
-                      <InputLeftElement
-                        h="100%"
-                        pointerEvents="none"
-                        children={<CFaLock color="gray.300" />}
-                      />
-                      <Input
-                        onChange={handlePwdInput}
-                        value={pwd}
-                        id="password"
-                        required
-
-                        className="buttonHeight"
-                        type={showPassword ? "text" : "password"}
-                        placeholder="Senha"
-                        style={{borderColor: "#0385FD", borderWidth: "2px"}}
-                      />
-                      <InputRightElement w="auto" height="100%" paddingRight="8px">
-                        <Button h="70%" size="sm" onClick={handleShowClick}>
-                          {showPassword ? "Ocultar" : "Mostrar"}
-                        </Button>
-                      </InputRightElement>
+                      <PasswordInput onChange={handleChange} name="password"></PasswordInput>
                     </InputGroup>
                   </FormControl>
                   <Button
