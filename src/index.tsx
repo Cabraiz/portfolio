@@ -14,14 +14,14 @@ import { ChakraProvider } from '@chakra-ui/react'
 
 async function main() {
   if (process.env.NODE_ENV === 'development') {
-    if (window.location.pathname === '/login') {
-      window.location.pathname = '/login/'
+    if (window.location.pathname === '/LoginHubLocal') {
+      window.location.pathname = '/LoginHubLocal/'
       return
     }
     const { worker } = require('./redux/mocks/browser')
     await worker.start({
       serviceWorker: {
-        url: '/login/mockServiceWorker.js',
+        url: '/LoginHubLocal/mockServiceWorker.js',
       },
     })
   }
