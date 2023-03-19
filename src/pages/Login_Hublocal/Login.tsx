@@ -144,25 +144,23 @@ function Login() {
         backgroundColor="white"
       >
       <Grid className="column" templateColumns='minmax(100px, 1fr)' autoFlow='column'>
-        <GridItem h="100vh" display = {isDesktop ? "none" : "flex"} style={{backgroundColor: "#0485FF"}}>
-          <Stack h="100vh"
+        <GridItem w="50vw" h="100vh" display = {isDesktop ? "none" : "flex"} style={{backgroundColor: "#0485FF"}}>
+          <Stack 
             justifyContent="center"
             alignItems="center"
           >
           <Image
-            h="90vh"
-            paddingTop="14vh"
             objectFit="cover"
             src={Login_Image}
           />
-          <Box h="auto" style={{ backgroundColor: "#00CC99", width: "50vw", marginTop: "0", padding: "21px 9vw 31px 9vw", alignItems: "center" }}>
+          <Box style={{ backgroundColor: "#00CC99", marginTop: "0", padding: "21px 9vw 31px 9vw", alignItems: "center" }}>
             <Text fontSize='x-large' className="frase-imagem-logo" style={{ padding: "0 3vw 10px 3vw" }}>{textoTitle}</Text>
             <Text fontSize='smaller' className="subfrase-imagem-logo letter-spacing-text ">{textoSubtitle}</Text>
           </Box>
           </Stack>
         </GridItem>  
-        <GridItem className="column columnB">
-          <Stack h="100vh" w="50vw"
+        <GridItem w="50vw" h="100vh" className="column columnB">
+          <Stack
             justifyContent="center"
             alignItems="center"
           >
@@ -235,7 +233,7 @@ function Login() {
                     w="full"
                     style={{backgroundColor: "#0385FD", color: "#FFFFFF",  fontWeight: "700"}}
                   >
-                  <Text className="letter-spacing-button poppins-text-button" fontSize='md'>LOGAR</Text>
+                  <Text className="letter-spacing-button poppins-text-button" fontSize='2xl'>LOGAR</Text>
                   </Button>
                   <Button
                     className="buttonHeight"
@@ -244,7 +242,7 @@ function Login() {
                     w="full"
                     style={{backgroundColor: "#00CC99", color: "#FFFFFF",  fontWeight: "700"}}
                   >
-                  <Text className="letter-spacing-button poppins-text-button" fontSize='md'>CRIAR CONTA</Text>
+                  <Text className="letter-spacing-button poppins-text-button" fontSize='2xl'>CRIAR CONTA</Text>
                   </Button>
                 </Stack>
               </form>
