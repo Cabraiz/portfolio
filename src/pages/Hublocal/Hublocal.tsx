@@ -39,7 +39,7 @@ const Hublocal = () => {
             backgroundColor="white"
             justifyContent="space-between"
         >
-            <Box w="auto" style={{ backgroundColor: "#00CC99", alignItems: "center", padding: "2vh 2vw 2vh 2vw" }}>
+            <Box w="auto" style={{ alignItems: "center", padding: "2vh 2vw 2vh 2vw" }}>
                 <Grid className="column" autoFlow='column'>
                     <GridItem style={{paddingRight: "10px"}}>
                         <Image
@@ -50,14 +50,14 @@ const Hublocal = () => {
                         />
                     </GridItem>
                     <GridItem style={{paddingRight: "10px"}}>
-                        <Text fontSize='x-large' className="frase-imagem-logo">Nome</Text>
+                        <Text fontSize='x-large' className="titulo-esquerda">Minhas Empresas</Text>
                     </GridItem>
                     <GridItem>
                         <Text fontSize='smaller' className="subfrase-imagem-logo letter-spacing-text ">Ola</Text>
                     </GridItem>
                 </Grid>
             </Box>
-            <Box w="auto" style={{ backgroundColor: "#00CC99", alignItems: "center", padding: "2vh 2vw 2vh 2vw" }}>
+            <Box w="auto" style={{ backgroundColor: "#EAEAEA", alignItems: "center", padding: "2vh 2vw 2vh 2vw" }}>
                 <Grid className="column" autoFlow='column'>
                     <GridItem style={{paddingRight: "10px"}}>
                         <Image

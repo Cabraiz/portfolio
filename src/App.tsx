@@ -144,7 +144,7 @@ function App() {
           <title>{title ? title : "No title"}</title>
         </Helmet>
       </HelmetProvider>
-      { pathname === "/hublocal" ? null : <Navbar
+      { pathname === "/hublocal" || "/LoginHubLocal" ? null : <Navbar
         className="border-gradient-green"
         style={{
           justifyContent: "space-between",

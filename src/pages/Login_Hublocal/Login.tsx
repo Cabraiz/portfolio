@@ -155,7 +155,7 @@ function Login() {
             objectFit="cover"
             src={Login_Image}
           />
-          <Box h="auto" style={{ backgroundColor: "#00CC99", width: "50vw", marginTop: "0", padding: "2.6vh 5.5vw 3vh 5.5vw", alignItems: "center" }}>
+          <Box h="auto" style={{ backgroundColor: "#00CC99", width: "50vw", marginTop: "0", padding: "2.5vh 6vw 3.7vh 6vw", alignItems: "center" }}>
             <Text fontSize='x-large' className="frase-imagem-logo" style={{ padding: "0 3vw 1vh 3vw" }}>{textoTitle}</Text>
             <Text fontSize='smaller' className="subfrase-imagem-logo letter-spacing-text ">{textoSubtitle}</Text>
           </Box>

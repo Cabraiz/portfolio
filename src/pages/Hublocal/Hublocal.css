@@ -32,3 +32,10 @@
 .letter-spacing-button{
     letter-spacing: 1px;
 }
+
+.titulo-esquerda{
+    color: black;
+    font-family: Poppins, sans-serif;
+    font-style: normal;
+    font-weight: bold;
+}

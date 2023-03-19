@@ -1,19 +1,19 @@
 @font-face {
-    font-family: "Poppins";
-    src: local("Poppins"), url("../../fonts/Poppins/Poppins-Bold.ttf");
+    font-family: 'Poppins';
+    src: local('Poppins'), url('../../fonts/Poppins/Poppins-Bold.ttf');
     font-style: normal;
     font-weight: bold;
 }
 
 @font-face {
-    font-family: "Poppins";
-    src: local("Poppins"), url("../../fonts/Poppins/Poppins-Regular.ttf");
+    font-family: 'Poppins';
+    src: local('Poppins'), url('../../fonts/Poppins/Poppins-Regular.ttf');
     font-weight: 400;
 }
 
 @font-face {
-    font-family: "Poppins";
-    src: local("Poppins"), url("../../fonts/Poppins/Poppins-Medium.ttf");
+    font-family: 'Poppins';
+    src: local('Poppins'), url('../../fonts/Poppins/Poppins-Medium.ttf');
     font-weight: 500;
 }
 
@@ -32,7 +32,7 @@
 .poppins-text-button{
     font-family: 'Poppins', sans-serif;
     font-weight: bold;
-    font-weight: "700";
+    font-weight: '700';
 }
 
 .frase-imagem-logo{
@@ -42,13 +42,14 @@
     line-height: 105%;
     vertical-align: top;
     align-items: center;
-    font-weight: 900;
+    font-style: normal;
+    font-weight: bold;
     text-align: center;
 }
 
 .subfrase-imagem-logo{
     font-family: 'Poppins', sans-serif;
-    font-style: 'Regular';
+    font-weight: 400;
     color: white;
     line-height: 120%;
     text-align: center;
