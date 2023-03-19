@@ -148,10 +148,12 @@ function Login() {
           <Stack 
             justifyContent="center"
             alignItems="center"
+            h="100vh"
           >
           <Image
+            h="full"
+            paddingTop="8.72vh"
             marginBlock= "-6px"
-            h="70vh"
             objectFit="cover"
             src={Login_Image}
           />
@@ -172,7 +174,7 @@ function Login() {
               w="24vw"
               src={Login_Logo}
             />
-            <Box minW={{ md: "30.8vw" }} >
+            <Box minW={{ md: "31vw" }} >
               <form onSubmit={handleSubmit}>
                 <Stack
                   w = {isDesktop ? "100vw" : "auto"}
