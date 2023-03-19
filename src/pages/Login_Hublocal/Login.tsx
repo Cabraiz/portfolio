@@ -171,9 +171,6 @@ function Login() {
     }: React.ChangeEvent<HTMLInputElement>) =>
       setFormState((prev) => ({ ...prev, [name]: value }))
 
-    const handleUserInput = (e: { target: { value: React.SetStateAction<string>; }; }) => setUser(e.target.value);
-    const handlePwdInput = (e: { target: { value: React.SetStateAction<string>; }; }) => setUser(e.target.value);
-
     const textoTitle = "Junte-se a vários clientes satisfeitos."
     const textoSubtitle = "Cliente HubLocal ganha mais relevância, autoridade e visibilidade. Mais de 7.000 marcas confiam na nossa plataforma. Seja uma delas!"
 
@@ -231,15 +228,12 @@ function Login() {
                         children={<CFaUserAlt color="gray.300" />}
                       />
                       <Input 
-                        onChange={handleUserInput} 
-                        value={user}
-                        ref={userRef}
-                        autoComplete="off"
-                        id="username"
+                        onChange={handleChange}
+                        name="username"
+                        type="text"
                         required
 
                         className="buttonHeight"
-                        type="email"
                         placeholder="E-mail" 
                         style={{borderColor: "#0385FD", borderWidth: "2px"}} />
                     </InputGroup>
@@ -274,6 +268,7 @@ function Login() {
           </Stack>
         </GridItem>
       </Grid>
+      <ProtectedComponent />
       <ToastContainer
         position="bottom-right"
         autoClose={5000}
