@@ -75,7 +75,6 @@ function PasswordInput({
 }
 
 function Login() {
-    const navigate = useNavigate()
 
     const CFaUserAlt = chakra(FaUserAlt);
 
@@ -89,6 +88,7 @@ function Login() {
     const [user, setUser] = useState ('')
     const [pwd, setPwd] = useState('')
     const [errMsg, setErrMsg] = useState('')
+    const navigate = useNavigate ()
 
     const [login, { isLoading }] = useLoginMutation()
     const dispatch = useDispatch()
@@ -214,7 +214,8 @@ function Login() {
             <Box minW={{ md: "31vw" }} >
               <form onSubmit={handleSubmit}>
                 <Stack
-                  w = {isDesktop ? "100vw" : "auto"}
+                  justifyContent="center"
+                  w = {isDesktop ? "90vw" : "auto"}
                   spacing={6}
                   backgroundColor="whiteAlpha.900"
                   style={{ paddingBottom: "0" }}
@@ -268,7 +269,6 @@ function Login() {
           </Stack>
         </GridItem>
       </Grid>
-      <ProtectedComponent />
       <ToastContainer
         position="bottom-right"
         autoClose={5000}
