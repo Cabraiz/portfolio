@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/passo-lar/static/css/main.b3f5cd94.css",
-    "main.js": "/passo-lar/static/js/main.5d2b53fe.js",
+    "main.js": "/passo-lar/static/js/main.da9a9c8b.js",
     "static/media/Login_Image.png": "/passo-lar/static/media/Login_Image.2af2be0ab25dfc31828e.png",
     "static/media/perfil.webp": "/passo-lar/static/media/perfil.0569782bdbd8cb90fc02.webp",
     "static/media/Poppins-Regular.ttf": "/passo-lar/static/media/Poppins-Regular.35d26b781dc5fda684cc.ttf",
@@ -22,6 +22,6 @@
   },
   "entrypoints": [
     "static/css/main.b3f5cd94.css",
-    "static/js/main.5d2b53fe.js"
+    "static/js/main.da9a9c8b.js"
   ]
 }
