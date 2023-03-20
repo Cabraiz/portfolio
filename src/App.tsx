@@ -198,7 +198,7 @@ function App() {
       <Routes>
         {/* public routes */}
         <Route path="/LoginHubLocal" element={<LoginHubLocal />} />
-        <Route path="/Mateus" element={<Mateus />} />
+        <Route path="/" element={<Mateus />} />
 
         <Route path="/" element={<PrivateOutlet />}>
           
