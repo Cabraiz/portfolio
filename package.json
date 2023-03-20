@@ -52,16 +52,14 @@
     "web-vitals": "^3.1.0"
   },
   "scripts": {
-    "start": "yarn upgrade && react-scripts start",
-    "vamola": "react-scripts start",
-    "build": "set \"GENERATE_SOURCEMAP=false\" && react-scripts build",
-    "postbuild": "rimraf build/**/*.map",
+    "start": "react-scripts start && set NODE_ENV='production'",
+    "dev": "react-scripts start && set NODE_ENV='dev'",
+    "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "deploy": "yarn build && gh-pages -d build",
     "lint": "tsc && eslint \"src/**/*.{js,ts,tsx}\" --quiet --fix",
-    "pre-commit": "npx lint-staged -d",
-    "prebuild": "rm -rf dist/"
+    "pre-commit": "npx lint-staged -d"
   },
   "eslintConfig": {
     "extends": [

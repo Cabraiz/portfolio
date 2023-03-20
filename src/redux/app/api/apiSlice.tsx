@@ -15,7 +15,7 @@ import { Mutex } from 'async-mutex'
 // create a new mutex
 const mutex = new Mutex()
 const baseQuery = fetchBaseQuery({ 
-    baseUrl: 'https://passo-lar-backend.vercel.app/',
+    baseUrl: 'https://passo-lar-backend.vercel.app',
     credentials: 'include',
     prepareHeaders: (headers, { getState }) => {
         const token = (getState() as RootState).auth.token
@@ -25,6 +25,8 @@ const baseQuery = fetchBaseQuery({
         return headers;
     }
 })
+
+
 const baseQueryWithReauth: BaseQueryFn<
   string | FetchArgs,
   unknown,
@@ -66,5 +68,36 @@ const baseQueryWithReauth: BaseQueryFn<
 
 export const apiSlice = createApi({
   baseQuery: baseQueryWithReauth,
-  endpoints: (builder) => ({}),
+  tagTypes: ['Post'],
+  endpoints: builder => ({
+    getPosts: builder.query({
+      query: () => '/posts',
+      providesTags: ['Post']
+    }),
+    getPost: builder.query({
+      query: postId => `/posts/${postId}`
+    }),
+    addNewPost: builder.mutation({
+      query: initialPost => ({
+        url: '/posts',
+        method: 'POST',
+        body: initialPost
+      }),
+      invalidatesTags: ['Post']
+    }),
+    editPost: builder.mutation({
+      query: post => ({
+        url: `/posts/${post.id}`,
+        method: 'PATCH',
+        body: post
+      })
+    })
+  })
 })
+
+export const {
+  useGetPostsQuery,
+  useGetPostQuery,
+  useAddNewPostMutation,
+  useEditPostMutation
+} = apiSlice

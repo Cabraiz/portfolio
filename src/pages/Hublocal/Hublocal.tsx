@@ -1,7 +1,6 @@
 import { useSelector } from "react-redux"
 import { selectCurrentUser, selectCurrentToken } from "../../redux/feature/auth/authSlice"
 import Perfil_Image from "../../images/HubLocal/Perfil_Image.png";
-import { Link } from "react-router-dom";
 
 import { ProtectedComponent } from '../../redux/feature/auth/ProtectedComponent'
 
@@ -9,17 +8,9 @@ import {
     Flex,
     Grid,
     GridItem,
-    Input,
-    Button,
-    InputGroup,
-    Stack,
-    InputLeftElement,
-    chakra,
     Box,
     Image,
-    FormControl,
     Text,
-    InputRightElement,
 } from "@chakra-ui/react";
 
 
@@ -30,11 +21,6 @@ const Hublocal = () => {
     const welcome = user ? `Welcome ${user}!` : 'Welcome!'
     const tokenAbbr = `${token?.slice(0, 9)}...`
 
-    const content = (
-        <section className="welcome">
-
-        </section>
-    )
     return (
         <Flex
             flexDirection="row"

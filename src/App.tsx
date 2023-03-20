@@ -18,7 +18,6 @@ import LoginHubLocal from "./pages/Login_Hublocal/Login";
 import Hublocal from "./pages/Hublocal/Hublocal";
 
 import { PrivateOutlet } from './redux/utils/PrivateOutlet'
-import RequireAuth from "./redux/feature/auth/RequireAuth";
 
 import Mateus from "./pages/Mateus/Mateus";
 //import Firebase from "./pages/Surprise/Surprise";
@@ -35,8 +34,6 @@ import {
   signInWithRedirect,
   signOut,
 } from "firebase/auth";
-
-import { Box, Center, VStack } from '@chakra-ui/react'
 
 function App() {  
   const [windowSize, setWindowSize] = useState(getWindowSize());
@@ -148,7 +145,7 @@ function App() {
           <title>{title ? title : "No title"}</title>
         </Helmet>
       </HelmetProvider>
-      { pathname === "/hublocal" || "/LoginHubLocal" ? null : <Navbar
+      { (pathname === "/hublocal" || pathname === "/LoginHubLocal") ? null : <Navbar
         className="border-gradient-green"
         style={{
           justifyContent: "space-between",
@@ -196,15 +193,14 @@ function App() {
         </Button>
       </Navbar> }
       <Routes>
+        <Route path='/' element={<Mateus />}/>
+
         {/* public routes */}
         <Route path="/LoginHubLocal" element={<LoginHubLocal />} />
-        <Route path="/" element={<Mateus />} />
 
-        <Route path="/" element={<PrivateOutlet />}>
-          
+        <Route path="/hublocal" element={<PrivateOutlet />}>
           {/* protected routes */}
           <Route index element={<Hublocal />} />
-
         </Route>
       </Routes>
       <ToastContainer
