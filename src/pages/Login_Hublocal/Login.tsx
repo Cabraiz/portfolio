@@ -75,6 +75,7 @@ function PasswordInput({
 }
 
 function Login() {
+    const navigate = useNavigate()
 
     const CFaUserAlt = chakra(FaUserAlt);
 
@@ -88,7 +89,6 @@ function Login() {
     const [user, setUser] = useState ('')
     const [pwd, setPwd] = useState('')
     const [errMsg, setErrMsg] = useState('')
-    const navigate = useNavigate ()
 
     const [login, { isLoading }] = useLoginMutation()
     const dispatch = useDispatch()

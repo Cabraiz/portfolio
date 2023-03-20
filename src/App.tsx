@@ -21,7 +21,7 @@ import { PrivateOutlet } from './redux/utils/PrivateOutlet'
 import RequireAuth from "./redux/feature/auth/RequireAuth";
 
 import Mateus from "./pages/Mateus/Mateus";
-import Firebase from "./pages/Surprise/Surprise";
+//import Firebase from "./pages/Surprise/Surprise";
 
 import "./pages/Mateus/Mateus.css";
 import "./pages/Surprise/Surprise.css";
@@ -198,15 +198,12 @@ function App() {
       <Routes>
         {/* public routes */}
         <Route path="/LoginHubLocal" element={<LoginHubLocal />} />
-        <Route path="/firebase" element={<Firebase />} />
         <Route path="/Mateus" element={<Mateus />} />
 
         <Route path="/" element={<PrivateOutlet />}>
           
           {/* protected routes */}
-          <Route element={<RequireAuth />}> 
-            <Route path="/hublocal" element={<Hublocal />} />
-          </Route>
+          <Route index element={<Hublocal />} />
 
         </Route>
       </Routes>

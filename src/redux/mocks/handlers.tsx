@@ -17,7 +17,7 @@ export const handlers = [
     return res(
       ctx.json({
         message:
-          'Join us on the Reactiflux Discord server in #redux if you have any questions.',
+          'Alright, you are authorized',
       })
     )
   }),
