@@ -145,7 +145,7 @@ function App() {
           <title>{title ? title : "No title"}</title>
         </Helmet>
       </HelmetProvider>
-      { (pathname === "/hublocal" || pathname === "/LoginHubLocal") ? null : <Navbar
+      { (pathname === "/hublocal" || pathname === "/loginhublocal") ? null : <Navbar
         className="border-gradient-green"
         style={{
           justifyContent: "space-between",
@@ -196,7 +196,7 @@ function App() {
         <Route path='/' element={<Mateus />}/>
 
         {/* public routes */}
-        <Route path="/LoginHubLocal" element={<LoginHubLocal />} />
+        <Route path="/loginhublocal" element={<LoginHubLocal />} />
 
         <Route path="/hublocal" element={<PrivateOutlet />}>
           {/* protected routes */}

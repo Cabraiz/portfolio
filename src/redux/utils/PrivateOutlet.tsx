@@ -8,6 +8,6 @@ export function PrivateOutlet() {
   return auth.user ? (
     <Outlet />
   ) : (
-    <Navigate to="/LoginHubLocal" state={{ from: location }} replace/>
+    <Navigate to="/loginhublocal" state={{ from: location }} replace/>
   )
 }

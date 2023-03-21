@@ -21,7 +21,7 @@ export const handlers = [
       })
     )
   }),
-  rest.post('/LoginHubLocal', (req, res, ctx) => {
+  rest.post('/loginhublocal', (req, res, ctx) => {
     return res(
       ctx.delay(400),
       ctx.json({
