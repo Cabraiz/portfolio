@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/static/css/main.c8b61847.css",
-    "main.js": "/static/js/main.d0ec6cbb.js",
+    "main.js": "/static/js/main.fc516a3d.js",
     "static/media/Login_Image.png": "/static/media/Login_Image.2af2be0ab25dfc31828e.png",
     "static/media/perfil.webp": "/static/media/perfil.0569782bdbd8cb90fc02.webp",
     "static/media/Poppins-Regular.ttf": "/static/media/Poppins-Regular.35d26b781dc5fda684cc.ttf",
@@ -22,6 +22,6 @@
   },
   "entrypoints": [
     "static/css/main.c8b61847.css",
-    "static/js/main.d0ec6cbb.js"
+    "static/js/main.fc516a3d.js"
   ]
 }
