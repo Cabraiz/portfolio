@@ -34,6 +34,8 @@ import { LoginRequest, useLoginMutation } from '../../redux/feature/auth/authApi
 
 import { ProtectedComponent } from '../../redux/feature/auth/ProtectedComponent'
 
+import Responsive from "../Responsive";
+
 function PasswordInput({
   name,
   onChange,
@@ -96,7 +98,7 @@ function Login() {
     const [isDesktop, setIsDesktop] = useState(false);
 
     const notifySucesso = () => {
-      toast.success("🦄 Website é Website", {
+      toast.success("Sucesso!", {
         position: "bottom-right",
         autoClose: 5000,
         hideProgressBar: false,
@@ -109,7 +111,7 @@ function Login() {
     };
   
     const notifyError = () => {
-      toast.warning("❌ Website Não é Website", {
+      toast.warning("Falha!", {
         position: "bottom-right",
         autoClose: 5000,
         hideProgressBar: false,
@@ -131,39 +133,43 @@ function Login() {
     }, [isDesktop]);
 
     useEffect(() => {
-        const node = userRef.current
-        node?.focus();
+      Responsive();
     },[])
 
     useEffect(() => {
-        setErrMsg('')
+      const node = userRef.current
+      node?.focus();
+    },[])
+
+    useEffect(() => {
+      setErrMsg('')
     },[user, pwd])
     
  
     const handleSubmit = async (e: { preventDefault: () => void; }) => {
-        e.preventDefault();
-        
-        try{
-            const userData = await login(formState).unwrap()
-            dispatch(tokenReceived({ ...userData, user }))
-            setUser('')
-            setPwd('')
-            navigate('/welcome')
+      e.preventDefault();
+      
+      try{
+          const userData = await login(formState).unwrap()
+          dispatch(tokenReceived({ ...userData, user }))
+          setUser('')
+          setPwd('')
+          navigate('/welcome')
 
-        }catch (err: any) {
-            const response = err?.response.status;
-            if(!err?.response) {
-                setErrMsg('No Sever Response')
-            } else if (response === 400){
-                setErrMsg('Missing Usarname or Password')
-            } else if (response === 401){
-                setErrMsg('Unauthorized')
-            } else {
-                setErrMsg('Login Failed')
-            }
-            const node = errRef.current
-            node?.focus();
-        }
+      }catch (err: any) {
+          const response = err?.response.status;
+          if(!err?.response) {
+              setErrMsg('No Sever Response')
+          } else if (response === 400){
+              setErrMsg('Missing Usarname or Password')
+          } else if (response === 401){
+              setErrMsg('Unauthorized')
+          } else {
+              setErrMsg('Login Failed')
+          }
+          const node = errRef.current
+          node?.focus();
+      }
     }
 
     const handleChange = ({
@@ -179,13 +185,16 @@ function Login() {
       <Flex
         flexDirection="column"
         backgroundColor="white"
+        justifyContent="center"
+        alignItems="center"
+        overflow-y= "scroll"
       >
       <Grid className="column" templateColumns='minmax(100px, 1fr)' autoFlow='column'>
-        <GridItem w="50vw" h="100vh" display = {isDesktop ? "none" : "flex"} style={{backgroundColor: "#0485FF", alignItems: "end"}}>
+        <GridItem w="50vw" display = {isDesktop ? "none" : "flex"} style={{backgroundColor: "#0485FF", alignItems: "end", height: "var(--doc-height)"}}>
           <Stack 
             justifyContent="center"
             alignItems="center"
-            h="100vh"
+            style={{height: "var(--doc-height)"}}
           >
           <Image
             h="full"
@@ -200,21 +209,20 @@ function Login() {
           </Box>
           </Stack>
         </GridItem>  
-        <GridItem w="50vw" h="100vh" className="column columnB">
+        <GridItem w="50vw" className="column columnB" style={{height: "var(--doc-height)"}}>
           <Stack
             justifyContent="center"
             alignItems="center"
           >
             <Image
               paddingBottom="3.3vh"
-              minW="200px"
+              minW="300px"
               w="24vw"
               src={Login_Logo}
             />
             <Box minW={{ md: "31vw" }} >
               <form onSubmit={handleSubmit}>
                 <Stack
-                  justifyContent="center"
                   w = {isDesktop ? "90vw" : "auto"}
                   spacing={6}
                   backgroundColor="whiteAlpha.900"
@@ -249,7 +257,6 @@ function Login() {
                     className="buttonHeight"
                     type="submit"
                     variant="solid"
-                    w="full"
                     style={{backgroundColor: "#0385FD", color: "#FFFFFF",  fontWeight: "700"}}
                   >
                   <Text className="letter-spacing-button poppins-text-button" fontSize='larger'>LOGAR</Text>
@@ -258,7 +265,6 @@ function Login() {
                     className="buttonHeight"
                     type="submit"
                     variant="solid" 
-                    w="full"
                     style={{backgroundColor: "#00CC99", color: "#FFFFFF",  fontWeight: "700"}}
                   >
                   <Text className="letter-spacing-button poppins-text-button" fontSize='larger'>CRIAR CONTA</Text>
