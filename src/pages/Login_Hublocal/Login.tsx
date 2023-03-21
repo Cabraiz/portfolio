@@ -34,8 +34,6 @@ import { LoginRequest, useLoginMutation } from '../../redux/feature/auth/authApi
 
 import { ProtectedComponent } from '../../redux/feature/auth/ProtectedComponent'
 
-import Responsive from "../Responsive";
-
 function PasswordInput({
   name,
   onChange,
@@ -96,6 +94,7 @@ function Login() {
     const dispatch = useDispatch()
 
     const [isDesktop, setIsDesktop] = useState(false);
+    const [realHeight, setrealHeight] = useState('');
 
     const notifySucesso = () => {
       toast.success("Sucesso!", {
@@ -124,6 +123,10 @@ function Login() {
     };
 
     useEffect(() => {
+      setrealHeight(`${window.innerHeight}px`)
+    }, [realHeight]);
+
+    useEffect(() => {
       const media = window.matchMedia('(max-width:700px)');
       const listener = () => setIsDesktop(media.matches);
       listener();
@@ -131,10 +134,6 @@ function Login() {
   
       return () => window.removeEventListener('resize', listener);
     }, [isDesktop]);
-
-    useEffect(() => {
-      Responsive();
-    },[])
 
     useEffect(() => {
       const node = userRef.current
@@ -182,112 +181,114 @@ function Login() {
 
 
     const content = isLoading ? <h1>Loading...</h1> : (
-      <Flex
-        flexDirection="column"
-        backgroundColor="white"
-        justifyContent="center"
-        alignItems="center"
-        overflow-y= "scroll"
-      >
-      <Grid className="column" templateColumns='minmax(100px, 1fr)' autoFlow='column'>
-        <GridItem w="50vw" display = {isDesktop ? "none" : "flex"} style={{backgroundColor: "#0485FF", alignItems: "end", height: "var(--doc-height)"}}>
-          <Stack 
-            justifyContent="center"
-            alignItems="center"
-            style={{height: "var(--doc-height)"}}
-          >
-          <Image
-            h="full"
-            paddingTop="8.72vh"
-            marginBlock= "-6px"
-            objectFit="cover"
-            src={Login_Image}
-          />
-          <Box style={{ backgroundColor: "#00CC99", marginTop: "0", padding: "2.5vh 5.2vw 3.75vh 5.2vw"}}>
-            <Text fontSize='4xl' className="frase-imagem-logo" style={{ padding: "0 3.55vw 1.2vh 3.55vw" }}>{textoTitle}</Text>
-            <Text fontSize='md' className="subfrase-imagem-logo letter-spacing-text ">{textoSubtitle}</Text>
-          </Box>
-          </Stack>
-        </GridItem>  
-        <GridItem w="50vw" className="column columnB" style={{height: "var(--doc-height)"}}>
-          <Stack
-            justifyContent="center"
-            alignItems="center"
-          >
+      <>
+        <Flex
+          flexDirection="column"
+          backgroundColor="white"
+          justifyContent="center"
+          alignItems="center"
+          overflow-y= "scroll"
+        >
+        <Grid className="column" templateColumns='minmax(100px, 1fr)' autoFlow='column'>
+          <GridItem w="50vw" h={realHeight} display = {isDesktop ? "none" : "flex"} style={{backgroundColor: "#0485FF", alignItems: "end"}}>
+            <Stack 
+              justifyContent="center"
+              alignItems="center"
+              h={realHeight}
+            >
             <Image
-              paddingBottom="3.3vh"
-              minW="300px"
-              w="24vw"
-              src={Login_Logo}
+              h="full"
+              paddingTop="8.72vh"
+              marginBlock= "-6px"
+              objectFit="cover"
+              src={Login_Image}
             />
-            <Box minW={{ md: "31vw" }} >
-              <form onSubmit={handleSubmit}>
-                <Stack
-                  w = {isDesktop ? "90vw" : "auto"}
-                  spacing={6}
-                  backgroundColor="whiteAlpha.900"
-                  style={{ paddingBottom: "0" }}
-                >
-                  <FormControl >
-                    <Text fontSize='sm' className="letter-spacing-text poppins-text-label" style={{ paddingBottom: "5px"}}>Email</Text>
-                    <InputGroup>
-                      <InputLeftElement
-                        h="100%"
-                        pointerEvents="none"
-                        children={<CFaUserAlt color="gray.300" />}
-                      />
-                      <Input 
-                        onChange={handleChange}
-                        name="username"
-                        type="text"
-                        required
-
-                        className="buttonHeight"
-                        placeholder="E-mail" 
-                        style={{borderColor: "#0385FD", borderWidth: "2px"}} />
-                    </InputGroup>
-                  </FormControl>
-                  <FormControl style={{marginTop: "0"}}>
-                    <Text fontSize='sm' className="letter-spacing-text poppins-text-label" style={{ padding: "10px 0 5px 0"}}>Senha</Text>
-                    <InputGroup style={{alignItems: "center"}}>
-                      <PasswordInput onChange={handleChange} name="password"></PasswordInput>
-                    </InputGroup>
-                  </FormControl>
-                  <Button
-                    className="buttonHeight"
-                    type="submit"
-                    variant="solid"
-                    style={{backgroundColor: "#0385FD", color: "#FFFFFF",  fontWeight: "700"}}
-                  >
-                  <Text className="letter-spacing-button poppins-text-button" fontSize='larger'>LOGAR</Text>
-                  </Button>
-                  <Button
-                    className="buttonHeight"
-                    type="submit"
-                    variant="solid" 
-                    style={{backgroundColor: "#00CC99", color: "#FFFFFF",  fontWeight: "700"}}
-                  >
-                  <Text className="letter-spacing-button poppins-text-button" fontSize='larger'>CRIAR CONTA</Text>
-                  </Button>
-                </Stack>
-              </form>
+            <Box style={{ backgroundColor: "#00CC99", marginTop: "0", padding: "2.5vh 5.2vw 3.75vh 5.2vw"}}>
+              <Text fontSize='4xl' className="frase-imagem-logo" style={{ padding: "0 3.55vw 1.2vh 3.55vw" }}>{textoTitle}</Text>
+              <Text fontSize='md' className="subfrase-imagem-logo letter-spacing-text ">{textoSubtitle}</Text>
             </Box>
-          </Stack>
-        </GridItem>
-      </Grid>
-      <ToastContainer
-        position="bottom-right"
-        autoClose={5000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="colored"
-      />
-    </Flex>
+            </Stack>
+          </GridItem>  
+          <GridItem w="50vw" className="column columnB" h={realHeight}>
+            <Stack
+              justifyContent="center"
+              alignItems="center"
+            >
+              <Image
+                paddingBottom="3.3vh"
+                minW="300px"
+                w="24vw"
+                src={Login_Logo}
+              />
+              <Box minW={{ md: "31vw" }} >
+                <form onSubmit={handleSubmit}>
+                  <Stack
+                    w = {isDesktop ? "90vw" : "auto"}
+                    spacing={6}
+                    backgroundColor="whiteAlpha.900"
+                    style={{ paddingBottom: "0" }}
+                  >
+                    <FormControl >
+                      <Text fontSize='sm' className="letter-spacing-text poppins-text-label" style={{ paddingBottom: "5px"}}>Email</Text>
+                      <InputGroup>
+                        <InputLeftElement
+                          h="100%"
+                          pointerEvents="none"
+                          children={<CFaUserAlt color="gray.300" />}
+                        />
+                        <Input 
+                          onChange={handleChange}
+                          name="username"
+                          type="text"
+                          required
+
+                          className="buttonHeight"
+                          placeholder="E-mail" 
+                          style={{borderColor: "#0385FD", borderWidth: "2px"}} />
+                      </InputGroup>
+                    </FormControl>
+                    <FormControl style={{marginTop: "0"}}>
+                      <Text fontSize='sm' className="letter-spacing-text poppins-text-label" style={{ padding: "10px 0 5px 0"}}>Senha</Text>
+                      <InputGroup style={{alignItems: "center"}}>
+                        <PasswordInput onChange={handleChange} name="password"></PasswordInput>
+                      </InputGroup>
+                    </FormControl>
+                    <Button
+                      className="buttonHeight"
+                      type="submit"
+                      variant="solid"
+                      style={{backgroundColor: "#0385FD", color: "#FFFFFF",  fontWeight: "700"}}
+                    >
+                    <Text className="letter-spacing-button poppins-text-button" fontSize='larger'>LOGAR</Text>
+                    </Button>
+                    <Button
+                      className="buttonHeight"
+                      type="submit"
+                      variant="solid" 
+                      style={{backgroundColor: "#00CC99", color: "#FFFFFF",  fontWeight: "700"}}
+                    >
+                    <Text className="letter-spacing-button poppins-text-button" fontSize='larger'>CRIAR CONTA</Text>
+                    </Button>
+                  </Stack>
+                </form>
+              </Box>
+            </Stack>
+          </GridItem>
+        </Grid>
+        <ToastContainer
+          position="bottom-right"
+          autoClose={5000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="colored"
+        />
+      </Flex>
+    </>
     )
 
     return content
