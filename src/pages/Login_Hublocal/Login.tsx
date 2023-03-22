@@ -187,7 +187,6 @@ function Login() {
           backgroundColor="white"
           justifyContent="center"
           alignItems="center"
-          overflow-y= "scroll"
         >
         <Grid className="column" templateColumns='minmax(100px, 1fr)' autoFlow='column'>
           <GridItem w="50vw" h={realHeight} display = {isDesktop ? "none" : "flex"} style={{backgroundColor: "#0485FF", alignItems: "end"}}>
@@ -229,7 +228,7 @@ function Login() {
                     style={{ paddingBottom: "0" }}
                   >
                     <FormControl >
-                      <Text fontSize='sm' className="letter-spacing-text poppins-text-label" style={{ paddingBottom: "5px"}}>Email</Text>
+                      <Text fontSize='sm' className="letter-spacing-text poppins-text-label" style={{ paddingBottom: "5px"}}>E-mail</Text>
                       <InputGroup>
                         <InputLeftElement
                           h="100%"
