@@ -14,7 +14,8 @@ import { Helmet, HelmetProvider } from "react-helmet-async";
 
 import { Routes, Route, useLocation } from "react-router-dom";
 
-import LoginHubLocal from "./pages/Login_Hublocal/Login";
+import RegisterHubLocal from "./pages/Register_HubLocal/Register";
+import LoginHubLocal from "./pages/Login_HubLocal/Login";
 import Hublocal from "./pages/Hublocal/Hublocal";
 
 import { PrivateOutlet } from "./redux/shared/utils/PrivateOutlet";
@@ -135,6 +136,8 @@ function App() {
 
   const { pathname } = useLocation();
 
+  const isNavOn = (pathname === '/hublocal') || (pathname === "/loginhublocal") || (pathname === "/registerhublocal")
+
   return (
     <>
       <HelmetProvider>
@@ -142,7 +145,7 @@ function App() {
           <title>{title ? title : "No title"}</title>
         </Helmet>
       </HelmetProvider>
-      {pathname === "/hublocal" || pathname === "/loginhublocal" ? null : (
+      { isNavOn ? null : (
         <Navbar
           className="border-gradient-green"
           style={{
@@ -197,6 +200,7 @@ function App() {
         <Route path="/" element={<Mateus />} />
 
         {/* public routes */}
+        <Route path="/registerhublocal" element={<RegisterHubLocal />} />
         <Route path="/loginhublocal" element={<LoginHubLocal />} />
 
         <Route path="/hublocal" element={<PrivateOutlet />}>
