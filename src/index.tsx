@@ -15,6 +15,8 @@ import { Provider } from 'react-redux'
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
 );
+// Initialize the msw worker, wait for the service worker registration to resolve, then mount
+worker.start({ quiet: true }).then(() =>
   root.render(
     <React.StrictMode>
       <Provider store={store}>
@@ -25,4 +27,5 @@ const root = ReactDOM.createRoot(
         </ChakraProvider>
       </Provider>
     </React.StrictMode>
-);
+  )
+)

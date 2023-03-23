@@ -17,7 +17,7 @@ import { Routes, Route, useLocation } from "react-router-dom";
 import LoginHubLocal from "./pages/Login_Hublocal/Login";
 import Hublocal from "./pages/Hublocal/Hublocal";
 
-import { PrivateOutlet } from './redux/utils/PrivateOutlet'
+import { PrivateOutlet } from './redux/shared/utils/PrivateOutlet'
 
 import Mateus from "./pages/Mateus/Mateus";
 //import Firebase from "./pages/Surprise/Surprise";
