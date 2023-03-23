@@ -6,6 +6,7 @@ import {
   INPUT_ACTION_CHANGE,
   INPUT_ACTION_CLEAR,
 } from "./model/InputAction";
+import { ChangeEvent, useReducer } from "react";
 
 const InitialInputState: InputState = {
   text: "",
@@ -28,4 +29,34 @@ const inputReducer = (state: InputState, action: Action<InputActionType>) => {
   }
 };
 
-const;
+const useInput = () => {
+    const [{ text, hasBeenTouched }, dispach] = useReducer (
+        inputReducer,
+        InitialInputState
+    );
+
+    const textChangeHandler = (e: ChangeEvent<HTMLInputElement>) => {
+        dispach({ type: INPUT_ACTION_CHANGE, value: e.target.value });
+
+    }
+
+    const inputBlurHandler = (e: ChangeEvent<HTMLInputElement>) => {
+        dispach({ type: INPUT_ACTION_BLUR});
+
+    }
+
+    const clearHandler = (e: ChangeEvent<HTMLInputElement>) => {
+        dispach({ type: INPUT_ACTION_CLEAR });
+
+    }
+
+    return {
+        text, 
+
+        textChangeHandler,
+        inputBlurHandler,
+        clearHandler
+    }
+};
+
+export default useInput

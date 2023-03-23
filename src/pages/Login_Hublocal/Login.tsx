@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState } from "react";
 
-import Login_Logo from "../../images/HubLocal/Login_Logo.png";
-import Login_Image from "../../images/HubLocal/Login_Image.png";
+import Login_Logo from "../../assets/HubLocal/Login_Logo.webp";
+import Login_Image from "../../assets/HubLocal/Login_Image.webp";
 
 import { ToastContainer, toast } from "react-toastify";
 

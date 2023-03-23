@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from "react";
 
-import Login_Logo from "../../images/HubLocal/Login_Logo.png";
-import Login_Image from "../../images/HubLocal/Login_Image.png";
+import Login_Logo from "../../assets/HubLocal/Login_Logo.webp";
+import Login_Image from "../../assets/HubLocal/Login_Image.webp";
 
 import { useDispatch, useSelector } from "react-redux";
-
 import { ToastContainer, toast } from "react-toastify";
-
 import { FaUserAlt, FaLock } from "react-icons/fa";
 
 import {

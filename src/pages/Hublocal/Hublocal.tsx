@@ -3,7 +3,7 @@ import {
   selectCurrentUser,
   selectCurrentToken,
 } from "../../redux/feature/auth/authSlice";
-import Perfil_Image from "../../images/HubLocal/Perfil_Image.png";
+import Perfil_Image from "../../assets/HubLocal/Perfil_Image.webp";
 
 import { ProtectedComponent } from "../../redux/feature/auth/ProtectedComponent";
 

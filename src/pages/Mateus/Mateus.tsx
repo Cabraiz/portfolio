@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { Col, Row, Image, Button } from "react-bootstrap";
 
-import perfil from "../../images/Mateus/perfil.webp";
-import dotsArray from "../../images/icones/svg_dotsArray.svg";
+import perfil from "../../assets/Mateus/perfil.webp";
+import dotsArray from "../../assets/icones/svg_dotsArray.svg";
 
-import IconGmail from "../../images/Mateus/IconGmail.png";
-import IconInsta from "../../images/Mateus/IconInsta.png";
-import IconLinkendin from "../../images/Mateus/IconLinkendin.png";
-import IconTiktok from "../../images/Mateus/IconTiktok.png";
+import IconGmail from "../../assets/Mateus/IconGmail.png";
+import IconInsta from "../../assets/Mateus/IconInsta.png";
+import IconLinkendin from "../../assets/Mateus/IconLinkendin.png";
+import IconTiktok from "../../assets/Mateus/IconTiktok.png";
 
 import { isMobile } from "react-device-detect";
 

@@ -2,10 +2,10 @@ import React, { Component } from "react";
 import { isMobile } from "react-device-detect";
 import ScratchCard from "react-scratchcard-v2";
 
-import icognita from "../../../images/Surprise/Icognita.png";
-import icognitaBlock from "../../../images/Surprise/IcognitaBlock.png";
-import icognitaDone from "../../../images/Surprise/icognitaDone.png";
-import circle from "../../../images/Surprise/circle.png";
+import icognita from "../../../assets/Surprise/Icognita.png";
+import icognitaBlock from "../../../assets/Surprise/IcognitaBlock.png";
+import icognitaDone from "../../../assets/Surprise/icognitaDone.png";
+import circle from "../../../assets/Surprise/circle.png";
 
 import "animate.css";
 

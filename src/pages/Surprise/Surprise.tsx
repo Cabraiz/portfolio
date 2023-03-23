@@ -6,12 +6,12 @@ import "react-h5-audio-player/lib/styles.css";
 import { Col, Row, Image, Modal } from "react-bootstrap";
 import update from "react-addons-update";
 
-import Done_1 from "../../images/Surprise/Done_1.png";
-import Done_2 from "../../images/Surprise/Done_2.png";
-import Done_3 from "../../images/Surprise/Done_3.png";
-import Done_4 from "../../images/Surprise/Done_4.png";
-import Done_5 from "../../images/Surprise/Done_5.png";
-import Done_6 from "../../images/Surprise/Done_6.png";
+import Done_1 from "../../assets/Surprise/Done_1.png";
+import Done_2 from "../../assets/Surprise/Done_2.png";
+import Done_3 from "../../assets/Surprise/Done_3.png";
+import Done_4 from "../../assets/Surprise/Done_4.png";
+import Done_5 from "../../assets/Surprise/Done_5.png";
+import Done_6 from "../../assets/Surprise/Done_6.png";
 
 import { auth, db } from "../../Firebase/Firebase";
 import { getDoc, setDoc, doc } from "firebase/firestore";

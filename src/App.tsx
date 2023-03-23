@@ -4,8 +4,8 @@ import "./App.css";
 
 import { Row, Navbar, Image, Button } from "react-bootstrap";
 
-import logo from "./images/icones/logo.svg";
-import logoGmail from "./images/icones/7.svg";
+import logo from "./assets/icones/logo.svg";
+import logoGmail from "./assets/icones/7.svg";
 
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
