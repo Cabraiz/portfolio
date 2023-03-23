@@ -36,6 +36,7 @@ import {
 } from "../../redux/feature/auth/authApiSlice";
 
 import { ProtectedComponent } from "../../redux/feature/auth/ProtectedComponent";
+import { isMobile } from "react-device-detect";
 
 function PasswordInput({
   name,
@@ -123,7 +124,11 @@ function Login() {
   };
 
   useEffect(() => {
-    setrealHeight(`${window.innerHeight}px`);
+    if(isMobile)
+      setrealHeight(`${window.innerHeight}px`);
+    else{
+      setrealHeight("100vh");
+    }
   }, [realHeight]);
 
   useEffect(() => {
