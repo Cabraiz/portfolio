@@ -1,16 +1,16 @@
-import React from 'react'
-import ReactDOM from 'react-dom/client'
+import React from "react";
+import ReactDOM from "react-dom/client";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./index.css";
 
 import App from "./App";
-import { store } from './redux/app/store'
+import { store } from "./redux/app/store";
 
 import { BrowserRouter } from "react-router-dom";
-import { ChakraProvider } from '@chakra-ui/react'
+import { ChakraProvider } from "@chakra-ui/react";
 
-import { worker } from './redux/mocks/browser'
-import { Provider } from 'react-redux'
+import { worker } from "./redux/mocks/browser";
+import { Provider } from "react-redux";
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
@@ -28,4 +28,4 @@ worker.start({ quiet: true }).then(() =>
       </Provider>
     </React.StrictMode>
   )
-)
+);

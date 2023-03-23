@@ -17,7 +17,7 @@ import { Routes, Route, useLocation } from "react-router-dom";
 import LoginHubLocal from "./pages/Login_Hublocal/Login";
 import Hublocal from "./pages/Hublocal/Hublocal";
 
-import { PrivateOutlet } from './redux/shared/utils/PrivateOutlet'
+import { PrivateOutlet } from "./redux/shared/utils/PrivateOutlet";
 
 import Mateus from "./pages/Mateus/Mateus";
 //import Firebase from "./pages/Surprise/Surprise";
@@ -35,7 +35,7 @@ import {
   signOut,
 } from "firebase/auth";
 
-function App() {  
+function App() {
   const [windowSize, setWindowSize] = useState(getWindowSize());
   const [signInStatus, setsignInStatus] = useState(["", false]);
 
@@ -52,10 +52,10 @@ function App() {
       setWindowSize(getWindowSize());
     }
 
-    window.addEventListener('resize', handleWindowResize);
+    window.addEventListener("resize", handleWindowResize);
 
     return () => {
-      window.removeEventListener('resize', handleWindowResize);
+      window.removeEventListener("resize", handleWindowResize);
     };
   }, []);
 
@@ -82,16 +82,14 @@ function App() {
   };
 
   function getWindowSize() {
-    const {innerWidth, innerHeight} = window;
-    return {innerWidth, innerHeight};
+    const { innerWidth, innerHeight } = window;
+    return { innerWidth, innerHeight };
   }
 
   const convertMultiplyVwToPx = () => {
     let temp;
-    if(!isMobile)
-      temp = (windowSize.innerWidth / 100) * 14;
-    else
-      temp = (windowSize.innerWidth / 100) * 14;
+    if (!isMobile) temp = (windowSize.innerWidth / 100) * 14;
+    else temp = (windowSize.innerWidth / 100) * 14;
     return temp;
   };
 
@@ -101,8 +99,7 @@ function App() {
         .then(() => {
           window.location.reload();
         })
-        .catch((error) => {
-        });
+        .catch((error) => {});
     } else {
       if (!isMobile) {
         signInWithRedirect(auth, provider)
@@ -145,55 +142,59 @@ function App() {
           <title>{title ? title : "No title"}</title>
         </Helmet>
       </HelmetProvider>
-      { (pathname === "/hublocal" || pathname === "/loginhublocal") ? null : <Navbar
-        className="border-gradient-green"
-        style={{
-          justifyContent: "space-between",
-          height: "11vh",
-          fontWeight: "600",
-          marginInline: "0px",
-          marginTop: "0.1vh",
-          marginBottom: "0",
-          paddingTop: "0.5vh",
-        }}
-      >
-        <Image
-          src={logo}
+      {pathname === "/hublocal" || pathname === "/loginhublocal" ? null : (
+        <Navbar
+          className="border-gradient-green"
           style={{
-            marginTop: "0.5vh",
-            borderRadius: "20%",
-            marginLeft: `${convertMultiplyVwToPx()}px`,
-            width: "8.5vh",
-            height: "8.5vh",
+            justifyContent: "space-between",
+            height: "11vh",
+            fontWeight: "600",
+            marginInline: "0px",
+            marginTop: "0.1vh",
+            marginBottom: "0",
+            paddingTop: "0.5vh",
           }}
-        />
-        <Button
-          style={{
-            marginRight: "4vw",
-            width: "auto",
-            height: "6vh",
-            fontSize: "1rem",
-            backgroundColor: "white",
-            color: "rgba(100, 100, 100)",
-            fontWeight: "500",
-            borderColor: "white",
-          }}
-          onClick={SignFirebase}
-        ><Row className="m-0 ps-0 pe-0" style={{alignItems: "center",}}>
-            <Image
-              src={logoGmail}
-              style={{
-                width: "calc(15px + 0.3vw)",
-                margin: "0",
-                padding: "0",
-                height: "100%",
-              }}
-            ></Image>&nbsp;&nbsp;{signInStatus}
-          </Row>
-        </Button>
-      </Navbar> }
+        >
+          <Image
+            src={logo}
+            style={{
+              marginTop: "0.5vh",
+              borderRadius: "20%",
+              marginLeft: `${convertMultiplyVwToPx()}px`,
+              width: "8.5vh",
+              height: "8.5vh",
+            }}
+          />
+          <Button
+            style={{
+              marginRight: "4vw",
+              width: "auto",
+              height: "6vh",
+              fontSize: "1rem",
+              backgroundColor: "white",
+              color: "rgba(100, 100, 100)",
+              fontWeight: "500",
+              borderColor: "white",
+            }}
+            onClick={SignFirebase}
+          >
+            <Row className="m-0 ps-0 pe-0" style={{ alignItems: "center" }}>
+              <Image
+                src={logoGmail}
+                style={{
+                  width: "calc(15px + 0.3vw)",
+                  margin: "0",
+                  padding: "0",
+                  height: "100%",
+                }}
+              ></Image>
+              &nbsp;&nbsp;{signInStatus}
+            </Row>
+          </Button>
+        </Navbar>
+      )}
       <Routes>
-        <Route path='/' element={<Mateus />}/>
+        <Route path="/" element={<Mateus />} />
 
         {/* public routes */}
         <Route path="/loginhublocal" element={<LoginHubLocal />} />

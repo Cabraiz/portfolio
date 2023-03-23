@@ -1,10 +1,10 @@
-import { Center, VStack, Box, Button } from '@chakra-ui/react'
-import { useProtectedMutation } from '../../feature/auth/authApiSlice'
+import { Center, VStack, Box, Button } from "@chakra-ui/react";
+import { useProtectedMutation } from "../../feature/auth/authApiSlice";
 
 export function ProtectedComponent() {
-  const [attemptAccess, { data, error, isLoading }] = useProtectedMutation()
+  const [attemptAccess, { data, error, isLoading }] = useProtectedMutation();
 
-  return (  
+  return (
     <Center w="400px">
       <VStack>
         <Box>
@@ -26,5 +26,5 @@ export function ProtectedComponent() {
         </Box>
       </VStack>
     </Center>
-  )
+  );
 }

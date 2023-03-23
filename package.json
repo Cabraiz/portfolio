@@ -59,7 +59,8 @@
     "eject": "react-scripts eject",
     "deploy": "yarn build && gh-pages -d build",
     "lint": "tsc && eslint \"src/**/*.{js,ts,tsx}\" --quiet --fix",
-    "pre-commit": "npx lint-staged -d"
+    "pre-commit": "npx lint-staged -d",
+    "pretty": "prettier --write \"./**/*.{js,jsx,ts,tsx,json}\""
   },
   "eslintConfig": {
     "extends": [
@@ -88,7 +89,7 @@
     "husky": "^8.0.3",
     "jest": "^29.3.1",
     "lint-staged": "^13.2.0",
-    "prettier": "2.8.4"
+    "prettier": "^2.8.6"
   },
   "lint-staged": {
     "**/*.{js,jsx}": [

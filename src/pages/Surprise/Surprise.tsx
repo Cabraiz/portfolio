@@ -221,8 +221,7 @@ function Surprise() {
         <Modal.Header className="text-center" closeButton>
           <Modal.Title style={{ fontSize: "1.3em", textAlign: "center" }}>
             {" "}
-            Vamos ver um filme? 🚗
-            {" "}
+            Vamos ver um filme? 🚗{" "}
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
@@ -240,7 +239,8 @@ function Surprise() {
       >
         <Modal.Header closeButton>
           <Modal.Title style={{ fontSize: "1em", textAlign: "center" }}>
-            {" "} 🍿🍿🍿🍿🍿🍿🍿🍿🍿 {" "}
+            {" "}
+            🍿🍿🍿🍿🍿🍿🍿🍿🍿{" "}
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
@@ -319,8 +319,7 @@ function Surprise() {
         <Modal.Header closeButton>
           <Modal.Title style={{ fontSize: "1.3em", textAlign: "center" }}>
             {" "}
-            E por hoje é só isso!👻
-            {" "}
+            E por hoje é só isso!👻{" "}
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>

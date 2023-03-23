@@ -1,36 +1,36 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { authApiSlice, User } from '../../feature/auth/authApiSlice'
-import type { RootState } from "../../app/store"
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { authApiSlice, User } from "../../feature/auth/authApiSlice";
+import type { RootState } from "../../app/store";
 
 type AuthState = {
-    user: User | null
-    token: string | null
-}
+  user: User | null;
+  token: string | null;
+};
 
 const authSlice = createSlice({
-    name: 'auth',
-    initialState: { user: null, token: null } as AuthState,
-    reducers: {
-        tokenReceived: (state, action: PayloadAction<any>) => {
-            const { user, acessToken } = action.payload
-            state.user = user
-            state.token = acessToken
-        },
-        loggedOut: (state) => {
-            state.user = null
-            state.token = null
-        }
+  name: "auth",
+  initialState: { user: null, token: null } as AuthState,
+  reducers: {
+    tokenReceived: (state, action: PayloadAction<any>) => {
+      const { user, acessToken } = action.payload;
+      state.user = user;
+      state.token = acessToken;
     },
-    extraReducers: (builder) => {
-        builder.addMatcher(
-          authApiSlice.endpoints.login.matchFulfilled,
-          (state, { payload }) => {
-            state.token = payload.token
-            state.user = payload.user
-          }
-        )
-      },
-})
+    loggedOut: (state) => {
+      state.user = null;
+      state.token = null;
+    },
+  },
+  extraReducers: (builder) => {
+    builder.addMatcher(
+      authApiSlice.endpoints.login.matchFulfilled,
+      (state, { payload }) => {
+        state.token = payload.token;
+        state.user = payload.user;
+      }
+    );
+  },
+});
 
 export const { tokenReceived, loggedOut } = authSlice.actions;
 
