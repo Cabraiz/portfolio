@@ -204,7 +204,7 @@ function Login() {
             display={isDesktop ? "none" : "flex"}
             style={{ backgroundColor: "#0485FF", alignItems: "end" }}
           >
-            <Stack justifyContent="center" alignItems="center" h={realHeight}>
+            <Stack justifyContent="end" alignItems="end" h={realHeight}>
               <Image
                 h="full"
                 paddingTop="8.72vh"
@@ -214,9 +214,10 @@ function Login() {
               />
               <Box
                 style={{
+                  justifyContent: "space-between",
                   backgroundColor: "#00CC99",
                   marginTop: "0",
-                  padding: "2.5vh 5.2vw 3.75vh 5.2vw",
+                  padding: "2.5vh 5.2vw 3.75vh 5.2vw"
                 }}
               >
                 <Text
@@ -253,11 +254,9 @@ function Login() {
                   >
                     <FormControl>
                       <Text
-                        fontSize="sm"
                         className="letter-spacing-text poppins-text-label"
-                        style={{ paddingBottom: "5px" }}
                       >
-                        E-mail
+                        Email
                       </Text>
                       <InputGroup>
                         <InputLeftElement
@@ -271,20 +270,19 @@ function Login() {
                           type="text"
                           required
                           className="buttonHeight"
-                          placeholder="E-mail"
+                          placeholder="Email"
                           style={{ borderColor: "#0385FD", borderWidth: "2px" }}
                         />
                       </InputGroup>
                     </FormControl>
                     <FormControl style={{ marginTop: "0" }}>
                       <Text
-                        fontSize="sm"
                         className="letter-spacing-text poppins-text-label"
-                        style={{ padding: "10px 0 5px 0" }}
+                        style={{ padding: "1vh 0 1vh 0", marginBottom: "0" }}
                       >
                         Senha
                       </Text>
-                      <InputGroup style={{ alignItems: "center" }}>
+                      <InputGroup style={{ alignItems: "center"}}>
                         <PasswordInput
                           onChange={handleChange}
                           name="password"
