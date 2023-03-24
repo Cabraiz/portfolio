@@ -74,3 +74,18 @@
     min-height: 50px;
     height: 7.3vh !important;
 }
+
+.fastAnimation {
+    animation: linear;
+    animation-name: run;
+    animation-duration: 0s;
+}
+
+@keyframes run {
+    0% {
+        width: 50%;
+    }
+    100% {
+        width: 100%;
+    }
+  }

@@ -20,6 +20,7 @@ import {
   FormControl,
   Text,
   InputRightElement,
+  VStack,
 } from "@chakra-ui/react";
 
 import { FaUserAlt, FaLock } from "react-icons/fa";
@@ -97,6 +98,8 @@ function Login() {
   const [isDesktop, setIsDesktop] = useState(false);
   const [realHeight, setrealHeight] = useState("");
 
+  const [isAnimationSet, setAnimationSet] = useState(false);
+
   const notifySucesso = () => {
     toast.success("Sucesso!", {
       position: "bottom-right",
@@ -122,6 +125,10 @@ function Login() {
       theme: "colored",
     });
   };
+
+  useEffect(() => {
+    setAnimationSet(true);
+  }, []);
 
   useEffect(() => {
     if(isMobile)
@@ -204,26 +211,26 @@ function Login() {
             display={isDesktop ? "none" : "flex"}
             style={{ backgroundColor: "#0485FF", alignItems: "end" }}
           >
-            <Stack justifyContent="end" alignItems="end" h={realHeight}>
-              <Image
-                h="full"
-                paddingTop="8.72vh"
-                marginBlock="-6px"
-                objectFit="cover"
-                src={Login_Image}
-              />
+            <Stack h={realHeight}>
+              <Box mt="20" h="full" display="flex">
+                <Image
+                  className={isAnimationSet ? "fastAnimation" : ""}
+                  marginBlock="-10px"
+                  objectFit="cover"
+                  src={Login_Image}
+                />
+              </Box>
               <Box
                 style={{
-                  justifyContent: "space-between",
                   backgroundColor: "#00CC99",
                   marginTop: "0",
-                  padding: "2.5vh 5.2vw 3.75vh 5.2vw"
+                  padding: "2vh 5.2vw 1.5vh 5.2vw"
                 }}
               >
                 <Text
                   fontSize="4xl"
                   className="frase-imagem-logo"
-                  style={{ padding: "0 3.55vw 1.2vh 3.55vw" }}
+                  padding= "0 3vw 0 3vw"
                 >
                   {textoTitle}
                 </Text>
