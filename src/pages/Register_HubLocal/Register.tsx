@@ -20,6 +20,7 @@ import {
   FormControl,
   Text,
   InputRightElement,
+  VStack,
 } from "@chakra-ui/react";
 
 import { FaUserAlt, FaLock } from "react-icons/fa";
@@ -94,8 +95,9 @@ function Register() {
   const [login, { isLoading }] = useLoginMutation();
   const dispatch = useDispatch();
 
-  const [isDesktop, setIsDesktop] = useState(false);
   const [realHeight, setrealHeight] = useState("");
+
+  const [isAnimationSet, setAnimationSet] = useState(false);
 
   const notifySucesso = () => {
     toast.success("Sucesso!", {
@@ -124,21 +126,16 @@ function Register() {
   };
 
   useEffect(() => {
+    setAnimationSet(true);
+  }, []);
+
+  useEffect(() => {
     if(isMobile)
       setrealHeight(`${window.innerHeight}px`);
     else{
       setrealHeight("100vh");
     }
   }, [realHeight]);
-
-  useEffect(() => {
-    const media = window.matchMedia("(max-width:700px)");
-    const listener = () => setIsDesktop(media.matches);
-    listener();
-    window.addEventListener("resize", listener);
-
-    return () => window.removeEventListener("resize", listener);
-  }, [isDesktop]);
 
   useEffect(() => {
     const node = userRef.current;
@@ -194,46 +191,46 @@ function Register() {
         alignItems="center"
       >
         <Grid
-          className="column"
           templateColumns="minmax(100px, 1fr)"
           autoFlow="column"
         >
           <GridItem
             w="50vw"
-            h={realHeight}
-            display={isDesktop ? "none" : "flex"}
+            maxH={realHeight}
+            display={{ base: "none", md: "flex" }}
             style={{ backgroundColor: "#0485FF", alignItems: "end" }}
           >
-            <Stack justifyContent="end" alignItems="end" h={realHeight}>
+            <Stack minH={realHeight} maxH={realHeight} justifyContent="end">
               <Image
-                h="full"
-                paddingTop="8.72vh"
-                marginBlock="-6px"
+                flexGrow="100"
+                className={isAnimationSet ? "fastAnimation" : ""}
+                marginBlock="-10px"
                 objectFit="cover"
                 src={Login_Image}
+                marginTop="10vh"
               />
-              <Box
+              <Stack
                 style={{
-                  justifyContent: "space-between",
                   backgroundColor: "#00CC99",
                   marginTop: "0",
-                  padding: "2.5vh 5.2vw 3.75vh 5.2vw"
-                }}
-              >
+                  padding: "2vh 5vw 2vh 5vw"
+                }}>
                 <Text
-                  fontSize="4xl"
+                  fontSize="35px"
                   className="frase-imagem-logo"
-                  style={{ padding: "0 3.55vw 1.2vh 3.55vw" }}
+                  style={{
+                    padding: "0 5vw 0 5vw"
+                  }}
                 >
                   {textoTitle}
                 </Text>
                 <Text
-                  fontSize="md"
+                  fontSize="16px"
                   className="subfrase-imagem-logo letter-spacing-text "
                 >
                   {textoSubtitle}
                 </Text>
-              </Box>
+              </Stack>
             </Stack>
           </GridItem>
           <GridItem w="50vw" className="column columnB" h={realHeight}>
@@ -247,7 +244,7 @@ function Register() {
               <Box minW={{ md: "31vw" }}>
                 <form onSubmit={handleSubmit}>
                   <Stack
-                    w={isDesktop ? "90vw" : "auto"}
+                    w={{ base: "90vw", md: "auto" }}
                     spacing={6}
                     backgroundColor="whiteAlpha.900"
                     style={{ paddingBottom: "0" }}

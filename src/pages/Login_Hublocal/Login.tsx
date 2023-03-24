@@ -200,14 +200,14 @@ function Login() {
             display={{ base: "none", md: "flex" }}
             style={{ backgroundColor: "#0485FF", alignItems: "end" }}
           >
-            <Stack minH={realHeight} justifyContent="end">
+            <Stack minH={realHeight} maxH={realHeight} justifyContent="end">
               <Image
                 flexGrow="100"
                 className={isAnimationSet ? "fastAnimation" : ""}
                 marginBlock="-10px"
                 objectFit="cover"
                 src={Login_Image}
-                paddingTop="10vh"
+                marginTop="10vh"
               />
               <Stack
                 style={{
