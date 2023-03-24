@@ -204,7 +204,7 @@ function Register() {
               <Image
                 flexGrow="100"
                 className={isAnimationSet ? "fastAnimation" : ""}
-                marginBlock="-10px"
+                marginBlock="-15px"
                 objectFit="cover"
                 src={Login_Image}
                 marginTop="10vh"
@@ -212,12 +212,11 @@ function Register() {
               <Stack
                 style={{
                   backgroundColor: "#00CC99",
-                  marginTop: "0",
-                  padding: "2vh 5vw 2vh 5vw"
+                  padding: "2.2vh 5vw 4vh 5vw",
                 }}>
                 <Text
-                  fontSize="35px"
                   className="frase-imagem-logo"
+                  margin= "0"
                   style={{
                     padding: "0 5vw 0 5vw"
                   }}
@@ -225,8 +224,7 @@ function Register() {
                   {textoTitle}
                 </Text>
                 <Text
-                  fontSize="16px"
-                  className="subfrase-imagem-logo letter-spacing-text "
+                  className="subfrase-imagem-logo letter-spacing-text"
                 >
                   {textoSubtitle}
                 </Text>
