@@ -1,19 +1,21 @@
 @font-face {
     font-family: 'Poppins';
     src: local('Poppins'), url('../../fonts/Poppins/Poppins-Bold.ttf');
-    font-style: normal;
-    font-weight: bold;
+    font-style: bold;
+    font-weight: 700;
 }
 
 @font-face {
     font-family: 'Poppins';
     src: local('Poppins'), url('../../fonts/Poppins/Poppins-Regular.ttf');
+    font-style: normal;
     font-weight: 400;
 }
 
 @font-face {
     font-family: 'Poppins';
-    src: local('Poppins'), url('../../fonts/Poppins/Poppins-Medium.ttf');
+    src: local('Poppins'), url("../../fonts/Poppins/Poppins-SemiBold.ttf");
+    font-style: normal;
     font-weight: 500;
 }
 
@@ -27,7 +29,7 @@
 
 .poppins-text-label{
     font-family: 'Poppins', sans-serif;
-    font-weight: '500';
+    font-weight: 500;
     font-size: 16px;
 }
 
@@ -35,7 +37,7 @@
     margin-bottom: 0;
     font-family: 'Poppins', sans-serif;
     font-weight: bold;
-    font-weight: '700';
+    font-weight: 700;
 }
 
 .frase-imagem-logo{
