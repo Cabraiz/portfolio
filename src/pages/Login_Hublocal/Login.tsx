@@ -95,7 +95,6 @@ function Login() {
   const [login, { isLoading }] = useLoginMutation();
   const dispatch = useDispatch();
 
-  const [isDesktop, setIsDesktop] = useState(false);
   const [realHeight, setrealHeight] = useState("");
 
   const [isAnimationSet, setAnimationSet] = useState(false);
@@ -137,15 +136,6 @@ function Login() {
       setrealHeight("100vh");
     }
   }, [realHeight]);
-
-  useEffect(() => {
-    const media = window.matchMedia("(max-width:700px)");
-    const listener = () => setIsDesktop(media.matches);
-    listener();
-    window.addEventListener("resize", listener);
-
-    return () => window.removeEventListener("resize", listener);
-  }, [isDesktop]);
 
   useEffect(() => {
     const node = userRef.current;
@@ -201,46 +191,46 @@ function Login() {
         alignItems="center"
       >
         <Grid
-          className="column"
           templateColumns="minmax(100px, 1fr)"
           autoFlow="column"
         >
           <GridItem
             w="50vw"
             h={realHeight}
-            display={isDesktop ? "none" : "flex"}
+            display={{ base: "none", md: "flex" }}
             style={{ backgroundColor: "#0485FF", alignItems: "end" }}
           >
-            <Stack h={realHeight}>
-              <Box mt="20" h="full" display="flex">
-                <Image
-                  className={isAnimationSet ? "fastAnimation" : ""}
-                  marginBlock="-10px"
-                  objectFit="cover"
-                  src={Login_Image}
-                />
-              </Box>
-              <Box
+            <Stack h={realHeight} justifyContent="center">
+              <Image
+                h= {{ base: "auto", md: "full" }}
+                className={isAnimationSet ? "fastAnimation" : ""}
+                marginBlock="-10px"
+                objectFit="cover"
+                src={Login_Image}
+                marginTop="10vh"
+              />
+              <Stack
                 style={{
                   backgroundColor: "#00CC99",
                   marginTop: "0",
-                  padding: "2vh 5.2vw 1.5vh 5.2vw"
-                }}
-              >
+                  padding: "2vh 5vw 2vh 5vw"
+                }}>
                 <Text
-                  fontSize="4xl"
+                  fontSize="35px"
                   className="frase-imagem-logo"
-                  padding= "0 3vw 0 3vw"
+                  style={{
+                    padding: "0 5vw 0 5vw"
+                  }}
                 >
                   {textoTitle}
                 </Text>
                 <Text
-                  fontSize="md"
+                  fontSize="16px"
                   className="subfrase-imagem-logo letter-spacing-text "
                 >
                   {textoSubtitle}
                 </Text>
-              </Box>
+              </Stack>
             </Stack>
           </GridItem>
           <GridItem w="50vw" className="column columnB" h={realHeight}>
@@ -254,7 +244,7 @@ function Login() {
               <Box minW={{ md: "31vw" }}>
                 <form onSubmit={handleSubmit}>
                   <Stack
-                    w={isDesktop ? "90vw" : "auto"}
+                    w={{ base: "90vw", md: "auto" }}
                     spacing={6}
                     backgroundColor="whiteAlpha.900"
                     style={{ paddingBottom: "0" }}
