@@ -196,18 +196,18 @@ function Login() {
         >
           <GridItem
             w="50vw"
-            h={realHeight}
+            maxH={realHeight}
             display={{ base: "none", md: "flex" }}
             style={{ backgroundColor: "#0485FF", alignItems: "end" }}
           >
-            <Stack h={realHeight} justifyContent="center">
+            <Stack minH={realHeight} justifyContent="end">
               <Image
-                h= {{ base: "auto", md: "full" }}
+                flexGrow="100"
                 className={isAnimationSet ? "fastAnimation" : ""}
                 marginBlock="-10px"
                 objectFit="cover"
                 src={Login_Image}
-                marginTop="10vh"
+                paddingTop="10vh"
               />
               <Stack
                 style={{
