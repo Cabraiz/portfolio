@@ -23,6 +23,7 @@ import { PrivateOutlet } from "./redux/shared/utils/PrivateOutlet";
 import Mateus from "./pages/Mateus/Mateus";
 //import Firebase from "./pages/Surprise/Surprise";
 
+import "./pages/Login_HubLocal/Login.css";
 import "./pages/Mateus/Mateus.css";
 import "./pages/Surprise/Surprise.css";
 
@@ -136,7 +137,10 @@ function App() {
 
   const { pathname } = useLocation();
 
-  const isNavOn = (pathname === '/hublocal') || (pathname === "/loginhublocal") || (pathname === "/registerhublocal")
+  const isNavOn =
+    pathname === "/hublocal" ||
+    pathname === "/loginhublocal" ||
+    pathname === "/registerhublocal";
 
   return (
     <>
@@ -145,7 +149,7 @@ function App() {
           <title>{title ? title : "No title"}</title>
         </Helmet>
       </HelmetProvider>
-      { isNavOn ? null : (
+      {isNavOn ? null : (
         <Navbar
           className="border-gradient-green"
           style={{

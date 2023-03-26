@@ -63,7 +63,7 @@ function PasswordInput({
         onChange={onChange}
         id="password"
         required
-        className="buttonHeight"
+        className="inputSettings"
         type={showPassword ? "text" : "password"}
         placeholder="Senha"
         style={{ borderColor: "#0385FD", borderWidth: "2px" }}
@@ -200,9 +200,9 @@ function Login() {
             display={{ base: "none", md: "flex" }}
             style={{ backgroundColor: "#0485FF", alignItems: "end" }}
           >
-            <Stack minH={realHeight} maxH={realHeight} justifyContent="end">
+            <Stack minH={realHeight} maxH={realHeight} justifyContent="end" alignItems="center">
               <Image
-                flexGrow="100"
+                flexGrow="1"
                 className={isAnimationSet ? "fastAnimation" : ""}
                 marginBlock="-15px"
                 objectFit="cover"
@@ -249,7 +249,8 @@ function Login() {
                   >
                     <FormControl>
                       <Text
-                        className="letter-spacing-text poppins-text-label"
+                        className="letter-spacing-text poppins-text-label" 
+                        style={{ padding: "1vh 0 1vh 0", marginBottom: "0" }}
                       >
                         Email
                       </Text>
@@ -264,7 +265,7 @@ function Login() {
                           name="username"
                           type="text"
                           required
-                          className="buttonHeight"
+                          className="inputSettings"
                           placeholder="Email"
                           style={{ borderColor: "#0385FD", borderWidth: "2px" }}
                         />
@@ -285,13 +286,11 @@ function Login() {
                       </InputGroup>
                     </FormControl>
                     <Button
-                      className="buttonHeight"
+                      className="buttonSettings buttonFont"
                       type="submit"
                       variant="solid"
                       style={{
                         backgroundColor: "#0385FD",
-                        color: "#FFFFFF",
-                        fontWeight: "700",
                       }}
                     >
                       <Text
@@ -302,13 +301,11 @@ function Login() {
                       </Text>
                     </Button>
                     <Button
-                      className="buttonHeight"
+                      className="buttonSettings buttonFont"
                       type="submit"
                       variant="solid"
                       style={{
-                        backgroundColor: "#00CC99",
-                        color: "#FFFFFF",
-                        fontWeight: "700",
+                        backgroundColor: "#00CC99"
                       }}
                     >
                       <Text

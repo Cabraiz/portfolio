@@ -73,9 +73,14 @@
     grid-column:span 2; /* B takes 2 columns */
 } 
 
-.buttonHeight {
+.buttonSettings, .inputSettings {
     min-height: 50px;
     height: 7.3vh !important;
+}
+
+.buttonFont {
+    color: #FFFFFF;
+    font-weight: 700;
 }
 
 .fastAnimation {

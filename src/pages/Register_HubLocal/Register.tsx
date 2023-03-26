@@ -20,6 +20,7 @@ import {
   FormControl,
   Text,
   InputRightElement,
+  VStack,
 } from "@chakra-ui/react";
 
 import { FaUserAlt, FaLock } from "react-icons/fa";
@@ -62,7 +63,7 @@ function PasswordInput({
         onChange={onChange}
         id="password"
         required
-        className="buttonHeight"
+        className="inputSettings"
         type={showPassword ? "text" : "password"}
         placeholder="Senha"
         style={{ borderColor: "#0385FD", borderWidth: "2px" }}
@@ -73,28 +74,6 @@ function PasswordInput({
         </Button>
       </InputRightElement>
     </InputGroup>
-  );
-}
-
-
-function NomeInput({
-  name,
-  onChange,
-}: {
-  name: string;
-  onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-}) {
-
-  return (
-    <Input
-      name={name}
-      onChange={onChange}
-      id="nome"
-      required
-
-      className="buttonHeight"
-      style={{ borderColor: "#0385FD", borderWidth: "2px" }}
-    />
   );
 }
 
@@ -221,9 +200,9 @@ function Register() {
             display={{ base: "none", md: "flex" }}
             style={{ backgroundColor: "#0485FF", alignItems: "end" }}
           >
-            <Stack minH={realHeight} maxH={realHeight} justifyContent="end">
+            <Stack minH={realHeight} maxH={realHeight} justifyContent="end" alignItems="center">
               <Image
-                flexGrow="100"
+                flexGrow="1"
                 className={isAnimationSet ? "fastAnimation" : ""}
                 marginBlock="-15px"
                 objectFit="cover"
@@ -270,7 +249,8 @@ function Register() {
                   >
                     <FormControl>
                       <Text
-                        className="letter-spacing-text poppins-text-label"
+                        className="letter-spacing-text poppins-text-label" 
+                        style={{ padding: "1vh 0 1vh 0", marginBottom: "0" }}
                       >
                         Email
                       </Text>
@@ -285,7 +265,7 @@ function Register() {
                           name="username"
                           type="text"
                           required
-                          className="buttonHeight"
+                          className="inputSettings"
                           placeholder="Email"
                           style={{ borderColor: "#0385FD", borderWidth: "2px" }}
                         />
@@ -303,20 +283,14 @@ function Register() {
                           onChange={handleChange}
                           name="password"
                         ></PasswordInput>
-                        <NomeInput 
-                          onChange={handleChange}
-                          name="nome"
-                        ></NomeInput>
                       </InputGroup>
                     </FormControl>
                     <Button
-                      className="buttonHeight"
+                      className="buttonSettings buttonFont"
                       type="submit"
                       variant="solid"
                       style={{
                         backgroundColor: "#0385FD",
-                        color: "#FFFFFF",
-                        fontWeight: "700",
                       }}
                     >
                       <Text
@@ -327,13 +301,11 @@ function Register() {
                       </Text>
                     </Button>
                     <Button
-                      className="buttonHeight"
+                      className="buttonSettings buttonFont"
                       type="submit"
                       variant="solid"
                       style={{
-                        backgroundColor: "#00CC99",
-                        color: "#FFFFFF",
-                        fontWeight: "700",
+                        backgroundColor: "#00CC99"
                       }}
                     >
                       <Text

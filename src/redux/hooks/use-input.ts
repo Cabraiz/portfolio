@@ -30,33 +30,30 @@ const inputReducer = (state: InputState, action: Action<InputActionType>) => {
 };
 
 const useInput = () => {
-    const [{ text, hasBeenTouched }, dispach] = useReducer (
-        inputReducer,
-        InitialInputState
-    );
+  const [{ text, hasBeenTouched }, dispach] = useReducer(
+    inputReducer,
+    InitialInputState
+  );
 
-    const textChangeHandler = (e: ChangeEvent<HTMLInputElement>) => {
-        dispach({ type: INPUT_ACTION_CHANGE, value: e.target.value });
+  const textChangeHandler = (e: ChangeEvent<HTMLInputElement>) => {
+    dispach({ type: INPUT_ACTION_CHANGE, value: e.target.value });
+  };
 
-    }
+  const inputBlurHandler = (e: ChangeEvent<HTMLInputElement>) => {
+    dispach({ type: INPUT_ACTION_BLUR });
+  };
 
-    const inputBlurHandler = (e: ChangeEvent<HTMLInputElement>) => {
-        dispach({ type: INPUT_ACTION_BLUR});
+  const clearHandler = (e: ChangeEvent<HTMLInputElement>) => {
+    dispach({ type: INPUT_ACTION_CLEAR });
+  };
 
-    }
+  return {
+    text,
 
-    const clearHandler = (e: ChangeEvent<HTMLInputElement>) => {
-        dispach({ type: INPUT_ACTION_CLEAR });
-
-    }
-
-    return {
-        text, 
-
-        textChangeHandler,
-        inputBlurHandler,
-        clearHandler
-    }
+    textChangeHandler,
+    inputBlurHandler,
+    clearHandler,
+  };
 };
 
-export default useInput
+export default useInput;
