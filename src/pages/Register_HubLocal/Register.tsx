@@ -45,7 +45,6 @@ function NomeInput({
   name: string;
   onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }) {
-
   return (
     <InputGroup size="md">
       <Input
@@ -53,7 +52,6 @@ function NomeInput({
         onChange={onChange}
         id="nome"
         required
-
         className="inputSettings"
         style={{ borderColor: "#0385FD", borderWidth: "2px" }}
       />
@@ -68,7 +66,6 @@ function PasswordInput({
   name: string;
   onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }) {
-
   return (
     <InputGroup size="md">
       <Input
@@ -76,7 +73,6 @@ function PasswordInput({
         onChange={onChange}
         id="password"
         required
-
         className="inputSettings"
         style={{ borderColor: "#0385FD", borderWidth: "2px" }}
       />
@@ -135,9 +131,8 @@ function Register() {
   }, []);
 
   useEffect(() => {
-    if(isMobile)
-      setrealHeight(`${window.innerHeight}px`);
-    else{
+    if (isMobile) setrealHeight(`${window.innerHeight}px`);
+    else {
       setrealHeight("100vh");
     }
   }, [realHeight]);
@@ -195,17 +190,19 @@ function Register() {
         justifyContent="center"
         alignItems="center"
       >
-        <Grid
-          templateColumns="minmax(100px, 1fr)"
-          autoFlow="column"
-        >
+        <Grid templateColumns="minmax(100px, 1fr)" autoFlow="column">
           <GridItem
             w="50vw"
             maxH={realHeight}
             display={{ base: "none", md: "flex" }}
             style={{ backgroundColor: "#0485FF", alignItems: "end" }}
           >
-            <Stack minH={realHeight} maxH={realHeight} justifyContent="end" alignItems="center">
+            <Stack
+              minH={realHeight}
+              maxH={realHeight}
+              justifyContent="end"
+              alignItems="center"
+            >
               <Image
                 flexGrow="1"
                 className={isAnimationSet ? "fastAnimation" : ""}
@@ -218,19 +215,18 @@ function Register() {
                 style={{
                   backgroundColor: "#00CC99",
                   padding: "2.2vh 5vw 4vh 5vw",
-                }}>
+                }}
+              >
                 <Text
                   className="frase-imagem-logo"
-                  margin= "0"
+                  margin="0"
                   style={{
-                    padding: "0 5vw 0 5vw"
+                    padding: "0 5vw 0 5vw",
                   }}
                 >
                   {textoTitle}
                 </Text>
-                <Text
-                  className="subfrase-imagem-logo letter-spacing-text"
-                >
+                <Text className="subfrase-imagem-logo letter-spacing-text">
                   {textoSubtitle}
                 </Text>
               </Stack>
@@ -244,7 +240,7 @@ function Register() {
                 w="24vw"
                 src={Login_Logo}
               />
-              <Box minW={{ md: "31vw" }} style={{ marginTop: "0"}}>
+              <Box minW={{ md: "31vw" }} style={{ marginTop: "0" }}>
                 <form onSubmit={handleSubmit}>
                   <Stack
                     w={{ base: "90vw", md: "auto" }}
@@ -253,12 +249,10 @@ function Register() {
                     style={{ paddingBottom: "0" }}
                   >
                     <FormControl style={{ marginTop: "0" }}>
-                      <Text
-                        className="letter-spacing-text poppins-text-label textPattern" 
-                      >
+                      <Text className="letter-spacing-text poppins-text-label textPattern">
                         Nome
                       </Text>
-                      <InputGroup style={{ alignItems: "center"}}>
+                      <InputGroup style={{ alignItems: "center" }}>
                         <NomeInput
                           onChange={handleChange}
                           name="nome"
@@ -266,9 +260,7 @@ function Register() {
                       </InputGroup>
                     </FormControl>
                     <FormControl style={{ marginTop: "0" }}>
-                      <Text
-                        className="letter-spacing-text poppins-text-label textPattern"
-                      >
+                      <Text className="letter-spacing-text poppins-text-label textPattern">
                         Email
                       </Text>
                       <InputGroup>
@@ -283,12 +275,10 @@ function Register() {
                       </InputGroup>
                     </FormControl>
                     <FormControl style={{ marginTop: "0" }}>
-                      <Text
-                        className="letter-spacing-text poppins-text-label textPattern"
-                      >
+                      <Text className="letter-spacing-text poppins-text-label textPattern">
                         Senha
                       </Text>
-                      <InputGroup style={{ alignItems: "center"}}>
+                      <InputGroup style={{ alignItems: "center" }}>
                         <PasswordInput
                           onChange={handleChange}
                           name="password"
@@ -296,12 +286,10 @@ function Register() {
                       </InputGroup>
                     </FormControl>
                     <FormControl style={{ marginTop: "0" }}>
-                      <Text
-                        className="letter-spacing-text poppins-text-label textPattern"
-                      >
+                      <Text className="letter-spacing-text poppins-text-label textPattern">
                         Repetir Senha
                       </Text>
-                      <InputGroup style={{ alignItems: "center"}}>
+                      <InputGroup style={{ alignItems: "center" }}>
                         <PasswordInput
                           onChange={handleChange}
                           name="repeatpassword"
@@ -328,7 +316,7 @@ function Register() {
                       type="submit"
                       variant="solid"
                       style={{
-                        backgroundColor: "#00CC99"
+                        backgroundColor: "#00CC99",
                       }}
                     >
                       <Text

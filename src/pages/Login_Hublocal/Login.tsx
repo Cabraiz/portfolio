@@ -130,9 +130,8 @@ function Login() {
   }, []);
 
   useEffect(() => {
-    if(isMobile)
-      setrealHeight(`${window.innerHeight}px`);
-    else{
+    if (isMobile) setrealHeight(`${window.innerHeight}px`);
+    else {
       setrealHeight("100vh");
     }
   }, [realHeight]);
@@ -190,17 +189,19 @@ function Login() {
         justifyContent="center"
         alignItems="center"
       >
-        <Grid
-          templateColumns="minmax(100px, 1fr)"
-          autoFlow="column"
-        >
+        <Grid templateColumns="minmax(100px, 1fr)" autoFlow="column">
           <GridItem
             w="50vw"
             maxH={realHeight}
             display={{ base: "none", md: "flex" }}
             style={{ backgroundColor: "#0485FF", alignItems: "end" }}
           >
-            <Stack minH={realHeight} maxH={realHeight} justifyContent="end" alignItems="center">
+            <Stack
+              minH={realHeight}
+              maxH={realHeight}
+              justifyContent="end"
+              alignItems="center"
+            >
               <Image
                 flexGrow="1"
                 className={isAnimationSet ? "fastAnimation" : ""}
@@ -213,33 +214,32 @@ function Login() {
                 style={{
                   backgroundColor: "#00CC99",
                   padding: "2.2vh 5vw 4vh 5vw",
-                }}>
+                }}
+              >
                 <Text
                   className="frase-imagem-logo"
-                  margin= "0"
+                  margin="0"
                   style={{
-                    padding: "0 5vw 0 5vw"
+                    padding: "0 5vw 0 5vw",
                   }}
                 >
                   {textoTitle}
                 </Text>
-                <Text
-                  className="subfrase-imagem-logo letter-spacing-text"
-                >
+                <Text className="subfrase-imagem-logo letter-spacing-text">
                   {textoSubtitle}
                 </Text>
               </Stack>
             </Stack>
           </GridItem>
           <GridItem w="50vw" className="column columnB" h={realHeight}>
-            <Stack justifyContent="center" alignItems="center" >
+            <Stack justifyContent="center" alignItems="center">
               <Image
                 paddingBottom="1.5vh"
                 minW="300px"
                 w="24vw"
                 src={Login_Logo}
               />
-              <Box minW={{ md: "31vw" }} style={{ marginTop: "0"}}>
+              <Box minW={{ md: "31vw" }} style={{ marginTop: "0" }}>
                 <form onSubmit={handleSubmit}>
                   <Stack
                     w={{ base: "90vw", md: "auto" }}
@@ -249,7 +249,7 @@ function Login() {
                   >
                     <FormControl>
                       <Text
-                        className="letter-spacing-text poppins-text-label" 
+                        className="letter-spacing-text poppins-text-label"
                         style={{ padding: "1vh 0 1vh 0", marginBottom: "0" }}
                       >
                         Email
@@ -278,7 +278,7 @@ function Login() {
                       >
                         Senha
                       </Text>
-                      <InputGroup style={{ alignItems: "center"}}>
+                      <InputGroup style={{ alignItems: "center" }}>
                         <PasswordInput
                           onChange={handleChange}
                           name="password"
@@ -305,7 +305,7 @@ function Login() {
                       type="submit"
                       variant="solid"
                       style={{
-                        backgroundColor: "#00CC99"
+                        backgroundColor: "#00CC99",
                       }}
                     >
                       <Text
