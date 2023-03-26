@@ -239,16 +239,16 @@ function Register() {
           <GridItem w="50vw" className="column columnB" h={realHeight}>
             <Stack justifyContent="center" alignItems="center">
               <Image
-                paddingBottom="3.3vh"
+                paddingBottom="1.5vh"
                 minW="300px"
                 w="24vw"
                 src={Login_Logo}
               />
-              <Box minW={{ md: "31vw" }}>
+              <Box minW={{ md: "31vw" }} style={{ marginTop: "0"}}>
                 <form onSubmit={handleSubmit}>
                   <Stack
                     w={{ base: "90vw", md: "auto" }}
-                    spacing={6}
+                    spacing={5}
                     backgroundColor="whiteAlpha.900"
                     style={{ paddingBottom: "0" }}
                   >
