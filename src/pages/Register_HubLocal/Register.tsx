@@ -20,7 +20,6 @@ import {
   FormControl,
   Text,
   InputRightElement,
-  VStack,
 } from "@chakra-ui/react";
 
 import { FaUserAlt, FaLock } from "react-icons/fa";
@@ -39,6 +38,29 @@ import {
 import { ProtectedComponent } from "../../redux/feature/auth/ProtectedComponent";
 import { isMobile } from "react-device-detect";
 
+function NomeInput({
+  name,
+  onChange,
+}: {
+  name: string;
+  onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+}) {
+
+  return (
+    <InputGroup size="md">
+      <Input
+        name={name}
+        onChange={onChange}
+        id="nome"
+        required
+
+        className="inputSettings"
+        style={{ borderColor: "#0385FD", borderWidth: "2px" }}
+      />
+    </InputGroup>
+  );
+}
+
 function PasswordInput({
   name,
   onChange,
@@ -46,40 +68,23 @@ function PasswordInput({
   name: string;
   onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }) {
-  const CFaLock = chakra(FaLock);
-  const [showPassword, setShowPassword] = useState(false);
-
-  const handleShowClick = () => setShowPassword(!showPassword);
 
   return (
     <InputGroup size="md">
-      <InputLeftElement
-        h="100%"
-        pointerEvents="none"
-        children={<CFaLock color="gray.300" />}
-      />
       <Input
         name={name}
         onChange={onChange}
         id="password"
         required
+
         className="inputSettings"
-        type={showPassword ? "text" : "password"}
-        placeholder="Senha"
         style={{ borderColor: "#0385FD", borderWidth: "2px" }}
       />
-      <InputRightElement w="auto" height="100%" paddingRight="8px">
-        <Button h="70%" size="sm" onClick={handleShowClick}>
-          {showPassword ? "Ocultar" : "Mostrar"}
-        </Button>
-      </InputRightElement>
     </InputGroup>
   );
 }
 
 function Register() {
-  const CFaUserAlt = chakra(FaUserAlt);
-
   const [formState, setFormState] = React.useState<LoginRequest>({
     username: "",
     password: "",
@@ -247,34 +252,39 @@ function Register() {
                     backgroundColor="whiteAlpha.900"
                     style={{ paddingBottom: "0" }}
                   >
-                    <FormControl>
+                    <FormControl style={{ marginTop: "0" }}>
                       <Text
-                        className="letter-spacing-text poppins-text-label" 
-                        style={{ padding: "1vh 0 1vh 0", marginBottom: "0" }}
+                        className="letter-spacing-text poppins-text-label textPattern" 
+                      >
+                        Nome
+                      </Text>
+                      <InputGroup style={{ alignItems: "center"}}>
+                        <NomeInput
+                          onChange={handleChange}
+                          name="nome"
+                        ></NomeInput>
+                      </InputGroup>
+                    </FormControl>
+                    <FormControl style={{ marginTop: "0" }}>
+                      <Text
+                        className="letter-spacing-text poppins-text-label textPattern"
                       >
                         Email
                       </Text>
                       <InputGroup>
-                        <InputLeftElement
-                          h="100%"
-                          pointerEvents="none"
-                          children={<CFaUserAlt color="gray.300" />}
-                        />
                         <Input
                           onChange={handleChange}
                           name="username"
                           type="text"
                           required
                           className="inputSettings"
-                          placeholder="Email"
                           style={{ borderColor: "#0385FD", borderWidth: "2px" }}
                         />
                       </InputGroup>
                     </FormControl>
                     <FormControl style={{ marginTop: "0" }}>
                       <Text
-                        className="letter-spacing-text poppins-text-label"
-                        style={{ padding: "1vh 0 1vh 0", marginBottom: "0" }}
+                        className="letter-spacing-text poppins-text-label textPattern"
                       >
                         Senha
                       </Text>
@@ -282,6 +292,19 @@ function Register() {
                         <PasswordInput
                           onChange={handleChange}
                           name="password"
+                        ></PasswordInput>
+                      </InputGroup>
+                    </FormControl>
+                    <FormControl style={{ marginTop: "0" }}>
+                      <Text
+                        className="letter-spacing-text poppins-text-label textPattern"
+                      >
+                        Repetir Senha
+                      </Text>
+                      <InputGroup style={{ alignItems: "center"}}>
+                        <PasswordInput
+                          onChange={handleChange}
+                          name="repeatpassword"
                         ></PasswordInput>
                       </InputGroup>
                     </FormControl>
@@ -297,7 +320,7 @@ function Register() {
                         className="letter-spacing-button poppins-text-button"
                         fontSize="larger"
                       >
-                        LOGAR
+                        REGISTRAR
                       </Text>
                     </Button>
                     <Button
@@ -312,7 +335,7 @@ function Register() {
                         className="letter-spacing-button poppins-text-button"
                         fontSize="larger"
                       >
-                        CRIAR CONTA
+                        LOGAR
                       </Text>
                     </Button>
                   </Stack>

@@ -86,6 +86,11 @@
     animation-duration: 0s;
 }
 
+.textPattern {
+    padding: 1vh 0 1vh 0;
+    margin-bottom: 0;
+}
+
 @keyframes run {
     0% {
         width: 50%;
