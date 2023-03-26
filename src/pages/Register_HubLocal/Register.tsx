@@ -20,7 +20,6 @@ import {
   FormControl,
   Text,
   InputRightElement,
-  VStack,
 } from "@chakra-ui/react";
 
 import { FaUserAlt, FaLock } from "react-icons/fa";
@@ -74,6 +73,28 @@ function PasswordInput({
         </Button>
       </InputRightElement>
     </InputGroup>
+  );
+}
+
+
+function NomeInput({
+  name,
+  onChange,
+}: {
+  name: string;
+  onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+}) {
+
+  return (
+    <Input
+      name={name}
+      onChange={onChange}
+      id="nome"
+      required
+
+      className="buttonHeight"
+      style={{ borderColor: "#0385FD", borderWidth: "2px" }}
+    />
   );
 }
 
@@ -282,6 +303,10 @@ function Register() {
                           onChange={handleChange}
                           name="password"
                         ></PasswordInput>
+                        <NomeInput 
+                          onChange={handleChange}
+                          name="nome"
+                        ></NomeInput>
                       </InputGroup>
                     </FormControl>
                     <Button
