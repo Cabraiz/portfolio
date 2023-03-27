@@ -148,26 +148,7 @@ function Login() {
   const handleSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
 
-    try {
-      const userData = await login(formState).unwrap();
-      dispatch(tokenReceived({ ...userData, user }));
-      setUser("");
-      setPwd("");
-      navigate("/welcome");
-    } catch (err: any) {
-      const response = err?.response.status;
-      if (!err?.response) {
-        setErrMsg("No Sever Response");
-      } else if (response === 400) {
-        setErrMsg("Missing Usarname or Password");
-      } else if (response === 401) {
-        setErrMsg("Unauthorized");
-      } else {
-        setErrMsg("Login Failed");
-      }
-      const node = errRef.current;
-      node?.focus();
-    }
+    
   };
 
   const handleChange = ({

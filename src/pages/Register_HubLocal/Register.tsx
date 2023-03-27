@@ -18,6 +18,7 @@ import {
   FormControl,
   Text,
   Link,
+  FormLabel,
 } from "@chakra-ui/react";
 
 import { useDispatch } from "react-redux";
@@ -36,6 +37,7 @@ import { isMobile } from "react-device-detect";
 import useInput from "../../redux/hooks/input/use-input";
 import { validateNameLength, validatePasswordLength } from "../../redux/shared/utils/validation/lenght";
 import { validateEmail } from "../../redux/shared/utils/validation/email";
+import { NewUser } from "../../redux/app/models/NewUser";
 
 function NomeInput({
   value,
@@ -53,6 +55,12 @@ function NomeInput({
   return (
     <InputGroup size="md">
       <Input
+        value={value}
+        onChange={onChange}
+        onBlur={onBlur}
+        //FormHelperText={helperText}
+        
+
         type='text'
         name='name'
         id='name'
@@ -255,26 +263,17 @@ function Register() {
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    try {
-      const userData = await login(formState).unwrap();
-      dispatch(tokenReceived({ ...userData, user }));
-      setUser("");
-      setPwd("");
-      navigate("/welcome");
-    } catch (err: any) {
-      const response = err?.response.status;
-      if (!err?.response) {
-        setErrMsg("No Sever Response");
-      } else if (response === 400) {
-        setErrMsg("Missing Usarname or Password");
-      } else if (response === 401) {
-        setErrMsg("Unauthorized");
-      } else {
-        setErrMsg("Login Failed");
-      }
-      const node = errRef.current;
-      node?.focus();
+    if (password !== confirmPassword) return;
+
+    if(nameHasError || emailHasError || passwordHasError || confirmPasswordHasError) return;
+
+    if (name.length === 0 || email.length === 0 || password.length === 0 || confirmPassword.length === 0) return;
+
+    const newUser: NewUser = {
+      name,email,password
     }
+
+    console.log('NEW USER: ', newUser)
   };
 
   const textoTitle = "Junte-se a vários clientes satisfeitos.";
@@ -345,14 +344,14 @@ function Register() {
                 <form onSubmit={handleSubmit}>
                   <Stack
                     w={{ base: "90vw", md: "auto" }}
-                    spacing={5}
+                    spacing={4}
                     backgroundColor="whiteAlpha.900"
                     style={{ paddingBottom: "0" }}
                   >
-                    <FormControl style={{ marginTop: "0" }}>
-                      <Text className="letter-spacing-text poppins-text-label textPattern">
+                    <FormControl isRequired style={{ marginTop: "0" }}>
+                      <FormLabel className="letter-spacing-text poppins-text-label textPattern">
                         Nome
-                      </Text>
+                      </FormLabel>
                       <InputGroup style={{ alignItems: "center" }}>
                         <NomeInput
                           value={name}
@@ -363,10 +362,10 @@ function Register() {
                         ></NomeInput>
                       </InputGroup>
                     </FormControl>
-                    <FormControl style={{ marginTop: "0" }}>
-                      <Text className="letter-spacing-text poppins-text-label textPattern">
+                    <FormControl isRequired style={{ marginTop: "0" }}>
+                      <FormLabel className="letter-spacing-text poppins-text-label textPattern">
                         Email
-                      </Text>
+                      </FormLabel>
                       <InputGroup>
                         <EmailInput
                           value={email}
@@ -377,10 +376,10 @@ function Register() {
                         ></EmailInput>
                       </InputGroup>
                     </FormControl>
-                    <FormControl style={{ marginTop: "0" }}>
-                      <Text className="letter-spacing-text poppins-text-label textPattern">
+                    <FormControl isRequired style={{ marginTop: "0" }}>
+                      <FormLabel className="letter-spacing-text poppins-text-label textPattern">
                         Senha
-                      </Text>
+                      </FormLabel>
                       <InputGroup style={{ alignItems: "center" }}>
                         <PasswordInput
                           value={password}
@@ -391,10 +390,10 @@ function Register() {
                         ></PasswordInput>
                       </InputGroup>
                     </FormControl>
-                    <FormControl style={{ marginTop: "0" }}>
-                      <Text className="letter-spacing-text poppins-text-label textPattern">
+                    <FormControl isRequired style={{ marginTop: "0" }}>
+                      <FormLabel className="letter-spacing-text poppins-text-label textPattern">
                         Repetir Senha
-                      </Text>
+                      </FormLabel>
                       <InputGroup style={{ alignItems: "center" }}>
                         <ConfirmPasswordInput
                           value={confirmPassword}
@@ -404,12 +403,13 @@ function Register() {
                           helperText={confirmPassword.length > 0 && password !== confirmPassword ? 'Requer mínimo de 6 caracteres' : ''}
                         ></ConfirmPasswordInput>
                       </InputGroup>
-                    </FormControl>
+                    </FormControl >
                     <Button
                       className="buttonSettings buttonFont"
                       type="submit"
                       variant="solid"
                       style={{
+                        marginTop: "4.2vh",
                         backgroundColor: "#0385FD",
                       }}
                     >
