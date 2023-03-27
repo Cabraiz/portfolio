@@ -1,4 +1,4 @@
-import { Action } from "../shared/models/action.interface";
+import { Action } from "../../shared/models/action.interface";
 import { InputState } from "./model/InputState.interface";
 import {
   InputActionType,
@@ -7,7 +7,7 @@ import {
   INPUT_ACTION_CLEAR,
 } from "./model/InputAction";
 import { ChangeEvent, useReducer } from "react";
-import { ValidatorFn } from "../shared/utils/validation/models/ValidatorFn";
+import { ValidatorFn } from "../../shared/utils/validation/models/ValidatorFn";
 
 const InitialInputState: InputState = {
   text: "",
