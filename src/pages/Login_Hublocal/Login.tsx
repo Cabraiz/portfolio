@@ -20,6 +20,7 @@ import {
   FormControl,
   Text,
   InputRightElement,
+  Link,
 } from "@chakra-ui/react";
 
 import { FaUserAlt, FaLock } from "react-icons/fa";
@@ -299,21 +300,22 @@ function Login() {
                         LOGAR
                       </Text>
                     </Button>
-                    <Button
-                      className="buttonSettings buttonFont"
-                      type="submit"
-                      variant="solid"
-                      style={{
-                        backgroundColor: "#00CC99",
-                      }}
-                    >
-                      <Text
-                        className="letter-spacing-button poppins-text-button"
-                        fontSize="larger"
+                    <Link href='/registerhublocal' style={{ textDecoration: "none"}}>
+                      <Button
+                        className="buttonSettings buttonFont"
+                        variant="solid"
+                        style={{
+                          backgroundColor: "#00CC99",
+                        }}
                       >
-                        CRIAR CONTA
-                      </Text>
-                    </Button>
+                        <Text
+                          className="letter-spacing-button poppins-text-button"
+                          fontSize="larger"
+                        >
+                          CRIAR CONTA
+                        </Text>
+                      </Button>
+                    </Link>
                   </Stack>
                 </form>
               </Box>
