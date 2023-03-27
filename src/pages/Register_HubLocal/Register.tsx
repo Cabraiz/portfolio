@@ -336,7 +336,7 @@ function Register() {
             <Stack justifyContent="center" alignItems="center">
               <Image
                 paddingBottom="1.5vh"
-                minW="300px"
+                minW={{ base: "70vw", md: "300px" }}
                 w="24vw"
                 src={Login_Logo}
               />
