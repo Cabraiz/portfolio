@@ -35,7 +35,7 @@ import {
 import { ProtectedComponent } from "../../redux/feature/auth/ProtectedComponent";
 import { isMobile } from "react-device-detect";
 import useInput from "../../redux/hooks/input/use-input";
-import { validateNameLength } from "../../redux/shared/utils/validation/lenght";
+import { validateNameLength, validatePasswordLength } from "../../redux/shared/utils/validation/lenght";
 import { validateEmail } from "../../redux/shared/utils/validation/email";
 
 function NomeInput({
@@ -92,7 +92,6 @@ function EmailInput({
         size='small'
 
         required
-
         className="inputSettings"
         style={{ borderColor: "#0385FD", borderWidth: "2px" }}
       />
@@ -101,6 +100,34 @@ function EmailInput({
 }
 
 function PasswordInput({
+  value,
+  onChange,
+  onBlur,
+  error,
+  helperText,
+}: {
+  value: string;
+  onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onBlur: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  error: boolean | undefined;
+  helperText: string;
+}) {
+  return (
+    <InputGroup size="md">
+      <Input
+
+        required
+
+
+        placeholder="Mínimo de 6 caracteres"
+        className="inputSettings"
+        style={{ borderColor: "#0385FD", borderWidth: "2px" }}
+      />
+    </InputGroup>
+  );
+}
+
+function ConfirmPasswordInput({
   value,
   onChange,
   onBlur,
@@ -149,6 +176,23 @@ function Register() {
     inputBlurHandler: emailBlurHandler,
     clearHandler: emailClearHandler
   } = useInput(validateEmail)
+ 
+  const {
+    text: password,
+    shouldDisplayError: passwordHasError,
+    textChangeHandler: passwordChangeHandler,
+    inputBlurHandler: passwordBlurHandler,
+    clearHandler: passwordClearHandler
+  } = useInput(validatePasswordLength)
+
+  const {
+    text: confirmPassword,
+    shouldDisplayError: confirmPasswordHasError,
+    textChangeHandler: confirmPasswordChangeHandler,
+    inputBlurHandler: confirmPasswordBlurHandler,
+    clearHandler: confirmPasswordClearHandler
+  } = useInput(validatePasswordLength)
+
 
   const userRef = useRef<HTMLInputElement>(null);
   const errRef = useRef<HTMLInputElement>(null);
@@ -341,11 +385,11 @@ function Register() {
                       </Text>
                       <InputGroup style={{ alignItems: "center" }}>
                         <PasswordInput
-                          value={name}
-                          onChange={nameChangeHandler}
-                          onBlur={nameBlurHandler}
-                          error={nameHasError}
-                          helperText={nameHasError ? 'Escreva seu nome' : ''}
+                          value={password}
+                          onChange={passwordChangeHandler}
+                          onBlur={passwordBlurHandler}
+                          error={passwordHasError}
+                          helperText={passwordHasError ? 'Escreva seu nome' : ''}
                         ></PasswordInput>
                       </InputGroup>
                     </FormControl>
@@ -354,13 +398,13 @@ function Register() {
                         Repetir Senha
                       </Text>
                       <InputGroup style={{ alignItems: "center" }}>
-                        <PasswordInput
-                          value={name}
-                          onChange={nameChangeHandler}
-                          onBlur={nameBlurHandler}
-                          error={nameHasError}
-                          helperText={nameHasError ? 'Escreva seu nome' : ''}
-                        ></PasswordInput>
+                        <ConfirmPasswordInput
+                          value={confirmPassword}
+                          onChange={confirmPasswordChangeHandler}
+                          onBlur={confirmPasswordBlurHandler}
+                          error={confirmPasswordHasError}
+                          helperText={confirmPasswordHasError ? 'Escreva seu nome' : ''}
+                        ></ConfirmPasswordInput>
                       </InputGroup>
                     </FormControl>
                     <Button
