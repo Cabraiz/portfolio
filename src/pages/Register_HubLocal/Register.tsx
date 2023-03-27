@@ -19,8 +19,6 @@ import {
   Text,
 } from "@chakra-ui/react";
 
-import { FaUserAlt, FaLock } from "react-icons/fa";
-
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
@@ -57,11 +55,8 @@ function NomeInput({
         type='text'
         name='name'
         id='name'
-        variant='outline'
-        size='small'
         
         required
-
         className="inputSettings"
         style={{ borderColor: "#0385FD", borderWidth: "2px" }}
       />
@@ -88,10 +83,8 @@ function EmailInput({
         type='text'
         name='email'
         id='email'
-        variant='outline'
-        size='small'
-
         required
+
         className="inputSettings"
         style={{ borderColor: "#0385FD", borderWidth: "2px" }}
       />
@@ -115,7 +108,9 @@ function PasswordInput({
   return (
     <InputGroup size="md">
       <Input
-
+        type='text'
+        name='password'
+        id='password'
         required
 
 
@@ -143,7 +138,9 @@ function ConfirmPasswordInput({
   return (
     <InputGroup size="md">
       <Input
-
+        type='text'
+        name='confirmPassword'
+        id='confirmPassword'
         required
 
 
@@ -375,7 +372,7 @@ function Register() {
                           onChange={emailChangeHandler}
                           onBlur={emailBlurHandler}
                           error={emailHasError}
-                          helperText={emailHasError ? 'Escreva seu nome' : ''}
+                          helperText={emailHasError ? 'Escreva seu email' : ''}
                         ></EmailInput>
                       </InputGroup>
                     </FormControl>
@@ -389,7 +386,7 @@ function Register() {
                           onChange={passwordChangeHandler}
                           onBlur={passwordBlurHandler}
                           error={passwordHasError}
-                          helperText={passwordHasError ? 'Escreva seu nome' : ''}
+                          helperText={passwordHasError ? 'Requer no mínimo 6 caracteres' : ''}
                         ></PasswordInput>
                       </InputGroup>
                     </FormControl>
@@ -402,8 +399,8 @@ function Register() {
                           value={confirmPassword}
                           onChange={confirmPasswordChangeHandler}
                           onBlur={confirmPasswordBlurHandler}
-                          error={confirmPasswordHasError}
-                          helperText={confirmPasswordHasError ? 'Escreva seu nome' : ''}
+                          error={confirmPassword.length > 0 && password !== confirmPassword}
+                          helperText={confirmPassword.length > 0 && password !== confirmPassword ? 'Requer mínimo de 6 caracteres' : ''}
                         ></ConfirmPasswordInput>
                       </InputGroup>
                     </FormControl>
