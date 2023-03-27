@@ -20,7 +20,6 @@ import {
   FormControl,
   Text,
   InputRightElement,
-  VStack,
 } from "@chakra-ui/react";
 
 import { FaUserAlt, FaLock } from "react-icons/fa";

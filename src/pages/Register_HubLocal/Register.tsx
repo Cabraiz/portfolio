@@ -13,13 +13,10 @@ import {
   Button,
   InputGroup,
   Stack,
-  InputLeftElement,
-  chakra,
   Box,
   Image,
   FormControl,
   Text,
-  InputRightElement,
 } from "@chakra-ui/react";
 
 import { FaUserAlt, FaLock } from "react-icons/fa";
@@ -39,6 +36,7 @@ import { ProtectedComponent } from "../../redux/feature/auth/ProtectedComponent"
 import { isMobile } from "react-device-detect";
 import useInput from "../../redux/hooks/input/use-input";
 import { validateNameLength } from "../../redux/shared/utils/validation/lenght";
+import { validateEmail } from "../../redux/shared/utils/validation/email";
 
 function NomeInput({
   value,
@@ -56,7 +54,11 @@ function NomeInput({
   return (
     <InputGroup size="md">
       <Input
-
+        type='text'
+        name='name'
+        id='name'
+        variant='outline'
+        size='small'
         
         required
 
@@ -83,7 +85,11 @@ function EmailInput({
   return (
     <InputGroup size="md">
       <Input
-
+        type='text'
+        name='email'
+        id='email'
+        variant='outline'
+        size='small'
 
         required
 
@@ -135,6 +141,14 @@ function Register() {
     inputBlurHandler: nameBlurHandler,
     clearHandler: nameClearHandler
   } = useInput(validateNameLength)
+
+  const {
+    text: email,
+    shouldDisplayError: emailHasError,
+    textChangeHandler: emailChangeHandler,
+    inputBlurHandler: emailBlurHandler,
+    clearHandler: emailClearHandler
+  } = useInput(validateEmail)
 
   const userRef = useRef<HTMLInputElement>(null);
   const errRef = useRef<HTMLInputElement>(null);
@@ -313,11 +327,11 @@ function Register() {
                       </Text>
                       <InputGroup>
                         <EmailInput
-                          value={name}
-                          onChange={nameChangeHandler}
-                          onBlur={nameBlurHandler}
-                          error={nameHasError}
-                          helperText={nameHasError ? 'Escreva seu nome' : ''}
+                          value={email}
+                          onChange={emailChangeHandler}
+                          onBlur={emailBlurHandler}
+                          error={emailHasError}
+                          helperText={emailHasError ? 'Escreva seu nome' : ''}
                         ></EmailInput>
                       </InputGroup>
                     </FormControl>
