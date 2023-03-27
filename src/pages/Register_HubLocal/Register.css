@@ -73,22 +73,26 @@
     grid-column:span 2; /* B takes 2 columns */
 } 
 
-.buttonHeightandFont {
+.buttonSettings, .inputSettings {
     min-height: 50px;
     height: 7.3vh !important;
+    width: 100%;
+}
+
+.buttonFont {
     color: #FFFFFF;
     font-weight: 700;
+}
+
+.textPattern {
+    padding: 1vh 0 1vh 0;
+    margin-bottom: 0;
 }
 
 .fastAnimation {
     animation: linear;
     animation-name: run;
     animation-duration: 0s;
-}
-
-.textPattern {
-    padding: 1vh 0 1vh 0;
-    margin-bottom: 0;
 }
 
 @keyframes run {

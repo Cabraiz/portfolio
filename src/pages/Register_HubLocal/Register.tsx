@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect, useState, FormEvent } from "react";
 
 import Login_Logo from "../../assets/HubLocal/Login_Logo.webp";
 import Login_Image from "../../assets/HubLocal/Login_Image.webp";
@@ -17,6 +17,7 @@ import {
   Image,
   FormControl,
   Text,
+  Link,
 } from "@chakra-ui/react";
 
 import { useDispatch } from "react-redux";
@@ -251,7 +252,7 @@ function Register() {
     setErrMsg("");
   }, [user, pwd]);
 
-  const handleSubmit = async (e: { preventDefault: () => void }) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     try {
@@ -419,21 +420,22 @@ function Register() {
                         REGISTRAR
                       </Text>
                     </Button>
-                    <Button
-                      className="buttonSettings buttonFont"
-                      type="submit"
-                      variant="solid"
-                      style={{
-                        backgroundColor: "#00CC99",
-                      }}
-                    >
-                      <Text
-                        className="letter-spacing-button poppins-text-button"
-                        fontSize="larger"
+                    <Link href='/loginhublocal' style={{ textDecoration: "none"}}>
+                      <Button
+                        className="buttonSettings buttonFont"
+                        variant="solid"
+                        style={{
+                          backgroundColor: "#00CC99",
+                        }}
                       >
-                        LOGAR
-                      </Text>
-                    </Button>
+                        <Text
+                          className="letter-spacing-button poppins-text-button"
+                          fontSize="larger"
+                        >
+                          LOGAR
+                        </Text>
+                      </Button>
+                    </Link>
                   </Stack>
                 </form>
               </Box>
