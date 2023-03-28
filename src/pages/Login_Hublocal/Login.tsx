@@ -6,9 +6,6 @@ import Login_Image from "../../assets/HubLocal/Login_Image.webp";
 import { ToastContainer, toast } from "react-toastify";
 
 import {
-  Flex,
-  Grid,
-  GridItem,
   Input,
   Button,
   InputGroup,
@@ -16,7 +13,6 @@ import {
   InputLeftElement,
   chakra,
   Box,
-  Image,
   FormControl,
   Text,
   InputRightElement,
@@ -38,6 +34,8 @@ import {
 
 import { ProtectedComponent } from "../../redux/feature/auth/ProtectedComponent";
 import { isMobile } from "react-device-detect";
+
+import Login_RegisterHubLocal from "../../pages/Login_RegisterHubLocal"
 
 function PasswordInput({
   name,
@@ -164,164 +162,92 @@ function Login() {
     <h1>Loading...</h1>
   ) : (
     <>
-      <Flex
-        flexDirection="column"
-        backgroundColor="white"
-        justifyContent="center"
-        alignItems="center"
-      >
-        <Grid templateColumns="minmax(100px, 1fr)" autoFlow="column">
-          <GridItem
-            w="50vw"
-            maxH={realHeight}
-            display={{ base: "none", md: "flex" }}
-            style={{ backgroundColor: "#0485FF", alignItems: "end" }}
+      <Box minW={{ md: "31vw" }} style={{ marginTop: "0" }}>
+        <form onSubmit={handleSubmit}>
+          <Stack
+            w={{ base: "90vw", md: "auto" }}
+            spacing={1}
+            backgroundColor="whiteAlpha.900"
+            style={{ paddingBottom: "0" }}
           >
-            <Stack
-              minH={realHeight}
-              maxH={realHeight}
-              justifyContent="end"
-              alignItems="center"
+            <FormControl>
+              <Text
+                className="letter-spacing-text poppins-text-label"
+              >
+                Email
+              </Text>
+              <InputGroup className="inputPattern">
+                <InputLeftElement
+                  h="100%"
+                  pointerEvents="none"
+                  children={<CFaUserAlt color="gray.300" />}
+                />
+                <Input
+                  onChange={handleChange}
+                  name="username"
+                  type="text"
+                  required
+                  className="inputSettings"
+                  placeholder="Email"
+                  style={{ borderColor: "#0385FD", borderWidth: "2px" }}
+                />
+              </InputGroup>
+            </FormControl>
+            <FormControl>
+              <Text
+                className="letter-spacing-text poppins-text-label"
+              >
+                Senha
+              </Text>
+              <InputGroup className="inputPattern">
+                <PasswordInput
+                  onChange={handleChange}
+                  name="password"
+                ></PasswordInput>
+              </InputGroup>
+            </FormControl>
+            <Button
+              className="buttonSettings buttonFont"
+              type="submit"
+              variant="solid"
+              style={{
+                backgroundColor: "#0385FD",
+                marginTop: "2.5vh",
+                marginBottom: "2vh",
+                boxShadow: "0px 2px 2px 0px #00000040",
+              }}
             >
-              <Image
-                flexGrow="1"
-                className={isAnimationSet ? "fastAnimation" : ""}
-                marginBlock="-15px"
-                objectFit="cover"
-                src={Login_Image}
-                marginTop="10vh"
-              />
-              <Stack
+              <Text
+                className="letter-spacing-button poppins-text-button"
+                fontSize="larger"
+              >
+                LOGAR
+              </Text>
+            </Button>
+            <Link href='/registerhublocal' style={{ textDecoration: "none"}}>
+              <Button
+                className="buttonSettings buttonFont"
+                variant="solid"
                 style={{
                   backgroundColor: "#00CC99",
-                  padding: "2.2vh 5vw 4vh 5vw",
+                  boxShadow: "0px 2px 2px 0px #00000040",
                 }}
               >
                 <Text
-                  className="frase-imagem-logo"
-                  margin="0"
-                  style={{
-                    padding: "0 5vw 0 5vw",
-                  }}
+                  className="letter-spacing-button poppins-text-button"
+                  fontSize="larger"
                 >
-                  {textoTitle}
+                  CRIAR CONTA
                 </Text>
-                <Text className="subfrase-imagem-logo letter-spacing-text">
-                  {textoSubtitle}
-                </Text>
-              </Stack>
-            </Stack>
-          </GridItem>
-          <GridItem w="50vw" className="column columnB" h={realHeight}>
-            <Stack justifyContent="center" alignItems="center">
-              <Image
-                paddingBottom="1.5vh"
-                minW={{ base: "70vw", md: "300px" }}
-                w="24vw"
-                src={Login_Logo}
-              />
-              <Box minW={{ md: "31vw" }} style={{ marginTop: "0" }}>
-                <form onSubmit={handleSubmit}>
-                  <Stack
-                    w={{ base: "90vw", md: "auto" }}
-                    spacing={1}
-                    backgroundColor="whiteAlpha.900"
-                    style={{ paddingBottom: "0" }}
-                  >
-                    <FormControl>
-                      <Text
-                        className="letter-spacing-text poppins-text-label"
-                      >
-                        Email
-                      </Text>
-                      <InputGroup className="inputPattern">
-                        <InputLeftElement
-                          h="100%"
-                          pointerEvents="none"
-                          children={<CFaUserAlt color="gray.300" />}
-                        />
-                        <Input
-                          onChange={handleChange}
-                          name="username"
-                          type="text"
-                          required
-                          className="inputSettings"
-                          placeholder="Email"
-                          style={{ borderColor: "#0385FD", borderWidth: "2px" }}
-                        />
-                      </InputGroup>
-                    </FormControl>
-                    <FormControl>
-                      <Text
-                        className="letter-spacing-text poppins-text-label"
-                      >
-                        Senha
-                      </Text>
-                      <InputGroup className="inputPattern">
-                        <PasswordInput
-                          onChange={handleChange}
-                          name="password"
-                        ></PasswordInput>
-                      </InputGroup>
-                    </FormControl>
-                    <Button
-                      className="buttonSettings buttonFont"
-                      type="submit"
-                      variant="solid"
-                      style={{
-                        backgroundColor: "#0385FD",
-                        marginTop: "2.5vh",
-                        marginBottom: "2vh",
-                        boxShadow: "0px 2px 2px 0px #00000040",
-                      }}
-                    >
-                      <Text
-                        className="letter-spacing-button poppins-text-button"
-                        fontSize="larger"
-                      >
-                        LOGAR
-                      </Text>
-                    </Button>
-                    <Link href='/registerhublocal' style={{ textDecoration: "none"}}>
-                      <Button
-                        className="buttonSettings buttonFont"
-                        variant="solid"
-                        style={{
-                          backgroundColor: "#00CC99",
-                          boxShadow: "0px 2px 2px 0px #00000040",
-                        }}
-                      >
-                        <Text
-                          className="letter-spacing-button poppins-text-button"
-                          fontSize="larger"
-                        >
-                          CRIAR CONTA
-                        </Text>
-                      </Button>
-                    </Link>
-                  </Stack>
-                </form>
-              </Box>
-            </Stack>
-          </GridItem>
-        </Grid>
-        <ToastContainer
-          position="bottom-right"
-          autoClose={5000}
-          hideProgressBar={false}
-          newestOnTop={false}
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-          theme="colored"
-        />
-      </Flex>
+              </Button>
+            </Link>
+          </Stack>
+        </form>
+      </Box>
     </>
   );
 
-  return content;
+  return Login_RegisterHubLocal(realHeight, isAnimationSet, Login_Image, Login_Logo, content);
 }
 
 export default Login;

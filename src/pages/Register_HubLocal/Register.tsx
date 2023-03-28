@@ -6,15 +6,11 @@ import Login_Image from "../../assets/HubLocal/Login_Image.webp";
 import { ToastContainer, toast } from "react-toastify";
 
 import {
-  Flex,
-  Grid,
-  GridItem,
   Input,
   Button,
   InputGroup,
   Stack,
   Box,
-  Image,
   FormControl,
   Text,
   Link,
@@ -40,6 +36,8 @@ import useInput from "../../redux/hooks/input/use-input";
 import { validateNameLength, validatePasswordLength } from "../../redux/shared/utils/validation/lenght";
 import { validateEmail } from "../../redux/shared/utils/validation/email";
 import { NewUser } from "../../redux/app/models/NewUser";
+
+import Login_RegisterHubLocal from "../../pages/Login_RegisterHubLocal"
 
 function NomeInput({
   value,
@@ -295,183 +293,111 @@ function Register() {
     <h1>Loading...</h1>
   ) : (
     <>
-      <Flex
-        flexDirection="column"
-        backgroundColor="white"
-        justifyContent="center"
-        alignItems="center"
-      >
-        <Grid templateColumns="minmax(100px, 1fr)" autoFlow="column">
-          <GridItem
-            w="50vw"
-            maxH={realHeight}
-            display={{ base: "none", md: "flex" }}
-            style={{ backgroundColor: "#0485FF", alignItems: "end" }}
+      <Box minW={{ md: "31vw" }} style={{ marginTop: "0" }}>
+        <form onSubmit={handleSubmit}>
+          <Stack
+            w={{ base: "90vw", md: "auto" }}
+            spacing={1}
+            backgroundColor="whiteAlpha.900"
           >
-            <Stack
-              minH={realHeight}
-              maxH={realHeight}
-              justifyContent="end"
-              alignItems="center"
+            <FormControl isRequired>
+              <FormLabel className="letter-spacing-text poppins-text-label textPattern">
+                Nome
+              </FormLabel>
+              <InputGroup className="inputPattern">
+                <NomeInput
+                  value={name}
+                  onChange={nameChangeHandler}
+                  onBlur={nameBlurHandler}
+                  error={nameHasError}
+                  helperText={nameHasError ? 'Escreva seu nome' : ''}
+                ></NomeInput>
+              </InputGroup>
+            </FormControl>
+            <FormControl isRequired>
+              <FormLabel className="letter-spacing-text poppins-text-label textPattern">
+                Email
+              </FormLabel>
+              <InputGroup className="inputPattern">
+                <EmailInput
+                  value={email}
+                  onChange={emailChangeHandler}
+                  onBlur={emailBlurHandler}
+                  error={emailHasError}
+                  helperText={emailHasError ? 'Escreva seu email' : ''}
+                ></EmailInput>
+              </InputGroup>
+            </FormControl>
+            <FormControl isRequired>
+              <FormLabel className="letter-spacing-text poppins-text-label textPattern">
+                Senha
+              </FormLabel>
+              <InputGroup className="inputPattern">
+                <PasswordInput
+                  value={password}
+                  onChange={passwordChangeHandler}
+                  onBlur={passwordBlurHandler}
+                  error={passwordHasError}
+                  helperText={passwordHasError ? 'Requer no mínimo 6 caracteres' : ''}
+                ></PasswordInput>
+              </InputGroup>
+            </FormControl>
+            <FormControl isRequired>
+              <FormLabel className="letter-spacing-text poppins-text-label textPattern">
+                Repetir Senha
+              </FormLabel>
+              <InputGroup className="inputPattern">
+                <ConfirmPasswordInput
+                  value={confirmPassword}
+                  onChange={confirmPasswordChangeHandler}
+                  onBlur={confirmPasswordBlurHandler}
+                  error={confirmPassword.length > 0 && password !== confirmPassword}
+                  helperText={confirmPassword.length > 0 && password !== confirmPassword ? 'Requer mínimo de 6 caracteres' : ''}
+                ></ConfirmPasswordInput>
+              </InputGroup>
+            </FormControl >
+            <Button
+              className="buttonSettings buttonFont"
+              type="submit"
+              variant="solid"
+              style={{
+                boxShadow: "0px 2px 2px 0px #00000040",
+                marginTop: "3.7vh",
+                marginBottom: "1.5vh",
+                backgroundColor: "#0385FD",
+              }}
             >
-              <Image
-                flexGrow="1"
-                className={isAnimationSet ? "fastAnimation" : ""}
-                marginBlock="-15px"
-                objectFit="cover"
-                src={Login_Image}
-                marginTop="10vh"
-              />
-              <Stack
+              <Text
+                className="letter-spacing-button poppins-text-button"
+                fontSize="larger"
+              >
+                REGISTRAR
+              </Text>
+            </Button>
+            <Link href='/loginhublocal' style={{ textDecoration: "none"}}>
+              <Button
+                className="buttonSettings buttonFont"
+                variant="solid"
                 style={{
                   backgroundColor: "#00CC99",
-                  padding: "2.2vh 5vw 4vh 5vw",
+                  boxShadow: "0px 2px 2px 0px #00000040",
                 }}
               >
                 <Text
-                  className="frase-imagem-logo"
-                  margin="0"
-                  style={{
-                    padding: "0 5vw 0 5vw",
-                  }}
+                  className="letter-spacing-button poppins-text-button"
+                  fontSize="larger"
                 >
-                  {textoTitle}
+                  LOGAR
                 </Text>
-                <Text className="subfrase-imagem-logo letter-spacing-text">
-                  {textoSubtitle}
-                </Text>
-              </Stack>
-            </Stack>
-          </GridItem>
-          <GridItem w="50vw" className="column columnB" h={realHeight}>
-            <Stack justifyContent="center" alignItems="center">
-              <Image
-                paddingBottom="1.5vh"
-                minW={{ base: "70vw", md: "300px" }}
-                w="24vw"
-                src={Login_Logo}
-              />
-              <Box minW={{ md: "31vw" }} style={{ marginTop: "0" }}>
-                <form onSubmit={handleSubmit}>
-                  <Stack
-                    w={{ base: "90vw", md: "auto" }}
-                    spacing={1}
-                    backgroundColor="whiteAlpha.900"
-                  >
-                    <FormControl isRequired>
-                      <FormLabel className="letter-spacing-text poppins-text-label textPattern">
-                        Nome
-                      </FormLabel>
-                      <InputGroup className="inputPattern">
-                        <NomeInput
-                          value={name}
-                          onChange={nameChangeHandler}
-                          onBlur={nameBlurHandler}
-                          error={nameHasError}
-                          helperText={nameHasError ? 'Escreva seu nome' : ''}
-                        ></NomeInput>
-                      </InputGroup>
-                    </FormControl>
-                    <FormControl isRequired>
-                      <FormLabel className="letter-spacing-text poppins-text-label textPattern">
-                        Email
-                      </FormLabel>
-                      <InputGroup className="inputPattern">
-                        <EmailInput
-                          value={email}
-                          onChange={emailChangeHandler}
-                          onBlur={emailBlurHandler}
-                          error={emailHasError}
-                          helperText={emailHasError ? 'Escreva seu email' : ''}
-                        ></EmailInput>
-                      </InputGroup>
-                    </FormControl>
-                    <FormControl isRequired>
-                      <FormLabel className="letter-spacing-text poppins-text-label textPattern">
-                        Senha
-                      </FormLabel>
-                      <InputGroup className="inputPattern">
-                        <PasswordInput
-                          value={password}
-                          onChange={passwordChangeHandler}
-                          onBlur={passwordBlurHandler}
-                          error={passwordHasError}
-                          helperText={passwordHasError ? 'Requer no mínimo 6 caracteres' : ''}
-                        ></PasswordInput>
-                      </InputGroup>
-                    </FormControl>
-                    <FormControl isRequired>
-                      <FormLabel className="letter-spacing-text poppins-text-label textPattern">
-                        Repetir Senha
-                      </FormLabel>
-                      <InputGroup className="inputPattern">
-                        <ConfirmPasswordInput
-                          value={confirmPassword}
-                          onChange={confirmPasswordChangeHandler}
-                          onBlur={confirmPasswordBlurHandler}
-                          error={confirmPassword.length > 0 && password !== confirmPassword}
-                          helperText={confirmPassword.length > 0 && password !== confirmPassword ? 'Requer mínimo de 6 caracteres' : ''}
-                        ></ConfirmPasswordInput>
-                      </InputGroup>
-                    </FormControl >
-                    <Button
-                      className="buttonSettings buttonFont"
-                      type="submit"
-                      variant="solid"
-                      style={{
-                        boxShadow: "0px 2px 2px 0px #00000040",
-                        marginTop: "3.7vh",
-                        marginBottom: "1.5vh",
-                        backgroundColor: "#0385FD",
-                      }}
-                    >
-                      <Text
-                        className="letter-spacing-button poppins-text-button"
-                        fontSize="larger"
-                      >
-                        REGISTRAR
-                      </Text>
-                    </Button>
-                    <Link href='/loginhublocal' style={{ textDecoration: "none"}}>
-                      <Button
-                        className="buttonSettings buttonFont"
-                        variant="solid"
-                        style={{
-                          backgroundColor: "#00CC99",
-                          boxShadow: "0px 2px 2px 0px #00000040",
-                        }}
-                      >
-                        <Text
-                          className="letter-spacing-button poppins-text-button"
-                          fontSize="larger"
-                        >
-                          LOGAR
-                        </Text>
-                      </Button>
-                    </Link>
-                  </Stack>
-                </form>
-              </Box>
-            </Stack>
-          </GridItem>
-        </Grid>
-        <ToastContainer
-          position="bottom-right"
-          autoClose={5000}
-          hideProgressBar={false}
-          newestOnTop={false}
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-          theme="colored"
-        />
-      </Flex>
+              </Button>
+            </Link>
+          </Stack>
+        </form>
+      </Box>
     </>
   );
-
-  return content;
+  
+  return Login_RegisterHubLocal(realHeight, isAnimationSet, Login_Image, Login_Logo, content);
 }
 
 export default Register;
