@@ -75,7 +75,7 @@ function NomeInput({
     </InputGroup>
       {error ? (
         <FormHelperText>
-          Enter the email you'd like to receive the newsletter on.
+          { helperText }
         </FormHelperText>
       ) : (
         <FormErrorMessage>Email is required.</FormErrorMessage>
@@ -355,9 +355,8 @@ function Register() {
                 <form onSubmit={handleSubmit}>
                   <Stack
                     w={{ base: "90vw", md: "auto" }}
-                    spacing={2}
+                    spacing={1}
                     backgroundColor="whiteAlpha.900"
-                    style={{ paddingBottom: "0" }}
                   >
                     <FormControl isRequired>
                       <FormLabel className="letter-spacing-text poppins-text-label textPattern">
@@ -420,7 +419,8 @@ function Register() {
                       type="submit"
                       variant="solid"
                       style={{
-                        marginTop: "4.2vh",
+                        boxShadow: "0px 2px 2px 0px #00000040",
+                        marginTop: "3.7vh",
                         marginBottom: "1.5vh",
                         backgroundColor: "#0385FD",
                       }}
@@ -438,6 +438,7 @@ function Register() {
                         variant="solid"
                         style={{
                           backgroundColor: "#00CC99",
+                          boxShadow: "0px 2px 2px 0px #00000040",
                         }}
                       >
                         <Text

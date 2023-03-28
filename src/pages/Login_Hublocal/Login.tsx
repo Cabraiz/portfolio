@@ -271,7 +271,8 @@ function Login() {
                       style={{
                         backgroundColor: "#0385FD",
                         marginTop: "2.5vh",
-                        marginBottom: "2vh"
+                        marginBottom: "2vh",
+                        boxShadow: "0px 2px 2px 0px #00000040",
                       }}
                     >
                       <Text
@@ -287,6 +288,7 @@ function Login() {
                         variant="solid"
                         style={{
                           backgroundColor: "#00CC99",
+                          boxShadow: "0px 2px 2px 0px #00000040",
                         }}
                       >
                         <Text
