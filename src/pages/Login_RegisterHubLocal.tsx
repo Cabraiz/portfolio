@@ -1,5 +1,7 @@
 import { Flex, Grid, GridItem, Stack, Image, Text } from "@chakra-ui/react";
 
+import "./Login_RegisterHubLocal.css";
+
 function Login_RegisterHubLocal(
   realHeight: string,
   isAnimationSet: boolean,
