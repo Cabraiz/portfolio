@@ -224,18 +224,17 @@ function Login() {
                 <form onSubmit={handleSubmit}>
                   <Stack
                     w={{ base: "90vw", md: "auto" }}
-                    spacing={5}
+                    spacing={1}
                     backgroundColor="whiteAlpha.900"
                     style={{ paddingBottom: "0" }}
                   >
                     <FormControl>
                       <Text
                         className="letter-spacing-text poppins-text-label"
-                        style={{ padding: "1vh 0 1vh 0", marginBottom: "0" }}
                       >
                         Email
                       </Text>
-                      <InputGroup>
+                      <InputGroup className="inputPattern">
                         <InputLeftElement
                           h="100%"
                           pointerEvents="none"
@@ -252,14 +251,13 @@ function Login() {
                         />
                       </InputGroup>
                     </FormControl>
-                    <FormControl style={{ marginTop: "0" }}>
+                    <FormControl>
                       <Text
                         className="letter-spacing-text poppins-text-label"
-                        style={{ padding: "1vh 0 1vh 0", marginBottom: "0" }}
                       >
                         Senha
                       </Text>
-                      <InputGroup style={{ alignItems: "center" }}>
+                      <InputGroup className="inputPattern">
                         <PasswordInput
                           onChange={handleChange}
                           name="password"
@@ -272,6 +270,8 @@ function Login() {
                       variant="solid"
                       style={{
                         backgroundColor: "#0385FD",
+                        marginTop: "2.5vh",
+                        marginBottom: "2vh"
                       }}
                     >
                       <Text

@@ -19,6 +19,8 @@ import {
   Text,
   Link,
   FormLabel,
+  FormHelperText,
+  FormErrorMessage,
 } from "@chakra-ui/react";
 
 import { useDispatch } from "react-redux";
@@ -53,12 +55,13 @@ function NomeInput({
   helperText: string;
 }) {
   return (
+    <>
     <InputGroup size="md">
       <Input
         value={value}
         onChange={onChange}
         onBlur={onBlur}
-        //FormHelperText={helperText}
+        
         
 
         type='text'
@@ -70,6 +73,14 @@ function NomeInput({
         style={{ borderColor: "#0385FD", borderWidth: "2px" }}
       />
     </InputGroup>
+      {error ? (
+        <FormHelperText>
+          Enter the email you'd like to receive the newsletter on.
+        </FormHelperText>
+      ) : (
+        <FormErrorMessage>Email is required.</FormErrorMessage>
+      )}
+    </>
   );
 }
 
@@ -344,15 +355,15 @@ function Register() {
                 <form onSubmit={handleSubmit}>
                   <Stack
                     w={{ base: "90vw", md: "auto" }}
-                    spacing={4}
+                    spacing={2}
                     backgroundColor="whiteAlpha.900"
                     style={{ paddingBottom: "0" }}
                   >
-                    <FormControl isRequired style={{ marginTop: "0" }}>
+                    <FormControl isRequired>
                       <FormLabel className="letter-spacing-text poppins-text-label textPattern">
                         Nome
                       </FormLabel>
-                      <InputGroup style={{ alignItems: "center" }}>
+                      <InputGroup className="inputPattern">
                         <NomeInput
                           value={name}
                           onChange={nameChangeHandler}
@@ -362,11 +373,11 @@ function Register() {
                         ></NomeInput>
                       </InputGroup>
                     </FormControl>
-                    <FormControl isRequired style={{ marginTop: "0" }}>
+                    <FormControl isRequired>
                       <FormLabel className="letter-spacing-text poppins-text-label textPattern">
                         Email
                       </FormLabel>
-                      <InputGroup>
+                      <InputGroup className="inputPattern">
                         <EmailInput
                           value={email}
                           onChange={emailChangeHandler}
@@ -376,11 +387,11 @@ function Register() {
                         ></EmailInput>
                       </InputGroup>
                     </FormControl>
-                    <FormControl isRequired style={{ marginTop: "0" }}>
+                    <FormControl isRequired>
                       <FormLabel className="letter-spacing-text poppins-text-label textPattern">
                         Senha
                       </FormLabel>
-                      <InputGroup style={{ alignItems: "center" }}>
+                      <InputGroup className="inputPattern">
                         <PasswordInput
                           value={password}
                           onChange={passwordChangeHandler}
@@ -390,11 +401,11 @@ function Register() {
                         ></PasswordInput>
                       </InputGroup>
                     </FormControl>
-                    <FormControl isRequired style={{ marginTop: "0" }}>
+                    <FormControl isRequired>
                       <FormLabel className="letter-spacing-text poppins-text-label textPattern">
                         Repetir Senha
                       </FormLabel>
-                      <InputGroup style={{ alignItems: "center" }}>
+                      <InputGroup className="inputPattern">
                         <ConfirmPasswordInput
                           value={confirmPassword}
                           onChange={confirmPasswordChangeHandler}
@@ -410,6 +421,7 @@ function Register() {
                       variant="solid"
                       style={{
                         marginTop: "4.2vh",
+                        marginBottom: "1.5vh",
                         backgroundColor: "#0385FD",
                       }}
                     >
