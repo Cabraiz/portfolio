@@ -35,7 +35,7 @@ import {
 import { ProtectedComponent } from "../../redux/feature/auth/ProtectedComponent";
 import { isMobile } from "react-device-detect";
 
-import Login_RegisterHubLocal from "../../pages/Login_RegisterHubLocal"
+import Login_RegisterHubLocal from "../../pages/Login_RegisterHubLocal";
 
 function PasswordInput({
   name,
@@ -145,8 +145,6 @@ function Login() {
 
   const handleSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
-
-    
   };
 
   const handleChange = ({
@@ -171,9 +169,7 @@ function Login() {
             style={{ paddingBottom: "0" }}
           >
             <FormControl>
-              <Text
-                className="letter-spacing-text poppins-text-label"
-              >
+              <Text className="letter-spacing-text poppins-text-label">
                 Email
               </Text>
               <InputGroup className="inputPattern">
@@ -194,9 +190,7 @@ function Login() {
               </InputGroup>
             </FormControl>
             <FormControl>
-              <Text
-                className="letter-spacing-text poppins-text-label"
-              >
+              <Text className="letter-spacing-text poppins-text-label">
                 Senha
               </Text>
               <InputGroup className="inputPattern">
@@ -224,7 +218,7 @@ function Login() {
                 LOGAR
               </Text>
             </Button>
-            <Link href='/registerhublocal' style={{ textDecoration: "none"}}>
+            <Link href="/registerhublocal" style={{ textDecoration: "none" }}>
               <Button
                 className="buttonSettings buttonFont"
                 variant="solid"
@@ -247,7 +241,13 @@ function Login() {
     </>
   );
 
-  return Login_RegisterHubLocal(realHeight, isAnimationSet, Login_Image, Login_Logo, content);
+  return Login_RegisterHubLocal(
+    realHeight,
+    isAnimationSet,
+    Login_Image,
+    Login_Logo,
+    content
+  );
 }
 
 export default Login;

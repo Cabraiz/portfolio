@@ -33,11 +33,14 @@ import {
 import { ProtectedComponent } from "../../redux/feature/auth/ProtectedComponent";
 import { isMobile } from "react-device-detect";
 import useInput from "../../redux/hooks/input/use-input";
-import { validateNameLength, validatePasswordLength } from "../../redux/shared/utils/validation/lenght";
+import {
+  validateNameLength,
+  validatePasswordLength,
+} from "../../redux/shared/utils/validation/lenght";
 import { validateEmail } from "../../redux/shared/utils/validation/email";
 import { NewUser } from "../../redux/app/models/NewUser";
 
-import Login_RegisterHubLocal from "../../pages/Login_RegisterHubLocal"
+import Login_RegisterHubLocal from "../../pages/Login_RegisterHubLocal";
 
 function NomeInput({
   value,
@@ -54,27 +57,21 @@ function NomeInput({
 }) {
   return (
     <>
-    <InputGroup size="md">
-      <Input
-        value={value}
-        onChange={onChange}
-        onBlur={onBlur}
-        
-        
-
-        type='text'
-        name='name'
-        id='name'
-        
-        required
-        className="inputSettings"
-        style={{ borderColor: "#0385FD", borderWidth: "2px" }}
-      />
-    </InputGroup>
+      <InputGroup size="md">
+        <Input
+          value={value}
+          onChange={onChange}
+          onBlur={onBlur}
+          type="text"
+          name="name"
+          id="name"
+          required
+          className="inputSettings"
+          style={{ borderColor: "#0385FD", borderWidth: "2px" }}
+        />
+      </InputGroup>
       {error ? (
-        <FormHelperText>
-          { helperText }
-        </FormHelperText>
+        <FormHelperText>{helperText}</FormHelperText>
       ) : (
         <FormErrorMessage>Email is required.</FormErrorMessage>
       )}
@@ -98,11 +95,10 @@ function EmailInput({
   return (
     <InputGroup size="md">
       <Input
-        type='text'
-        name='email'
-        id='email'
+        type="text"
+        name="email"
+        id="email"
         required
-
         className="inputSettings"
         style={{ borderColor: "#0385FD", borderWidth: "2px" }}
       />
@@ -126,12 +122,10 @@ function PasswordInput({
   return (
     <InputGroup size="md">
       <Input
-        type='text'
-        name='password'
-        id='password'
+        type="text"
+        name="password"
+        id="password"
         required
-
-
         placeholder="Mínimo de 6 caracteres"
         className="inputSettings"
         style={{ borderColor: "#0385FD", borderWidth: "2px" }}
@@ -156,12 +150,10 @@ function ConfirmPasswordInput({
   return (
     <InputGroup size="md">
       <Input
-        type='text'
-        name='confirmPassword'
-        id='confirmPassword'
+        type="text"
+        name="confirmPassword"
+        id="confirmPassword"
         required
-
-
         placeholder="Mínimo de 6 caracteres"
         className="inputSettings"
         style={{ borderColor: "#0385FD", borderWidth: "2px" }}
@@ -181,33 +173,32 @@ function Register() {
     shouldDisplayError: nameHasError,
     textChangeHandler: nameChangeHandler,
     inputBlurHandler: nameBlurHandler,
-    clearHandler: nameClearHandler
-  } = useInput(validateNameLength)
+    clearHandler: nameClearHandler,
+  } = useInput(validateNameLength);
 
   const {
     text: email,
     shouldDisplayError: emailHasError,
     textChangeHandler: emailChangeHandler,
     inputBlurHandler: emailBlurHandler,
-    clearHandler: emailClearHandler
-  } = useInput(validateEmail)
- 
+    clearHandler: emailClearHandler,
+  } = useInput(validateEmail);
+
   const {
     text: password,
     shouldDisplayError: passwordHasError,
     textChangeHandler: passwordChangeHandler,
     inputBlurHandler: passwordBlurHandler,
-    clearHandler: passwordClearHandler
-  } = useInput(validatePasswordLength)
+    clearHandler: passwordClearHandler,
+  } = useInput(validatePasswordLength);
 
   const {
     text: confirmPassword,
     shouldDisplayError: confirmPasswordHasError,
     textChangeHandler: confirmPasswordChangeHandler,
     inputBlurHandler: confirmPasswordBlurHandler,
-    clearHandler: confirmPasswordClearHandler
-  } = useInput(validatePasswordLength)
-
+    clearHandler: confirmPasswordClearHandler,
+  } = useInput(validatePasswordLength);
 
   const userRef = useRef<HTMLInputElement>(null);
   const errRef = useRef<HTMLInputElement>(null);
@@ -274,15 +265,29 @@ function Register() {
 
     if (password !== confirmPassword) return;
 
-    if(nameHasError || emailHasError || passwordHasError || confirmPasswordHasError) return;
+    if (
+      nameHasError ||
+      emailHasError ||
+      passwordHasError ||
+      confirmPasswordHasError
+    )
+      return;
 
-    if (name.length === 0 || email.length === 0 || password.length === 0 || confirmPassword.length === 0) return;
+    if (
+      name.length === 0 ||
+      email.length === 0 ||
+      password.length === 0 ||
+      confirmPassword.length === 0
+    )
+      return;
 
     const newUser: NewUser = {
-      name,email,password
-    }
+      name,
+      email,
+      password,
+    };
 
-    console.log('NEW USER: ', newUser)
+    console.log("NEW USER: ", newUser);
   };
 
   const textoTitle = "Junte-se a vários clientes satisfeitos.";
@@ -310,7 +315,7 @@ function Register() {
                   onChange={nameChangeHandler}
                   onBlur={nameBlurHandler}
                   error={nameHasError}
-                  helperText={nameHasError ? 'Escreva seu nome' : ''}
+                  helperText={nameHasError ? "Escreva seu nome" : ""}
                 ></NomeInput>
               </InputGroup>
             </FormControl>
@@ -324,7 +329,7 @@ function Register() {
                   onChange={emailChangeHandler}
                   onBlur={emailBlurHandler}
                   error={emailHasError}
-                  helperText={emailHasError ? 'Escreva seu email' : ''}
+                  helperText={emailHasError ? "Escreva seu email" : ""}
                 ></EmailInput>
               </InputGroup>
             </FormControl>
@@ -338,7 +343,9 @@ function Register() {
                   onChange={passwordChangeHandler}
                   onBlur={passwordBlurHandler}
                   error={passwordHasError}
-                  helperText={passwordHasError ? 'Requer no mínimo 6 caracteres' : ''}
+                  helperText={
+                    passwordHasError ? "Requer no mínimo 6 caracteres" : ""
+                  }
                 ></PasswordInput>
               </InputGroup>
             </FormControl>
@@ -351,11 +358,17 @@ function Register() {
                   value={confirmPassword}
                   onChange={confirmPasswordChangeHandler}
                   onBlur={confirmPasswordBlurHandler}
-                  error={confirmPassword.length > 0 && password !== confirmPassword}
-                  helperText={confirmPassword.length > 0 && password !== confirmPassword ? 'Requer mínimo de 6 caracteres' : ''}
+                  error={
+                    confirmPassword.length > 0 && password !== confirmPassword
+                  }
+                  helperText={
+                    confirmPassword.length > 0 && password !== confirmPassword
+                      ? "Requer mínimo de 6 caracteres"
+                      : ""
+                  }
                 ></ConfirmPasswordInput>
               </InputGroup>
-            </FormControl >
+            </FormControl>
             <Button
               className="buttonSettings buttonFont"
               type="submit"
@@ -374,7 +387,7 @@ function Register() {
                 REGISTRAR
               </Text>
             </Button>
-            <Link href='/loginhublocal' style={{ textDecoration: "none"}}>
+            <Link href="/loginhublocal" style={{ textDecoration: "none" }}>
               <Button
                 className="buttonSettings buttonFont"
                 variant="solid"
@@ -396,8 +409,14 @@ function Register() {
       </Box>
     </>
   );
-  
-  return Login_RegisterHubLocal(realHeight, isAnimationSet, Login_Image, Login_Logo, content);
+
+  return Login_RegisterHubLocal(
+    realHeight,
+    isAnimationSet,
+    Login_Image,
+    Login_Logo,
+    content
+  );
 }
 
 export default Register;
