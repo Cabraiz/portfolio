@@ -1,6 +1,13 @@
 @font-face {
     font-family: 'Poppins';
-    src: local('Poppins'), url('../fonts/Poppins/Poppins-Regular.ttf');
+    src: local('Poppins'), url("../../fonts/Poppins/Poppins-Medium.ttf");
+    font-style: normal;
+    font-weight: 500;
+}
+
+@font-face {
+    font-family: 'Poppins';
+    src: local('Poppins'), url('../../fonts/Poppins/Poppins-Regular.ttf');
     font-style: normal;
     font-weight: 400;
 }
@@ -23,3 +30,9 @@
 .columnB {
     grid-column:span 2; /* B takes 2 columns */
 } 
+
+.form-helper-font {
+    color: red;
+    font-style: normal;
+    font-weight: 500;
+}

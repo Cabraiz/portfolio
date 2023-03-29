@@ -47,18 +47,18 @@
     font-size: 35px;
 }
 
-.buttonSettings, .inputSettings {
+.button-settings, .input-setting {
     min-height: 50px;
     height: 7.3vh !important;
     width: 100%;
 }
 
-.buttonFont {
+.button-font {
     color: #FFFFFF;
     font-weight: 700;
 }
 
-.inputPattern { 
+.input-pattern { 
     margin-top: 0.5vh;
     margin-bottom: 0.5vh;
 }

@@ -40,7 +40,8 @@ import {
 import { validateEmail } from "../../redux/shared/utils/validation/email";
 import { NewUser } from "../../redux/app/models/NewUser";
 
-import Login_RegisterHubLocal from "../../pages/Login_RegisterHubLocal";
+import { LoginRegisterHubLocalParams } from "../Auxiliadores/models/loginRregisterHubLocal.interface"
+import  { Login_RegisterHubLocal, Login_RegisterHubLocal_2 }  from "../../pages/Auxiliadores/Login_RegisterHubLocal";
 
 function NomeInput({
   value,
@@ -48,33 +49,10 @@ function NomeInput({
   onBlur,
   error,
   helperText,
-}: {
-  value: string;
-  onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  onBlur: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  error: boolean | undefined;
-  helperText: string;
-}) {
+}: LoginRegisterHubLocalParams){
   return (
     <>
-      <InputGroup size="md">
-        <Input
-          value={value}
-          onChange={onChange}
-          onBlur={onBlur}
-          type="text"
-          name="name"
-          id="name"
-          required
-          className="inputSettings"
-          style={{ borderColor: "#0385FD", borderWidth: "2px" }}
-        />
-      </InputGroup>
-      {error ? (
-        <FormHelperText>{helperText}</FormHelperText>
-      ) : (
-        <FormErrorMessage>Email is required.</FormErrorMessage>
-      )}
+      { Login_RegisterHubLocal_2({ value, onChange, onBlur, error, helperText, type:"text",  name:"name", id:"name" })}
     </>
   );
 }
@@ -85,24 +63,11 @@ function EmailInput({
   onBlur,
   error,
   helperText,
-}: {
-  value: string;
-  onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  onBlur: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  error: boolean | undefined;
-  helperText: string;
-}) {
+}: LoginRegisterHubLocalParams){
   return (
-    <InputGroup size="md">
-      <Input
-        type="text"
-        name="email"
-        id="email"
-        required
-        className="inputSettings"
-        style={{ borderColor: "#0385FD", borderWidth: "2px" }}
-      />
-    </InputGroup>
+    <>
+      { Login_RegisterHubLocal_2({ value, onChange, onBlur, error, helperText, type:"text", name:"email", id:"email" })}
+    </>
   );
 }
 
@@ -112,25 +77,11 @@ function PasswordInput({
   onBlur,
   error,
   helperText,
-}: {
-  value: string;
-  onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  onBlur: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  error: boolean | undefined;
-  helperText: string;
-}) {
+}: LoginRegisterHubLocalParams){
   return (
-    <InputGroup size="md">
-      <Input
-        type="text"
-        name="password"
-        id="password"
-        required
-        placeholder="Mínimo de 6 caracteres"
-        className="inputSettings"
-        style={{ borderColor: "#0385FD", borderWidth: "2px" }}
-      />
-    </InputGroup>
+    <>
+      { Login_RegisterHubLocal_2({ value, onChange, onBlur, error, helperText, type:"text", name:"password", id:"password", placeholder: "Mínimo de 6 caracteres" })}
+    </>
   );
 }
 
@@ -140,25 +91,11 @@ function ConfirmPasswordInput({
   onBlur,
   error,
   helperText,
-}: {
-  value: string;
-  onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  onBlur: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  error: boolean | undefined;
-  helperText: string;
-}) {
+}: LoginRegisterHubLocalParams){
   return (
-    <InputGroup size="md">
-      <Input
-        type="text"
-        name="confirmPassword"
-        id="confirmPassword"
-        required
-        placeholder="Mínimo de 6 caracteres"
-        className="inputSettings"
-        style={{ borderColor: "#0385FD", borderWidth: "2px" }}
-      />
-    </InputGroup>
+    <>
+      { Login_RegisterHubLocal_2({ value, onChange, onBlur, error, helperText, type:"text", name:"password", id:"password", placeholder: "Mínimo de 6 caracteres" })}
+    </>
   );
 }
 
@@ -306,24 +243,24 @@ function Register() {
             backgroundColor="whiteAlpha.900"
           >
             <FormControl isRequired>
-              <FormLabel className="letter-spacing-text poppins-text-label textPattern">
+              <FormLabel className="letter-spacing-text poppins-text-label text-pattern">
                 Nome
               </FormLabel>
-              <InputGroup className="inputPattern">
+              <InputGroup className="input-pattern">
                 <NomeInput
                   value={name}
                   onChange={nameChangeHandler}
                   onBlur={nameBlurHandler}
                   error={nameHasError}
-                  helperText={nameHasError ? "Escreva seu nome" : ""}
+                  helperText={nameHasError ? "Nome inválido" : ""}
                 ></NomeInput>
               </InputGroup>
             </FormControl>
             <FormControl isRequired>
-              <FormLabel className="letter-spacing-text poppins-text-label textPattern">
+              <FormLabel className="letter-spacing-text poppins-text-label text-pattern">
                 Email
               </FormLabel>
-              <InputGroup className="inputPattern">
+              <InputGroup className="input-pattern">
                 <EmailInput
                   value={email}
                   onChange={emailChangeHandler}
@@ -334,10 +271,10 @@ function Register() {
               </InputGroup>
             </FormControl>
             <FormControl isRequired>
-              <FormLabel className="letter-spacing-text poppins-text-label textPattern">
+              <FormLabel className="letter-spacing-text poppins-text-label text-pattern">
                 Senha
               </FormLabel>
-              <InputGroup className="inputPattern">
+              <InputGroup className="input-pattern">
                 <PasswordInput
                   value={password}
                   onChange={passwordChangeHandler}
@@ -350,10 +287,10 @@ function Register() {
               </InputGroup>
             </FormControl>
             <FormControl isRequired>
-              <FormLabel className="letter-spacing-text poppins-text-label textPattern">
+              <FormLabel className="letter-spacing-text poppins-text-label text-pattern">
                 Repetir Senha
               </FormLabel>
-              <InputGroup className="inputPattern">
+              <InputGroup className="input-pattern">
                 <ConfirmPasswordInput
                   value={confirmPassword}
                   onChange={confirmPasswordChangeHandler}
@@ -370,7 +307,7 @@ function Register() {
               </InputGroup>
             </FormControl>
             <Button
-              className="buttonSettings buttonFont"
+              className="button-setting button-font"
               type="submit"
               variant="solid"
               style={{
@@ -389,7 +326,7 @@ function Register() {
             </Button>
             <Link href="/loginhublocal" style={{ textDecoration: "none" }}>
               <Button
-                className="buttonSettings buttonFont"
+                className="button-setting button-font"
                 variant="solid"
                 style={{
                   backgroundColor: "#00CC99",

@@ -35,7 +35,7 @@ import {
 import { ProtectedComponent } from "../../redux/feature/auth/ProtectedComponent";
 import { isMobile } from "react-device-detect";
 
-import Login_RegisterHubLocal from "../../pages/Login_RegisterHubLocal";
+import { Login_RegisterHubLocal } from "../../pages/Auxiliadores/Login_RegisterHubLocal";
 
 function PasswordInput({
   name,
@@ -61,7 +61,7 @@ function PasswordInput({
         onChange={onChange}
         id="password"
         required
-        className="inputSettings"
+        className="input-setting"
         type={showPassword ? "text" : "password"}
         placeholder="Senha"
         style={{ borderColor: "#0385FD", borderWidth: "2px" }}
@@ -172,7 +172,7 @@ function Login() {
               <Text className="letter-spacing-text poppins-text-label">
                 Email
               </Text>
-              <InputGroup className="inputPattern">
+              <InputGroup className="input-pattern">
                 <InputLeftElement
                   h="100%"
                   pointerEvents="none"
@@ -183,7 +183,7 @@ function Login() {
                   name="username"
                   type="text"
                   required
-                  className="inputSettings"
+                  className="input-setting"
                   placeholder="Email"
                   style={{ borderColor: "#0385FD", borderWidth: "2px" }}
                 />
@@ -193,7 +193,7 @@ function Login() {
               <Text className="letter-spacing-text poppins-text-label">
                 Senha
               </Text>
-              <InputGroup className="inputPattern">
+              <InputGroup className="input-pattern">
                 <PasswordInput
                   onChange={handleChange}
                   name="password"
@@ -201,7 +201,7 @@ function Login() {
               </InputGroup>
             </FormControl>
             <Button
-              className="buttonSettings buttonFont"
+              className="button-settings button-font"
               type="submit"
               variant="solid"
               style={{
@@ -220,7 +220,7 @@ function Login() {
             </Button>
             <Link href="/registerhublocal" style={{ textDecoration: "none" }}>
               <Button
-                className="buttonSettings buttonFont"
+                className="button-settings button-font"
                 variant="solid"
                 style={{
                   backgroundColor: "#00CC99",

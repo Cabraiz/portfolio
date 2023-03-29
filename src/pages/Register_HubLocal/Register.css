@@ -47,24 +47,30 @@
     font-size: 35px;
 }
 
-.buttonSettings, .inputSettings {
+.button-setting, .input-setting {
     min-height: 50px;
     height: 7.3vh !important;
     width: 100%;
 }
 
-.buttonFont {
+.button-font {
     color: #FFFFFF;
     font-weight: 700;
 }
 
-.textPattern {
+.text-pattern {
     margin: 0 !important;
 }
 
-.inputPattern { 
+.input-pattern { 
     align-items: center;
     margin-top: 0.5vh;
+}
+
+.form-helper-font {
+    color: red;
+    font-style: normal;
+    font-weight: 500;
 }
 
 .fastAnimation {

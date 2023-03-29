@@ -1,6 +1,7 @@
-import { Flex, Grid, GridItem, Stack, Image, Text } from "@chakra-ui/react";
+import { Flex, Grid, GridItem, Stack, Image, Text, Input, FormHelperText } from "@chakra-ui/react";
 
 import "./Login_RegisterHubLocal.css";
+import { LoginRegisterHubLocalParams } from "./models/loginRregisterHubLocal.interface"
 
 function Login_RegisterHubLocal(
   realHeight: string,
@@ -22,6 +23,7 @@ function Login_RegisterHubLocal(
         alignItems="center"
       >
         <Grid templateColumns="minmax(100px, 1fr)" autoFlow="column">
+          {/* Left grid item */}
           <GridItem
             w="50vw"
             maxH={realHeight}
@@ -63,6 +65,7 @@ function Login_RegisterHubLocal(
               </Stack>
             </Stack>
           </GridItem>
+          {/* Right grid item */}
           <GridItem w="50vw" className="column columnB" h={realHeight}>
             <Stack justifyContent="center" alignItems="center">
               <Image
@@ -82,4 +85,33 @@ function Login_RegisterHubLocal(
   return content;
 }
 
-export default Login_RegisterHubLocal;
+function Login_RegisterHubLocal_2( params: LoginRegisterHubLocalParams ){
+    return (
+      <>
+        <Stack w="inherit">
+            <Input
+            value={params.value}
+            onChange={params.onChange}
+            onBlur={params.onBlur}
+            type={params.type}
+            name={params.name}
+            id={params.id}
+            required
+
+            className="input-setting"
+            borderColor={params.error ? "red" : "#0385FD"}
+            style={{ borderWidth: "2px" }}
+            />
+            {params.error ? (
+            <FormHelperText>
+            <Text className="form-helper-font" mb="0">
+                {params.helperText}
+            </Text>
+            </FormHelperText>
+        ) : ""}
+        </Stack>
+      </>
+    )
+}
+
+export { Login_RegisterHubLocal, Login_RegisterHubLocal_2 };
