@@ -6,7 +6,6 @@ import Login_Image from "../../assets/HubLocal/Login_Image.webp";
 import { ToastContainer, toast } from "react-toastify";
 
 import {
-  Input,
   Button,
   InputGroup,
   Stack,
@@ -15,8 +14,6 @@ import {
   Text,
   Link,
   FormLabel,
-  FormHelperText,
-  FormErrorMessage,
 } from "@chakra-ui/react";
 
 import { useDispatch } from "react-redux";
@@ -80,7 +77,7 @@ function PasswordInput({
 }: LoginRegisterHubLocalParams){
   return (
     <>
-      { Login_RegisterHubLocal_2({ value, onChange, onBlur, error, helperText, type:"text", name:"password", id:"password", placeholder: "Mínimo de 6 caracteres" })}
+      { Login_RegisterHubLocal_2({ value, onChange, onBlur, error, helperText, type:"password", name:"password", id:"password", placeholder: "Mínimo de 6 caracteres" })}
     </>
   );
 }
@@ -94,7 +91,7 @@ function ConfirmPasswordInput({
 }: LoginRegisterHubLocalParams){
   return (
     <>
-      { Login_RegisterHubLocal_2({ value, onChange, onBlur, error, helperText, type:"text", name:"password", id:"password", placeholder: "Mínimo de 6 caracteres" })}
+      { Login_RegisterHubLocal_2({ value, onChange, onBlur, error, helperText, type:"password", name:"password", id:"password", placeholder: "Mínimo de 6 caracteres" })}
     </>
   );
 }
@@ -266,7 +263,7 @@ function Register() {
                   onChange={emailChangeHandler}
                   onBlur={emailBlurHandler}
                   error={emailHasError}
-                  helperText={emailHasError ? "Escreva seu email" : ""}
+                  helperText={emailHasError ? "Email inválido" : ""}
                 ></EmailInput>
               </InputGroup>
             </FormControl>
