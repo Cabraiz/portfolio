@@ -17,6 +17,7 @@ import {
   Text,
   InputRightElement,
   Link,
+  FormHelperText,
 } from "@chakra-ui/react";
 
 import { FaUserAlt, FaLock } from "react-icons/fa";
@@ -55,47 +56,85 @@ function PasswordInput({
   const handleShowClick = () => setShowPassword(!showPassword);
 
   return (
-    <InputGroup size="md">
-      <InputLeftElement
-        h="100%"
-        pointerEvents="none"
-        children={<CFaLock color="gray.300" />}
-      />
-      <Input
-        value={value}
-        onChange={onChange}
-        onBlur={onBlur}
-        type={showPassword ? "text" : "password"}
-        name="password"
-        id="password"
-        required
-        
-        className="input-setting"
-        placeholder="Senha"
-        style={{ borderColor: "#0385FD", borderWidth: "2px" }}
-      />
-      <InputRightElement w="auto" height="100%" paddingRight="8px">
-        <Button h="70%" size="sm" onClick={handleShowClick}>
-          {showPassword ? "Ocultar" : "Mostrar"}
-        </Button>
-      </InputRightElement>
-    </InputGroup>
+    <Stack w="inherit">
+      <InputGroup className="input-pattern">
+        <InputLeftElement
+          h="100%"
+          pointerEvents="none"
+          children={<CFaLock color="gray.300" />}
+        />
+        <Input
+          value={value}
+          onChange={onChange}
+          onBlur={onBlur}
+          type={showPassword ? "text" : "password"}
+          name="password"
+          id="password"
+          required
+          
+          className="input-setting"
+          placeholder="Senha"
+          style={{ borderColor: "#0385FD", borderWidth: "2px" }}
+        />
+        <InputRightElement w="auto" h="100%" paddingRight="8px">
+          <Button h="70%" size="sm" onClick={handleShowClick}>
+            {showPassword ? "Ocultar" : "Mostrar"}
+          </Button>
+        </InputRightElement>
+      </InputGroup>
+      {error ? (
+      <FormHelperText>
+        <Text className="form-helper-font" mb="0">
+            {helperText}
+        </Text>
+      </FormHelperText>
+      ) : ""}
+    </Stack>
+  );
+}
+
+function EmailInput({
+  value,
+  onChange,
+  onBlur,
+  error,
+  helperText,
+}: LoginRegisterHubLocalParams) {
+
+  const CFaUserAlt = chakra(FaUserAlt);
+
+  return (
+    <Stack w="inherit">
+      <InputGroup className="input-pattern">
+        <InputLeftElement
+            h="100%"
+            pointerEvents="none"
+            children={<CFaUserAlt color="gray.300" />}
+          />
+          <Input
+            value={value}
+            onChange={onChange}
+            onBlur={onBlur}
+            required
+
+            className="input-setting"
+            placeholder="Email"
+            style={{ borderColor: "#0385FD", borderWidth: "2px" }}
+          />
+      </InputGroup>
+      {error ? (
+      <FormHelperText>
+        <Text className="form-helper-font" mb="0">
+            {helperText}
+        </Text>
+      </FormHelperText>
+      ) : ""}
+    </Stack>
   );
 }
 
 function Login() {
-  const CFaUserAlt = chakra(FaUserAlt);
 
-  const [formState, setFormState] = React.useState<LoginRequest>({
-    username: "",
-    password: "",
-  });
-
-  const userRef = useRef<HTMLInputElement>(null);
-  const errRef = useRef<HTMLInputElement>(null);
-  const [user, setUser] = useState("");
-  const [pwd, setPwd] = useState("");
-  const [errMsg, setErrMsg] = useState("");
   const [login, { isLoading }] = useLoginMutation();
 
   const [realHeight, setrealHeight] = useState("");
@@ -162,11 +201,6 @@ function Login() {
     clearForm()
   };
 
-  const handleChange = ({
-    target: { name, value },
-  }: React.ChangeEvent<HTMLInputElement>) =>
-    setFormState((prev) => ({ ...prev, [name]: value }));
-
 
   const ErrorNotify = (message: string) => toast.warn(message, {
     position: "bottom-right",
@@ -178,10 +212,6 @@ function Login() {
     progress: undefined,
     theme: "dark",
   });
-
-  const textoTitle = "Junte-se a vários clientes satisfeitos.";
-  const textoSubtitle =
-    "Cliente HubLocal ganha mais relevância, autoridade e visibilidade. Mais de 7.000 marcas confiam na nossa plataforma. Seja uma delas!";
 
   const content = isLoading ? (
     <h1>Loading...</h1>
@@ -199,38 +229,27 @@ function Login() {
               <Text className="letter-spacing-text poppins-text-label">
                 Email
               </Text>
-              <InputGroup className="input-pattern">
-                <InputLeftElement
-                  h="100%"
-                  pointerEvents="none"
-                  children={<CFaUserAlt color="gray.300" />}
-                />
-                <Input
-                  onChange={handleChange}
-                  name="username"
-                  type="text"
-                  required
-                  className="input-setting"
-                  placeholder="Email"
-                  style={{ borderColor: "#0385FD", borderWidth: "2px" }}
-                />
-              </InputGroup>
+              <EmailInput
+                value={email}
+                onChange={emailChangeHandler}
+                onBlur={emailBlurHandler}
+                error={emailHasError}
+                helperText={emailHasError ? "Email inválido" : ""}
+              ></EmailInput>
             </FormControl>
             <FormControl>
               <Text className="letter-spacing-text poppins-text-label">
                 Senha
               </Text>
-              <InputGroup className="input-pattern">
-                <PasswordInput
-                  value={password}
-                  onChange={passwordChangeHandler}
-                  onBlur={passwordBlurHandler}
-                  error={passwordHasError}
-                  helperText={
-                    passwordHasError ? "Requer no mínimo 6 caracteres" : ""
-                  }
-                ></PasswordInput>
-              </InputGroup>
+              <PasswordInput
+                value={password}
+                onChange={passwordChangeHandler}
+                onBlur={passwordBlurHandler}
+                error={passwordHasError}
+                helperText={
+                  passwordHasError ? "Requer no mínimo 6 caracteres" : ""
+                }
+              ></PasswordInput>
             </FormControl>
             <Button
               className="button-settings button-font"
