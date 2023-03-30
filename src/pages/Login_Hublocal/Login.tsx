@@ -39,14 +39,16 @@ import { Login_RegisterHubLocal } from "../../pages/Auxiliadores/Login_RegisterH
 import { validatePasswordLength } from "../../redux/shared/utils/validation/lenght";
 import { validateEmail } from "../../redux/shared/utils/validation/email";
 import useInput from "../../redux/hooks/input/use-input";
+import { LoginRegisterHubLocalParams } from "../Auxiliadores/models/loginRregisterHubLocal.interface";
 
 function PasswordInput({
-  name,
+  value,
   onChange,
-}: {
-  name: string;
-  onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-}) {
+  onBlur,
+  error,
+  helperText,
+}: LoginRegisterHubLocalParams) {
+
   const CFaLock = chakra(FaLock);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -60,12 +62,15 @@ function PasswordInput({
         children={<CFaLock color="gray.300" />}
       />
       <Input
-        name={name}
+        value={value}
         onChange={onChange}
+        onBlur={onBlur}
+        type={showPassword ? "text" : "password"}
+        name="password"
         id="password"
         required
+        
         className="input-setting"
-        type={showPassword ? "text" : "password"}
         placeholder="Senha"
         style={{ borderColor: "#0385FD", borderWidth: "2px" }}
       />
@@ -91,10 +96,7 @@ function Login() {
   const [user, setUser] = useState("");
   const [pwd, setPwd] = useState("");
   const [errMsg, setErrMsg] = useState("");
-  const navigate = useNavigate();
-
   const [login, { isLoading }] = useLoginMutation();
-  const dispatch = useDispatch();
 
   const [realHeight, setrealHeight] = useState("");
 
@@ -126,15 +128,6 @@ function Login() {
       setrealHeight("100vh");
     }
   }, [realHeight]);
-
-  useEffect(() => {
-    const node = userRef.current;
-    node?.focus();
-  }, []);
-
-  useEffect(() => {
-    setErrMsg("");
-  }, [user, pwd]);
 
   const clearForm = () => {
     emailClearHandler();
@@ -229,8 +222,13 @@ function Login() {
               </Text>
               <InputGroup className="input-pattern">
                 <PasswordInput
-                  onChange={handleChange}
-                  name="password"
+                  value={password}
+                  onChange={passwordChangeHandler}
+                  onBlur={passwordBlurHandler}
+                  error={passwordHasError}
+                  helperText={
+                    passwordHasError ? "Requer no mínimo 6 caracteres" : ""
+                  }
                 ></PasswordInput>
               </InputGroup>
             </FormControl>
