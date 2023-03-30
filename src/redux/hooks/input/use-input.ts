@@ -52,7 +52,7 @@ const useInput = (validatorFN?: ValidatorFn) => {
     dispach({ type: INPUT_ACTION_BLUR });
   };
 
-  const clearHandler = (e: ChangeEvent<HTMLInputElement>) => {
+  const clearHandler = () => {
     dispach({ type: INPUT_ACTION_CLEAR });
   };
 

@@ -148,31 +148,16 @@ function Register() {
 
   const [isAnimationSet, setAnimationSet] = useState(false);
 
-  const notifySucesso = () => {
-    toast.success("Sucesso!", {
-      position: "bottom-right",
-      autoClose: 5000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-      theme: "colored",
+  const ErrorNotify = (message: string) => toast.warn(message, {
+    position: "bottom-right",
+    autoClose: 5000,
+    hideProgressBar: false,
+    closeOnClick: true,
+    pauseOnHover: true,
+    draggable: true,
+    progress: undefined,
+    theme: "dark",
     });
-  };
-
-  const notifyError = () => {
-    toast.warning("Falha!", {
-      position: "bottom-right",
-      autoClose: 5000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-      theme: "colored",
-    });
-  };
 
   useEffect(() => {
     setAnimationSet(true);
@@ -194,26 +179,43 @@ function Register() {
     setErrMsg("");
   }, [user, pwd]);
 
+  const clearForm = () => {
+    nameClearHandler();
+    emailClearHandler();
+    passwordClearHandler();
+    confirmPasswordClearHandler();
+  }
+
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    const errors: string[] = [];
 
-    if (password !== confirmPassword) return;
+    if (password !== confirmPassword){
+      errors.push("Senhas não correspondem");
+    }
 
     if (
       nameHasError ||
       emailHasError ||
       passwordHasError ||
       confirmPasswordHasError
-    )
-      return;
+    ){
+      errors.push("Preencha campos corretamente");
+    }
 
     if (
       name.length === 0 ||
       email.length === 0 ||
       password.length === 0 ||
       confirmPassword.length === 0
-    )
+    ){
+      errors.push("Preencha todos os campos");
+    }
+
+    if (errors.length > 0) {
+      ErrorNotify(errors[0]);
       return;
+    }
 
     const newUser: NewUser = {
       name,
@@ -222,6 +224,8 @@ function Register() {
     };
 
     console.log("NEW USER: ", newUser);
+
+    clearForm()
   };
 
   const textoTitle = "Junte-se a vários clientes satisfeitos.";
@@ -233,7 +237,7 @@ function Register() {
   ) : (
     <>
       <Box minW={{ md: "31vw" }} style={{ marginTop: "0" }}>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} autoComplete="off">
           <Stack
             w={{ base: "90vw", md: "auto" }}
             spacing={1}
@@ -341,6 +345,18 @@ function Register() {
           </Stack>
         </form>
       </Box>
+      <ToastContainer
+        position="bottom-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
+      />
     </>
   );
 

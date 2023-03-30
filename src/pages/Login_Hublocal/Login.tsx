@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect, useState, FormEvent } from "react";
 
 import Login_Logo from "../../assets/HubLocal/Login_Logo.webp";
 import Login_Image from "../../assets/HubLocal/Login_Image.webp";
@@ -36,6 +36,9 @@ import { ProtectedComponent } from "../../redux/feature/auth/ProtectedComponent"
 import { isMobile } from "react-device-detect";
 
 import { Login_RegisterHubLocal } from "../../pages/Auxiliadores/Login_RegisterHubLocal";
+import { validatePasswordLength } from "../../redux/shared/utils/validation/lenght";
+import { validateEmail } from "../../redux/shared/utils/validation/email";
+import useInput from "../../redux/hooks/input/use-input";
 
 function PasswordInput({
   name,
@@ -97,31 +100,21 @@ function Login() {
 
   const [isAnimationSet, setAnimationSet] = useState(false);
 
-  const notifySucesso = () => {
-    toast.success("Sucesso!", {
-      position: "bottom-right",
-      autoClose: 5000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-      theme: "colored",
-    });
-  };
+  const {
+    text: email,
+    shouldDisplayError: emailHasError,
+    textChangeHandler: emailChangeHandler,
+    inputBlurHandler: emailBlurHandler,
+    clearHandler: emailClearHandler,
+  } = useInput(validateEmail);
 
-  const notifyError = () => {
-    toast.warning("Falha!", {
-      position: "bottom-right",
-      autoClose: 5000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-      theme: "colored",
-    });
-  };
+  const {
+    text: password,
+    shouldDisplayError: passwordHasError,
+    textChangeHandler: passwordChangeHandler,
+    inputBlurHandler: passwordBlurHandler,
+    clearHandler: passwordClearHandler,
+  } = useInput(validatePasswordLength);
 
   useEffect(() => {
     setAnimationSet(true);
@@ -143,14 +136,55 @@ function Login() {
     setErrMsg("");
   }, [user, pwd]);
 
-  const handleSubmit = async (e: { preventDefault: () => void }) => {
+  const clearForm = () => {
+    emailClearHandler();
+    passwordClearHandler();
+  }
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    const errors: string[] = [];
+
+    if (
+      emailHasError ||
+      passwordHasError 
+    ){
+      errors.push("Preencha campos corretamente");
+    }
+
+    if (
+      email.length === 0 ||
+      password.length === 0
+    ){
+      errors.push("Preencha todos os campos");
+    }
+
+    if (errors.length > 0) {
+      ErrorNotify(errors[0]);
+      return;
+    }
+
+    console.log("USER: ", email, password);
+
+    clearForm()
   };
 
   const handleChange = ({
     target: { name, value },
   }: React.ChangeEvent<HTMLInputElement>) =>
     setFormState((prev) => ({ ...prev, [name]: value }));
+
+
+  const ErrorNotify = (message: string) => toast.warn(message, {
+    position: "bottom-right",
+    autoClose: 5000,
+    hideProgressBar: false,
+    closeOnClick: true,
+    pauseOnHover: true,
+    draggable: true,
+    progress: undefined,
+    theme: "dark",
+  });
 
   const textoTitle = "Junte-se a vários clientes satisfeitos.";
   const textoSubtitle =
@@ -238,6 +272,18 @@ function Login() {
           </Stack>
         </form>
       </Box>
+      <ToastContainer
+        position="bottom-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
+      />
     </>
   );
 
