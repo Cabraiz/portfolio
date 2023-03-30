@@ -1,4 +1,4 @@
-import { Flex, Grid, GridItem, Stack, Image, Text, Input, FormHelperText } from "@chakra-ui/react";
+import { Flex, Grid, GridItem, Stack, Image, Text, Input, FormHelperText, InputGroup } from "@chakra-ui/react";
 
 import "./ModeloJSXPage.css";
 import { ModeloLadoEsquerdoPageParams, RegisterParams } from "./models/ModeloJSXPage.interface"
@@ -81,63 +81,34 @@ function ModeloLadoEsquerdoPage( params: ModeloLadoEsquerdoPageParams ) {
 }
 
 function ModeloLadoDireitoPage( params: RegisterParams, EsquerdoJSX?: JSX.Element, DireitoJSX?: JSX.Element){
-    return (
-      <>
-        <Stack w="inherit">
-            {EsquerdoJSX}
-            <Input
-            value={params.value}
-            onChange={params.onChange}
-            onBlur={params.onBlur}
-            type={params.type}
-            name={params.name}
-            id={params.id}
-            required
-
-            className="input-setting"
-            borderColor={params.error ? "red" : "#0385FD"}
-            style={{ borderWidth: "2px" }}
-            />
-            {DireitoJSX}
-            {params.error ? (
-            <FormHelperText>
-            <Text className="form-helper-font" mb="0">
-                {params.helperText}
-            </Text>
-            </FormHelperText>
-        ) : ""}
-        </Stack>
-      </>
-    )
-}
-
-function Model_Login( params: RegisterParams, EsquerdoJSX?: JSX.Element, DireitoJSX?: JSX.Element ){
   return (
     <>
       <Stack w="inherit">
+        <InputGroup className="input-pattern">
           {EsquerdoJSX}
-          <Input
-          value={params.value}
-          onChange={params.onChange}
-          onBlur={params.onBlur}
-          type={params.type}
-          name={params.name}
-          id={params.id}
-          required
+              <Input
+              value={params.value}
+              onChange={params.onChange}
+              onBlur={params.onBlur}
+              type={params.type}
+              name={params.name}
+              id={params.id}
+              required
 
-          className="input-setting"
-          borderColor={params.error ? "red" : "#0385FD"}
-          style={{ borderWidth: "2px" }}
-          />
-          {DireitoJSX}
-          {params.error ? (
-          <FormHelperText>
-          <Text className="form-helper-font" mb="0">
-              {params.helperText}
-          </Text>
-          </FormHelperText>
-      ) : ""}
-      </Stack>
+              className="input-setting"
+              borderColor={params.error ? "red" : "#0385FD"}
+              style={{ borderWidth: "2px" }}
+              />
+            {DireitoJSX}
+        </InputGroup>
+        {params.error ? (
+        <FormHelperText>
+        <Text className="form-helper-font" mb="0">
+            {params.helperText}
+        </Text>
+        </FormHelperText>
+       ) : ""}
+    </Stack>
     </>
   )
 }

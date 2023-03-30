@@ -58,11 +58,6 @@
     font-weight: 700;
 }
 
-.input-pattern { 
-    margin-top: 0.5vh;
-    margin-bottom: 0.5vh;
-}
-
 .fastAnimation {
     animation: linear;
     animation-name: run;

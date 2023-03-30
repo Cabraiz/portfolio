@@ -62,11 +62,6 @@
     margin: 0 !important;
 }
 
-.input-pattern { 
-    align-items: center;
-    margin-top: 0.5vh;
-}
-
 .form-helper-font {
     color: red;
     font-style: normal;

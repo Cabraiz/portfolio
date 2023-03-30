@@ -6,9 +6,7 @@ import Login_Image from "../../assets/HubLocal/Login_Image.webp";
 import { ToastContainer, toast } from "react-toastify";
 
 import {
-  Input,
   Button,
-  InputGroup,
   Stack,
   InputLeftElement,
   chakra,
@@ -17,7 +15,6 @@ import {
   Text,
   InputRightElement,
   Link,
-  FormHelperText,
 } from "@chakra-ui/react";
 
 import { FaUserAlt, FaLock } from "react-icons/fa";
@@ -50,16 +47,18 @@ function PasswordInput({
   const [showPassword, setShowPassword] = useState(false);
   const handleShowClick = () => setShowPassword(!showPassword);
 
-  const inputLeftElement = (<InputLeftElement
+  const inputLeftElement = (
+  <InputLeftElement
     h="100%"
     pointerEvents="none"
     children={<CFaLock color="gray.300" />}
   />)
 
-  const inputRightElement = (<InputRightElement w="auto" h="100%" paddingRight="8px">
-  <Button h="70%" size="sm" onClick={handleShowClick}>
-    {showPassword ? "Ocultar" : "Mostrar"}
-  </Button>
+  const inputRightElement = (
+  <InputRightElement w="auto" h="100%" paddingRight="8px">
+    <Button h="70%" size="sm" onClick={handleShowClick}>
+      {showPassword ? "Ocultar" : "Mostrar"}
+    </Button>
   </InputRightElement>)
 
   return (

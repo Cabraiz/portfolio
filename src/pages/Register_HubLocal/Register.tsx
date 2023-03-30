@@ -231,7 +231,7 @@ function Register() {
   const textoTitle = "Junte-se a vários clientes satisfeitos.";
   const textoSubtitle =
     "Cliente HubLocal ganha mais relevância, autoridade e visibilidade. Mais de 7.000 marcas confiam na nossa plataforma. Seja uma delas!";
-
+  
   const content = isLoading ? (
     <h1>Loading...</h1>
   ) : (
