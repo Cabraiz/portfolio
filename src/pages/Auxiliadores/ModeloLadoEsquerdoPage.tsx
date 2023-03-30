@@ -1,16 +1,10 @@
 import { Flex, Grid, GridItem, Stack, Image, Text, Input, FormHelperText } from "@chakra-ui/react";
 
-import "./Login_RegisterHubLocal.css";
-import { LoginRegisterHubLocalParams } from "./models/loginRregisterHubLocal.interface"
+import "./ModeloLadoEsquerdoPage.css";
+import { ModeloLadoEsquerdoPageParams, RegisterParams } from "./models/loginRregisterHubLocal.interface"
 import { ToastContainer, toast } from "react-toastify";
 
-function Login_RegisterHubLocal(
-  realHeight: string,
-  isAnimationSet: boolean,
-  Login_Image: string,
-  Login_Logo: string,
-  JSX: JSX.Element
-) {
+function ModeloLadoEsquerdoPage( params: ModeloLadoEsquerdoPageParams ) {
   const textoTitle = "Junte-se a vários clientes satisfeitos.";
   const textoSubtitle =
     "Cliente HubLocal ganha mais relevância, autoridade e visibilidade. Mais de 7.000 marcas confiam na nossa plataforma. Seja uma delas!";
@@ -27,22 +21,22 @@ function Login_RegisterHubLocal(
           {/* Left grid item */}
           <GridItem
             w="50vw"
-            maxH={realHeight}
+            maxH={params.realHeight}
             display={{ base: "none", md: "flex" }}
             style={{ backgroundColor: "#0485FF", alignItems: "end" }}
           >
             <Stack
-              minH={realHeight}
-              maxH={realHeight}
+              minH={params.realHeight}
+              maxH={params.realHeight}
               justifyContent="end"
               alignItems="center"
             >
               <Image
                 flexGrow="1"
-                className={isAnimationSet ? "fastAnimation" : ""}
+                className={params.isAnimationSet ? "fastAnimation" : ""}
                 marginBlock="-15px"
                 objectFit="cover"
-                src={Login_Image}
+                src={params.Login_Image}
                 marginTop="10vh"
               />
               <Stack
@@ -67,15 +61,15 @@ function Login_RegisterHubLocal(
             </Stack>
           </GridItem>
           {/* Right grid item */}
-          <GridItem w="50vw" className="column columnB" h={realHeight}>
+          <GridItem w="50vw" className="column columnB" h={params.realHeight}>
             <Stack justifyContent="center" alignItems="center">
               <Image
                 paddingBottom="1.5vh"
                 minW={{ base: "70vw", md: "300px" }}
                 w="24.5vw"
-                src={Login_Logo}
+                src={params.Login_Logo}
               />
-              {JSX}
+              {params.JSX}
             </Stack>
           </GridItem>
         </Grid>
@@ -86,7 +80,7 @@ function Login_RegisterHubLocal(
   return content;
 }
 
-function Login_RegisterHubLocal_2( params: LoginRegisterHubLocalParams ){
+function Model_Register( params: RegisterParams ){
     return (
       <>
         <Stack w="inherit">
@@ -115,4 +109,33 @@ function Login_RegisterHubLocal_2( params: LoginRegisterHubLocalParams ){
     )
 }
 
-export { Login_RegisterHubLocal, Login_RegisterHubLocal_2 };
+function Model_Login( params: RegisterParams,  ){
+  return (
+    <>
+      <Stack w="inherit">
+          <Input
+          value={params.value}
+          onChange={params.onChange}
+          onBlur={params.onBlur}
+          type={params.type}
+          name={params.name}
+          id={params.id}
+          required
+
+          className="input-setting"
+          borderColor={params.error ? "red" : "#0385FD"}
+          style={{ borderWidth: "2px" }}
+          />
+          {params.error ? (
+          <FormHelperText>
+          <Text className="form-helper-font" mb="0">
+              {params.helperText}
+          </Text>
+          </FormHelperText>
+      ) : ""}
+      </Stack>
+    </>
+  )
+}
+
+export { ModeloLadoEsquerdoPage , Model_Register };

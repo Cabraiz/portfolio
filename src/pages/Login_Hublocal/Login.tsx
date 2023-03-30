@@ -36,11 +36,11 @@ import {
 import { ProtectedComponent } from "../../redux/feature/auth/ProtectedComponent";
 import { isMobile } from "react-device-detect";
 
-import { Login_RegisterHubLocal } from "../../pages/Auxiliadores/Login_RegisterHubLocal";
+import { ModeloLadoEsquerdoPage } from "../Auxiliadores/ModeloLadoEsquerdoPage";
 import { validatePasswordLength } from "../../redux/shared/utils/validation/lenght";
 import { validateEmail } from "../../redux/shared/utils/validation/email";
 import useInput from "../../redux/hooks/input/use-input";
-import { LoginRegisterHubLocalParams } from "../Auxiliadores/models/loginRregisterHubLocal.interface";
+import { ModeloLadoEsquerdoPageParams, RegisterParams } from "../Auxiliadores/models/loginRregisterHubLocal.interface";
 
 function PasswordInput({
   value,
@@ -48,7 +48,7 @@ function PasswordInput({
   onBlur,
   error,
   helperText,
-}: LoginRegisterHubLocalParams) {
+}: RegisterParams) {
 
   const CFaLock = chakra(FaLock);
   const [showPassword, setShowPassword] = useState(false);
@@ -99,7 +99,7 @@ function EmailInput({
   onBlur,
   error,
   helperText,
-}: LoginRegisterHubLocalParams) {
+}: RegisterParams) {
 
   const CFaUserAlt = chakra(FaUserAlt);
 
@@ -110,17 +110,17 @@ function EmailInput({
             h="100%"
             pointerEvents="none"
             children={<CFaUserAlt color="gray.300" />}
-          />
-          <Input
-            value={value}
-            onChange={onChange}
-            onBlur={onBlur}
-            required
+        />
+        <Input
+          value={value}
+          onChange={onChange}
+          onBlur={onBlur}
+          required
 
-            className="input-setting"
-            placeholder="Email"
-            style={{ borderColor: "#0385FD", borderWidth: "2px" }}
-          />
+          className="input-setting"
+          placeholder="Email"
+          style={{ borderColor: "#0385FD", borderWidth: "2px" }}
+        />
       </InputGroup>
       {error ? (
       <FormHelperText>
@@ -218,7 +218,7 @@ function Login() {
   ) : (
     <>
       <Box minW={{ md: "31vw" }} style={{ marginTop: "0" }}>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} autoComplete="off">
           <Stack
             w={{ base: "90vw", md: "auto" }}
             spacing={1}
@@ -303,14 +303,16 @@ function Login() {
       />
     </>
   );
+  
+  const params: ModeloLadoEsquerdoPageParams = {
+    realHeight: realHeight,
+    isAnimationSet: isAnimationSet,
+    Login_Image: Login_Image,
+    Login_Logo: Login_Logo,
+    JSX: content,
+  };
 
-  return Login_RegisterHubLocal(
-    realHeight,
-    isAnimationSet,
-    Login_Image,
-    Login_Logo,
-    content
-  );
+  return ModeloLadoEsquerdoPage(params);
 }
 
 export default Login;

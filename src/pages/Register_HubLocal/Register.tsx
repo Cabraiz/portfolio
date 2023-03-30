@@ -37,8 +37,8 @@ import {
 import { validateEmail } from "../../redux/shared/utils/validation/email";
 import { NewUser } from "../../redux/app/models/NewUser";
 
-import { LoginRegisterHubLocalParams } from "../Auxiliadores/models/loginRregisterHubLocal.interface"
-import  { Login_RegisterHubLocal, Login_RegisterHubLocal_2 }  from "../../pages/Auxiliadores/Login_RegisterHubLocal";
+import { ModeloLadoEsquerdoPageParams, RegisterParams } from "../Auxiliadores/models/loginRregisterHubLocal.interface"
+import  { ModeloLadoEsquerdoPage, Model_Register }  from "../Auxiliadores/ModeloLadoEsquerdoPage";
 
 function NomeInput({
   value,
@@ -46,10 +46,10 @@ function NomeInput({
   onBlur,
   error,
   helperText,
-}: LoginRegisterHubLocalParams){
+}: RegisterParams){
   return (
     <>
-      { Login_RegisterHubLocal_2({ value, onChange, onBlur, error, helperText, type:"text",  name:"name", id:"name" })}
+      { Model_Register({ value, onChange, onBlur, error, helperText, type:"text",  name:"name", id:"name" })}
     </>
   );
 }
@@ -60,10 +60,10 @@ function EmailInput({
   onBlur,
   error,
   helperText,
-}: LoginRegisterHubLocalParams){
+}: RegisterParams){
   return (
     <>
-      { Login_RegisterHubLocal_2({ value, onChange, onBlur, error, helperText, type:"text", name:"email", id:"email" })}
+      { Model_Register({ value, onChange, onBlur, error, helperText, type:"text", name:"email", id:"email" })}
     </>
   );
 }
@@ -74,10 +74,10 @@ function PasswordInput({
   onBlur,
   error,
   helperText,
-}: LoginRegisterHubLocalParams){
+}: RegisterParams){
   return (
     <>
-      { Login_RegisterHubLocal_2({ value, onChange, onBlur, error, helperText, type:"password", name:"password", id:"password", placeholder: "Mínimo de 6 caracteres" })}
+      { Model_Register({ value, onChange, onBlur, error, helperText, type:"password", name:"password", id:"password", placeholder: "Mínimo de 6 caracteres" })}
     </>
   );
 }
@@ -88,10 +88,10 @@ function ConfirmPasswordInput({
   onBlur,
   error,
   helperText,
-}: LoginRegisterHubLocalParams){
+}: RegisterParams){
   return (
     <>
-      { Login_RegisterHubLocal_2({ value, onChange, onBlur, error, helperText, type:"password", name:"password", id:"password", placeholder: "Mínimo de 6 caracteres" })}
+      { Model_Register({ value, onChange, onBlur, error, helperText, type:"password", name:"password", id:"password", placeholder: "Mínimo de 6 caracteres" })}
     </>
   );
 }
@@ -360,13 +360,15 @@ function Register() {
     </>
   );
 
-  return Login_RegisterHubLocal(
-    realHeight,
-    isAnimationSet,
-    Login_Image,
-    Login_Logo,
-    content
-  );
+  const params: ModeloLadoEsquerdoPageParams = {
+    realHeight: realHeight,
+    isAnimationSet: isAnimationSet,
+    Login_Image: Login_Image,
+    Login_Logo: Login_Logo,
+    JSX: content,
+  };
+
+  return ModeloLadoEsquerdoPage(params);
 }
 
 export default Register;
