@@ -1,7 +1,7 @@
 import { Flex, Grid, GridItem, Stack, Image, Text, Input, FormHelperText } from "@chakra-ui/react";
 
-import "./ModeloLadoEsquerdoPage.css";
-import { ModeloLadoEsquerdoPageParams, RegisterParams } from "./models/loginRregisterHubLocal.interface"
+import "./ModeloJSXPage.css";
+import { ModeloLadoEsquerdoPageParams, RegisterParams } from "./models/ModeloJSXPage.interface"
 import { ToastContainer, toast } from "react-toastify";
 
 function ModeloLadoEsquerdoPage( params: ModeloLadoEsquerdoPageParams ) {
@@ -80,10 +80,11 @@ function ModeloLadoEsquerdoPage( params: ModeloLadoEsquerdoPageParams ) {
   return content;
 }
 
-function Model_Register( params: RegisterParams ){
+function ModeloLadoDireitoPage( params: RegisterParams, EsquerdoJSX?: JSX.Element, DireitoJSX?: JSX.Element){
     return (
       <>
         <Stack w="inherit">
+            {EsquerdoJSX}
             <Input
             value={params.value}
             onChange={params.onChange}
@@ -97,6 +98,7 @@ function Model_Register( params: RegisterParams ){
             borderColor={params.error ? "red" : "#0385FD"}
             style={{ borderWidth: "2px" }}
             />
+            {DireitoJSX}
             {params.error ? (
             <FormHelperText>
             <Text className="form-helper-font" mb="0">
@@ -109,10 +111,11 @@ function Model_Register( params: RegisterParams ){
     )
 }
 
-function Model_Login( params: RegisterParams,  ){
+function Model_Login( params: RegisterParams, EsquerdoJSX?: JSX.Element, DireitoJSX?: JSX.Element ){
   return (
     <>
       <Stack w="inherit">
+          {EsquerdoJSX}
           <Input
           value={params.value}
           onChange={params.onChange}
@@ -126,6 +129,7 @@ function Model_Login( params: RegisterParams,  ){
           borderColor={params.error ? "red" : "#0385FD"}
           style={{ borderWidth: "2px" }}
           />
+          {DireitoJSX}
           {params.error ? (
           <FormHelperText>
           <Text className="form-helper-font" mb="0">
@@ -138,4 +142,4 @@ function Model_Login( params: RegisterParams,  ){
   )
 }
 
-export { ModeloLadoEsquerdoPage , Model_Register };
+export { ModeloLadoEsquerdoPage , ModeloLadoDireitoPage };

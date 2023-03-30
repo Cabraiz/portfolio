@@ -37,8 +37,8 @@ import {
 import { validateEmail } from "../../redux/shared/utils/validation/email";
 import { NewUser } from "../../redux/app/models/NewUser";
 
-import { ModeloLadoEsquerdoPageParams, RegisterParams } from "../Auxiliadores/models/loginRregisterHubLocal.interface"
-import  { ModeloLadoEsquerdoPage, Model_Register }  from "../Auxiliadores/ModeloLadoEsquerdoPage";
+import {  RegisterParams } from "../Auxiliadores/models/ModeloJSXPage.interface"
+import  { ModeloLadoEsquerdoPage, ModeloLadoDireitoPage }  from "../Auxiliadores/ModeloJSXPage";
 
 function NomeInput({
   value,
@@ -49,7 +49,7 @@ function NomeInput({
 }: RegisterParams){
   return (
     <>
-      { Model_Register({ value, onChange, onBlur, error, helperText, type:"text",  name:"name", id:"name" })}
+      { ModeloLadoDireitoPage({ value, onChange, onBlur, error, helperText, type:"text",  name:"name", id:"name" })}
     </>
   );
 }
@@ -63,7 +63,7 @@ function EmailInput({
 }: RegisterParams){
   return (
     <>
-      { Model_Register({ value, onChange, onBlur, error, helperText, type:"text", name:"email", id:"email" })}
+      { ModeloLadoDireitoPage({ value, onChange, onBlur, error, helperText, type:"text", name:"email", id:"email" })}
     </>
   );
 }
@@ -77,7 +77,7 @@ function PasswordInput({
 }: RegisterParams){
   return (
     <>
-      { Model_Register({ value, onChange, onBlur, error, helperText, type:"password", name:"password", id:"password", placeholder: "Mínimo de 6 caracteres" })}
+      { ModeloLadoDireitoPage({ value, onChange, onBlur, error, helperText, type:"password", name:"password", id:"password", placeholder: "Mínimo de 6 caracteres" })}
     </>
   );
 }
@@ -91,7 +91,7 @@ function ConfirmPasswordInput({
 }: RegisterParams){
   return (
     <>
-      { Model_Register({ value, onChange, onBlur, error, helperText, type:"password", name:"password", id:"password", placeholder: "Mínimo de 6 caracteres" })}
+      { ModeloLadoDireitoPage({ value, onChange, onBlur, error, helperText, type:"password", name:"password", id:"password", placeholder: "Mínimo de 6 caracteres" })}
     </>
   );
 }
@@ -360,15 +360,7 @@ function Register() {
     </>
   );
 
-  const params: ModeloLadoEsquerdoPageParams = {
-    realHeight: realHeight,
-    isAnimationSet: isAnimationSet,
-    Login_Image: Login_Image,
-    Login_Logo: Login_Logo,
-    JSX: content,
-  };
-
-  return ModeloLadoEsquerdoPage(params);
+  return ModeloLadoEsquerdoPage({realHeight, isAnimationSet, Login_Image, Login_Logo, JSX: content});
 }
 
 export default Register;

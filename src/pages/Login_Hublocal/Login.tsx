@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState, FormEvent } from "react";
+import React, { useEffect, useState, FormEvent } from "react";
 
 import Login_Logo from "../../assets/HubLocal/Login_Logo.webp";
 import Login_Image from "../../assets/HubLocal/Login_Image.webp";
@@ -21,10 +21,6 @@ import {
 } from "@chakra-ui/react";
 
 import { FaUserAlt, FaLock } from "react-icons/fa";
-
-import { useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
-
 import "./Login.css";
 
 import { tokenReceived } from "../../redux/feature/auth/authSlice";
@@ -36,11 +32,11 @@ import {
 import { ProtectedComponent } from "../../redux/feature/auth/ProtectedComponent";
 import { isMobile } from "react-device-detect";
 
-import { ModeloLadoEsquerdoPage } from "../Auxiliadores/ModeloLadoEsquerdoPage";
+import { ModeloLadoEsquerdoPage, ModeloLadoDireitoPage } from "../Auxiliadores/ModeloJSXPage";
 import { validatePasswordLength } from "../../redux/shared/utils/validation/lenght";
 import { validateEmail } from "../../redux/shared/utils/validation/email";
 import useInput from "../../redux/hooks/input/use-input";
-import { ModeloLadoEsquerdoPageParams, RegisterParams } from "../Auxiliadores/models/loginRregisterHubLocal.interface";
+import { ModeloLadoEsquerdoPageParams, RegisterParams } from "../Auxiliadores/models/ModeloJSXPage.interface";
 
 function PasswordInput({
   value,
@@ -52,45 +48,25 @@ function PasswordInput({
 
   const CFaLock = chakra(FaLock);
   const [showPassword, setShowPassword] = useState(false);
-
   const handleShowClick = () => setShowPassword(!showPassword);
 
+  const inputLeftElement = (<InputLeftElement
+    h="100%"
+    pointerEvents="none"
+    children={<CFaLock color="gray.300" />}
+  />)
+
+  const inputRightElement = (<InputRightElement w="auto" h="100%" paddingRight="8px">
+  <Button h="70%" size="sm" onClick={handleShowClick}>
+    {showPassword ? "Ocultar" : "Mostrar"}
+  </Button>
+  </InputRightElement>)
+
   return (
-    <Stack w="inherit">
-      <InputGroup className="input-pattern">
-        <InputLeftElement
-          h="100%"
-          pointerEvents="none"
-          children={<CFaLock color="gray.300" />}
-        />
-        <Input
-          value={value}
-          onChange={onChange}
-          onBlur={onBlur}
-          type={showPassword ? "text" : "password"}
-          name="password"
-          id="password"
-          required
-          
-          className="input-setting"
-          placeholder="Senha"
-          style={{ borderColor: "#0385FD", borderWidth: "2px" }}
-        />
-        <InputRightElement w="auto" h="100%" paddingRight="8px">
-          <Button h="70%" size="sm" onClick={handleShowClick}>
-            {showPassword ? "Ocultar" : "Mostrar"}
-          </Button>
-        </InputRightElement>
-      </InputGroup>
-      {error ? (
-      <FormHelperText>
-        <Text className="form-helper-font" mb="0">
-            {helperText}
-        </Text>
-      </FormHelperText>
-      ) : ""}
-    </Stack>
-  );
+    <>
+      { ModeloLadoDireitoPage({ value, onChange, onBlur, error, helperText, type:"password", name:"password", id:"password", placeholder: "Mínimo de 6 caracteres" }, inputLeftElement, inputRightElement)}
+    </>
+  )
 }
 
 function EmailInput({
@@ -102,34 +78,16 @@ function EmailInput({
 }: RegisterParams) {
 
   const CFaUserAlt = chakra(FaUserAlt);
+  const inputLeftElement = (<InputLeftElement
+    h="100%"
+    pointerEvents="none"
+    children={<CFaUserAlt color="gray.300" />}
+  />)
 
   return (
-    <Stack w="inherit">
-      <InputGroup className="input-pattern">
-        <InputLeftElement
-            h="100%"
-            pointerEvents="none"
-            children={<CFaUserAlt color="gray.300" />}
-        />
-        <Input
-          value={value}
-          onChange={onChange}
-          onBlur={onBlur}
-          required
-
-          className="input-setting"
-          placeholder="Email"
-          style={{ borderColor: "#0385FD", borderWidth: "2px" }}
-        />
-      </InputGroup>
-      {error ? (
-      <FormHelperText>
-        <Text className="form-helper-font" mb="0">
-            {helperText}
-        </Text>
-      </FormHelperText>
-      ) : ""}
-    </Stack>
+    <>
+      { ModeloLadoDireitoPage({ value, onChange, onBlur, error, helperText, type:"text", name:"email", id:"email" }, inputLeftElement)}
+    </>
   );
 }
 
@@ -303,16 +261,8 @@ function Login() {
       />
     </>
   );
-  
-  const params: ModeloLadoEsquerdoPageParams = {
-    realHeight: realHeight,
-    isAnimationSet: isAnimationSet,
-    Login_Image: Login_Image,
-    Login_Logo: Login_Logo,
-    JSX: content,
-  };
 
-  return ModeloLadoEsquerdoPage(params);
+  return ModeloLadoEsquerdoPage({realHeight, isAnimationSet, Login_Image, Login_Logo, JSX: content});
 }
 
 export default Login;
