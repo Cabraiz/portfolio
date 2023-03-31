@@ -8,7 +8,7 @@ const _validateLength: ValidatorFn = (
   const textLength = text.trim().length;
 
   if (options?.min && textLength < options?.min) return false;
-  if (options?.max && textLength < options?.max) return false;
+  if (options?.max && textLength > options?.max) return false;
 
   return true;
 };

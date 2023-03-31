@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState, FormEvent } from "react";
+import React, { useEffect, useState, FormEvent } from "react";
 
 import Login_Logo from "../../assets/HubLocal/Login_Logo.webp";
 import Login_Image from "../../assets/HubLocal/Login_Image.webp";
@@ -15,9 +15,6 @@ import {
   Link,
   FormLabel,
 } from "@chakra-ui/react";
-
-import { useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
 
 import "./Register.css";
 
@@ -134,30 +131,10 @@ function Register() {
     clearHandler: confirmPasswordClearHandler,
   } = useInput(validatePasswordLength);
 
-  const userRef = useRef<HTMLInputElement>(null);
-  const errRef = useRef<HTMLInputElement>(null);
-  const [user, setUser] = useState("");
-  const [pwd, setPwd] = useState("");
-  const [errMsg, setErrMsg] = useState("");
-  const navigate = useNavigate();
-
   const [login, { isLoading }] = useLoginMutation();
-  const dispatch = useDispatch();
 
   const [realHeight, setrealHeight] = useState("");
-
   const [isAnimationSet, setAnimationSet] = useState(false);
-
-  const ErrorNotify = (message: string) => toast.warn(message, {
-    position: "bottom-right",
-    autoClose: 5000,
-    hideProgressBar: false,
-    closeOnClick: true,
-    pauseOnHover: true,
-    draggable: true,
-    progress: undefined,
-    theme: "dark",
-    });
 
   useEffect(() => {
     setAnimationSet(true);
@@ -170,21 +147,24 @@ function Register() {
     }
   }, [realHeight]);
 
-  useEffect(() => {
-    const node = userRef.current;
-    node?.focus();
-  }, []);
-
-  useEffect(() => {
-    setErrMsg("");
-  }, [user, pwd]);
-
   const clearForm = () => {
     nameClearHandler();
     emailClearHandler();
     passwordClearHandler();
     confirmPasswordClearHandler();
   }
+
+  const ErrorNotify = (message: string) => toast.warn(message, {
+    position: isMobile ? "top-center" : "bottom-right",
+    autoClose: 5000,
+    hideProgressBar: false,
+    closeOnClick: true,
+    pauseOnHover: true,
+    draggable: true,
+    progress: undefined,
+    theme: "dark",
+    toastId: "error-toast",
+  });
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -346,7 +326,7 @@ function Register() {
         </form>
       </Box>
       <ToastContainer
-        position="bottom-right"
+        position= {isMobile ? "top-center" : "bottom-right"}
         autoClose={5000}
         hideProgressBar={false}
         newestOnTop={false}
@@ -356,6 +336,7 @@ function Register() {
         draggable
         pauseOnHover
         theme="dark"
+        limit={1}
       />
     </>
   );

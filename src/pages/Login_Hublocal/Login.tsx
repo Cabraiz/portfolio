@@ -63,7 +63,7 @@ function PasswordInput({
 
   return (
     <>
-      { ModeloLadoDireitoPage({ value, onChange, onBlur, error, helperText, type:"password", name:"password", id:"password", placeholder: "Mínimo de 6 caracteres" }, inputLeftElement, inputRightElement)}
+      { ModeloLadoDireitoPage({ value, onChange, onBlur, error, helperText, type: showPassword ? "text" : "password", name:"password", id:"password", placeholder: "Mínimo de 6 caracteres" }, inputLeftElement, inputRightElement)}
     </>
   )
 }
@@ -130,13 +130,26 @@ function Login() {
     passwordClearHandler();
   }
 
+  const ErrorNotify = (message: string) => toast.warn(message, {
+    position:  isMobile ? "top-center" : "bottom-right",
+    autoClose: 5000,
+    hideProgressBar: false,
+    closeOnClick: true,
+    pauseOnHover: true,
+    draggable: true,
+    progress: undefined,
+    theme: "dark",
+    toastId: "error-toast",
+  });
+
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const errors: string[] = [];
 
+    console.log(emailHasError, passwordHasError);
     if (
       emailHasError ||
-      passwordHasError 
+      passwordHasError
     ){
       errors.push("Preencha campos corretamente");
     }
@@ -158,19 +171,7 @@ function Login() {
     clearForm()
   };
 
-
-  const ErrorNotify = (message: string) => toast.warn(message, {
-    position: "bottom-right",
-    autoClose: 5000,
-    hideProgressBar: false,
-    closeOnClick: true,
-    pauseOnHover: true,
-    draggable: true,
-    progress: undefined,
-    theme: "dark",
-  });
-
-  const content = isLoading ? (
+  const content: JSX.Element = isLoading ? (
     <h1>Loading...</h1>
   ) : (
     <>
@@ -247,7 +248,7 @@ function Login() {
         </form>
       </Box>
       <ToastContainer
-        position="bottom-right"
+        position={isMobile ? "top-center" : "bottom-right"}
         autoClose={5000}
         hideProgressBar={false}
         newestOnTop={false}
@@ -257,6 +258,7 @@ function Login() {
         draggable
         pauseOnHover
         theme="dark"
+        limit={1}
       />
     </>
   );

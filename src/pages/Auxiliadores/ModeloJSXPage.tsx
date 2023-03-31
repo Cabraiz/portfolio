@@ -2,14 +2,13 @@ import { Flex, Grid, GridItem, Stack, Image, Text, Input, FormHelperText, InputG
 
 import "./ModeloJSXPage.css";
 import { ModeloLadoEsquerdoPageParams, RegisterParams } from "./models/ModeloJSXPage.interface"
-import { ToastContainer, toast } from "react-toastify";
 
 function ModeloLadoEsquerdoPage( params: ModeloLadoEsquerdoPageParams ) {
   const textoTitle = "Junte-se a vários clientes satisfeitos.";
   const textoSubtitle =
     "Cliente HubLocal ganha mais relevância, autoridade e visibilidade. Mais de 7.000 marcas confiam na nossa plataforma. Seja uma delas!";
 
-  const content = (
+  const content: JSX.Element = (
     <>
       <Flex
         flexDirection="column"
