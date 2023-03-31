@@ -3,7 +3,7 @@ import React, { useEffect, useState, FormEvent } from "react";
 import Login_Logo from "../../assets/HubLocal/Login_Logo.webp";
 import Login_Image from "../../assets/HubLocal/Login_Image.webp";
 
-import { ToastContainer, toast } from "react-toastify";
+import { toast } from "react-toastify";
 
 import {
   Button,
@@ -135,10 +135,6 @@ function ConfirmPasswordInput({
 }
 
 function Register() {
-  const [formState, setFormState] = React.useState<LoginRequest>({
-    username: "",
-    password: "",
-  });
 
   const {
     text: name,
@@ -249,10 +245,6 @@ function Register() {
     clearForm();
   };
 
-  const textoTitle = "Junte-se a vários clientes satisfeitos.";
-  const textoSubtitle =
-    "Cliente HubLocal ganha mais relevância, autoridade e visibilidade. Mais de 7.000 marcas confiam na nossa plataforma. Seja uma delas!";
-
   const content = isLoading ? (
     <h1>Loading...</h1>
   ) : (
@@ -346,7 +338,6 @@ function Register() {
                 REGISTRAR
               </Text>
             </Button>
-            <ToastContainer />
             <Link href="/loginhublocal" style={{ textDecoration: "none" }}>
               <Button
                 className="button-setting button-font"

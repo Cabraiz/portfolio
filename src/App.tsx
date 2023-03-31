@@ -7,7 +7,7 @@ import { Row, Navbar, Image, Button } from "react-bootstrap";
 import logo from "./assets/icones/logo.svg";
 import logoGmail from "./assets/icones/7.svg";
 
-import { ToastContainer, toast } from "react-toastify";
+import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 import { Helmet, HelmetProvider } from "react-helmet-async";
@@ -89,10 +89,7 @@ function App() {
   }
 
   const convertMultiplyVwToPx = () => {
-    let temp;
-    if (!isMobile) temp = (windowSize.innerWidth / 100) * 14;
-    else temp = (windowSize.innerWidth / 100) * 14;
-    return temp;
+    return (windowSize.innerWidth / 100) * 14;
   };
 
   const SignFirebase = async () => {
@@ -133,7 +130,6 @@ function App() {
   };
 
   const [title] = useState("Bem Vindo! 🤝");
-  const [site, setSite] = useState<string>("");
 
   const { pathname } = useLocation();
 
@@ -212,6 +208,7 @@ function App() {
           <Route index element={<Hublocal />} />
         </Route>
       </Routes>
+      <ToastContainer />
     </>
   );
 }

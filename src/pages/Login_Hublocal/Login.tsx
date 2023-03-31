@@ -3,7 +3,7 @@ import React, { useEffect, useState, FormEvent } from "react";
 import Login_Logo from "../../assets/HubLocal/Login_Logo.webp";
 import Login_Image from "../../assets/HubLocal/Login_Image.webp";
 
-import { ToastContainer, toast } from "react-toastify";
+import { toast } from "react-toastify";
 
 import {
   Button,
@@ -54,6 +54,7 @@ function PasswordInput({
 
   const inputLeftElement = (
     <InputLeftElement
+      ms="1vw"
       h="100%"
       pointerEvents="none"
       children={<CFaLock color="gray.300" />}
@@ -99,6 +100,7 @@ function EmailInput({
   const CFaUserAlt = chakra(FaUserAlt);
   const inputLeftElement = (
     <InputLeftElement
+      ms="1vw"
       h="100%"
       pointerEvents="none"
       children={<CFaUserAlt color="gray.300" />}
@@ -254,7 +256,6 @@ function Login() {
                 LOGAR
               </Text>
             </Button>
-            <ToastContainer />
             <Link href="/registerhublocal" style={{ textDecoration: "none" }}>
               <Button
                 className="button-settings button-font"
