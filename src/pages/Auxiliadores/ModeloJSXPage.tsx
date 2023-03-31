@@ -1,9 +1,22 @@
-import { Flex, Grid, GridItem, Stack, Image, Text, Input, FormHelperText, InputGroup } from "@chakra-ui/react";
+import {
+  Flex,
+  Grid,
+  GridItem,
+  Stack,
+  Image,
+  Text,
+  Input,
+  FormHelperText,
+  InputGroup,
+} from "@chakra-ui/react";
 
 import "./ModeloJSXPage.css";
-import { ModeloLadoEsquerdoPageParams, RegisterParams } from "./models/ModeloJSXPage.interface"
+import {
+  ModeloLadoEsquerdoPageParams,
+  RegisterParams,
+} from "./models/ModeloJSXPage.interface";
 
-function ModeloLadoEsquerdoPage( params: ModeloLadoEsquerdoPageParams ) {
+function ModeloLadoEsquerdoPage(params: ModeloLadoEsquerdoPageParams) {
   const textoTitle = "Junte-se a vários clientes satisfeitos.";
   const textoSubtitle =
     "Cliente HubLocal ganha mais relevância, autoridade e visibilidade. Mais de 7.000 marcas confiam na nossa plataforma. Seja uma delas!";
@@ -79,37 +92,42 @@ function ModeloLadoEsquerdoPage( params: ModeloLadoEsquerdoPageParams ) {
   return content;
 }
 
-function ModeloLadoDireitoPage( params: RegisterParams, EsquerdoJSX?: JSX.Element, DireitoJSX?: JSX.Element){
+function ModeloLadoDireitoPage(
+  params: RegisterParams,
+  EsquerdoJSX?: JSX.Element,
+  DireitoJSX?: JSX.Element
+) {
   return (
     <>
       <Stack w="inherit">
         <InputGroup className="input-pattern">
           {EsquerdoJSX}
-              <Input
-              value={params.value}
-              onChange={params.onChange}
-              onBlur={params.onBlur}
-              type={params.type}
-              name={params.name}
-              id={params.id}
-              required
-
-              className="input-setting"
-              borderColor={params.error ? "red" : "#0385FD"}
-              style={{ borderWidth: "2px" }}
-              />
-            {DireitoJSX}
+          <Input
+            value={params.value}
+            onChange={params.onChange}
+            onBlur={params.onBlur}
+            type={params.type}
+            name={params.name}
+            id={params.id}
+            required
+            className="input-setting"
+            borderColor={params.error ? "red" : "#0385FD"}
+            style={{ borderWidth: "2px" }}
+          />
+          {DireitoJSX}
         </InputGroup>
         {params.error ? (
-        <FormHelperText>
-        <Text className="form-helper-font" mb="0">
-            {params.helperText}
-        </Text>
-        </FormHelperText>
-       ) : ""}
-    </Stack>
+          <FormHelperText>
+            <Text className="form-helper-font" mb="0">
+              {params.helperText}
+            </Text>
+          </FormHelperText>
+        ) : (
+          ""
+        )}
+      </Stack>
     </>
-  )
+  );
 }
 
-export { ModeloLadoEsquerdoPage , ModeloLadoDireitoPage };
+export { ModeloLadoEsquerdoPage, ModeloLadoDireitoPage };

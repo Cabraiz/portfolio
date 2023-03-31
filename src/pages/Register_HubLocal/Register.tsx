@@ -34,8 +34,11 @@ import {
 import { validateEmail } from "../../redux/shared/utils/validation/email";
 import { NewUser } from "../../redux/app/models/NewUser";
 
-import {  RegisterParams } from "../Auxiliadores/models/ModeloJSXPage.interface"
-import  { ModeloLadoEsquerdoPage, ModeloLadoDireitoPage }  from "../Auxiliadores/ModeloJSXPage";
+import { RegisterParams } from "../Auxiliadores/models/ModeloJSXPage.interface";
+import {
+  ModeloLadoEsquerdoPage,
+  ModeloLadoDireitoPage,
+} from "../Auxiliadores/ModeloJSXPage";
 
 function NomeInput({
   value,
@@ -43,10 +46,19 @@ function NomeInput({
   onBlur,
   error,
   helperText,
-}: RegisterParams){
+}: RegisterParams) {
   return (
     <>
-      { ModeloLadoDireitoPage({ value, onChange, onBlur, error, helperText, type:"text",  name:"name", id:"name" })}
+      {ModeloLadoDireitoPage({
+        value,
+        onChange,
+        onBlur,
+        error,
+        helperText,
+        type: "text",
+        name: "name",
+        id: "name",
+      })}
     </>
   );
 }
@@ -57,10 +69,19 @@ function EmailInput({
   onBlur,
   error,
   helperText,
-}: RegisterParams){
+}: RegisterParams) {
   return (
     <>
-      { ModeloLadoDireitoPage({ value, onChange, onBlur, error, helperText, type:"text", name:"email", id:"email" })}
+      {ModeloLadoDireitoPage({
+        value,
+        onChange,
+        onBlur,
+        error,
+        helperText,
+        type: "text",
+        name: "email",
+        id: "email",
+      })}
     </>
   );
 }
@@ -71,10 +92,20 @@ function PasswordInput({
   onBlur,
   error,
   helperText,
-}: RegisterParams){
+}: RegisterParams) {
   return (
     <>
-      { ModeloLadoDireitoPage({ value, onChange, onBlur, error, helperText, type:"password", name:"password", id:"password", placeholder: "Mínimo de 6 caracteres" })}
+      {ModeloLadoDireitoPage({
+        value,
+        onChange,
+        onBlur,
+        error,
+        helperText,
+        type: "password",
+        name: "password",
+        id: "password",
+        placeholder: "Mínimo de 6 caracteres",
+      })}
     </>
   );
 }
@@ -85,10 +116,20 @@ function ConfirmPasswordInput({
   onBlur,
   error,
   helperText,
-}: RegisterParams){
+}: RegisterParams) {
   return (
     <>
-      { ModeloLadoDireitoPage({ value, onChange, onBlur, error, helperText, type:"password", name:"password", id:"password", placeholder: "Mínimo de 6 caracteres" })}
+      {ModeloLadoDireitoPage({
+        value,
+        onChange,
+        onBlur,
+        error,
+        helperText,
+        type: "password",
+        name: "password",
+        id: "password",
+        placeholder: "Mínimo de 6 caracteres",
+      })}
     </>
   );
 }
@@ -152,25 +193,25 @@ function Register() {
     emailClearHandler();
     passwordClearHandler();
     confirmPasswordClearHandler();
-  }
+  };
 
-  const ErrorNotify = (message: string) => toast.warn(message, {
-    position: isMobile ? "top-center" : "bottom-right",
-    autoClose: 5000,
-    hideProgressBar: false,
-    closeOnClick: true,
-    pauseOnHover: true,
-    draggable: true,
-    progress: undefined,
-    theme: "dark",
-    toastId: "error-toast",
-  });
+  const ErrorNotify = (message: string) =>
+    toast.warn(message, {
+      position: isMobile ? "top-center" : "bottom-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "dark",
+    });
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const errors: string[] = [];
 
-    if (password !== confirmPassword){
+    if (password !== confirmPassword) {
       errors.push("Senhas não correspondem");
     }
 
@@ -179,7 +220,7 @@ function Register() {
       emailHasError ||
       passwordHasError ||
       confirmPasswordHasError
-    ){
+    ) {
       errors.push("Preencha campos corretamente");
     }
 
@@ -188,7 +229,7 @@ function Register() {
       email.length === 0 ||
       password.length === 0 ||
       confirmPassword.length === 0
-    ){
+    ) {
       errors.push("Preencha todos os campos");
     }
 
@@ -205,13 +246,13 @@ function Register() {
 
     console.log("NEW USER: ", newUser);
 
-    clearForm()
+    clearForm();
   };
 
   const textoTitle = "Junte-se a vários clientes satisfeitos.";
   const textoSubtitle =
     "Cliente HubLocal ganha mais relevância, autoridade e visibilidade. Mais de 7.000 marcas confiam na nossa plataforma. Seja uma delas!";
-  
+
   const content = isLoading ? (
     <h1>Loading...</h1>
   ) : (
@@ -305,6 +346,7 @@ function Register() {
                 REGISTRAR
               </Text>
             </Button>
+            <ToastContainer />
             <Link href="/loginhublocal" style={{ textDecoration: "none" }}>
               <Button
                 className="button-setting button-font"
@@ -325,23 +367,16 @@ function Register() {
           </Stack>
         </form>
       </Box>
-      <ToastContainer
-        position= {isMobile ? "top-center" : "bottom-right"}
-        autoClose={5000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="dark"
-        limit={1}
-      />
     </>
   );
 
-  return ModeloLadoEsquerdoPage({realHeight, isAnimationSet, Login_Image, Login_Logo, JSX: content});
+  return ModeloLadoEsquerdoPage({
+    realHeight,
+    isAnimationSet,
+    Login_Image,
+    Login_Logo,
+    JSX: content,
+  });
 }
 
 export default Register;

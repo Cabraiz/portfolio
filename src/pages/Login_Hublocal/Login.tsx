@@ -29,11 +29,17 @@ import {
 import { ProtectedComponent } from "../../redux/feature/auth/ProtectedComponent";
 import { isMobile } from "react-device-detect";
 
-import { ModeloLadoEsquerdoPage, ModeloLadoDireitoPage } from "../Auxiliadores/ModeloJSXPage";
+import {
+  ModeloLadoEsquerdoPage,
+  ModeloLadoDireitoPage,
+} from "../Auxiliadores/ModeloJSXPage";
 import { validatePasswordLength } from "../../redux/shared/utils/validation/lenght";
 import { validateEmail } from "../../redux/shared/utils/validation/email";
 import useInput from "../../redux/hooks/input/use-input";
-import { ModeloLadoEsquerdoPageParams, RegisterParams } from "../Auxiliadores/models/ModeloJSXPage.interface";
+import {
+  ModeloLadoEsquerdoPageParams,
+  RegisterParams,
+} from "../Auxiliadores/models/ModeloJSXPage.interface";
 
 function PasswordInput({
   value,
@@ -42,30 +48,45 @@ function PasswordInput({
   error,
   helperText,
 }: RegisterParams) {
-
   const CFaLock = chakra(FaLock);
   const [showPassword, setShowPassword] = useState(false);
   const handleShowClick = () => setShowPassword(!showPassword);
 
   const inputLeftElement = (
-  <InputLeftElement
-    h="100%"
-    pointerEvents="none"
-    children={<CFaLock color="gray.300" />}
-  />)
+    <InputLeftElement
+      h="100%"
+      pointerEvents="none"
+      children={<CFaLock color="gray.300" />}
+    />
+  );
 
   const inputRightElement = (
-  <InputRightElement w="auto" h="100%" paddingRight="8px">
-    <Button h="70%" size="sm" onClick={handleShowClick}>
-      {showPassword ? "Ocultar" : "Mostrar"}
-    </Button>
-  </InputRightElement>)
+    <InputRightElement w="auto" h="100%" paddingRight="8px">
+      <Button h="70%" size="sm" onClick={handleShowClick}>
+        {showPassword ? "Ocultar" : "Mostrar"}
+      </Button>
+    </InputRightElement>
+  );
 
   return (
     <>
-      { ModeloLadoDireitoPage({ value, onChange, onBlur, error, helperText, type: showPassword ? "text" : "password", name:"password", id:"password", placeholder: "Mínimo de 6 caracteres" }, inputLeftElement, inputRightElement)}
+      {ModeloLadoDireitoPage(
+        {
+          value,
+          onChange,
+          onBlur,
+          error,
+          helperText,
+          type: showPassword ? "text" : "password",
+          name: "password",
+          id: "password",
+          placeholder: "Mínimo de 6 caracteres",
+        },
+        inputLeftElement,
+        inputRightElement
+      )}
     </>
-  )
+  );
 }
 
 function EmailInput({
@@ -75,23 +96,35 @@ function EmailInput({
   error,
   helperText,
 }: RegisterParams) {
-
   const CFaUserAlt = chakra(FaUserAlt);
-  const inputLeftElement = (<InputLeftElement
-    h="100%"
-    pointerEvents="none"
-    children={<CFaUserAlt color="gray.300" />}
-  />)
+  const inputLeftElement = (
+    <InputLeftElement
+      h="100%"
+      pointerEvents="none"
+      children={<CFaUserAlt color="gray.300" />}
+    />
+  );
 
   return (
     <>
-      { ModeloLadoDireitoPage({ value, onChange, onBlur, error, helperText, type:"text", name:"email", id:"email" }, inputLeftElement)}
+      {ModeloLadoDireitoPage(
+        {
+          value,
+          onChange,
+          onBlur,
+          error,
+          helperText,
+          type: "text",
+          name: "email",
+          id: "email",
+        },
+        inputLeftElement
+      )}
     </>
   );
 }
 
 function Login() {
-
   const [login, { isLoading }] = useLoginMutation();
 
   const [realHeight, setrealHeight] = useState("");
@@ -128,36 +161,30 @@ function Login() {
   const clearForm = () => {
     emailClearHandler();
     passwordClearHandler();
-  }
+  };
 
-  const ErrorNotify = (message: string) => toast.warn(message, {
-    position:  isMobile ? "top-center" : "bottom-right",
-    autoClose: 5000,
-    hideProgressBar: false,
-    closeOnClick: true,
-    pauseOnHover: true,
-    draggable: true,
-    progress: undefined,
-    theme: "dark",
-    toastId: "error-toast",
-  });
+  const ErrorNotify = (message: string) =>
+    toast.warn(message, {
+      position: isMobile ? "top-center" : "bottom-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "dark",
+    });
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const errors: string[] = [];
 
     console.log(emailHasError, passwordHasError);
-    if (
-      emailHasError ||
-      passwordHasError
-    ){
+    if (emailHasError || passwordHasError) {
       errors.push("Preencha campos corretamente");
     }
 
-    if (
-      email.length === 0 ||
-      password.length === 0
-    ){
+    if (email.length === 0 || password.length === 0) {
       errors.push("Preencha todos os campos");
     }
 
@@ -168,7 +195,7 @@ function Login() {
 
     console.log("USER: ", email, password);
 
-    clearForm()
+    clearForm();
   };
 
   const content: JSX.Element = isLoading ? (
@@ -227,6 +254,7 @@ function Login() {
                 LOGAR
               </Text>
             </Button>
+            <ToastContainer />
             <Link href="/registerhublocal" style={{ textDecoration: "none" }}>
               <Button
                 className="button-settings button-font"
@@ -247,23 +275,16 @@ function Login() {
           </Stack>
         </form>
       </Box>
-      <ToastContainer
-        position={isMobile ? "top-center" : "bottom-right"}
-        autoClose={5000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="dark"
-        limit={1}
-      />
     </>
   );
 
-  return ModeloLadoEsquerdoPage({realHeight, isAnimationSet, Login_Image, Login_Logo, JSX: content});
+  return ModeloLadoEsquerdoPage({
+    realHeight,
+    isAnimationSet,
+    Login_Image,
+    Login_Logo,
+    JSX: content,
+  });
 }
 
 export default Login;

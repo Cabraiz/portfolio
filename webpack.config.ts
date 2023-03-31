@@ -1,4 +1,4 @@
-import { Configuration } from 'webpack';
+import { Configuration } from "webpack";
 const Dotenv = require("dotenv-webpack");
 
 const webpackConfig: Configuration = {
