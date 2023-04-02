@@ -1,84 +1,85 @@
+/* Fonts */
 @font-face {
-    font-family: 'Poppins';
-    src: local('Poppins'), url('../../fonts/Poppins/Poppins-Bold.ttf');
-    font-style: bold;
+    font-family: "Poppins";
+    src: local("Poppins"), url("../../fonts/Poppins/Poppins-Bold.ttf") format("truetype");
     font-weight: 700;
 }
 
 @font-face {
-    font-family: 'Poppins';
-    src: local('Poppins'), url("../../fonts/Poppins/Poppins-Medium.ttf");
-    font-style: normal;
-    font-weight: 500;
+font-family: "Poppins";
+src: local("Poppins"), url("../../fonts/Poppins/Poppins-Medium.ttf") format("truetype");
+font-weight: 500;
 }
 
-.letter-spacing-text{
-    letter-spacing: 0.4px;
+/* Typography */
+.poppins-text-label,
+.poppins-text-button,
+.frase-imagem-logo {
+  font-family: "Poppins", sans-serif;
 }
 
-.letter-spacing-button{
-    letter-spacing: 1px;
-}
-
-.poppins-text-label{
-    font-family: 'Poppins', sans-serif;
+.poppins-text-label {
     font-weight: 500;
     font-size: 16px;
     color: #373737;
+  }
+  
+.poppins-text-button {
+font-weight: 700;
+margin-bottom: 0;
 }
 
-.poppins-text-button{
-    margin-bottom: 0;
-    font-family: 'Poppins', sans-serif;
-    font-weight: bold;
-    font-weight: 700;
+.frase-imagem-logo {
+font-weight: bold;
+font-style: normal;
+font-size: 35px;
+line-height: 105%;
+letter-spacing: 0.5px;
+text-align: center;
+color: white;
+vertical-align: top;
 }
 
-.frase-imagem-logo{
-    letter-spacing: 0.5px;
-    color: white;
-    font-family: 'Poppins', sans-serif;
-    line-height: 105%;
-    vertical-align: top;
-    align-items: center;
-    font-style: normal;
-    font-weight: bold;
-    text-align: center;
-    font-size: 35px;
+.letter-spacing-text {
+letter-spacing: 0.4px;
 }
 
-.button-setting, .input-setting {
-    min-height: 50px;
-    height: 7.3vh !important;
-    width: 100%;
+.letter-spacing-button {
+letter-spacing: 1px;
+}
+
+/* Buttons and inputs */
+.button-setting,
+.input-setting {
+height: 7.3vh;
+min-height: 50px;
+width: 100%;
 }
 
 .button-font {
-    color: #FFFFFF;
-    font-weight: 700;
+color: #fff;
+font-weight: 700;
+}
+
+/* Miscellaneous */
+.form-helper-font {
+color: red;
+font-weight: 500;
 }
 
 .text-pattern {
-    margin: 0 !important;
-}
-
-.form-helper-font {
-    color: red;
-    font-style: normal;
-    font-weight: 500;
+margin: 0;
 }
 
 .fastAnimation {
-    animation: linear;
-    animation-name: run;
-    animation-duration: 0s;
+animation: run 0s linear;
 }
 
 @keyframes run {
-    0% {
-        width: 50%;
-    }
-    100% {
-        width: 100%;
-    }
-  }
+0% {
+    width: 50%;
+}
+100% {
+    width: 100%;
+}
+}

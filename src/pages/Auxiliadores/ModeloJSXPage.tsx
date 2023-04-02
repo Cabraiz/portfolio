@@ -124,7 +124,7 @@ function ModeloLadoDireitoPage(
               {params.helperText}
             </Text>
           </FormHelperText>
-         )}
+        )}
       </Stack>
     </>
   );

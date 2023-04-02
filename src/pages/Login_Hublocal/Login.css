@@ -1,26 +1,26 @@
+/* Fonts */
 @font-face {
-    font-family: 'Poppins';
-    src: local('Poppins'), url('../../fonts/Poppins/Poppins-Bold.ttf');
-    font-style: bold;
+    font-family: "Poppins";
+    src: local("Poppins"), url("../../fonts/Poppins/Poppins-Bold.ttf") format("truetype");
     font-weight: 700;
 }
 
 @font-face {
-    font-family: 'Poppins';
-    src: local('Poppins'), url("../../fonts/Poppins/Poppins-Medium.ttf");
-    font-style: normal;
-    font-weight: 500;
+font-family: "Poppins";
+src: local("Poppins"), url("../../fonts/Poppins/Poppins-Medium.ttf") format("truetype");
+font-weight: 500;
 }
 
-.letter-spacing-text{
+/* Typography */
+.letter-spacing-text {
     letter-spacing: 0.4px;
 }
 
-.letter-spacing-button{
+.letter-spacing-button {
     letter-spacing: 1px;
 }
 
-.poppins-text-label{
+.poppins-text-label {
     font-family: 'Poppins', sans-serif;
     font-weight: 500;
     font-size: 16px;
@@ -28,46 +28,46 @@
     margin-bottom: 0;
 }
 
-.poppins-text-button{
+.poppins-text-button {
     font-family: 'Poppins', sans-serif;
-    font-weight: bold;
     font-weight: 700;
 }
 
-.frase-imagem-logo{
-    letter-spacing: 0.5px;
-    color: white;
+.frase-imagem-logo {
     font-family: 'Poppins', sans-serif;
-    line-height: 105%;
-    vertical-align: top;
-    align-items: center;
-    font-style: normal;
-    font-weight: bold;
-    text-align: center;
+    font-weight: 700;
     font-size: 35px;
+    letter-spacing: 0.5px;
+    line-height: 105%;
+    text-align: center;
+    color: #fff;
+    align-items: center;
+    vertical-align: top;
 }
 
-.button-settings, .input-setting {
+/* Buttons and Inputs */
+    .button-settings,
+    .input-setting {
     min-height: 50px;
     height: 7.3vh !important;
 }
 
 .button-font {
-    color: #FFFFFF;
     font-weight: 700;
+    color: #fff;
 }
 
+/* Animations */
 .fastAnimation {
-    animation: linear;
-    animation-name: run;
-    animation-duration: 0s;
+    animation: run 0s linear;
 }
 
 @keyframes run {
     0% {
-        width: 50%;
+    width: 50%;
     }
     100% {
-        width: 100%;
+    width: 100%;
     }
-  }
+}
+    
