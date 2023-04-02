@@ -50,7 +50,6 @@
 .button-settings, .input-setting {
     min-height: 50px;
     height: 7.3vh !important;
-    width: 100%;
 }
 
 .button-font {

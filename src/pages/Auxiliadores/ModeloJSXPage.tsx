@@ -100,7 +100,7 @@ function ModeloLadoDireitoPage(
   return (
     <>
       <Stack w="inherit">
-        <InputGroup className="input-pattern">
+        <InputGroup style={{ marginTop: "0.5vh" }}>
           {EsquerdoJSX}
           <Input
             value={params.value}
@@ -112,7 +112,9 @@ function ModeloLadoDireitoPage(
             required
             className="input-setting"
             borderColor={params.error ? "red" : "#0385FD"}
-            style={{ borderWidth: "2px" }}
+            paddingLeft={EsquerdoJSX == null ? "" : "50px"}
+            paddingRight={DireitoJSX == null ? "" : "80px"}
+            style={{ borderWidth: "2px", width:"100%" }}
           />
           {DireitoJSX}
         </InputGroup>

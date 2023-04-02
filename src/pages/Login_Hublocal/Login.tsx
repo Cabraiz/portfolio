@@ -37,7 +37,6 @@ import { validatePasswordLength } from "../../redux/shared/utils/validation/leng
 import { validateEmail } from "../../redux/shared/utils/validation/email";
 import useInput from "../../redux/hooks/input/use-input";
 import {
-  ModeloLadoEsquerdoPageParams,
   RegisterParams,
 } from "../Auxiliadores/models/ModeloJSXPage.interface";
 
@@ -54,15 +53,15 @@ function PasswordInput({
 
   const inputLeftElement = (
     <InputLeftElement
-      ms="1vw"
+      ms="10px"
       h="100%"
       pointerEvents="none"
-      children={<CFaLock color="gray.300" />}
+      children={<CFaLock color="gray.300" boxSize="22px"/>}
     />
   );
 
   const inputRightElement = (
-    <InputRightElement w="auto" h="100%" paddingRight="8px">
+    <InputRightElement w="fit-content" h="100%" paddingRight="8px">
       <Button h="70%" size="sm" onClick={handleShowClick}>
         {showPassword ? "Ocultar" : "Mostrar"}
       </Button>
@@ -100,10 +99,10 @@ function EmailInput({
   const CFaUserAlt = chakra(FaUserAlt);
   const inputLeftElement = (
     <InputLeftElement
-      ms="1vw"
+      ms="10px"
       h="100%"
       pointerEvents="none"
-      children={<CFaUserAlt color="gray.300" />}
+      children={<CFaUserAlt color="gray.300" boxSize="22px" />}
     />
   );
 
@@ -263,6 +262,7 @@ function Login() {
                 style={{
                   backgroundColor: "#00CC99",
                   boxShadow: "0px 2px 2px 0px #00000040",
+                  width: "100%",
                 }}
               >
                 <Text
