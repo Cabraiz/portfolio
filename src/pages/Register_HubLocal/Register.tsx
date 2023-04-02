@@ -38,6 +38,7 @@ import { RegisterParams } from "../Auxiliadores/models/ModeloJSXPage.interface";
 import {
   ModeloLadoEsquerdoPage,
   ModeloLadoDireitoPage,
+  LoadingPage
 } from "../Auxiliadores/ModeloJSXPage";
 
 function NomeInput({
@@ -246,7 +247,7 @@ function Register() {
   };
 
   const content = isLoading ? (
-    <h1>Loading...</h1>
+    <LoadingPage/>
   ) : (
     <>
       <Box minW={{ md: "31vw" }} style={{ marginTop: "0" }}>

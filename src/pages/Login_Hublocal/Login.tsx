@@ -15,6 +15,7 @@ import {
   Text,
   InputRightElement,
   Link,
+  Spinner,
 } from "@chakra-ui/react";
 
 import { FaUserAlt, FaLock } from "react-icons/fa";
@@ -32,6 +33,7 @@ import { isMobile } from "react-device-detect";
 import {
   ModeloLadoEsquerdoPage,
   ModeloLadoDireitoPage,
+  LoadingPage,
 } from "../Auxiliadores/ModeloJSXPage";
 import { validatePasswordLength } from "../../redux/shared/utils/validation/lenght";
 import { validateEmail } from "../../redux/shared/utils/validation/email";
@@ -200,7 +202,7 @@ function Login() {
   };
 
   const content: JSX.Element = isLoading ? (
-    <h1>Loading...</h1>
+    <LoadingPage/>
   ) : (
     <>
       <Box minW={{ md: "31vw" }} style={{ marginTop: "0" }}>
