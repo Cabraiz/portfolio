@@ -112,21 +112,19 @@ function ModeloLadoDireitoPage(
             required
             className="input-setting"
             borderColor={params.error ? "red" : "#0385FD"}
-            paddingLeft={EsquerdoJSX == null ? "" : "50px"}
-            paddingRight={DireitoJSX == null ? "" : "80px"}
+            paddingLeft={`${EsquerdoJSX ? "50px" : ""}`}
+            paddingRight={`${DireitoJSX ? "80px" : ""}`}
             style={{ borderWidth: "2px", width:"100%" }}
           />
           {DireitoJSX}
         </InputGroup>
-        {params.error ? (
+        {params.error && (
           <FormHelperText>
             <Text className="form-helper-font" mb="0">
               {params.helperText}
             </Text>
           </FormHelperText>
-        ) : (
-          ""
-        )}
+         )}
       </Stack>
     </>
   );
