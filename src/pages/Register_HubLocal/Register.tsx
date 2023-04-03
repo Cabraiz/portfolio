@@ -254,7 +254,7 @@ function Register() {
         <form onSubmit={handleSubmit} autoComplete="off">
           <Stack
             w={{ base: "90vw", md: "auto" }}
-            spacing={1}
+            spacing={2}
             backgroundColor="whiteAlpha.900"
           >
             <FormControl isRequired>
@@ -327,7 +327,7 @@ function Register() {
               variant="solid"
               style={{
                 boxShadow: "0px 2px 2px 0px #00000040",
-                marginTop: "3.7vh",
+                marginTop: "4vh",
                 marginBottom: "1.5vh",
                 backgroundColor: "#0385FD",
               }}

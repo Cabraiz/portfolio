@@ -51,7 +51,7 @@ font-weight: 500;
 /* Buttons and inputs */
 .button-setting,
 .input-setting {
-    height: 7.3vh;
+    height: 7.2vh !important;
     min-height: 50px;
     width: 100%;
 }
@@ -68,7 +68,7 @@ font-weight: 500;
 }
 
 .text-pattern {
-    margin: 0;
+    margin-bottom: 0 !important;
 }
 
 .fastAnimation {

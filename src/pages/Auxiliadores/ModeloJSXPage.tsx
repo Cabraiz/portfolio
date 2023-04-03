@@ -78,7 +78,7 @@ function ModeloLadoEsquerdoPage(params: ModeloLadoEsquerdoPageParams) {
           <GridItem w="50vw" className="column columnB" h={params.realHeight}>
             <Stack justifyContent="center" alignItems="center">
               <Image
-                paddingBottom="1.5vh"
+                paddingBottom="3.5vh"
                 minW={{ base: "70vw", md: "300px" }}
                 w="24.5vw"
                 src={params.Login_Logo}

@@ -209,7 +209,7 @@ function Login() {
         <form onSubmit={handleSubmit} autoComplete="off">
           <Stack
             w={{ base: "90vw", md: "auto" }}
-            spacing={1}
+            spacing={3}
             backgroundColor="whiteAlpha.900"
             style={{ paddingBottom: "0" }}
           >
@@ -245,8 +245,8 @@ function Login() {
               variant="solid"
               style={{
                 backgroundColor: "#0385FD",
-                marginTop: "2.5vh",
-                marginBottom: "2vh",
+                marginTop: "3vh",
+                marginBottom: "1vh",
                 boxShadow: "0px 2px 2px 0px #00000040",
               }}
             >
