@@ -14,7 +14,7 @@ import { Mutex } from "async-mutex";
 // create a new mutex
 const mutex = new Mutex();
 const baseQuery = fetchBaseQuery({
-  baseUrl: "https://passo-lar-backend.vercel.app",
+  baseUrl: `${process.env.REACT_APP_BASE_API}`,
   credentials: "include",
   prepareHeaders: (headers, { getState }) => {
     const token = (getState() as RootState).auth.token;

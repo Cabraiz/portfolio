@@ -1,15 +1,45 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { authApiSlice, User } from "../../feature/auth/authApiSlice";
 import type { RootState } from "../../app/store";
+import { DisplayUser } from "../../app/models/DisplayUser.interface";
+import { Jwt } from "../../app/models/Jwt";
+import { NewUser } from "../../app/models/NewUser";
 
-type AuthState = {
-  user: User | null;
-  token: string | null;
-};
+// TODO: move higher
+interface AsyncState {
+  isLoading: boolean;
+  isSucess: boolean;
+  isError: boolean;
+}
+
+interface AuthState extends AsyncState {
+  user?: DisplayUser | null;
+  jwt?: Jwt;
+  isAuthenticated?: boolean;
+}
+
+const initialState: AuthState = {
+  user: null, // user,
+  jwt: null,  // jwt,
+  isAuthenticated: false,
+  isLoading: false, 
+  isSucess: false, 
+  isError: false,
+}
+
+export const register = createAsyncThunk(
+  'auth/register',
+  async (user: NewUser, thunkAPI) => {
+  try{
+    
+  } catch(err){
+    return thunkAPI.rejectWithValue('Não foi possível registrar!')
+  }
+})
 
 const authSlice = createSlice({
   name: "auth",
-  initialState: { user: null, token: null } as AuthState,
+  initialState: initialState,
   reducers: {
     tokenReceived: (state, action: PayloadAction<any>) => {
       const { user, acessToken } = action.payload;
@@ -22,13 +52,8 @@ const authSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    builder.addMatcher(
-      authApiSlice.endpoints.login.matchFulfilled,
-      (state, { payload }) => {
-        state.token = payload.token;
-        state.user = payload.user;
-      }
-    );
+    //REGISTER
+    builder.addCase()
   },
 });
 
