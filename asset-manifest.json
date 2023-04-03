@@ -1,7 +1,8 @@
 {
   "files": {
-    "main.css": "/static/css/main.61e8601b.css",
-    "main.js": "/static/js/main.796f77c4.js",
+    "main.css": "/static/css/main.b8d2453e.css",
+    "main.js": "/static/js/main.b4c509b7.js",
+    "static/js/522.3ec76d36.chunk.js": "/static/js/522.3ec76d36.chunk.js",
     "static/media/Login_Image.webp": "/static/media/Login_Image.7bfd0e326bcc786e4632.webp",
     "static/media/perfil.webp": "/static/media/perfil.0569782bdbd8cb90fc02.webp",
     "static/media/Poppins-Regular.ttf": "/static/media/Poppins-Regular.35d26b781dc5fda684cc.ttf",
@@ -21,7 +22,7 @@
     "static/media/7.svg": "/static/media/7.a45b46e964c34094185e40d691917f1b.svg"
   },
   "entrypoints": [
-    "static/css/main.61e8601b.css",
-    "static/js/main.796f77c4.js"
+    "static/css/main.b8d2453e.css",
+    "static/js/main.b4c509b7.js"
   ]
 }
