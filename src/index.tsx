@@ -1,31 +1,48 @@
-import React from "react";
-import ReactDOM from "react-dom/client";
-import "bootstrap/dist/css/bootstrap.min.css";
-import "./index.css";
+import App from './App';
+import ReactDOM from 'react-dom/client';
+import React, { FC, Suspense } from 'react';
+import { BrowserRouter } from 'react-router-dom';
+import { Provider } from 'react-redux';
+import { ChakraProvider } from '@chakra-ui/react';
+import { useReportWebVitals } from './reportWebVitals';
+import { store } from './redux/app/store';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import './index.css';
 
-import App from "./App";
-import { store } from "./redux/app/store";
+import { worker } from './redux/mocks/browser';
 
-import { BrowserRouter } from "react-router-dom";
-import { ChakraProvider } from "@chakra-ui/react";
+const handleWebVitals = (metric: any) => {};
 
-import { worker } from "./redux/mocks/browser";
-import { Provider } from "react-redux";
+interface ReportWebVitalsProps {
+  children: React.ReactNode;
+}
 
-const root = ReactDOM.createRoot(
-  document.getElementById("root") as HTMLElement
-);
-// Initialize the msw worker, wait for the service worker registration to resolve, then mount
-worker.start({ onUnhandledRequest: "bypass", quiet: true }).then(() =>
-  root.render(
+const ReportWebVitals: FC<ReportWebVitalsProps> = ({ children }) => {
+  useReportWebVitals(handleWebVitals);
+  return <>{children}</>;
+};
+
+const MainApp: FC = () => {
+  return (
     <React.StrictMode>
       <Provider store={store}>
         <ChakraProvider>
           <BrowserRouter>
-            <App />
+            <Suspense  fallback={<div>Loading...</div>}>
+              <App />
+            </Suspense>
           </BrowserRouter>
         </ChakraProvider>
       </Provider>
     </React.StrictMode>
-  )
-);
+  );
+}
+
+const rootElement = document.getElementById('root');
+if (rootElement) {
+  worker.start({ onUnhandledRequest: 'bypass', quiet: true }).then(() => {
+    ReactDOM.createRoot(rootElement).render(<MainApp />);
+  });
+} else {
+  console.error('Não foi possível encontrar o elemento raiz');
+}
