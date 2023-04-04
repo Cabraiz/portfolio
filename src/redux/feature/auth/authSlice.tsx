@@ -21,25 +21,26 @@ interface AuthState extends AsyncState {
 
 const initialState: AuthState = {
   user: null, // user,
-  jwt: null,  // jwt,
+  jwt: null, // jwt,
   isAuthenticated: false,
-  isLoading: false, 
-  isSucess: false, 
+  isLoading: false,
+  isSucess: false,
   isError: false,
-}
+};
 
 export const register = createAsyncThunk(
-  'auth/register',
+  "auth/register",
   async (user: NewUser, thunkAPI) => {
-    try{
+    try {
       return await authSevice.register(user);
-    } catch(err){
-      return thunkAPI.rejectWithValue('Não foi possível registrar!')
+    } catch (err) {
+      return thunkAPI.rejectWithValue("Não foi possível registrar!");
     }
-})
+  }
+);
 
 export const authSlice = createSlice({
-  name: 'auth',
+  name: "auth",
   initialState,
   reducers: {
     reset: (state) => {
@@ -47,7 +48,10 @@ export const authSlice = createSlice({
       state.isSucess = false;
       state.isError = false;
     },
-    tokenReceived: (state, action: PayloadAction<{ user: DisplayUser; jwt: Jwt }>) => {
+    tokenReceived: (
+      state,
+      action: PayloadAction<{ user: DisplayUser; jwt: Jwt }>
+    ) => {
       const { user, jwt } = action.payload;
       state.user = user;
       state.jwt = jwt;
@@ -63,17 +67,17 @@ export const authSlice = createSlice({
     //REGISTER
     builder.addCase(register.pending, (state) => {
       state.isLoading = true;
-    })
+    });
     builder.addCase(register.fulfilled, (state, action) => {
       state.isLoading = false;
       state.isSucess = true;
       state.user = action.payload;
-    })
+    });
     builder.addCase(register.rejected, (state) => {
       state.isLoading = false;
       state.isError = true;
       state.user = null;
-    })
+    });
   },
 });
 

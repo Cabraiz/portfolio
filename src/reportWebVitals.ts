@@ -1,4 +1,4 @@
-import { Metric } from 'web-vitals';
+import { Metric } from "web-vitals";
 import { useEffect } from "react";
 
 export const useReportWebVitals = (onPerfEntry?: (metric: Metric) => void) => {

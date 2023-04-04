@@ -11,7 +11,7 @@ import { Flex, Grid, GridItem, Box, Image, Text } from "@chakra-ui/react";
 
 const Hublocal = () => {
   const user = useSelector(selectCurrentUser);
-  const token = useSelector(selectCurrentToken);  
+  const token = useSelector(selectCurrentToken);
 
   return (
     <Flex

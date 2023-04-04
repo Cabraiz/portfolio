@@ -38,9 +38,7 @@ import {
 import { validatePasswordLength } from "../../redux/shared/utils/validation/lenght";
 import { validateEmail } from "../../redux/shared/utils/validation/email";
 import useInput from "../../redux/hooks/input/use-input";
-import {
-  RegisterParams,
-} from "../Auxiliadores/models/ModeloJSXPage.interface";
+import { RegisterParams } from "../Auxiliadores/models/ModeloJSXPage.interface";
 
 function PasswordInput({
   value,
@@ -58,7 +56,7 @@ function PasswordInput({
       ms="10px"
       h="100%"
       pointerEvents="none"
-      children={<CFaLock color="gray.300" boxSize="22px"/>}
+      children={<CFaLock color="gray.300" boxSize="22px" />}
     />
   );
 
@@ -202,7 +200,7 @@ function Login() {
   };
 
   const content: JSX.Element = isLoading ? (
-    <LoadingPage/>
+    <LoadingPage />
   ) : (
     <>
       <Box minW={{ md: "31vw" }} style={{ marginTop: "0" }}>

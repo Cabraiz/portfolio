@@ -1,5 +1,5 @@
 export interface DisplayUser {
-    id: string;
-    name: string;
-    email: string;
+  id: string;
+  name: string;
+  email: string;
 }

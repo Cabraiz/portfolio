@@ -4,7 +4,6 @@ import Login_Logo from "../../assets/HubLocal/Login_Logo.webp";
 import Login_Image from "../../assets/HubLocal/Login_Image.webp";
 
 import { toast } from "react-toastify";
-
 import {
   Button,
   InputGroup,
@@ -15,16 +14,11 @@ import {
   Link,
   FormLabel,
 } from "@chakra-ui/react";
-
-import "./Register.css";
-
-import { tokenReceived } from "../../redux/feature/auth/authSlice";
+import { register, tokenReceived } from "../../redux/feature/auth/authSlice";
 import {
   LoginRequest,
   useLoginMutation,
 } from "../../redux/feature/auth/authApiSlice";
-
-import { ProtectedComponent } from "../../redux/feature/auth/ProtectedComponent";
 import { isMobile } from "react-device-detect";
 import useInput from "../../redux/hooks/input/use-input";
 import {
@@ -38,8 +32,13 @@ import { RegisterParams } from "../Auxiliadores/models/ModeloJSXPage.interface";
 import {
   ModeloLadoEsquerdoPage,
   ModeloLadoDireitoPage,
-  LoadingPage
+  LoadingPage,
 } from "../Auxiliadores/ModeloJSXPage";
+import { useAppDispatch, useAppSelector } from "../../redux/hooks/hooks";
+import { useNavigate } from "react-router-dom";
+
+import { ProtectedComponent } from "../../redux/feature/auth/ProtectedComponent";
+import "./Register.css";
 
 function NomeInput({
   value,
@@ -128,7 +127,7 @@ function ConfirmPasswordInput({
         helperText,
         type: "password",
         name: "password",
-        id: "password",
+        id: "confirmpassword",
         placeholder: "Mínimo de 6 caracteres",
       })}
     </>
@@ -136,7 +135,6 @@ function ConfirmPasswordInput({
 }
 
 function Register() {
-
   const {
     text: name,
     shouldDisplayError: nameHasError,
@@ -168,8 +166,6 @@ function Register() {
     inputBlurHandler: confirmPasswordBlurHandler,
     clearHandler: confirmPasswordClearHandler,
   } = useInput(validatePasswordLength);
-
-  const [login, { isLoading }] = useLoginMutation();
 
   const [realHeight, setrealHeight] = useState("");
   const [isAnimationSet, setAnimationSet] = useState(false);
@@ -203,6 +199,12 @@ function Register() {
       progress: undefined,
       theme: "dark",
     });
+
+  const [login, { isLoading }] = useLoginMutation();
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+
+  //const { isLoading, isSuccess } = useAppSelector((state) => state.auth)
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -241,13 +243,25 @@ function Register() {
       password,
     };
 
-    console.log("NEW USER: ", newUser);
+    try {
+      const response = dispatch(register(newUser) as any);
+      const user = response.payload;
+      if (user) {
+        dispatch(tokenReceived(user.token));
+        navigate("/");
+      } else {
+        ErrorNotify("Houve um erro ao tentar cadastrar o usuário");
+      }
+    } catch (error) {
+      console.error(error);
+      ErrorNotify("Houve um erro ao tentar cadastrar o usuário");
+    }
 
     clearForm();
   };
 
   const content = isLoading ? (
-    <LoadingPage/>
+    <LoadingPage />
   ) : (
     <>
       <Box minW={{ md: "31vw" }} style={{ marginTop: "0" }}>
