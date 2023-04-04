@@ -10,6 +10,13 @@ import type {
 } from "@reduxjs/toolkit/query";
 
 import { Mutex } from "async-mutex";
+import { DisplayUser } from "../models/DisplayUser.interface";
+import { Jwt } from "../models/Jwt";
+
+interface TokenData {
+  user: DisplayUser;
+  jwt: Jwt;
+}
 
 // create a new mutex
 const mutex = new Mutex();
@@ -17,9 +24,9 @@ const baseQuery = fetchBaseQuery({
   baseUrl: `${process.env.REACT_APP_BASE_API}`,
   credentials: "include",
   prepareHeaders: (headers, { getState }) => {
-    const token = (getState() as RootState).auth.token;
-    if (token) {
-      headers.set("autorizathion", `Bearer ${token}`);
+    const jwt = (getState() as RootState).auth.jwt;
+    if (jwt) {
+      headers.set("autorizathion", `Bearer ${jwt}`);
     }
     return headers;
   },
@@ -44,7 +51,8 @@ const baseQueryWithReauth: BaseQueryFn<
           extraOptions
         );
         if (refreshResult.data) {
-          api.dispatch(tokenReceived(refreshResult.data));
+          const tokenData = refreshResult.data as TokenData;
+          api.dispatch(tokenReceived(tokenData));
           // retry the initial query
           result = await baseQuery(args, api, extraOptions);
         } else {
