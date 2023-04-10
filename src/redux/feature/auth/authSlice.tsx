@@ -1,10 +1,10 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { authApiSlice, User } from "../../feature/auth/authApiSlice";
 import type { RootState } from "../../app/store";
 import { DisplayUser } from "../../app/models/DisplayUser.interface";
 import { Jwt } from "../../app/models/Jwt";
 import { NewUser } from "../../app/models/NewUser";
 import authSevice from "../../app/services/auth.service";
+import { apiSlice } from "../../app/api/apiSlice";
 
 // TODO: move higher
 interface AsyncState {
@@ -57,33 +57,38 @@ export const authSlice = createSlice({
       state.jwt = jwt;
       state.isAuthenticated = true;
     },
-    loggedOut: (state) => {
+    logOut: (state) => {
       state.user = null;
       state.jwt = null;
       state.isAuthenticated = false;
     },
   },
   extraReducers: (builder) => {
-    //REGISTER
-    builder.addCase(register.pending, (state) => {
-      state.isLoading = true;
-    });
-    builder.addCase(register.fulfilled, (state, action) => {
-      state.isLoading = false;
-      state.isSucess = true;
-      state.user = action.payload;
-    });
-    builder.addCase(register.rejected, (state) => {
-      state.isLoading = false;
-      state.isError = true;
-      state.user = null;
-    });
+    builder
+      //REGISTER
+      .addCase(register.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(register.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.isSucess = true;
+        state.user = action.payload;
+      })
+      .addCase(register.rejected, (state) => {
+        state.isLoading = false;
+        state.isError = true;
+        state.user = null;
+      });
   },
 });
 
-export const { tokenReceived, loggedOut } = authSlice.actions;
+export const { reset, tokenReceived, logOut } = authSlice.actions;
 
-export default authSlice.reducer;
+export const selectedUser = (state: RootState) => {
+  return state.auth;
+}
 
 export const selectCurrentUser = (state: RootState) => state.auth.user;
 export const selectCurrentToken = (state: RootState) => state.auth.jwt;
+
+export default authSlice.reducer;

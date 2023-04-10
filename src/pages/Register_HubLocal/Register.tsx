@@ -1,4 +1,4 @@
-import React, { useEffect, useState, FormEvent } from "react";
+import React, { FC, useEffect, useState, FormEvent } from "react";
 
 import Login_Logo from "../../assets/HubLocal/Login_Logo.webp";
 import Login_Image from "../../assets/HubLocal/Login_Image.webp";
@@ -14,7 +14,7 @@ import {
   Link,
   FormLabel,
 } from "@chakra-ui/react";
-import { register, tokenReceived } from "../../redux/feature/auth/authSlice";
+import { reset, register, tokenReceived } from "../../redux/feature/auth/authSlice";
 import {
   LoginRequest,
   useLoginMutation,
@@ -201,6 +201,7 @@ function Register() {
     });
 
   const [login, { isLoading }] = useLoginMutation();
+
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
@@ -236,19 +237,21 @@ function Register() {
       ErrorNotify(errors[0]);
       return;
     }
-
-    const newUser: NewUser = {
-      name,
-      email,
-      password,
-    };
-
+    
     try {
+      const newUser: NewUser = {
+        name,
+        email,
+        password,
+      };
+
       const response = dispatch(register(newUser) as any);
       const user = response.payload;
       if (user) {
         dispatch(tokenReceived(user.token));
-        navigate("/");
+        dispatch(reset());
+        clearForm();
+        navigate("/loginhublocal");
       } else {
         ErrorNotify("Houve um erro ao tentar cadastrar o usuário");
       }
@@ -256,8 +259,6 @@ function Register() {
       console.error(error);
       ErrorNotify("Houve um erro ao tentar cadastrar o usuário");
     }
-
-    clearForm();
   };
 
   const content = isLoading ? (
