@@ -9,7 +9,7 @@
 }
 
 .font-sequel {
-  font-size: calc(50px + 1vw);
+  font-size: calc(50px + 2vw);
   background-clip: text;
   color:transparent;
   font-family: "Sequel_2", sans-serif;
