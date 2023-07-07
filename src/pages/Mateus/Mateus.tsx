@@ -23,14 +23,14 @@ function Mateus() {
   }
 
   const paddingLadoDireito = isMobile ? "5vw" : "15vw";
-  const gradient = isMobile ?  "linear-gradient(90deg, rgba(97,219,251,1) 0%, rgba(97,219,251,1) 64%, rgba(235,26,100,1) 64%, rgba(235,26,100,1) 100%)" :  "linear-gradient(90deg, rgba(97,219,251,1) 100%)"
+  const gradient = isMobile ?  "linear-gradient(90deg,#f1c40f 0%,#f1c40f 64%,#9b59b6 64%, #9b59b6 100%)" :  "linear-gradient(90deg,#f1c40f 100%, #f1c40f 100%)"
 
   return (
     <Row className="p-0 m-0">
       <Col
         className="col-sm-12 col-md-5 m-0"
         style={{
-          padding: "calc(20px + 8vw) 0 0 5vw",
+          padding: "15vh 0 0 8vw",
         }}
       >
         <Row
