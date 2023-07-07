@@ -30,18 +30,16 @@ function Mateus() {
       <Col
         className="col-sm-12 col-md-5 m-0"
         style={{
-          padding: "15vh 0 0 8vw",
+          padding: "21vh 0 0 7vw",
         }}
       >
         <Row
           className="p-0 font-sequel"
           style={{
             backgroundImage: gradient,
-            display: "flex",
-            alignItems: "center",
           }}
         >
-        <Col className="text-left" style={{ height: "20vh", marginTop: "5vh", marginBottom: "3vh", width: "100%"}}>
+        <Col className="text-left" style={{ height: "auto", width: "100%", marginBottom: "4vh"}}>
           Full Stack <br />
           Developer.
         </Col>
