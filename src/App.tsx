@@ -17,6 +17,7 @@ import { Routes, Route, useLocation } from "react-router-dom";
 import RegisterHubLocal from "./pages/Register_HubLocal/Register";
 import LoginHubLocal from "./pages/Login_HubLocal/Login";
 import Hublocal from "./pages/Hublocal/Hublocal";
+import Surprise from "./pages/Surprise/Surprise";
 
 import { PrivateOutlet } from "./redux/shared/utils/PrivateOutlet";
 
@@ -202,6 +203,7 @@ function App() {
         {/* public routes */}
         <Route path="/registerhublocal" element={<RegisterHubLocal />} />
         <Route path="/loginhublocal" element={<LoginHubLocal />} />
+        <Route path="/surprise" element={<Surprise />} />
 
         <Route path="/hublocal" element={<PrivateOutlet />}>
           {/* protected routes */}

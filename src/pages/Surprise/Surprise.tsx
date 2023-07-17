@@ -20,7 +20,7 @@ import "animate.css";
 
 import { Done, Default, Block } from "./Triplice/Triplice";
 
-const backgroundSong = require("../../song/Surprise/backgroundSong.ogg");
+//const backgroundSong = require("../../song/Surprise/backgroundSong.ogg");
 
 let load = false;
 
