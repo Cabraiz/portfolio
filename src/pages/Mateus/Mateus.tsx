@@ -45,6 +45,7 @@ function Mateus() {
           className="p-0 font-sequel"
           style={{
             backgroundImage: gradient,
+            marginBottom: Math.max(10, 4),
           }}
         >
           Full Stack <br />
@@ -59,7 +60,7 @@ function Mateus() {
         >
           Hey there! Welcome to my website, where we code with style and debug with a smile 😄
           <br />Get ready for some HTMLarious adventures!
-          <div style={{ textAlign: "right", marginTop: "10px" }}>-ChatGPT</div>
+          <div style={{ textAlign: "right"}}>-ChatGPT</div>
         </div>
         <div
           className="p-0 m-0"
@@ -79,7 +80,7 @@ function Mateus() {
           paddingRight: paddingLadoDireito,
         }}
       >
-        <Image className="p-0" src={perfil} />
+        <Image className="p-0" src={perfil} alt="Profile Image" />
 
         <Row
           className="m-0"
