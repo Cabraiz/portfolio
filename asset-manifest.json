@@ -1,13 +1,13 @@
 {
   "files": {
     "main.css": "/static/css/main.a4d68d5f.css",
-    "main.js": "/static/js/main.8804dadb.js",
+    "main.js": "/static/js/main.5bd6b04a.js",
     "static/js/522.68a08121.chunk.js": "/static/js/522.68a08121.chunk.js",
     "static/media/Login_Image.webp": "/static/media/Login_Image.7bfd0e326bcc786e4632.webp",
-    "static/media/Done_2.png": "/static/media/Done_2.8f12d203cee90d02fd15.png",
-    "static/media/Done_4.png": "/static/media/Done_4.a52945d5f14a64e4210a.png",
-    "static/media/Done_1.png": "/static/media/Done_1.a0c9bd6bbce84f25d926.png",
+    "static/media/Done_4.png": "/static/media/Done_4.cf5d24e6106704bc94ab.png",
+    "static/media/Done_2.png": "/static/media/Done_2.6dcd291823d87a372524.png",
     "static/media/Done_5.png": "/static/media/Done_5.e3d980285bc191530def.png",
+    "static/media/Done_1.png": "/static/media/Done_1.1e838e72d0926658eb23.png",
     "static/media/perfil.webp": "/static/media/perfil.bfbfe74e4344ed31f7c4.webp",
     "static/media/Done_6.png": "/static/media/Done_6.b395bbc9592b1fa9b500.png",
     "static/media/icognitaDone.png": "/static/media/icognitaDone.5bf75b23f399c51ca38d.png",
@@ -32,6 +32,6 @@
   },
   "entrypoints": [
     "static/css/main.a4d68d5f.css",
-    "static/js/main.8804dadb.js"
+    "static/js/main.5bd6b04a.js"
   ]
 }
