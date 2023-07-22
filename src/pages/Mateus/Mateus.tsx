@@ -14,6 +14,25 @@ interface SocialButtonProps {
   icon: string; // Define the type for the 'icon' prop
 }
 
+export function capitalizeFirstLetter(name: string): string {
+  return name.charAt(0).toUpperCase() + name.slice(1);
+}
+
+export function getSocialMediaName(index: number): string {
+  switch (index) {
+    case 0:
+      return "Linkendin";
+    case 1:
+      return "Gmail";
+    case 2:
+      return "Insta";
+    case 3:
+      return "Tiktok";
+    default:
+      return "";
+  }
+}
+
 function Mateus() {
   const [scrollY, setScrollY] = useState(0);
 
