@@ -6,12 +6,13 @@ import perfil from "../../assets/Mateus/perfil.webp";
 import dotsArray from "../../assets/icones/svg_dotsArray.svg";
 import IconGmail from "../../assets/Mateus/IconGmail.png";
 import IconInsta from "../../assets/Mateus/IconInsta.png";
-import IconLinkendin from "../../assets/Mateus/IconLinkendin.png";
+import IconLinkendin from "../../assets/Mateus/IconLinkedIn.png";
 import IconTiktok from "../../assets/Mateus/IconTiktok.png";
 
 interface SocialButtonProps {
   href: string;
-  icon: string; // Define the type for the 'icon' prop
+  icon: string;
+  alt: string;
 }
 
 export function capitalizeFirstLetter(name: string): string {
@@ -21,7 +22,7 @@ export function capitalizeFirstLetter(name: string): string {
 export function getSocialMediaName(index: number): string {
   switch (index) {
     case 0:
-      return "Linkendin";
+      return "LinkedIn";
     case 1:
       return "Gmail";
     case 2:
@@ -108,24 +109,27 @@ function Mateus() {
             justifyContent: "center",
           }}
         >
-          <SocialButton href="https://www.linkedin.com/in/cabraiz/" icon={IconLinkendin} />
+          <SocialButton href="https://www.linkedin.com/in/cabraiz/" icon={IconLinkendin} alt="LinkedIn"/>
           <SocialButton
             href="mailto:mateusccabr@gmail.com?subject=Freelance%20Job%20Opportunity%20for%20Developer%20Engineer&body=Dear%20Cabral%2C%0D%0A%0D%0AWe%20came%20across%20your%20profile%20and%20our%20company%20is%20looking%20for%20a%20freelance%20developer%20engineer%20to%20work%20on%20a%20project%20that%20involves%20%5Bbriefly%20mention%20the%20project%20or%20technology%20stack%5D.%0D%0A%0D%0AIf%20you%20are%20interested%20in%20this%20opportunity%2C%20please%20let%20us%20know%20and%20we%20can%20discuss%20the%20details%20further.%0D%0A%0D%0AThank%20you%20for%20your%20time%20and%20consideration.%0D%0A%0D%0ABest%20regards%2C%0D%0A%5BCompany%20Name%5D"
             icon={IconGmail}
+            alt="Gmail"
           />
-          <SocialButton href="https://www.instagram.com/cabraiz/" icon={IconInsta} />
-          <SocialButton href="https://www.tiktok.com/@cabraiz" icon={IconTiktok} />
+          <SocialButton href="https://www.instagram.com/cabraiz/" icon={IconInsta} alt="Insta"/>
+          <SocialButton href="https://www.tiktok.com/@cabraiz" icon={IconTiktok} alt="Tiktok" />
         </Row>
       </Col>
     </Row>
   );
 }
 
-function SocialButton({ href, icon }: SocialButtonProps) {
+function SocialButton({ href, icon, alt }: SocialButtonProps) {
   return (
     <Col className="col-auto">
-      <Button className="btn-trasn" href={href}>
-        <Image className="imagesize" src={icon} alt="Social Icon" />
+      <Button className="btn-trasn">
+        <a href={href} className="social-link"> {/* Add className to the anchor element */}
+          <Image className="imagesize" src={icon} alt={alt} />
+        </a>
       </Button>
     </Col>
   );
