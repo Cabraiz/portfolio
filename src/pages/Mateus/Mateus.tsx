@@ -123,7 +123,7 @@ function Mateus() {
   );
 }
 
-function SocialButton({ href, icon, alt }: SocialButtonProps) {
+export function SocialButton({ href, icon, alt }: SocialButtonProps) {
   return (
     <Col className="col-auto">
       <Button className="btn-trasn">
