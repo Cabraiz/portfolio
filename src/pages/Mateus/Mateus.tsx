@@ -61,12 +61,12 @@ function Mateus() {
   return (
     <Row className="p-0 m-0">
       {/* Left Column */}
-      <Col className="col-sm-12 col-md-5 m-0" style={{ padding: "21vh 0 0 7vw" }}>
+      <Col className="col-sm-12 col-md-5 m-0" style={{ padding: "22vh 0 0 4vw" }}>
         <div
           className="p-0 font-sequel"
           style={{
             backgroundImage: gradient,
-            marginBottom: Math.max(10, 4),
+            marginBottom: 'max(10px, 4vh)',
           }}
         >
           Full Stack <br />
@@ -100,9 +100,10 @@ function Mateus() {
           marginTop: "10vh",
           paddingLeft: paddingLadoDireito,
           paddingRight: paddingLadoDireito,
+          marginLeft: "-5vw",
         }}
       >
-        <Image className="p-0" src={perfil} alt="Profile Image" />
+        <Image className="p-0" src={perfil} alt="Profile Image"/>
 
         <Row
           className="m-0 d-flex flex-row justify-content-evenly align-items-center"

@@ -54,7 +54,7 @@ body {
 }
 .nav-link-custom.active,
 .nav-link-custom:hover {
-  color: rgba(255, 255, 255, 0.884) !important;
+  color: rgba(255, 255, 255, 0.9) !important;
   border: none;
 }
 
@@ -63,6 +63,6 @@ body {
   display: block;
   height: 5px;
   margin-top: 10px;
-  background-color: rgba(255, 255, 255, 0.884);
+  background-color: rgba(255, 255, 255, 0.85);
   width: 100%;
 }

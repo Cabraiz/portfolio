@@ -132,6 +132,19 @@ function App() {
     }
   };
 
+  const createButton = (buttonNumber: number) => (
+    <Button
+      key={buttonNumber}
+      variant="primary"
+      size="sm"
+      style={{ width: "10px", height: "10px", marginBottom: "3vh"}}
+      //onClick={handleButtonClick(buttonNumber)}
+    >
+    </Button>
+  );
+
+  const buttons = Array.from({ length: 5 }, (_, index) => createButton(index + 1));
+
   const [title] = useState("Bem Vindo! 🤝");
 
   const { pathname } = useLocation();
@@ -179,16 +192,19 @@ function App() {
             }}
           />
           <Nav id="nav-dropdown">
-            {links.map((link) => (
-              <Nav.Link
-                key={link}
-                className={`nav-link-custom ${selectedLink === link ? 'active' : ''}`}
-                href={`#${link.toLowerCase()}`}
-                onClick={handleLinkClick(link)}
-              >
-                {link}
-              </Nav.Link>
-            ))}
+            {!isMobile ? (
+              // Render Nav.Link elements for non-mobile devices
+              links.map((link) => (
+                <Nav.Link
+                  key={link}
+                  className={`nav-link-custom ${selectedLink === link ? 'active' : ''}`}
+                  href={`#${link.toLowerCase()}`}
+                  onClick={handleLinkClick(link)}
+                >
+                  {link}
+                </Nav.Link>
+              ))
+            ) : null}
           </Nav>
           <Button
             style={{
@@ -231,6 +247,20 @@ function App() {
           <Route index element={<Hublocal />} />
         </Route>
       </Routes>
+      <div
+      style={{
+        position: "fixed",
+        bottom: "10px",
+        right: "10px",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "flex-end",
+        marginBottom: "10vh",
+        marginRight: "3vw",
+      }}
+      >
+        {buttons}
+      </div>
       <ToastContainer />
     </>
   );
