@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 
 import "./App.css";
 
-import { Row, Navbar, Image, Button } from "react-bootstrap";
+import { Row, Navbar, Image, Button, Nav } from "react-bootstrap";
 
 import logo from "./assets/icones/logo.svg";
 import logoGmail from "./assets/icones/7.svg";
@@ -153,22 +153,32 @@ function App() {
             justifyContent: "space-between",
             height: "11vh",
             fontWeight: "600",
+            paddingTop: "0px",
+            paddingBottom: "0px",
             marginInline: "0px",
             marginTop: "0.1vh",
             marginBottom: "0",
-            paddingTop: "0.5vh",
           }}
         >
           <Image
             src={logo}
             style={{
+              marginLeft: `${convertMultiplyVwToPx()}px`,
+              marginRight: "20px",
               marginTop: "0.5vh",
               borderRadius: "20%",
-              marginLeft: `${convertMultiplyVwToPx()}px`,
               width: "8.5vh",
               height: "8.5vh",
             }}
           />
+          <Nav id="nav-dropdown">
+            <Nav.Link className="nav-link-custom" href="#home">Home</Nav.Link>
+            <Nav.Link className="nav-link-custom" href="#features">About</Nav.Link>
+            <Nav.Link className="nav-link-custom" href="#portfolio">Portfolio</Nav.Link>
+            <Nav.Link className="nav-link-custom" href="#work">Work</Nav.Link>
+            <Nav.Link className="nav-link-custom" href="#blog">Blog</Nav.Link>
+            <Nav.Link className="nav-link-custom" href="#contact">Contact</Nav.Link>
+          </Nav>
           <Button
             style={{
               marginRight: "4vw",

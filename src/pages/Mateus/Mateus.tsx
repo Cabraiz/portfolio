@@ -13,6 +13,7 @@ interface SocialButtonProps {
   href: string;
   icon: string;
   alt: string;
+  isScrollToTop?: boolean;
 }
 
 export function capitalizeFirstLetter(name: string): string {
@@ -88,6 +89,7 @@ function Mateus() {
             height: "20vh",
             justifyContent: "start",
           }}
+          data-testid="gradientElement"
         ></div>
       </Col>
 
@@ -103,10 +105,9 @@ function Mateus() {
         <Image className="p-0" src={perfil} alt="Profile Image" />
 
         <Row
-          className="m-0"
+          className="m-0 d-flex flex-row justify-content-evenly align-items-center"
           style={{
             padding: "2vh 0 0 0",
-            justifyContent: "center",
           }}
         >
           <SocialButton href="https://www.linkedin.com/in/cabraiz/" icon={IconLinkendin} alt="LinkedIn"/>
@@ -123,15 +124,16 @@ function Mateus() {
   );
 }
 
-export function SocialButton({ href, icon, alt }: SocialButtonProps) {
+export function SocialButton({ href, icon, alt, isScrollToTop }: SocialButtonProps) {
   return (
-    <Col className="col-auto">
-      <Button className="btn-trasn">
-        <a href={href} className="social-link"> {/* Add className to the anchor element */}
-          <Image className="imagesize" src={icon} alt={alt} />
-        </a>
-      </Button>
-    </Col>
+    <a
+      href={href}
+      className={`social-link ${isScrollToTop ? "btn-trasn scrollToTopButton" : "btn-trasn"}`}
+      data-testid={isScrollToTop ? "scrollToTopButton" : undefined}
+      style={{width:"auto"}}
+    >
+      <Image className="imagesize" src={icon} alt={alt} />
+    </a>
   );
 }
 

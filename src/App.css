@@ -2,6 +2,13 @@
   font-family: "Brutal";
   src: local("Brutal"), url("./fonts/Brutal/Brutal-Type-Medium.ttf");
 }
+
+
+@font-face {
+  font-family: "BlommingElegant";
+  src: local("BlommingElegant"), url("fonts/BloomingElegant/Blooming\ Elegant\ Sans.otf");
+}
+
 html {
   height: auto !important;
 }
@@ -32,4 +39,21 @@ body {
       #ffffff00 100%
     )
     100% 0 100% 0/0.3vh 0 0.3vh 0 stretch;
+}
+#nav-dropdown {
+  font-family: "BlommingElegant", sans-serif;
+  font-weight: 300;
+  font-size: 2vw;
+  padding-right: 350px;
+}
+
+.nav-link-custom {
+  color: rgba(255, 255, 255, 0.596) !important;
+  margin: 0 1vw 0 1vw;
+  padding: 0 0 15px 0 !important;
+}
+
+.nav-link-custom:hover {
+  color: rgba(255, 255, 255, 0.884) !important;
+  border: none;
 }
