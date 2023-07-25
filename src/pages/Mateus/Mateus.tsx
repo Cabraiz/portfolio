@@ -36,34 +36,19 @@ export function getSocialMediaName(index: number): string {
 }
 
 function Mateus() {
-  const [scrollY, setScrollY] = useState(0);
-
-  useEffect(() => {
-    function handleScroll() {
-      setScrollY(window.scrollY);
-    }
-
-    window.addEventListener("scroll", handleScroll);
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, []);
-
-  function getScrollYPosition(): number {
-    return scrollY;
-  }
 
   const paddingTopFullStack = isMobile ? "10vh" : "22vh";
+
   const margingLadoDireito = isMobile ? "0" : "-5vw";
   const paddingLadoDireito = isMobile ? "5vw" : "15vw";
   const gradient = isMobile
-    ? "linear-gradient(90deg,#f1c40f 0%,#f1c40f 64%,#9b59b6 64%, #9b59b6 100%)"
+    ? "linear-gradient(90deg,#f1c40f 0%,#f1c40f 71.5%,#9b59b6 71.5%, #9b59b6 100%)"
     : "linear-gradient(90deg,#f1c40f 100%, #f1c40f 100%)";
 
   return (
     <Row className="p-0 m-0">
       {/* Left Column */}
-      <Col className="col-sm-12 col-md-5 m-0" style={{ padding: `${paddingTopFullStack} 0 0 4vw` }}>
+      <Col className="col-sm-12 col-md-5 m-0" style={{ padding: `${paddingTopFullStack} max(50px, 4vw) 0 max(50px, 4vw)`, minWidth: "450px" }}>
         <div
           className="p-0 font-sequel"
           style={{
@@ -133,7 +118,7 @@ export function SocialButton({ href, icon, alt, isScrollToTop }: SocialButtonPro
       href={href}
       className={`social-link ${isScrollToTop ? "btn-trasn scrollToTopButton" : "btn-trasn"}`}
       data-testid={isScrollToTop ? "scrollToTopButton" : undefined}
-      style={{width:"auto"}}
+      style={{width:"auto", marginBottom: "2vh"}}
     >
       <Image className="imagesize" src={icon} alt={alt} />
     </a>

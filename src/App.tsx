@@ -247,20 +247,22 @@ function App() {
           <Route index element={<Hublocal />} />
         </Route>
       </Routes>
-      <div
-      style={{
-        position: "fixed",
-        bottom: "10px",
-        right: "10px",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "flex-end",
-        marginBottom: "10vh",
-        marginRight: "3vw",
-      }}
-      >
-        {buttons}
-      </div>
+      {!isMobile ? (
+        <div
+          style={{
+            position: "fixed",
+            bottom: "10px",
+            right: "10px",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "flex-end",
+            marginBottom: "10vh",
+            marginRight: "3vw",
+          }}
+        >
+          {buttons}
+        </div>
+      ) : null}
       <ToastContainer />
     </>
   );
