@@ -53,6 +53,8 @@ function Mateus() {
     return scrollY;
   }
 
+  const paddingTopFullStack = isMobile ? "10vh" : "22vh";
+  const margingLadoDireito = isMobile ? "0" : "-5vw";
   const paddingLadoDireito = isMobile ? "5vw" : "15vw";
   const gradient = isMobile
     ? "linear-gradient(90deg,#f1c40f 0%,#f1c40f 64%,#9b59b6 64%, #9b59b6 100%)"
@@ -61,7 +63,7 @@ function Mateus() {
   return (
     <Row className="p-0 m-0">
       {/* Left Column */}
-      <Col className="col-sm-12 col-md-5 m-0" style={{ padding: "22vh 0 0 4vw" }}>
+      <Col className="col-sm-12 col-md-5 m-0" style={{ padding: `${paddingTopFullStack} 0 0 4vw` }}>
         <div
           className="p-0 font-sequel"
           style={{
@@ -100,7 +102,7 @@ function Mateus() {
           marginTop: "10vh",
           paddingLeft: paddingLadoDireito,
           paddingRight: paddingLadoDireito,
-          marginLeft: "-5vw",
+          marginLeft: margingLadoDireito,
         }}
       >
         <Image className="p-0" src={perfil} alt="Profile Image"/>

@@ -191,10 +191,10 @@ function App() {
               height: "8.5vh",
             }}
           />
-          <Nav id="nav-dropdown">
-            {!isMobile ? (
-              // Render Nav.Link elements for non-mobile devices
-              links.map((link) => (
+          {!isMobile ? (
+            // Render Nav element and Nav.Link elements for non-mobile devices
+            <Nav id="nav-dropdown">
+              {links.map((link) => (
                 <Nav.Link
                   key={link}
                   className={`nav-link-custom ${selectedLink === link ? 'active' : ''}`}
@@ -203,9 +203,9 @@ function App() {
                 >
                   {link}
                 </Nav.Link>
-              ))
-            ) : null}
-          </Nav>
+              ))}
+            </Nav>
+          ) : null} 
           <Button
             style={{
               marginRight: "4vw",
