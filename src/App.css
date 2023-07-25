@@ -50,10 +50,19 @@ body {
 .nav-link-custom {
   color: rgba(255, 255, 255, 0.596) !important;
   margin: 0 1vw 0 1vw;
-  padding: 0 0 15px 0 !important;
+  padding: 0 !important;
 }
-
+.nav-link-custom.active,
 .nav-link-custom:hover {
   color: rgba(255, 255, 255, 0.884) !important;
   border: none;
+}
+
+.nav-link-custom.active::after {
+  content: "";
+  display: block;
+  height: 5px;
+  margin-top: 10px;
+  background-color: rgba(255, 255, 255, 0.884);
+  width: 100%;
 }

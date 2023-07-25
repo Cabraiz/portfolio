@@ -41,6 +41,8 @@ import {
 function App() {
   const [windowSize, setWindowSize] = useState(getWindowSize());
   const [signInStatus, setsignInStatus] = useState(["", false]);
+  const [selectedLink, setSelectedLink] = useState("Home");
+  const links = ["Home", "About", "Portfolio", "Work", "Blog", "Contact"];
 
   useEffect(() => {
     onAuthStateChanged(auth, (user) => {
@@ -139,6 +141,11 @@ function App() {
     pathname === "/loginhublocal" ||
     pathname === "/registerhublocal";
 
+    const handleLinkClick = (link: string) => (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
+      event.preventDefault();
+      setSelectedLink(link);
+    };
+    
   return (
     <>
       <HelmetProvider>
@@ -172,12 +179,16 @@ function App() {
             }}
           />
           <Nav id="nav-dropdown">
-            <Nav.Link className="nav-link-custom" href="#home">Home</Nav.Link>
-            <Nav.Link className="nav-link-custom" href="#features">About</Nav.Link>
-            <Nav.Link className="nav-link-custom" href="#portfolio">Portfolio</Nav.Link>
-            <Nav.Link className="nav-link-custom" href="#work">Work</Nav.Link>
-            <Nav.Link className="nav-link-custom" href="#blog">Blog</Nav.Link>
-            <Nav.Link className="nav-link-custom" href="#contact">Contact</Nav.Link>
+            {links.map((link) => (
+              <Nav.Link
+                key={link}
+                className={`nav-link-custom ${selectedLink === link ? 'active' : ''}`}
+                href={`#${link.toLowerCase()}`}
+                onClick={handleLinkClick(link)}
+              >
+                {link}
+              </Nav.Link>
+            ))}
           </Nav>
           <Button
             style={{

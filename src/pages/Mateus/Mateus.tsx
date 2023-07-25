@@ -107,7 +107,7 @@ function Mateus() {
         <Row
           className="m-0 d-flex flex-row justify-content-evenly align-items-center"
           style={{
-            padding: "2vh 0 0 0",
+            padding: "3vh 0 0 0",
           }}
         >
           <SocialButton href="https://www.linkedin.com/in/cabraiz/" icon={IconLinkendin} alt="LinkedIn"/>
