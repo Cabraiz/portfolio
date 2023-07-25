@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/static/css/main.a4d68d5f.css",
-    "main.js": "/static/js/main.faa7b42f.js",
+    "main.css": "/static/css/main.ac3e5717.css",
+    "main.js": "/static/js/main.b8dddd94.js",
     "static/js/522.68a08121.chunk.js": "/static/js/522.68a08121.chunk.js",
     "static/media/Login_Image.webp": "/static/media/Login_Image.7bfd0e326bcc786e4632.webp",
     "static/media/Done_4.png": "/static/media/Done_4.cf5d24e6106704bc94ab.png",
@@ -25,13 +25,14 @@
     "static/media/Login_Logo.webp": "/static/media/Login_Logo.6796cda8930d62a61a4e.webp",
     "static/media/IconInsta.png": "/static/media/IconInsta.d67d6208638407d8db10.png",
     "static/media/IconTiktok.png": "/static/media/IconTiktok.48a67b6acca4d7532fcc.png",
-    "static/media/IconLinkendin.png": "/static/media/IconLinkendin.a5b21c7347ec31d79da6.png",
+    "static/media/IconLinkedIn.png": "/static/media/IconLinkedIn.a5b21c7347ec31d79da6.png",
+    "static/media/Blooming Elegant Sans.otf": "/static/media/Blooming Elegant Sans.446d389bc3eaeca0b837.otf",
     "static/media/Icognita.png": "/static/media/Icognita.ed95410fce0a38014340.png",
     "index.html": "/index.html",
     "static/media/7.svg": "/static/media/7.a45b46e964c34094185e40d691917f1b.svg"
   },
   "entrypoints": [
-    "static/css/main.a4d68d5f.css",
-    "static/js/main.faa7b42f.js"
+    "static/css/main.ac3e5717.css",
+    "static/js/main.b8dddd94.js"
   ]
 }
