@@ -1,14 +1,14 @@
 {
   "files": {
-    "main.css": "/static/css/main.ac3e5717.css",
-    "main.js": "/static/js/main.b8dddd94.js",
+    "main.css": "/static/css/main.34835bc5.css",
+    "main.js": "/static/js/main.f5e044bf.js",
     "static/js/522.68a08121.chunk.js": "/static/js/522.68a08121.chunk.js",
     "static/media/Login_Image.webp": "/static/media/Login_Image.7bfd0e326bcc786e4632.webp",
     "static/media/Done_4.png": "/static/media/Done_4.cf5d24e6106704bc94ab.png",
     "static/media/Done_2.png": "/static/media/Done_2.6dcd291823d87a372524.png",
     "static/media/Done_5.png": "/static/media/Done_5.e3d980285bc191530def.png",
     "static/media/Done_1.png": "/static/media/Done_1.1e838e72d0926658eb23.png",
-    "static/media/perfil.webp": "/static/media/perfil.bfbfe74e4344ed31f7c4.webp",
+    "static/media/perfil.webp": "/static/media/perfil.ce9bc504cd449b07a429.webp",
     "static/media/Done_6.png": "/static/media/Done_6.b395bbc9592b1fa9b500.png",
     "static/media/icognitaDone.png": "/static/media/icognitaDone.5bf75b23f399c51ca38d.png",
     "static/media/Poppins-Regular.ttf": "/static/media/Poppins-Regular.35d26b781dc5fda684cc.ttf",
@@ -32,7 +32,7 @@
     "static/media/7.svg": "/static/media/7.a45b46e964c34094185e40d691917f1b.svg"
   },
   "entrypoints": [
-    "static/css/main.ac3e5717.css",
-    "static/js/main.b8dddd94.js"
+    "static/css/main.34835bc5.css",
+    "static/js/main.f5e044bf.js"
   ]
 }
