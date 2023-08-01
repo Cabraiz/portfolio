@@ -42,7 +42,7 @@ function App() {
   const [windowSize, setWindowSize] = useState(getWindowSize());
   const [signInStatus, setsignInStatus] = useState(["", false]);
   const [selectedLink, setSelectedLink] = useState("Home");
-  const links = ["Home", "About", "Portfolio", "Work", "Blog", "Contact"];
+  const links = ["Home", "Portfolio", "Road Map", "Pricing", "Contact"];
 
   useEffect(() => {
     onAuthStateChanged(auth, (user) => {
@@ -132,18 +132,27 @@ function App() {
     }
   };
 
-  const createButton = (buttonNumber: number) => (
+  const createButton = (buttonNumber: number, selected: boolean) => (
     <Button
       key={buttonNumber}
       variant="primary"
       size="sm"
-      style={{ width: "10px", height: "10px", marginBottom: "3vh"}}
-      //onClick={handleButtonClick(buttonNumber)}
-    >
+      style={{
+        width: "6px",
+        height: "14px",
+        marginBottom: "3vh",
+        transform: "rotate(45deg)", 
+        backgroundColor: selected ? "red" : "#9b59b6",
+        border: "none", // Remove the default button border
+      }}
+      // onClick={handleButtonClick(buttonNumber)}
+      >
     </Button>
   );
 
-  const buttons = Array.from({ length: 5 }, (_, index) => createButton(index + 1));
+  const buttons = Array.from({ length: 5 }).map((_, index) =>
+    createButton(index + 1, links[index] === selectedLink)
+  );
 
   const [title] = useState("Bem Vindo! 🤝");
 
@@ -193,45 +202,46 @@ function App() {
           />
           {!isMobile ? (
             // Render Nav element and Nav.Link elements for non-mobile devices
-            <Nav id="nav-dropdown">
-              {links.map((link) => (
-                <Nav.Link
-                  key={link}
-                  className={`nav-link-custom ${selectedLink === link ? 'active' : ''}`}
-                  href={`#${link.toLowerCase()}`}
-                  onClick={handleLinkClick(link)}
-                >
-                  {link}
-                </Nav.Link>
-              ))}
-            </Nav>
-          ) : null} 
-          <Button
-            style={{
-              marginRight: "4vw",
-              width: "auto",
-              height: "6vh",
-              fontSize: "1rem",
-              backgroundColor: "white",
-              color: "rgba(100, 100, 100)",
-              fontWeight: "500",
-              borderColor: "white",
-            }}
-            onClick={SignFirebase}
-          >
-            <Row className="m-0 ps-0 pe-0" style={{ alignItems: "center" }}>
-              <Image
-                src={logoGmail}
+            <>
+              <Nav id="nav-dropdown">
+                {links.map((link) => (
+                  <Nav.Link
+                    key={link}
+                    className={`nav-link-custom ${selectedLink === link ? 'active' : ''}`}
+                    href={`#${link.toLowerCase()}`}
+                    onClick={handleLinkClick(link)}
+                  >
+                    {link}
+                  </Nav.Link>
+                ))}
+              </Nav><Button
                 style={{
-                  width: "calc(15px + 0.3vw)",
-                  margin: "0",
-                  padding: "0",
-                  height: "100%",
+                  marginRight: "4vw",
+                  width: "auto",
+                  height: "6vh",
+                  fontSize: "1rem",
+                  backgroundColor: "white",
+                  color: "rgba(100, 100, 100)",
+                  fontWeight: "500",
+                  borderColor: "white",
                 }}
-              ></Image>
-              &nbsp;&nbsp;{signInStatus}
-            </Row>
-          </Button>
+                onClick={SignFirebase}
+              >
+                <Row className="m-0 ps-0 pe-0" style={{ alignItems: "center" }}>
+                  <Image
+                    src={logoGmail}
+                    style={{
+                      width: "calc(15px + 0.3vw)",
+                      margin: "0",
+                      padding: "0",
+                      height: "100%",
+                    }}
+                  ></Image>
+                  &nbsp;&nbsp;{signInStatus}
+                </Row>
+              </Button>
+            </>
+          ) : null} 
         </Navbar>
       )}
       <Routes>
@@ -256,7 +266,7 @@ function App() {
             display: "flex",
             flexDirection: "column",
             alignItems: "flex-end",
-            marginBottom: "10vh",
+            marginBottom: "8vh",
             marginRight: "3vw",
           }}
         >

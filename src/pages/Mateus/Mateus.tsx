@@ -9,6 +9,8 @@ import IconInsta from "../../assets/Mateus/IconInsta.png";
 import IconLinkendin from "../../assets/Mateus/IconLinkedIn.png";
 import IconTiktok from "../../assets/Mateus/IconTiktok.png";
 
+import MateusPDF from "./Mateus_Resume.pdf";
+
 interface SocialButtonProps {
   href: string;
   icon: string;
@@ -37,7 +39,7 @@ export function getSocialMediaName(index: number): string {
 
 function Mateus() {
 
-  const paddingTopFullStack = isMobile ? "10vh" : "22vh";
+  const paddingTopFullStack = isMobile ? "10vh" : "20vh";
 
   const margingLadoDireito = isMobile ? "0" : "-5vw";
   const paddingLadoDireito = isMobile ? "5vw" : "15vw";
@@ -46,7 +48,7 @@ function Mateus() {
     : "linear-gradient(90deg,#f1c40f 100%, #f1c40f 100%)";
 
   return (
-    <Row className="p-0 m-0">
+    <Row data-testid="mateus-container" className="p-0 m-0">
       {/* Left Column */}
       <Col className="col-sm-12 col-md-5 m-0" style={{ padding: `${paddingTopFullStack} max(50px, 4vw) 0 max(50px, 4vw)`, minWidth: "450px" }}>
         <div
@@ -54,30 +56,44 @@ function Mateus() {
           style={{
             backgroundImage: gradient,
             marginBottom: 'max(10px, 4vh)',
+            minWidth: "400px",
           }}
         >
           Full Stack <br />
-          Developer.
+          <div className="text-nowrap">Develope<span className="font-dot-space">r</span><span className="font-dot font-dot-space">.</span></div>
         </div>
         <div
           className="p-0 font-sequel-underline"
           style={{
             width: "100%",
             justifyContent: "start",
+            marginLeft: "-5px"
           }}
         >
           Hey there! Welcome to my website, where we code with style and debug with a smile 😄
           <br />Get ready for some HTMLarious adventures!
           <div style={{ textAlign: "right"}}>-ChatGPT</div>
         </div>
-        <div
-          className="p-0 m-0"
-          style={{
-            height: "20vh",
-            justifyContent: "start",
-          }}
-          data-testid="gradientElement"
-        ></div>
+        <Col className="justify-content-end">
+          <Row className="col-sm-12 col-md-8 p-0 m-0 mt-4 pb-2" style= {{ minWidth: "400px" }}>
+              <Col className="col-sm-6 col-md-5 m-0 text-nowrap ps-0">
+                <Button className ="btn-yellow py-3 btn-press-effect mb-4">
+                  HIRE ME
+                </Button>
+              </Col>
+              <Col className="col-sm-6 col-md-7 m-0 text-nowrap ps-0 ps-3">
+                <Button 
+                  className ="btn-trasn-w-border py-3 btn-tran-effect btn-press-effect"
+                  href={MateusPDF}
+                  target="_blank"
+                  rel="noreferrer"
+                  style= {{ minWidth: "200px" }}
+                >
+                  DOWNLOAD CV
+                </Button>
+              </Col>
+          </Row>
+        </Col>
       </Col>
 
       {/* Right Column */}

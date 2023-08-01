@@ -8,6 +8,21 @@
   src: local("Sequel"), url("../../fonts/Sequel/sequel-sans-heavy-disp-2.otf");
 }
 
+@font-face {
+  font-family: "Sequel_2";
+  src: local("Sequel"), url("../../fonts/Sequel/sequel-sans-heavy-disp-2.otf");
+}
+
+.font-dot {
+  font-family: "Fira Code", Consolas, 'Courier New', monospace;
+  font-size: calc(60px + 2.2vw);
+}
+
+.font-dot-space{
+  letter-spacing: -0.2em;
+}
+
+
 .font-sequel {
   font-size: calc(50px + 2vw);
   background-clip: text;
@@ -49,6 +64,69 @@
 
 .imagesize:hover{
   filter: none;
+}
+
+.btn-trasn-w-border {
+  background-color: transparent !important;
+  color: rgb(220 220 220); 
+  border-color: rgb(220 220 220)!important; 
+}
+
+.btn-yellow {
+  color:  rgb(220 220 220);
+  background-color: #eec211 !important;
+  border-color: #eec211 !important; 
+}
+
+.btn-yellow,
+.btn-trasn-w-border {
+  font-weight: 600 !important;
+  width: 100%;
+}
+
+.btn-press-effect {
+  background: #8d6e63;
+  font-size: 20px;
+  color: white;
+  border-radius: 7px;
+  box-shadow: 0 7px 0px #6d4c41;
+  display: inline-block;
+  transition: all .2s;
+  position: relative;
+  cursor: pointer;
+}
+
+.btn-press-effect:active {
+  top: 3px;
+  box-shadow: 0 2px 0px #6d4c41;
+  transition: all .2s;
+}
+
+.btn-tran-effect {
+  text-align: center;
+  display: inline-block;
+  border: 1px solid #fff;
+  cursor: pointer;
+  letter-spacing: 2px;
+  position:relative;
+  overflow:hidden;
+}
+
+.btn-tran-effect:before {
+  content: "";
+  position: absolute;
+  height: 150px;
+  width: 50px;
+  background : #fff;
+  right: -40px;
+  top: -40px;
+  transform: rotate(37deg);
+  transition: all .3s;
+  opacity: 0.3;
+}
+
+.btn-tran-effect:hover:before {
+  right: 105%;
 }
 
 img {
