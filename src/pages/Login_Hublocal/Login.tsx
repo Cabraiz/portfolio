@@ -83,7 +83,7 @@ function PasswordInput({
           placeholder: "Mínimo de 6 caracteres",
         },
         inputLeftElement,
-        inputRightElement
+        inputRightElement,
       )}
     </>
   );
@@ -119,7 +119,7 @@ function EmailInput({
           name: "email",
           id: "email",
         },
-        inputLeftElement
+        inputLeftElement,
       )}
     </>
   );

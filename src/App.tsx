@@ -141,17 +141,16 @@ function App() {
         width: "6px",
         height: "14px",
         marginBottom: "3vh",
-        transform: "rotate(45deg)", 
+        transform: "rotate(45deg)",
         backgroundColor: selected ? "red" : "#9b59b6",
         border: "none", // Remove the default button border
       }}
       // onClick={handleButtonClick(buttonNumber)}
-      >
-    </Button>
+    ></Button>
   );
 
   const buttons = Array.from({ length: 5 }).map((_, index) =>
-    createButton(index + 1, links[index] === selectedLink)
+    createButton(index + 1, links[index] === selectedLink),
   );
 
   const [title] = useState("Bem Vindo! 🤝");
@@ -163,11 +162,13 @@ function App() {
     pathname === "/loginhublocal" ||
     pathname === "/registerhublocal";
 
-    const handleLinkClick = (link: string) => (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
+  const handleLinkClick =
+    (link: string) =>
+    (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
       event.preventDefault();
       setSelectedLink(link);
     };
-    
+
   return (
     <>
       <HelmetProvider>
@@ -207,14 +208,17 @@ function App() {
                 {links.map((link) => (
                   <Nav.Link
                     key={link}
-                    className={`nav-link-custom ${selectedLink === link ? 'active' : ''}`}
+                    className={`nav-link-custom ${
+                      selectedLink === link ? "active" : ""
+                    }`}
                     href={`#${link.toLowerCase()}`}
                     onClick={handleLinkClick(link)}
                   >
                     {link}
                   </Nav.Link>
                 ))}
-              </Nav><Button
+              </Nav>
+              <Button
                 style={{
                   marginRight: "4vw",
                   width: "auto",
@@ -241,7 +245,7 @@ function App() {
                 </Row>
               </Button>
             </>
-          ) : null} 
+          ) : null}
         </Navbar>
       )}
       <Routes>

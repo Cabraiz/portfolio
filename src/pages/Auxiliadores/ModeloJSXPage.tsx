@@ -97,7 +97,7 @@ function ModeloLadoEsquerdoPage(params: ModeloLadoEsquerdoPageParams) {
 function ModeloLadoDireitoPage(
   params: RegisterParams,
   EsquerdoJSX?: JSX.Element,
-  DireitoJSX?: JSX.Element
+  DireitoJSX?: JSX.Element,
 ) {
   return (
     <>

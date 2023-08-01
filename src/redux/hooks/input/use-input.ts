@@ -33,7 +33,7 @@ const inputReducer = (state: InputState, action: Action<InputActionType>) => {
 const useInput = (validatorFN?: ValidatorFn) => {
   const [{ text, hasBeenTouched }, dispach] = useReducer(
     inputReducer,
-    InitialInputState
+    InitialInputState,
   );
 
   let shouldDisplayError;

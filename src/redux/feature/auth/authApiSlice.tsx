@@ -1,5 +1,5 @@
 import { apiSlice } from "../../app/api/apiSlice";
-import { logOut } from '../auth/authSlice';
+import { logOut } from "../auth/authSlice";
 
 export interface User {
   first_name: string;
@@ -46,4 +46,5 @@ export const authApiSlice = apiSlice.injectEndpoints({
   }),
 });
 
-export const { useLoginMutation, useSendLogoutMutation,useProtectedMutation } = authApiSlice;
+export const { useLoginMutation, useSendLogoutMutation, useProtectedMutation } =
+  authApiSlice;

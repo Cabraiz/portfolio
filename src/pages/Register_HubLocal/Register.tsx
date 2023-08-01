@@ -14,7 +14,11 @@ import {
   Link,
   FormLabel,
 } from "@chakra-ui/react";
-import { reset, register, tokenReceived } from "../../redux/feature/auth/authSlice";
+import {
+  reset,
+  register,
+  tokenReceived,
+} from "../../redux/feature/auth/authSlice";
 import {
   LoginRequest,
   useLoginMutation,
@@ -237,7 +241,7 @@ function Register() {
       ErrorNotify(errors[0]);
       return;
     }
-    
+
     try {
       const newUser: NewUser = {
         name,

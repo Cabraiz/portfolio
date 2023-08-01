@@ -33,7 +33,7 @@ function Surprise() {
 
   const getRealTime = async () => {
     const response = await fetch(
-      "https://worldtimeapi.org/api/timezone/America/Fortaleza"
+      "https://worldtimeapi.org/api/timezone/America/Fortaleza",
     );
     const temp = await response.json();
     return new Date(temp.datetime).getHours();
@@ -150,7 +150,7 @@ function Surprise() {
         [a]: {
           $set: b,
         },
-      })
+      }),
     );
   };
 

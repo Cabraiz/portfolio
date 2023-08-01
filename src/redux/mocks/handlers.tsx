@@ -11,13 +11,13 @@ export const handlers = [
         ctx.json({
           message: "You shall not pass. Please login first.",
         }),
-        ctx.status(401)
+        ctx.status(401),
       );
     }
     return res(
       ctx.json({
         message: "Alright, you are authorized",
-      })
+      }),
     );
   }),
   rest.post("/loginhublocal", (req, res, ctx) => {
@@ -29,7 +29,7 @@ export const handlers = [
           last_name: "User",
         },
         token,
-      })
+      }),
     );
   }),
 ];
