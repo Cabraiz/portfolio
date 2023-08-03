@@ -1,0 +1,46 @@
+version: 2
+
+updates:
+  - package-ecosystem: "bundler"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    version: "> 1.0.0, < 2.0.0"
+
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    version: "^1.0.0"
+    update-config:
+      version: "widen"
+      unlock_requirement: true
+
+  - package-ecosystem: "yarn"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    version: "^1.0.0"
+
+automerge:
+  - package-ecosystem: "bundler"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    minor: true
+
+updates:
+  - package-ecosystem: "bundler"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    branches:
+      - "main"
+
+updates:
+  - package-ecosystem: "bundler"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    paths:
+      - "backend/**/*"
