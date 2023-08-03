@@ -90,7 +90,10 @@ function Mateus() {
             style={{ minWidth: "400px" }}
           >
             <Col className="col-sm-6 col-md-5 m-0 text-nowrap ps-0">
-              <Button className="btn-yellow py-3 btn-press-effect mb-4">
+              <Button 
+                className="btn-yellow py-3 btn-press-effect mb-4"
+                style={{ background: "linear-gradient(-145deg, #f1c40f 0%,   #e2b913 100%)" }}
+              >
                 HIRE ME
               </Button>
             </Col>

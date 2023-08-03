@@ -42,7 +42,7 @@ function App() {
   const [windowSize, setWindowSize] = useState(getWindowSize());
   const [signInStatus, setsignInStatus] = useState(["", false]);
   const [selectedLink, setSelectedLink] = useState("Home");
-  const links = ["Home", "Portfolio", "Road Map", "Pricing", "Contact"];
+  const links = ["Home", "Portfolio", "Live", "Road Map", "Pricing", "Contact"];
 
   useEffect(() => {
     onAuthStateChanged(auth, (user) => {
@@ -138,18 +138,22 @@ function App() {
       variant="primary"
       size="sm"
       style={{
-        width: "6px",
-        height: "14px",
-        marginBottom: "3vh",
-        transform: "rotate(45deg)",
-        backgroundColor: selected ? "red" : "#9b59b6",
-        border: "none", // Remove the default button border
+        width: selected ? "23px" : "",
+        height: selected ? "22px" : "12px",
+        marginRight: selected ? "-2px" : "",
+        marginBottom: selected ? "2.5vh" : "3vh",
+        transform: selected ? "" : "rotate(45deg) scaleX(0.7)",
+        transformOrigin: selected ? "" :  "center",
+        backgroundColor: selected ? "#00000000" : "#9b59b6",
+        borderColor: selected ? "#9b59b6" : "#00000000",
+        borderWidth: selected ? "3px" : "",
+        borderRadius: "1px",
       }}
       // onClick={handleButtonClick(buttonNumber)}
     ></Button>
   );
 
-  const buttons = Array.from({ length: 5 }).map((_, index) =>
+  const buttons = Array.from({ length: links.length }).map((_, index) =>
     createButton(index + 1, links[index] === selectedLink),
   );
 
@@ -204,7 +208,7 @@ function App() {
           {!isMobile ? (
             // Render Nav element and Nav.Link elements for non-mobile devices
             <>
-              <Nav id="nav-dropdown">
+              <Nav id="nav-dropdown" style={{ display: 'inline-flex', alignItems: 'center' }}>
                 {links.map((link) => (
                   <Nav.Link
                     key={link}
@@ -214,7 +218,20 @@ function App() {
                     href={`#${link.toLowerCase()}`}
                     onClick={handleLinkClick(link)}
                   >
-                    {link}
+                    {link === "Live" && (
+                      <div className="conjunto-circle">
+                        <div className="outer-outer-circle">
+                          <div className="arc-hole-top-outer-outer"> </div>
+                          <div className="arc-hole-bottom-outer-outer"> </div>
+                        </div>
+                        <div className="outer-circle"> </div>
+                        <div className="inner-circle"></div>
+                      </div>
+                      
+                    )}
+                    <span style={{ marginLeft: link === "Live" ? '5px' : '0' }}>
+                      {link}
+                    </span>
                   </Nav.Link>
                 ))}
               </Nav>
