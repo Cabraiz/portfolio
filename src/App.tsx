@@ -1,18 +1,23 @@
+
 import React, { useEffect, useState } from "react";
+import { Routes, Route, useLocation } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
+import { db, auth, provider } from "./Firebase/Firebase";
+import { doc, setDoc, getDoc } from "firebase/firestore";
+import { onAuthStateChanged, signInWithPopup, signInWithRedirect, signOut } from "firebase/auth";
 
 import "./App.css";
+import "./pages/Login_HubLocal/Login.css";
+import "./pages/Mateus/Mateus.css";
+import "./pages/Surprise/Surprise.css";
 
 import { Row, Navbar, Image, Button, Nav } from "react-bootstrap";
 
 import logo from "./assets/icones/logo.svg";
 import logoGmail from "./assets/icones/7.svg";
 
-import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-import { Helmet, HelmetProvider } from "react-helmet-async";
-
-import { Routes, Route, useLocation } from "react-router-dom";
 
 import RegisterHubLocal from "./pages/Register_HubLocal/Register";
 import LoginHubLocal from "./pages/Login_HubLocal/Login";
@@ -22,27 +27,20 @@ import Surprise from "./pages/Surprise/Surprise";
 import { PrivateOutlet } from "./redux/shared/utils/PrivateOutlet";
 
 import Mateus from "./pages/Mateus/Mateus";
+import LiveAnimation from "./pages/PrincipalPage/Animation/live_animation";
+import TitleWebsite from "./pages/PrincipalPage/TitleWebsite/title_website";
 //import Firebase from "./pages/Surprise/Surprise";
 
-import "./pages/Login_HubLocal/Login.css";
-import "./pages/Mateus/Mateus.css";
-import "./pages/Surprise/Surprise.css";
-
 import { isMobile } from "react-device-detect";
-import { db, auth, provider } from "./Firebase/Firebase";
-import { doc, setDoc, getDoc } from "firebase/firestore";
-import {
-  onAuthStateChanged,
-  signInWithPopup,
-  signInWithRedirect,
-  signOut,
-} from "firebase/auth";
+
+const BUTTON_TEXT_SIGN_IN = "Sign In With Google";
+const BUTTON_TEXT_SIGN_OUT = "Sign Out";
 
 function App() {
   const [windowSize, setWindowSize] = useState(getWindowSize());
   const [signInStatus, setsignInStatus] = useState(["", false]);
   const [selectedLink, setSelectedLink] = useState("Home");
-  const links = ["Home", "Portfolio", "Live", "Road Map", "Pricing", "Contact"];
+  const links = ["Home", "Portfolio", "Road Map", "Pricing","Live", "Contact"];
 
   useEffect(() => {
     onAuthStateChanged(auth, (user) => {
@@ -157,8 +155,6 @@ function App() {
     createButton(index + 1, links[index] === selectedLink),
   );
 
-  const [title] = useState("Bem Vindo! 🤝");
-
   const { pathname } = useLocation();
 
   const isNavOn =
@@ -172,14 +168,11 @@ function App() {
       event.preventDefault();
       setSelectedLink(link);
     };
-
   return (
     <>
-      <HelmetProvider>
-        <Helmet>
-          <title>{title ? title : "No title"}</title>
-        </Helmet>
-      </HelmetProvider>
+      <div>
+        <TitleWebsite title1="Bem Vindo! 🤝" title2="Cabraiz" />
+      </div>
       {isNavOn ? null : (
         <Navbar
           className="border-gradient-green"
@@ -219,15 +212,9 @@ function App() {
                     onClick={handleLinkClick(link)}
                   >
                     {link === "Live" && (
-                      <div className="conjunto-circle">
-                        <div className="outer-outer-circle">
-                          <div className="arc-hole-top-outer-outer"> </div>
-                          <div className="arc-hole-bottom-outer-outer"> </div>
-                        </div>
-                        <div className="outer-circle"> </div>
-                        <div className="inner-circle"></div>
+                      <div>
+                        <LiveAnimation />
                       </div>
-                      
                     )}
                     <span style={{ marginLeft: link === "Live" ? '5px' : '0' }}>
                       {link}
