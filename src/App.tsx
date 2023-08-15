@@ -2,12 +2,12 @@
 import React, { useEffect, useState } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
-import { db, auth, provider } from "./Firebase/Firebase";
+import { db, auth, provider } from "./Firebase/firebase_";
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import { onAuthStateChanged, signInWithPopup, signInWithRedirect, signOut } from "firebase/auth";
 
 import "./App.css";
-import "./pages/Login_HubLocal/Login.css";
+import "./pages/LoginHubLocal/login.css";
 import "./pages/Mateus/Mateus.css";
 import "./pages/Surprise/Surprise.css";
 
@@ -19,8 +19,8 @@ import logoGmail from "./assets/icones/7.svg";
 import "react-toastify/dist/ReactToastify.css";
 
 
-import RegisterHubLocal from "./pages/Register_HubLocal/Register";
-import LoginHubLocal from "./pages/Login_HubLocal/Login";
+import RegisterHubLocal from "./pages/RegisterHubLocal/Register";
+import LoginHubLocal from "./pages/LoginHubLocal/login";
 import Hublocal from "./pages/Hublocal/Hublocal";
 import Surprise from "./pages/Surprise/Surprise";
 
@@ -205,7 +205,7 @@ function App() {
                 {links.map((link) => (
                   <Nav.Link
                     key={link}
-                    className={`nav-link-custom ${
+                    className={`text-nowrap nav-link-custom ${
                       selectedLink === link ? "active" : ""
                     }`}
                     href={`#${link.toLowerCase()}`}

@@ -19,7 +19,7 @@ import {
 } from "@chakra-ui/react";
 
 import { FaUserAlt, FaLock } from "react-icons/fa";
-import "./Login.css";
+import "./login.css";
 
 import { tokenReceived } from "../../redux/feature/auth/authSlice";
 import {

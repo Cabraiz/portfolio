@@ -13,7 +13,7 @@ import Done_4 from "../../assets/Surprise/Done_4.png";
 import Done_5 from "../../assets/Surprise/Done_5.png";
 import Done_6 from "../../assets/Surprise/Done_6.png";
 
-import { auth, db } from "../../Firebase/Firebase";
+import { auth, db } from "../../Firebase/firebase_";
 import { getDoc, setDoc, doc } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import "animate.css";
