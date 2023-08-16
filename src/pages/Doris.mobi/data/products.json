@@ -1,0 +1,426 @@
+{
+    "data": {
+      "product": [
+        {
+          "url": "https://www.zara.com/br/pt/camisa-de-linho---algodao-p01063307.html",
+          "identifier": "01063307B",
+          "name": "Camisa de linho - Algodão",
+          "parent_identifier": "01063307",
+          "thumbnail": "https://static.zara.net/photos///2023/V/0/2/p/1063/307/250/2/w/1500/1063307250_6_1_1.jpg?ts=1673338592102",
+          "preview_image": "https://static.zara.net/photos///2023/V/0/2/p/1063/307/250/2/w/1500/1063307250_2_1_1.jpg?ts=1673439820958",
+          "status": "PROCESSED",
+          "list_price": 299.9,
+          "selling_price": 249.9,
+          "active": true,
+          "category": {
+            "name": "shirt"
+          }
+        },
+        {
+          "url": "https://www.zara.com/br/pt/camisa-de-linho---algodao-p01063307.html",
+          "identifier": "01063307A",
+          "name": "Camisa de linho - Algodão",
+          "parent_identifier": "01063307",
+          "thumbnail": "https://static.zara.net/photos///2023/V/0/2/p/1063/307/620/2/w/1500/1063307620_6_1_1.jpg?ts=1674209503310",
+          "preview_image": "https://static.zara.net/photos///2023/V/0/1/p/1063/307/620/2/w/1500/1063307620_2_4_1.jpg?ts=1677493811580",
+          "status": "PROCESSED",
+          "list_price": 299.9,
+          "selling_price": 249.9,
+          "active": true,
+          "category": {
+            "name": "shirt"
+          }
+        },
+        {
+          "url": "https://www.zara.com/br/pt/camisa-de-linho---algodao-p01063307.html",
+          "identifier": "01063307C",
+          "name": "Camisa de linho - Algodão",
+          "parent_identifier": "01063307",
+          "thumbnail": "https://static.zara.net/photos///2023/V/0/2/p/1063/307/500/2/w/1500/1063307500_6_1_1.jpg?ts=1673338600377",
+          "preview_image": "https://static.zara.net/photos///2023/V/0/2/p/1063/307/500/2/w/1500/1063307500_2_1_1.jpg?ts=1673439824384",
+          "status": "PROCESSED",
+          "list_price": 299.9,
+          "selling_price": 209.9,
+          "active": true,
+          "category": {
+            "name": "shirt"
+          }
+        },
+        {
+          "url": "https://www.zara.com/br/pt/camisa-de-linho---algodao-p01063307.html",
+          "identifier": "01063307D",
+          "name": "Camisa de linho - Algodão",
+          "parent_identifier": "01063307",
+          "thumbnail": "https://static.zara.net/photos///2023/V/0/2/p/1063/307/052/2/w/1500/1063307052_6_1_1.jpg?ts=1673338594716",
+          "preview_image": "https://static.zara.net/photos///2023/V/0/1/p/1063/307/052/2/w/1500/1063307052_1_1_1.jpg?ts=1676369583211",
+          "status": "PROCESSING_ERROR",
+          "list_price": 299.9,
+          "selling_price": 249.9,
+          "active": true,
+          "category": {
+            "name": "shirt"
+          }
+        },
+        {
+          "url": "https://www.zara.com/br/pt/camisa-de-linho---algodao-p01063307.html",
+          "identifier": "01063307E",
+          "name": "Camisa de linho - Algodão",
+          "parent_identifier": "01063307",
+          "thumbnail": "https://static.zara.net/photos///2023/V/0/2/p/1063/307/403/2/w/1500/1063307403_6_1_1.jpg?ts=1673338595351",
+          "preview_image": "https://static.zara.net/photos///2023/V/0/2/p/1063/307/403/2/w/1500/1063307403_1_1_1.jpg?ts=1673430708372",
+          "status": "PROCESSED",
+          "list_price": 299.9,
+          "selling_price": 249.9,
+          "active": true,
+          "category": {
+            "name": "shirt"
+          }
+        },
+        {
+          "url": "https://www.zara.com/br/pt/camiseta-heavy-weight-premium-p01887331.html",
+          "identifier": "01887331A",
+          "name": "Camiseta heavy weight premium",
+          "parent_identifier": "01887331",
+          "thumbnail": "https://static.zara.net/photos///2022/I/0/2/p/1887/331/064/2/w/1500/1887331064_6_1_1.jpg?ts=1661335433329",
+          "preview_image": "https://static.zara.net/photos///2023/W/0/2/p/1887/331/064/2/w/1500/1887331064_1_1_1.jpg?ts=1676539195117",
+          "status": "PROCESSED",
+          "list_price": 199.9,
+          "selling_price": 169.9,
+          "active": true,
+          "category": {
+            "name": "tshirt"
+          }
+        },
+        {
+          "url": "https://www.zara.com/br/pt/camiseta-heavy-weight-premium-p01887331.html",
+          "identifier": "01887331B",
+          "name": "Camiseta heavy weight premium",
+          "parent_identifier": "01887331",
+          "thumbnail": "https://static.zara.net/photos///2022/I/0/2/p/1887/331/712/2/w/1500/1887331712_6_1_1.jpg?ts=1661335428820",
+          "preview_image": "https://static.zara.net/photos///2023/W/0/2/p/1887/331/712/2/w/1500/1887331712_2_3_1.jpg?ts=1676539196452",
+          "status": "PROCESSED",
+          "list_price": 199.9,
+          "selling_price": 169.9,
+          "active": false,
+          "category": {
+            "name": "tshirt"
+          }
+        },
+        {
+          "url": "https://www.zara.com/br/pt/camiseta-heavy-weight-premium-p01887331.html",
+          "identifier": "01887331C",
+          "name": "Camiseta heavy weight premium",
+          "parent_identifier": "01887331",
+          "thumbnail": "https://static.zara.net/photos///2022/I/0/2/p/1887/331/800/2/w/1500/1887331800_6_1_1.jpg?ts=1661335431199",
+          "preview_image": "https://static.zara.net/photos///2023/W/0/2/p/1887/331/800/2/w/1500/1887331800_2_1_1.jpg?ts=1676539196687",
+          "status": "PROCESSED",
+          "list_price": 199.9,
+          "selling_price": 199.9,
+          "active": true,
+          "category": {
+            "name": "tshirt"
+          }
+        },
+        {
+          "thumbnail": "https://eris-storage.s3.us-east-2.amazonaws.com/production/pant_098c5955-6cf8-46d7-b5b8-849b3a730b61-outfit-thumbnail.jpg",
+          "preview_image": "https://eris-storage.s3.us-east-2.amazonaws.com/production/pant_098c5955-6cf8-46d7-b5b8-849b3a730b61-outfit-thumbnail.jpg",
+          "status": "PROCESSED",
+          "selling_price": 244.5,
+          "name": "Calca Jeans Deep Blue-Azul Medio",
+          "list_price": 489,
+          "identifier": "3439",
+          "parent_identifier": "3439",
+          "url": "https://www.zapalla.com.br/calca-jeans-deep-blueazul-medio-68300012-062/p",
+          "active": true,
+          "category": {
+            "name": "pants"
+          }
+        },
+        {
+          "thumbnail": "https://eris-storage.s3.us-east-2.amazonaws.com/production/pant_b71d6cac-d3e4-437a-a0da-357b613c22ca-outfit-thumbnail.jpg",
+          "preview_image": "https://eris-storage.s3.us-east-2.amazonaws.com/production/pant_b71d6cac-d3e4-437a-a0da-357b613c22ca-outfit-thumbnail.jpg",
+          "status": "PROCESSED",
+          "selling_price": 0,
+          "name": "Calca Cargo - I23-Verde Oliva",
+          "list_price": 798,
+          "identifier": "3872",
+          "parent_identifier": "3872",
+          "url": "https://www.zapalla.com.br/calca-cargo--i23verde-oliva-68310001-140/p",
+          "active": true,
+          "category": {
+            "name": "pants"
+          }
+        },
+        {
+          "thumbnail": "https://eris-storage.s3.us-east-2.amazonaws.com/production/pant_6185c97c-bb67-4619-8092-2fc23004a8f0-outfit-thumbnail.jpg",
+          "preview_image": "https://eris-storage.s3.us-east-2.amazonaws.com/production/pant_6185c97c-bb67-4619-8092-2fc23004a8f0-outfit-thumbnail.jpg",
+          "status": "PROCESSED",
+          "selling_price": 0,
+          "name": "Calca Jogger - I23-Preto",
+          "list_price": 499,
+          "identifier": "3888",
+          "parent_identifier": "3888",
+          "url": "https://www.zapalla.com.br/calca-jogger--i23preto-68310008-009/p",
+          "active": true,
+          "category": {
+            "name": "pants"
+          }
+        },
+        {
+          "thumbnail": "https://eris-storage.s3.us-east-2.amazonaws.com/production/pant_0c7be972-9135-4369-bcd4-d5c1e8004590-outfit-thumbnail.jpg",
+          "preview_image": "https://eris-storage.s3.us-east-2.amazonaws.com/production/pant_0c7be972-9135-4369-bcd4-d5c1e8004590-outfit-thumbnail.jpg",
+          "status": "PROCESSED",
+          "selling_price": 0,
+          "name": "Calca Jogger-Khaki",
+          "list_price": 489,
+          "identifier": "3425",
+          "parent_identifier": "3425",
+          "url": "https://www.zapalla.com.br/calca-joggerkhaki-68300004-073/p",
+          "active": true,
+          "category": {
+            "name": "pants"
+          }
+        },
+        {
+          "thumbnail": "https://eris-storage.s3.us-east-2.amazonaws.com/production/pant_1e4988d7-9363-4a54-bf05-098948b20318-outfit-thumbnail.jpg",
+          "preview_image": "https://eris-storage.s3.us-east-2.amazonaws.com/production/pant_1e4988d7-9363-4a54-bf05-098948b20318-outfit-thumbnail.jpg",
+          "status": "PROCESSED",
+          "selling_price": 0,
+          "name": "Calca Five Pockets - I23-Verde Oliva",
+          "list_price": 599,
+          "identifier": "3884",
+          "parent_identifier": "3884",
+          "url": "https://www.zapalla.com.br/calca-five-pockets--i23verde-oliva-68310005-140/p",
+          "active": true,
+          "category": {
+            "name": "pants"
+          }
+        },
+        {
+          "thumbnail": "https://eris-storage.s3.us-east-2.amazonaws.com/production/pant_e4755557-dbcd-491b-a48e-05331dd05e7f-outfit-thumbnail.jpg",
+          "preview_image": "https://eris-storage.s3.us-east-2.amazonaws.com/production/pant_e4755557-dbcd-491b-a48e-05331dd05e7f-outfit-thumbnail.jpg",
+          "status": "PROCESSED",
+          "selling_price": 0,
+          "name": "Calca Cargo - I23-Charuto",
+          "list_price": 798,
+          "identifier": "3873",
+          "parent_identifier": "3873",
+          "url": "https://www.zapalla.com.br/calca-cargo--i23charuto-68310001-644/p",
+          "active": true,
+          "category": {
+            "name": "pants"
+          }
+        },
+        {
+          "thumbnail": "https://eris-storage.s3.us-east-2.amazonaws.com/production/pant_89e09a70-6471-482c-9a43-b1bcd218c6ff-outfit-thumbnail.jpg",
+          "preview_image": "https://eris-storage.s3.us-east-2.amazonaws.com/production/pant_89e09a70-6471-482c-9a43-b1bcd218c6ff-outfit-thumbnail.jpg",
+          "status": "PROCESSED",
+          "selling_price": 0,
+          "name": "Calca Chino I23-Verde Oliva",
+          "list_price": 649,
+          "identifier": "3878",
+          "parent_identifier": "3878",
+          "url": "https://www.zapalla.com.br/calca-chino-i23verde-oliva-68310004-140/p",
+          "active": true,
+          "category": {
+            "name": "pants"
+          }
+        },
+        {
+          "thumbnail": "https://eris-storage.s3.us-east-2.amazonaws.com/production/pant_d51e0ea9-0312-49d8-b53d-ba37731c3de1-outfit-thumbnail.jpg",
+          "preview_image": "https://eris-storage.s3.us-east-2.amazonaws.com/production/pant_d51e0ea9-0312-49d8-b53d-ba37731c3de1-outfit-thumbnail.jpg",
+          "status": "PROCESSED",
+          "selling_price": 0,
+          "name": "Calca Jeans Destroyed - I23-Azul Claro",
+          "list_price": 569,
+          "identifier": "3893",
+          "parent_identifier": "3893",
+          "url": "https://www.zapalla.com.br/calca-jeans-destroyed--i23azul-claro-68310012-109/p",
+          "active": true,
+          "category": {
+            "name": "pants"
+          }
+        },
+        {
+          "thumbnail": "https://eris-storage.s3.us-east-2.amazonaws.com/production/pant_e33d21ad-4c34-4bec-a345-be6370f0185d-outfit-thumbnail.jpg",
+          "preview_image": "https://eris-storage.s3.us-east-2.amazonaws.com/production/pant_e33d21ad-4c34-4bec-a345-be6370f0185d-outfit-thumbnail.jpg",
+          "status": "PROCESSED",
+          "selling_price": 0,
+          "name": "Calca Five Pockets-Areia",
+          "list_price": 549,
+          "identifier": "3423",
+          "parent_identifier": "3423",
+          "url": "https://www.zapalla.com.br/calca-five-pocketsareia-68300003-025/p",
+          "active": true,
+          "category": {
+            "name": "pants"
+          }
+        },
+        {
+          "thumbnail": "https://eris-storage.s3.us-east-2.amazonaws.com/production/pant_fd485428-7c72-4534-978f-231384fb160a-outfit-thumbnail.jpg",
+          "preview_image": "https://eris-storage.s3.us-east-2.amazonaws.com/production/pant_fd485428-7c72-4534-978f-231384fb160a-outfit-thumbnail.jpg",
+          "status": "PROCESSED",
+          "selling_price": 0,
+          "name": "Calca Chino I23-Chumbo",
+          "list_price": 649,
+          "identifier": "3876",
+          "parent_identifier": "3876",
+          "url": "https://www.zapalla.com.br/calca-chino-i23chumbo-68310004-012/p",
+          "active": true,
+          "category": {
+            "name": "pants"
+          }
+        },
+        {
+          "thumbnail": "https://eris-storage.s3.us-east-2.amazonaws.com/production/bermuda_2a888247-c52c-40dd-9f3e-7739823c83fd-outfit-thumbnail.jpg",
+          "preview_image": "https://eris-storage.s3.us-east-2.amazonaws.com/production/bermuda_2a888247-c52c-40dd-9f3e-7739823c83fd-outfit-thumbnail.jpg",
+          "status": "PROCESSED",
+          "selling_price": 244.5,
+          "name": "Bermuda New Chino-Pistache",
+          "list_price": 489,
+          "identifier": "3513",
+          "parent_identifier": "3513",
+          "url": "https://www.zapalla.com.br/bermuda-new-chinopistache-14300003-256/p",
+          "active": true,
+          "category": {
+            "name": "bermuda"
+          }
+        },
+        {
+          "thumbnail": "https://eris-storage.s3.us-east-2.amazonaws.com/production/bermuda_b2653811-3530-4813-99df-7baba0c9d74f-outfit-thumbnail.jpg",
+          "preview_image": "https://eris-storage.s3.us-east-2.amazonaws.com/production/bermuda_b2653811-3530-4813-99df-7baba0c9d74f-outfit-thumbnail.jpg",
+          "status": "PROCESSED",
+          "selling_price": 244.5,
+          "name": "Bermuda Chino V2023-Cherry",
+          "list_price": 489,
+          "identifier": "3511",
+          "parent_identifier": null,
+          "url": "https://www.zapalla.com.br/bermuda-chino-v2023cherry-14300002-593/p",
+          "active": true,
+          "category": {
+            "name": "bermuda"
+          }
+        },
+        {
+          "thumbnail": "https://eris-storage.s3.us-east-2.amazonaws.com/production/bermuda_f619361d-9def-4786-968b-960aea1011e7-outfit-thumbnail.jpg",
+          "preview_image": "https://eris-storage.s3.us-east-2.amazonaws.com/production/bermuda_f619361d-9def-4786-968b-960aea1011e7-outfit-thumbnail.jpg",
+          "status": "PROCESSED",
+          "selling_price": 284.5,
+          "name": "Bermuda Alfaiataria-Verde",
+          "list_price": 569,
+          "identifier": "3518",
+          "parent_identifier": "3518",
+          "url": "https://www.zapalla.com.br/bermuda-alfaiatariaverde-14300005-014/p",
+          "active": true,
+          "category": {
+            "name": "bermuda"
+          }
+        },
+        {
+          "thumbnail": "https://eris-storage.s3.us-east-2.amazonaws.com/production/bermuda_9bc49bc2-951d-4bac-bc68-8e05817ba884-outfit-thumbnail.jpg",
+          "preview_image": "https://eris-storage.s3.us-east-2.amazonaws.com/production/bermuda_9bc49bc2-951d-4bac-bc68-8e05817ba884-outfit-thumbnail.jpg",
+          "status": "PROCESSING_ERROR",
+          "selling_price": 244.5,
+          "name": "Bermuda New Chino-Melao",
+          "list_price": 489,
+          "identifier": "3514",
+          "parent_identifier": "3514",
+          "url": "https://www.zapalla.com.br/bermuda-new-chinomelao-14300003-408/p",
+          "active": true,
+          "category": {
+            "name": "bermuda"
+          }
+        },
+        {
+          "thumbnail": "https://eris-storage.s3.us-east-2.amazonaws.com/production/bermuda_d89d0d71-26f4-4ed6-9893-60cf078a5227-outfit-thumbnail.jpg",
+          "preview_image": "https://eris-storage.s3.us-east-2.amazonaws.com/production/bermuda_d89d0d71-26f4-4ed6-9893-60cf078a5227-outfit-thumbnail.jpg",
+          "status": "PROCESSED",
+          "selling_price": 244.5,
+          "name": "Bermuda New Paper-Khaki",
+          "list_price": 489,
+          "identifier": "3521",
+          "parent_identifier": "3521",
+          "url": "https://www.zapalla.com.br/bermuda-new-paperkhaki-14300006-073/p",
+          "active": true,
+          "category": {
+            "name": "bermuda"
+          }
+        },
+        {
+          "thumbnail": "https://eris-storage.s3.us-east-2.amazonaws.com/production/bermuda_92f37b96-744b-4f27-81fe-37591afb840c-outfit-thumbnail.jpg",
+          "preview_image": "https://eris-storage.s3.us-east-2.amazonaws.com/production/bermuda_92f37b96-744b-4f27-81fe-37591afb840c-outfit-thumbnail.jpg",
+          "status": "PROCESSED",
+          "selling_price": 0,
+          "name": "Bermuda New Chino - I23-Charuto",
+          "list_price": 598,
+          "identifier": "3845",
+          "parent_identifier": "3845",
+          "url": "https://www.zapalla.com.br/bermuda-new-chino--i23charuto-14310004-644/p",
+          "active": true,
+          "category": {
+            "name": "bermuda"
+          }
+        },
+        {
+          "thumbnail": "https://eris-storage.s3.us-east-2.amazonaws.com/production/bermuda_034f984a-680c-4f46-ad6d-d801af5b7ec0-outfit-thumbnail.jpg",
+          "preview_image": "https://eris-storage.s3.us-east-2.amazonaws.com/production/bermuda_034f984a-680c-4f46-ad6d-d801af5b7ec0-outfit-thumbnail.jpg",
+          "status": "PROCESSED",
+          "selling_price": 0,
+          "name": "Bermuda New Chino - I23-Indigo",
+          "list_price": 598,
+          "identifier": "3844",
+          "parent_identifier": "3844",
+          "url": "https://www.zapalla.com.br/bermuda-new-chino--i23indigo-14310004-460/p",
+          "active": true,
+          "category": {
+            "name": "bermuda"
+          }
+        },
+        {
+          "thumbnail": "https://eris-storage.s3.us-east-2.amazonaws.com/production/bermuda_f9016873-d562-4c5b-b5a9-bab7a9f3bc77-outfit-thumbnail.jpg",
+          "preview_image": "https://eris-storage.s3.us-east-2.amazonaws.com/production/bermuda_f9016873-d562-4c5b-b5a9-bab7a9f3bc77-outfit-thumbnail.jpg",
+          "status": "PROCESSED",
+          "selling_price": 0,
+          "name": "Bermuda Cargo-Areia",
+          "list_price": 284.5,
+          "identifier": "3517",
+          "parent_identifier": "3517",
+          "url": "https://www.zapalla.com.br/bermuda-cargoareia-14300004-025/p",
+          "active": true,
+          "category": {
+            "name": "bermuda"
+          }
+        },
+        {
+          "thumbnail": "https://eris-storage.s3.us-east-2.amazonaws.com/production/bermuda_7f932915-cbb9-413f-b5f5-1e9fce5357ec-outfit-thumbnail.jpg",
+          "preview_image": "https://eris-storage.s3.us-east-2.amazonaws.com/production/bermuda_7f932915-cbb9-413f-b5f5-1e9fce5357ec-outfit-thumbnail.jpg",
+          "status": "PROCESSED",
+          "selling_price": 0,
+          "name": "Bermuda Chino NS - Khaki",
+          "list_price": 598,
+          "identifier": "2674",
+          "parent_identifier": "2674",
+          "url": "https://www.zapalla.com.br/bermuda-chino-ns-inv21khaki-14270002-073/p",
+          "active": true,
+          "category": {
+            "name": "bermuda"
+          }
+        },
+        {
+          "thumbnail": "https://eris-storage.s3.us-east-2.amazonaws.com/production/pant_d42d23fc-bf7d-4937-8b59-b13473b98abe-outfit-thumbnail.jpg",
+          "preview_image": "https://eris-storage.s3.us-east-2.amazonaws.com/production/pant_d42d23fc-bf7d-4937-8b59-b13473b98abe-outfit-thumbnail.jpg",
+          "status": "PROCESSED",
+          "selling_price": 0,
+          "name": "Camisa 100% Linho Tinturada C/ Bolso-Tiramissu",
+          "list_price": 569,
+          "identifier": "3286",
+          "parent_identifier": "3286",
+          "url": "https://www.zapalla.com.br/camisa-100-linho-tinturada-c--bolsotiramissu-06290021-416/p",
+          "active": true,
+          "category": {
+            "name": "bermuda"
+          }
+        }
+      ]
+    }
+  }

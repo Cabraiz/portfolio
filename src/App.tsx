@@ -24,6 +24,8 @@ import LoginHubLocal from "./pages/LoginHubLocal/login";
 import Hublocal from "./pages/Hublocal/Hublocal";
 import Surprise from "./pages/Surprise/Surprise";
 import Resume from "./pages/Resume/Resume";
+import Doris from "./pages/Doris.mobi/principal";
+
 
 import { PrivateOutlet } from "./redux/shared/utils/PrivateOutlet";
 
@@ -162,7 +164,8 @@ function App() {
     pathname === "/hublocal" ||
     pathname === "/loginhublocal" ||
     pathname === "/registerhublocal" ||
-    pathname === "/resume";
+    pathname === "/resume" ||
+    pathname === "/doris";
 
   const handleLinkClick =
     (link: string) =>
@@ -262,7 +265,7 @@ function App() {
         <Route path="/loginhublocal" element={<LoginHubLocal />} />
         <Route path="/surprise" element={<Surprise />} />
         <Route path="/resume" element={<Resume />} />
-        <Route path="/doris" element={<Resume />} />
+        <Route path="/doris" element={<Doris />} />
 
         <Route path="/hublocal" element={<PrivateOutlet />}>
           {/* protected routes */}
