@@ -262,6 +262,7 @@ function App() {
         <Route path="/loginhublocal" element={<LoginHubLocal />} />
         <Route path="/surprise" element={<Surprise />} />
         <Route path="/resume" element={<Resume />} />
+        <Route path="/doris" element={<Resume />} />
 
         <Route path="/hublocal" element={<PrivateOutlet />}>
           {/* protected routes */}
