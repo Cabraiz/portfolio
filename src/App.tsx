@@ -23,6 +23,7 @@ import RegisterHubLocal from "./pages/RegisterHubLocal/Register";
 import LoginHubLocal from "./pages/LoginHubLocal/login";
 import Hublocal from "./pages/Hublocal/Hublocal";
 import Surprise from "./pages/Surprise/Surprise";
+import Resume from "./pages/Resume/Resume";
 
 import { PrivateOutlet } from "./redux/shared/utils/PrivateOutlet";
 
@@ -160,7 +161,8 @@ function App() {
   const isNavOn =
     pathname === "/hublocal" ||
     pathname === "/loginhublocal" ||
-    pathname === "/registerhublocal";
+    pathname === "/registerhublocal" ||
+    pathname === "/resume";
 
   const handleLinkClick =
     (link: string) =>
@@ -259,13 +261,14 @@ function App() {
         <Route path="/registerhublocal" element={<RegisterHubLocal />} />
         <Route path="/loginhublocal" element={<LoginHubLocal />} />
         <Route path="/surprise" element={<Surprise />} />
+        <Route path="/resume" element={<Resume />} />
 
         <Route path="/hublocal" element={<PrivateOutlet />}>
           {/* protected routes */}
           <Route index element={<Hublocal />} />
         </Route>
       </Routes>
-      {!isMobile ? (
+      {!isNavOn && !isMobile ? (
         <div
           style={{
             position: "fixed",

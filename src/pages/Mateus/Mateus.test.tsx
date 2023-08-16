@@ -7,15 +7,13 @@ import {
   fireEvent,
 } from "@testing-library/react";
 import Mateus, { capitalizeFirstLetter, getSocialMediaName } from "./Mateus";
-import { default as axe, Result } from "axe-core";
-import { isMobile } from "react-device-detect";
 
 jest.mock("react-device-detect", () => ({
   ...jest.requireActual("react-device-detect"),
   isMobile: true,
 }));
 
-jest.useFakeTimers();
+jest.useFakeTimers(); 
 
 describe("Mateus", () => {
   test("should display correct title", async () => {

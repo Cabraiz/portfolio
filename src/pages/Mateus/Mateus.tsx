@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Link } from 'react-router-dom';
 import { Col, Row, Image, Button } from "react-bootstrap";
 import { isMobile } from "react-device-detect";
 
@@ -8,8 +9,6 @@ import IconGmail from "../../assets/Mateus/IconGmail.png";
 import IconInsta from "../../assets/Mateus/IconInsta.png";
 import IconLinkendin from "../../assets/Mateus/IconLinkedIn.png";
 import IconTiktok from "../../assets/Mateus/IconTiktok.png";
-
-import MateusPDF from "./Mateus_Resume.pdf";
 
 interface SocialButtonProps {
   href: string;
@@ -45,6 +44,10 @@ function Mateus() {
   const gradient = isMobile
     ? "linear-gradient(90deg,#f1c40f 0%,#f1c40f 71.5%,#9b59b6 71.5%, #9b59b6 100%)"
     : "linear-gradient(90deg,#f1c40f 100%, #f1c40f 100%)";
+
+  const openResumeTab = () => {
+    window.open('/resume', '_blank');
+  };
 
   return (
     <Row data-testid="mateus-container" className="p-0 m-0">
@@ -100,10 +103,8 @@ function Mateus() {
             <Col className="col-sm-6 col-md-7 m-0 text-nowrap ps-0 ps-3">
               <Button
                 className="btn-trasn-w-border py-3 btn-tran-effect btn-press-effect"
-                href={MateusPDF}
-                target="_blank"
-                rel="noreferrer"
                 style={{ minWidth: "200px" }}
+                onClick={openResumeTab}
               >
                 DOWNLOAD CV
               </Button>
