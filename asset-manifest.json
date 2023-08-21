@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/static/css/main.b3d70687.css",
-    "main.js": "/static/js/main.5cd3353d.js",
+    "main.js": "/static/js/main.fb8a00aa.js",
     "static/js/496.216cd1be.chunk.js": "/static/js/496.216cd1be.chunk.js",
     "static/media/Login_Image.webp": "/static/media/Login_Image.7bfd0e326bcc786e4632.webp",
     "static/media/Mateus_Resume.pdf": "/static/media/Mateus_Resume.b9a256516d3918e6c018.pdf",
@@ -12,6 +12,7 @@
     "static/media/perfil.webp": "/static/media/perfil.ce9bc504cd449b07a429.webp",
     "static/media/Done_6.png": "/static/media/Done_6.b395bbc9592b1fa9b500.png",
     "static/media/icognitaDone.png": "/static/media/icognitaDone.5bf75b23f399c51ca38d.png",
+    "static/media/Montserrat-Bold.ttf": "/static/media/Montserrat-Bold.2c155811b35513d5beaa.ttf",
     "static/media/Poppins-Regular.ttf": "/static/media/Poppins-Regular.35d26b781dc5fda684cc.ttf",
     "static/media/Done_3.png": "/static/media/Done_3.d03f5810f30411ef7266.png",
     "static/media/Poppins-Medium.ttf": "/static/media/Poppins-Medium.673ed42382ab264e0bf5.ttf",
@@ -32,11 +33,11 @@
     "index.html": "/index.html",
     "static/media/7.svg": "/static/media/7.a45b46e964c34094185e40d691917f1b.svg",
     "main.b3d70687.css.map": "/static/css/main.b3d70687.css.map",
-    "main.5cd3353d.js.map": "/static/js/main.5cd3353d.js.map",
+    "main.fb8a00aa.js.map": "/static/js/main.fb8a00aa.js.map",
     "496.216cd1be.chunk.js.map": "/static/js/496.216cd1be.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.b3d70687.css",
-    "static/js/main.5cd3353d.js"
+    "static/js/main.fb8a00aa.js"
   ]
 }
