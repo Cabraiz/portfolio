@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/static/css/main.b3d70687.css",
-    "main.js": "/static/js/main.11f13bd6.js",
+    "main.js": "/static/js/main.e952d81a.js",
     "static/js/496.216cd1be.chunk.js": "/static/js/496.216cd1be.chunk.js",
     "static/media/Login_Image.webp": "/static/media/Login_Image.7bfd0e326bcc786e4632.webp",
     "static/media/Mateus_Resume.pdf": "/static/media/Mateus_Resume.b9a256516d3918e6c018.pdf",
@@ -34,11 +34,11 @@
     "index.html": "/index.html",
     "static/media/7.svg": "/static/media/7.a45b46e964c34094185e40d691917f1b.svg",
     "main.b3d70687.css.map": "/static/css/main.b3d70687.css.map",
-    "main.11f13bd6.js.map": "/static/js/main.11f13bd6.js.map",
+    "main.e952d81a.js.map": "/static/js/main.e952d81a.js.map",
     "496.216cd1be.chunk.js.map": "/static/js/496.216cd1be.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.b3d70687.css",
-    "static/js/main.11f13bd6.js"
+    "static/js/main.e952d81a.js"
   ]
 }
