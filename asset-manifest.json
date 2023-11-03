@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/static/css/main.7c0ea1a5.css",
-    "main.js": "/static/js/main.1427c9b0.js",
+    "main.css": "/static/css/main.c992528c.css",
+    "main.js": "/static/js/main.30d1c4d9.js",
     "static/js/496.1631b0d2.chunk.js": "/static/js/496.1631b0d2.chunk.js",
     "static/media/Login_Image.webp": "/static/media/Login_Image.7bfd0e326bcc786e4632.webp",
     "static/media/Mateus_Resume.pdf": "/static/media/Mateus_Resume.b9a256516d3918e6c018.pdf",
@@ -18,6 +18,7 @@
     "static/media/Done_3.png": "/static/media/Done_3.d03f5810f30411ef7266.png",
     "static/media/Poppins-Medium.ttf": "/static/media/Poppins-Medium.673ed42382ab264e0bf5.ttf",
     "static/media/Poppins-Bold.ttf": "/static/media/Poppins-Bold.cdb29a5d7ccf57ff05a3.ttf",
+    "static/media/DroidSans-Bold.ttf": "/static/media/DroidSans-Bold.b9749b951e5cd304f9e1.ttf",
     "static/media/IconGmail.png": "/static/media/IconGmail.c486455f1124bd99423a.png",
     "static/media/TanseekModernProArabicBook.ttf": "/static/media/TanseekModernProArabicBook.1722983b121862945e93.ttf",
     "static/media/Brutal-Type-Medium.ttf": "/static/media/Brutal-Type-Medium.c9565f55635b259358c3.ttf",
@@ -30,15 +31,15 @@
     "static/media/IconInsta.png": "/static/media/IconInsta.d67d6208638407d8db10.png",
     "static/media/IconTiktok.png": "/static/media/IconTiktok.48a67b6acca4d7532fcc.png",
     "static/media/IconLinkedIn.png": "/static/media/IconLinkedIn.a5b21c7347ec31d79da6.png",
-    "static/media/Blooming Elegant Sans.otf": "/static/media/Blooming Elegant Sans.446d389bc3eaeca0b837.otf",
+    "static/media/BloomingElegantSans.otf": "/static/media/BloomingElegantSans.446d389bc3eaeca0b837.otf",
     "static/media/Icognita.png": "/static/media/Icognita.ed95410fce0a38014340.png",
     "index.html": "/index.html",
-    "main.7c0ea1a5.css.map": "/static/css/main.7c0ea1a5.css.map",
-    "main.1427c9b0.js.map": "/static/js/main.1427c9b0.js.map",
+    "main.c992528c.css.map": "/static/css/main.c992528c.css.map",
+    "main.30d1c4d9.js.map": "/static/js/main.30d1c4d9.js.map",
     "496.1631b0d2.chunk.js.map": "/static/js/496.1631b0d2.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.7c0ea1a5.css",
-    "static/js/main.1427c9b0.js"
+    "static/css/main.c992528c.css",
+    "static/js/main.30d1c4d9.js"
   ]
 }
