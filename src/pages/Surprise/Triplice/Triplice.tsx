@@ -1,33 +1,16 @@
-import React, { Component } from "react";
-import { isMobile } from "react-device-detect";
-import ScratchCard from "react-scratchcard-v2";
+import React, { useEffect, useRef } from "react";
+import { ScratchCard, SCRATCH_TYPE } from "scratchcard-js";
 
 import icognita from "../../../assets/Surprise/Icognita.png";
 import icognitaBlock from "../../../assets/Surprise/IcognitaBlock.png";
 import icognitaDone from "../../../assets/Surprise/icognitaDone.png";
 import circle from "../../../assets/Surprise/circle.png";
 
-import "animate.css";
-
-const convertVhToPx = (vh: number) => {
-  const oneVhInPx = window.innerHeight / 100;
-  return oneVhInPx * vh;
-};
-
-const convertVwToPx = (vw: number, a: number) => {
-  const oneVhInPx = window.innerWidth / 100;
-  let temp = oneVhInPx * vw;
-  if (!isMobile) {
-    temp = temp / 3.6;
-  }
-  if (temp < 140) {
-    temp = 140;
-  }
-  return Math.ceil(temp);
-};
+const convertVhToPx = (vh: number) => window.innerHeight / 100 * vh;
+const convertVwToPx = (vw: number) => window.innerWidth / 100 * vw;
 
 const cardCustomStyle = {
-  image: circle,
+  brushSrc: circle,
   width: 15,
   height: 15,
 };
@@ -39,49 +22,46 @@ const percRasp = 20;
 type ContainerProps = {
   children: React.ReactNode;
   onComplete?: () => void;
+  imageSrc: string;
 };
 
-export const Block = (props: ContainerProps) => {
-  return (
-    <ScratchCard
-      width={convertVwToPx(vw, 0)}
-      height={convertVhToPx(vh)}
-      image={icognitaBlock}
-      finishPercent={percRasp}
-      customBrush={cardCustomStyle}
-      onComplete={props.onComplete}
-    >
-      {props.children}
-    </ScratchCard>
-  );
+const ScratchCardComponent = ({ imageSrc, onComplete }: ContainerProps) => {
+  const scratchRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (scratchRef.current) {
+      const sc = new ScratchCard("#scratch-card", {
+        scratchType: SCRATCH_TYPE.CIRCLE,
+        containerWidth: convertVwToPx(vw),
+        containerHeight: convertVhToPx(vh),
+        imageForwardSrc: imageSrc,
+        htmlBackground: "",
+        percentToFinish: percRasp,
+        brushSrc: cardCustomStyle.brushSrc,
+      });
+
+      sc.canvas.addEventListener("scratch.move", () => {
+        if (sc.getPercent() >= percRasp && onComplete) {
+          onComplete();
+        }
+      });
+
+      sc.init();
+    }
+  }, [imageSrc, onComplete]);
+
+  return <div id="scratch-card" ref={scratchRef}></div>;
 };
 
-export const Done = (props: ContainerProps) => {
-  return (
-    <ScratchCard
-      width={convertVwToPx(vw, 0)}
-      height={convertVhToPx(vh)}
-      image={icognitaDone}
-      finishPercent={percRasp}
-      customBrush={cardCustomStyle}
-      onComplete={props.onComplete}
-    >
-      {props.children}
-    </ScratchCard>
-  );
-};
+export const Block = (props: Omit<ContainerProps, "imageSrc">) => (
+  <ScratchCardComponent imageSrc={icognitaBlock} {...props} />
+);
 
-export const Default = (props: ContainerProps) => {
-  return (
-    <ScratchCard
-      width={convertVwToPx(vw, 0)}
-      height={convertVhToPx(vh)}
-      image={icognita}
-      finishPercent={percRasp}
-      customBrush={cardCustomStyle}
-      onComplete={props.onComplete}
-    >
-      {props.children}
-    </ScratchCard>
-  );
-};
+export const Done = (props: Omit<ContainerProps, "imageSrc">) => (
+  <ScratchCardComponent imageSrc={icognitaDone} {...props} />
+);
+
+export const Default = (props: Omit<ContainerProps, "imageSrc">) => (
+  <ScratchCardComponent imageSrc={icognita} {...props} />
+);
+

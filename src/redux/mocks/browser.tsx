@@ -1,6 +1,5 @@
-// src/mocks/browser.js
-import { setupWorker } from "msw";
-import { handlers } from "./handlers";
+import { setupWorker } from 'msw/browser';
+import { handlers } from './handlers';
 
-// This configures a Service Worker with the given request handlers.
+// Isso configura um Service Worker com os manipuladores de requisição fornecidos.
 export const worker = setupWorker(...handlers);

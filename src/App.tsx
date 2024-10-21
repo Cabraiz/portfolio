@@ -2,9 +2,9 @@
 import React, { useEffect, useState } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
-import { db, auth, provider } from "./Firebase/firebase_";
-import { doc, setDoc, getDoc } from "firebase/firestore";
-import { onAuthStateChanged, signInWithPopup, signInWithRedirect, signOut } from "firebase/auth";
+//import { db, auth, provider } from "./Firebase/firebase_";
+//import { doc, setDoc, getDoc } from "firebase/firestore";
+//import { onAuthStateChanged, signInWithPopup, signInWithRedirect, signOut } from "firebase/auth";
 
 import "./App.css";
 import "./pages/LoginHubLocal/login.css";
@@ -36,8 +36,8 @@ import TitleWebsite from "./pages/PrincipalPage/TitleWebsite/title_website";
 
 import { isMobile } from "react-device-detect";
 
-const BUTTON_TEXT_SIGN_IN = "Sign In With Google";
-const BUTTON_TEXT_SIGN_OUT = "Sign Out";
+//const BUTTON_TEXT_SIGN_IN = "Sign In With Google";
+//const BUTTON_TEXT_SIGN_OUT = "Sign Out";
 
 function App() {
   const [windowSize, setWindowSize] = useState(getWindowSize());
@@ -46,13 +46,13 @@ function App() {
   const links = ["Home", "Portfolio", "Road Map", "Pricing","Live", "Contact"];
 
   useEffect(() => {
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setsignInStatus(["Sign Out", false]);
-      } else {
-        setsignInStatus(["Sign In With Google", true]);
-      }
-    });
+    //onAuthStateChanged(auth, (user) => {
+      //if (user) {
+      //  setsignInStatus(["Sign Out", false]);
+      //} else {
+      //  setsignInStatus(["Sign In With Google", true]);
+      //}
+   // });
 
     function handleWindowResize() {
       setWindowSize(getWindowSize());
@@ -69,7 +69,7 @@ function App() {
     return String(value);
   }
 
-  const addTodo = async () => {
+  /*const addTodo = async () => {
     const temp = getStringValue(auth.currentUser?.uid);
     const docRef = doc(db, temp, "bloqueados");
     const docSnap = await getDoc(docRef);
@@ -85,7 +85,7 @@ function App() {
         });
       }
     }
-  };
+  };*/
 
   function getWindowSize() {
     const { innerWidth, innerHeight } = window;
@@ -96,7 +96,7 @@ function App() {
     return (windowSize.innerWidth / 100) * 14;
   };
 
-  const SignFirebase = async () => {
+  /*const SignFirebase = async () => {
     if (!signInStatus[1]) {
       signOut(auth)
         .then(() => {
@@ -131,7 +131,7 @@ function App() {
       const errorMessage = e.message;
       const email = e.customData.email;
     }
-  };
+  };*/
 
   const createButton = (buttonNumber: number, selected: boolean) => (
     <Button
@@ -238,7 +238,7 @@ function App() {
                   fontWeight: "500",
                   borderColor: "white",
                 }}
-                onClick={SignFirebase}
+                //onClick={SignFirebase}
               >
                 <Row className="m-0 ps-0 pe-0" style={{ alignItems: "center" }}>
                   <Image

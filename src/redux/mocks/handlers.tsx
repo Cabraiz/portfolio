@@ -1,10 +1,10 @@
-import { rest } from "msw";
+import { http } from 'msw';
 import { nanoid } from "@reduxjs/toolkit";
 
 const token = nanoid();
 
 export const handlers = [
-  rest.get("/protected", (req, res, ctx) => {
+  http.get("/protected", (req, res, ctx) => {
     const headers = req.headers.all();
     if (headers.authorization !== `Bearer ${token}`) {
       return res(
@@ -20,7 +20,7 @@ export const handlers = [
       }),
     );
   }),
-  rest.post("/loginhublocal", (req, res, ctx) => {
+  http.post("/loginhublocal", (req, res, ctx) => {
     return res(
       ctx.delay(400),
       ctx.json({

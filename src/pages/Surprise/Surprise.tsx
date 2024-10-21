@@ -13,7 +13,7 @@ import Done_4 from "../../assets/Surprise/Done_4.png";
 import Done_5 from "../../assets/Surprise/Done_5.png";
 import Done_6 from "../../assets/Surprise/Done_6.png";
 
-import { auth, db } from "../../Firebase/firebase_";
+//import { auth, db } from "../../Firebase/firebase_";
 import { getDoc, setDoc, doc } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import "animate.css";
@@ -25,6 +25,7 @@ import { Done, Default, Block } from "./Triplice/Triplice";
 let load = false;
 
 function Surprise() {
+  /*
   const startHorarios = [15, 16, 18, 18, 20, 23];
   const [finalizados, setFinalizados] = useState<any>([]);
   let finalizadosBool: any[] = [];
@@ -336,6 +337,7 @@ function Surprise() {
       </Modal>
     </>
   );
+  */
 }
 
 export default Surprise;
