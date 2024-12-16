@@ -67,7 +67,7 @@ function Mateus() {
             minWidth: "400px",
           }}
         >
-          Full Stack <br />
+          Fulla Stack <br />
           <div className="text-nowrap">
             Develope<span className="font-dot-space">r</span>
             <span className="font-dot font-dot-space">.</span>

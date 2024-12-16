@@ -17,7 +17,7 @@ const MainApp: React.FC = () => {
         <ChakraProvider>
           <BrowserRouter>
             <Suspense fallback={<div>Loading...</div>}>
-              <App />d
+              <App />
             </Suspense>
           </BrowserRouter>
         </ChakraProvider>
