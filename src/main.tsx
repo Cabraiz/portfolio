@@ -7,7 +7,6 @@ import { Provider } from "react-redux";
 import { store } from "./redux/app/store";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./index.css";
-import { worker } from "./redux/mocks/browser";
 
 // Componente principal encapsulando toda a aplicação
 const MainApp: React.FC = () => {
@@ -29,10 +28,7 @@ const MainApp: React.FC = () => {
 // Inicializando a aplicação no elemento root
 const rootElement = document.getElementById("root");
 if (rootElement) {
-  // Inicializando o Mock Service Worker e, em seguida, montando a aplicação
-  worker.start({ onUnhandledRequest: "bypass" }).then(() => {
-    ReactDOM.createRoot(rootElement).render(<MainApp />);
-  });
+  ReactDOM.createRoot(rootElement).render(<MainApp />);
 } else {
   console.error("Elemento root não encontrado");
 }

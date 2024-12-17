@@ -1,20 +1,15 @@
-import { Metric } from "web-vitals";
+import { onCLS, onFID, onFCP, onLCP, onTTFB, Metric } from "web-vitals";
 import { useEffect } from "react";
 
 export const useReportWebVitals = (onPerfEntry?: (metric: Metric) => void) => {
   useEffect(() => {
-    if (onPerfEntry && typeof window !== "undefined") {
-      import("web-vitals")
-        .then(({ getCLS, getFID, getFCP, getLCP, getTTFB }) => {
-          getCLS(onPerfEntry);
-          getFID(onPerfEntry);
-          getFCP(onPerfEntry);
-          getLCP(onPerfEntry);
-          getTTFB(onPerfEntry);
-        })
-        .catch((err) => {
-          console.error("Failed to load web-vitals", err);
-        });
+    if (onPerfEntry) {
+      // Chamar as métricas diretamente
+      onCLS(onPerfEntry);
+      onFID(onPerfEntry);
+      onFCP(onPerfEntry);
+      onLCP(onPerfEntry);
+      onTTFB(onPerfEntry);
     }
   }, [onPerfEntry]);
 };

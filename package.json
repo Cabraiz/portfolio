@@ -29,12 +29,10 @@
     "eslint": "9.13.0",
     "firebase": "^10.14.1",
     "framer-motion": "^11.11.9",
-    "gh-pages": "^6.0.0",
     "glob-parent": "^6.0.2",
     "hermes-engine": "^0.11.0",
     "init": "^0.1.2",
     "lozad": "^1.16.0",
-    "msw": "^2.4.11",
     "node-fetch": "^3.3.2",
     "nth-check": "^2.1.1",
     "protobufjs": "^7.2.4",
@@ -58,7 +56,6 @@
     "ts-loader": "^9.4.2",
     "uuid": "^10.0.0",
     "vite": "^5.4.9",
-    "web-vitals": "^4.2.3",
     "workbox-core": "^7.0.0"
   },
   "scripts": {
@@ -66,8 +63,8 @@
     "build": "tsc && vite build",
     "build:ci": "tsc && vite build && cp 404.html dist/",
     "serve": "vite preview",
-    "update": "yarn upgrade && yarn outdated",
-    "deploy": "yarn build && gh-pages -d dist",
+    "update": "npm update && npm outdated",
+    "deploy": "npm run build && gh-pages -d dist",
     "lint": "tsc && eslint \"src/**/*.{js,ts,tsx}\" --quiet --fix",
     "pre-commit": "npx lint-staged -d",
     "pretty": "prettier --write \"./**/*.{js,jsx,ts,tsx,json}\"",
@@ -94,8 +91,11 @@
     "@types/react-dom": "^18.3.1",
     "@types/redux-logger": "^3.0.13",
     "@vitejs/plugin-react-swc": "^3.7.1",
+    "gh-pages": "^6.2.0",
+    "msw": "^2.6.8",
     "vite-tsconfig-paths": "^5.0.1",
     "vitest": "^2.1.3",
+    "web-vitals": "^4.2.4",
     "webpack": "^5.0.0"
   },
   "lint-staged": {
@@ -109,7 +109,9 @@
     "protobufjs": ">=7.2.4"
   },
   "msw": {
-    "workerDirectory": "public"
+    "workerDirectory": [
+      "public"
+    ]
   },
   "engines": {
     "node": ">=23.0.0"

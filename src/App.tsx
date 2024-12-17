@@ -25,6 +25,7 @@ import Hublocal from "./pages/Hublocal/Hublocal";
 import Surprise from "./pages/Surprise/Surprise";
 import Resume from "./pages/Resume/Resume";
 import Doris from "./pages/Doris.mobi/principal";
+import CasaNova from "./pages/CasaNova/CasaNova";
 
 
 import { PrivateOutlet } from "./redux/shared/utils/PrivateOutlet";
@@ -41,7 +42,7 @@ import { isMobile } from "react-device-detect";
 
 function App() {
   const [windowSize, setWindowSize] = useState(getWindowSize());
-  const [signInStatus, setsignInStatus] = useState(["", false]);
+  const [signInStatus] = useState(["", false]);
   const [selectedLink, setSelectedLink] = useState("Home");
   const links = ["Home", "Portfolio", "Road Map", "Pricing","Live", "Contact"];
 
@@ -165,7 +166,8 @@ function App() {
     pathname === "/loginhublocal" ||
     pathname === "/registerhublocal" ||
     pathname === "/resume" ||
-    pathname === "/doris";
+    pathname === "/doris" ||
+    pathname === "/casanova";
 
   const handleLinkClick =
     (link: string) =>
@@ -263,9 +265,10 @@ function App() {
         {/* public routes */}
         <Route path="/registerhublocal" element={<RegisterHubLocal />} />
         <Route path="/loginhublocal" element={<LoginHubLocal />} />
-        <Route path="/surprise" element={<Surprise />} />
+        {/* <Route path="/surprise" element={<Surprise />} /> */}
         <Route path="/resume" element={<Resume />} />
         <Route path="/doris" element={<Doris />} />
+        <Route path="/casanova" element={<CasaNova />} />
 
         <Route path="/hublocal" element={<PrivateOutlet />}>
           {/* protected routes */}
