@@ -40,3 +40,51 @@
   letter-spacing: 1.2px;
   line-height: 140%;
 }
+
+/* Fundo divertido para a página */
+body {
+  background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+  font-family: 'Arial', sans-serif;
+  color: #333;
+}
+
+.container {
+  background: rgba(255, 255, 255, 0.9);
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* Centralizar o conteúdo do modal */
+.modal-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Estilo para o QR Code */
+.modal-body svg {
+  margin: 20px 0;
+  border: 5px dashed #fda085;
+  border-radius: 15px;
+  padding: 10px;
+  background: white;
+}
+
+/* Fundo divertido específico para a página casanova */
+body.casanova-page {
+  background: radial-gradient(circle, #ffd1dc 20%, #ffe4b3 80%);
+}
+
+/* Botões no modal */
+.modal-footer .btn {
+  background-color: #fda085;
+  border: none;
+  color: white;
+  transition: background-color 0.3s ease;
+}
+
+.modal-footer .btn:hover {
+  background-color: #f6d365;
+}
