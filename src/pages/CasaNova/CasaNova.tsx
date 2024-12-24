@@ -10,6 +10,7 @@ interface Item {
   price: number;
   img: string;
   purchased: boolean;
+  quantity: number;
 }
 
 const NewHomeGiftPage: React.FC = () => {
@@ -84,6 +85,7 @@ const NewHomeGiftPage: React.FC = () => {
             price: parseFloat(item.preco),
             img: processedImg,
             purchased: !!item.nome_pessoa,
+            quantity: parseInt(item.quantidade, 10), // Adiciona a quantidade
           };
         })
       );
@@ -188,35 +190,45 @@ const NewHomeGiftPage: React.FC = () => {
       ) : (
         <div className="container mt-4 casanova-page">
           <div className="row gy-3">
-            {items.map((item) => (
-              <div key={item.id} className="col">
-                <div
-                  className={`card h-100 shadow-sm ${
-                    item.purchased ? 'border-success' : 'border-primary'
-                  }`}
-                >
-                  <img
-                    src={item.img}
-                    alt={item.name}
-                    className="card-img-top"
-                    style={{ objectFit: 'contain', height: '150px' }}
-                  />
-                  <div className="card-body text-center">
-                    <h5 className="card-title">{item.name}</h5>
-                    <p className="card-text">R$ {item.price.toFixed(2).replace('.', ',')}</p>
-                    <button
-                      className={`btn w-100 ${
-                        item.purchased ? 'btn-success' : 'btn-primary'
-                      }`}
-                      onClick={() => handleShowPayment(item)}
-                    >
-                      {item.purchased ? 'Comprado ✔️' : 'Pagar'}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+  {items.map((item) => (
+    <div key={item.id} className="col">
+      <div
+        className={`card h-100 shadow-sm position-relative ${
+          item.purchased ? 'border-success' : 'border-primary'
+        }`}
+      >
+        {/* Indicador Circular */}
+        <div className="progress-circle">
+          <span className="progress-text">
+            {item.quantity - (item.purchased ? 1 : 0)}/{item.quantity}
+          </span>
+        </div>
+
+        {/* Imagem do item */}
+        <img
+          src={item.img}
+          alt={item.name}
+          className="card-img-top"
+          style={{ objectFit: 'contain', height: '150px' }}
+        />
+
+        <div className="card-body text-center">
+          <h5 className="card-title">{item.name}</h5>
+          <p className="card-text">R$ {item.price.toFixed(2).replace('.', ',')}</p>
+          <button
+            className={`btn w-100 ${
+              item.purchased ? 'btn-success' : 'btn-primary'
+            }`}
+            onClick={() => handleShowPayment(item)}
+          >
+            {item.purchased ? 'Comprado ✔️' : 'Pagar'}
+          </button>
+        </div>
+      </div>
+    </div>
+  ))}
+</div>
+
   
           {/* Botões de navegação */}
           <button
