@@ -157,3 +157,39 @@ body.casanova-page {
 .modal-footer .btn:hover {
   background-color: #f6d365;
 }
+
+.navigation-arrow {
+  position: fixed;
+  top: 50%; /* Centraliza verticalmente */
+  transform: translateY(-50%); /* Ajusta para alinhar ao centro */
+  width: 10%; /* Largura de 10% da tela */
+  height: 50%; /* Altura de 50% da tela */
+  background-color: rgba(0, 0, 255, 0.7); /* Fundo semi-transparente (exemplo) */
+  border: none;
+  outline: none;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000; /* Para garantir que fiquem acima de outros elementos */
+  color: white; /* Cor do ícone */
+  font-size: 2rem; /* Tamanho do ícone */
+  border-radius: 0 5px 5px 0; /* Apenas para botões arredondados */
+}
+
+.navigation-arrow.left {
+  left: 0; /* Fixa ao lado esquerdo */
+  border-radius: 0 5px 5px 0; /* Arredondamento à direita */
+}
+
+.navigation-arrow.right {
+  right: 0; /* Fixa ao lado direito */
+  border-radius: 5px 0 0 5px; /* Arredondamento à esquerda */
+}
+
+.navigation-arrow.disabled {
+  background-color: rgba(0, 0, 255, 0.3); /* Fundo mais claro para indicar desativado */
+  cursor: not-allowed;
+  pointer-events: none; /* Evita cliques */
+}
+

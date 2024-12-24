@@ -187,7 +187,6 @@ const NewHomeGiftPage: React.FC = () => {
         <div className="error-container">Erro: {error}</div>
       ) : (
         <div className="container mt-4 casanova-page">
-          <h1 className="text-center mb-4">Chá de Casa Nova 🎉</h1>
           <div className="row gy-3">
             {items.map((item) => (
               <div key={item.id} className="col">
@@ -218,26 +217,27 @@ const NewHomeGiftPage: React.FC = () => {
               </div>
             ))}
           </div>
-          <div className="d-flex justify-content-between align-items-center mt-4">
-            <button
-              className="btn btn-lg btn-primary"
-              onClick={() => handlePageChange('prev')}
-              disabled={currentPage === 0}
-            >
-              ◀
-            </button>
-            <span>Página {currentPage + 1}</span>
-            <button
-              className="btn btn-lg btn-primary"
-              onClick={() => handlePageChange('next')}
-              disabled={items.length < itemsPerPage}
-            >
-              ▶
-            </button>
-          </div>
+  
+          {/* Botões de navegação */}
+          <button
+            className={`navigation-arrow left ${currentPage === 0 ? 'disabled' : ''}`}
+            onClick={() => handlePageChange('prev')}
+            disabled={currentPage === 0}
+          >
+            ◀
+          </button>
+          <button
+            className={`navigation-arrow right ${
+              items.length < itemsPerPage ? 'disabled' : ''
+            }`}
+            onClick={() => handlePageChange('next')}
+            disabled={items.length < itemsPerPage}
+          >
+            ▶
+          </button>
         </div>
       )}
-
+  
       {/* Modal */}
       <Modal show={showModal} onHide={handleCloseModal} centered>
         <Modal.Header closeButton>
@@ -266,6 +266,7 @@ const NewHomeGiftPage: React.FC = () => {
       </Modal>
     </div>
   );
+  
 };
 
 export default NewHomeGiftPage;
