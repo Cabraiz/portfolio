@@ -81,7 +81,7 @@ body {
 }
 
 .casanova-page {
-  background: rgba(255, 255, 255, 0.9) !important;
+  background: rgba(255, 255, 255) !important;
   padding: 20px !important;
   border-radius: 15px !important;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2) !important;
@@ -92,7 +92,7 @@ body {
   flex-direction: column !important;
   justify-content: space-between !important;
   align-items: center !important;
-  background: rgba(255, 255, 255, 0.9) !important;
+  background: rgba(255, 255, 255) !important;
   padding: 20px !important;
   border-radius: 15px !important;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2) !important;
@@ -117,7 +117,11 @@ body {
 .card img {
   max-height: 200px !important;
   object-fit: contain !important;
+  padding: 10px !important; /* Adicionado padding */
+  background-color: #f8f8f8; /* Opcional: Adiciona um fundo para destacar */
+  border-radius: 5px !important; /* Para manter consistência no design */
 }
+
 
 
 /* Centralizar o conteúdo do modal */

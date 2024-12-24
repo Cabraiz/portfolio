@@ -71,13 +71,23 @@ const NewHomeGiftPage: React.FC = () => {
         throw new Error('Erro ao carregar os itens.');
       }
       const data: any[] = await response.json();
-      const transformedItems: Item[] = data.map((item) => ({
-        id: item.id,
-        name: item.item_nome,
-        price: parseFloat(item.preco),
-        img: item.imagem || 'https://via.placeholder.com/150',
-        purchased: !!item.nome_pessoa,
-      }));
+  
+      const transformedItems: Item[] = await Promise.all(
+        data.map(async (item) => {
+          const img = new Image();
+          img.src = item.imagem || 'https://via.placeholder.com/150';
+          await new Promise((resolve) => (img.onload = resolve));
+          const processedImg = await makeWhiteTransparent(img);
+          return {
+            id: item.id,
+            name: item.item_nome,
+            price: parseFloat(item.preco),
+            img: processedImg,
+            purchased: !!item.nome_pessoa,
+          };
+        })
+      );
+  
       setItems(transformedItems);
     } catch (err: any) {
       setError(err.message || 'Erro desconhecido.');
@@ -85,6 +95,7 @@ const NewHomeGiftPage: React.FC = () => {
       setLoading(false);
     }
   };
+  
 
   useEffect(() => {
     fetchItems(currentPage);
@@ -116,6 +127,47 @@ const NewHomeGiftPage: React.FC = () => {
       setCurrentPage((prev) => prev - 1);
     }
   };
+
+  const makeWhiteTransparent = (img: HTMLImageElement): Promise<string> => {
+    return new Promise((resolve) => {
+      const canvas = document.createElement('canvas');
+      const context = canvas.getContext('2d');
+  
+      if (!context) {
+        resolve(img.src);
+        return;
+      }
+  
+      // Ajusta o tamanho do canvas para o tamanho da imagem
+      canvas.width = img.width;
+      canvas.height = img.height;
+  
+      // Desenha a imagem no canvas
+      context.drawImage(img, 0, 0);
+  
+      // Obtém os dados de pixels
+      const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+      const data = imageData.data;
+  
+      // Substitui o branco (255, 255, 255) por transparência
+      for (let i = 0; i < data.length; i += 4) {
+        const r = data[i];
+        const g = data[i + 1];
+        const b = data[i + 2];
+  
+        if (r === 255 && g === 255 && b === 255) {
+          data[i + 3] = 0; // Define alpha para 0 (transparente)
+        }
+      }
+  
+      // Atualiza os dados do canvas
+      context.putImageData(imageData, 0, 0);
+  
+      // Retorna a imagem processada como uma URL de dados
+      resolve(canvas.toDataURL());
+    });
+  };
+  
 
   return (
     <div className="loading-container">
