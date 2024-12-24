@@ -1,11 +1,90 @@
 body {
-  display: flex !important;
-  justify-content: center !important;
-  align-items: center !important;
-  height: 100vh !important;
-  width: 100vw !important;
   margin: 0 !important;
+  font-family: 'Roboto', sans-serif !important;
   background: linear-gradient(135deg, #f6d365 0%, #fda085 100%) !important;
+  height: 100vh !important;
+  overflow-x: hidden !important;
+}
+
+.loading-container {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  height: 100vh !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+.loading-wrapper {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 20px !important;
+  justify-content: center !important;
+  width: 100% !important;
+}
+
+.skeleton-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)) !important;
+  gap: 20px !important;
+  width: 100% !important;
+  padding: 20px !important;
+  box-sizing: border-box !important;
+}
+
+.skeleton-card {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+  padding: 20px !important;
+  background: linear-gradient(90deg, #ececec 25%, #f3f3f3 50%, #ececec 75%) !important;
+  background-size: 200% 100% !important;
+  animation: skeleton-loading 1.5s infinite !important;
+  border-radius: 10px !important;
+}
+
+.skeleton-img {
+  width: 100% !important;
+  height: 120px !important;
+  background: #ddd !important;
+  border-radius: 5px !important;
+}
+
+.skeleton-text {
+  width: 80% !important;
+  height: 20px !important;
+  background: #ddd !important;
+  margin: 10px 0 !important;
+  border-radius: 5px !important;
+}
+
+.skeleton-button {
+  width: 50% !important;
+  height: 30px !important;
+  background: #ddd !important;
+  border-radius: 5px !important;
+}
+
+.error-container {
+  color: red !important;
+  font-size: 1.5rem !important;
+  text-align: center !important;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.casanova-page {
+  background: rgba(255, 255, 255, 0.9) !important;
+  padding: 20px !important;
+  border-radius: 15px !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2) !important;
 }
 
 .container {
