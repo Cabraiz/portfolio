@@ -24,11 +24,16 @@ const NewHomeGiftPage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState<number>(0);
-  const [itemsPerPage] = useState<number>(4);
+  const [itemsPerPage] = useState<number>(6);
   const [showModal, setShowModal] = useState<boolean>(false);
   const [selectedItem, setSelectedItem] = useState<Item | null>(null);
   const [pixCode, setPixCode] = useState<string | null>(null);
   const [transitioning, setTransitioning] = useState<boolean>(false);
+
+  const sortByCheapest = () => {
+    const sortedItems = [...items].sort((a, b) => a.price - b.price);
+    setItems(sortedItems);
+  };
 
   const generatePixPayload = (
     amount: number,
@@ -255,6 +260,14 @@ const NewHomeGiftPage: React.FC = () => {
         <div className="error-container">Erro: {error}</div>
       ) : (
         <>
+          {/* Botão de Ordenação */}
+          <div className="sort-button-container">
+            <button className="luxury-button" onClick={sortByCheapest}>
+              ✨ Mostrar Mais Baratos ✨
+            </button>
+          </div>
+  
+          {/* Condicional para Mobile e Desktop */}
           {isMobile ? (
             // Modo Mobile: Swipeable Item com animações estilo TikTok
             <div {...swipeHandlers} className="mobile-swipe-container">
@@ -306,32 +319,45 @@ const NewHomeGiftPage: React.FC = () => {
             // Modo Desktop: Grid de Itens
             <div className="container mt-4 casanova-page">
               <div className="row gy-3">
-                {items.map((item) => (
-                  <div key={item.id} className="col">
-                    <div className="card h-100 shadow-sm">
-                      <img
-                        src={item.img}
-                        alt={item.name}
-                        className="card-img-top"
-                        style={{ objectFit: "contain", height: "150px" }}
-                      />
-                      <div className="card-body text-center">
-                        <h5 className="card-title">{item.name}</h5>
-                        <p className="card-text">
-                          R$ {item.price.toFixed(2).replace(".", ",")}
-                        </p>
-                        <button
-                          className={`btn ${
-                            item.purchased ? "btn-success" : "btn-primary"
-                          }`}
-                          onClick={() => handleShowPayment(item)}
-                        >
-                          {item.purchased ? "Comprado ✔️" : "Pagar"}
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
+              {items.map((item) => (
+  <div key={item.id} className="col">
+    <div
+      className={`card h-100 shadow-sm position-relative ${
+        item.purchased ? 'border-success' : 'border-primary'
+      }`}
+    >
+      {/* Indicador Circular de Quantidade */}
+      <div className="progress-circle">
+        <span className="progress-text">
+          {item.quantity - (item.purchased ? 1 : 0)}/{item.quantity}
+        </span>
+      </div>
+
+      {/* Imagem do item */}
+      <img
+        src={item.img}
+        alt={item.name}
+        className="card-img-top"
+        style={{ objectFit: 'contain', height: '150px' }}
+      />
+
+      {/* Corpo do card */}
+      <div className="card-body text-center">
+        <h5 className="card-title">{item.name}</h5>
+        <p className="card-text">R$ {item.price.toFixed(2).replace('.', ',')}</p>
+        <button
+          className={`btn w-100 ${
+            item.purchased ? 'btn-success' : 'btn-primary'
+          }`}
+          onClick={() => handleShowPayment(item)}
+        >
+          {item.purchased ? 'Comprado ✔️' : 'Pagar'}
+        </button>
+      </div>
+    </div>
+  </div>
+))}
+
               </div>
               {/* Botões de navegação */}
               <button

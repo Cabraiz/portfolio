@@ -273,3 +273,60 @@ body.casanova-page {
 .swipe-item.hidden {
   display: none;
 }
+
+/* Contêiner do botão */
+.sort-button-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+/* Botão luxuoso */
+.luxury-button {
+  background: linear-gradient(135deg, #ffd700, #ff8c00); /* Gradiente dourado */
+  color: white;
+  font-size: 1.2rem; /* Tamanho maior para destaque */
+  font-weight: bold;
+  padding: 15px 30px; /* Tamanho confortável */
+  border: none;
+  border-radius: 50px; /* Bordas arredondadas */
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3), inset 0 -3px 5px rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  transition: all 0.3s ease; /* Suaviza as transições */
+  position: relative;
+  overflow: hidden;
+}
+
+/* Efeito de hover */
+.luxury-button:hover {
+  background: linear-gradient(135deg, #ff8c00, #ffd700); /* Gradiente invertido */
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4), inset 0 -5px 10px rgba(255, 255, 255, 0.3);
+  transform: scale(1.05); /* Leve aumento */
+}
+
+/* Brilho animado */
+.luxury-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -75%;
+  width: 150%;
+  height: 100%;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.1), transparent);
+  transform: skewX(-30deg);
+  transition: all 0.3s ease;
+}
+
+.luxury-button:hover::before {
+  left: 100%;
+  transition: all 0.5s ease;
+}
+
+.card-title {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3; /* Limita a 3 linhas */
+  overflow: hidden; /* Esconde o texto que exceder as 3 linhas */
+  text-overflow: ellipsis; /* Adiciona "..." no final, se o texto for cortado */
+  white-space: normal;
+}
