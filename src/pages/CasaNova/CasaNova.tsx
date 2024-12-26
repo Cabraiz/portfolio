@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Modal, Button } from 'react-bootstrap';
 import { QRCodeSVG } from 'qrcode.react';
+import { useSwipeable } from 'react-swipeable';
 import './CasaNova.css';
+import { isMobile } from 'react-device-detect';
 
 interface Item {
   id: number;
@@ -11,6 +13,10 @@ interface Item {
   img: string;
   purchased: boolean;
   quantity: number;
+}
+
+interface CasaNovaProps {
+  isMobile: boolean;
 }
 
 const NewHomeGiftPage: React.FC = () => {
@@ -72,24 +78,14 @@ const NewHomeGiftPage: React.FC = () => {
         throw new Error('Erro ao carregar os itens.');
       }
       const data: any[] = await response.json();
-  
-      const transformedItems: Item[] = await Promise.all(
-        data.map(async (item) => {
-          const img = new Image();
-          img.src = item.imagem || 'https://via.placeholder.com/150';
-          await new Promise((resolve) => (img.onload = resolve));
-          const processedImg = await makeWhiteTransparent(img);
-          return {
-            id: item.id,
-            name: item.item_nome,
-            price: parseFloat(item.preco),
-            img: processedImg,
-            purchased: !!item.nome_pessoa,
-            quantity: parseInt(item.quantidade, 10), // Adiciona a quantidade
-          };
-        })
-      );
-  
+      const transformedItems: Item[] = data.map((item) => ({
+        id: item.id,
+        name: item.item_nome,
+        price: parseFloat(item.preco),
+        img: item.imagem || 'https://via.placeholder.com/150',
+        purchased: !!item.nome_pessoa,
+        quantity: parseInt(item.quantidade, 10),
+      }));
       setItems(transformedItems);
     } catch (err: any) {
       setError(err.message || 'Erro desconhecido.');
@@ -97,7 +93,6 @@ const NewHomeGiftPage: React.FC = () => {
       setLoading(false);
     }
   };
-  
 
   useEffect(() => {
     fetchItems(currentPage);
@@ -120,6 +115,20 @@ const NewHomeGiftPage: React.FC = () => {
     setSelectedItem(null);
     setPixCode(null);
   };
+
+  const handleSwipe = (direction: 'up' | 'down') => {
+    if (direction === 'up' && items.length > currentPage + 1) {
+      setCurrentPage((prev) => prev + 1);
+    } else if (direction === 'down' && currentPage > 0) {
+      setCurrentPage((prev) => prev - 1);
+    }
+  };
+
+  const swipeHandlers = useSwipeable({
+    onSwipedUp: () => handleSwipe('up'),
+    onSwipedDown: () => handleSwipe('down'),
+    preventScrollOnSwipe: true,
+  });
 
   const handlePageChange = (direction: 'next' | 'prev') => {
     if (direction === 'next' && items.length === itemsPerPage) {
@@ -174,99 +183,95 @@ const NewHomeGiftPage: React.FC = () => {
   return (
     <div className="loading-container">
       {loading ? (
-        <div className="loading-wrapper">
-          <div className="skeleton-grid">
-            {Array.from({ length: itemsPerPage }).map((_, index) => (
-              <div key={index} className="skeleton-card">
-                <div className="skeleton-img"></div>
-                <div className="skeleton-text"></div>
-                <div className="skeleton-button"></div>
-              </div>
-            ))}
-          </div>
-        </div>
+        <div className="loading-wrapper">Carregando...</div>
       ) : error ? (
         <div className="error-container">Erro: {error}</div>
       ) : (
-        <div className="container mt-4 casanova-page">
-          <div className="row gy-3">
-  {items.map((item) => (
-    <div key={item.id} className="col">
-      <div
-        className={`card h-100 shadow-sm position-relative ${
-          item.purchased ? 'border-success' : 'border-primary'
-        }`}
-      >
-        {/* Indicador Circular */}
-        <div className="progress-circle">
-          <span className="progress-text">
-            {item.quantity - (item.purchased ? 1 : 0)}/{item.quantity}
-          </span>
-        </div>
-
-        {/* Imagem do item */}
-        <img
-          src={item.img}
-          alt={item.name}
-          className="card-img-top"
-          style={{ objectFit: 'contain', height: '150px' }}
-        />
-
-        <div className="card-body text-center">
-          <h5 className="card-title">{item.name}</h5>
-          <p className="card-text">R$ {item.price.toFixed(2).replace('.', ',')}</p>
-          <button
-            className={`btn w-100 ${
-              item.purchased ? 'btn-success' : 'btn-primary'
-            }`}
-            onClick={() => handleShowPayment(item)}
-          >
-            {item.purchased ? 'Comprado ✔️' : 'Pagar'}
-          </button>
-        </div>
-      </div>
-    </div>
-  ))}
-</div>
-
-  
-          {/* Botões de navegação */}
-          <button
-            className={`navigation-arrow left ${currentPage === 0 ? 'disabled' : ''}`}
-            onClick={() => handlePageChange('prev')}
-            disabled={currentPage === 0}
-          >
-            ◀
-          </button>
-          <button
-            className={`navigation-arrow right ${
-              items.length < itemsPerPage ? 'disabled' : ''
-            }`}
-            onClick={() => handlePageChange('next')}
-            disabled={items.length < itemsPerPage}
-          >
-            ▶
-          </button>
-        </div>
+        <>
+          {isMobile ? (
+            // Modo Mobile: Swipeable Item
+            <div {...swipeHandlers} className="mobile-swipe-container">
+              {items[currentPage] && (
+                <div className="mobile-item">
+                  <img
+                    src={items[currentPage].img}
+                    alt={items[currentPage].name}
+                    style={{ width: '100%', height: '300px', objectFit: 'cover' }}
+                  />
+                  <h5>{items[currentPage].name}</h5>
+                  <p>R$ {items[currentPage].price.toFixed(2).replace('.', ',')}</p>
+                  <button
+                    className={`btn ${
+                      items[currentPage].purchased ? 'btn-success' : 'btn-primary'
+                    }`}
+                    onClick={() => handleShowPayment(items[currentPage])}
+                  >
+                    {items[currentPage].purchased ? 'Comprado ✔️' : 'Pagar'}
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            // Modo Desktop: Grid de Itens
+            <div className="container mt-4 casanova-page">
+              <div className="row gy-3">
+                {items.map((item) => (
+                  <div key={item.id} className="col">
+                    <div className="card h-100 shadow-sm">
+                      <img
+                        src={item.img}
+                        alt={item.name}
+                        className="card-img-top"
+                        style={{ objectFit: 'contain', height: '150px' }}
+                      />
+                      <div className="card-body text-center">
+                        <h5 className="card-title">{item.name}</h5>
+                        <p className="card-text">R$ {item.price.toFixed(2).replace('.', ',')}</p>
+                        <button
+                          className={`btn ${
+                            item.purchased ? 'btn-success' : 'btn-primary'
+                          }`}
+                          onClick={() => handleShowPayment(item)}
+                        >
+                          {item.purchased ? 'Comprado ✔️' : 'Pagar'}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {/* Botões de navegação */}
+              <button
+                className={`navigation-arrow left ${currentPage === 0 ? 'disabled' : ''}`}
+                onClick={() => handlePageChange('prev')}
+                disabled={currentPage === 0}
+              >
+                ◀
+              </button>
+              <button
+                className={`navigation-arrow right ${
+                  items.length < itemsPerPage ? 'disabled' : ''
+                }`}
+                onClick={() => handlePageChange('next')}
+                disabled={items.length < itemsPerPage}
+              >
+                ▶
+              </button>
+            </div>
+          )}
+        </>
       )}
-  
-      {/* Modal */}
+
+      {/* Modal de Pagamento */}
       <Modal show={showModal} onHide={handleCloseModal} centered>
         <Modal.Header closeButton>
           <Modal.Title>Pagamento via PIX</Modal.Title>
         </Modal.Header>
-        <Modal.Body className="text-center">
+        <Modal.Body>
           {selectedItem && pixCode && (
             <>
-              <h5>{selectedItem.name}</h5>
-              <p>Escaneie o QR Code ou copie o código abaixo:</p>
               <QRCodeSVG value={pixCode} size={200} />
-              <textarea
-                className="form-control mt-3"
-                value={pixCode}
-                readOnly
-                onClick={(e) => (e.target as HTMLTextAreaElement).select()}
-              />
+              <textarea value={pixCode} readOnly />
             </>
           )}
         </Modal.Body>
@@ -278,7 +283,6 @@ const NewHomeGiftPage: React.FC = () => {
       </Modal>
     </div>
   );
-  
 };
 
 export default NewHomeGiftPage;
