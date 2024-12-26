@@ -28,6 +28,7 @@ const NewHomeGiftPage: React.FC = () => {
   const [showModal, setShowModal] = useState<boolean>(false);
   const [selectedItem, setSelectedItem] = useState<Item | null>(null);
   const [pixCode, setPixCode] = useState<string | null>(null);
+  const [transitioning, setTransitioning] = useState<boolean>(false);
 
   const generatePixPayload = (
     amount: number,
@@ -116,11 +117,19 @@ const NewHomeGiftPage: React.FC = () => {
     setPixCode(null);
   };
 
-  const handleSwipe = (direction: 'up' | 'down') => {
-    if (direction === 'up' && items.length > currentPage + 1) {
-      setCurrentPage((prev) => prev + 1);
-    } else if (direction === 'down' && currentPage > 0) {
-      setCurrentPage((prev) => prev - 1);
+  const handleSwipe = async (direction: "up" | "down") => {
+    if (transitioning) return;
+
+    const nextPage =
+      direction === "up"
+        ? Math.min(currentPage + 1, items.length - 1)
+        : Math.max(currentPage - 1, 0);
+
+    if (nextPage !== currentPage) {
+      setTransitioning(true);
+      await new Promise((resolve) => setTimeout(resolve, 300)); // Simula o tempo de transição
+      setCurrentPage(nextPage);
+      setTransitioning(false);
     }
   };
 
@@ -189,27 +198,51 @@ const NewHomeGiftPage: React.FC = () => {
       ) : (
         <>
           {isMobile ? (
-            // Modo Mobile: Swipeable Item
+            // Modo Mobile: Swipeable Item com animações estilo TikTok
             <div {...swipeHandlers} className="mobile-swipe-container">
-              {items[currentPage] && (
-                <div className="mobile-item">
+              {items.map((item, index) => (
+                <div
+                  key={item.id}
+                  className={`swipe-item ${
+                    index === currentPage
+                      ? "active"
+                      : index === currentPage - 1
+                      ? "previous"
+                      : index === currentPage + 1
+                      ? "next"
+                      : "hidden"
+                  }`}
+                  style={{
+                    transform:
+                      index === currentPage
+                        ? "translateY(0)"
+                        : index < currentPage
+                        ? "translateY(-100%)"
+                        : "translateY(100%)",
+                    transition: transitioning ? "transform 0.3s ease-in-out" : "none",
+                  }}
+                >
                   <img
-                    src={items[currentPage].img}
-                    alt={items[currentPage].name}
-                    style={{ width: '100%', height: '300px', objectFit: 'cover' }}
+                    src={item.img}
+                    alt={item.name}
+                    style={{
+                      width: "100%",
+                      height: "300px",
+                      objectFit: "cover",
+                    }}
                   />
-                  <h5>{items[currentPage].name}</h5>
-                  <p>R$ {items[currentPage].price.toFixed(2).replace('.', ',')}</p>
+                  <h5>{item.name}</h5>
+                  <p>R$ {item.price.toFixed(2).replace(".", ",")}</p>
                   <button
                     className={`btn ${
-                      items[currentPage].purchased ? 'btn-success' : 'btn-primary'
+                      item.purchased ? "btn-success" : "btn-primary"
                     }`}
-                    onClick={() => handleShowPayment(items[currentPage])}
+                    onClick={() => handleShowPayment(item)}
                   >
-                    {items[currentPage].purchased ? 'Comprado ✔️' : 'Pagar'}
+                    {item.purchased ? "Comprado ✔️" : "Pagar"}
                   </button>
                 </div>
-              )}
+              ))}
             </div>
           ) : (
             // Modo Desktop: Grid de Itens
@@ -222,18 +255,20 @@ const NewHomeGiftPage: React.FC = () => {
                         src={item.img}
                         alt={item.name}
                         className="card-img-top"
-                        style={{ objectFit: 'contain', height: '150px' }}
+                        style={{ objectFit: "contain", height: "150px" }}
                       />
                       <div className="card-body text-center">
                         <h5 className="card-title">{item.name}</h5>
-                        <p className="card-text">R$ {item.price.toFixed(2).replace('.', ',')}</p>
+                        <p className="card-text">
+                          R$ {item.price.toFixed(2).replace(".", ",")}
+                        </p>
                         <button
                           className={`btn ${
-                            item.purchased ? 'btn-success' : 'btn-primary'
+                            item.purchased ? "btn-success" : "btn-primary"
                           }`}
                           onClick={() => handleShowPayment(item)}
                         >
-                          {item.purchased ? 'Comprado ✔️' : 'Pagar'}
+                          {item.purchased ? "Comprado ✔️" : "Pagar"}
                         </button>
                       </div>
                     </div>
@@ -242,17 +277,19 @@ const NewHomeGiftPage: React.FC = () => {
               </div>
               {/* Botões de navegação */}
               <button
-                className={`navigation-arrow left ${currentPage === 0 ? 'disabled' : ''}`}
-                onClick={() => handlePageChange('prev')}
+                className={`navigation-arrow left ${
+                  currentPage === 0 ? "disabled" : ""
+                }`}
+                onClick={() => handlePageChange("prev")}
                 disabled={currentPage === 0}
               >
                 ◀
               </button>
               <button
                 className={`navigation-arrow right ${
-                  items.length < itemsPerPage ? 'disabled' : ''
+                  items.length < itemsPerPage ? "disabled" : ""
                 }`}
-                onClick={() => handlePageChange('next')}
+                onClick={() => handlePageChange("next")}
                 disabled={items.length < itemsPerPage}
               >
                 ▶
@@ -261,7 +298,7 @@ const NewHomeGiftPage: React.FC = () => {
           )}
         </>
       )}
-
+  
       {/* Modal de Pagamento */}
       <Modal show={showModal} onHide={handleCloseModal} centered>
         <Modal.Header closeButton>
