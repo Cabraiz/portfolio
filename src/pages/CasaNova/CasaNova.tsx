@@ -3,7 +3,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { Modal, Button } from 'react-bootstrap';
 import './CasaNova.css';
 import { isMobile } from 'react-device-detect';
-import { fetchItems } from './api';
+import { fetchItems, fetchTotalItems } from './api';
 import { generatePixPayload } from './utils';
 import MobileView from './MobileView';
 import DesktopView from './DesktopView';
@@ -11,6 +11,7 @@ import { Item } from './types';
 import { QRCodeSVG } from 'qrcode.react';
 
 const NewHomeGiftPage: React.FC = () => {
+  const [totalItems, setTotalItems] = useState<number>(0);
   const [items, setItems] = useState<{ [page: number]: Item[] }>({});
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -25,28 +26,44 @@ const NewHomeGiftPage: React.FC = () => {
     try {
       setLoading(true);
   
-      // Filtra as páginas que ainda não foram carregadas
-      const pagesNotLoaded = pagesToLoad.filter((page) => !items[page]);
+      // Verifique se o total de itens já foi carregado
+      if (totalItems === 0) {
+        const total = await fetchTotalItems();
+        setTotalItems(total); // Atualiza o total de itens no estado
+      }
   
-      // Faz fetch apenas das páginas não carregadas
       const fetchedPages = await Promise.all(
-        pagesNotLoaded.map((page) => fetchItems(page, itemsPerPage))
+        pagesToLoad.map(async (page) => {
+          const items = await fetchItems(page, itemsPerPage);
+          return { page, items };
+        })
       );
   
-      // Atualiza o estado com as novas páginas
       setItems((prevItems) => {
         const newItems = { ...prevItems };
-        pagesNotLoaded.forEach((page, index) => {
-          newItems[page] = fetchedPages[index];
+        fetchedPages.forEach(({ page, items }) => {
+          newItems[page] = items;
         });
         return newItems;
       });
-    } catch (err: any) {
-      setError(err.message || 'Erro desconhecido.');
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err.message); // Acesse a mensagem de erro
+      } else {
+        setError('Erro desconhecido.');
+      }
     } finally {
       setLoading(false);
     }
   };
+  
+  // UseEffect para carregar dados iniciais
+  useEffect(() => {
+    // Carregar a página atual e pré-carregar as próximas 2 páginas
+    loadItems([currentPage, currentPage + 1, currentPage + 2]);
+  }, [currentPage]);
+  
+  
   
   useEffect(() => {
     // Carregar a página atual e pré-carregar as próximas 2 páginas
@@ -104,7 +121,7 @@ const NewHomeGiftPage: React.FC = () => {
     loadItems([currentPage + 1, currentPage + 2]);
   };
   
-  
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
 
   return (
     <div className="loading-container">
@@ -126,6 +143,7 @@ const NewHomeGiftPage: React.FC = () => {
             items={items}
             currentPage={currentPage}
             itemsPerPage={itemsPerPage}
+            totalPages={totalPages} // Passe totalPages como prop
             handlePageChange={handlePageChange}
             handleShowPayment={handleShowPayment}
           />

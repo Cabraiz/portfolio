@@ -32,3 +32,21 @@ export const fetchItems = async (page: number, itemsPerPage: number): Promise<It
 
   return transformedItems;
 };
+
+export const fetchTotalItems = async (): Promise<number> => {
+    const response = await fetch('https://casa-nova-api.vercel.app/casa/quantidade');
+  
+    if (!response.ok) {
+      throw new Error('Erro ao carregar o total de itens.');
+    }
+  
+    const data = await response.json();
+  
+    if (typeof data.quantidade !== 'number') {
+      throw new Error('Formato de resposta inválido da API de quantidade.');
+    }
+  
+    return data.quantidade;
+  };
+  
+

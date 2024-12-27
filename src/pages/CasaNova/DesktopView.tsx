@@ -26,12 +26,11 @@ const useLazyLoad = (callback: () => void) => {
     return targetRef;
   };
   
-
-
-interface DesktopViewProps {
+  interface DesktopViewProps {
     items: { [page: number]: Item[] };
     currentPage: number;
     itemsPerPage: number;
+    totalPages: number; // Novo parâmetro para total de páginas
     handlePageChange: (direction: 'next' | 'prev') => void;
     handleShowPayment: (item: Item) => void;
   }
@@ -40,6 +39,7 @@ interface DesktopViewProps {
     items,
     currentPage,
     itemsPerPage,
+    totalPages, // Recebendo totalPages como prop
     handlePageChange,
     handleShowPayment,
   }) => {
@@ -85,20 +85,16 @@ interface DesktopViewProps {
           ))}
         </div>
         <button
-          className={`navigation-arrow left ${
-            currentPage === 0 ? 'disabled' : ''
-          }`}
+          className={`navigation-arrow left ${currentPage === 0 ? 'disabled' : ''}`}
           onClick={() => handlePageChange('prev')}
           disabled={currentPage === 0}
         >
           ◀
         </button>
         <button
-          className={`navigation-arrow right ${
-            !items[currentPage + 1] ? 'disabled' : ''
-          }`}
+          className={`navigation-arrow right ${currentPage >= totalPages - 1 ? 'disabled' : ''}`}
           onClick={() => handlePageChange('next')}
-          disabled={!items[currentPage + 1]}
+          disabled={currentPage >= totalPages - 1}
         >
           ▶
         </button>
