@@ -1,54 +1,82 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Item } from './types';
+import { makeWhiteTransparent } from './utils';
 
 const useLazyLoad = (callback: () => void) => {
-    const targetRef = useRef<HTMLDivElement | null>(null);
-  
-    useEffect(() => {
-      if (!targetRef.current) return;
-  
-      const observer = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              callback();
-            }
-          });
-        },
-        { rootMargin: '100px' }
+  const targetRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!targetRef.current) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            callback();
+          }
+        });
+      },
+      { rootMargin: '100px' }
+    );
+
+    observer.observe(targetRef.current);
+
+    return () => observer.disconnect();
+  }, [callback]);
+
+  return targetRef;
+};
+
+interface DesktopViewProps {
+  items: { [page: number]: Item[] };
+  currentPage: number;
+  itemsPerPage: number;
+  totalPages: number; // Novo parâmetro para total de páginas
+  handlePageChange: (direction: 'next' | 'prev') => void;
+  handleShowPayment: (item: Item) => void;
+}
+
+const DesktopView: React.FC<DesktopViewProps> = ({
+  items,
+  currentPage,
+  itemsPerPage,
+  totalPages,
+  handlePageChange,
+  handleShowPayment,
+}) => {
+  const currentItems = items[currentPage] || [];
+  const [processedImages, setProcessedImages] = useState<
+  { id: string; processedImg: string | null }[]
+>([]);
+
+  // Processar as imagens no nível superior
+  useEffect(() => {
+    const processImages = async () => {
+      const processed = await Promise.all(
+        currentItems.map(async (item) => {
+          const img = new Image();
+          img.src = item.img;
+          const result = await makeWhiteTransparent(img);
+          return { id: item.id.toString(), processedImg: result }; // Converte ID para string
+        })
       );
+      setProcessedImages(processed);
+    };
   
-      observer.observe(targetRef.current);
+    processImages();
+  }, [currentItems]);
   
-      return () => observer.disconnect();
-    }, [callback]);
-  
-    return targetRef;
-  };
-  
-  interface DesktopViewProps {
-    items: { [page: number]: Item[] };
-    currentPage: number;
-    itemsPerPage: number;
-    totalPages: number; // Novo parâmetro para total de páginas
-    handlePageChange: (direction: 'next' | 'prev') => void;
-    handleShowPayment: (item: Item) => void;
-  }
-  
-  const DesktopView: React.FC<DesktopViewProps> = ({
-    items,
-    currentPage,
-    itemsPerPage,
-    totalPages, // Recebendo totalPages como prop
-    handlePageChange,
-    handleShowPayment,
-  }) => {
-    const currentItems = items[currentPage] || []; // Itens da página atual
-  
-    return (
-      <div className="container mt-4 casanova-page">
-        <div className="row gy-3">
-          {currentItems.map((item) => (
+
+  return (
+    <div className="container mt-4 casanova-page">
+      <div className="row gy-3">
+        {currentItems.map((item) => {
+          const processedImage = processedImages.find(
+            (img) => img.id === item.id.toString() // Converte item.id para string
+          );
+          
+
+          return (
             <div key={item.id} className="col">
               <div
                 className={`card h-100 shadow-sm position-relative ${
@@ -61,7 +89,7 @@ const useLazyLoad = (callback: () => void) => {
                   </span>
                 </div>
                 <img
-                  src={item.img}
+                  src={processedImage?.processedImg || item.img} // Use a imagem processada ou original
                   alt={item.name}
                   className="card-img-top"
                   style={{ objectFit: 'contain', height: '150px' }}
@@ -82,25 +110,25 @@ const useLazyLoad = (callback: () => void) => {
                 </div>
               </div>
             </div>
-          ))}
-        </div>
-        <button
-          className={`navigation-arrow left ${currentPage === 0 ? 'disabled' : ''}`}
-          onClick={() => handlePageChange('prev')}
-          disabled={currentPage === 0}
-        >
-          ◀
-        </button>
-        <button
-          className={`navigation-arrow right ${currentPage >= totalPages - 1 ? 'disabled' : ''}`}
-          onClick={() => handlePageChange('next')}
-          disabled={currentPage >= totalPages - 1}
-        >
-          ▶
-        </button>
+          );
+        })}
       </div>
-    );
-  };
-  
-  export default DesktopView;
-  
+      <button
+        className={`navigation-arrow left ${currentPage === 0 ? 'disabled' : ''}`}
+        onClick={() => handlePageChange('prev')}
+        disabled={currentPage === 0}
+      >
+        ◀
+      </button>
+      <button
+        className={`navigation-arrow right ${currentPage >= totalPages - 1 ? 'disabled' : ''}`}
+        onClick={() => handlePageChange('next')}
+        disabled={currentPage >= totalPages - 1}
+      >
+        ▶
+      </button>
+    </div>
+  );
+};
+
+export default DesktopView;

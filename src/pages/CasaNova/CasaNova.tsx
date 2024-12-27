@@ -26,36 +26,57 @@ const NewHomeGiftPage: React.FC = () => {
     try {
       setLoading(true);
   
-      // Verifique se o total de itens já foi carregado
+      // Verifique se o total de itens já está armazenado no localStorage
       if (totalItems === 0) {
-        const total = await fetchTotalItems();
-        setTotalItems(total); // Atualiza o total de itens no estado
+        const storedTotalItems = localStorage.getItem('totalItems');
+        if (storedTotalItems) {
+          // Se o total estiver no localStorage, use-o
+          setTotalItems(parseInt(storedTotalItems, 10));
+        } else {
+          // Caso contrário, busque da API e armazene no localStorage
+          const total = await fetchTotalItems();
+          setTotalItems(total);
+          localStorage.setItem('totalItems', total.toString());
+        }
       }
   
-      const fetchedPages = await Promise.all(
-        pagesToLoad.map(async (page) => {
-          const items = await fetchItems(page, itemsPerPage);
-          return { page, items };
-        })
-      );
+      // Recuperar itens do localStorage
+      const storedItems = JSON.parse(localStorage.getItem('items') ?? '{}');
   
-      setItems((prevItems) => {
-        const newItems = { ...prevItems };
+      // Filtre as páginas que ainda não foram carregadas
+      const pagesToFetch = pagesToLoad.filter((page) => !storedItems[page]);
+  
+      // Carregue novas páginas, se necessário
+      if (pagesToFetch.length > 0) {
+        const fetchedPages = await Promise.all(
+          pagesToFetch.map(async (page) => {
+            const items = await fetchItems(page, itemsPerPage);
+            return { page, items };
+          })
+        );
+  
+        // Atualize o estado e o localStorage
+        const updatedItems = { ...storedItems };
         fetchedPages.forEach(({ page, items }) => {
-          newItems[page] = items;
+          updatedItems[page] = items;
         });
-        return newItems;
-      });
+  
+        localStorage.setItem('items', JSON.stringify(updatedItems)); // Salve os itens no localStorage
+        setItems(updatedItems);
+      } else {
+        // Se todos os itens estiverem no localStorage, atualize o estado diretamente
+        setItems(storedItems);
+      }
     } catch (err) {
       if (err instanceof Error) {
-        setError(err.message); // Acesse a mensagem de erro
+        setError(err.message);
       } else {
         setError('Erro desconhecido.');
       }
     } finally {
       setLoading(false);
     }
-  };
+  };  
   
   // UseEffect para carregar dados iniciais
   useEffect(() => {
