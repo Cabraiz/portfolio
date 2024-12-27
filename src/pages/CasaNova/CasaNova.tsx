@@ -11,7 +11,7 @@ import { Item } from './types';
 import { QRCodeSVG } from 'qrcode.react';
 
 const NewHomeGiftPage: React.FC = () => {
-  const [items, setItems] = useState<Item[]>([]);
+  const [items, setItems] = useState<{ [page: number]: Item[] }>({});
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState<number>(0);
@@ -21,20 +21,36 @@ const NewHomeGiftPage: React.FC = () => {
   const [pixCode, setPixCode] = useState<string | null>(null);
   const [transitioning, setTransitioning] = useState<boolean>(false);
 
-  const loadItems = async (page: number) => {
+  const loadItems = async (pagesToLoad: number[]) => {
     try {
       setLoading(true);
-      const fetchedItems = await fetchItems(page, itemsPerPage);
-      setItems(fetchedItems);
+  
+      // Filtra as páginas que ainda não foram carregadas
+      const pagesNotLoaded = pagesToLoad.filter((page) => !items[page]);
+  
+      // Faz fetch apenas das páginas não carregadas
+      const fetchedPages = await Promise.all(
+        pagesNotLoaded.map((page) => fetchItems(page, itemsPerPage))
+      );
+  
+      // Atualiza o estado com as novas páginas
+      setItems((prevItems) => {
+        const newItems = { ...prevItems };
+        pagesNotLoaded.forEach((page, index) => {
+          newItems[page] = fetchedPages[index];
+        });
+        return newItems;
+      });
     } catch (err: any) {
       setError(err.message || 'Erro desconhecido.');
     } finally {
       setLoading(false);
     }
   };
-
+  
   useEffect(() => {
-    loadItems(currentPage);
+    // Carregar a página atual e pré-carregar as próximas 2 páginas
+    loadItems([currentPage, currentPage + 1, currentPage + 2]);
   }, [currentPage]);
 
   const handleShowPayment = (item: Item) => {
@@ -57,27 +73,38 @@ const NewHomeGiftPage: React.FC = () => {
 
   const handleSwipe = async (direction: 'up' | 'down') => {
     if (transitioning) return;
+  
+    const totalPages = Object.keys(items).length; // Número total de páginas carregadas
+  
     const nextPage =
       direction === 'up'
-        ? Math.min(currentPage + 1, items.length - 1)
+        ? Math.min(currentPage + 1, totalPages - 1)
         : Math.max(currentPage - 1, 0);
-
+  
     if (nextPage !== currentPage) {
       setTransitioning(true);
-      await new Promise((resolve) => setTimeout(resolve, 300));
       setCurrentPage(nextPage);
       setTransitioning(false);
+  
+      // Pré-carregar as próximas páginas
+      loadItems([nextPage + 1, nextPage + 2]);
     }
   };
 
   const handlePageChange = (direction: 'next' | 'prev') => {
-    if (direction === 'next' && items.length === itemsPerPage) {
-      setCurrentPage((prev) => prev + 1);
-    }
-    if (direction === 'prev' && currentPage > 0) {
-      setCurrentPage((prev) => prev - 1);
-    }
+    setCurrentPage((prevPage) => {
+      const nextPage =
+        direction === 'next' ? prevPage + 1 : Math.max(prevPage - 1, 0);
+  
+      // Retorna o próximo número de página
+      return nextPage;
+    });
+  
+    // Pré-carregar as próximas páginas (opcional)
+    loadItems([currentPage + 1, currentPage + 2]);
   };
+  
+  
 
   return (
     <div className="loading-container">
@@ -88,7 +115,7 @@ const NewHomeGiftPage: React.FC = () => {
       ) : (
         isMobile ? (
           <MobileView
-            items={items}
+            items={items[currentPage] || []} // Passa apenas os itens da página atual como array
             currentPage={currentPage}
             transitioning={transitioning}
             handleSwipe={handleSwipe}
