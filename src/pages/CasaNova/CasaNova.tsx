@@ -10,6 +10,7 @@ import DesktopView from './DesktopView';
 import { Item } from './types';
 import { QRCodeSVG } from 'qrcode.react';
 import { loadStripe } from '@stripe/stripe-js';
+import LoadingPlaceholder from './LoadingPlaceholder'; 
 
 const stripePromise = loadStripe(import.meta.env.VITE_APP_STRIPE_PUBLIC_KEY?.trim() || '');
 console.log("Chave do Stripe:", import.meta.env.VITE_APP_STRIPE_PUBLIC_KEY);
@@ -201,58 +202,54 @@ const NewHomeGiftPage: React.FC = () => {
   const totalPages = Math.ceil(totalItems / itemsPerPage);
 
   return (
-    <div className="loading-container">
-      {loading ? (
-        <div className="loading-wrapper">Carregando...</div>
-      ) : error ? (
-        <div className="error-container">Erro: {error}</div>
-      ) : (
-        isMobile ? (
-<MobileView
-  items={Object.values(items).flat()} // Passa todos os itens como um array único
-  currentPage={currentPage} // Índice global atual
-  transitioning={transitioning}
-  handleSwipe={handleSwipe}
-  handleShowPayment={handleShowPayment}
-/>
-
-        ) : (
-          <DesktopView
-            items={items}
-            currentPage={currentPage}
-            itemsPerPage={itemsPerPage}
-            totalPages={totalPages} // Passe totalPages como prop
-            handlePageChange={handlePageChange}
-            handleShowPayment={handleShowPayment}
-          />
-        )
-      )}
-
-      <Modal show={showModal} onHide={handleCloseModal} centered>
-        <Modal.Header closeButton>
-          <Modal.Title>Pagamento</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {selectedItem && pixCode && (
-            <>
-              <QRCodeSVG value={pixCode} size={200} />
-              <textarea value={pixCode} readOnly />
-              <button
-                onClick={handleRedirectToStripe}
-                className="btn btn-secondary w-100 mt-3"
-              >
-                Pagar com Cartão de Crédito
-              </button>
-            </>
-          )}
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={handleCloseModal}>
-            Fechar
-          </Button>
-        </Modal.Footer>
-      </Modal>
-    </div>
+    <div className={`loading-container ${isMobile ? 'mobile-margins' : ''}`}>
+    {loading ? (
+      <LoadingPlaceholder />
+    ) : error ? (
+      <div className="error-container">Erro: {error}</div>
+    ) : isMobile ? (
+      <MobileView
+        items={Object.values(items).flat()}
+        currentPage={currentPage}
+        transitioning={transitioning}
+        handleSwipe={handleSwipe}
+        handleShowPayment={handleShowPayment}
+      />
+    ) : (
+      <DesktopView
+        items={items}
+        currentPage={currentPage}
+        itemsPerPage={itemsPerPage}
+        totalPages={Math.ceil(totalItems / itemsPerPage)}
+        handlePageChange={handlePageChange}
+        handleShowPayment={handleShowPayment}
+      />
+    )}
+    <Modal show={showModal} onHide={handleCloseModal} centered>
+      <Modal.Header closeButton>
+        <Modal.Title>Pagamento</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        {selectedItem && pixCode && (
+          <>
+            <QRCodeSVG value={pixCode} size={200} />
+            <textarea value={pixCode} readOnly />
+            <button
+              onClick={handleRedirectToStripe}
+              className="btn btn-secondary w-100 mt-3"
+            >
+              Pagar com Cartão de Crédito
+            </button>
+          </>
+        )}
+      </Modal.Body>
+      <Modal.Footer>
+        <Button variant="secondary" onClick={handleCloseModal}>
+          Fechar
+        </Button>
+      </Modal.Footer>
+    </Modal>
+  </div>
   );
 };
 
