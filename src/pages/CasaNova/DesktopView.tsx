@@ -105,7 +105,7 @@ const DesktopView: React.FC<DesktopViewProps> = ({
                     }`}
                     onClick={() => handleShowPayment(item)}
                   >
-                    {item.purchased ? 'Comprado ✔️' : 'Pagar'}
+                    {item.purchased ? 'Comprado ✔️' : 'Ajudar'}
                   </button>
                 </div>
               </div>

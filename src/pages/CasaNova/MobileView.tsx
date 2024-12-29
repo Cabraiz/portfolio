@@ -72,7 +72,7 @@ const MobileView: React.FC<MobileViewProps> = ({
               }`}
               onClick={() => handleShowPayment(item)}
             >
-              {item.purchased ? 'Comprado ✔️' : 'Pagar'}
+              {item.purchased ? 'Comprado ✔️' : 'Ajudar'}
             </button>
           </div>
         );

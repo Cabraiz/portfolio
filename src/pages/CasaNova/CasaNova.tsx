@@ -9,6 +9,10 @@ import MobileView from './MobileView';
 import DesktopView from './DesktopView';
 import { Item } from './types';
 import { QRCodeSVG } from 'qrcode.react';
+import { loadStripe } from '@stripe/stripe-js';
+
+const stripePromise = loadStripe(import.meta.env.VITE_APP_STRIPE_PUBLIC_KEY?.trim() || '');
+console.log("Chave do Stripe:", import.meta.env.VITE_APP_STRIPE_PUBLIC_KEY);
 
 const NewHomeGiftPage: React.FC = () => {
   const [totalItems, setTotalItems] = useState<number>(0);
@@ -84,6 +88,54 @@ const NewHomeGiftPage: React.FC = () => {
     loadItems([currentPage, currentPage + 1, currentPage + 2]);
   }, [currentPage]);
   
+  const handleRedirectToStripe = async () => {
+    if (!selectedItem) {
+      console.error("Nenhum item selecionado para pagamento.");
+      return;
+    }
+  
+    const stripe = await stripePromise;
+    if (!stripe) {
+      console.error("Erro ao inicializar Stripe.");
+      return;
+    }
+  
+    try {
+      const response = await fetch(import.meta.env.VITE_APP_PAYMENT_BACKEND_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          payment_method_types: ['card'],
+          line_items: [
+            {
+              price_data: {
+                currency: 'brl',
+                product_data: {
+                  name: selectedItem.name,
+                },
+                unit_amount: selectedItem.price * 100, // Valor em centavos
+              },
+              quantity: 1,
+            },
+          ],
+          mode: 'payment',
+          success_url: import.meta.env.VITE_APP_REDIRECT_SUCCESS_URL,
+          cancel_url: import.meta.env.VITE_APP_REDIRECT_CANCEL_URL,
+        }),
+      });
+  
+      if (!response.ok) {
+        throw new Error(`Erro ao criar sessão Stripe: ${response.statusText}`);
+      }
+  
+      const session = await response.json();
+      await stripe.redirectToCheckout({ sessionId: session.id });
+    } catch (error) {
+      console.error("Erro ao redirecionar para Stripe:", error);
+    }
+  };
   
   
   useEffect(() => {
@@ -178,13 +230,19 @@ const NewHomeGiftPage: React.FC = () => {
 
       <Modal show={showModal} onHide={handleCloseModal} centered>
         <Modal.Header closeButton>
-          <Modal.Title>Pagamento via PIX</Modal.Title>
+          <Modal.Title>Pagamento</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           {selectedItem && pixCode && (
             <>
               <QRCodeSVG value={pixCode} size={200} />
               <textarea value={pixCode} readOnly />
+              <button
+                onClick={handleRedirectToStripe}
+                className="btn btn-secondary w-100 mt-3"
+              >
+                Pagar com Cartão de Crédito
+              </button>
             </>
           )}
         </Modal.Body>
