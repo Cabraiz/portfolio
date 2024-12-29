@@ -89,7 +89,7 @@ const DesktopView: React.FC<DesktopViewProps> = ({
                   </span>
                 </div>
                 <img
-                  src={processedImage?.processedImg || item.img} // Use a imagem processada ou original
+                  src={processedImage?.processedImg ?? item.img} // Use a imagem processada ou original
                   alt={item.name}
                   className="card-img-top"
                   style={{ objectFit: 'contain', height: '150px' }}

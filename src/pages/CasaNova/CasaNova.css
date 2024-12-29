@@ -243,13 +243,6 @@ body.casanova-page {
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
-.mobile-swipe-container {
-  position: relative;
-  width: 100%;
-  height: 100vh;
-  overflow: hidden;
-}
-
 .swipe-item {
   position: absolute;
   width: 100%;
@@ -258,17 +251,19 @@ body.casanova-page {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  transition: transform 0.3s ease-in-out;
   background: white;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  will-change: transform; /* Otimização para animações */
+  transition: transform 0.3s ease-in-out;
 }
 
-.swipe-item img {
-  max-width: 90%;
-  max-height: 60%;
-  object-fit: contain;
-  border-radius: 10px;
+.mobile-swipe-container {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden; /* Evita overflow */
 }
+
 
 .swipe-item.hidden {
   display: none;
@@ -329,4 +324,24 @@ body.casanova-page {
   overflow: hidden; /* Esconde o texto que exceder as 3 linhas */
   text-overflow: ellipsis; /* Adiciona "..." no final, se o texto for cortado */
   white-space: normal;
+}
+
+.mobile-swipe-container {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.swipe-item {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: white;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  will-change: transform; /* Otimização para animações */
 }

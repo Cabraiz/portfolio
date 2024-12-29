@@ -109,25 +109,29 @@ const NewHomeGiftPage: React.FC = () => {
     setPixCode(null);
   };
 
-  const handleSwipe = async (direction: 'up' | 'down') => {
+  const handleSwipe = (direction: 'up' | 'down') => {
     if (transitioning) return;
   
-    const totalPages = Object.keys(items).length; // Número total de páginas carregadas
+    const totalItemsFlat = Object.values(items).flat(); // Unifica todos os itens em um único array
+    const totalItemsCount = totalItemsFlat.length;
   
-    const nextPage =
-      direction === 'up'
-        ? Math.min(currentPage + 1, totalPages - 1)
-        : Math.max(currentPage - 1, 0);
+    let newIndex = currentPage;
   
-    if (nextPage !== currentPage) {
-      setTransitioning(true);
-      setCurrentPage(nextPage);
-      setTransitioning(false);
+    if (direction === 'up') {
+      newIndex = Math.min(currentPage + 1, totalItemsCount - 1); // Vai para o próximo item
+    } else if (direction === 'down') {
+      newIndex = Math.max(currentPage - 1, 0); // Volta para o item anterior
+    }
   
-      // Pré-carregar as próximas páginas
-      loadItems([nextPage + 1, nextPage + 2]);
+    if (newIndex !== currentPage) {
+      setTransitioning(true); // Ativa transição
+      setTimeout(() => setTransitioning(false), 300); // Duração da animação (300ms)
+      setCurrentPage(newIndex); // Atualiza o índice atual
     }
   };
+  
+  
+  
 
   const handlePageChange = (direction: 'next' | 'prev') => {
     setCurrentPage((prevPage) => {
@@ -152,13 +156,14 @@ const NewHomeGiftPage: React.FC = () => {
         <div className="error-container">Erro: {error}</div>
       ) : (
         isMobile ? (
-          <MobileView
-            items={items[currentPage] || []} // Passa apenas os itens da página atual como array
-            currentPage={currentPage}
-            transitioning={transitioning}
-            handleSwipe={handleSwipe}
-            handleShowPayment={handleShowPayment}
-          />
+<MobileView
+  items={Object.values(items).flat()} // Passa todos os itens como um array único
+  currentPage={currentPage} // Índice global atual
+  transitioning={transitioning}
+  handleSwipe={handleSwipe}
+  handleShowPayment={handleShowPayment}
+/>
+
         ) : (
           <DesktopView
             items={items}

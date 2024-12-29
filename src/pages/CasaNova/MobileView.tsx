@@ -1,69 +1,85 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useSwipeable } from 'react-swipeable';
 import { Item } from './types';
 
 interface MobileViewProps {
   items: Item[];
   currentPage: number;
-  transitioning: boolean;
+  transitioning: boolean; // Adiciona esta linha
   handleSwipe: (direction: 'up' | 'down') => void;
   handleShowPayment: (item: Item) => void;
 }
 
-const MobileView: React.FC<MobileViewProps> = ({ items, currentPage, transitioning, handleSwipe, handleShowPayment }) => {
+
+const MobileView: React.FC<MobileViewProps> = ({
+  items,
+  currentPage,
+  handleSwipe,
+  handleShowPayment,
+}) => {
+  const [progress, setProgress] = useState<number>(0);
+  const [isSwiping, setIsSwiping] = useState<boolean>(false);
+
   const swipeHandlers = useSwipeable({
-    onSwipedUp: () => handleSwipe('up'),
-    onSwipedDown: () => handleSwipe('down'),
+    onSwipedUp: () => {
+      setIsSwiping(false);
+      handleSwipe('up');
+    },
+    onSwipedDown: () => {
+      setIsSwiping(false);
+      handleSwipe('down');
+    },
+    onSwiping: (e) => {
+      setIsSwiping(true);
+      setProgress(e.deltaY / window.innerHeight);
+    },
+    onSwiped: () => setProgress(0),
     preventScrollOnSwipe: true,
+    trackMouse: true,
   });
 
   return (
     <div {...swipeHandlers} className="mobile-swipe-container">
-      {items.map((item, index) => (
-        <div
-          key={item.id}
-          className={`swipe-item ${
-            index === currentPage
-              ? "active"
-              : index === currentPage - 1
-              ? "previous"
-              : index === currentPage + 1
-              ? "next"
-              : "hidden"
-          }`}
-          style={{
-            transform:
-              index === currentPage
-                ? "translateY(0)"
-                : index < currentPage
-                ? "translateY(-100%)"
-                : "translateY(100%)",
-            transition: transitioning ? "transform 0.3s ease-in-out" : "none",
-          }}
-        >
-          <img
-            src={item.img}
-            alt={item.name}
+      {items.map((item, index) => {
+        const offset = index - currentPage;
+        const translateY = offset * 100 + (isSwiping ? progress * 100 : 0);
+
+        return (
+          <div
+            key={item.id}
+            className="swipe-item"
             style={{
-              width: "100%",
-              height: "300px",
-              objectFit: "cover",
+              transform: `translateY(${translateY}%)`,
+              transition: isSwiping ? 'none' : 'transform 0.3s ease-in-out',
+              zIndex: -Math.abs(offset),
             }}
-          />
-          <h5>{item.name}</h5>
-          <p>R$ {item.price.toFixed(2).replace(".", ",")}</p>
-          <button
-            className={`btn ${
-              item.purchased ? "btn-success" : "btn-primary"
-            }`}
-            onClick={() => handleShowPayment(item)}
           >
-            {item.purchased ? "Comprado ✔️" : "Pagar"}
-          </button>
-        </div>
-      ))}
+            <img
+              src={item.img}
+              alt={item.name}
+              style={{
+                width: '100%',
+                height: 'calc(100vh - 150px)',
+                objectFit: 'contain',
+                margin: 'auto',
+              }}
+            />
+            <h5>{item.name}</h5>
+            <p>R$ {item.price.toFixed(2).replace('.', ',')}</p>
+            <button
+              className={`btn ${
+                item.purchased ? 'btn-success' : 'btn-primary'
+              }`}
+              onClick={() => handleShowPayment(item)}
+            >
+              {item.purchased ? 'Comprado ✔️' : 'Pagar'}
+            </button>
+          </div>
+        );
+      })}
     </div>
   );
 };
+
 
 export default MobileView;
