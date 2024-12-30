@@ -84,28 +84,44 @@ const MobileView: React.FC<MobileViewProps> = ({
 
       {/* Barra de Quantidade */}
       <div className="luxury-footer">
-        <button
-          className={`luxury-nav-button ${
-            currentPage === 0 ? "disabled" : ""
-          }`}
-          onClick={() => handleSwipe("down")}
-          disabled={currentPage === 0}
-        >
-          ◀
-        </button>
-        <span className="luxury-page-indicator">
-          {currentPage + 1} / {items.length}
-        </span>
-        <button
-          className={`luxury-nav-button ${
-            currentPage === items.length - 1 ? "disabled" : ""
-          }`}
-          onClick={() => handleSwipe("up")}
-          disabled={currentPage === items.length - 1}
-        >
-          ▶
-        </button>
-      </div>
+  {/* Botão de navegação para itens anteriores */}
+  <button
+    className={`luxury-nav-button ${
+      currentPage === 0 ? "disabled" : ""
+    }`}
+    onClick={() => handleSwipe("down")}
+    disabled={currentPage === 0}
+  >
+    ◀
+  </button>
+
+  {/* Indicador de progresso */}
+  <div className="luxury-quantity-indicator">
+    <span className="luxury-quantity-text">
+      {currentPage + 1} / {items.length}
+    </span>
+    <div className="luxury-progress-bar">
+      <div
+        className="luxury-progress-bar-fill"
+        style={{
+          width: `${((currentPage + 1) / items.length) * 100}%`,
+        }}
+      ></div>
+    </div>
+  </div>
+
+  {/* Botão de navegação para próximos itens */}
+  <button
+    className={`luxury-nav-button ${
+      currentPage === items.length - 1 ? "disabled" : ""
+    }`}
+    onClick={() => handleSwipe("up")}
+    disabled={currentPage === items.length - 1}
+  >
+    ▶
+  </button>
+</div>
+
     </div>
   );
 };
