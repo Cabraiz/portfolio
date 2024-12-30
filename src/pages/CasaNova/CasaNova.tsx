@@ -11,6 +11,7 @@ import { Item } from './types';
 import { QRCodeSVG } from 'qrcode.react';
 import LoadingPlaceholder from './LoadingPlaceholder'; 
 import ShimmerPlaceholder from './ShimmerPlaceholder';
+import { clearDB, saveToDB } from './dbHelpers';
 
 const NewHomeGiftPage: React.FC = () => {
   const [totalItems, setTotalItems] = useState<number>(0);
@@ -28,14 +29,18 @@ const NewHomeGiftPage: React.FC = () => {
     try {
       setLoading(true);
   
+      // Limpar IndexedDB e LocalStorage ao reiniciar
+      if (totalItems === 0) {
+        await clearDB(); // Limpa o IndexedDB
+        localStorage.clear(); // Limpa o localStorage
+      }
+  
       // Verifique se o total de itens já está armazenado no localStorage
       if (totalItems === 0) {
         const storedTotalItems = localStorage.getItem('totalItems');
         if (storedTotalItems) {
-          // Se o total estiver no localStorage, use-o
           setTotalItems(parseInt(storedTotalItems, 10));
         } else {
-          // Caso contrário, busque da API e armazene no localStorage
           const total = await fetchTotalItems();
           setTotalItems(total);
           localStorage.setItem('totalItems', total.toString());
@@ -45,28 +50,32 @@ const NewHomeGiftPage: React.FC = () => {
       // Recuperar itens do localStorage
       const storedItems = JSON.parse(localStorage.getItem('items') ?? '{}');
   
-      // Filtre as páginas que ainda não foram carregadas
+      // Filtrar páginas que precisam ser carregadas
       const pagesToFetch = pagesToLoad.filter((page) => !storedItems[page]);
   
-      // Carregue novas páginas, se necessário
       if (pagesToFetch.length > 0) {
         const fetchedPages = await Promise.all(
           pagesToFetch.map(async (page) => {
             const items = await fetchItems(page, itemsPerPage);
+  
+            // Salvar os itens no IndexedDB
+            for (const item of items) {
+              await saveToDB(item.id, JSON.stringify(item));
+            }
+  
             return { page, items };
           })
         );
   
-        // Atualize o estado e o localStorage
+        // Atualizar localStorage e estado
         const updatedItems = { ...storedItems };
         fetchedPages.forEach(({ page, items }) => {
           updatedItems[page] = items;
         });
   
-        localStorage.setItem('items', JSON.stringify(updatedItems)); // Salve os itens no localStorage
+        localStorage.setItem('items', JSON.stringify(updatedItems));
         setItems(updatedItems);
       } else {
-        // Se todos os itens estiverem no localStorage, atualize o estado diretamente
         setItems(storedItems);
       }
     } catch (err) {
@@ -78,7 +87,8 @@ const NewHomeGiftPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };  
+  };
+  
   
   // UseEffect para carregar dados iniciais
   useEffect(() => {

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useSwipeable } from 'react-swipeable';
 import { Item } from './types';
+import './LuxuryPage.css'; // Novo arquivo CSS para o design luxuoso
 
 interface MobileViewProps {
   items: Item[];
@@ -9,7 +10,6 @@ interface MobileViewProps {
   handleSwipe: (direction: 'up' | 'down') => void;
   handleShowPayment: (item: Item) => void;
 }
-
 
 const MobileView: React.FC<MobileViewProps> = ({
   items,
@@ -39,47 +39,46 @@ const MobileView: React.FC<MobileViewProps> = ({
   });
 
   return (
-    <div {...swipeHandlers} className="mobile-swipe-container">
-      {items.map((item, index) => {
-        const offset = index - currentPage;
-        const translateY = offset * 100 + (isSwiping ? progress * 100 : 0);
-
-        return (
-          <div
-            key={item.id}
-            className="swipe-item"
-            style={{
-              transform: `translateY(${translateY}%)`,
-              transition: isSwiping ? 'none' : 'transform 0.3s ease-in-out',
-              zIndex: -Math.abs(offset),
-            }}
-          >
-            <img
-              src={item.img}
-              alt={item.name}
+    <>
+      <div className="luxury-background"></div> {/* Adiciona o fundo global */}
+      <div {...swipeHandlers} className="luxury-swipe-container">
+        {items.map((item, index) => {
+          const offset = index - currentPage;
+          const translateY = offset * 100 + (isSwiping ? progress * 100 : 0);
+  
+          return (
+            <div
+              key={item.id}
+              className="luxury-swipe-item"
               style={{
-                width: '100%',
-                height: 'calc(100vh - 150px)',
-                objectFit: 'contain',
-                margin: 'auto',
+                transform: `translateY(${translateY}%)`,
+                transition: isSwiping ? 'none' : 'transform 0.3s ease-in-out',
+                zIndex: -Math.abs(offset),
               }}
-            />
-            <h5>{item.name}</h5>
-            <p>R$ {item.price.toFixed(2).replace('.', ',')}</p>
-            <button
-              className={`btn ${
-                item.purchased ? 'btn-success' : 'btn-primary'
-              }`}
-              onClick={() => handleShowPayment(item)}
             >
-              {item.purchased ? 'Comprado ✔️' : 'Ajudar'}
-            </button>
-          </div>
-        );
-      })}
-    </div>
-  );
+              <div className="luxury-item-card">
+                <img
+                  src={item.img}
+                  alt={item.name}
+                  className="luxury-item-image"
+                />
+                <div className="luxury-item-info">
+                  <h5 className="luxury-item-title">{item.name}</h5>
+                  <p className="luxury-item-price">R$ {item.price.toFixed(2).replace('.', ',')}</p>
+                  <button
+                    className={`luxury-button ${item.purchased ? 'btn-success' : 'btn-primary'}`}
+                    onClick={() => handleShowPayment(item)}
+                  >
+                    {item.purchased ? 'Comprado ✔️' : 'Contribuir Agora'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </>
+  );  
 };
-
 
 export default MobileView;
