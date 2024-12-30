@@ -41,7 +41,6 @@ const MobileView: React.FC<MobileViewProps> = ({
   return (
     <div className="luxury-mobile-container">
       <div {...swipeHandlers} className="luxury-swipe-container">
-        
         {items.map((item, index) => {
           const offset = index - currentPage;
           const translateY = offset * 100 + (isSwiping ? progress * 100 : 0);
@@ -56,27 +55,42 @@ const MobileView: React.FC<MobileViewProps> = ({
                 zIndex: -Math.abs(offset),
               }}
             >
-              <div className="luxury-item-card">
-                <img
-                  src={item.img}
-                  alt={item.name}
-                  className="luxury-item-image"
-                />
-                <div className="luxury-item-info">
-                  <h5 className="luxury-item-title">{item.name}</h5>
-                  <p className="luxury-item-price">
-                    R$ {item.price.toFixed(2).replace(".", ",")}
-                  </p>
-                  <button
-                    className={`luxury-button luxury-button-glow ${
-                      item.purchased ? "btn-success" : "btn-primary"
-                    }`}
-                    onClick={() => handleShowPayment(item)}
-                  >
-                    {item.purchased ? "Comprado ✔️" : "Contribuir Agora"}
-                  </button>
-                </div>
-              </div>
+              {/* Adiciona onClick no cartão para abrir o modal */}
+              <div
+  className="luxury-item-card"
+  onClick={() => {
+    console.log(`Cartão clicado: ${item.name}`); // Log para depuração
+    handleShowPayment(item); // Chama o modal ao clicar no cartão
+  }}
+  style={{ cursor: 'pointer' }}
+>
+  <img
+    src={item.img}
+    alt={item.name}
+    className="luxury-item-image"
+  />
+  <div className="luxury-item-info">
+    <h5 className="luxury-item-title">{item.name}</h5>
+    <p className="luxury-item-price">
+      R$ {item.price.toFixed(2).replace(".", ",")}
+    </p>
+    {/* Botão que impede propagação */}
+    <button
+      className={`luxury-button luxury-button-glow ${
+        item.purchased ? "btn-success" : "btn-primary"
+      }`}
+      onClick={(e) => {
+        e.stopPropagation();
+        console.log(`Botão clicado no item: ${item.name}`);
+        handleShowPayment(item); 
+      }}
+    >
+      {item.purchased ? "Comprado ✔️" : "Contribuir Agora"}
+    </button>
+  </div>
+</div>
+
+
             </div>
           );
         })}
@@ -84,44 +98,38 @@ const MobileView: React.FC<MobileViewProps> = ({
 
       {/* Barra de Quantidade */}
       <div className="luxury-footer">
-  {/* Botão de navegação para itens anteriores */}
-  <button
-    className={`luxury-nav-button ${
-      currentPage === 0 ? "disabled" : ""
-    }`}
-    onClick={() => handleSwipe("down")}
-    disabled={currentPage === 0}
-  >
-    ◀
-  </button>
-
-  {/* Indicador de progresso */}
-  <div className="luxury-quantity-indicator">
-    <span className="luxury-quantity-text">
-      {currentPage + 1} / {items.length}
-    </span>
-    <div className="luxury-progress-bar">
-      <div
-        className="luxury-progress-bar-fill"
-        style={{
-          width: `${((currentPage + 1) / items.length) * 100}%`,
-        }}
-      ></div>
-    </div>
-  </div>
-
-  {/* Botão de navegação para próximos itens */}
-  <button
-    className={`luxury-nav-button ${
-      currentPage === items.length - 1 ? "disabled" : ""
-    }`}
-    onClick={() => handleSwipe("up")}
-    disabled={currentPage === items.length - 1}
-  >
-    ▶
-  </button>
-</div>
-
+        <button
+          className={`luxury-nav-button ${
+            currentPage === 0 ? "disabled" : ""
+          }`}
+          onClick={() => handleSwipe("down")}
+          disabled={currentPage === 0}
+        >
+          ◀
+        </button>
+        <div className="luxury-quantity-indicator">
+          <span className="luxury-quantity-text">
+            {currentPage + 1} / {items.length}
+          </span>
+          <div className="luxury-progress-bar">
+            <div
+              className="luxury-progress-bar-fill"
+              style={{
+                width: `${((currentPage + 1) / items.length) * 100}%`,
+              }}
+            ></div>
+          </div>
+        </div>
+        <button
+          className={`luxury-nav-button ${
+            currentPage === items.length - 1 ? "disabled" : ""
+          }`}
+          onClick={() => handleSwipe("up")}
+          disabled={currentPage === items.length - 1}
+        >
+          ▶
+        </button>
+      </div>
     </div>
   );
 };

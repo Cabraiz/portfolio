@@ -9,8 +9,6 @@ import MobileView from './MobileView';
 import DesktopView from './DesktopView';
 import { Item } from './types';
 import { QRCodeSVG } from 'qrcode.react';
-import LoadingPlaceholder from './LoadingPlaceholder'; 
-import ShimmerPlaceholder from './ShimmerPlaceholder';
 import { clearDB, saveToDB } from './dbHelpers';
 
 const NewHomeGiftPage: React.FC = () => {
@@ -164,6 +162,7 @@ const NewHomeGiftPage: React.FC = () => {
   }, [currentPage]);
 
   const handleShowPayment = (item: Item) => {
+    console.log("Abrindo modal para o item:", item); // Log para verificar
     const payload = generatePixPayload(
       item.price,
       '61070800317',
