@@ -10,6 +10,7 @@ import DesktopView from './DesktopView';
 import { Item } from './types';
 import { QRCodeSVG } from 'qrcode.react';
 import LoadingPlaceholder from './LoadingPlaceholder'; 
+import ShimmerPlaceholder from './ShimmerPlaceholder';
 
 const NewHomeGiftPage: React.FC = () => {
   const [totalItems, setTotalItems] = useState<number>(0);
@@ -211,29 +212,28 @@ const NewHomeGiftPage: React.FC = () => {
 
   return (
     <div className={`loading-container ${isMobile ? 'mobile-margins' : ''}`}>
-    {loading ? (
-      <LoadingPlaceholder />
-    ) : error ? (
-      <div className="error-container">Erro: {error}</div>
-    ) : isMobile ? (
-      <MobileView
-        items={Object.values(items).flat()}
-        currentPage={currentPage}
-        transitioning={transitioning}
-        handleSwipe={handleSwipe}
-        handleShowPayment={handleShowPayment}
-      />
-    ) : (
-      <DesktopView
-        items={items}
-        currentPage={currentPage}
-        itemsPerPage={itemsPerPage}
-        totalPages={Math.ceil(totalItems / itemsPerPage)}
-        handlePageChange={handlePageChange}
-        handleShowPayment={handleShowPayment}
-      />
-    )}
-    <Modal show={showModal} onHide={handleCloseModal} centered>
+      {error ? (
+        <div className="error-container">Erro: {error}</div>
+      ) : isMobile ? (
+        <MobileView
+          items={Object.values(items).flat()}
+          currentPage={currentPage}
+          transitioning={transitioning}
+          handleSwipe={handleSwipe}
+          handleShowPayment={handleShowPayment}
+        />
+      ) : (
+        <DesktopView
+          items={items}
+          currentPage={currentPage}
+          itemsPerPage={itemsPerPage}
+          totalPages={Math.ceil(totalItems / itemsPerPage)}
+          handlePageChange={handlePageChange}
+          handleShowPayment={handleShowPayment}
+          isLoading={loading} // Passa a flag de loading para o DesktopView
+        />
+      )}
+      <Modal show={showModal} onHide={handleCloseModal} centered>
         <Modal.Header closeButton>
           <Modal.Title>Pagamento</Modal.Title>
         </Modal.Header>
@@ -257,8 +257,8 @@ const NewHomeGiftPage: React.FC = () => {
           </Button>
         </Modal.Footer>
       </Modal>
-  </div>
-  );
+    </div>
+  );  
 };
 
 export default NewHomeGiftPage;
