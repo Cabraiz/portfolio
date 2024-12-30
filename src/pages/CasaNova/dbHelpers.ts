@@ -1,7 +1,9 @@
 import { openDB, IDBPDatabase } from 'idb';
+import { Item } from './types';
 
 const DB_NAME = 'lazyLoadingDB';
 const STORE_NAME = 'images';
+
 
 // Inicializa o banco de dados
 export const initDB = async (): Promise<IDBPDatabase> => {

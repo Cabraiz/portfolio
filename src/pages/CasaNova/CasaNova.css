@@ -1,7 +1,6 @@
 body {
   margin: 0 !important;
   font-family: 'Roboto', sans-serif !important;
-  background: linear-gradient(135deg, #f6d365 0%, #fda085 100%) !important;
   height: 100vh !important;
   overflow-x: hidden !important;
 }

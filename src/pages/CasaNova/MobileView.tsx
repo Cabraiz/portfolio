@@ -39,20 +39,20 @@ const MobileView: React.FC<MobileViewProps> = ({
   });
 
   return (
-    <>
-      <div className="luxury-background"></div> {/* Adiciona o fundo global */}
+    <div className="luxury-mobile-container">
       <div {...swipeHandlers} className="luxury-swipe-container">
+        
         {items.map((item, index) => {
           const offset = index - currentPage;
           const translateY = offset * 100 + (isSwiping ? progress * 100 : 0);
-  
+
           return (
             <div
               key={item.id}
               className="luxury-swipe-item"
               style={{
                 transform: `translateY(${translateY}%)`,
-                transition: isSwiping ? 'none' : 'transform 0.3s ease-in-out',
+                transition: isSwiping ? "none" : "transform 0.3s ease-in-out",
                 zIndex: -Math.abs(offset),
               }}
             >
@@ -64,12 +64,16 @@ const MobileView: React.FC<MobileViewProps> = ({
                 />
                 <div className="luxury-item-info">
                   <h5 className="luxury-item-title">{item.name}</h5>
-                  <p className="luxury-item-price">R$ {item.price.toFixed(2).replace('.', ',')}</p>
+                  <p className="luxury-item-price">
+                    R$ {item.price.toFixed(2).replace(".", ",")}
+                  </p>
                   <button
-                    className={`luxury-button ${item.purchased ? 'btn-success' : 'btn-primary'}`}
+                    className={`luxury-button luxury-button-glow ${
+                      item.purchased ? "btn-success" : "btn-primary"
+                    }`}
                     onClick={() => handleShowPayment(item)}
                   >
-                    {item.purchased ? 'Comprado ✔️' : 'Contribuir Agora'}
+                    {item.purchased ? "Comprado ✔️" : "Contribuir Agora"}
                   </button>
                 </div>
               </div>
@@ -77,8 +81,33 @@ const MobileView: React.FC<MobileViewProps> = ({
           );
         })}
       </div>
-    </>
-  );  
+
+      {/* Barra de Quantidade */}
+      <div className="luxury-footer">
+        <button
+          className={`luxury-nav-button ${
+            currentPage === 0 ? "disabled" : ""
+          }`}
+          onClick={() => handleSwipe("down")}
+          disabled={currentPage === 0}
+        >
+          ◀
+        </button>
+        <span className="luxury-page-indicator">
+          {currentPage + 1} / {items.length}
+        </span>
+        <button
+          className={`luxury-nav-button ${
+            currentPage === items.length - 1 ? "disabled" : ""
+          }`}
+          onClick={() => handleSwipe("up")}
+          disabled={currentPage === items.length - 1}
+        >
+          ▶
+        </button>
+      </div>
+    </div>
+  );
 };
 
 export default MobileView;

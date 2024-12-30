@@ -3,9 +3,56 @@
     width: 100%;
     height: 100vh;
     overflow: hidden;
-    background: linear-gradient(135deg, #f6d365, #fda085);
+    background: #2b5876;
   }
   
+
+  .luxury-swipe-container::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle at center, rgba(255, 255, 255, 0.1), transparent 70%);
+    animation: rotate-gradient 8s infinite linear; /* Gira gradualmente */
+    z-index: 1;
+  }
+  
+  .luxury-swipe-container::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.08), transparent 70%);
+    mix-blend-mode: overlay;
+    animation: pulsate 5s infinite ease-in-out; /* Pulsa suavemente */
+    opacity: 0.6;
+    z-index: 1;
+  }
+  
+  @keyframes rotate-gradient {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+  
+  @keyframes pulsate {
+    0%, 100% {
+      opacity: 0.6;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.9;
+      transform: scale(1.1);
+    }
+  }
+    
   .luxury-swipe-item {
     position: absolute;
     width: 100%;
@@ -26,14 +73,12 @@
   }
   
   .luxury-item-image {
-    max-width: 100%;
-    max-height: calc(100vh - 200px); /* Limita a altura da imagem */
-    object-fit: contain; /* Ajusta a imagem para caber sem distorção */
-    margin: auto; /* Centraliza a imagem no contêiner */
-    border-radius: 10px; /* Adiciona bordas arredondadas para um toque luxuoso */
-    background-color: #f9f9f9; /* Fundo neutro para destacar a imagem */
+    max-height: 50vh; 
+    width: auto;
+    object-fit: contain; 
+    margin: 0 auto;
+    display: block;
   }
-  
   
   .luxury-item-info {
     margin-top: 10px;
@@ -43,7 +88,14 @@
     font-size: 1.5rem;
     font-weight: bold;
     color: #333;
+    display: -webkit-box; /* Flexibilidade para linhas limitadas */
+    -webkit-line-clamp: 4; /* Limita o texto a 4 linhas */
+    -webkit-box-orient: vertical; /* Necessário para o line-clamp funcionar */
+    overflow: hidden; /* Esconde o excesso de texto */
+    text-overflow: ellipsis; /* Adiciona "..." ao final do texto */
+    word-wrap: break-word; /* Permite quebra de palavras longas */
   }
+  
   
   .luxury-item-price {
     font-size: 1.2rem;
@@ -52,20 +104,69 @@
   }
   
   .luxury-button {
-    background: linear-gradient(135deg, #ffd700, #ff8c00);
-    color: #fff;
-    font-weight: bold;
-    border: none;
-    padding: 10px 20px;
+    background: linear-gradient(135deg, #FFD700, #FF8C00); /* Ouro e âmbar */
+    color: #ffffff;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    padding: 12px 25px;
     border-radius: 50px;
+    border: none;
     cursor: pointer;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+    box-shadow: 0 5px 10px rgba(255, 140, 0, 0.4); /* Glow inicial sutil */
+  }
+  
+  .luxury-button::before {
+    content: '';
+    position: absolute;
+    bottom: -15px; /* Glow mais próximo da parte inferior */
+    left: 50%;
+    width: 100%;
+    height: 40px;
+    background: radial-gradient(ellipse at center, rgba(255, 223, 0, 0.3), transparent);
+    transform: translateX(-50%);
+    border-radius: 50%;
+    opacity: 0.5;
+    transition: opacity 0.4s ease-in-out, transform 0.4s ease-in-out;
+    z-index: -1;
+  }
+  
+  .luxury-button:hover::before {
+    opacity: 0.8; /* Realça o glow ao passar o mouse */
+    transform: translateX(-50%) scale(1.1);
   }
   
   .luxury-button:hover {
-    transform: scale(1.05);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+    transform: translateY(-3px) scale(1.05); /* Suave elevação */
+    box-shadow: 0 10px 20px rgba(255, 140, 0, 0.6);
   }
+  
+  .luxury-button:active {
+    transform: scale(0.95); /* Clique mais natural */
+    background: linear-gradient(135deg, #FFC107, #FF4500); /* Intensifica no clique */
+  }
+  
+  /* Glow animado inferior */
+  .luxury-button.luxury-button-glow::before {
+    animation: glow-pulse 3s infinite ease-in-out;
+  }
+  
+  @keyframes glow-pulse {
+    0%, 100% {
+      opacity: 0.5;
+      transform: translateX(-50%) scale(1);
+    }
+    50% {
+      opacity: 0.8;
+      transform: translateX(-50%) scale(1.2);
+    }
+  }
+  
   
   body .luxury-background {
     position: fixed;
@@ -76,4 +177,52 @@
     z-index: -1;
     background: linear-gradient(135deg, #ffd700, #ff8c00);
   }
+
+  .luxury-mobile-container {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+  }
+  
+  .luxury-footer {
+    position: fixed;
+    bottom: 10px;
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+    z-index: 100;
+  }
+  
+  .luxury-page-indicator {
+    font-size: 1rem;
+    font-weight: bold;
+    color: #333;
+  }
+  
+  .luxury-nav-button {
+    background: #007bff;
+    border: none;
+    color: white;
+    font-size: 1.2rem;
+    font-weight: bold;
+    padding: 10px 15px;
+    border-radius: 50%;
+    transition: background 0.3s ease;
+  }
+  
+  .luxury-nav-button:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+  }
+  
+  .luxury-nav-button:hover:not(:disabled) {
+    background: #0056b3;
+  }
+  
   
