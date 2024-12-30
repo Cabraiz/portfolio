@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Item } from "./types";
 import { initDB, saveToDB, getFromDB } from "./dbHelpers";
 import ShimmerPlaceholder from "./ShimmerPlaceholder"; // Componente de shimmer
+import { makeWhiteTransparent } from "./utils";
 
 interface DesktopViewProps {
   items: { [page: number]: Item[] };
@@ -19,13 +20,12 @@ const loadImage = async (id: string, imgSrc: string): Promise<string | null> => 
     return cachedImage;
   }
   try {
-    const response = await fetch(imgSrc); // Faz o download da imagem
-    if (!response.ok) throw new Error(`Erro ao carregar imagem ${imgSrc}`);
-    const blob = await response.blob();
-    const objectURL = URL.createObjectURL(blob);
+    const img = new Image();
+    img.src = imgSrc;
+    const processedImage = await makeWhiteTransparent(img); // Torna o branco transparente
 
-    await saveToDB(id, objectURL); // Armazena no IndexedDB
-    return objectURL;
+    await saveToDB(id, processedImage); // Salva a imagem processada no IndexedDB
+    return processedImage;
   } catch (error) {
     console.error(`Erro ao carregar imagem para o item ${id}:`, error);
     return null;
