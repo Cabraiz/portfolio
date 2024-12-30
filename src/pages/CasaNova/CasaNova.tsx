@@ -9,11 +9,7 @@ import MobileView from './MobileView';
 import DesktopView from './DesktopView';
 import { Item } from './types';
 import { QRCodeSVG } from 'qrcode.react';
-import { loadStripe } from '@stripe/stripe-js';
 import LoadingPlaceholder from './LoadingPlaceholder'; 
-
-const stripePromise = loadStripe(import.meta.env.VITE_APP_STRIPE_PUBLIC_KEY?.trim() || '');
-console.log("Chave do Stripe:", import.meta.env.VITE_APP_STRIPE_PUBLIC_KEY);
 
 const NewHomeGiftPage: React.FC = () => {
   const [totalItems, setTotalItems] = useState<number>(0);
@@ -89,52 +85,64 @@ const NewHomeGiftPage: React.FC = () => {
     loadItems([currentPage, currentPage + 1, currentPage + 2]);
   }, [currentPage]);
   
-  const handleRedirectToStripe = async () => {
+  const handleRedirectToMercadoPago = async () => {
     if (!selectedItem) {
       console.error("Nenhum item selecionado para pagamento.");
       return;
     }
   
-    const stripe = await stripePromise;
-    if (!stripe) {
-      console.error("Erro ao inicializar Stripe.");
-      return;
-    }
-  
     try {
-      const response = await fetch(import.meta.env.VITE_APP_PAYMENT_BACKEND_URL, {
+      const formattedPrice = parseFloat(selectedItem.price.toFixed(2));
+      console.log("Preço formatado:", formattedPrice);
+  
+      // Determina o número máximo de parcelas permitidas sem juros
+      let maxInstallments = 1; // Padrão: pagamento à vista
+      if (formattedPrice > 50 && formattedPrice <= 100) {
+        maxInstallments = 2; // 2x sem juros
+      } else if (formattedPrice > 100) {
+        maxInstallments = 3; // 3x sem juros
+      }
+  
+      // Configurando a preferência no Mercado Pago
+      const response = await fetch(import.meta.env.VITE_MP_BACKEND_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          Authorization: `Bearer ${import.meta.env.VITE_MP_ACCESS_TOKEN}`, // Use o token correto
         },
         body: JSON.stringify({
-          payment_method_types: ['card'],
-          line_items: [
+          items: [
             {
-              price_data: {
-                currency: 'brl',
-                product_data: {
-                  name: selectedItem.name,
-                },
-                unit_amount: selectedItem.price * 100, // Valor em centavos
-              },
+              title: selectedItem.name || 'Sem título',
               quantity: 1,
+              unit_price: formattedPrice,
             },
           ],
-          mode: 'payment',
-          success_url: import.meta.env.VITE_APP_REDIRECT_SUCCESS_URL,
-          cancel_url: import.meta.env.VITE_APP_REDIRECT_CANCEL_URL,
+          back_urls: {
+            success: `${import.meta.env.REACT_APP_BASE_API}/success`,
+            failure: `${import.meta.env.REACT_APP_BASE_API}/failure`,
+            pending: `${import.meta.env.REACT_APP_BASE_API}/pending`,
+          },
+          auto_return: 'approved',
+          payment_methods: {
+            installments: maxInstallments, // Define o número máximo de parcelas sem juros
+            default_installments: 1, // Padrão: pagamento à vista
+            excluded_payment_methods: [], // Permite todos os métodos de pagamento
+          },
         }),
       });
   
       if (!response.ok) {
-        throw new Error(`Erro ao criar sessão Stripe: ${response.statusText}`);
+        const errorDetails = await response.json();
+        console.error("Erro do Mercado Pago:", errorDetails);
+        throw new Error(`Erro ao criar preferência no Mercado Pago: ${response.statusText}`);
       }
   
-      const session = await response.json();
-      await stripe.redirectToCheckout({ sessionId: session.id });
+      const data = await response.json();
+      console.log("Link gerado:", data.init_point);
+      window.location.href = data.init_point; // Redireciona para o checkout do Mercado Pago
     } catch (error) {
-      console.error("Erro ao redirecionar para Stripe:", error);
+      console.error("Erro ao redirecionar para Mercado Pago:", error);
     }
   };
   
@@ -226,29 +234,29 @@ const NewHomeGiftPage: React.FC = () => {
       />
     )}
     <Modal show={showModal} onHide={handleCloseModal} centered>
-      <Modal.Header closeButton>
-        <Modal.Title>Pagamento</Modal.Title>
-      </Modal.Header>
-      <Modal.Body>
-        {selectedItem && pixCode && (
-          <>
-            <QRCodeSVG value={pixCode} size={200} />
-            <textarea value={pixCode} readOnly />
-            <button
-              onClick={handleRedirectToStripe}
-              className="btn btn-secondary w-100 mt-3"
-            >
-              Pagar com Cartão de Crédito
-            </button>
-          </>
-        )}
-      </Modal.Body>
-      <Modal.Footer>
-        <Button variant="secondary" onClick={handleCloseModal}>
-          Fechar
-        </Button>
-      </Modal.Footer>
-    </Modal>
+        <Modal.Header closeButton>
+          <Modal.Title>Pagamento</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {selectedItem && pixCode && (
+            <>
+              <QRCodeSVG value={pixCode} size={200} />
+              <textarea value={pixCode} readOnly />
+              <button
+                onClick={handleRedirectToMercadoPago}
+                className="btn btn-secondary w-100 mt-3"
+              >
+                Pagar com Cartão de Crédito
+              </button>
+            </>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleCloseModal}>
+            Fechar
+          </Button>
+        </Modal.Footer>
+      </Modal>
   </div>
   );
 };
