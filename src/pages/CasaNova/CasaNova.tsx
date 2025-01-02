@@ -60,12 +60,7 @@ const NewHomeGiftPage: React.FC = () => {
             // Salvar os itens no IndexedDB
             for (const item of items) {
               const key = item.id || `page-${page}-index-${items.indexOf(item)}`;
-            
-              if (!item.img) {
-                console.error(`Imagem ausente para o item com chave: ${key}`);
-              } else {
-                console.log(`Salvando imagem: ${item.img}`);
-              }
+
             
               await saveToDB(key, JSON.stringify(item));
             }
@@ -96,80 +91,28 @@ const NewHomeGiftPage: React.FC = () => {
       setLoading(false);
     }
   };
-  
-  
-  // UseEffect para carregar dados iniciais
-  useEffect(() => {
-    // Carregar a página atual e pré-carregar as próximas 2 páginas
-    loadItems([currentPage, currentPage + 1, currentPage + 2]);
-  }, [currentPage]);
-  
-  const handleRedirectToMercadoPago = async () => {
-    if (!selectedItem) {
-      console.error("Nenhum item selecionado para pagamento.");
-      return;
+
+  const getMaxInstallments = (price: number): number => {
+    if (price > 200) {
+      return 5; // 5x para valores acima de R$200
+    } else if (price > 160) {
+      return 4; // 4x para valores acima de R$160
+    } else if (price > 120) {
+      return 3; // 3x para valores acima de R$120
+    } else if (price > 80) {
+      return 2; // 2x para valores acima de R$80
     }
-  
-    try {
-      const formattedPrice = parseFloat(selectedItem.price.toFixed(2));
-      console.log("Preço formatado:", formattedPrice);
-  
-      // Determina o número máximo de parcelas permitidas sem juros
-      let maxInstallments = 1; // Padrão: pagamento à vista
-      if (formattedPrice > 50 && formattedPrice <= 100) {
-        maxInstallments = 2; // 2x sem juros
-      } else if (formattedPrice > 100) {
-        maxInstallments = 3; // 3x sem juros
-      }
-  
-      // Configurando a preferência no Mercado Pago
-      const response = await fetch(import.meta.env.VITE_MP_BACKEND_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${import.meta.env.VITE_MP_ACCESS_TOKEN}`, // Use o token correto
-        },
-        body: JSON.stringify({
-          items: [
-            {
-              title: selectedItem.name || 'Sem título',
-              quantity: 1,
-              unit_price: formattedPrice,
-            },
-          ],
-          back_urls: {
-            success: `${import.meta.env.REACT_APP_BASE_API}/success`,
-            failure: `${import.meta.env.REACT_APP_BASE_API}/failure`,
-            pending: `${import.meta.env.REACT_APP_BASE_API}/pending`,
-          },
-          auto_return: 'approved',
-          payment_methods: {
-            installments: maxInstallments, // Define o número máximo de parcelas sem juros
-            default_installments: 1, // Padrão: pagamento à vista
-            excluded_payment_methods: [], // Permite todos os métodos de pagamento
-          },
-        }),
-      });
-  
-      if (!response.ok) {
-        const errorDetails = await response.json();
-        console.error("Erro do Mercado Pago:", errorDetails);
-        throw new Error(`Erro ao criar preferência no Mercado Pago: ${response.statusText}`);
-      }
-  
-      const data = await response.json();
-      console.log("Link gerado:", data.init_point);
-      window.location.href = data.init_point; // Redireciona para o checkout do Mercado Pago
-    } catch (error) {
-      console.error("Erro ao redirecionar para Mercado Pago:", error);
-    }
+    return 1; // 1x (à vista) para valores abaixo de R$80
   };
   
   
   useEffect(() => {
-    // Carregar a página atual e pré-carregar as próximas 2 páginas
-    loadItems([currentPage, currentPage + 1, currentPage + 2]);
-  }, [currentPage]);
+    const nextPages = [currentPage, currentPage + 1, currentPage + 2];
+    const pagesToLoad = nextPages.filter((page) => !items[page]);
+    if (pagesToLoad.length > 0) {
+      loadItems(pagesToLoad);
+    }
+  }, [currentPage, items]);
 
   const handleShowPayment = (item: Item) => {
     console.log("Abrindo modal para o item:", item); // Log para verificar
@@ -219,6 +162,7 @@ const NewHomeGiftPage: React.FC = () => {
   
     try {
       const formattedPrice = parseFloat(selectedItem.price.toFixed(2));
+      const maxInstallments = getMaxInstallments(formattedPrice);
   
       const response = await fetch(import.meta.env.VITE_MP_BACKEND_URL, {
         method: 'POST',
@@ -240,6 +184,10 @@ const NewHomeGiftPage: React.FC = () => {
             pending: `${import.meta.env.REACT_APP_BASE_API}/pending`,
           },
           auto_return: 'approved',
+          payment_methods: {
+            installments: maxInstallments, // Define o número máximo de parcelas
+            default_installments: 1, // Padrão: pagamento à vista
+          },
         }),
       });
   
@@ -251,12 +199,11 @@ const NewHomeGiftPage: React.FC = () => {
   
       const data = await response.json();
       console.log("Redirecionando para:", data.init_point);
-      window.location.href = data.init_point; // Redireciona para o checkout do Mercado Pago
+      window.location.href = data.init_point; // Redireciona para o checkout
     } catch (error) {
-      console.error("Erro ao redirecionar para Mercado Pago:", error);
+      console.error("Erro ao redirecionar para pagamento:", error);
     }
   };
-  
   
 
   const handlePageChange = (direction: 'next' | 'prev') => {

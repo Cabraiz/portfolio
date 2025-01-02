@@ -70,7 +70,6 @@ const DesktopView: React.FC<DesktopViewProps> = ({
       await Promise.all(
         currentItems.map(async (item) => {
           const img = await loadImage(item.id.toString(), item.img, inMemoryCache);
-          console.log(`Imagem processada para o item ${item.id}:`, img);
           if (img) {
             updates[item.id] = img;
           } else {

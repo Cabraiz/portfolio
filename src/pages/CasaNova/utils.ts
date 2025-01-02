@@ -70,7 +70,6 @@ export const calculateCRC16 = (payload: string): string => {
       }
       context.putImageData(imageData, 0, 0);
       const base64Image = canvas.toDataURL();
-      console.log("Imagem processada com sucesso:", base64Image);
       resolve(base64Image);
     } catch (error) {
       console.error("Erro ao processar a imagem:", error);
