@@ -36,8 +36,10 @@ export const calculateCRC16 = (payload: string): string => {
   export const makeWhiteTransparent = (img: HTMLImageElement): Promise<string> => {
     return new Promise((resolve, reject) => {
       if (!img.complete || img.naturalWidth === 0) {
-        img.onload = () => processImage(img, resolve, reject);
-        img.onerror = () => reject(new Error('Falha ao carregar a imagem.'));
+        img.onload = () => {
+          processImage(img, resolve, reject);
+        };
+        img.onerror = () => reject(new Error("Falha ao carregar a imagem."));
       } else {
         processImage(img, resolve, reject);
       }
@@ -50,8 +52,8 @@ export const calculateCRC16 = (payload: string): string => {
     reject: (reason?: any) => void
   ) => {
     try {
-      const canvas = document.createElement('canvas');
-      const context = canvas.getContext('2d');
+      const canvas = document.createElement("canvas");
+      const context = canvas.getContext("2d");
       if (!context) {
         resolve(img.src);
         return;
@@ -63,12 +65,15 @@ export const calculateCRC16 = (payload: string): string => {
       const data = imageData.data;
       for (let i = 0; i < data.length; i += 4) {
         if (data[i] === 255 && data[i + 1] === 255 && data[i + 2] === 255) {
-          data[i + 3] = 0;
+          data[i + 3] = 0; // Tornando transparente
         }
       }
       context.putImageData(imageData, 0, 0);
-      resolve(canvas.toDataURL());
+      const base64Image = canvas.toDataURL();
+      console.log("Imagem processada com sucesso:", base64Image);
+      resolve(base64Image);
     } catch (error) {
+      console.error("Erro ao processar a imagem:", error);
       reject(error);
     }
   };

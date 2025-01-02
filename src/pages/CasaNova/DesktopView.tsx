@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Item } from "./types";
-import { initDB, saveToDB, getFromDB } from "./dbHelpers";
-import ShimmerPlaceholder from "./ShimmerPlaceholder"; // Componente de shimmer
+import { getFromDB, saveToDB } from "./dbHelpers";
+import ShimmerPlaceholder from "./ShimmerPlaceholder";
 import { makeWhiteTransparent } from "./utils";
 
 interface DesktopViewProps {
@@ -11,26 +11,45 @@ interface DesktopViewProps {
   totalPages: number;
   handlePageChange: (direction: "next" | "prev") => void;
   handleShowPayment: (item: Item) => void;
-  isLoading: boolean; // Propriedade para indicar o estado de carregamento
+  isLoading: boolean;
 }
 
-const loadImage = async (id: string, imgSrc: string): Promise<string | null> => {
-  const cachedImage = await getFromDB(id); // Verifica o cache no IndexedDB
+const loadImage = async (
+  id: string,
+  imgSrc: string,
+  inMemoryCache: { [id: string]: string | null }
+): Promise<string | null> => {
+  if (inMemoryCache[id]) {
+    return inMemoryCache[id];
+  }
+
+  const cachedImage = await getFromDB(id);
   if (cachedImage) {
+    inMemoryCache[id] = cachedImage;
     return cachedImage;
   }
+
   try {
     const img = new Image();
     img.src = imgSrc;
-    const processedImage = await makeWhiteTransparent(img); // Torna o branco transparente
 
-    await saveToDB(id, processedImage); // Salva a imagem processada no IndexedDB
+    const processedImage = await makeWhiteTransparent(img);
+    if (!processedImage) {
+      console.warn(`Processamento falhou para o item ${id}. Salvando imagem original.`);
+      await saveToDB(id, imgSrc);
+      inMemoryCache[id] = imgSrc;
+      return imgSrc;
+    }
+
+    await saveToDB(id, processedImage);
+    inMemoryCache[id] = processedImage;
     return processedImage;
   } catch (error) {
     console.error(`Erro ao carregar imagem para o item ${id}:`, error);
     return null;
   }
 };
+
 
 const DesktopView: React.FC<DesktopViewProps> = ({
   items,
@@ -43,13 +62,21 @@ const DesktopView: React.FC<DesktopViewProps> = ({
 }) => {
   const currentItems = items[currentPage] || [];
   const [processedImages, setProcessedImages] = useState<{ [id: string]: string | null }>({});
+  const inMemoryCache: { [id: string]: string | null } = {}; // Cache em memória para evitar repetição
 
   useEffect(() => {
     const loadAllImages = async () => {
       const updates: { [id: string]: string | null } = {};
       await Promise.all(
         currentItems.map(async (item) => {
-          const img = await loadImage(item.id.toString(), item.img); // Faz o carregamento da imagem
+          const img = await loadImage(item.id.toString(), item.img, inMemoryCache);
+          console.log(`Imagem processada para o item ${item.id}:`, img);
+          if (img) {
+            updates[item.id] = img;
+          } else {
+            console.warn(`Imagem quebrada ou não processada para o item ${item.id}`);
+            updates[item.id] = item.img; // Use a imagem original como fallback
+          }
           updates[item.id] = img;
         })
       );
@@ -76,8 +103,11 @@ const DesktopView: React.FC<DesktopViewProps> = ({
               </div>
             ))
           : // Exibir itens reais
-            currentItems.map((item) => (
-              <div key={item.id} className="col">
+            currentItems.map((item, index) => (
+              <div
+                key={item.id || `item-${index}`}
+                className="col"
+              >
                 <div
                   className={`card h-100 shadow-sm position-relative ${
                     item?.purchased ? "border-success" : "border-primary"
@@ -92,8 +122,8 @@ const DesktopView: React.FC<DesktopViewProps> = ({
                   >
                     {processedImages[item.id] ? (
                       <img
-                        src={processedImages[item.id] ?? undefined}
-                        alt={item.name}
+                        src={processedImages[item.id] ?? item.img}
+                        alt={item.name || "Imagem indisponível"}
                         className="card-img-top"
                         style={{ objectFit: "contain", height: "100%" }}
                       />
@@ -103,7 +133,11 @@ const DesktopView: React.FC<DesktopViewProps> = ({
                   </div>
                   <div className="card-body text-center">
                     <h5 className="card-title">
-                      {item.name || <ShimmerPlaceholder width="70%" height="20px" />}
+                      {item.name ? (
+                        item.name
+                      ) : (
+                        <ShimmerPlaceholder width="70%" height="20px" />
+                      )}
                     </h5>
                     <p className="card-text">
                       {item.price ? (
@@ -117,6 +151,7 @@ const DesktopView: React.FC<DesktopViewProps> = ({
                         item.purchased ? "btn-success" : "btn-primary"
                       }`}
                       onClick={() => handleShowPayment(item)}
+                      disabled={!item.price}
                     >
                       {item.purchased ? "Comprado ✔️" : "Ajudar"}
                     </button>

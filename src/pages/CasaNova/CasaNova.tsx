@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Modal, Button } from 'react-bootstrap';
 import './CasaNova.css';
 import { isMobile } from 'react-device-detect';
 import { fetchItems, fetchTotalItems } from './api';
@@ -8,8 +7,8 @@ import { generatePixPayload } from './utils';
 import MobileView from './MobileView';
 import DesktopView from './DesktopView';
 import { Item } from './types';
-import { QRCodeSVG } from 'qrcode.react';
 import { clearDB, saveToDB } from './dbHelpers';
+import PaymentModal from './PaymentModal';
 
 const NewHomeGiftPage: React.FC = () => {
   const [totalItems, setTotalItems] = useState<number>(0);
@@ -55,22 +54,33 @@ const NewHomeGiftPage: React.FC = () => {
         const fetchedPages = await Promise.all(
           pagesToFetch.map(async (page) => {
             const items = await fetchItems(page, itemsPerPage);
-  
+      
+            console.log('Itens carregados para a página:', page, items);
+      
             // Salvar os itens no IndexedDB
             for (const item of items) {
-              await saveToDB(item.id, JSON.stringify(item));
+              const key = item.id || `page-${page}-index-${items.indexOf(item)}`;
+            
+              if (!item.img) {
+                console.error(`Imagem ausente para o item com chave: ${key}`);
+              } else {
+                console.log(`Salvando imagem: ${item.img}`);
+              }
+            
+              await saveToDB(key, JSON.stringify(item));
             }
-  
+            
+      
             return { page, items };
           })
         );
-  
+      
         // Atualizar localStorage e estado
         const updatedItems = { ...storedItems };
         fetchedPages.forEach(({ page, items }) => {
           updatedItems[page] = items;
         });
-  
+      
         localStorage.setItem('items', JSON.stringify(updatedItems));
         setItems(updatedItems);
       } else {
@@ -201,6 +211,51 @@ const NewHomeGiftPage: React.FC = () => {
     }
   };
   
+  const handleRedirectToCreditCard = async () => {
+    if (!selectedItem) {
+      console.error("Nenhum item selecionado para pagamento.");
+      return;
+    }
+  
+    try {
+      const formattedPrice = parseFloat(selectedItem.price.toFixed(2));
+  
+      const response = await fetch(import.meta.env.VITE_MP_BACKEND_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${import.meta.env.VITE_MP_ACCESS_TOKEN}`,
+        },
+        body: JSON.stringify({
+          items: [
+            {
+              title: selectedItem.name || 'Sem título',
+              quantity: 1,
+              unit_price: formattedPrice,
+            },
+          ],
+          back_urls: {
+            success: `${import.meta.env.REACT_APP_BASE_API}/success`,
+            failure: `${import.meta.env.REACT_APP_BASE_API}/failure`,
+            pending: `${import.meta.env.REACT_APP_BASE_API}/pending`,
+          },
+          auto_return: 'approved',
+        }),
+      });
+  
+      if (!response.ok) {
+        const errorDetails = await response.json();
+        console.error("Erro ao criar preferência de pagamento:", errorDetails);
+        throw new Error(`Erro: ${response.statusText}`);
+      }
+  
+      const data = await response.json();
+      console.log("Redirecionando para:", data.init_point);
+      window.location.href = data.init_point; // Redireciona para o checkout do Mercado Pago
+    } catch (error) {
+      console.error("Erro ao redirecionar para Mercado Pago:", error);
+    }
+  };
   
   
 
@@ -242,30 +297,12 @@ const NewHomeGiftPage: React.FC = () => {
           isLoading={loading} // Passa a flag de loading para o DesktopView
         />
       )}
-      <Modal show={showModal} onHide={handleCloseModal} centered>
-        <Modal.Header closeButton>
-          <Modal.Title>Pagamento</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {selectedItem && pixCode && (
-            <>
-              <QRCodeSVG value={pixCode} size={200} />
-              <textarea value={pixCode} readOnly />
-              <button
-                onClick={handleRedirectToMercadoPago}
-                className="btn btn-secondary w-100 mt-3"
-              >
-                Pagar com Cartão de Crédito
-              </button>
-            </>
-          )}
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={handleCloseModal}>
-            Fechar
-          </Button>
-        </Modal.Footer>
-      </Modal>
+      <PaymentModal
+        show={showModal}
+        onClose={handleCloseModal}
+        pixCode={pixCode}
+        handleRedirectToCreditCard={handleRedirectToCreditCard}
+      />
     </div>
   );  
 };

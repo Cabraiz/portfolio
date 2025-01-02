@@ -125,25 +125,6 @@ body {
   border-radius: 5px !important; /* Para manter consistência no design */
 }
 
-
-
-/* Centralizar o conteúdo do modal */
-.modal-body {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
-/* Estilo para o QR Code */
-.modal-body svg {
-  margin: 20px 0;
-  border: 5px dashed #fda085;
-  border-radius: 15px;
-  padding: 10px;
-  background: white;
-}
-
 /* Fundo divertido específico para a página casanova */
 body.casanova-page {
   background: radial-gradient(circle, #ffd1dc 20%, #ffe4b3 80%);
@@ -344,5 +325,107 @@ body.casanova-page {
   100% {
     background-position: 200%;
   }
+}
+
+.modal-content {
+  border-radius: 15px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  background: linear-gradient(135deg, #ffd1dc, #fda085);
+  color: #333;
+}
+
+.modal-header, .modal-footer {
+  background: #ffe4b3;
+  border-radius: 15px 15px 0 0;
+  text-align: center;
+}
+
+.modal-title {
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #333;
+}
+
+.modal-body {
+  text-align: center;
+}
+
+.modal-body svg {
+  margin: 20px auto;
+  padding: 10px;
+  border: 5px solid #fda085;
+  border-radius: 15px;
+  background: white;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.modal-body svg:hover {
+  transform: scale(1.05);
+}
+
+.copy-feedback {
+  margin-top: 10px;
+  color: #4caf50;
+  font-weight: bold;
+  display: none;
+}
+
+.copy-feedback.show {
+  display: block;
+}
+
+.copy-button {
+  background-color: #fda085;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.copy-button:hover {
+  background-color: #f6d365;
+}
+
+.payment-button {
+  background-color: #ffd700;
+  border: none;
+  color: white;
+  font-family: 'Poppins', sans-serif;
+  font-weight: bold;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 12px 20px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.payment-button:hover {
+  background-color: #f6c700;
+  transform: translateY(-2px);
+}
+
+.payment-button i {
+  font-size: 1.5rem;
+  color: white;
+}
+
+.payment-button.credit-card {
+  background-color: #007bff;
+}
+
+.payment-button.credit-card:hover {
+  background-color: #0056b3;
 }
 

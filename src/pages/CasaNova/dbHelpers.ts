@@ -7,15 +7,17 @@ const STORE_NAME = 'images';
 
 // Inicializa o banco de dados
 export const initDB = async (): Promise<IDBPDatabase> => {
-    const db = await openDB(DB_NAME, 1, {
-      upgrade(db) {
-        if (!db.objectStoreNames.contains(STORE_NAME)) {
-          db.createObjectStore(STORE_NAME);
-        }
-      },
-    });
-    return db;
-  };
+  const db = await openDB(DB_NAME, 1, {
+    upgrade(db) {
+      if (!db.objectStoreNames.contains(STORE_NAME)) {
+        // Criação da ObjectStore com keyPath
+        db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+      }
+    },
+  });
+  return db;
+};
+
 
   export const syncDBWithServer = async (fetchItemsFn: () => Promise<Item[]>): Promise<void> => {
     const db = await initDB();
@@ -35,13 +37,17 @@ export const initDB = async (): Promise<IDBPDatabase> => {
 // Salva um valor no IndexedDB
 export const saveToDB = async (key: string, value: string): Promise<void> => {
   const db = await initDB();
-  await db.put(STORE_NAME, value, key);
+  // Salva apenas o valor da imagem no IndexedDB
+  await db.put(STORE_NAME, { id: key, value });
 };
+
+
 
 // Recupera um valor do IndexedDB
 export const getFromDB = async (key: string): Promise<string | undefined> => {
   const db = await initDB();
-  return await db.get(STORE_NAME, key);
+  const result = await db.get(STORE_NAME, key);
+  return result?.value; // Retorna apenas o valor Base64
 };
 
 // Remove um valor do IndexedDB
