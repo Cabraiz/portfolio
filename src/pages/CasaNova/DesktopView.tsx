@@ -104,59 +104,59 @@ const DesktopView: React.FC<DesktopViewProps> = ({
           : // Exibir itens reais
             currentItems.map((item, index) => (
               <div
-                key={item.id || `item-${index}`}
-                className="col"
-              >
-                <div
-                  className={`card h-100 shadow-sm position-relative ${
-                    item?.purchased ? "border-success" : "border-primary"
-                  }`}
-                >
-                  <div
-                    className="shimmer-wrapper"
-                    style={{
-                      height: "150px",
-                      backgroundColor: "#f0f0f0",
-                    }}
-                  >
-                    {processedImages[item.id] ? (
-                      <img
-                        src={processedImages[item.id] ?? item.img}
-                        alt={item.name || "Imagem indisponível"}
-                        className="card-img-top"
-                        style={{ objectFit: "contain", height: "100%" }}
-                      />
-                    ) : (
-                      <ShimmerPlaceholder height="100%" />
-                    )}
-                  </div>
-                  <div className="card-body text-center">
-                    <h5 className="card-title">
-                      {item.name ? (
-                        item.name
-                      ) : (
-                        <ShimmerPlaceholder width="70%" height="20px" />
-                      )}
-                    </h5>
-                    <p className="card-text">
-                      {item.price ? (
-                        `R$ ${item.price.toFixed(2).replace(".", ",")}`
-                      ) : (
-                        <ShimmerPlaceholder width="50%" height="20px" />
-                      )}
-                    </p>
-                    <button
-                      className={`btn w-100 ${
-                        item.purchased ? "btn-success" : "btn-primary"
-                      }`}
-                      onClick={() => handleShowPayment(item)}
-                      disabled={!item.price}
-                    >
-                      {item.purchased ? "Comprado ✔️" : "Ajudar"}
-                    </button>
-                  </div>
-                </div>
-              </div>
+    key={`${item.id}-${index}`} // Garante que a chave seja única
+    className="col"
+  >
+    <div
+      className={`card h-100 shadow-sm position-relative ${
+        item?.purchased ? "border-success" : "border-primary"
+      }`}
+    >
+      <div
+        className="shimmer-wrapper"
+        style={{
+          height: "150px",
+          backgroundColor: "#f0f0f0",
+        }}
+      >
+        {processedImages[item.id] ? (
+          <img
+            src={processedImages[item.id] ?? item.img}
+            alt={item.name || "Imagem indisponível"}
+            className="card-img-top"
+            style={{ objectFit: "contain", height: "100%" }}
+          />
+        ) : (
+          <ShimmerPlaceholder height="100%" />
+        )}
+      </div>
+      <div className="card-body text-center">
+        <h5 className="card-title">
+          {item.name ? (
+            item.name
+          ) : (
+            <ShimmerPlaceholder width="70%" height="20px" />
+          )}
+        </h5>
+        <p className="card-text">
+          {item.price ? (
+            `R$ ${item.price.toFixed(2).replace(".", ",")}`
+          ) : (
+            <ShimmerPlaceholder width="50%" height="20px" />
+          )}
+        </p>
+        <button
+          className={`btn w-100 ${
+            item.purchased ? "btn-success" : "btn-primary"
+          }`}
+          onClick={() => handleShowPayment(item)}
+          disabled={!item.price}
+        >
+          {item.purchased ? "Comprado ✔️" : "Ajudar"}
+        </button>
+      </div>
+    </div>
+  </div>
             ))}
       </div>
       <button

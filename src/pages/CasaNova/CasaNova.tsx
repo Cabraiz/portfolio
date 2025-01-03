@@ -26,71 +26,31 @@ const NewHomeGiftPage: React.FC = () => {
     try {
       setLoading(true);
   
-      // Limpar IndexedDB e LocalStorage ao reiniciar
-      if (totalItems === 0) {
-        await clearDB(); // Limpa o IndexedDB
-        localStorage.clear(); // Limpa o localStorage
-      }
+      const fetchedPages = await Promise.all(
+        pagesToLoad.map(async (page) => {
+          const items = await fetchItems(page, itemsPerPage);
+          return { page, items };
+        })
+      );
   
-      // Verifique se o total de itens já está armazenado no localStorage
-      if (totalItems === 0) {
-        const storedTotalItems = localStorage.getItem('totalItems');
-        if (storedTotalItems) {
-          setTotalItems(parseInt(storedTotalItems, 10));
-        } else {
-          const total = await fetchTotalItems();
-          setTotalItems(total);
-          localStorage.setItem('totalItems', total.toString());
-        }
-      }
+      const updatedItems = { ...items };
+      fetchedPages.forEach(({ page, items }) => {
+        updatedItems[page] = items;
+      });
   
-      // Recuperar itens do localStorage
-      const storedItems = JSON.parse(localStorage.getItem('items') ?? '{}');
+      // Consolidar todos os itens e ordenar globalmente
+      const allItems = Object.values(updatedItems).flat();
+      allItems.sort((a, b) => a.price - b.price); // Ordenar globalmente por preço
   
-      // Filtrar páginas que precisam ser carregadas
-      const pagesToFetch = pagesToLoad.filter((page) => !storedItems[page]);
-  
-      if (pagesToFetch.length > 0) {
-        const fetchedPages = await Promise.all(
-          pagesToFetch.map(async (page) => {
-            const items = await fetchItems(page, itemsPerPage);
-      
-            console.log('Itens carregados para a página:', page, items);
-      
-            // Salvar os itens no IndexedDB
-            for (const item of items) {
-              const key = item.id || `page-${page}-index-${items.indexOf(item)}`;
-
-            
-              await saveToDB(key, JSON.stringify(item));
-            }
-            
-      
-            return { page, items };
-          })
-        );
-      
-        // Atualizar localStorage e estado
-        const updatedItems = { ...storedItems };
-        fetchedPages.forEach(({ page, items }) => {
-          updatedItems[page] = items;
-        });
-      
-        localStorage.setItem('items', JSON.stringify(updatedItems));
-        setItems(updatedItems);
-      } else {
-        setItems(storedItems);
-      }
+      // Atualizar o estado
+      setItems({ 0: allItems }); // Reatribui todos os itens na página 0
     } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError('Erro desconhecido.');
-      }
+      setError(err instanceof Error ? err.message : 'Erro desconhecido.');
     } finally {
       setLoading(false);
     }
   };
+  
 
   const getMaxInstallments = (price: number): number => {
     if (price > 200) {
@@ -107,12 +67,31 @@ const NewHomeGiftPage: React.FC = () => {
   
   
   useEffect(() => {
-    const nextPages = [currentPage, currentPage + 1, currentPage + 2];
-    const pagesToLoad = nextPages.filter((page) => !items[page]);
-    if (pagesToLoad.length > 0) {
-      loadItems(pagesToLoad);
-    }
+    const loadPages = async () => {
+      const nextPages = [currentPage]; // Apenas a página atual
+      const pagesToLoad = nextPages.filter((page) => !items[page]);
+  
+      if (pagesToLoad.length > 0) {
+        const loadedPages = await Promise.all(
+          pagesToLoad.map(async (page) => {
+            const pageItems = await fetchItems(page, itemsPerPage);
+            return { page, pageItems };
+          })
+        );
+  
+        setItems((prev) => {
+          const updatedItems = { ...prev };
+          loadedPages.forEach(({ page, pageItems }) => {
+            updatedItems[page] = pageItems;
+          });
+          return updatedItems;
+        });
+      }
+    };
+  
+    loadPages(); // Chama a função assíncrona
   }, [currentPage, items]);
+  
 
   const handleShowPayment = (item: Item) => {
     console.log("Abrindo modal para o item:", item); // Log para verificar
@@ -205,6 +184,25 @@ const NewHomeGiftPage: React.FC = () => {
     }
   };
   
+  const sortItems = (criterion: 'price' | 'name') => {
+    const sortedItems = { ...items };
+  
+    Object.keys(sortedItems).forEach((page) => {
+      sortedItems[+page] = sortedItems[+page].sort((a, b) => {
+        if (criterion === 'price') {
+          return a.price - b.price; // Menor preço primeiro
+        } else if (criterion === 'name') {
+          return a.name.localeCompare(b.name); // Ordem alfabética
+        }
+        return 0;
+      });
+    });
+  
+    // Garante a atualização do estado
+    setItems({ ...sortedItems });
+  };
+  
+
 
   const handlePageChange = (direction: 'next' | 'prev') => {
     setCurrentPage((prevPage) => {
@@ -232,6 +230,7 @@ const NewHomeGiftPage: React.FC = () => {
           transitioning={transitioning}
           handleSwipe={handleSwipe}
           handleShowPayment={handleShowPayment}
+          sortItems={sortItems}
         />
       ) : (
         <DesktopView

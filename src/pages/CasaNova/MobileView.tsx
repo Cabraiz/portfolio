@@ -63,48 +63,48 @@ const MobileView: React.FC<MobileViewProps> = ({
       )}
 
       <div {...swipeHandlers} className="luxury-swipe-container">
-        {items.map((item, index) => {
-          const offset = index - currentPage;
-          const translateY = offset * 100 + (isSwiping ? progress * 100 : 0);
+      {items.map((item, index) => {
+  const offset = index - currentPage;
+  const translateY = offset * 100 + (isSwiping ? progress * 100 : 0);
 
-          return (
-            <div
-              key={item.id}
-              className="luxury-swipe-item"
-              style={{
-                transform: `translateY(${translateY}%)`,
-                transition: isSwiping ? 'none' : 'transform 0.3s ease-in-out',
-                zIndex: -Math.abs(offset),
-              }}
-            >
-              <div
-                className="luxury-item-card"
-                onClick={() => handleShowPayment(item)}
-                style={{ cursor: 'pointer' }}
-              >
-                <img src={item.img} alt={item.name} className="luxury-item-image" />
-                <div className="luxury-item-info">
-  <h5 className="luxury-item-title">{item.name}</h5>
-  <p className="luxury-item-price">
-    R$ {item.price ? item.price.toFixed(2).replace('.', ',') : '0,00'}
-  </p>
-  <button
-    className={`luxury-button luxury-button-glow ${
-      item.purchased ? 'btn-success' : 'btn-primary'
-    }`}
-    onClick={(e) => {
-      e.stopPropagation();
-      handleShowPayment(item);
-    }}
-  >
-    {item.purchased ? 'Comprado ✔️' : 'Contribuir Agora'}
-  </button>
-</div>
+  return (
+    <div
+      key={`${item.id}-${index}`} // Combina ID e índice para garantir chave única
+      className="luxury-swipe-item"
+      style={{
+        transform: `translateY(${translateY}%)`,
+        transition: isSwiping ? 'none' : 'transform 0.3s ease-in-out',
+        zIndex: -Math.abs(offset),
+      }}
+    >
+      <div
+        className="luxury-item-card"
+        onClick={() => handleShowPayment(item)}
+        style={{ cursor: 'pointer' }}
+      >
+        <img src={item.img} alt={item.name} className="luxury-item-image" />
+        <div className="luxury-item-info">
+          <h5 className="luxury-item-title">{item.name}</h5>
+          <p className="luxury-item-price">
+            R$ {item.price ? item.price.toFixed(2).replace('.', ',') : '0,00'}
+          </p>
+          <button
+            className={`luxury-button luxury-button-glow ${
+              item.purchased ? 'btn-success' : 'btn-primary'
+            }`}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleShowPayment(item);
+            }}
+          >
+            {item.purchased ? 'Comprado ✔️' : 'Contribuir Agora'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+})}
 
-              </div>
-            </div>
-          );
-        })}
       </div>
 
       <div className="luxury-footer">
