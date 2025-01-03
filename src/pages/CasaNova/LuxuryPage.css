@@ -63,6 +63,8 @@
     justify-content: center;
     align-items: center;
     transition: transform 0.3s ease-in-out;
+    transform: translateY(-20px); /* Empurra o card para cima */
+    z-index: 202px;
   }
   
   .luxury-item-card {
@@ -73,6 +75,7 @@
     text-align: center;
     width: 90%;
     z-index: 2;
+    margin-bottom: calc(30px + 30px);
   }
   
   .luxury-item-image {
@@ -263,3 +266,91 @@
     transition: width 0.3s ease-in-out;
   }
   
+  /* Container do modal */
+.luxury-sort-modal {
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.luxury-sort-button.expanded {
+  background: linear-gradient(135deg, #ff8c00, #ffd700);
+  transform: scale(1.1);
+}
+
+@keyframes expand {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Contêiner para o botão de ordenação */
+.luxury-sort-top {
+  position: fixed;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 200; /* Coloca o botão acima do restante do conteúdo */
+}
+
+/* Botão de ordenar */
+.luxury-sort-button {
+  background: linear-gradient(135deg, #ffd700, #ff8c00);
+  color: white;
+  font-size: 1rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 20px;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.luxury-sort-button:hover {
+  background: linear-gradient(135deg, #ff8c00, #ffd700);
+  transform: scale(1.1);
+}
+
+/* Modal de opções de ordenação */
+.luxury-sort-options {
+  position: fixed;
+  top: 50px; /* Abaixo do botão */
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 10px;
+  padding: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  z-index: 201;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.luxury-sort-options button {
+  background: transparent;
+  border: none;
+  font-size: 1rem;
+  color: #333;
+  text-align: center;
+  padding: 8px 10px;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background 0.3s ease;
+}
+
+.luxury-sort-options button:hover {
+  background: rgba(0, 0, 0, 0.1);
+}
+
