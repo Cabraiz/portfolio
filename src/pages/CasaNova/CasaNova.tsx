@@ -21,6 +21,7 @@ const NewHomeGiftPage: React.FC = () => {
   const [selectedItem, setSelectedItem] = useState<Item | null>(null);
   const [pixCode, setPixCode] = useState<string | null>(null);
   const [transitioning, setTransitioning] = useState<boolean>(false);
+  const [sortCriterion, setSortCriterion] = useState<'price' | 'name'>('price');
 
   const loadItems = async (pagesToLoad: number[]) => {
     try {
@@ -28,28 +29,25 @@ const NewHomeGiftPage: React.FC = () => {
   
       const fetchedPages = await Promise.all(
         pagesToLoad.map(async (page) => {
-          const items = await fetchItems(page, itemsPerPage);
+          const items = await fetchItems(page, itemsPerPage, sortCriterion); // Passa o critério de ordenação
           return { page, items };
         })
       );
   
-      const updatedItems = { ...items };
-      fetchedPages.forEach(({ page, items }) => {
-        updatedItems[page] = items;
+      setItems((prev) => {
+        const updatedItems = { ...prev };
+        fetchedPages.forEach(({ page, items }) => {
+          updatedItems[page] = items;
+        });
+        return updatedItems;
       });
-  
-      // Consolidar todos os itens e ordenar globalmente
-      const allItems = Object.values(updatedItems).flat();
-      allItems.sort((a, b) => a.price - b.price); // Ordenar globalmente por preço
-  
-      // Atualizar o estado
-      setItems({ 0: allItems }); // Reatribui todos os itens na página 0
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro desconhecido.');
     } finally {
       setLoading(false);
     }
   };
+  
   
 
   const getMaxInstallments = (price: number): number => {
@@ -68,13 +66,13 @@ const NewHomeGiftPage: React.FC = () => {
   
   useEffect(() => {
     const loadPages = async () => {
-      const nextPages = [currentPage]; // Apenas a página atual
+      const nextPages = [currentPage];
       const pagesToLoad = nextPages.filter((page) => !items[page]);
   
       if (pagesToLoad.length > 0) {
         const loadedPages = await Promise.all(
           pagesToLoad.map(async (page) => {
-            const pageItems = await fetchItems(page, itemsPerPage);
+            const pageItems = await fetchItems(page, itemsPerPage, sortCriterion); // Passa o critério
             return { page, pageItems };
           })
         );
@@ -89,8 +87,9 @@ const NewHomeGiftPage: React.FC = () => {
       }
     };
   
-    loadPages(); // Chama a função assíncrona
-  }, [currentPage, items]);
+    loadPages(); // Carrega os itens
+  }, [currentPage, sortCriterion]); // Dispara sempre que o critério muda
+  
   
 
   const handleShowPayment = (item: Item) => {
@@ -185,24 +184,10 @@ const NewHomeGiftPage: React.FC = () => {
   };
   
   const sortItems = (criterion: 'price' | 'name') => {
-    const sortedItems = { ...items };
-  
-    Object.keys(sortedItems).forEach((page) => {
-      sortedItems[+page] = sortedItems[+page].sort((a, b) => {
-        if (criterion === 'price') {
-          return a.price - b.price; // Menor preço primeiro
-        } else if (criterion === 'name') {
-          return a.name.localeCompare(b.name); // Ordem alfabética
-        }
-        return 0;
-      });
-    });
-  
-    // Garante a atualização do estado
-    setItems({ ...sortedItems });
+    setSortCriterion(criterion); // Define o novo critério de ordenação
+    setCurrentPage(0); // Reseta a página atual
+    setItems({}); // Limpa os itens atuais para forçar o recarregamento
   };
-  
-
 
   const handlePageChange = (direction: 'next' | 'prev') => {
     setCurrentPage((prevPage) => {
@@ -216,8 +201,7 @@ const NewHomeGiftPage: React.FC = () => {
     // Pré-carregar as próximas páginas (opcional)
     loadItems([currentPage + 1, currentPage + 2]);
   };
-  
-  const totalPages = Math.ceil(totalItems / itemsPerPage);
+
 
   return (
     <div className={`loading-container ${isMobile ? 'mobile-margins' : ''}`}>

@@ -3,10 +3,15 @@ import { Item } from './types';
 // api.ts
 const BASE_URL = 'https://casa-nova-api.vercel.app';
 
-export const fetchItems = async (page: number, itemsPerPage: number) => {
+export const fetchItems = async (
+  page: number,
+  itemsPerPage: number,
+  sortCriterion: 'price' | 'name'
+) => {
   const skip = page * itemsPerPage;
+  const ordenarPor = sortCriterion === 'price' ? 'preco' : 'nome'; // Tradução para os parâmetros do backend
   const response = await fetch(
-    `${BASE_URL}/casa/filtro?ordenar_por=preco&ordem=asc&skip=${skip}&limit=${itemsPerPage}`
+    `${BASE_URL}/casa/filtro?ordenar_por=${ordenarPor}&ordem=asc&skip=${skip}&limit=${itemsPerPage}`
   );
 
   if (!response.ok) {
@@ -23,6 +28,7 @@ export const fetchItems = async (page: number, itemsPerPage: number) => {
     purchased: !!item.nome_pessoa,
   }));
 };
+
 
 export const fetchTotalItems = async () => {
   const response = await fetch(`${BASE_URL}/casa/quantidade`);

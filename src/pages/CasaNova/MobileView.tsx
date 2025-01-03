@@ -57,9 +57,23 @@ const MobileView: React.FC<MobileViewProps> = ({
       {/* Modal de opções de ordenação */}
       {showSortModal && (
         <div className="luxury-sort-options">
-          <button onClick={() => sortItems('price')}>Por Preço</button>
-          <button onClick={() => sortItems('name')}>Por Nome</button>
-        </div>
+        <button
+          onClick={() => {
+            setShowSortModal(false); // Fecha o modal
+            sortItems('price'); // Notifica o componente pai sobre o critério 'price'
+          }}
+        >
+          Por Preço
+        </button>
+        <button
+          onClick={() => {
+            setShowSortModal(false); // Fecha o modal
+            sortItems('name'); // Notifica o componente pai sobre o critério 'name'
+          }}
+        >
+          Por Nome
+        </button>
+      </div>      
       )}
 
       <div {...swipeHandlers} className="luxury-swipe-container">
