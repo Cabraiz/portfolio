@@ -5,7 +5,7 @@ import tsconfigPaths from 'vite-tsconfig-paths';
 const isProd = process.env.NODE_ENV === 'production';
 
 export default defineConfig({
-  base: isProd ? '' : '', // Ajuste o basePath conforme o ambiente
+  base: isProd ? '' : '/',
   plugins: [react(), tsconfigPaths()],
   build: {
     sourcemap: true,

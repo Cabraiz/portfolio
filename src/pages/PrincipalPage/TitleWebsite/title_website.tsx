@@ -1,5 +1,4 @@
-import React, { useEffect } from "react";
-import { Helmet, HelmetProvider } from "react-helmet-async";
+import { useEffect } from "react";
 
 interface TitleWebsiteProps {
   title1: string;
@@ -8,24 +7,20 @@ interface TitleWebsiteProps {
 
 function TitleWebsite({ title1, title2 }: TitleWebsiteProps) {
   useEffect(() => {
-    const visibilityChangeListener = () => {
+    document.title = title1;
+
+    const handleVisibilityChange = () => {
       document.title = document.hidden ? title2 : title1;
     };
 
-    document.addEventListener("visibilitychange", visibilityChangeListener);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
 
     return () => {
-      document.removeEventListener("visibilitychange", visibilityChangeListener);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, [title1, title2]);
 
-  return (
-    <HelmetProvider>
-      <Helmet>
-        <title>{title1}</title>
-      </Helmet>
-    </HelmetProvider>
-  );
+  return null; // nada a renderizar, pois só cuida do título
 }
 
 export default TitleWebsite;

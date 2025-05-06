@@ -6,7 +6,6 @@ import {
   Image,
   Text,
   Input,
-  FormHelperText,
   InputGroup,
   Spinner,
   Box,
@@ -17,6 +16,8 @@ import {
   ModeloLadoEsquerdoPageParams,
   RegisterParams,
 } from "./models/ModeloJSXPage.interface";
+import { JSX } from "react";
+
 
 function ModeloLadoEsquerdoPage(params: ModeloLadoEsquerdoPageParams) {
   const textoTitle = "Junte-se a vários clientes satisfeitos.";
@@ -24,7 +25,6 @@ function ModeloLadoEsquerdoPage(params: ModeloLadoEsquerdoPageParams) {
     "Cliente HubLocal ganha mais relevância, autoridade e visibilidade. Mais de 7.000 marcas confiam na nossa plataforma. Seja uma delas!";
 
   const content: JSX.Element = (
-    <>
       <Flex
         flexDirection="column"
         backgroundColor="white"
@@ -88,7 +88,6 @@ function ModeloLadoEsquerdoPage(params: ModeloLadoEsquerdoPageParams) {
           </GridItem>
         </Grid>
       </Flex>
-    </>
   );
 
   return content;
@@ -100,35 +99,37 @@ function ModeloLadoDireitoPage(
   DireitoJSX?: JSX.Element,
 ) {
   return (
-    <>
-      <Stack w="inherit">
-        <InputGroup style={{ marginTop: "0.5vh" }}>
-          {EsquerdoJSX}
-          <Input
-            value={params.value}
-            onChange={params.onChange}
-            onBlur={params.onBlur}
-            type={params.type}
-            name={params.name}
-            id={params.id}
-            required
-            className="input-setting"
-            borderColor={params.error ? "red" : "#0385FD"}
-            paddingLeft={`${EsquerdoJSX ? "50px" : ""}`}
-            paddingRight={`${DireitoJSX ? "80px" : ""}`}
-            style={{ borderWidth: "2px", width: "100%" }}
-          />
-          {DireitoJSX}
-        </InputGroup>
-        {params.error && (
-          <FormHelperText>
-            <Text className="form-helper-font" mb="0">
-              {params.helperText}
-            </Text>
-          </FormHelperText>
-        )}
-      </Stack>
-    </>
+    <Stack w="inherit">
+      <InputGroup
+        style={{ marginTop: "0.5vh" }}
+        startElement={EsquerdoJSX}
+        endElement={DireitoJSX}
+      >
+        <Input
+          value={params.value}
+          onChange={params.onChange}
+          onBlur={params.onBlur}
+          type={params.type}
+          name={params.name}
+          id={params.id}
+          required
+          className="input-setting"
+          borderColor={params.error ? "red" : "#0385FD"}
+          style={{ borderWidth: "2px", width: "100%" }}
+        />
+      </InputGroup>
+
+      {params.error && (
+        <Text
+          className="form-helper-font"
+          color="red.500"
+          fontSize="sm"
+          mt="1"
+        >
+          {params.helperText}
+        </Text>
+      )}
+    </Stack>
   );
 }
 

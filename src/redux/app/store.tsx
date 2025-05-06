@@ -1,16 +1,15 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { apiSlice } from "./api/apiSlice";
 import authReducer from "../feature/auth/authSlice";
-import { thunk } from "redux-thunk";
-import logger from "redux-logger";
+import logger from "redux-logger"; // só se quiser no dev
 
 export const store = configureStore({
   reducer: {
     [apiSlice.reducerPath]: apiSlice.reducer,
     auth: authReducer,
   },
-  // O middleware agora é uma função que aceita o middleware padrão e o modifica
-  middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(thunk, apiSlice.middleware, logger),
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware().concat(apiSlice.middleware, logger),
   devTools: process.env.NODE_ENV !== "production",
 });
 

@@ -1,3 +1,5 @@
+import { JSX } from "react";
+
 export interface RegisterParams {
   value: string;
   onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;

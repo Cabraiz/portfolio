@@ -9,11 +9,10 @@ import {
   InputGroup,
   Stack,
   Box,
-  FormControl,
   Text,
   Link,
-  FormLabel,
 } from "@chakra-ui/react";
+import { Field, Input } from "@chakra-ui/react";
 import {
   reset,
   register,
@@ -268,118 +267,140 @@ function Register() {
   const content = isLoading ? (
     <LoadingPage />
   ) : (
-    <>
-      <Box minW={{ md: "31vw" }} style={{ marginTop: "0" }}>
-        <form onSubmit={handleSubmit} autoComplete="off">
-          <Stack
-            w={{ base: "90vw", md: "auto" }}
-            spacing={2}
-            backgroundColor="whiteAlpha.900"
+
+<Box minW={{ md: "31vw" }} style={{ marginTop: "0" }}>
+  <form onSubmit={handleSubmit} autoComplete="off">
+    <Stack
+      w={{ base: "90vw", md: "auto" }}
+      gap={2}
+      bg="whiteAlpha.900"
+    >
+      <Field.Root id="name" required invalid={nameHasError}>
+        <Field.Label>Nome</Field.Label>
+        <Input
+          name="name"
+          id="name"
+          type="text"
+          value={name}
+          onChange={nameChangeHandler}
+          onBlur={nameBlurHandler}
+          className="input-setting"
+        />
+        {nameHasError && (
+          <Field.ErrorText>Nome inválido</Field.ErrorText>
+        )}
+      </Field.Root>
+
+      <Field.Root
+        id="email"
+        required
+        invalid={emailHasError}
+        className="input-pattern"
+      >
+        <Field.Label className="letter-spacing-text poppins-text-label text-pattern">
+          Email
+        </Field.Label>
+        <Input
+          type="text"
+          name="email"
+          id="email"
+          value={email}
+          onChange={emailChangeHandler}
+          onBlur={emailBlurHandler}
+          className="input-setting"
+        />
+        {emailHasError && (
+          <Field.ErrorText>Email inválido</Field.ErrorText>
+        )}
+      </Field.Root>
+
+      <Field.Root
+        id="password"
+        required
+        invalid={passwordHasError}
+        className="input-pattern"
+      >
+        <Field.Label className="letter-spacing-text poppins-text-label text-pattern">
+          Senha
+        </Field.Label>
+        <Input
+          type="password"
+          name="password"
+          id="password"
+          value={password}
+          onChange={passwordChangeHandler}
+          onBlur={passwordBlurHandler}
+          placeholder="Mínimo de 6 caracteres"
+          className="input-setting"
+        />
+        {passwordHasError && (
+          <Field.ErrorText>Requer no mínimo 6 caracteres</Field.ErrorText>
+        )}
+      </Field.Root>
+
+      <Field.Root
+        id="confirmpassword"
+        required
+        invalid={confirmPassword.length > 0 && password !== confirmPassword}
+        className="input-pattern"
+      >
+        <Field.Label className="letter-spacing-text poppins-text-label text-pattern">
+          Repetir Senha
+        </Field.Label>
+        <Input
+          type="password"
+          name="confirmpassword"
+          id="confirmpassword"
+          value={confirmPassword}
+          onChange={confirmPasswordChangeHandler}
+          onBlur={confirmPasswordBlurHandler}
+          placeholder="Mínimo de 6 caracteres"
+          className="input-setting"
+        />
+        {confirmPassword.length > 0 && password !== confirmPassword && (
+          <Field.ErrorText>Requer mínimo de 6 caracteres</Field.ErrorText>
+        )}
+      </Field.Root>
+
+      <Button
+          className="button-setting button-font"
+          type="submit"
+          variant="solid"
+          style={{
+            boxShadow: "0px 2px 2px 0px #00000040",
+            marginTop: "4vh",
+            marginBottom: "1.5vh",
+            backgroundColor: "#0385FD",
+          }}
+        >
+          <Text
+            className="letter-spacing-button poppins-text-button"
+            fontSize="larger"
           >
-            <FormControl isRequired>
-              <FormLabel className="letter-spacing-text poppins-text-label text-pattern">
-                Nome
-              </FormLabel>
-              <InputGroup className="input-pattern">
-                <NomeInput
-                  value={name}
-                  onChange={nameChangeHandler}
-                  onBlur={nameBlurHandler}
-                  error={nameHasError}
-                  helperText={nameHasError ? "Nome inválido" : ""}
-                ></NomeInput>
-              </InputGroup>
-            </FormControl>
-            <FormControl isRequired>
-              <FormLabel className="letter-spacing-text poppins-text-label text-pattern">
-                Email
-              </FormLabel>
-              <InputGroup className="input-pattern">
-                <EmailInput
-                  value={email}
-                  onChange={emailChangeHandler}
-                  onBlur={emailBlurHandler}
-                  error={emailHasError}
-                  helperText={emailHasError ? "Email inválido" : ""}
-                ></EmailInput>
-              </InputGroup>
-            </FormControl>
-            <FormControl isRequired>
-              <FormLabel className="letter-spacing-text poppins-text-label text-pattern">
-                Senha
-              </FormLabel>
-              <InputGroup className="input-pattern">
-                <PasswordInput
-                  value={password}
-                  onChange={passwordChangeHandler}
-                  onBlur={passwordBlurHandler}
-                  error={passwordHasError}
-                  helperText={
-                    passwordHasError ? "Requer no mínimo 6 caracteres" : ""
-                  }
-                ></PasswordInput>
-              </InputGroup>
-            </FormControl>
-            <FormControl isRequired>
-              <FormLabel className="letter-spacing-text poppins-text-label text-pattern">
-                Repetir Senha
-              </FormLabel>
-              <InputGroup className="input-pattern">
-                <ConfirmPasswordInput
-                  value={confirmPassword}
-                  onChange={confirmPasswordChangeHandler}
-                  onBlur={confirmPasswordBlurHandler}
-                  error={
-                    confirmPassword.length > 0 && password !== confirmPassword
-                  }
-                  helperText={
-                    confirmPassword.length > 0 && password !== confirmPassword
-                      ? "Requer mínimo de 6 caracteres"
-                      : ""
-                  }
-                ></ConfirmPasswordInput>
-              </InputGroup>
-            </FormControl>
-            <Button
-              className="button-setting button-font"
-              type="submit"
-              variant="solid"
-              style={{
-                boxShadow: "0px 2px 2px 0px #00000040",
-                marginTop: "4vh",
-                marginBottom: "1.5vh",
-                backgroundColor: "#0385FD",
-              }}
+            REGISTRAR
+          </Text>
+        </Button>
+        <Link href="/loginhublocal" style={{ textDecoration: "none" }}>
+          <Button
+            className="button-setting button-font"
+            variant="solid"
+            style={{
+              backgroundColor: "#00CC99",
+              boxShadow: "0px 2px 2px 0px #00000040",
+            }}
+          >
+            <Text
+              className="letter-spacing-button poppins-text-button"
+              fontSize="larger"
             >
-              <Text
-                className="letter-spacing-button poppins-text-button"
-                fontSize="larger"
-              >
-                REGISTRAR
-              </Text>
-            </Button>
-            <Link href="/loginhublocal" style={{ textDecoration: "none" }}>
-              <Button
-                className="button-setting button-font"
-                variant="solid"
-                style={{
-                  backgroundColor: "#00CC99",
-                  boxShadow: "0px 2px 2px 0px #00000040",
-                }}
-              >
-                <Text
-                  className="letter-spacing-button poppins-text-button"
-                  fontSize="larger"
-                >
-                  LOGAR
-                </Text>
-              </Button>
-            </Link>
-          </Stack>
-        </form>
-      </Box>
-    </>
-  );
+              LOGAR
+            </Text>
+          </Button>
+        </Link>
+      </Stack>
+    </form>
+  </Box>
+);
 
   return ModeloLadoEsquerdoPage({
     realHeight,

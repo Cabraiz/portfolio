@@ -1,8 +1,7 @@
-import React, { useEffect, useState } from "react";
+/*import React, { useEffect, useState } from "react";
 import Confetti from "react-confetti";
 import { isMobile } from "react-device-detect";
 import AudioPlayer from "react-h5-audio-player";
-import "react-h5-audio-player/lib/styles.css";
 import { Col, Row, Image, Modal } from "react-bootstrap";
 import update from "react-addons-update";
 
@@ -25,7 +24,7 @@ import { Done, Default, Block } from "./Triplice/Triplice";
 let load = false;
 
 function Surprise() {
-  /*
+  
   const startHorarios = [15, 16, 18, 18, 20, 23];
   const [finalizados, setFinalizados] = useState<any>([]);
   let finalizadosBool: any[] = [];
@@ -337,7 +336,15 @@ function Surprise() {
       </Modal>
     </>
   );
-  */
 }
 
 export default Surprise;
+  */
+
+// src/components/CaixaVazia.tsx
+
+import { Box } from "@chakra-ui/react";
+
+export default function CaixaVazia() {
+  return <Box />;
+}

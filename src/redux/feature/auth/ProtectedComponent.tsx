@@ -8,7 +8,7 @@ export function ProtectedComponent() {
     <Center w="400px">
       <VStack>
         <Box>
-          <Button onClick={() => attemptAccess()} isLoading={isLoading}>
+          <Button onClick={() => attemptAccess()} loading={isLoading}>
             Make an authenticated request
           </Button>
         </Box>

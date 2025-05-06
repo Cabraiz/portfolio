@@ -1,4 +1,4 @@
-import React, { useEffect, useState, FormEvent } from "react";
+import React, { useEffect, useState, FormEvent, JSX } from "react";
 
 import Login_Logo from "../../assets/HubLocal/Login_Logo.webp";
 import Login_Image from "../../assets/HubLocal/Login_Image.webp";
@@ -8,26 +8,18 @@ import { toast } from "react-toastify";
 import {
   Button,
   Stack,
-  InputLeftElement,
-  chakra,
   Box,
-  FormControl,
   Text,
-  InputRightElement,
   Link,
-  Spinner,
 } from "@chakra-ui/react";
 
-import { FaUserAlt, FaLock } from "react-icons/fa";
+import { FaLock } from "react-icons/fa";
 import "./login.css";
 
-import { tokenReceived } from "../../redux/feature/auth/authSlice";
 import {
-  LoginRequest,
   useLoginMutation,
 } from "../../redux/feature/auth/authApiSlice";
 
-import { ProtectedComponent } from "../../redux/feature/auth/ProtectedComponent";
 import { isMobile } from "react-device-detect";
 
 import {
@@ -40,6 +32,10 @@ import { validateEmail } from "../../redux/shared/utils/validation/email";
 import useInput from "../../redux/hooks/input/use-input";
 import { RegisterParams } from "../Auxiliadores/models/ModeloJSXPage.interface";
 
+import { Field, Input } from "@chakra-ui/react";
+import { FaUserAlt } from "react-icons/fa";
+import { chakra } from "@chakra-ui/react";
+
 function PasswordInput({
   value,
   onChange,
@@ -47,45 +43,49 @@ function PasswordInput({
   error,
   helperText,
 }: RegisterParams) {
-  const CFaLock = chakra(FaLock);
+  const Icon = chakra(FaLock);
   const [showPassword, setShowPassword] = useState(false);
-  const handleShowClick = () => setShowPassword(!showPassword);
-
-  const inputLeftElement = (
-    <InputLeftElement
-      ms="10px"
-      h="100%"
-      pointerEvents="none"
-      children={<CFaLock color="gray.300" boxSize="22px" />}
-    />
-  );
-
-  const inputRightElement = (
-    <InputRightElement w="fit-content" h="100%" paddingRight="8px">
-      <Button h="70%" size="sm" onClick={handleShowClick}>
-        {showPassword ? "Ocultar" : "Mostrar"}
-      </Button>
-    </InputRightElement>
-  );
 
   return (
-    <>
-      {ModeloLadoDireitoPage(
-        {
-          value,
-          onChange,
-          onBlur,
-          error,
-          helperText,
-          type: showPassword ? "text" : "password",
-          name: "password",
-          id: "password",
-          placeholder: "Mínimo de 6 caracteres",
-        },
-        inputLeftElement,
-        inputRightElement,
-      )}
-    </>
+    <Field.Root
+      id="password"
+      required
+      invalid={error}
+      className="input-pattern"
+    >
+      <Field.Label className="letter-spacing-text poppins-text-label text-pattern">
+        Senha
+      </Field.Label>
+      
+      <Box position="relative">
+        <Input
+          name="password"
+          id="password"
+          type={showPassword ? "text" : "password"}
+          value={value}
+          onChange={onChange}
+          onBlur={onBlur}
+          placeholder="Mínimo de 6 caracteres"
+          className="input-setting"
+          paddingLeft="2.5rem"
+          paddingRight="5rem"
+        />
+        <Box position="absolute" left="0.75rem" top="50%" transform="translateY(-50%)">
+          <Icon color="gray.300" boxSize="20px" />
+        </Box>
+        <Box position="absolute" right="0.5rem" top="50%" transform="translateY(-50%)">
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => setShowPassword(!showPassword)}
+          >
+            {showPassword ? "Ocultar" : "Mostrar"}
+          </Button>
+        </Box>
+      </Box>
+
+      {error && <Field.ErrorText>{helperText}</Field.ErrorText>}
+    </Field.Root>
   );
 }
 
@@ -96,32 +96,32 @@ function EmailInput({
   error,
   helperText,
 }: RegisterParams) {
-  const CFaUserAlt = chakra(FaUserAlt);
-  const inputLeftElement = (
-    <InputLeftElement
-      ms="10px"
-      h="100%"
-      pointerEvents="none"
-      children={<CFaUserAlt color="gray.300" boxSize="22px" />}
-    />
-  );
+  const Icon = chakra(FaUserAlt);
 
   return (
-    <>
-      {ModeloLadoDireitoPage(
-        {
-          value,
-          onChange,
-          onBlur,
-          error,
-          helperText,
-          type: "text",
-          name: "email",
-          id: "email",
-        },
-        inputLeftElement,
-      )}
-    </>
+    <Field.Root id="email" required invalid={error} className="input-pattern">
+      <Field.Label className="letter-spacing-text poppins-text-label text-pattern">
+        Email
+      </Field.Label>
+
+      <Box position="relative">
+        <Input
+          name="email"
+          id="email"
+          type="text"
+          value={value}
+          onChange={onChange}
+          onBlur={onBlur}
+          className="input-setting"
+          paddingLeft="2.5rem"
+        />
+        <Box position="absolute" left="0.75rem" top="50%" transform="translateY(-50%)">
+          <Icon color="gray.300" boxSize="20px" />
+        </Box>
+      </Box>
+
+      {error && <Field.ErrorText>{helperText}</Field.ErrorText>}
+    </Field.Root>
   );
 }
 
@@ -202,81 +202,70 @@ function Login() {
   const content: JSX.Element = isLoading ? (
     <LoadingPage />
   ) : (
-    <>
-      <Box minW={{ md: "31vw" }} style={{ marginTop: "0" }}>
-        <form onSubmit={handleSubmit} autoComplete="off">
-          <Stack
-            w={{ base: "90vw", md: "auto" }}
-            spacing={3}
-            backgroundColor="whiteAlpha.900"
-            style={{ paddingBottom: "0" }}
+    <Box minW={{ md: "31vw" }} style={{ marginTop: "0" }}>
+      <form onSubmit={handleSubmit} autoComplete="off">
+      <Stack
+        w={{ base: "90vw", md: "auto" }}
+        gap={3}
+        backgroundColor="whiteAlpha.900"
+        style={{ paddingBottom: "0" }}
+      >
+          <EmailInput
+            value={email}
+            onChange={emailChangeHandler}
+            onBlur={emailBlurHandler}
+            error={emailHasError}
+            helperText={emailHasError ? "Email inválido" : ""}
+          />
+  
+          <PasswordInput
+            value={password}
+            onChange={passwordChangeHandler}
+            onBlur={passwordBlurHandler}
+            error={passwordHasError}
+            helperText={passwordHasError ? "Requer no mínimo 6 caracteres" : ""}
+          />
+  
+          <Button
+            className="button-settings button-font"
+            type="submit"
+            variant="solid"
+            style={{
+              backgroundColor: "#0385FD",
+              marginTop: "3vh",
+              marginBottom: "1vh",
+              boxShadow: "0px 2px 2px 0px #00000040",
+            }}
           >
-            <FormControl>
-              <Text className="letter-spacing-text poppins-text-label">
-                Email
-              </Text>
-              <EmailInput
-                value={email}
-                onChange={emailChangeHandler}
-                onBlur={emailBlurHandler}
-                error={emailHasError}
-                helperText={emailHasError ? "Email inválido" : ""}
-              ></EmailInput>
-            </FormControl>
-            <FormControl>
-              <Text className="letter-spacing-text poppins-text-label">
-                Senha
-              </Text>
-              <PasswordInput
-                value={password}
-                onChange={passwordChangeHandler}
-                onBlur={passwordBlurHandler}
-                error={passwordHasError}
-                helperText={
-                  passwordHasError ? "Requer no mínimo 6 caracteres" : ""
-                }
-              ></PasswordInput>
-            </FormControl>
+            <Text
+              className="letter-spacing-button poppins-text-button"
+              fontSize="larger"
+            >
+              LOGAR
+            </Text>
+          </Button>
+  
+          <Link href="/registerhublocal" style={{ textDecoration: "none" }}>
             <Button
               className="button-settings button-font"
-              type="submit"
               variant="solid"
               style={{
-                backgroundColor: "#0385FD",
-                marginTop: "3vh",
-                marginBottom: "1vh",
+                backgroundColor: "#00CC99",
                 boxShadow: "0px 2px 2px 0px #00000040",
+                width: "100%",
               }}
             >
               <Text
                 className="letter-spacing-button poppins-text-button"
                 fontSize="larger"
               >
-                LOGAR
+                CRIAR CONTA
               </Text>
             </Button>
-            <Link href="/registerhublocal" style={{ textDecoration: "none" }}>
-              <Button
-                className="button-settings button-font"
-                variant="solid"
-                style={{
-                  backgroundColor: "#00CC99",
-                  boxShadow: "0px 2px 2px 0px #00000040",
-                  width: "100%",
-                }}
-              >
-                <Text
-                  className="letter-spacing-button poppins-text-button"
-                  fontSize="larger"
-                >
-                  CRIAR CONTA
-                </Text>
-              </Button>
-            </Link>
-          </Stack>
-        </form>
-      </Box>
-    </>
+          </Link>
+        </Stack>
+      </form>
+    </Box>
   );
 
   return ModeloLadoEsquerdoPage({

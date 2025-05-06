@@ -2,9 +2,10 @@ import App from "./App";
 import ReactDOM from "react-dom/client";
 import React, { Suspense } from "react";
 import { BrowserRouter } from "react-router-dom";
-import { ChakraProvider } from "@chakra-ui/react";
 import { Provider } from "react-redux";
 import { store } from "./redux/app/store";
+import { ChakraProvider } from "@chakra-ui/react";
+import { system } from "./theme";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./index.css";
 
@@ -13,7 +14,7 @@ const MainApp: React.FC = () => {
   return (
     <React.StrictMode>
       <Provider store={store}>
-        <ChakraProvider>
+        <ChakraProvider value={system}>
           <BrowserRouter>
             <Suspense fallback={<div>Loading...</div>}>
               <App />

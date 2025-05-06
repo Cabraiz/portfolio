@@ -2,9 +2,6 @@
 import React, { useEffect, useState } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
-//import { db, auth, provider } from "./Firebase/firebase_";
-//import { doc, setDoc, getDoc } from "firebase/firestore";
-//import { onAuthStateChanged, signInWithPopup, signInWithRedirect, signOut } from "firebase/auth";
 
 import "./App.css";
 import "./pages/LoginHubLocal/login.css";
@@ -33,12 +30,8 @@ import { PrivateOutlet } from "./redux/shared/utils/PrivateOutlet";
 import Mateus from "./pages/Mateus/Mateus";
 import LiveAnimation from "./pages/PrincipalPage/Animation/live_animation";
 import TitleWebsite from "./pages/PrincipalPage/TitleWebsite/title_website";
-//import Firebase from "./pages/Surprise/Surprise";
 
 import { isMobile } from "react-device-detect";
-
-//const BUTTON_TEXT_SIGN_IN = "Sign In With Google";
-//const BUTTON_TEXT_SIGN_OUT = "Sign Out";
 
 function App() {
   const [windowSize, setWindowSize] = useState(getWindowSize());
@@ -47,14 +40,6 @@ function App() {
   const links = ["Home", "Portfolio", "Road Map", "Pricing","Live", "Contact"];
 
   useEffect(() => {
-    //onAuthStateChanged(auth, (user) => {
-      //if (user) {
-      //  setsignInStatus(["Sign Out", false]);
-      //} else {
-      //  setsignInStatus(["Sign In With Google", true]);
-      //}
-   // });
-
     function handleWindowResize() {
       setWindowSize(getWindowSize());
     }
@@ -66,28 +51,6 @@ function App() {
     };
   }, []);
 
-  function getStringValue(value: any): string {
-    return String(value);
-  }
-
-  /*const addTodo = async () => {
-    const temp = getStringValue(auth.currentUser?.uid);
-    const docRef = doc(db, temp, "bloqueados");
-    const docSnap = await getDoc(docRef);
-    if (!docSnap.exists()) {
-      if (temp !== undefined) {
-        await setDoc(doc(db, temp, "bloqueados"), {
-          0: false,
-          1: false,
-          2: false,
-          3: false,
-          4: false,
-          5: false,
-        });
-      }
-    }
-  };*/
-
   function getWindowSize() {
     const { innerWidth, innerHeight } = window;
     return { innerWidth, innerHeight };
@@ -96,43 +59,6 @@ function App() {
   const convertMultiplyVwToPx = () => {
     return (windowSize.innerWidth / 100) * 14;
   };
-
-  /*const SignFirebase = async () => {
-    if (!signInStatus[1]) {
-      signOut(auth)
-        .then(() => {
-          window.location.reload();
-        })
-        .catch((error) => {});
-    } else {
-      if (!isMobile) {
-        signInWithRedirect(auth, provider)
-          .then((result: any) => {
-            AfterSignIn(true);
-          })
-          .catch((error) => {
-            AfterSignIn(false);
-          });
-      } else {
-        signInWithPopup(auth, provider)
-          .then((result: any) => {
-            AfterSignIn(true);
-          })
-          .catch((error) => {
-            AfterSignIn(false, error);
-          });
-      }
-    }
-  };
-
-  const AfterSignIn = (b: boolean, e?: any) => {
-    if (b) {
-      addTodo();
-    } else {
-      const errorMessage = e.message;
-      const email = e.customData.email;
-    }
-  };*/
 
   const createButton = (buttonNumber: number, selected: boolean) => (
     <Button
@@ -151,7 +77,6 @@ function App() {
         borderWidth: selected ? "3px" : "",
         borderRadius: "1px",
       }}
-      // onClick={handleButtonClick(buttonNumber)}
     ></Button>
   );
 

@@ -1,10 +1,7 @@
-import React, { useEffect, useState } from "react";
-import { Link } from 'react-router-dom';
 import { Col, Row, Image, Button } from "react-bootstrap";
 import { isMobile } from "react-device-detect";
 
 import perfil from "../../assets/Mateus/perfil.webp";
-import dotsArray from "../../assets/icones/svg_dotsArray.svg";
 import IconGmail from "../../assets/Mateus/IconGmail.png";
 import IconInsta from "../../assets/Mateus/IconInsta.png";
 import IconLinkendin from "../../assets/Mateus/IconLinkedIn.png";
@@ -67,7 +64,7 @@ function Mateus() {
             minWidth: "400px",
           }}
         >
-          Full Stack <br />
+          Web Wizard <br />
           <div className="text-nowrap">
             Develope<span className="font-dot-space">r</span>
             <span className="font-dot font-dot-space">.</span>
