@@ -12,6 +12,7 @@ import seloUNIFOR from "../../assets/Mateus/Selos/UNIFOR.svg";
 import seloSANA from "../../assets/Mateus/Selos/SANA.png";
 import seloSEDIH from "../../assets/Mateus/Selos/SEDIH.svg";
 import RoleTitle from "./RoleTitle";
+import FloatingChat from "./FloatingChat";
 
 interface SocialButtonProps {
   href: string;
@@ -53,193 +54,196 @@ function Mateus() {
   };
 
   return (
-    <Row data-testid="mateus-container" className="p-0 m-0">
-      {/* Left Column */}
-      <Col
-        className="col-sm-12 col-md-5 m-0"
-        style={{
-          padding: `${paddingTopFullStack} max(50px, 4vw) 0 max(50px, 4vw)`,
-          minWidth: "450px",
-        }}
-      >
-        <div
+    <>
+      <Row data-testid="mateus-container" className="p-0 m-0">
+        {/* Left Column */}
+        <Col
+          className="col-sm-12 col-md-5 m-0"
           style={{
-            fontFamily: "var(--bs-body-font-family)",
-            fontSize: "4rem",
-            fontWeight: 700,
-            color: "#f1c40f",
-            marginBottom: "1.5rem",
+            padding: `${paddingTopFullStack} max(50px, 4vw) 0 max(50px, 4vw)`,
+            minWidth: "450px",
           }}
         >
-          Senior
-        </div>
-        <div
-          className="p-0 font-sequel"
-          style={{
-            backgroundImage: gradient,
-            marginBottom: "max(10px, 4vh)",
-            minWidth: "400px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "start",
-            height: "3.5rem",
-          }}
-        >
-          <RoleTitle />
-        </div>
-
-
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            gap: "2rem",
-            flexWrap: "wrap",
-            marginTop: "2vh",
-            marginBottom: "4vh",
-            padding: "1.2rem 2rem",
-            backgroundColor: "rgba(255, 255, 255, 0.05)",
-            borderRadius: "20px",
-            backdropFilter: "blur(10px)",
-            WebkitBackdropFilter: "blur(10px)",
-          }}
-        >
-          <img
-            src={seloBNB}
-            alt="Banco do Nordeste"
+          <div
             style={{
-              height: "40px",
-              filter: "grayscale(100%)",
-              opacity: 0.8,
+              fontFamily: "var(--bs-body-font-family)",
+              fontSize: "4rem",
+              fontWeight: 700,
+              color: "#f1c40f",
+              marginBottom: "1.5rem",
             }}
-          />
-          <img
-            src={seloUNIFOR}
-            alt="UNIFOR"
-            style={{
-              height: "40px",
-              filter: "grayscale(100%)",
-              opacity: 0.8,
-            }}
-          />
-          <img
-            src={seloSANA}
-            alt="SANA"
-            style={{
-              height: "40px",
-              filter: "grayscale(100%)",
-              opacity: 0.8,
-            }}
-          />
-          <img
-            src={seloSEDIH}
-            alt="SEDIH"
-            style={{
-              height: "40px",
-              filter: "grayscale(100%)",
-              opacity: 0.8,
-            }}
-          />
-        </div>
-        <Col className="justify-content-end">
-        <Row
-          className="col-sm-12 col-md-8 p-0 m-0 mt-4 pb-2 d-flex justify-content-between flex-wrap"
-          style={{ minWidth: "400px" }}
-        >
-        <Col className="me-3">
-          <Button className="btn-yellow py-3 btn-press-effect mb-4" style={{
-            background: "linear-gradient(-145deg, #f1c40f 0%, #e2b913 100%)"
-          }}>
-            HIRE ME
-          </Button>
-        </Col>
-
-        <Col>
-          <Button
-            className="btn-trasn-w-border py-3 btn-tran-effect btn-press-effect"
-            style={{ minWidth: "200px" }}
-            onClick={openResumeTab}
           >
-            DOWNLOAD CV
-          </Button>
-        </Col>
-
-          </Row>
-        </Col>
-      </Col>
-
-     {/* Right Column */}
-      <Col
-        className="col-sm-12 col-md-7"
-        style={{
-          marginTop: "10vh",
-          paddingLeft: paddingLadoDireito,
-          paddingRight: paddingLadoDireito,
-          marginLeft: margingLadoDireito,
-        }}
-      >
-        <div
-          style={{
-            backgroundColor: "rgba(255, 255, 255, 0.1)",
-            padding: "2vh 2vw",
-            borderRadius: "20px",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            width: "fit-content",
-            margin: "0 auto",
-            backdropFilter: "blur(8px)",
-            WebkitBackdropFilter: "blur(8px)",
-          }}
-        >
-          <Image
-            className="p-0"
-            src={perfil}
-            alt="Profile Image"
+            Senior
+          </div>
+          <div
+            className="p-0 font-sequel"
             style={{
-              borderRadius: "20px",
-              marginBottom: "2vh",
-              maxWidth: "100%",
+              backgroundImage: gradient,
+              marginBottom: "max(10px, 4vh)",
+              minWidth: "400px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "start",
+              height: "3.5rem",
             }}
-          />
+          >
+            <RoleTitle />
+          </div>
 
-          {/* Botões horizontais */}
+
           <div
             style={{
               display: "flex",
-              flexDirection: "row",
               justifyContent: "center",
               alignItems: "center",
-              gap: "1.5rem",
-              flexWrap: "wrap", // previne quebra feia no mobile
+              gap: "2rem",
+              flexWrap: "wrap",
               marginTop: "2vh",
+              marginBottom: "4vh",
+              padding: "1.2rem 2rem",
+              backgroundColor: "rgba(255, 255, 255, 0.05)",
+              borderRadius: "20px",
+              backdropFilter: "blur(10px)",
+              WebkitBackdropFilter: "blur(10px)",
             }}
           >
-            <SocialButton
-              href="https://www.linkedin.com/in/cabraiz/"
-              icon={IconLinkendin}
-              alt="LinkedIn"
+            <img
+              src={seloBNB}
+              alt="Banco do Nordeste"
+              style={{
+                height: "40px",
+                filter: "grayscale(100%)",
+                opacity: 0.8,
+              }}
             />
-            <SocialButton
-              href="mailto:mateusccabr@gmail.com?subject=Freelance..."
-              icon={IconGmail}
-              alt="Gmail"
+            <img
+              src={seloUNIFOR}
+              alt="UNIFOR"
+              style={{
+                height: "40px",
+                filter: "grayscale(100%)",
+                opacity: 0.8,
+              }}
             />
-            <SocialButton
-              href="https://www.instagram.com/cabraiz/"
-              icon={IconInsta}
-              alt="Insta"
+            <img
+              src={seloSANA}
+              alt="SANA"
+              style={{
+                height: "40px",
+                filter: "grayscale(100%)",
+                opacity: 0.8,
+              }}
             />
-            <SocialButton
-              href="https://www.tiktok.com/@cabraiz"
-              icon={IconTiktok}
-              alt="Tiktok"
+            <img
+              src={seloSEDIH}
+              alt="SEDIH"
+              style={{
+                height: "40px",
+                filter: "grayscale(100%)",
+                opacity: 0.8,
+              }}
             />
           </div>
-        </div>
-      </Col>
-    </Row>
+          <Col className="justify-content-end">
+          <Row
+            className="col-sm-12 col-md-8 p-0 m-0 mt-4 pb-2 d-flex justify-content-between flex-wrap"
+            style={{ minWidth: "400px" }}
+          >
+          <Col className="me-3">
+            <Button className="btn-yellow py-3 btn-press-effect mb-4" style={{
+              background: "linear-gradient(-145deg, #f1c40f 0%, #e2b913 100%)"
+            }}>
+              HIRE ME
+            </Button>
+          </Col>
+
+          <Col>
+            <Button
+              className="btn-trasn-w-border py-3 btn-tran-effect btn-press-effect"
+              style={{ minWidth: "200px" }}
+              onClick={openResumeTab}
+            >
+              DOWNLOAD CV
+            </Button>
+          </Col>
+
+            </Row>
+          </Col>
+        </Col>
+
+      {/* Right Column */}
+        <Col
+          className="col-sm-12 col-md-7"
+          style={{
+            marginTop: "10vh",
+            paddingLeft: paddingLadoDireito,
+            paddingRight: paddingLadoDireito,
+            marginLeft: margingLadoDireito,
+          }}
+        >
+          <div
+            style={{
+              backgroundColor: "rgba(255, 255, 255, 0.1)",
+              padding: "2vh 2vw",
+              borderRadius: "20px",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              width: "fit-content",
+              margin: "0 auto",
+              backdropFilter: "blur(8px)",
+              WebkitBackdropFilter: "blur(8px)",
+            }}
+          >
+            <Image
+              className="p-0"
+              src={perfil}
+              alt="Profile Image"
+              style={{
+                borderRadius: "20px",
+                marginBottom: "2vh",
+                maxWidth: "100%",
+              }}
+            />
+
+            {/* Botões horizontais */}
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "center",
+                alignItems: "center",
+                gap: "1.5rem",
+                flexWrap: "wrap", // previne quebra feia no mobile
+                marginTop: "2vh",
+              }}
+            >
+              <SocialButton
+                href="https://www.linkedin.com/in/cabraiz/"
+                icon={IconLinkendin}
+                alt="LinkedIn"
+              />
+              <SocialButton
+                href="mailto:mateusccabr@gmail.com?subject=Freelance..."
+                icon={IconGmail}
+                alt="Gmail"
+              />
+              <SocialButton
+                href="https://www.instagram.com/cabraiz/"
+                icon={IconInsta}
+                alt="Insta"
+              />
+              <SocialButton
+                href="https://www.tiktok.com/@cabraiz"
+                icon={IconTiktok}
+                alt="Tiktok"
+              />
+            </div>
+          </div>
+        </Col>
+      </Row>
+    <FloatingChat />
+    </>
   );
 }
 

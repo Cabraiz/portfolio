@@ -6,6 +6,7 @@ const titles = [
   "Full Stack Developer",
   "Front-End Specialist",
   "Back-End Developer",
+  "DevOps Engineer", 
 ];
 
 export default function RoleTitle() {
