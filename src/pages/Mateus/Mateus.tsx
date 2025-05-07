@@ -13,11 +13,13 @@ import seloSANA from "../../assets/Mateus/Selos/SANA.svg";
 import seloSEDIH from "../../assets/Mateus/Selos/SEDIH.svg";
 import RoleTitle from "./RoleTitle";
 import FloatingChat from "./FloatingChat";
-import { seloTooltips } from "./seloTooltips";
 
 import Tippy from '@tippyjs/react';
 import '../../styles/styles.css';
 import 'tippy.js/dist/tippy.css';
+
+import { useTranslation } from 'react-i18next';
+
 
 interface SocialButtonProps {
   href: string;
@@ -55,7 +57,6 @@ export function getSocialMediaName(index: number): string {
 
 function Mateus() {
   const paddingTopFullStack = isMobile ? "10vh" : "20vh";
-
   const margingLadoDireito = isMobile ? "0" : "-5vw";
   const paddingLadoDireito = isMobile ? "5vw" : "15vw";
   const gradient = isMobile
@@ -65,6 +66,8 @@ function Mateus() {
   const openResumeTab = () => {
     window.open('/resume', '_blank');
   };
+
+  const { t } = useTranslation();
 
   return (
     <>
@@ -121,30 +124,28 @@ function Mateus() {
             }}
           >
             {selos.map((selo) => (
-  <Tippy
-    key={selo.key}
-    content={seloTooltips[selo.key]}
-    placement="top"
-    animation="fade"
-    arrow={true}
-    delay={[500, 100]}
-    theme="bubble"
-    offset={[0, 20]}
-  >
-    <img
-      src={selo.src}
-      alt={selo.alt}
-      style={{
-        height: "40px",
-        filter: "grayscale(100%)",
-        opacity: 0.8,
-        ...selo.style,
-      }}
-    />
-  </Tippy>
-))}
-
-
+              <Tippy
+                key={selo.key}
+                content={t(`selo.${selo.key}`)} // <- aqui agora usa o idioma atual
+                placement="top"
+                animation="fade"
+                arrow={true}
+                delay={[500, 100]}
+                theme="bubble"
+                offset={[0, 20]}
+              >
+                <img
+                  src={selo.src}
+                  alt={selo.alt}
+                  style={{
+                    height: "40px",
+                    filter: "grayscale(100%)",
+                    opacity: 0.8,
+                    ...selo.style,
+                  }}
+                />
+              </Tippy>
+            ))}
           </div>
           <Col>
           <Row
