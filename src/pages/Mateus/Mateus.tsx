@@ -2,10 +2,16 @@ import { Col, Row, Image, Button } from "react-bootstrap";
 import { isMobile } from "react-device-detect";
 
 import perfil from "../../assets/Mateus/perfil.webp";
-import IconGmail from "../../assets/Mateus/IconGmail.png";
-import IconInsta from "../../assets/Mateus/IconInsta.png";
-import IconLinkendin from "../../assets/Mateus/IconLinkedIn.png";
-import IconTiktok from "../../assets/Mateus/IconTiktok.png";
+import IconGmail from "../../assets/Mateus/icon/IconGmail.png";
+import IconInsta from "../../assets/Mateus/icon/IconInsta.png";
+import IconLinkendin from "../../assets/Mateus/icon/IconLinkedIn.png";
+import IconTiktok from "../../assets/Mateus/icon/IconTiktok.png";
+
+import seloBNB from "../../assets/Mateus/Selos/BNB.svg";
+import seloUNIFOR from "../../assets/Mateus/Selos/UNIFOR.svg";
+import seloSANA from "../../assets/Mateus/Selos/SANA.png";
+import seloSEDIH from "../../assets/Mateus/Selos/SEDIH.svg";
+import RoleTitle from "./RoleTitle";
 
 interface SocialButtonProps {
   href: string;
@@ -57,31 +63,84 @@ function Mateus() {
         }}
       >
         <div
+          style={{
+            fontFamily: "var(--bs-body-font-family)",
+            fontSize: "4rem",
+            fontWeight: 700,
+            color: "#f1c40f",
+            marginBottom: "1.5rem",
+          }}
+        >
+          Senior
+        </div>
+        <div
           className="p-0 font-sequel"
           style={{
             backgroundImage: gradient,
             marginBottom: "max(10px, 4vh)",
             minWidth: "400px",
-          }}
-        >
-          Web Wizard <br />
-          <div className="text-nowrap">
-            Develope<span className="font-dot-space">r</span>
-          </div>
-        </div>
-        <div
-          className="p-0 font-sequel-underline"
-          style={{
-            width: "100%",
+            display: "flex",
+            alignItems: "center",
             justifyContent: "start",
-            marginLeft: "-5px",
+            height: "3.5rem",
           }}
         >
-          Hey there! Welcome to my website, where we code with style and debug
-          with a smile 😄
-          <br />
-          Get ready for some HTMLarious adventures!
-          <div style={{ textAlign: "right" }}>-ChatGPT</div>
+          <RoleTitle />
+        </div>
+
+
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            gap: "2rem",
+            flexWrap: "wrap",
+            marginTop: "2vh",
+            marginBottom: "4vh",
+            padding: "1.2rem 2rem",
+            backgroundColor: "rgba(255, 255, 255, 0.05)",
+            borderRadius: "20px",
+            backdropFilter: "blur(10px)",
+            WebkitBackdropFilter: "blur(10px)",
+          }}
+        >
+          <img
+            src={seloBNB}
+            alt="Banco do Nordeste"
+            style={{
+              height: "40px",
+              filter: "grayscale(100%)",
+              opacity: 0.8,
+            }}
+          />
+          <img
+            src={seloUNIFOR}
+            alt="UNIFOR"
+            style={{
+              height: "40px",
+              filter: "grayscale(100%)",
+              opacity: 0.8,
+            }}
+          />
+          <img
+            src={seloSANA}
+            alt="SANA"
+            style={{
+              height: "40px",
+              filter: "grayscale(100%)",
+              opacity: 0.8,
+            }}
+          />
+          <img
+            src={seloSEDIH}
+            alt="SEDIH"
+            style={{
+              height: "40px",
+              filter: "grayscale(100%)",
+              opacity: 0.8,
+            }}
+          />
         </div>
         <Col className="justify-content-end">
         <Row
@@ -110,7 +169,7 @@ function Mateus() {
         </Col>
       </Col>
 
-      {/* Right Column */}
+     {/* Right Column */}
       <Col
         className="col-sm-12 col-md-7"
         style={{
@@ -120,35 +179,65 @@ function Mateus() {
           marginLeft: margingLadoDireito,
         }}
       >
-        <Image className="p-0" src={perfil} alt="Profile Image" />
-
-        <Row
-          className="m-0 d-flex flex-row justify-content-evenly align-items-center"
+        <div
           style={{
-            padding: "3vh 0 0 0",
+            backgroundColor: "rgba(255, 255, 255, 0.1)",
+            padding: "2vh 2vw",
+            borderRadius: "20px",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            width: "fit-content",
+            margin: "0 auto",
+            backdropFilter: "blur(8px)",
+            WebkitBackdropFilter: "blur(8px)",
           }}
         >
-          <SocialButton
-            href="https://www.linkedin.com/in/cabraiz/"
-            icon={IconLinkendin}
-            alt="LinkedIn"
+          <Image
+            className="p-0"
+            src={perfil}
+            alt="Profile Image"
+            style={{
+              borderRadius: "20px",
+              marginBottom: "2vh",
+              maxWidth: "100%",
+            }}
           />
-          <SocialButton
-            href="mailto:mateusccabr@gmail.com?subject=Freelance%20Job%20Opportunity%20for%20Developer%20Engineer&body=Dear%20Cabral%2C%0D%0A%0D%0AWe%20came%20across%20your%20profile%20and%20our%20company%20is%20looking%20for%20a%20freelance%20developer%20engineer%20to%20work%20on%20a%20project%20that%20involves%20%5Bbriefly%20mention%20the%20project%20or%20technology%20stack%5D.%0D%0A%0D%0AIf%20you%20are%20interested%20in%20this%20opportunity%2C%20please%20let%20us%20know%20and%20we%20can%20discuss%20the%20details%20further.%0D%0A%0D%0AThank%20you%20for%20your%20time%20and%20consideration.%0D%0A%0D%0ABest%20regards%2C%0D%0A%5BCompany%20Name%5D"
-            icon={IconGmail}
-            alt="Gmail"
-          />
-          <SocialButton
-            href="https://www.instagram.com/cabraiz/"
-            icon={IconInsta}
-            alt="Insta"
-          />
-          <SocialButton
-            href="https://www.tiktok.com/@cabraiz"
-            icon={IconTiktok}
-            alt="Tiktok"
-          />
-        </Row>
+
+          {/* Botões horizontais */}
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              justifyContent: "center",
+              alignItems: "center",
+              gap: "1.5rem",
+              flexWrap: "wrap", // previne quebra feia no mobile
+              marginTop: "2vh",
+            }}
+          >
+            <SocialButton
+              href="https://www.linkedin.com/in/cabraiz/"
+              icon={IconLinkendin}
+              alt="LinkedIn"
+            />
+            <SocialButton
+              href="mailto:mateusccabr@gmail.com?subject=Freelance..."
+              icon={IconGmail}
+              alt="Gmail"
+            />
+            <SocialButton
+              href="https://www.instagram.com/cabraiz/"
+              icon={IconInsta}
+              alt="Insta"
+            />
+            <SocialButton
+              href="https://www.tiktok.com/@cabraiz"
+              icon={IconTiktok}
+              alt="Tiktok"
+            />
+          </div>
+        </div>
       </Col>
     </Row>
   );

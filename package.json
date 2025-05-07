@@ -31,7 +31,7 @@
     "dotenv-webpack": "8.1.0",
     "eslint": "9.26.0",
     "firebase": "11.6.1",
-    "framer-motion": "12.10.0",
+    "framer-motion": "^12.10.0",
     "glob-parent": "^6.0.2",
     "idb": "8.0.2",
     "init": "0.1.2",

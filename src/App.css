@@ -9,8 +9,6 @@
   src: local("BlommingElegant"), url("fonts/BloomingElegant/Blooming\ Elegant\ Sans.otf");
 }
 
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500&display=swap');
-
 
 html {
   height: auto !important;
@@ -87,7 +85,7 @@ body::before {
 #nav-dropdown {
   font-family: "BlommingElegant", sans-serif;
   font-weight: 300;
-  font-size: 1.5vw;
+  font-size: 1.4vw;
 }
 
 .nav-link-custom {
