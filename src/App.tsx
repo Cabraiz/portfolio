@@ -140,56 +140,94 @@ function App() {
                 id="nav-dropdown"
                 style={{
                   display: "flex",
-                  alignItems: "center",
+                  alignItems: "stretch",
                   justifyContent: "flex-start",
-                  flex: 1,
-                  marginLeft: "2vw"
+                  marginLeft: "-4vw",
+                  marginTop: "1vh",
+                  height: "100%",
+                  gap: "1rem",
                 }}
               >
                 {links.map((link) => (
-                  <Nav.Link
+                  <button
                     key={link}
-                    className={`text-nowrap nav-link-custom ${selectedLink === link ? "active" : ""}`}
-                    href={`#${link.toLowerCase()}`}
-                    onClick={handleLinkClick(link)}
-                    style={{ position: "relative" }} 
+                    onClick={() => {
+                      window.location.hash = `#${link.toLowerCase()}`;
+                      setSelectedLink(link);
+                    }}
+                    style={{
+                      all: "unset", // remove aparência nativa do botão
+                      flex: "1 1 auto",
+                      height: "100%",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      cursor: "pointer",
+                    }}
                   >
+                    <Nav.Link
+                      as="div"
+                      className={`text-nowrap nav-link-custom ${selectedLink === link ? "active" : ""}`}
+                      style={{
+                        height: "100%",
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        position: "relative",
+                        width: "100%",
+                        fontWeight: 500,
+                        letterSpacing: 1.5
+                      }}
+                    >
                       {link === "Live" && (
-                      <div
-                        style={{
-                          position: "absolute",
-                          top: "-2vh",
-                          left: "-1vw",
-                          zIndex: 10,
-                          transform: "scale(0.6)", // ⬅️ reduz em 20%
-                          transformOrigin: "top left" // ⬅️ âncora para não centralizar no meio
-                        }}
-                      >
-                        <LiveAnimation />
-                      </div>
-                    )}
-                    <span style={{ marginLeft: link === "Live" ? '5px' : '0' }}>
-                      {link}
-                    </span>
-                  </Nav.Link>
+                        <div
+                          style={{
+                            position: "absolute",
+                            top: "1.5vh",
+                            left: "-1.2vw",
+                            zIndex: 10,
+                            transform: "scale(0.5)",
+                            transformOrigin: "top left",
+                          }}
+                        >
+                          <LiveAnimation />
+                        </div>
+                      )}
+                      <span style={{ marginBottom: "0.2rem" }}>{link}</span>
+                      {selectedLink === link && (
+                        <div
+                          style={{
+                            width: "50%",
+                            height: "3px",
+                            backgroundColor: "white",
+                            borderRadius: "3px",
+                            transition: "all 0.3s ease",
+                          }}
+                        />
+                      )}
+                    </Nav.Link>
+                  </button>
                 ))}
               </Nav>
+
               <Button
+  className="google-signin-button"
   style={{
     display: "flex",
-    alignItems: "center", // 👈 volta para o alinhamento natural
+    alignItems: "center",
     gap: "10px",
-    paddingTop: "3.5vh",
+    paddingTop: "5vh",
     paddingBottom: "6px",
     paddingLeft: "16px",
     paddingRight: "16px",
-    height: "10vh",
+    height: "11vh",
     fontSize: "1.2rem",
     fontFamily: '"Roboto", sans-serif',
     fontWeight: 500,
     letterSpacing: "1px",
     lineHeight: "24px",
-    backgroundColor: "#ffffff",
+    backgroundColor: "#ffffffcf",
     color: "#3c4043",
     alignSelf: "flex-start",
     border: "1px solid #dadce0",
@@ -201,20 +239,18 @@ function App() {
       "0 1px 2px rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15)",
     marginRight: "4vw",
     cursor: "pointer",
-    marginTop:"-2vh"
+    marginTop: "-2vh",
   }}
   onClick={() => alert("Login with Google (coming soon!)")}
 >
   <Image
     src={logoGmail}
     alt="Google Logo"
-    style={{
-      width: "18px",
-      height: "18px",
-    }}
+    style={{ width: "18px", height: "18px" }}
   />
   Sign in with Google
 </Button>
+
             </>
           ) : null}
         </Navbar>

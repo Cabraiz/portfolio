@@ -9,10 +9,15 @@ import IconTiktok from "../../assets/Mateus/icon/IconTiktok.png";
 
 import seloBNB from "../../assets/Mateus/Selos/BNB.svg";
 import seloUNIFOR from "../../assets/Mateus/Selos/UNIFOR.svg";
-import seloSANA from "../../assets/Mateus/Selos/SANA.png";
+import seloSANA from "../../assets/Mateus/Selos/SANA.svg";
 import seloSEDIH from "../../assets/Mateus/Selos/SEDIH.svg";
 import RoleTitle from "./RoleTitle";
 import FloatingChat from "./FloatingChat";
+import { seloTooltips } from "./seloTooltips";
+
+import Tippy from '@tippyjs/react';
+import '../../styles/styles.css';
+import 'tippy.js/dist/tippy.css';
 
 interface SocialButtonProps {
   href: string;
@@ -20,6 +25,14 @@ interface SocialButtonProps {
   alt: string;
   isScrollToTop?: boolean;
 }
+
+const selos = [
+  { key: "BNB", src: seloBNB, alt: "Banco do Nordeste", style: { scale: "0.9", marginTop: "5px" } },
+  { key: "UNIFOR", src: seloUNIFOR, alt: "UNIFOR", style: {} },
+  { key: "SANA", src: seloSANA, alt: "SANA", style: { scale: "0.75", marginTop: "5px" } },
+  { key: "SEDIH", src: seloSEDIH, alt: "SEDIH", style: {} },
+];
+
 
 export function capitalizeFirstLetter(name: string): string {
   return name.charAt(0).toUpperCase() + name.slice(1);
@@ -107,46 +120,35 @@ function Mateus() {
               WebkitBackdropFilter: "blur(10px)",
             }}
           >
-            <img
-              src={seloBNB}
-              alt="Banco do Nordeste"
-              style={{
-                height: "40px",
-                filter: "grayscale(100%)",
-                opacity: 0.8,
-              }}
-            />
-            <img
-              src={seloUNIFOR}
-              alt="UNIFOR"
-              style={{
-                height: "40px",
-                filter: "grayscale(100%)",
-                opacity: 0.8,
-              }}
-            />
-            <img
-              src={seloSANA}
-              alt="SANA"
-              style={{
-                height: "40px",
-                filter: "grayscale(100%)",
-                opacity: 0.8,
-              }}
-            />
-            <img
-              src={seloSEDIH}
-              alt="SEDIH"
-              style={{
-                height: "40px",
-                filter: "grayscale(100%)",
-                opacity: 0.8,
-              }}
-            />
+            {selos.map((selo) => (
+  <Tippy
+    key={selo.key}
+    content={seloTooltips[selo.key]}
+    placement="top"
+    animation="fade"
+    arrow={true}
+    delay={[500, 100]}
+    theme="bubble"
+    offset={[0, 20]}
+  >
+    <img
+      src={selo.src}
+      alt={selo.alt}
+      style={{
+        height: "40px",
+        filter: "grayscale(100%)",
+        opacity: 0.8,
+        ...selo.style,
+      }}
+    />
+  </Tippy>
+))}
+
+
           </div>
-          <Col className="justify-content-end">
+          <Col>
           <Row
-            className="col-sm-12 col-md-8 p-0 m-0 mt-4 pb-2 d-flex justify-content-between flex-wrap"
+            className="p-0 m-0 mt-4 pb-2 d-flex justify-content-end flex-wrap"
             style={{ minWidth: "400px" }}
           >
           <Col className="me-3">

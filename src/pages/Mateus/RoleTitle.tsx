@@ -2,11 +2,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useState } from "react";
 
 const titles = [
-  "Software Engineer",
-  "Full Stack Developer",
-  "Front-End Specialist",
-  "Back-End Developer",
-  "DevOps Engineer", 
+"Software Engineer",
+"Full Stack Developer",
+"Front-End Specialist",
+"Back-End Developer",
+"📱 Mobile Developer",
 ];
 
 export default function RoleTitle() {
