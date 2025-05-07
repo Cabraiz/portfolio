@@ -67,7 +67,6 @@ function Mateus() {
           Web Wizard <br />
           <div className="text-nowrap">
             Develope<span className="font-dot-space">r</span>
-            <span className="font-dot font-dot-space">.</span>
           </div>
         </div>
         <div
@@ -85,27 +84,28 @@ function Mateus() {
           <div style={{ textAlign: "right" }}>-ChatGPT</div>
         </div>
         <Col className="justify-content-end">
-          <Row
-            className="col-sm-12 col-md-8 p-0 m-0 mt-4 pb-2"
-            style={{ minWidth: "400px" }}
+        <Row
+          className="col-sm-12 col-md-8 p-0 m-0 mt-4 pb-2 d-flex justify-content-between flex-wrap"
+          style={{ minWidth: "400px" }}
+        >
+        <Col className="me-3">
+          <Button className="btn-yellow py-3 btn-press-effect mb-4" style={{
+            background: "linear-gradient(-145deg, #f1c40f 0%, #e2b913 100%)"
+          }}>
+            HIRE ME
+          </Button>
+        </Col>
+
+        <Col>
+          <Button
+            className="btn-trasn-w-border py-3 btn-tran-effect btn-press-effect"
+            style={{ minWidth: "200px" }}
+            onClick={openResumeTab}
           >
-            <Col className="col-sm-6 col-md-5 m-0 text-nowrap ps-0">
-              <Button 
-                className="btn-yellow py-3 btn-press-effect mb-4"
-                style={{ background: "linear-gradient(-145deg, #f1c40f 0%,   #e2b913 100%)" }}
-              >
-                HIRE ME
-              </Button>
-            </Col>
-            <Col className="col-sm-6 col-md-7 m-0 text-nowrap ps-0 ps-3">
-              <Button
-                className="btn-trasn-w-border py-3 btn-tran-effect btn-press-effect"
-                style={{ minWidth: "200px" }}
-                onClick={openResumeTab}
-              >
-                DOWNLOAD CV
-              </Button>
-            </Col>
+            DOWNLOAD CV
+          </Button>
+        </Col>
+
           </Row>
         </Col>
       </Col>

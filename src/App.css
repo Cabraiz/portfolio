@@ -9,13 +9,57 @@
   src: local("BlommingElegant"), url("fonts/BloomingElegant/Blooming\ Elegant\ Sans.otf");
 }
 
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500&display=swap');
+
+
 html {
   height: auto !important;
 }
+
 body {
-  background: linear-gradient(90deg, #9b59b6 0%, #9b59b6 68%, #f1c40f 68%, #f1c40f 100%) !important;
+  font-family: 'Playfair Display', serif;
+  background-color: #0b0b0b; /* preto veludo */
+  background-image: radial-gradient(
+      circle at top left,
+      rgba(255, 215, 0, 0.12),
+      transparent 60%
+    ),
+    radial-gradient(
+      circle at bottom right,
+      rgba(255, 215, 0, 0.08),
+      transparent 70%
+    ),
+    linear-gradient(
+      135deg,
+      #0b0b0b 0%,
+      #1a1a1a 50%,
+      #0b0b0b 100%
+    );
+  background-blend-mode: screen, overlay, normal;
   background-repeat: no-repeat;
+  background-size: cover;
+  background-attachment: fixed;
+  color: #fdf5e6; /* branco perolado, elegante */
 }
+
+
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse at 70% 30%,
+    rgba(255, 255, 255, 0.06),
+    transparent 70%
+  );
+  z-index: -1;
+}
+
+
 .font-face-gm {
   font-family: "Brutal", sans-serif;
   letter-spacing: 5px;
@@ -43,8 +87,7 @@ body {
 #nav-dropdown {
   font-family: "BlommingElegant", sans-serif;
   font-weight: 300;
-  font-size: 2vw;
-  padding-right: 350px;
+  font-size: 1.5vw;
 }
 
 .nav-link-custom {
@@ -62,7 +105,7 @@ body {
   content: "";
   display: block;
   height: 5px;
-  margin-top: 10px;
+  margin-top: 2px;
   background-color: rgba(255, 255, 255, 0.85);
   width: 100%;
 }

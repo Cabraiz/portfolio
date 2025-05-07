@@ -109,7 +109,9 @@ function App() {
         <Navbar
           className="border-gradient-green"
           style={{
+            display: "flex",
             justifyContent: "space-between",
+            alignItems: "center",
             height: "11vh",
             fontWeight: "600",
             paddingTop: "0px",
@@ -119,6 +121,7 @@ function App() {
             marginBottom: "0",
           }}
         >
+     
           <Image
             src={logo}
             style={{
@@ -133,18 +136,35 @@ function App() {
           {!isMobile ? (
             // Render Nav element and Nav.Link elements for non-mobile devices
             <>
-              <Nav id="nav-dropdown" style={{ display: 'inline-flex', alignItems: 'center' }}>
+              <Nav
+                id="nav-dropdown"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "flex-start",
+                  flex: 1,
+                  marginLeft: "2vw"
+                }}
+              >
                 {links.map((link) => (
                   <Nav.Link
                     key={link}
-                    className={`text-nowrap nav-link-custom ${
-                      selectedLink === link ? "active" : ""
-                    }`}
+                    className={`text-nowrap nav-link-custom ${selectedLink === link ? "active" : ""}`}
                     href={`#${link.toLowerCase()}`}
                     onClick={handleLinkClick(link)}
+                    style={{ position: "relative" }} 
                   >
-                    {link === "Live" && (
-                      <div>
+                      {link === "Live" && (
+                      <div
+                        style={{
+                          position: "absolute",
+                          top: "-2vh",
+                          left: "-1vw",
+                          zIndex: 10,
+                          transform: "scale(0.6)", // ⬅️ reduz em 20%
+                          transformOrigin: "top left" // ⬅️ âncora para não centralizar no meio
+                        }}
+                      >
                         <LiveAnimation />
                       </div>
                     )}
@@ -155,31 +175,46 @@ function App() {
                 ))}
               </Nav>
               <Button
-                style={{
-                  marginRight: "4vw",
-                  width: "auto",
-                  height: "6vh",
-                  fontSize: "1rem",
-                  backgroundColor: "white",
-                  color: "rgba(100, 100, 100)",
-                  fontWeight: "500",
-                  borderColor: "white",
-                }}
-                //onClick={SignFirebase}
-              >
-                <Row className="m-0 ps-0 pe-0" style={{ alignItems: "center" }}>
-                  <Image
-                    src={logoGmail}
-                    style={{
-                      width: "calc(15px + 0.3vw)",
-                      margin: "0",
-                      padding: "0",
-                      height: "100%",
-                    }}
-                  ></Image>
-                  &nbsp;&nbsp;{signInStatus}
-                </Row>
-              </Button>
+  style={{
+    display: "flex",
+    alignItems: "center", // 👈 volta para o alinhamento natural
+    gap: "10px",
+    paddingTop: "3.5vh",
+    paddingBottom: "6px",
+    paddingLeft: "16px",
+    paddingRight: "16px",
+    height: "10vh",
+    fontSize: "1.2rem",
+    fontFamily: '"Roboto", sans-serif',
+    fontWeight: 500,
+    letterSpacing: "1px",
+    lineHeight: "24px",
+    backgroundColor: "#ffffff",
+    color: "#3c4043",
+    alignSelf: "flex-start",
+    border: "1px solid #dadce0",
+    borderTopLeftRadius: "0px",
+    borderTopRightRadius: "0px",
+    borderBottomLeftRadius: "15px",
+    borderBottomRightRadius: "15px",
+    boxShadow:
+      "0 1px 2px rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15)",
+    marginRight: "4vw",
+    cursor: "pointer",
+    marginTop:"-2vh"
+  }}
+  onClick={() => alert("Login with Google (coming soon!)")}
+>
+  <Image
+    src={logoGmail}
+    alt="Google Logo"
+    style={{
+      width: "18px",
+      height: "18px",
+    }}
+  />
+  Sign in with Google
+</Button>
             </>
           ) : null}
         </Navbar>
