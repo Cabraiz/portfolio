@@ -335,15 +335,19 @@ export function SocialButton({
   return (
     <a
       href={href}
-      className={`social-link ${
-        isScrollToTop ? "btn-trasn scrollToTopButton" : "btn-trasn"
-      }`}
-      data-testid={isScrollToTop ? "scrollToTopButton" : undefined}
-      style={{ width: "auto", marginBottom: "2vh" }}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="social-wrapper"
     >
-      <Image className="imagesize" src={icon} alt={alt} />
+      <div className={`social-link ${isScrollToTop ? "scrollToTopButton" : ""}`}>
+        <Image className="imagesize" src={icon} alt={alt} />
+      </div>
+      <div className={`tooltip-custom tooltip-${alt.toLowerCase().replace(/\s+/g, '').normalize("NFD").replace(/[\u0300-\u036f]/g, "")}`}>
+        {alt}
+      </div>
     </a>
   );
 }
+
 
 export default Mateus;
