@@ -17,6 +17,12 @@ import seloSEDIH from "../../assets/Mateus/Selos/SEDIH.svg";
 import RoleTitle from "./RoleTitle";
 import FloatingChat from "./FloatingChat";
 
+import cat1 from "../../assets/Mateus/cutieIcons/Cat1.png";
+import cat2 from "../../assets/Mateus/cutieIcons/Cat2.png";
+import cat3 from "../../assets/Mateus/cutieIcons/Cat3.png";
+import cat4 from "../../assets/Mateus/cutieIcons/Cat4.png";
+
+
 import Tippy from '@tippyjs/react';
 import '../../styles/styles.css';
 import 'tippy.js/dist/tippy.css';
@@ -34,12 +40,35 @@ interface SocialButtonProps {
 }
 
 const selos = [
-  { key: "BNB", src: seloBNB, alt: "Banco do Nordeste", style: { scale: "0.9", marginTop: "5px" } },
-  { key: "UNIFOR", src: seloUNIFOR, alt: "UNIFOR", style: {} },
-  { key: "SANA", src: seloSANA, alt: "SANA", style: { scale: "0.75", marginTop: "5px" } },
-  { key: "SEDIH", src: seloSEDIH, alt: "SEDIH", style: {} },
+  {
+    key: "BNB",
+    src: seloBNB,
+    alt: "Banco do Nordeste",
+    cat: cat1,
+    style: { scale: "0.9", marginTop: "5px" },
+  },
+  {
+    key: "UNIFOR",
+    src: seloUNIFOR,
+    alt: "UNIFOR",
+    cat: cat2,
+    style: {},
+  },
+  {
+    key: "SANA",
+    src: seloSANA,
+    alt: "SANA",
+    cat: cat3,
+    style: { scale: "0.75", marginTop: "5px" },
+  },
+  {
+    key: "SEDIH",
+    src: seloSEDIH,
+    alt: "SEDIH",
+    cat: cat4,
+    style: {},
+  },
 ];
-
 
 export function capitalizeFirstLetter(name: string): string {
   return name.charAt(0).toUpperCase() + name.slice(1);
@@ -135,26 +164,63 @@ function Mateus() {
           >
             {selos.map((selo) => (
               <Tippy
-                key={selo.key}
-                content={t(`selo.${selo.key}`)} // <- aqui agora usa o idioma atual
-                placement="top"
-                animation="fade"
-                arrow={true}
-                delay={[500, 100]}
-                theme="bubble"
-                offset={[0, 20]}
-              >
-                <img
-                  src={selo.src}
-                  alt={selo.alt}
+              key={selo.key}
+              content={
+                <div
                   style={{
-                    height: "40px",
-                    filter: "grayscale(100%)",
-                    opacity: 0.8,
-                    ...selo.style,
+                    display: 'flex',
+                    flexDirection: 'row',
+                    gap: '1rem',
+                    maxWidth: '280px',
+                    padding: '4px',
+                    alignItems: 'flex-start',
                   }}
-                />
-              </Tippy>
+                >
+                  <div style={{ flexShrink: 0 }}>
+                    <img
+                      src={selo.cat} // você pode trocar por outro ou sortear entre cat1..4
+                      alt="Cat Icon"
+                      style={{
+                        height: '11vh',
+                        objectFit: 'cover',
+                        borderRadius: '8px',
+                      }}
+                    />
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <p
+                      style={{
+                        fontSize: '12px',
+                        margin: 0,
+                        lineHeight: '1.4',
+                        wordBreak: 'break-word',
+                        whiteSpace: 'normal',
+                      }}
+                    >
+                      {t(`selo.${selo.key}`)}
+                    </p>
+                  </div>
+                </div>
+              }
+              placement="top"
+              animation="fade"
+              arrow={true}
+              delay={[500, 100]}
+              theme="bubble"
+              offset={[0, 20]}
+            >
+              <img
+                src={selo.src}
+                alt={selo.alt}
+                style={{
+                  height: "40px",
+                  filter: "grayscale(100%)",
+                  opacity: 0.8,
+                  ...selo.style,
+                }}
+              />
+            </Tippy>
+            
             ))}
           </div>
           <Col>
