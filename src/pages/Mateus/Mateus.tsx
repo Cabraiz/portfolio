@@ -75,7 +75,9 @@ function Mateus() {
   const { t } = useTranslation();
   const isPT = i18n.language === 'pt' || i18n.language.startsWith('pt');
 
+  const [isLoading, setIsLoading] = useState(false);
   const [forceHover, setForceHover] = useState(false);
+
 
   return (
     <>
@@ -162,56 +164,64 @@ function Mateus() {
           >
           <Col className="me-3">
           <button
-            className={`lux-button ${forceHover ? "lux-hover" : ""}`}
-            onClick={() => {
-              setForceHover(true); // simula hover visualmente
-              setTimeout(() => {
-                window.open(
-                  isPT
-                    ? "https://wa.me/5585998575707"
-                    : "https://meet.google.com/SEULINK",
-                  "_blank"
-                );
-                setForceHover(false); // remove hover forçado
-              }, 1000);
-            }}
-            
-          >
-              <div>
-                <span>
-                  {isPT && (
-                    <img
-                      src={IconWhatsAppVector}
-                      alt="WhatsApp"
-                      style={{
-                        height: "22px",
-                        width: "22px",
-                        marginRight: "0.4rem",
-                        verticalAlign: "middle"
-                      }}
-                    />
-                  )}
-                  <p>{isPT ? "WHATSAPP" : "MEET"}</p>
-                </span>
-              </div>
-              <div>
-                <span>
-                  {isPT && (
-                    <img
-                      src={IconWhatsAppVector}
-                      alt="WhatsApp"
-                      style={{
-                        height: "22px",
-                        width: "22px",
-                        marginRight: "0.4rem",
-                        verticalAlign: "middle"
-                      }}
-                    />
-                  )}
-                  <p>{isPT ? "VAMOS CONVERSAR" : "LET'S TALK"}</p>
-                </span>
-              </div>
-            </button>
+  className={`lux-button ${forceHover ? "lux-hover" : ""} ${isLoading ? "lux-loading" : ""}`}
+  onClick={() => {
+    setIsLoading(true);
+    setForceHover(true);
+    setTimeout(() => {
+      window.open(
+        isPT
+          ? "https://wa.me/5585998575707"
+          : "https://meet.google.com/SEULINK",
+        "_blank"
+      );
+      setIsLoading(false);
+      setForceHover(false);
+    }, 1000);
+  }}
+>
+  <div>
+    <span>
+      {isPT && (
+        <img
+          src={IconWhatsAppVector}
+          alt="WhatsApp"
+          style={{
+            height: "22px",
+            width: "22px",
+            marginRight: "0.4rem",
+            verticalAlign: "middle"
+          }}
+        />
+      )}
+      {!isLoading && (
+        <p>{isPT ? "WHATSAPP" : "MEET"}</p>
+      )}
+    </span>
+  </div>
+  <div>
+    <span>
+      {isPT && (
+        <img
+          src={IconWhatsAppVector}
+          alt="WhatsApp"
+          style={{
+            height: "22px",
+            width: "22px",
+            marginRight: "0.4rem",
+            verticalAlign: "middle"
+          }}
+        />
+      )}
+      {!isLoading ? (
+        <p>{isPT ? "VAMOS CONVERSAR" : "LET'S TALK"}</p>
+      ) : (
+        <div className="lux-loading-bar" />
+      )}
+    </span>
+  </div>
+</button>
+
           </Col>
           <Col>
             <Button
