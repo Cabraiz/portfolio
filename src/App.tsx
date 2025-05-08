@@ -32,12 +32,13 @@ import LiveAnimation from "./pages/PrincipalPage/Animation/live_animation";
 import TitleWebsite from "./pages/PrincipalPage/TitleWebsite/title_website";
 
 import { isMobile } from "react-device-detect";
+import { useTranslation } from "react-i18next";
 
 function App() {
   const [windowSize, setWindowSize] = useState(getWindowSize());
   const [signInStatus] = useState(["", false]);
   const [selectedLink, setSelectedLink] = useState("Home");
-  const links = ["Home", "Portfolio", "Road Map", "Pricing","Live", "Contact"];
+  const links = ["home", "portfolio", "roadMap", "pricing", "live", "contact"];
 
   useEffect(() => {
     function handleWindowResize() {
@@ -99,7 +100,9 @@ function App() {
     (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
       event.preventDefault();
       setSelectedLink(link);
-    };
+  };
+
+  const { t } = useTranslation();
   return (
     <>
       <div>
@@ -180,21 +183,21 @@ function App() {
                         letterSpacing: 1.5
                       }}
                     >
-                      {link === "Live" && (
-                        <div
-                          style={{
-                            position: "absolute",
-                            top: "1.5vh",
-                            left: "-1.2vw",
-                            zIndex: 10,
-                            transform: "scale(0.5)",
-                            transformOrigin: "top left",
-                          }}
-                        >
-                          <LiveAnimation />
-                        </div>
-                      )}
-                      <span style={{ marginBottom: "0.2rem" }}>{link}</span>
+                    {link === "live" && (
+                      <div
+                        style={{
+                          position: "absolute",
+                          top: "1.5vh",
+                          left: "-1.2vw",
+                          zIndex: 10,
+                          transform: "scale(0.5)",
+                          transformOrigin: "top left",
+                        }}
+                      >
+                        <LiveAnimation />
+                      </div>
+                    )}
+                      <span style={{ marginBottom: "0.2rem" }}>{t(`nav.${link}`)}</span>
                       {selectedLink === link && (
                         <div
                           style={{

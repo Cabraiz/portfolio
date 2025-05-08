@@ -1,11 +1,14 @@
 import { Col, Row, Image, Button } from "react-bootstrap";
 import { isMobile } from "react-device-detect";
+import IconWhatsAppVector from "../../assets/Mateus/icon/IconWhatsAppVector.svg";
 
 import perfil from "../../assets/Mateus/perfil.webp";
 import IconGmail from "../../assets/Mateus/icon/IconGmail.png";
 import IconInsta from "../../assets/Mateus/icon/IconInsta.png";
 import IconLinkendin from "../../assets/Mateus/icon/IconLinkedIn.png";
 import IconTiktok from "../../assets/Mateus/icon/IconTiktok.png";
+import IconWhatsApp from "../../assets/Mateus/icon/IconWhatsApp.png";
+import IconMeet from "../../assets/Mateus/icon/IconMeet.png";
 
 import seloBNB from "../../assets/Mateus/Selos/BNB.svg";
 import seloUNIFOR from "../../assets/Mateus/Selos/UNIFOR.svg";
@@ -19,6 +22,8 @@ import '../../styles/styles.css';
 import 'tippy.js/dist/tippy.css';
 
 import { useTranslation } from 'react-i18next';
+import i18n from "@/i18n/i18n";
+import { useState } from "react";
 
 
 interface SocialButtonProps {
@@ -68,6 +73,9 @@ function Mateus() {
   };
 
   const { t } = useTranslation();
+  const isPT = i18n.language === 'pt' || i18n.language.startsWith('pt');
+
+  const [forceHover, setForceHover] = useState(false);
 
   return (
     <>
@@ -153,20 +161,65 @@ function Mateus() {
             style={{ minWidth: "400px" }}
           >
           <Col className="me-3">
-            <Button className="btn-yellow py-3 btn-press-effect mb-4" style={{
-              background: "linear-gradient(-145deg, #f1c40f 0%, #e2b913 100%)"
-            }}>
-              HIRE ME
-            </Button>
+          <button
+            className={`lux-button ${forceHover ? "lux-hover" : ""}`}
+            onClick={() => {
+              setForceHover(true); // simula hover visualmente
+              setTimeout(() => {
+                window.open(
+                  isPT
+                    ? "https://wa.me/5585998575707"
+                    : "https://meet.google.com/SEULINK",
+                  "_blank"
+                );
+                setForceHover(false); // remove hover forçado
+              }, 1000);
+            }}
+            
+          >
+              <div>
+                <span>
+                  {isPT && (
+                    <img
+                      src={IconWhatsAppVector}
+                      alt="WhatsApp"
+                      style={{
+                        height: "22px",
+                        width: "22px",
+                        marginRight: "0.4rem",
+                        verticalAlign: "middle"
+                      }}
+                    />
+                  )}
+                  <p>{isPT ? "WHATSAPP" : "MEET"}</p>
+                </span>
+              </div>
+              <div>
+                <span>
+                  {isPT && (
+                    <img
+                      src={IconWhatsAppVector}
+                      alt="WhatsApp"
+                      style={{
+                        height: "22px",
+                        width: "22px",
+                        marginRight: "0.4rem",
+                        verticalAlign: "middle"
+                      }}
+                    />
+                  )}
+                  <p>{isPT ? "VAMOS CONVERSAR" : "LET'S TALK"}</p>
+                </span>
+              </div>
+            </button>
           </Col>
-
           <Col>
             <Button
               className="btn-trasn-w-border py-3 btn-tran-effect btn-press-effect"
               style={{ minWidth: "200px" }}
               onClick={openResumeTab}
             >
-              DOWNLOAD CV
+              {t("buttons.downloadCV")}
             </Button>
           </Col>
 
@@ -241,6 +294,19 @@ function Mateus() {
                 icon={IconTiktok}
                 alt="Tiktok"
               />
+              {isPT ? (
+                <SocialButton
+                  href="https://meet.google.com/SEULINK"
+                  icon={IconMeet}
+                  alt="Meet"
+                />
+              ) : (
+                <SocialButton
+                  href="https://wa.me/SEUNUMERO"
+                  icon={IconWhatsApp}
+                  alt="WhatsApp"
+                />
+              )}
             </div>
           </div>
         </Col>

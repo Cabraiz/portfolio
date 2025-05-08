@@ -4,6 +4,19 @@
       "UNIFOR": "Formado em Ciência da Computação, comecei minha carreira com estágios e coordenação de projetos, gerenciando recursos tecnológicos desde cedo.",
       "SANA": "Desde 2020, atuo nessa ONG focando em melhorar a comunicação e o trabalho em equipe numa área de TI que sempre foi técnica, mas carente de empatia.",
       "SEDIH": "Hoje sou analista sênior, desenvolvendo ferramentas escaláveis para apoiar toda a estrutura digital da secretaria e melhorar os serviços públicos."
+    },
+    
+    "nav": {
+      "home": "Início",
+      "portfolio": "Portfólio",
+      "roadMap": "RoadMap",
+      "pricing": "Preços",
+      "live": "Ao Vivo",
+      "contact": "Contato"
+    },
+
+    "buttons": {
+      "hireMe": "WhatsApp",
+      "downloadCV": "CURRÍCULO"
     }
-  }
-  
+}
