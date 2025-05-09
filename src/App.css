@@ -100,6 +100,7 @@ body::before {
 }
 
 .google-signin-button {
+  margin-top: -11vh;
   position: relative;
   overflow: hidden;
   background: rgba(255, 255, 255, 0.65);
@@ -141,17 +142,22 @@ body::before {
   left: 100%;
 }
 
-
 @keyframes bounceToFinal {
   0%   { margin-top: -11vh; }
-  55%  { margin-top: -1.6vh; }   /* overshoot */
-  70%  { margin-top: -2.6vh; }   /* volta acima */
-  82%  { margin-top: -2.05vh; }  /* quase lá */
-  89%  { margin-top: -2.2vh; }   /* mais sutil ainda */
-  94%  { margin-top: -1.98vh; }  /* micro bounce */
-  100% { margin-top: -2vh; }     /* final */
+  50%  { margin-top: -1.6vh; }
+  60%  { margin-top: -3vh; }
+  68%  { margin-top: -1.7vh; }
+  74%  { margin-top: -2.6vh; }
+  80%  { margin-top: -1.9vh; }
+  85%  { margin-top: -2.4vh; }
+  89%  { margin-top: -1.97vh; }
+  92%  { margin-top: -2.2vh; }
+  95%  { margin-top: -2.01vh; }
+  97%  { margin-top: -2.07vh; }
+  99%  { margin-top: -1.995vh; }
+  100% { margin-top: -2vh; }
 }
 
 .google-animate-bounce {
-  animation: bounceToFinal 2.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: bounceToFinal 3s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
