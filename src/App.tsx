@@ -7,6 +7,7 @@ import "./App.css";
 import "./pages/LoginHubLocal/login.css";
 import "./pages/Mateus/Mateus.css";
 import "./pages/Surprise/Surprise.css";
+import GoogleSignInButton from "./GoogleSignInButton";
 
 import { Row, Navbar, Image, Button, Nav } from "react-bootstrap";
 
@@ -223,59 +224,7 @@ function App() {
                   </button>
                 ))}
               </Nav>
-              <Button
-                className={`google-signin-button ${animateGoogle ? "google-animate-bounce" : ""}`}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "10px",
-                  paddingTop: "5vh",
-                  paddingBottom: "6px",
-                  paddingLeft: "16px",
-                  paddingRight: "16px",
-                  height: "11vh",
-                  fontSize: "1.2rem",
-                  fontFamily: '"Roboto", sans-serif',
-                  fontWeight: 500,
-                  letterSpacing: "1px",
-                  lineHeight: "24px",
-                  backgroundColor: "#ffffffcf",
-                  color: "#3c4043",
-                  alignSelf: "flex-start",
-                  border: "1px solid #dadce0",
-                  borderTopLeftRadius: "0px",
-                  borderTopRightRadius: "0px",
-                  borderBottomLeftRadius: "15px",
-                  borderBottomRightRadius: "15px",
-                  boxShadow:
-                    "0 1px 2px rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15)",
-                  marginRight: "4vw",
-                  cursor: "pointer",
-                }}
-                onClick={() => alert("Login with Google (coming soon!)")}
-              >
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "10px",
-                  padding: "6px 12px",
-                  backgroundColor: "rgba(255,255,255,0.5)",
-                  borderRadius: "24px",
-                  border: "1px solid rgba(0,0,0,0.5)",
-                  backdropFilter: "blur(2px)",
-                  WebkitBackdropFilter: "blur(2px)",
-                  boxShadow: "inset 0 0 0.3px rgba(255,255,255,0.3)",
-                  position: "relative",
-                  zIndex: 2
-                }}
-              >
-                <Image src={logoGmail} alt="Google Logo" style={{ width: "18px", height: "18px" }} />
-                <span style={{ color: "#3c4043", fontWeight: 600, textShadow: "none" }}>
-                  {t("google.login")}
-                </span>
-              </div>
-              </Button>
+              <GoogleSignInButton animate={animateGoogle} />
             </>
           ) : null}
         </Navbar>
