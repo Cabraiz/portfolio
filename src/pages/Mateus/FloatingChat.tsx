@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { FaEnvelope } from "react-icons/fa";
 import { AnimatePresence, motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 
 export default function FloatingChat() {
   const [isOpen, setIsOpen] = useState(false);
@@ -8,32 +9,27 @@ export default function FloatingChat() {
   const [messages, setMessages] = useState<string[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const phrases = [
-    "Let's Work Together",
-    "Send Me a Message",
-    "Let's Get in Touch",
-    "Reach Out to Me",
-    "Talk to Me Today",
-  ];
+  const { t } = useTranslation();
+  const phrases = t("floatingChat.phrases", { returnObjects: true }) as string[];
 
   const [currentPhraseIndex, setCurrentPhraseIndex] = useState(0);
 
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentPhraseIndex((prevIndex) => (prevIndex + 1) % phrases.length);
-    }, 10000); // 10 segundos
-  
-    return () => clearInterval(interval);
-  }, []);
+    }, 10000);
 
-  const typewriterText = "Hey, Mateus";
+    return () => clearInterval(interval);
+  }, [phrases.length]);
+
+  const typewriterText = t("floatingChat.intro");
 
   useEffect(() => {
-    if (!isOpen || !inputRef.current  || messages.length > 0) return;
-  
+    if (!isOpen || !inputRef.current || messages.length > 0) return;
+
     inputRef.current.focus();
-    setInputValue(""); // garante que limpa
-  
+    setInputValue("");
+
     let i = 0;
     const interval = setInterval(() => {
       if (i < typewriterText.length) {
@@ -45,11 +41,10 @@ export default function FloatingChat() {
       } else {
         clearInterval(interval);
       }
-    }, 200);
-  
+    }, 100);
+
     return () => clearInterval(interval);
-  }, [isOpen, typewriterText]);
-  
+  }, [isOpen, messages.length]);
 
   const sendMessage = () => {
     if (inputValue.trim()) {
@@ -112,7 +107,7 @@ export default function FloatingChat() {
             }}
           >
             <div style={{ marginBottom: "0.8rem", fontWeight: "bold", fontSize: "1.3rem" }}>
-              Let's Discuss Your Project
+              {t("floatingChat.title")}
             </div>
 
             <div
@@ -126,7 +121,15 @@ export default function FloatingChat() {
                 gap: "0.5rem",
               }}
             >
-              <p>Hi there! Ready to bring your idea to life? Let’s talk about your project.</p>
+              <span>
+                {t("floatingChat.greeting").split('\n').map((line, index) => (
+                  <span key={index}>
+                    {line}
+                    <br />
+                  </span>
+                ))}
+              </span>
+
               {messages.map((msg, index) => (
                 <div
                   key={index}
@@ -148,7 +151,7 @@ export default function FloatingChat() {
               <input
                 ref={inputRef}
                 type="text"
-                placeholder="Type your message..."
+                placeholder={t("floatingChat.placeholder")}
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyDown={handleKeyDown}
@@ -175,7 +178,7 @@ export default function FloatingChat() {
                   fontWeight: "bold",
                 }}
               >
-                Send
+                {t("floatingChat.send")}
               </button>
             </div>
 
@@ -192,7 +195,7 @@ export default function FloatingChat() {
                 fontWeight: "bold",
               }}
             >
-              Close
+              {t("floatingChat.close")}
             </button>
           </motion.div>
         )}

@@ -5,21 +5,31 @@
     "SANA": "Been working with this NGO since 2020, focusing on improving communication and teamwork in an IT team that’s strong technically but needed more human connection.",
     "SEDIH": "Currently acting as a senior analyst, building scalable tools that support the Secretariat’s entire digital ecosystem and enhance public service delivery."
   },
-
-    "nav": {
-      "home": "Home",
-      "portfolio": "Portfolio",
-      "roadMap": "Road Map",
-      "pricing": "Pricing",
-      "live": "Live",
-      "contact": "Contact"
-    },
-
-      "buttons": {
-        "hireMe": "Google Meet",
-        "downloadCV": "DOWNLOAD CV"
-      }
-
-    
+  "nav": {
+    "home": "Home",
+    "portfolio": "Portfolio",
+    "roadMap": "Road Map",
+    "pricing": "Pricing",
+    "live": "Live",
+    "contact": "Contact"
+  },
+  "buttons": {
+    "hireMe": "Google Meet",
+    "downloadCV": "DOWNLOAD CV"
+  },
+  "floatingChat": {
+    "phrases": [
+      "Let's Work Together",
+      "Send Me a Message",
+      "Let's Get in Touch",
+      "Reach Out to Me",
+      "Talk to Me Today"
+    ],
+    "title": "Let's Discuss Your Project",
+    "greeting": "Hi there! Ready to bring your idea to life?\nLet’s talk about your project.",
+    "placeholder": "Type your message...",
+    "send": "Send",
+    "close": "Close",
+    "intro": "Hey, Mateus. My name is "
+  }
 }
-  
