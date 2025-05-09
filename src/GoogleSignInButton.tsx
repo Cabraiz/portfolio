@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Button, Image } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import logoGmail from "./assets/icones/7.svg";
-import IconGmail from "./assets/Mateus/icon/IconGmail.png";
+import IconGmail from "./assets/Mateus/icon/IconGoogle.png";
 
 interface GoogleSignInButtonProps {
     animate?: boolean;
@@ -41,8 +41,8 @@ interface GoogleSignInButtonProps {
     src={IconGmail}
     alt="Gmail"
     style={{
-      width: "20px",
-      height: "20px",
+      width: "50px",
+      height: "50px",
       objectFit: "contain",
     }}
   />
@@ -75,7 +75,7 @@ interface GoogleSignInButtonProps {
               borderBottomRightRadius: "15px",
               boxShadow:
                 "0 1px 2px rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15)",
-              marginRight: "4vw",
+              marginRight: "1.5vw",
               cursor: "pointer",
             }}
             onClick={onClick}
