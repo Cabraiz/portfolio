@@ -263,26 +263,18 @@ function App() {
                   backgroundColor: "rgba(255,255,255,0.5)",
                   borderRadius: "24px",
                   border: "1px solid rgba(0,0,0,0.5)",
-                  backdropFilter: "blur(2px)", // luxo sutil
+                  backdropFilter: "blur(2px)",
                   WebkitBackdropFilter: "blur(2px)",
-                  boxShadow: "inset 0 0 0.3px rgba(255,255,255,0.3)", // brilho interno sutil
+                  boxShadow: "inset 0 0 0.3px rgba(255,255,255,0.3)",
+                  position: "relative",
+                  zIndex: 2
                 }}
               >
-                  <Image
-                    src={logoGmail}
-                    alt="Google Logo"
-                    style={{ width: "18px", height: "18px" }}
-                  />
-                  <span
-                    style={{
-                      color: "#3c4043",
-                      fontWeight: 600,
-                      textShadow: "none",
-                    }}
-                  >
-                    {t("google.login")}
-                  </span>
-                </div>
+                <Image src={logoGmail} alt="Google Logo" style={{ width: "18px", height: "18px" }} />
+                <span style={{ color: "#3c4043", fontWeight: 600, textShadow: "none" }}>
+                  {t("google.login")}
+                </span>
+              </div>
               </Button>
             </>
           ) : null}
