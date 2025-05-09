@@ -31,5 +31,8 @@
     "send": "Enviar",
     "close": "Fechar",
     "intro": "Olá, Mateus. Me chamo "
+  },
+  "google": {
+    "login": "Entrar com o Google"
   }
 }

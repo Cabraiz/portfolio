@@ -31,5 +31,8 @@
     "send": "Send",
     "close": "Close",
     "intro": "Hey, Mateus. My name is "
+  },
+  "google": {
+    "login": "Sign in with Google"
   }
 }
