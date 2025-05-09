@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from "react";
-import { Routes, Route, useLocation } from "react-router-dom";
+import { Routes, Route, useLocation, Link } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 
 import "./App.css";
@@ -136,17 +136,21 @@ function App() {
           }}
         >
      
-          <Image
-            src={logo}
-            style={{
-              marginLeft: `${convertMultiplyVwToPx()}px`,
-              marginRight: "20px",
-              marginTop: "0.5vh",
-              borderRadius: "20%",
-              width: "8.5vh",
-              height: "8.5vh",
-            }}
-          />
+     <Link to="/" style={{ textDecoration: "none" }}>
+      <Image
+        src={logo}
+        style={{
+          marginLeft: `${convertMultiplyVwToPx()}px`,
+          marginRight: "20px",
+          marginTop: "0.5vh",
+          borderRadius: "20%",
+          width: "8.5vh",
+          height: "8.5vh",
+          cursor: "pointer",
+        }}
+        alt="Logo"
+      />
+    </Link>
           {!isMobile ? (
             // Render Nav element and Nav.Link elements for non-mobile devices
             <>
