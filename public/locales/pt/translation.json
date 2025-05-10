@@ -19,15 +19,14 @@
   },
   "floatingChat": {
     "phrases": [
-      "Estou online – Chama aí!",
-      "Conversa em tempo real 🟢",
-      "Manda mensagem, tô por aqui",
-      "Ao vivo e sem enrolação",
-      "Igual ao MSN, só que melhor",
-      "Papo direto comigo!",
-      "Sem bots, só eu mesmo",
-      "Manda um oi 😉",
-      "Tipo Bate-Papo UOL, mas só nós"
+      "Estou ONline – Chama aí!",
+      "Conversa em Tempo Real 🔴",
+      "Testa se é ao vivo mesmo",
+      "Igual ao MSN - Só que Melhor",
+      "Papo Direto Comigo!",
+      "Sem bots - Só eu mesmo",
+      "Manda um OI 😉",
+      "Tipo Bate-Papo UOL"
     ],
     "title": "Vamos Conversar Sobre Seu Projeto",
     "greeting": "Olá! Pronto para tirar sua ideia do papel?\nVamos conversar sobre seu projeto.",

@@ -126,6 +126,8 @@ function Mateus() {
               fontWeight: 700,
               color: "#f1c40f",
               marginBottom: "1.5rem",
+              cursor: "default",
+              userSelect: "none",
             }}
           >
             Senior
@@ -140,6 +142,9 @@ function Mateus() {
               alignItems: "center",
               justifyContent: "start",
               height: "3.5rem",
+              cursor: "default",
+              userSelect: "none",
+              pointerEvents: "none",
             }}
           >
             <RoleTitle />
@@ -209,18 +214,26 @@ function Mateus() {
               theme="bubble"
               offset={[0, 20]}
             >
-              <img
-                src={selo.src}
-                alt={selo.alt}
+              <div
                 style={{
-                  height: "40px",
-                  filter: "grayscale(100%)",
-                  opacity: 0.8,
-                  ...selo.style,
+                  pointerEvents: "auto",
+                  cursor: "default",
                 }}
-              />
+              >
+                <img
+                  src={selo.src}
+                  alt={selo.alt}
+                  style={{
+                    height: "40px",
+                    filter: "grayscale(100%)",
+                    opacity: 0.8,
+                    ...selo.style,
+                    pointerEvents: "none",
+                    userSelect: "none",
+                  }}
+                />
+              </div>
             </Tippy>
-            
             ))}
           </div>
           <Col>
