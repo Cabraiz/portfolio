@@ -42,20 +42,25 @@ export default function RoleTitle() {
         animate={{ y: "0%", opacity: 1 }}
         exit={{ y: "-30%", opacity: 0 }}
         transition={{ duration: 0.6, ease: [0.6, 0, 0.4, 1] }}
-        style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            width: "100%",
-            padding: "0.5rem 1rem", // ← adiciona padding vertical e horizontal
-            fontSize: "3.2rem",
-            fontWeight: 700,
-            fontFamily: '"Brutal", sans-serif',
-            color: "#f1c40f",
-            textAlign: "center",
-            lineHeight: 1.2,
-            boxSizing: "border-box", // garante que padding não quebre o layout
+       style={{
+          position: "absolute",
+          inset: 0, // substitui top: 0; left: 0; width: 100%; height: 100%;
+          margin: "auto",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontSize: "calc(2.8vw)",
+          fontWeight: 700,
+          fontFamily: '"Brutal", sans-serif',
+          color: "#f1c40f",
+          textAlign: "center",
+          lineHeight: 1.2,
+          whiteSpace: "nowrap",
+          overflow: "hidden",
+          boxSizing: "border-box",
+          padding: "0 1rem",
         }}
+
         >
         {titles[index]}
         </motion.div>

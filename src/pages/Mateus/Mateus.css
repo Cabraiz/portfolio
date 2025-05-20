@@ -22,7 +22,6 @@
   letter-spacing: -0.2em;
 }
 
-
 .font-sequel {
   font-size: calc(50px + 2vw);
   background-clip: text;
@@ -319,4 +318,12 @@ img {
 .tooltip-meet {
   background-color: #00ac47!important;
   color: white!important;
+}
+
+.max-80vh-column {
+  max-height: 80vh;
+  overflow-y: auto; /* permite scroll interno se ultrapassar */
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start; /* ou center, se quiser centralizado */
 }

@@ -64,11 +64,13 @@ body::before {
   font-size: 14px;
   font-weight: 500;
 }
-.row {
+
+.home-row {
   justify-content: center;
   padding-left: 10vw;
   padding-right: 10vw;
 }
+
 .border-gradient-green {
   border: solid;
   border-image: linear-gradient(

@@ -1,4 +1,4 @@
-import { Col, Row, Image, Button } from "react-bootstrap";
+import { Col, Row, Image, Button, Container } from "react-bootstrap";
 import { isMobile } from "react-device-detect";
 import IconWhatsAppVector from "../../assets/Mateus/icon/IconWhatsAppVector.svg";
 
@@ -6,7 +6,6 @@ import perfil from "../../assets/Mateus/perfil.webp";
 import IconGmail from "../../assets/Mateus/icon/IconGmail.png";
 import IconInsta from "../../assets/Mateus/icon/IconInsta.png";
 import IconLinkendin from "../../assets/Mateus/icon/IconLinkedIn.png";
-import IconTiktok from "../../assets/Mateus/icon/IconTiktok.png";
 import IconWhatsApp from "../../assets/Mateus/icon/IconWhatsApp.png";
 import IconMeet from "../../assets/Mateus/icon/IconMeet.png";
 
@@ -22,7 +21,6 @@ import cat2 from "../../assets/Mateus/cutieIcons/Cat2.png";
 import cat3 from "../../assets/Mateus/cutieIcons/Cat3.png";
 import cat4 from "../../assets/Mateus/cutieIcons/Cat4.png";
 
-
 import Tippy from '@tippyjs/react';
 import '../../styles/styles.css';
 import 'tippy.js/dist/tippy.css';
@@ -30,7 +28,6 @@ import 'tippy.js/dist/tippy.css';
 import { useTranslation } from 'react-i18next';
 import i18n from "@/i18n/i18n";
 import { useState } from "react";
-
 
 interface SocialButtonProps {
   href: string;
@@ -40,393 +37,181 @@ interface SocialButtonProps {
 }
 
 const selos = [
-  {
-    key: "BNB",
-    src: seloBNB,
-    alt: "Banco do Nordeste",
-    cat: cat1,
-    style: { scale: "0.9", marginTop: "5px" },
-  },
-  {
-    key: "UNIFOR",
-    src: seloUNIFOR,
-    alt: "UNIFOR",
-    cat: cat2,
-    style: {},
-  },
-  {
-    key: "SANA",
-    src: seloSANA,
-    alt: "SANA",
-    cat: cat3,
-    style: { scale: "0.75", marginTop: "5px" },
-  },
-  {
-    key: "SEDIH",
-    src: seloSEDIH,
-    alt: "SEDIH",
-    cat: cat4,
-    style: {},
-  },
+  { key: "BNB", src: seloBNB, alt: "Banco do Nordeste", cat: cat1, style: { scale: "0.9", marginTop: "5px" } },
+  { key: "UNIFOR", src: seloUNIFOR, alt: "UNIFOR", cat: cat2, style: {} },
+  { key: "SANA", src: seloSANA, alt: "SANA", cat: cat3, style: { scale: "0.75", marginTop: "5px" } },
+  { key: "SEDIH", src: seloSEDIH, alt: "SEDIH", cat: cat4, style: {} },
 ];
 
-export function capitalizeFirstLetter(name: string): string {
-  return name.charAt(0).toUpperCase() + name.slice(1);
-}
-
-export function getSocialMediaName(index: number): string {
-  switch (index) {
-    case 0:
-      return "LinkedIn";
-    case 1:
-      return "Gmail";
-    case 2:
-      return "Insta";
-    case 3:
-      return "Tiktok";
-    default:
-      return "";
-  }
-}
-
 function Mateus() {
-  const paddingTopFullStack = isMobile ? "10vh" : "20vh";
-  const margingLadoDireito = isMobile ? "0" : "-5vw";
-  const paddingLadoDireito = isMobile ? "5vw" : "15vw";
   const gradient = isMobile
     ? "linear-gradient(90deg,#f1c40f 0%,#f1c40f 71.5%,#9b59b6 71.5%, #9b59b6 100%)"
     : "linear-gradient(90deg,#f1c40f 100%, #f1c40f 100%)";
 
-  const openResumeTab = () => {
-    window.open('/resume', '_blank');
-  };
-
+  const openResumeTab = () => window.open('/resume', '_blank');
   const { t } = useTranslation();
   const isPT = i18n.language === 'pt' || i18n.language.startsWith('pt');
-
   const [isLoading, setIsLoading] = useState(false);
   const [forceHover, setForceHover] = useState(false);
 
-
   return (
     <>
-      <Row data-testid="mateus-container" className="p-0 m-0">
-        {/* Left Column */}
-        <Col
-          className="col-sm-12 col-md-5 m-0"
-          style={{
-            padding: `${paddingTopFullStack} max(50px, 4vw) 0 max(50px, 4vw)`,
-            minWidth: "450px",
-          }}
-        >
-          <div
-            style={{
-              fontFamily: "var(--bs-body-font-family)",
-              fontSize: "4rem",
-              fontWeight: 700,
-              color: "#f1c40f",
-              marginBottom: "1.5rem",
-              cursor: "default",
-              userSelect: "none",
-            }}
-          >
-            Senior
-          </div>
-          <div
-            className="p-0 font-sequel"
-            style={{
-              backgroundImage: gradient,
-              marginBottom: "max(10px, 4vh)",
-              minWidth: "400px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "start",
-              height: "3.5rem",
-              cursor: "default",
-              userSelect: "none",
-              pointerEvents: "none",
-            }}
-          >
-            <RoleTitle />
-          </div>
-
-
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              gap: "2rem",
-              flexWrap: "wrap",
-              marginTop: "2vh",
-              marginBottom: "4vh",
-              padding: "1.2rem 2rem",
-              backgroundColor: "rgba(255, 255, 255, 0.05)",
-              borderRadius: "20px",
-              backdropFilter: "blur(10px)",
-              WebkitBackdropFilter: "blur(10px)",
-            }}
-          >
-            {selos.map((selo) => (
-              <Tippy
-              key={selo.key}
-              content={
-                <div
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'row',
-                    gap: '1rem',
-                    maxWidth: '280px',
-                    padding: '4px',
-                    alignItems: 'flex-start',
-                  }}
-                >
-                  <div style={{ flexShrink: 0 }}>
-                    <img
-                      src={selo.cat} // você pode trocar por outro ou sortear entre cat1..4
-                      alt="Cat Icon"
-                      style={{
-                        height: '11vh',
-                        objectFit: 'cover',
-                        borderRadius: '8px',
-                      }}
-                    />
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <p
-                      style={{
-                        fontSize: '12px',
-                        margin: 0,
-                        lineHeight: '1.4',
-                        wordBreak: 'break-word',
-                        whiteSpace: 'normal',
-                      }}
-                    >
-                      {t(`selo.${selo.key}`)}
-                    </p>
-                  </div>
-                </div>
-              }
-              placement="top"
-              animation="fade"
-              arrow={true}
-              delay={[500, 100]}
-              theme="bubble"
-              offset={[0, 20]}
-            >
-              <div
-                style={{
-                  pointerEvents: "auto",
-                  cursor: "default",
-                }}
-              >
-                <img
-                  src={selo.src}
-                  alt={selo.alt}
-                  style={{
-                    height: "40px",
-                    filter: "grayscale(100%)",
-                    opacity: 0.8,
-                    ...selo.style,
-                    pointerEvents: "none",
-                    userSelect: "none",
-                  }}
-                />
-              </div>
-            </Tippy>
-            ))}
-          </div>
-          <Col>
-          <Row
-            className="p-0 m-0 mt-4 pb-2 d-flex justify-content-end flex-wrap"
-            style={{ minWidth: "400px" }}
-          >
-          <Col className="me-3">
-          <button
-  className={`lux-button ${forceHover ? "lux-hover" : ""} ${isLoading ? "lux-loading" : ""}`}
-  onClick={() => {
-    setIsLoading(true);
-    setForceHover(true);
-    setTimeout(() => {
-      window.open(
-        isPT
-          ? "https://wa.me/5585998575707"
-          : "https://meet.google.com/SEULINK",
-        "_blank"
-      );
-      setIsLoading(false);
-      setForceHover(false);
-    }, 1000);
-  }}
->
-  <div>
-    <span>
-      {isPT && (
-        <img
-          src={IconWhatsAppVector}
-          alt="WhatsApp"
-          style={{
-            height: "22px",
-            width: "22px",
-            marginRight: "0.4rem",
-            verticalAlign: "middle"
-          }}
-        />
-      )}
-      {!isLoading && (
-        <p>{isPT ? "WHATSAPP" : "MEET"}</p>
-      )}
-    </span>
-  </div>
-  <div>
-    <span>
-      {isPT && (
-        <img
-          src={IconWhatsAppVector}
-          alt="WhatsApp"
-          style={{
-            height: "22px",
-            width: "22px",
-            marginRight: "0.4rem",
-            verticalAlign: "middle"
-          }}
-        />
-      )}
-      {!isLoading ? (
-        <p>{isPT ? "VAMOS CONVERSAR" : "LET'S TALK"}</p>
-      ) : (
-        <div className="lux-loading-bar" />
-      )}
-    </span>
-  </div>
-</button>
-
-          </Col>
-          <Col>
-            <Button
-              className="btn-trasn-w-border py-3 btn-tran-effect btn-press-effect"
-              style={{ minWidth: "200px" }}
-              onClick={openResumeTab}
-            >
-              {t("buttons.downloadCV")}
-            </Button>
-          </Col>
-
-            </Row>
-          </Col>
-        </Col>
-
-      {/* Right Column */}
-        <Col
-          className="col-sm-12 col-md-7"
-          style={{
-            marginTop: "10vh",
-            paddingLeft: paddingLadoDireito,
-            paddingRight: paddingLadoDireito,
-            marginLeft: margingLadoDireito,
-          }}
-        >
-          <div
-            style={{
-              backgroundColor: "rgba(255, 255, 255, 0.1)",
-              padding: "2vh 2vw",
-              borderRadius: "20px",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              width: "fit-content",
-              margin: "0 auto",
-              backdropFilter: "blur(8px)",
-              WebkitBackdropFilter: "blur(8px)",
-            }}
-          >
-            <Image
-              className="p-0"
-              src={perfil}
-              alt="Profile Image"
-              style={{
-                borderRadius: "20px",
-                marginBottom: "2vh",
-                maxWidth: "100%",
-              }}
-            />
-
-            {/* Botões horizontais */}
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "row",
-                justifyContent: "center",
-                alignItems: "center",
-                gap: "1.5rem",
-                flexWrap: "wrap", // previne quebra feia no mobile
-                marginTop: "2vh",
-              }}
-            >
-              <SocialButton
-                href="https://www.linkedin.com/in/cabraiz/"
-                icon={IconLinkendin}
-                alt="LinkedIn"
-              />
-              <SocialButton
-                href="mailto:mateusccabr@gmail.com?subject=Freelance..."
-                icon={IconGmail}
-                alt="Gmail"
-              />
-              <SocialButton
-                href="https://www.instagram.com/cabraiz/"
-                icon={IconInsta}
-                alt="Insta"
-              />
-              <SocialButton
-                href="https://www.tiktok.com/@cabraiz"
-                icon={IconTiktok}
-                alt="Tiktok"
-              />
-              {isPT ? (
-                <SocialButton
-                  href="https://meet.google.com/SEULINK"
-                  icon={IconMeet}
-                  alt="Meet"
-                />
-              ) : (
-                <SocialButton
-                  href="https://wa.me/SEUNUMERO"
-                  icon={IconWhatsApp}
-                  alt="WhatsApp"
-                />
-              )}
+      <Container fluid>
+        <Row className = " max-80vh-column" style={{ padding: "9vh 5vw 10vh 5vw",  }}>
+          <Col className="col-md-5 max-80vh-column" style={{ paddingTop: "11vh", }}>
+            <div style={{ fontFamily: "var(--bs-body-font-family)", fontSize: "4rem", fontWeight: 700, color: "#f1c40f", marginBottom: "1.5rem" }}>Senior</div>
+            <div className="font-sequel" style={{ backgroundImage: gradient, marginBottom: "max(10px, 4vh)", display: "flex", alignItems: "center", justifyContent: "start", height: "3.5rem" }}>
+              <RoleTitle />
             </div>
-          </div>
-        </Col>
-      </Row>
-    <FloatingChat />
+            <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "2rem", flexWrap: "nowrap", marginBottom: "max(10px, 4vh)", padding: "1.2rem 2rem", backgroundColor: "rgba(255, 255, 255, 0.05)", borderRadius: "20px", backdropFilter: "blur(10px)" }}>
+              {selos.map((selo) => (
+                <Tippy key={selo.key} content={<div style={{ display: 'flex', gap: '1rem', maxWidth: '280px', padding: '4px' }}><img src={selo.cat} alt="Cat" style={{ height: '11vh', borderRadius: '8px' }} /><p style={{ fontSize: '12px', margin: 0 }}>{t(`selo.${selo.key}`)}</p></div>} placement="top" animation="fade" arrow delay={[500, 100]} theme="bubble" offset={[0, 20]}>
+                  <div><img src={selo.src} alt={selo.alt} style={{ height: "40px", filter: "grayscale(100%)", opacity: 0.8, ...selo.style }} /></div>
+                </Tippy>
+              ))}
+            </div>
+            <Row className="pb-2 justify-content-end">
+  <Col md={2} />
+  
+  <Col md={5}>
+    <button
+      className={`lux-button ${forceHover ? "lux-hover" : ""} ${isLoading ? "lux-loading" : ""}`}
+      onClick={() => {
+        setIsLoading(true);
+        setForceHover(true);
+        setTimeout(() => {
+          window.open(
+            isPT ? "https://wa.me/5585998575707" : "https://meet.google.com/SEULINK",
+            "_blank"
+          );
+          setIsLoading(false);
+          setForceHover(false);
+        }, 1000);
+      }}
+    >
+      <div>
+        <span>
+          {isPT && (
+            <img
+              src={IconWhatsAppVector}
+              alt="WhatsApp"
+              style={{ height: "22px", width: "22px", marginRight: "0.4rem"}}
+            />
+          )}
+          {!isLoading && <p>{isPT ? "WHATSAPP" : "MEET"}</p>}
+        </span>
+      </div>
+      <div>
+        <span>
+          {isPT && (
+            <img
+              src={IconWhatsAppVector}
+              alt="WhatsApp"
+              style={{ height: "22px", width: "22px" }}
+            />
+          )}
+          {!isLoading ? (
+            <p>{isPT ? "VAMOS CONVERSAR" : "LET'S TALK"}</p>
+          ) : (
+            <div className="lux-loading-bar" />
+          )}
+        </span>
+      </div>
+    </button>
+  </Col>
+
+  <Col md={5}>
+    <Button
+      className="btn-trasn-w-border py-3 btn-tran-effect btn-press-effect w-100"
+      onClick={openResumeTab}
+    >
+      {t("buttons.downloadCV")}
+    </Button>
+  </Col>
+</Row>
+
+          </Col>
+
+          <Col className="col-md-7">
+  <div
+    style={{
+      backgroundColor: "rgba(255, 255, 255, 0.1)",
+      marginLeft: "10vw",
+      padding: "4vh max(40px, 2vw) 4vh max(40px, 2vw)",
+      borderRadius: "20px",
+      display: "flex",
+      flexDirection: "column",
+      justifyContent: "space-evenly",
+      alignItems: "center",
+      width: "fit-content",
+      height: "100%",
+      backdropFilter: "blur(8px)",
+      gap: "4vh"
+    }}
+  >
+    {/* Wrapper da Imagem */}
+    <div
+      style={{
+        borderRadius: "3rem",
+        overflow: "hidden",
+        height: "50vh",
+        boxShadow: "0 10px 30px rgba(0,0,0,0.2)",
+      }}
+    >
+      <Image
+        src={perfil}
+        alt="Profile Image"
+        style={{
+          width: "100%",
+          height: "100%",
+          objectFit: "cover",
+          objectPosition: "center top",
+        }}
+      />
+    </div>
+
+    {/* Redes sociais */}
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "spac",
+        flexWrap: "nowrap",
+        gap: "1rem",
+        width: "100%",
+      }}
+    >
+      <SocialButton href="https://www.linkedin.com/in/cabraiz/" icon={IconLinkendin} alt="LinkedIn" />
+      <SocialButton href="mailto:mateusccabr@gmail.com?subject=Freelance..." icon={IconGmail} alt="Gmail" />
+      <SocialButton href="https://www.instagram.com/cabraiz/" icon={IconInsta} alt="Insta" />
+      {isPT ? (
+        <SocialButton href="https://meet.google.com/SEULINK" icon={IconMeet} alt="Meet" />
+      ) : (
+        <SocialButton href="https://wa.me/SEUNUMERO" icon={IconWhatsApp} alt="WhatsApp" />
+      )}
+    </div>
+  </div>
+</Col>
+
+
+
+
+        </Row>
+      </Container>
+      <FloatingChat />
     </>
   );
 }
 
-export function SocialButton({
-  href,
-  icon,
-  alt,
-  isScrollToTop,
-}: SocialButtonProps) {
+export function SocialButton({ href, icon, alt, isScrollToTop }: SocialButtonProps) {
   return (
-    <a
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="social-wrapper"
-    >
+    <a href={href} target="_blank" rel="noopener noreferrer" className="social-wrapper">
       <div className={`social-link ${isScrollToTop ? "scrollToTopButton" : ""}`}>
         <Image className="imagesize" src={icon} alt={alt} />
       </div>
-      <div className={`tooltip-custom tooltip-${alt.toLowerCase().replace(/\s+/g, '').normalize("NFD").replace(/[\u0300-\u036f]/g, "")}`}>
-        {alt}
-      </div>
+      <div className={`tooltip-custom tooltip-${alt.toLowerCase().replace(/\s+/g, '').normalize("NFD").replace(/[\u0300-\u036f]/g, "")}`}>{alt}</div>
     </a>
   );
 }
-
 
 export default Mateus;

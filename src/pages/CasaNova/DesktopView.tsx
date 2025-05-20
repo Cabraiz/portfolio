@@ -86,8 +86,8 @@ const DesktopView: React.FC<DesktopViewProps> = ({
   }, [currentItems]);
 
   return (
-    <div className="container mt-4 casanova-page">
-      <div className="row gy-3">
+    <div className="containerCasa mt-4 casanova-page">
+      <div className="rowCasa gy-3">
         {isLoading
           ? // Exibir placeholders durante o carregamento
             Array.from({ length: itemsPerPage }).map((_, index) => (

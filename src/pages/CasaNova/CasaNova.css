@@ -90,7 +90,7 @@ body {
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2) !important;
 }
 
-.container {
+.containerCasa {
   display: flex !important;
   flex-direction: column !important;
   justify-content: space-between !important;
@@ -103,7 +103,7 @@ body {
 }
 
 /* Garante que os itens internos se ajustem */
-.row {
+.rowCasa {
   display: flex !important; /* Usa flexbox */
   flex-wrap: wrap !important; /* Permite quebra de linha */
   justify-content: center !important; /* Centraliza horizontalmente */
