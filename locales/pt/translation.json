@@ -1,0 +1,41 @@
+{
+  "selo": {
+    "BNB": "Passei vários anos na divisão de cartões e boletos, lidando com conciliação financeira, ferramentas de atendimento e otimizando relatórios internos.",
+    "UNIFOR": "Formado em Ciência da Computação, comecei minha carreira com estágios e coordenação de projetos, gerenciando recursos tecnológicos desde cedo.",
+    "SANA": "Desde 2020, atuo nessa ONG focando em melhorar a comunicação e o trabalho em equipe numa área de TI que sempre foi técnica, mas carente de empatia.",
+    "SEDIH": "Hoje sou analista sênior, desenvolvendo ferramentas escaláveis para apoiar toda a estrutura digital da secretaria e melhorar os serviços públicos."
+  },
+  "nav": {
+    "home": "Início",
+    "portfolio": "Portfólio",
+    "roadMap": "RoadMap",
+    "pricing": "Preços",
+    "live": "Ao Vivo",
+    "contact": "Contato"
+  },
+  "buttons": {
+    "hireMe": "WhatsApp",
+    "downloadCV": "CURRÍCULO"
+  },
+  "floatingChat": {
+    "phrases": [
+      "Estou ONline – Chama aí!",
+      "Conversa em Tempo Real 🔴",
+      "Testa se é ao vivo mesmo",
+      "Igual ao MSN - Só que Melhor",
+      "Papo Direto Comigo!",
+      "Sem bots - Só eu mesmo",
+      "Manda um OI 😉",
+      "Tipo Bate-Papo UOL"
+    ],
+    "title": "Vamos Conversar Sobre Seu Projeto",
+    "greeting": "Olá! Pronto para tirar sua ideia do papel?\nVamos conversar sobre seu projeto.",
+    "placeholder": "Digite sua mensagem...",
+    "send": "Enviar",
+    "close": "Fechar",
+    "intro": "Olá, Mateus. Me chamo "
+  },
+  "google": {
+    "login": "Entrar com o Google"
+  }
+}
