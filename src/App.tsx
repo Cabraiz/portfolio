@@ -125,157 +125,159 @@ function App() {
     </div>
     {isNavOn ? null : (
       <>
-       <Navbar
-  className="border-gradient-green"
-  style={{
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    position: "relative", // <- importante
-    height: "11vh",
-    fontWeight: "600",
-    padding: "0",
-    margin: "0",
-  }}
->
-  {/* Logo à esquerda */}
-  <Link to="/" style={{ textDecoration: "none" }}>
-    <Image
-      src={logo}
-      style={{
-        marginLeft: isMobileView ? "5vw" : `${convertMultiplyVwToPx()}px`,
-        marginRight: "20px",
-        marginTop: "0.5vh",
-        borderRadius: "20%",
-        width: "8.5vh",
-        height: "8.5vh",
-        cursor: "pointer",
-      }}
-      alt="Logo"
-    />
-  </Link>
-
-  {/* Nome centralizado absoluto */}
-  {isMobileView && (
-    <span
-      style={{
-        position: "absolute",
-        left: "53%",
-        transform: "translateX(-50%)",
-        fontSize: "1.4rem",
-        fontWeight: "600",
-        color: "#ffffff",
-        whiteSpace: "nowrap",
-        letterSpacing: "1px",
-      }}
-    >
-      Cabraiz
-    </span>
-  )}
-
-  {/* Botão hamburger à direita */}
-  {isMobileView && (
-    <Button
-      onClick={() => setMenuOpen(!menuOpen)}
-      style={{
-        backgroundColor: "transparent",
-        border: "none",
-        marginRight: "5vw",
-        padding: "0",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "center",
-        alignItems: "center",
-        gap: "4px",
-      }}
-    >
-      <div style={{ width: "24px", height: "2px", backgroundColor: "#fff" }} />
-      <div style={{ width: "24px", height: "2px", backgroundColor: "#fff" }} />
-      <div style={{ width: "24px", height: "2px", backgroundColor: "#fff" }} />
-    </Button>
-  )}
-
-  {!isMobileView && (
-    <>
-      {/* Navegação normal */}
-      <Nav
-        style={{
-          display: "flex",
-          alignItems: "stretch",
-          justifyContent: "flex-start",
-          marginLeft: "-4vw",
-          marginTop: "1vh",
-          height: "100%",
-          gap: "1rem",
-        }}
-      >
-        {links.map((link) => (
-          <button
-            key={link}
-            onClick={() => {
-              window.location.hash = `#${link.toLowerCase()}`;
-              setSelectedLink(link);
-            }}
-            style={{
-              all: "unset",
-              flex: "1 1 auto",
-              height: "100%",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              cursor: "pointer",
-            }}
-          >
-            <Nav.Link
-              as="div"
-              className={`text-nowrap nav-link-custom ${selectedLink === link ? "active" : ""}`}
+        <Navbar
+          className="border-gradient-green"
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            height: "11vh",
+            fontWeight: "600",
+            paddingTop: "0px",
+            paddingBottom: "0px",
+            marginInline: "0px",
+            marginTop: "0.1vh",
+            marginBottom: "0",
+          }}
+        >
+          <Link to="/" style={{ textDecoration: "none" }}>
+            <Image
+              src={logo}
               style={{
-                height: "100%",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                position: "relative",
-                width: "100%",
-                fontWeight: 500,
-                letterSpacing: 1.5,
+                marginLeft: isMobileView ? "5vw" : `${convertMultiplyVwToPx()}px`,
+                marginRight: "20px",
+                marginTop: "0.5vh",
+                borderRadius: "20%",
+                width: "8.5vh",
+                height: "8.5vh",
+                cursor: "pointer",
               }}
-            >
-              {link === "live" && (
-                <div
+              alt="Logo"
+            />
+          </Link>
+
+          {isMobileView ? (
+            <>
+              <div style={{ position: "relative", flexGrow: 1 }}>
+                {/* Cabraiz centralizado */}
+                <span
                   style={{
                     position: "absolute",
-                    top: "1.5vh",
-                    left: "-1.2vw",
-                    zIndex: 10,
-                    transform: "scale(0.5)",
-                    transformOrigin: "top left",
+                    left: "42%",
+                    transform: "translate(-50%, -40%)",
+                    fontSize: "1.5rem",
+                    fontWeight: "600",
+                    color: "#ffffff",
+                    whiteSpace: "nowrap",
+                    letterSpacing: "1px",
+                    zIndex: 1,
                   }}
                 >
-                  <LiveAnimation />
-                </div>
-              )}
-              <span style={{ marginBottom: "0.2rem" }}>{t(`nav.${link}`)}</span>
-              {selectedLink === link && (
-                <div
-                  style={{
-                    width: "50%",
-                    height: "3px",
-                    backgroundColor: "white",
-                    borderRadius: "3px",
-                    transition: "all 0.3s ease",
-                  }}
-                />
-              )}
-            </Nav.Link>
-          </button>
-        ))}
-      </Nav>
-      <GoogleSignInButton animate={animateGoogle} />
-    </>
-  )}
-</Navbar>
+                  Cabraiz
+                </span>
+              </div>
 
+              {/* Botão Hamburguer à direita */}
+              <Button
+                onClick={() => setMenuOpen(!menuOpen)}
+                style={{
+                  backgroundColor: "transparent",
+                  border: "none",
+                  marginRight: "5vw",
+                  padding: "0",
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  gap: "4px",
+                  zIndex: 2,
+                }}
+              >
+                <div style={{ width: "24px", height: "2px", backgroundColor: "#fff" }} />
+                <div style={{ width: "24px", height: "2px", backgroundColor: "#fff" }} />
+                <div style={{ width: "24px", height: "2px", backgroundColor: "#fff" }} />
+              </Button>
+            </>
+          ) : (
+            <>
+              <Nav
+                id="nav-dropdown"
+                style={{
+                  display: "flex",
+                  alignItems: "stretch",
+                  justifyContent: "flex-start",
+                  marginLeft: "-4vw",
+                  marginTop: "1vh",
+                  height: "100%",
+                  gap: "1rem",
+                }}
+              >
+                {links.map((link) => (
+                  <button
+                    key={link}
+                    onClick={() => {
+                      window.location.hash = `#${link.toLowerCase()}`;
+                      setSelectedLink(link);
+                    }}
+                    style={{
+                      all: "unset",
+                      flex: "1 1 auto",
+                      height: "100%",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      cursor: "pointer",
+                    }}
+                  >
+                    <Nav.Link
+                      as="div"
+                      className={`text-nowrap nav-link-custom ${selectedLink === link ? "active" : ""}`}
+                      style={{
+                        height: "100%",
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        position: "relative",
+                        width: "100%",
+                        fontWeight: 500,
+                        letterSpacing: 1.5,
+                      }}
+                    >
+                      {link === "live" && (
+                        <div
+                          style={{
+                            position: "absolute",
+                            top: "1.5vh",
+                            left: "-1.2vw",
+                            zIndex: 10,
+                            transform: "scale(0.5)",
+                            transformOrigin: "top left",
+                          }}
+                        >
+                          <LiveAnimation />
+                        </div>
+                      )}
+                      <span style={{ marginBottom: "0.2rem" }}>{t(`nav.${link}`)}</span>
+                      {selectedLink === link && (
+                        <div
+                          style={{
+                            width: "50%",
+                            height: "3px",
+                            backgroundColor: "white",
+                            borderRadius: "3px",
+                            transition: "all 0.3s ease",
+                          }}
+                        />
+                      )}
+                    </Nav.Link>
+                  </button>
+                ))}
+              </Nav>
+              <GoogleSignInButton animate={animateGoogle} />
+            </>
+          )}
+        </Navbar>
 
         {/* Dropdown menu mobile */}
         <div
