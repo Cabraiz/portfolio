@@ -61,7 +61,7 @@ function Mateus() {
           <Col className="col-md-5 max-80vh-column" style={{ paddingTop: "11vh", }}>
             <div style={{ fontFamily: "var(--bs-body-font-family)", fontSize: "4rem", fontWeight: 700, color: "#f1c40f", marginBottom: "1.5rem" }}>Senior</div>
             <div className="font-sequel" style={{ backgroundImage: gradient, marginBottom: "max(10px, 4vh)", display: "flex", alignItems: "center", justifyContent: "start", height: "3.5rem" }}>
-              <RoleTitle />
+              <RoleTitle/>
             </div>
             <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "2rem", flexWrap: "nowrap", marginBottom: "max(10px, 4vh)", padding: "1.2rem 2rem", backgroundColor: "rgba(255, 255, 255, 0.05)", borderRadius: "20px", backdropFilter: "blur(10px)" }}>
               {selos.map((selo) => (

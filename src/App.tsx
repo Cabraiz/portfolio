@@ -42,6 +42,8 @@ function App() {
   const links = ["home", "portfolio", "roadMap", "pricing", "live", "contact"];
   const [animateGoogle, setAnimateGoogle] = useState(false);
 
+  const isMobileView = windowSize.innerWidth < 768;
+
   useEffect(() => {
     // aguarda página carregada para ativar animação
     const timeout = setTimeout(() => {
@@ -151,8 +153,28 @@ function App() {
         alt="Logo"
       />
     </Link>
-          {!isMobile ? (
-            // Render Nav element and Nav.Link elements for non-mobile devices
+          {isMobileView ? (
+            <div style={{
+              flexGrow: 1,
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center"
+            }}>
+              <span
+                style={{
+                  fontSize: "1.4rem",
+                  fontWeight: "600",
+                  color: "#ffffff",
+                  textAlign: "center",
+                  whiteSpace: "nowrap",
+                  letterSpacing: "1px"
+                }}
+              >
+                {/* Nome ou slogan no mobile */}
+                Cabraiz
+              </span>
+            </div>
+          ) : (
             <>
               <Nav
                 id="nav-dropdown"
@@ -174,7 +196,7 @@ function App() {
                       setSelectedLink(link);
                     }}
                     style={{
-                      all: "unset", // remove aparência nativa do botão
+                      all: "unset",
                       flex: "1 1 auto",
                       height: "100%",
                       display: "flex",
@@ -198,20 +220,20 @@ function App() {
                         letterSpacing: 1.5
                       }}
                     >
-                    {link === "live" && (
-                      <div
-                        style={{
-                          position: "absolute",
-                          top: "1.5vh",
-                          left: "-1.2vw",
-                          zIndex: 10,
-                          transform: "scale(0.5)",
-                          transformOrigin: "top left",
-                        }}
-                      >
-                        <LiveAnimation />
-                      </div>
-                    )}
+                      {link === "live" && (
+                        <div
+                          style={{
+                            position: "absolute",
+                            top: "1.5vh",
+                            left: "-1.2vw",
+                            zIndex: 10,
+                            transform: "scale(0.5)",
+                            transformOrigin: "top left",
+                          }}
+                        >
+                          <LiveAnimation />
+                        </div>
+                      )}
                       <span style={{ marginBottom: "0.2rem" }}>{t(`nav.${link}`)}</span>
                       {selectedLink === link && (
                         <div
@@ -230,7 +252,8 @@ function App() {
               </Nav>
               <GoogleSignInButton animate={animateGoogle} />
             </>
-          ) : null}
+          )}
+
         </Navbar>
       )}
       <Routes>

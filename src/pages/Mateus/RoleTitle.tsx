@@ -25,7 +25,6 @@ export default function RoleTitle() {
     height: "5rem", // ⬅️ reduzido sutilmente
     overflow: "hidden",
     width: "100%",
-    maxWidth: "700px",
     position: "relative",
     borderRadius: "12px",
     background: "rgba(0, 0, 0, 0.2)",
@@ -49,7 +48,7 @@ export default function RoleTitle() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          fontSize: "calc(2.8vw)",
+          fontSize: "calc(2.5vw)",
           fontWeight: 700,
           fontFamily: '"Brutal", sans-serif',
           color: "#f1c40f",
