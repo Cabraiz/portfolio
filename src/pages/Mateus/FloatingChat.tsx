@@ -59,30 +59,44 @@ export default function FloatingChat() {
     }
   };
 
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+
   return (
-    <div style={{ position: "fixed", bottom: "20px", right: "20px", zIndex: 9999 }}>
+    <div
+      style={{
+        position: "fixed",
+        bottom: isMobile ? "0px" : "20px",
+        right: isMobile ? "0px" : "20px",
+        zIndex: 9999,
+        paddingRight: isMobile ? 0 : undefined,
+        paddingBottom: isMobile ? 0 : undefined,
+      }}
+    >
       {!isOpen && (
         <button
-          onClick={() => setIsOpen(true)}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "0.7rem",
-            background: "linear-gradient(90deg, #5b117d, #9b59b6)",
-            color: "white",
-            border: "none",
-            padding: "1rem 2rem",
-            borderRadius: "12px 12px 0 12px",
-            boxShadow: "0 5px 15px rgba(0, 0, 0, 0.35)",
-            fontWeight: "600",
-            fontSize: "1.1rem",
-            cursor: "pointer",
-            minWidth: "250px",
-          }}
-        >
-          <FaEnvelope size={20} />
-          {phrases[currentPhraseIndex]}
-        </button>
+  onClick={() => setIsOpen(true)}
+  style={{
+    display: "flex",
+    alignItems: "center",
+    gap: "0.7rem",
+    background: "rgba(255, 255, 255, 0.08)",
+    backdropFilter: "blur(12px)",
+    WebkitBackdropFilter: "blur(12px)",
+    border: "1px solid rgba(255, 255, 255, 0.2)",
+    padding: "1rem 2rem",
+    borderRadius: isMobile ? "16px 0 0 0" : "16px",
+    boxShadow: "0 8px 24px rgba(0, 0, 0, 0.3)",
+    color: "#ffffff",
+    fontWeight: "600",
+    fontSize: "1.1rem",
+    cursor: "pointer",
+    minWidth: "250px",
+  }}
+>
+  <FaEnvelope size={20} />
+  {phrases[currentPhraseIndex]}
+</button>
+
       )}
 
       <AnimatePresence>
@@ -93,11 +107,14 @@ export default function FloatingChat() {
             exit={{ opacity: 0, y: 20, transition: { duration: 0 } }}
             transition={{ duration: 0.8, ease: [0.23, 1, 0.32, 1] }}
             style={{
-              width: "480px",
-              height: "600px",
-              backgroundColor: "#1b1b1b",
-              borderRadius: "16px",
-              boxShadow: "0 0 30px rgba(0,0,0,0.6)",
+              width: isMobile ? "100vw" : "480px",
+              height: isMobile ? "100vh" : "600px",
+              background: "rgba(255, 255, 255, 0.06)",
+              backdropFilter: "blur(18px)",
+              WebkitBackdropFilter: "blur(18px)",
+              border: "1px solid rgba(255, 255, 255, 0.15)",
+              borderRadius: isMobile ? "0" : "20px",
+              boxShadow: "0 12px 32px rgba(0, 0, 0, 0.35)",
               display: "flex",
               flexDirection: "column",
               padding: "1.5rem",
@@ -105,6 +122,7 @@ export default function FloatingChat() {
               position: "relative",
               fontSize: "1rem",
             }}
+
           >
             <div style={{ marginBottom: "0.8rem", fontWeight: "bold", fontSize: "1.3rem" }}>
               {t("floatingChat.title")}
@@ -135,12 +153,17 @@ export default function FloatingChat() {
                   key={index}
                   style={{
                     alignSelf: "flex-end",
-                    backgroundColor: "#9b59b6",
+                    background: "rgba(255, 255, 255, 0.12)",
+                    border: "1px solid rgba(255, 255, 255, 0.2)",
                     padding: "0.6rem 1rem",
                     borderRadius: "12px",
                     maxWidth: "80%",
                     wordWrap: "break-word",
+                    color: "#fff",
+                    backdropFilter: "blur(8px)",
+                    WebkitBackdropFilter: "blur(8px)",
                   }}
+
                 >
                   {msg}
                 </div>
@@ -170,8 +193,8 @@ export default function FloatingChat() {
                 onClick={sendMessage}
                 style={{
                   padding: "0 1rem",
-                  backgroundColor: "#9b59b6",
-                  color: "white",
+                  backgroundColor: "#f1c40f",
+                  color: "#000",
                   border: "none",
                   borderRadius: "8px",
                   cursor: "pointer",
@@ -186,8 +209,8 @@ export default function FloatingChat() {
               onClick={() => setIsOpen(false)}
               style={{
                 marginTop: "1rem",
-                backgroundColor: "#9b59b6",
-                color: "white",
+                backgroundColor: "#f1c40f",
+                color: "#000",
                 border: "none",
                 padding: "0.6rem 1rem",
                 borderRadius: "8px",

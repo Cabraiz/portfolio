@@ -57,8 +57,8 @@ function Mateus() {
   return (
     <>
       <Container fluid>
-        <Row className = " max-80vh-column" style={{ padding: "9vh 5vw 10vh 5vw",  }}>
-          <Col className="col-md-5 max-80vh-column" style={{ paddingTop: "11vh", }}>
+        <Row className="custom-section-row max-80vh-column">
+          <Col className="col-md-5 max-80vh-column" style={{ paddingTop: isMobile ? "0" : "11vh" }}>
             <div style={{ fontFamily: "var(--bs-body-font-family)", fontSize: "4rem", fontWeight: 700, color: "#f1c40f", marginBottom: "1.5rem" }}>Senior</div>
             <div className="font-sequel" style={{ backgroundImage: gradient, marginBottom: "max(10px, 4vh)", display: "flex", alignItems: "center", justifyContent: "start", height: "3.5rem" }}>
               <RoleTitle/>

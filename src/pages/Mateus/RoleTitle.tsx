@@ -11,6 +11,27 @@ const titles = [
 
 export default function RoleTitle() {
   const [index, setIndex] = useState(0);
+  const [windowSize, setWindowSize] = useState(getWindowSize());
+
+  const isMobileView = windowSize.innerWidth < 768;
+
+    useEffect(() => {
+      function handleWindowResize() {
+        setWindowSize(getWindowSize());
+      }
+  
+      window.addEventListener("resize", handleWindowResize);
+  
+      return () => {
+        window.removeEventListener("resize", handleWindowResize);
+      };
+    }, []);
+  
+    function getWindowSize() {
+      const { innerWidth, innerHeight } = window;
+      return { innerWidth, innerHeight };
+    }
+  
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -21,19 +42,18 @@ export default function RoleTitle() {
 
   return (
     <div
-  style={{
-    height: "5rem", // ⬅️ reduzido sutilmente
-    overflow: "hidden",
-    width: "100%",
-    position: "relative",
-    borderRadius: "12px",
-    background: "rgba(0, 0, 0, 0.2)",
-    borderTop: "2px solid #f1c40f",
-    borderBottom: "2px solid #f1c40f",
-    padding: "0.5rem 1.5rem", // ⬅️ mais compacto
-  }}
->
-
+      style={{
+        height: "5rem",
+        overflow: "hidden",
+        width: "100%",
+        position: "relative",
+        borderRadius: "12px",
+        background: "rgba(0, 0, 0, 0.2)",
+        borderTop: "2px solid #f1c40f",
+        borderBottom: "2px solid #f1c40f",
+        padding: "0.5rem 1.5rem",
+      }}
+    >
       <AnimatePresence mode="wait">
       <motion.div
         key={titles[index]}
@@ -43,12 +63,12 @@ export default function RoleTitle() {
         transition={{ duration: 0.6, ease: [0.6, 0, 0.4, 1] }}
        style={{
           position: "absolute",
-          inset: 0, // substitui top: 0; left: 0; width: 100%; height: 100%;
+          inset: 0,
           margin: "auto",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          fontSize: "calc(2.5vw)",
+          fontSize: isMobileView ? "calc(7vw)" : "calc(2.5vw)",
           fontWeight: 700,
           fontFamily: '"Brutal", sans-serif',
           color: "#f1c40f",

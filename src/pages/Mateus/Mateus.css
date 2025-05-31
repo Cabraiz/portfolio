@@ -327,3 +327,14 @@ img {
   flex-direction: column;
   justify-content: flex-start; /* ou center, se quiser centralizado */
 }
+
+.custom-section-row {
+  padding: 6vh 6vw 6vh 6vw;
+}
+
+@media (max-width: 768px) {
+  .custom-section-row {
+    padding: 4vh 4vw;
+  }
+}
+

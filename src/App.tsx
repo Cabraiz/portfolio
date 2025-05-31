@@ -333,7 +333,7 @@ function App() {
       </Route>
     </Routes>
 
-    {!isNavOn && !isMobile ? (
+    {!isNavOn && !isMobileView && (
       <div
         style={{
           position: "fixed",
@@ -348,7 +348,7 @@ function App() {
       >
         {buttons}
       </div>
-    ) : null}
+    )}
 
     <ToastContainer />
   </>
