@@ -281,42 +281,44 @@ function App() {
         </Navbar>
 
         {/* Dropdown menu mobile */}
-        <div
-  style={{
-    maxHeight: menuOpen ? "500px" : "0px",
-    overflow: "hidden",
-    transition: "max-height 0.4s ease",
-    backgroundColor: "#121212",
-    padding: menuOpen ? "1rem 2rem" : "0 2rem",
-    display: "flex",
-    flexDirection: "column",
-    gap: "1rem",
-  }}
->
-  {links.map((link) => (
-    <a
-      key={link}
-      href={`#${link}`}
-      onClick={() => {
-        setSelectedLink(link);
-        setMenuOpen(false);
-      }}
-      style={{
-        color: "#fff",
-        textDecoration: "none",
-        fontSize: "1.1rem",
-        fontWeight: "500",
-        opacity: menuOpen ? 1 : 0,
-        transition: "opacity 0.3s ease",
-      }}
-    >
-      {t(`nav.${link}`)}
-    </a>
-  ))}
-  <div style={{ marginTop: "1rem", opacity: menuOpen ? 1 : 0, transition: "opacity 0.3s ease" }}>
-    <GoogleSignInButton animate={animateGoogle} />
-  </div>
-</div>
+        {menuOpen && isMobileView && (
+          <div
+            style={{
+              position: "absolute",
+              top: "11vh",
+              left: 0,
+              right: 0,
+              backgroundColor: "#121212",
+              padding: "1rem 2rem",
+              zIndex: 1000,
+              display: "flex",
+              flexDirection: "column",
+              gap: "1rem",
+            }}
+          >
+            {links.map((link) => (
+              <a
+                key={link}
+                href={`#${link}`}
+                onClick={() => {
+                  setSelectedLink(link);
+                  setMenuOpen(false);
+                }}
+                style={{
+                  color: "#fff",
+                  textDecoration: "none",
+                  fontSize: "1.1rem",
+                  fontWeight: "500",
+                }}
+              >
+                {t(`nav.${link}`)}
+              </a>
+            ))}
+            <div style={{ marginTop: "1rem" }}>
+              <GoogleSignInButton animate={animateGoogle} />
+            </div>
+          </div>
+        )}
       </>
     )}
 
