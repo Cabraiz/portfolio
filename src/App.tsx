@@ -42,6 +42,8 @@ function App() {
   const links = ["home", "portfolio", "roadMap", "pricing", "live", "contact"];
   const [animateGoogle, setAnimateGoogle] = useState(false);
 
+  const [menuOpen, setMenuOpen] = useState(false);
+
   const isMobileView = windowSize.innerWidth < 768;
 
   useEffect(() => {
@@ -117,11 +119,12 @@ function App() {
 
   const { t } = useTranslation();
   return (
-    <>
-      <div>
-        <TitleWebsite title1="Bem Vindo! 🤝" title2="Cabraiz" />
-      </div>
-      {isNavOn ? null : (
+  <>
+    <div>
+      <TitleWebsite title1="Bem Vindo! 🤝" title2="Cabraiz" />
+    </div>
+    {isNavOn ? null : (
+      <>
         <Navbar
           className="border-gradient-green"
           style={{
@@ -137,43 +140,65 @@ function App() {
             marginBottom: "0",
           }}
         >
-     
-     <Link to="/" style={{ textDecoration: "none" }}>
-      <Image
-        src={logo}
-        style={{
-          marginLeft: `${convertMultiplyVwToPx()}px`,
-          marginRight: "20px",
-          marginTop: "0.5vh",
-          borderRadius: "20%",
-          width: "8.5vh",
-          height: "8.5vh",
-          cursor: "pointer",
-        }}
-        alt="Logo"
-      />
-    </Link>
+          <Link to="/" style={{ textDecoration: "none" }}>
+            <Image
+              src={logo}
+              style={{
+                marginLeft: `${convertMultiplyVwToPx()}px`,
+                marginRight: "20px",
+                marginTop: "0.5vh",
+                borderRadius: "20%",
+                width: "8.5vh",
+                height: "8.5vh",
+                cursor: "pointer",
+              }}
+              alt="Logo"
+            />
+          </Link>
+
           {isMobileView ? (
-            <div style={{
-              flexGrow: 1,
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center"
-            }}>
-              <span
+            <>
+              <div
                 style={{
-                  fontSize: "1.4rem",
-                  fontWeight: "600",
-                  color: "#ffffff",
-                  textAlign: "center",
-                  whiteSpace: "nowrap",
-                  letterSpacing: "1px"
+                  flexGrow: 1,
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
                 }}
               >
-                {/* Nome ou slogan no mobile */}
-                Cabraiz
-              </span>
-            </div>
+                <span
+                  style={{
+                    fontSize: "1.4rem",
+                    fontWeight: "600",
+                    color: "#ffffff",
+                    textAlign: "center",
+                    whiteSpace: "nowrap",
+                    letterSpacing: "1px",
+                  }}
+                >
+                  Cabraiz
+                </span>
+              </div>
+              {/* Hamburger menu */}
+              <Button
+                onClick={() => setMenuOpen(!menuOpen)}
+                style={{
+                  backgroundColor: "transparent",
+                  border: "none",
+                  marginRight: "5vw",
+                  padding: "0",
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  gap: "4px",
+                }}
+              >
+                <div style={{ width: "24px", height: "2px", backgroundColor: "#fff" }} />
+                <div style={{ width: "24px", height: "2px", backgroundColor: "#fff" }} />
+                <div style={{ width: "24px", height: "2px", backgroundColor: "#fff" }} />
+              </Button>
+            </>
           ) : (
             <>
               <Nav
@@ -217,7 +242,7 @@ function App() {
                         position: "relative",
                         width: "100%",
                         fontWeight: 500,
-                        letterSpacing: 1.5
+                        letterSpacing: 1.5,
                       }}
                     >
                       {link === "live" && (
@@ -253,44 +278,81 @@ function App() {
               <GoogleSignInButton animate={animateGoogle} />
             </>
           )}
-
         </Navbar>
-      )}
-      <Routes>
-        <Route path="/" element={<Mateus />} />
 
-        {/* public routes */}
-        <Route path="/registerhublocal" element={<RegisterHubLocal />} />
-        <Route path="/loginhublocal" element={<LoginHubLocal />} />
-        {/* <Route path="/surprise" element={<Surprise />} /> */}
-        <Route path="/resume" element={<Resume />} />
-        <Route path="/doris" element={<Doris />} />
-        <Route path="/casanova" element={<CasaNova />} />
-
-        <Route path="/hublocal" element={<PrivateOutlet />}>
-          {/* protected routes */}
-          <Route index element={<Hublocal />} />
-        </Route>
-      </Routes>
-      {!isNavOn && !isMobile ? (
+        {/* Dropdown menu mobile */}
         <div
-          style={{
-            position: "fixed",
-            bottom: "10px",
-            right: "10px",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "flex-end",
-            marginBottom: "8vh",
-            marginRight: "3vw",
-          }}
-        >
-          {buttons}
-        </div>
-      ) : null}
-      <ToastContainer />
-    </>
-  );
+  style={{
+    maxHeight: menuOpen ? "500px" : "0px",
+    overflow: "hidden",
+    transition: "max-height 0.4s ease",
+    backgroundColor: "#121212",
+    padding: menuOpen ? "1rem 2rem" : "0 2rem",
+    display: "flex",
+    flexDirection: "column",
+    gap: "1rem",
+  }}
+>
+  {links.map((link) => (
+    <a
+      key={link}
+      href={`#${link}`}
+      onClick={() => {
+        setSelectedLink(link);
+        setMenuOpen(false);
+      }}
+      style={{
+        color: "#fff",
+        textDecoration: "none",
+        fontSize: "1.1rem",
+        fontWeight: "500",
+        opacity: menuOpen ? 1 : 0,
+        transition: "opacity 0.3s ease",
+      }}
+    >
+      {t(`nav.${link}`)}
+    </a>
+  ))}
+  <div style={{ marginTop: "1rem", opacity: menuOpen ? 1 : 0, transition: "opacity 0.3s ease" }}>
+    <GoogleSignInButton animate={animateGoogle} />
+  </div>
+</div>
+      </>
+    )}
+
+    <Routes>
+      <Route path="/" element={<Mateus />} />
+      <Route path="/registerhublocal" element={<RegisterHubLocal />} />
+      <Route path="/loginhublocal" element={<LoginHubLocal />} />
+      <Route path="/resume" element={<Resume />} />
+      <Route path="/doris" element={<Doris />} />
+      <Route path="/casanova" element={<CasaNova />} />
+      <Route path="/hublocal" element={<PrivateOutlet />}>
+        <Route index element={<Hublocal />} />
+      </Route>
+    </Routes>
+
+    {!isNavOn && !isMobile ? (
+      <div
+        style={{
+          position: "fixed",
+          bottom: "10px",
+          right: "10px",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "flex-end",
+          marginBottom: "8vh",
+          marginRight: "3vw",
+        }}
+      >
+        {buttons}
+      </div>
+    ) : null}
+
+    <ToastContainer />
+  </>
+);
+
 }
 
 export default App;
