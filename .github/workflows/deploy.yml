@@ -1,0 +1,46 @@
+name: Build and Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+
+    steps:
+      - name: 🔍 Checkout
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: yarn
+
+      - name: 📦 Install dependencies
+        run: yarn install --immutable
+
+      - name: 🛠️ Build app
+        run: yarn build:ci
+
+      - name: 📤 Upload static site to artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    name: 🚀 Deploy to GitHub Pages
+
+    steps:
+      - name: 🚀 Deploy with GitHub Pages
+        uses: actions/deploy-pages@v4
