@@ -87,6 +87,9 @@ jobs:
       - name: 🧰 Install jq (if missing)
         run: sudo apt-get update && sudo apt-get install -y jq
 
+      - name: 🛠️ Type-check (TS)
+        run: tsc
+
       - name: 🩹 Patch react-toastify deep import for Vite (Node 20+)
         run: |
           FILE=node_modules/react-toastify/dist/ReactToastify.css
@@ -101,7 +104,7 @@ jobs:
           fi
 
       - name: 🛠️ Build app
-        run: npm run build:ci
+        run: vite build && cp 404.html dist/
 
       - name: 📤 Upload static site to artifact
         uses: actions/upload-pages-artifact@v3
