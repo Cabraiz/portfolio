@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Button, Image } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import logoGmail from "./assets/icones/7.svg";
-import IconGmail from "./assets/Mateus/icon/IconGoogle.png";
+import IconGmail from "./assets/Mateus/icon/IconGoogl.png";
 
 interface GoogleSignInButtonProps {
     animate?: boolean;
