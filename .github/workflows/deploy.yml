@@ -45,10 +45,13 @@ jobs:
           find src -type f \( -name "*.ts" -o -name "*.tsx" \) | while read file; do
             grep -iE 'from\s+["'"'"'].*\.svg' "$file" | while read line; do
               old=$(echo "$line" | sed -nE "s/.*from\s+['\"](.*\.svg)['\"].*/\1/p")
-              lowercase=$(echo "$old" | tr '[:upper:]' '[:lower:]')
-              if [ "$old" != "$lowercase" ]; then
-                echo "📝 Corrigindo import em $file: $old → $lowercase"
-                sed -i "s|$old|$lowercase|g" "$file"
+              dir=$(dirname "$old")
+              fileonly=$(basename "$old")
+              lowercasefile=$(echo "$fileonly" | tr '[:upper:]' '[:lower:]')
+              corrected="$dir/$lowercasefile"
+              if [ "$old" != "$corrected" ]; then
+                echo "📝 Corrigindo import em $file: $old → $corrected"
+                sed -i "s|$old|$corrected|g" "$file"
               fi
             done
           done
