@@ -104,7 +104,7 @@ jobs:
           fi
 
       - name: 🛠️ Build app
-        run: vite build && cp 404.html dist/
+        run: npx vite build && cp 404.html dist/
 
       - name: 📤 Upload static site to artifact
         uses: actions/upload-pages-artifact@v3
