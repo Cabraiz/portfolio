@@ -84,6 +84,17 @@ jobs:
             done
           done
 
+      - name: 🩹 Patch react-toastify CSS for Vite compatibility
+        run: |
+          CSS_SOURCE=node_modules/react-toastify/dist/ReactToastify.css
+          CSS_TARGET=src/react-toastify.css
+          if [ -f "$CSS_SOURCE" ]; then
+            echo "✅ react-toastify CSS encontrado. Copiando para $CSS_TARGET"
+            cp "$CSS_SOURCE" "$CSS_TARGET"
+          else
+            echo "⚠️ react-toastify CSS não encontrado. Build pode falhar."
+          fi
+
       - name: 🛠️ Build app
         run: npm run build:ci
 
