@@ -28,31 +28,35 @@ jobs:
       - name: 📦 Install dependencies
         run: npm ci
 
-      - name: 🔧 Normalize filenames to lowercase (.svg)
+      - name: 🔧 Normalize filenames to lowercase (.svg and .png)
         run: |
-          find src -type f -iname "*.svg" | while read filepath; do
-            dirname=$(dirname "$filepath")
-            filename=$(basename "$filepath")
-            lowercase="$dirname/$(echo "$filename" | tr '[:upper:]' '[:lower:]')"
-            if [ "$filepath" != "$lowercase" ]; then
-              echo "📝 Renomeando '$filepath' para '$lowercase'"
-              git mv "$filepath" "$lowercase" 2>/dev/null || mv "$filepath" "$lowercase"
-            fi
+          for ext in svg png; do
+            find src -type f -iname "*.${ext}" | while read filepath; do
+              dirname=$(dirname "$filepath")
+              filename=$(basename "$filepath")
+              lowercase="$dirname/$(echo "$filename" | tr '[:upper:]' '[:lower:]')"
+              if [ "$filepath" != "$lowercase" ]; then
+                echo "📝 Renomeando '$filepath' para '$lowercase'"
+                git mv "$filepath" "$lowercase" 2>/dev/null || mv "$filepath" "$lowercase"
+              fi
+            done
           done
 
-      - name: 🛠️ Fix imports to match lowercase SVG filenames
+      - name: 🛠️ Fix imports to match lowercase filenames (.svg and .png)
         run: |
-          find src -type f \( -name "*.ts" -o -name "*.tsx" \) | while read file; do
-            grep -iE 'from\s+["'"'"'].*\.svg' "$file" | while read line; do
-              old=$(echo "$line" | sed -nE "s/.*from\s+['\"](.*\.svg)['\"].*/\1/p")
-              dir=$(dirname "$old")
-              fileonly=$(basename "$old")
-              lowercasefile=$(echo "$fileonly" | tr '[:upper:]' '[:lower:]')
-              corrected="$dir/$lowercasefile"
-              if [ "$old" != "$corrected" ]; then
-                echo "📝 Corrigindo import em $file: $old → $corrected"
-                sed -i "s|$old|$corrected|g" "$file"
-              fi
+          for ext in svg png; do
+            find src -type f \( -name "*.ts" -o -name "*.tsx" \) | while read file; do
+              grep -iE "from\s+['\"].*\.${ext}" "$file" | while read line; do
+                old=$(echo "$line" | sed -nE "s/.*from\s+['\"](.*\.${ext})['\"].*/\1/p")
+                dir=$(dirname "$old")
+                fileonly=$(basename "$old")
+                lowercasefile=$(echo "$fileonly" | tr '[:upper:]' '[:lower:]')
+                corrected="$dir/$lowercasefile"
+                if [ "$old" != "$corrected" ]; then
+                  echo "📝 Corrigindo import em $file: $old → $corrected"
+                  sed -i "s|$old|$corrected|g" "$file"
+                fi
+              done
             done
           done
 
