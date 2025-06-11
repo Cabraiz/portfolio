@@ -84,12 +84,13 @@ jobs:
             done
           done
 
-      - name: 🩹 Patch react-toastify CSS for Vite compatibility
+      - name: 🩹 Patch react-toastify CSS for Vite compatibility (deep import fix)
         run: |
           FILE=node_modules/react-toastify/dist/ReactToastify.css
+          PATCH=node_modules/react-toastify/dist/reacttoastify.css
           if [ -f "$FILE" ]; then
-            echo "✅ react-toastify CSS encontrado. Renomeando para lowercase"
-            mv "$FILE" node_modules/react-toastify/dist/reacttoastify.css
+            echo "✅ react-toastify CSS encontrado. Duplicando com nome em lowercase"
+            cp "$FILE" "$PATCH"
           else
             echo "⚠️ react-toastify CSS não encontrado. Build pode falhar."
           fi
