@@ -1,0 +1,231 @@
+// AppNavbar.tsx
+import React from "react";
+import { Button, Image, Nav, Navbar } from "react-bootstrap";
+import { Link } from "react-router-dom";
+import logo from "./assets/icones/logo.svg";
+import LiveAnimation from "./pages/PrincipalPage/Animation/live_animation";
+import GoogleSignInButton from "./GoogleSignInButton";
+import { useTranslation } from "react-i18next";
+
+interface AppNavbarProps {
+  isMobileView: boolean;
+  selectedLink: string;
+  setSelectedLink: (link: string) => void;
+  animateGoogle: boolean;
+  menuOpen: boolean;
+  setMenuOpen: (open: boolean) => void;
+  links: string[];
+  convertMultiplyVwToPx: () => number;
+}
+
+const AppNavbar: React.FC<AppNavbarProps> = ({
+  isMobileView,
+  selectedLink,
+  setSelectedLink,
+  animateGoogle,
+  menuOpen,
+  setMenuOpen,
+  links,
+  convertMultiplyVwToPx,
+}) => {
+  const { t } = useTranslation();
+
+  return (
+    <>
+      <Navbar
+        className="border-gradient-green"
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          height: "11vh",
+          fontWeight: "600",
+          marginTop: "0.1vh",
+        }}
+      >
+        <Link to="/" style={{ textDecoration: "none" }}>
+          <Image
+            src={logo}
+            style={{
+              marginLeft: isMobileView ? "5vw" : `${convertMultiplyVwToPx()}px`,
+              marginRight: "20px",
+              marginTop: "0.5vh",
+              borderRadius: "20%",
+              width: "8.5vh",
+              height: "8.5vh",
+              cursor: "pointer",
+            }}
+            alt="Logo"
+          />
+        </Link>
+
+        {isMobileView ? (
+          <>
+            <div style={{ position: "relative", flexGrow: 1 }}>
+              <span
+                style={{
+                  position: "absolute",
+                  left: "42%",
+                  transform: "translate(-50%, -40%)",
+                  fontSize: "1.5rem",
+                  fontWeight: "600",
+                  color: "#ffffff",
+                  whiteSpace: "nowrap",
+                  letterSpacing: "1px",
+                  zIndex: 1,
+                }}
+              >
+                Cabraiz
+              </span>
+            </div>
+
+            <Button
+              onClick={() => setMenuOpen(!menuOpen)}
+              style={{
+                backgroundColor: "transparent",
+                border: "none",
+                marginRight: "5vw",
+                padding: "0",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+                alignItems: "center",
+                gap: "4px",
+                zIndex: 2,
+              }}
+            >
+              {[...Array(3)].map((_, i) => (
+                <div key={i} style={{ width: "24px", height: "2px", backgroundColor: "#fff" }} />
+              ))}
+            </Button>
+          </>
+        ) : (
+          <>
+            <Nav
+              style={{
+                display: "flex",
+                alignItems: "stretch",
+                marginLeft: "-4vw",
+                marginTop: "1vh",
+                gap: "1rem",
+              }}
+            >
+              {links.map((link) => (
+                <button
+                  key={link}
+                  onClick={() => {
+                    window.location.hash = `#${link.toLowerCase()}`;
+                    setSelectedLink(link);
+                  }}
+                  style={{
+                    all: "unset",
+                    height: "100%",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Nav.Link
+  as="div"
+  className={`nav-link-custom ${selectedLink === link ? "active" : ""}`}
+  style={{
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    fontWeight: 100,
+    letterSpacing: 1.3,
+    fontSize: "1.8rem",
+    fontFamily: "Poppins, sans-serif",
+    cursor: "pointer",
+    userSelect: "none",
+    transition: "all 0.25s ease-in-out",
+  }}
+  onMouseEnter={(e) => {
+    e.currentTarget.style.opacity = "0.85";
+    e.currentTarget.style.transform = "scale(1.035)";
+  }}
+  onMouseLeave={(e) => {
+    e.currentTarget.style.opacity = "1";
+    e.currentTarget.style.transform = "scale(1)";
+  }}
+>
+  {link === "live" && (
+    <div
+      style={{
+        position: "absolute",
+        top: "1.5vh",
+        left: "-1.2vw",
+        zIndex: 10,
+        transform: "scale(0.5)",
+      }}
+    >
+      <LiveAnimation />
+    </div>
+  )}
+
+  <span>{t(`nav.${link}`)}</span>
+
+  {selectedLink === link && (
+    <div
+      style={{
+        width: "50%",
+        height: "3px",
+        backgroundColor: "white",
+        borderRadius: "3px",
+        marginTop: "6px", // espaçamento elegante entre texto e traço
+      }}
+    />
+  )}
+</Nav.Link>
+
+                </button>
+              ))}
+            </Nav>
+            <GoogleSignInButton animate={animateGoogle} />
+          </>
+        )}
+      </Navbar>
+
+      {isMobileView && (
+        <div
+          style={{
+            maxHeight: menuOpen ? "500px" : "0px",
+            overflow: "hidden",
+            transition: "max-height 0.4s ease",
+            backgroundColor: "#121212",
+            padding: menuOpen ? "1rem 2rem" : "0 2rem",
+            display: "flex",
+            flexDirection: "column",
+            gap: "1rem",
+            borderBottom: menuOpen ? "1px solid #444" : "none",
+          }}
+        >
+          {links.map((link) => (
+            <a
+              key={link}
+              href={`#${link}`}
+              onClick={() => {
+                setSelectedLink(link);
+                setMenuOpen(false);
+              }}
+              style={{
+                color: "#fff",
+                textDecoration: "none",
+                fontSize: "1.1rem",
+                fontWeight: "500",
+              }}
+            >
+              {t(`nav.${link}`)}
+            </a>
+          ))}
+          <div style={{ marginTop: "1rem" }}>
+            <GoogleSignInButton animate={animateGoogle} />
+          </div>
+        </div>
+      )}
+    </>
+  );
+};
+
+export default AppNavbar;
