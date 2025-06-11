@@ -84,16 +84,18 @@ jobs:
             done
           done
 
-      - name: 🩹 Patch react-toastify CSS for Vite compatibility (deep import fix)
+      - name: 🩹 Patch react-toastify deep import for Vite (Node 20+)
         run: |
-          FILE=node_modules/react-toastify/dist/ReactToastify.css
-          PATCH=node_modules/react-toastify/dist/reacttoastify.css
-          if [ -f "$FILE" ]; then
-            echo "✅ react-toastify CSS encontrado. Duplicando com nome em lowercase"
-            cp "$FILE" "$PATCH"
+          CSS=node_modules/react-toastify/dist/ReactToastify.css
+          if [ -f "$CSS" ]; then
+            echo "✅ react-toastify CSS exists. Creating virtual export map..."
+            echo '{ "exports": { "./dist/ReactToastify.css": "./dist/ReactToastify.css" } }' > node_modules/react-toastify/package.json
+            cp LICENSE node_modules/react-toastify/LICENSE 2>/dev/null || true
           else
-            echo "⚠️ react-toastify CSS não encontrado. Build pode falhar."
+            echo "❌ react-toastify CSS not found"
+            exit 1
           fi
+
 
       - name: 🛠️ Build app
         run: npm run build:ci
