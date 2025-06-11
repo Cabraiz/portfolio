@@ -124,6 +124,5 @@
   },
   "engines": {
     "node": ">=23.0.0"
-  },
-  "packageManager": "yarn@3.6.0"
+  }
 }
