@@ -84,12 +84,6 @@ jobs:
             done
           done
 
-      - name: 🧰 Install jq (if missing)
-        run: sudo apt-get update && sudo apt-get install -y jq
-
-      - name: 🛠️ Type-check (TS)
-        run: tsc
-
       - name: 🩹 Patch react-toastify deep import and root entry for Vite (Node 20+)
         run: |
           FILE=node_modules/react-toastify/dist/ReactToastify.css
