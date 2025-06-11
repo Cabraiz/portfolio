@@ -1,5 +1,5 @@
 // AppNavbar.tsx
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Button, Image, Nav, Navbar } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import logo from "./assets/icones/logo.svg";
@@ -29,6 +29,33 @@ const AppNavbar: React.FC<AppNavbarProps> = ({
   convertMultiplyVwToPx,
 }) => {
   const { t } = useTranslation();
+
+  const navRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+  const navContainerRef = useRef<HTMLDivElement>(null);
+  const [underlineStyle, setUnderlineStyle] = useState<React.CSSProperties>({
+    width: 0,
+    left: 0,
+    opacity: 0,
+  });
+
+  useEffect(() => {
+    const current = navRefs.current[selectedLink];
+    const container = navContainerRef.current;
+    if (current && container) {
+      setUnderlineStyle({
+  width: current.offsetWidth,
+  left: current.offsetLeft,
+  opacity: 1,
+  transition: "all 300ms ease-in-out",
+  position: "absolute",
+  bottom: "-8px",
+  height: "3px",
+  backgroundColor: "white",
+  borderRadius: "3px",
+});
+
+    }
+  }, [selectedLink]);
 
   return (
     <>
@@ -102,7 +129,9 @@ const AppNavbar: React.FC<AppNavbarProps> = ({
         ) : (
           <>
             <Nav
+              ref={navContainerRef}
               style={{
+                position: "relative",
                 display: "flex",
                 alignItems: "stretch",
                 marginLeft: "-4vw",
@@ -127,6 +156,7 @@ const AppNavbar: React.FC<AppNavbarProps> = ({
                 >
                   <Nav.Link
   as="div"
+  ref={(el) => { navRefs.current[link] = el; }}
   className={`nav-link-custom ${selectedLink === link ? "active" : ""}`}
   style={{
     display: "flex",
@@ -140,6 +170,8 @@ const AppNavbar: React.FC<AppNavbarProps> = ({
     cursor: "pointer",
     userSelect: "none",
     transition: "all 0.25s ease-in-out",
+    paddingBottom: "10px",
+    position: "relative", // importante
   }}
   onMouseEnter={(e) => {
     e.currentTarget.style.opacity = "0.85";
@@ -150,38 +182,34 @@ const AppNavbar: React.FC<AppNavbarProps> = ({
     e.currentTarget.style.transform = "scale(1)";
   }}
 >
-  {link === "live" && (
-    <div
-      style={{
-        position: "absolute",
-        top: "1.5vh",
-        left: "-1.2vw",
-        zIndex: 10,
-        transform: "scale(0.5)",
-      }}
-    >
-      <LiveAnimation />
-    </div>
-  )}
+  {/* container com posição relativa */}
+  <div style={{ position: "relative" }}>
+    {/* bolinha decorativa fixa */}
+    {link === "live" && (
+      <div
+        style={{
+          position: "absolute",
+          left: "-2rem",
+          top: "0",
+          transform: "translateY(-50%) scale(0.5)",
+          pointerEvents: "none", // impede clique
+        }}
+      >
+        <LiveAnimation />
+      </div>
+    )}
 
-  <span>{t(`nav.${link}`)}</span>
-
-  {selectedLink === link && (
-    <div
-      style={{
-        width: "50%",
-        height: "3px",
-        backgroundColor: "white",
-        borderRadius: "3px",
-        marginTop: "6px", // espaçamento elegante entre texto e traço
-      }}
-    />
-  )}
+    {/* texto centralizado normalmente */}
+    <span>{t(`nav.${link}`)}</span>
+  </div>
 </Nav.Link>
 
                 </button>
               ))}
+              {/* 🔥 Traço animado */}
+              <div style={underlineStyle} />
             </Nav>
+
             <GoogleSignInButton animate={animateGoogle} />
           </>
         )}
