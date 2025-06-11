@@ -84,18 +84,21 @@ jobs:
             done
           done
 
+      - name: 🧰 Install jq (if missing)
+        run: sudo apt-get update && sudo apt-get install -y jq
+
       - name: 🩹 Patch react-toastify deep import for Vite (Node 20+)
         run: |
-          CSS=node_modules/react-toastify/dist/ReactToastify.css
-          if [ -f "$CSS" ]; then
-            echo "✅ react-toastify CSS exists. Creating virtual export map..."
-            echo '{ "exports": { "./dist/ReactToastify.css": "./dist/ReactToastify.css" } }' > node_modules/react-toastify/package.json
-            cp LICENSE node_modules/react-toastify/LICENSE 2>/dev/null || true
+          FILE=node_modules/react-toastify/dist/ReactToastify.css
+          PKG=node_modules/react-toastify/package.json
+          if [ -f "$FILE" ]; then
+            echo "✅ CSS encontrado. Fazendo patch não destrutivo no package.json..."
+            tmpfile=$(mktemp)
+            jq '. + { exports: { "./dist/ReactToastify.css": "./dist/ReactToastify.css" } }' "$PKG" > "$tmpfile" && mv "$tmpfile" "$PKG"
           else
-            echo "❌ react-toastify CSS not found"
+            echo "❌ CSS não encontrado. Abortando build."
             exit 1
           fi
-
 
       - name: 🛠️ Build app
         run: npm run build:ci
