@@ -30,7 +30,7 @@ jobs:
 
       - name: 🧱 Normalize folder names to lowercase (recursively)
         run: |
-          find src -type d | tac | while read dir; do
+          find ./src -type d | tac | while read dir; do
             parent=$(dirname "$dir")
             base=$(basename "$dir")
             lower=$(echo "$base" | tr '[:upper:]' '[:lower:]')
@@ -44,7 +44,7 @@ jobs:
       - name: 🔧 Normalize filenames to lowercase (images, fonts, code, and CSS)
         run: |
           for ext in svg png webp jpg jpeg gif ico otf ttf woff woff2 ts tsx css; do
-            find src -type f -iname "*.${ext}" | while read filepath; do
+            find ./src -type f -iname "*.${ext}" | while read filepath; do
               dirname=$(dirname "$filepath")
               filename=$(basename "$filepath")
               lowercase="$dirname/$(echo "$filename" | tr '[:upper:]' '[:lower:]')"
@@ -58,7 +58,7 @@ jobs:
       - name: 🛠️ Fix imports to match lowercase file paths (including .css)
         run: |
           for ext in svg png webp jpg jpeg gif ico otf ttf woff woff2 ts tsx css; do
-            find src -type f \( -name "*.ts" -o -name "*.tsx" \) | while read file; do
+            find ./src -type f \( -name "*.ts" -o -name "*.tsx" \) | while read file; do
               grep -iE "['\"].*\.${ext}['\"]" "$file" | while read line; do
                 old=$(echo "$line" | sed -nE "s/.*['\"](.*\.${ext})['\"].*/\1/p")
                 if [ -n "$old" ]; then
@@ -74,7 +74,7 @@ jobs:
 
       - name: 🛠️ Fix imports to match lowercase folder paths
         run: |
-          find src -type f \( -name "*.ts" -o -name "*.tsx" \) | while read file; do
+          find ./src -type f \( -name "*.ts" -o -name "*.tsx" \) | while read file; do
             grep -oE "from\s+['\"][^'\"]+['\"]" "$file" | sed -E "s/from\s+['\"](.*)['\"]/\\1/" | while read path; do
               corrected=$(echo "$path" | sed -E 's@/([^/]+)@/\L\1@g')
               if [ "$path" != "$corrected" ]; then
