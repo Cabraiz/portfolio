@@ -1,6 +1,6 @@
 import { Col, Row, Image, Button, Container } from "react-bootstrap";
 import { isMobile } from "react-device-detect";
-import IconWhatsAppVector from "../../assets/Mateus/icon/IconWhatsAppVector.svg?url?url";
+import IconWhatsAppVector from "../../assets/Mateus/icon/IconWhatsAppVector.svg?url";
 
 import perfil from "../../assets/Mateus/perfil.webp";
 import IconGmail from "../../assets/Mateus/icon/IconGmail.png";
