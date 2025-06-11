@@ -11,8 +11,8 @@ import GoogleSignInButton from "./GoogleSignInButton";
 
 import { Row, Navbar, Image, Button, Nav } from "react-bootstrap";
 
-import logo from "./assets/icones/logo.svg?url";
-import logoGmail from "./assets/icones/7.svg?url";
+import logo from "./assets/icones/logo.svg";
+import logoGmail from "./assets/icones/7.svg";
 
 import "react-toastify/dist/ReactToastify.css";
 

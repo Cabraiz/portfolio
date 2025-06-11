@@ -1,6 +1,6 @@
 import { Col, Row, Image, Button, Container } from "react-bootstrap";
 import { isMobile } from "react-device-detect";
-import IconWhatsAppVector from "../../assets/Mateus/icon/IconWhatsAppVector.svg?url";
+import IconWhatsAppVector from "../../assets/Mateus/icon/IconWhatsAppVector.svg";
 
 import perfil from "../../assets/Mateus/perfil.webp";
 import IconGmail from "../../assets/Mateus/icon/IconGmail.png";
@@ -9,10 +9,10 @@ import IconLinkendin from "../../assets/Mateus/icon/IconLinkedIn.png";
 import IconWhatsApp from "../../assets/Mateus/icon/IconWhatsApp.png";
 import IconMeet from "../../assets/Mateus/icon/IconMeet.png";
 
-import seloBNB from "../../assets/Mateus/Selos/BNB.svg?url";
-import seloUNIFOR from "../../assets/Mateus/Selos/UNIFOR.svg?url";
-import seloSANA from "../../assets/Mateus/Selos/SANA.svg?url";
-import seloSEDIH from "../../assets/Mateus/Selos/SEDIH.svg?url";
+import seloBNB from "../../assets/Mateus/Selos/BNB.svg";
+import seloUNIFOR from "../../assets/Mateus/Selos/UNIFOR.svg";
+import seloSANA from "../../assets/Mateus/Selos/SANA.svg";
+import seloSEDIH from "../../assets/Mateus/Selos/SEDIH.svg";
 import RoleTitle from "./RoleTitle";
 import FloatingChat from "./FloatingChat";
 
