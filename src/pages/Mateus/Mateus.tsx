@@ -170,7 +170,7 @@ function Mateus() {
       />
     </div>
 
-    {/* Redes */}
+    {/* Redes sociais */}
     <div
       style={{
         display: "flex",
