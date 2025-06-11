@@ -14,8 +14,7 @@ import { Row, Navbar, Image, Button, Nav } from "react-bootstrap";
 import logo from "./assets/icones/logo.svg";
 import logoGmail from "./assets/icones/7.svg";
 
-import "react-toastify/dist/ReactToastify.css";
-
+import('react-toastify/dist/ReactToastify.css');
 
 import RegisterHubLocal from "./pages/RegisterHubLocal/Register";
 import LoginHubLocal from "./pages/LoginHubLocal/login";
