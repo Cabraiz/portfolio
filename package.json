@@ -102,6 +102,7 @@
     "@vitejs/plugin-react-swc": "3.9.0",
     "gh-pages": "6.3.0",
     "msw": "2.7.6",
+    "vite-plugin-svgr": "^4.3.0",
     "vite-tsconfig-paths": "5.1.4",
     "vitest": "3.2.3",
     "web-vitals": "4.2.4",

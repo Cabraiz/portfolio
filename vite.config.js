@@ -6,7 +6,7 @@ const isProd = process.env.NODE_ENV === 'production';
 
 export default defineConfig({
   base: isProd ? '' : '/',
-  plugins: [react(), tsconfigPaths()],
+  plugins: [react(), tsconfigPaths(), svgr()],
   build: {
     sourcemap: true,
   },
