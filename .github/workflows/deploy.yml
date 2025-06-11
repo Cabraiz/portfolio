@@ -28,6 +28,18 @@ jobs:
       - name: 📦 Install dependencies
         run: npm ci
 
+      - name: 🧱 Normalize folder names to lowercase (inside /src/assets)
+        run: |
+          find src/assets -type d | tac | while read dir; do
+            parent=$(dirname "$dir")
+            base=$(basename "$dir")
+            lower=$(echo "$base" | tr '[:upper:]' '[:lower:]')
+            if [ "$base" != "$lower" ]; then
+              echo "📁 Renomeando pasta '$dir' → '$parent/$lower'"
+              git mv "$dir" "$parent/$lower" 2>/dev/null || mv "$dir" "$parent/$lower"
+            fi
+          done
+
       - name: 🔧 Normalize filenames to lowercase (images)
         run: |
           for ext in svg png webp jpg jpeg gif ico; do
