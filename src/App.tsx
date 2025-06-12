@@ -76,14 +76,27 @@ function App() {
   );
 
   const { pathname } = useLocation();
-  const isNavOn = [
-    "/hublocal",
-    "/loginhublocal",
-    "/registerhublocal",
-    "/resume",
-    "/doris",
-    "/casanova",
-  ].includes(pathname);
+
+  const hiddenNavbarRoutes = [
+    "/enigma",
+    "/libras-unlock",
+    "/libras",
+    "/rosa-unlock",
+    "/rosa",
+    "/vinho-unlock",
+    "/vinho",
+  ];
+
+  const isNavHidden = hiddenNavbarRoutes.includes(pathname);
+
+  useEffect(() => {
+    const body = document.body;
+    if (isNavHidden) {
+      body.classList.add("no-background");
+    } else {
+      body.classList.remove("no-background");
+    }
+  }, [isNavHidden]);
 
   const { t } = useTranslation();
 
@@ -91,7 +104,7 @@ function App() {
     <>
       <TitleWebsite title1="Bem Vindo! 🤝" title2="Cabraiz" />
 
-      {!isNavOn && (
+      {!isNavHidden && (
         <AppNavbar
           isMobileView={isMobileView}
           selectedLink={selectedLink}
@@ -106,7 +119,7 @@ function App() {
 
       <AppRoutes />
 
-      {!isNavOn && !isMobileView && (
+      {!isNavHidden && !isMobileView && (
         <div
           style={{
             position: "fixed",

@@ -1,0 +1,56 @@
+/* src/components/DigitalCodeUnlock.css */
+.unlock-container {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #0b0b0e;
+}
+
+.code-box {
+  display: flex;
+  gap: 1rem;
+}
+
+.digit-input {
+  width: 60px;
+  height: 80px;
+  font-size: 2rem;
+  text-align: center;
+  border: none;
+  border-radius: 12px;
+  background: #1a1a1d;
+  color: #fff;
+  box-shadow: 0 0 0 2px #444 inset;
+  outline: none;
+  transition: box-shadow 0.2s ease-in-out;
+}
+
+.digit-input:focus {
+  box-shadow: 0 0 0 2px #6c47ff inset;
+}
+
+@media (max-width: 480px) {
+  .digit-input {
+    width: 48px;
+    height: 64px;
+    font-size: 1.5rem;
+  }
+}
+
+.led-timer {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 5rem;
+  color: red;
+  background: black;
+  padding: 2rem 4rem;
+  border-radius: 12px;
+  box-shadow: 0 0 20px red;
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0% { box-shadow: 0 0 10px red; opacity: 1; }
+  50% { box-shadow: 0 0 25px red; opacity: 0.7; }
+  100% { box-shadow: 0 0 10px red; opacity: 1; }
+}

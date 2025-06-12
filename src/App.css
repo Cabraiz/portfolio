@@ -18,6 +18,14 @@
   font-weight: 700;
 }
 
+@font-face {
+  font-family: "Orbitron";
+  src:
+    local("Orbitron"),
+    url("/fonts/Orbitron/Orbitron-Bold.ttf") format("truetype");
+  font-weight: 700;
+}
+
 html {
   height: auto !important;
 }
@@ -223,4 +231,9 @@ body::before {
 
 .google-circle-button:hover img {
   transform: scale(1.5); /* opcional: pequeno efeito de zoom */
+}
+
+body.no-background {
+  background-image: none !important;
+  background-color: #ffffff !important;
 }
