@@ -96,6 +96,32 @@
   min-height: 72px;
 }
 
+.lcd-display::after {
+  content: '';
+  position: absolute;
+  top: -100%;
+  left: 0;
+  width: 100%;
+  height: 200%;
+  background: linear-gradient(
+    120deg,
+    rgba(255, 255, 255, 0.06) 0%,
+    rgba(255, 255, 255, 0.12) 50%,
+    rgba(255, 255, 255, 0.06) 100%
+  );
+  transform: skewY(-10deg);
+  animation: lcd-reflection 8s infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+
+@keyframes lcd-reflection {
+  0% { top: -100%; }
+  50% { top: 100%; }
+  100% { top: 100%; }
+}
+
+
 /* Efeito de vidro sujo / mofo */
 .lcd-display::before {
   content: '';
@@ -177,7 +203,7 @@
   );
   transform: skewX(-25deg);
   transition: none;
-  animation: shine 4s infinite ease-in-out;
+  animation: shine 4s infinite alternate ease-in-out;
   pointer-events: none;
 }
 
@@ -254,4 +280,15 @@
   position: absolute;
   top: 0;
   left: 0;
+}
+
+.blinking {
+  animation: blink 1.2s infinite;
+  opacity: 0.6;
+}
+
+@keyframes blink {
+  0%   { opacity: 0.3; }
+  50%  { opacity: 1; }
+  100% { opacity: 0.3; }
 }

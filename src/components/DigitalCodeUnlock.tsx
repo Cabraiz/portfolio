@@ -83,7 +83,12 @@ const DigitalCodeUnlock: React.FC<Props> = ({ routeKey, next }) => {
 <div className="lcd-display">
   {Array.from({ length: 4 }).map((_, i) => (
     <div key={i} className="lcd-digit">
-      <span className="digit-char">{digits[i] ?? "•"}</span>
+     <span
+        className={`digit-char ${!digits[i] ? "blinking" : ""}`}
+      >
+        {digits[i] ?? "•"}
+      </span>
+
       <svg
         className="digit-blood"
         viewBox="0 0 100 100"
@@ -101,29 +106,33 @@ const DigitalCodeUnlock: React.FC<Props> = ({ routeKey, next }) => {
 
 
           <div className="keypad">
-            {keys.map((key) => (
-              <button
-                key={key}
-                onClick={() => handleKeyPress(key)}
-                className={`key ${key}`}
-              >
-                <span className="key-label">{key}</span>
+            {keys.map((key, idx) => {
+  const randomDelay = Math.random() * 4; // entre 0s e 4s
+  return (
+    <button
+      key={key}
+      onClick={() => handleKeyPress(key)}
+      className={`key ${key}`}
+    >
+      <span className="key-label">{key}</span>
 
-                {/* SVG procedurais de rachadura com classe crack-overlay */}
-                <svg
-                  className="crack-overlay"
-                  viewBox="0 0 100 100"
-                  preserveAspectRatio="none"
-                >
-                  <path
-                    d={crackPaths[Math.floor(Math.random() * crackPaths.length)]}
-                    stroke="#fff"
-                    strokeWidth="0.3"
-                    fill="none"
-                  />
-                </svg>
-              </button>
-            ))}
+      <svg
+        className="crack-overlay"
+        viewBox="0 0 100 100"
+        preserveAspectRatio="none"
+        style={{ animationDelay: `${randomDelay}s` }}
+      >
+        <path
+          d={crackPaths[Math.floor(Math.random() * crackPaths.length)]}
+          stroke="#fff"
+          strokeWidth="0.3"
+          fill="none"
+        />
+      </svg>
+    </button>
+  );
+})}
+
           </div>
         </div>
       )}
