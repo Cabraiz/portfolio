@@ -14,49 +14,63 @@ const CODES: Record<string, string> = {
   vinho: "7890",
 };
 
+const keys = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "clear", "0", "enter"];
+
 const DigitalCodeUnlock: React.FC<Props> = ({ routeKey, next }) => {
-  const [digits, setDigits] = useState(["", "", "", ""]);
+  const [digits, setDigits] = useState<string[]>([]);
   const [isLocked, setIsLocked] = useState(false);
   const [timer, setTimer] = useState(5);
   const navigate = useNavigate();
 
-  const handleChange = (index: number, value: string) => {
-    if (isLocked || !/^\d?$/.test(value)) return;
+  const playClick = () => new Audio("/sounds/mw.mp3").play();
+  const playError = () => new Audio("/sounds/ib.mp3").play();
 
-    const updated = [...digits];
-    updated[index] = value;
-    setDigits(updated);
+  const crackPaths = [
+    "M5,90 L30,70 L40,80 L60,60 L80,75 L95,60",
+    "M10,90 L25,65 L35,75 L55,55 L75,70 L90,55",
+    "M5,95 L20,70 L35,85 L50,60 L70,80 L95,50",
+    "M0,80 L20,60 L40,78 L60,58 L85,70 L100,55",
+  ];
 
-    new Audio("/sounds/mw.mp3").play();
 
-    if (value && index < 3) {
-      const nextInput = document.getElementById(`digit-${index + 1}`);
-      nextInput?.focus();
+  const handleKeyPress = (key: string) => {
+    if (isLocked) return;
+
+    playClick();
+
+    if (key === "clear") {
+      setDigits([]);
+      return;
     }
 
-    if (updated.every((d) => d.length === 1)) {
-      const typedCode = updated.join("");
-      if (typedCode === CODES[routeKey]) {
+    if (key === "enter") {
+      if (digits.length !== 4) return;
+
+      const typed = digits.join("");
+      if (typed === CODES[routeKey]) {
         sessionStorage.setItem(`unlocked-${routeKey}`, "true");
         navigate(next);
       } else {
-        new Audio("/sounds/ib.mp3").play();
+        playError();
         setIsLocked(true);
         setTimer(5);
-        setDigits(["", "", "", ""]);
-
         let countdown = 5;
         const interval = setInterval(() => {
-          countdown -= 1;
+          countdown--;
           setTimer(countdown);
           if (countdown === 0) {
             clearInterval(interval);
             setIsLocked(false);
-            setDigits(["", "", "", ""]);
-            document.getElementById("digit-0")?.focus();
+            setDigits([]);
           }
         }, 1000);
       }
+
+      return;
+    }
+
+    if (digits.length < 4) {
+      setDigits([...digits, key]);
     }
   };
 
@@ -65,20 +79,40 @@ const DigitalCodeUnlock: React.FC<Props> = ({ routeKey, next }) => {
       {isLocked ? (
         <div className="led-timer">{timer}</div>
       ) : (
-        <div className="code-box">
-          {digits.map((digit, idx) => (
-            <input
-              key={idx}
-              id={`digit-${idx}`}
-              maxLength={1}
-              type="password"
-              inputMode="numeric"
-              value={digit}
-              onChange={(e) => handleChange(idx, e.target.value)}
-              className="digit-input"
-              autoFocus={idx === 0}
-            />
-          ))}
+        <div className="keypad-wrapper">
+          <div className="lcd-display">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="lcd-digit">
+                {digits[i] ?? "•"}
+              </div>
+            ))}
+          </div>
+
+          <div className="keypad">
+            {keys.map((key) => (
+              <button
+                key={key}
+                onClick={() => handleKeyPress(key)}
+                className={`key ${key}`}
+              >
+                <span className="key-label">{key}</span>
+
+                {/* SVG procedurais de rachadura com classe crack-overlay */}
+                <svg
+                  className="crack-overlay"
+                  viewBox="0 0 100 100"
+                  preserveAspectRatio="none"
+                >
+                  <path
+                    d={crackPaths[Math.floor(Math.random() * crackPaths.length)]}
+                    stroke="#fff"
+                    strokeWidth="0.3"
+                    fill="none"
+                  />
+                </svg>
+              </button>
+            ))}
+          </div>
         </div>
       )}
     </div>
