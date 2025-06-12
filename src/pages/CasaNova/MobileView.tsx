@@ -1,15 +1,15 @@
-import React, { useState } from 'react';
-import { useSwipeable } from 'react-swipeable';
-import { Item } from './types';
-import './LuxuryPage.css';
+import React, { useState } from "react";
+import { useSwipeable } from "react-swipeable";
+import { Item } from "./types";
+import "./LuxuryPage.css";
 
 interface MobileViewProps {
   items: Item[];
   currentPage: number;
   transitioning: boolean;
-  handleSwipe: (direction: 'up' | 'down') => void;
+  handleSwipe: (direction: "up" | "down") => void;
   handleShowPayment: (item: Item) => void;
-  sortItems: (criterion: 'price' | 'name') => void;
+  sortItems: (criterion: "price" | "name") => void;
 }
 
 const MobileView: React.FC<MobileViewProps> = ({
@@ -27,11 +27,11 @@ const MobileView: React.FC<MobileViewProps> = ({
   const swipeHandlers = useSwipeable({
     onSwipedUp: () => {
       setIsSwiping(false);
-      handleSwipe('up');
+      handleSwipe("up");
     },
     onSwipedDown: () => {
       setIsSwiping(false);
-      handleSwipe('down');
+      handleSwipe("down");
     },
     onSwiping: (e) => {
       setIsSwiping(true);
@@ -57,74 +57,80 @@ const MobileView: React.FC<MobileViewProps> = ({
       {/* Modal de opções de ordenação */}
       {showSortModal && (
         <div className="luxury-sort-options">
-        <button
-          onClick={() => {
-            setShowSortModal(false); // Fecha o modal
-            sortItems('price'); // Notifica o componente pai sobre o critério 'price'
-          }}
-        >
-          Por Preço
-        </button>
-        <button
-          onClick={() => {
-            setShowSortModal(false); // Fecha o modal
-            sortItems('name'); // Notifica o componente pai sobre o critério 'name'
-          }}
-        >
-          Por Nome
-        </button>
-      </div>      
+          <button
+            onClick={() => {
+              setShowSortModal(false); // Fecha o modal
+              sortItems("price"); // Notifica o componente pai sobre o critério 'price'
+            }}
+          >
+            Por Preço
+          </button>
+          <button
+            onClick={() => {
+              setShowSortModal(false); // Fecha o modal
+              sortItems("name"); // Notifica o componente pai sobre o critério 'name'
+            }}
+          >
+            Por Nome
+          </button>
+        </div>
       )}
 
       <div {...swipeHandlers} className="luxury-swipe-container">
-      {items.map((item, index) => {
-  const offset = index - currentPage;
-  const translateY = offset * 100 + (isSwiping ? progress * 100 : 0);
+        {items.map((item, index) => {
+          const offset = index - currentPage;
+          const translateY = offset * 100 + (isSwiping ? progress * 100 : 0);
 
-  return (
-    <div
-      key={`${item.id}-${index}`} // Combina ID e índice para garantir chave única
-      className="luxury-swipe-item"
-      style={{
-        transform: `translateY(${translateY}%)`,
-        transition: isSwiping ? 'none' : 'transform 0.3s ease-in-out',
-        zIndex: -Math.abs(offset),
-      }}
-    >
-      <div
-        className="luxury-item-card"
-        onClick={() => handleShowPayment(item)}
-        style={{ cursor: 'pointer' }}
-      >
-        <img src={item.img} alt={item.name} className="luxury-item-image" />
-        <div className="luxury-item-info">
-          <h5 className="luxury-item-title">{item.name}</h5>
-          <p className="luxury-item-price">
-            R$ {item.price ? item.price.toFixed(2).replace('.', ',') : '0,00'}
-          </p>
-          <button
-            className={`luxury-button luxury-button-glow ${
-              item.purchased ? 'btn-success' : 'btn-primary'
-            }`}
-            onClick={(e) => {
-              e.stopPropagation();
-              handleShowPayment(item);
-            }}
-          >
-            {item.purchased ? 'Comprado ✔️' : 'Contribuir Agora'}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-})}
-
+          return (
+            <div
+              key={`${item.id}-${index}`} // Combina ID e índice para garantir chave única
+              className="luxury-swipe-item"
+              style={{
+                transform: `translateY(${translateY}%)`,
+                transition: isSwiping ? "none" : "transform 0.3s ease-in-out",
+                zIndex: -Math.abs(offset),
+              }}
+            >
+              <div
+                className="luxury-item-card"
+                onClick={() => handleShowPayment(item)}
+                style={{ cursor: "pointer" }}
+              >
+                <img
+                  src={item.img}
+                  alt={item.name}
+                  className="luxury-item-image"
+                />
+                <div className="luxury-item-info">
+                  <h5 className="luxury-item-title">{item.name}</h5>
+                  <p className="luxury-item-price">
+                    R${" "}
+                    {item.price
+                      ? item.price.toFixed(2).replace(".", ",")
+                      : "0,00"}
+                  </p>
+                  <button
+                    className={`luxury-button luxury-button-glow ${
+                      item.purchased ? "btn-success" : "btn-primary"
+                    }`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleShowPayment(item);
+                    }}
+                  >
+                    {item.purchased ? "Comprado ✔️" : "Contribuir Agora"}
+                  </button>
+                </div>
+              </div>
+            </div>
+          );
+        })}
       </div>
 
       <div className="luxury-footer">
         <button
-          className={`luxury-nav-button ${currentPage === 0 ? 'disabled' : ''}`}
-          onClick={() => handleSwipe('down')}
+          className={`luxury-nav-button ${currentPage === 0 ? "disabled" : ""}`}
+          onClick={() => handleSwipe("down")}
           disabled={currentPage === 0}
         >
           ◀
@@ -144,9 +150,9 @@ const MobileView: React.FC<MobileViewProps> = ({
         </div>
         <button
           className={`luxury-nav-button ${
-            currentPage === items.length - 1 ? 'disabled' : ''
+            currentPage === items.length - 1 ? "disabled" : ""
           }`}
-          onClick={() => handleSwipe('up')}
+          onClick={() => handleSwipe("up")}
           disabled={currentPage === items.length - 1}
         >
           ▶

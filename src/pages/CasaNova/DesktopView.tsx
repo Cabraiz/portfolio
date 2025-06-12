@@ -17,7 +17,7 @@ interface DesktopViewProps {
 const loadImage = async (
   id: string,
   imgSrc: string,
-  inMemoryCache: { [id: string]: string | null }
+  inMemoryCache: { [id: string]: string | null },
 ): Promise<string | null> => {
   if (inMemoryCache[id]) {
     return inMemoryCache[id];
@@ -35,7 +35,9 @@ const loadImage = async (
 
     const processedImage = await makeWhiteTransparent(img);
     if (!processedImage) {
-      console.warn(`Processamento falhou para o item ${id}. Salvando imagem original.`);
+      console.warn(
+        `Processamento falhou para o item ${id}. Salvando imagem original.`,
+      );
       await saveToDB(id, imgSrc);
       inMemoryCache[id] = imgSrc;
       return imgSrc;
@@ -50,7 +52,6 @@ const loadImage = async (
   }
 };
 
-
 const DesktopView: React.FC<DesktopViewProps> = ({
   items,
   currentPage,
@@ -61,7 +62,9 @@ const DesktopView: React.FC<DesktopViewProps> = ({
   isLoading,
 }) => {
   const currentItems = items[currentPage] || [];
-  const [processedImages, setProcessedImages] = useState<{ [id: string]: string | null }>({});
+  const [processedImages, setProcessedImages] = useState<{
+    [id: string]: string | null;
+  }>({});
   const inMemoryCache: { [id: string]: string | null } = {}; // Cache em memória para evitar repetição
 
   useEffect(() => {
@@ -69,15 +72,21 @@ const DesktopView: React.FC<DesktopViewProps> = ({
       const updates: { [id: string]: string | null } = {};
       await Promise.all(
         currentItems.map(async (item) => {
-          const img = await loadImage(item.id.toString(), item.img, inMemoryCache);
+          const img = await loadImage(
+            item.id.toString(),
+            item.img,
+            inMemoryCache,
+          );
           if (img) {
             updates[item.id] = img;
           } else {
-            console.warn(`Imagem quebrada ou não processada para o item ${item.id}`);
+            console.warn(
+              `Imagem quebrada ou não processada para o item ${item.id}`,
+            );
             updates[item.id] = item.img; // Use a imagem original como fallback
           }
           updates[item.id] = img;
-        })
+        }),
       );
       setProcessedImages((prev) => ({ ...prev, ...updates }));
     };
@@ -96,7 +105,11 @@ const DesktopView: React.FC<DesktopViewProps> = ({
                   <ShimmerPlaceholder height="150px" />
                   <div className="card-body text-center">
                     <ShimmerPlaceholder width="70%" height="20px" />
-                    <ShimmerPlaceholder width="50%" height="20px" style={{ marginTop: "10px" }} />
+                    <ShimmerPlaceholder
+                      width="50%"
+                      height="20px"
+                      style={{ marginTop: "10px" }}
+                    />
                   </div>
                 </div>
               </div>
@@ -104,59 +117,59 @@ const DesktopView: React.FC<DesktopViewProps> = ({
           : // Exibir itens reais
             currentItems.map((item, index) => (
               <div
-    key={`${item.id}-${index}`} // Garante que a chave seja única
-    className="col"
-  >
-    <div
-      className={`card h-100 shadow-sm position-relative ${
-        item?.purchased ? "border-success" : "border-primary"
-      }`}
-    >
-      <div
-        className="shimmer-wrapper"
-        style={{
-          height: "150px",
-          backgroundColor: "#f0f0f0",
-        }}
-      >
-        {processedImages[item.id] ? (
-          <img
-            src={processedImages[item.id] ?? item.img}
-            alt={item.name || "Imagem indisponível"}
-            className="card-img-top"
-            style={{ objectFit: "contain", height: "100%" }}
-          />
-        ) : (
-          <ShimmerPlaceholder height="100%" />
-        )}
-      </div>
-      <div className="card-body text-center">
-        <h5 className="card-title">
-          {item.name ? (
-            item.name
-          ) : (
-            <ShimmerPlaceholder width="70%" height="20px" />
-          )}
-        </h5>
-        <p className="card-text">
-          {item.price ? (
-            `R$ ${item.price.toFixed(2).replace(".", ",")}`
-          ) : (
-            <ShimmerPlaceholder width="50%" height="20px" />
-          )}
-        </p>
-        <button
-          className={`btn w-100 ${
-            item.purchased ? "btn-success" : "btn-primary"
-          }`}
-          onClick={() => handleShowPayment(item)}
-          disabled={!item.price}
-        >
-          {item.purchased ? "Comprado ✔️" : "Ajudar"}
-        </button>
-      </div>
-    </div>
-  </div>
+                key={`${item.id}-${index}`} // Garante que a chave seja única
+                className="col"
+              >
+                <div
+                  className={`card h-100 shadow-sm position-relative ${
+                    item?.purchased ? "border-success" : "border-primary"
+                  }`}
+                >
+                  <div
+                    className="shimmer-wrapper"
+                    style={{
+                      height: "150px",
+                      backgroundColor: "#f0f0f0",
+                    }}
+                  >
+                    {processedImages[item.id] ? (
+                      <img
+                        src={processedImages[item.id] ?? item.img}
+                        alt={item.name || "Imagem indisponível"}
+                        className="card-img-top"
+                        style={{ objectFit: "contain", height: "100%" }}
+                      />
+                    ) : (
+                      <ShimmerPlaceholder height="100%" />
+                    )}
+                  </div>
+                  <div className="card-body text-center">
+                    <h5 className="card-title">
+                      {item.name ? (
+                        item.name
+                      ) : (
+                        <ShimmerPlaceholder width="70%" height="20px" />
+                      )}
+                    </h5>
+                    <p className="card-text">
+                      {item.price ? (
+                        `R$ ${item.price.toFixed(2).replace(".", ",")}`
+                      ) : (
+                        <ShimmerPlaceholder width="50%" height="20px" />
+                      )}
+                    </p>
+                    <button
+                      className={`btn w-100 ${
+                        item.purchased ? "btn-success" : "btn-primary"
+                      }`}
+                      onClick={() => handleShowPayment(item)}
+                      disabled={!item.price}
+                    >
+                      {item.purchased ? "Comprado ✔️" : "Ajudar"}
+                    </button>
+                  </div>
+                </div>
+              </div>
             ))}
       </div>
       <button

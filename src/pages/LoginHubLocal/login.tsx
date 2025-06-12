@@ -5,20 +5,12 @@ import Login_Image from "../../assets/HubLocal/Login_Image.webp";
 
 import { toast } from "react-toastify";
 
-import {
-  Button,
-  Stack,
-  Box,
-  Text,
-  Link,
-} from "@chakra-ui/react";
+import { Button, Stack, Box, Text, Link } from "@chakra-ui/react";
 
 import { FaLock } from "react-icons/fa";
 import "./login.css";
 
-import {
-  useLoginMutation,
-} from "../../redux/feature/auth/authApiSlice";
+import { useLoginMutation } from "../../redux/feature/auth/authApiSlice";
 
 import { isMobile } from "react-device-detect";
 
@@ -56,7 +48,7 @@ function PasswordInput({
       <Field.Label className="letter-spacing-text poppins-text-label text-pattern">
         Senha
       </Field.Label>
-      
+
       <Box position="relative">
         <Input
           name="password"
@@ -70,10 +62,20 @@ function PasswordInput({
           paddingLeft="2.5rem"
           paddingRight="5rem"
         />
-        <Box position="absolute" left="0.75rem" top="50%" transform="translateY(-50%)">
+        <Box
+          position="absolute"
+          left="0.75rem"
+          top="50%"
+          transform="translateY(-50%)"
+        >
           <Icon color="gray.300" boxSize="20px" />
         </Box>
-        <Box position="absolute" right="0.5rem" top="50%" transform="translateY(-50%)">
+        <Box
+          position="absolute"
+          right="0.5rem"
+          top="50%"
+          transform="translateY(-50%)"
+        >
           <Button
             size="sm"
             variant="ghost"
@@ -115,7 +117,12 @@ function EmailInput({
           className="input-setting"
           paddingLeft="2.5rem"
         />
-        <Box position="absolute" left="0.75rem" top="50%" transform="translateY(-50%)">
+        <Box
+          position="absolute"
+          left="0.75rem"
+          top="50%"
+          transform="translateY(-50%)"
+        >
           <Icon color="gray.300" boxSize="20px" />
         </Box>
       </Box>
@@ -204,12 +211,12 @@ function Login() {
   ) : (
     <Box minW={{ md: "31vw" }} style={{ marginTop: "0" }}>
       <form onSubmit={handleSubmit} autoComplete="off">
-      <Stack
-        w={{ base: "90vw", md: "auto" }}
-        gap={3}
-        backgroundColor="whiteAlpha.900"
-        style={{ paddingBottom: "0" }}
-      >
+        <Stack
+          w={{ base: "90vw", md: "auto" }}
+          gap={3}
+          backgroundColor="whiteAlpha.900"
+          style={{ paddingBottom: "0" }}
+        >
           <EmailInput
             value={email}
             onChange={emailChangeHandler}
@@ -217,7 +224,7 @@ function Login() {
             error={emailHasError}
             helperText={emailHasError ? "Email inválido" : ""}
           />
-  
+
           <PasswordInput
             value={password}
             onChange={passwordChangeHandler}
@@ -225,7 +232,7 @@ function Login() {
             error={passwordHasError}
             helperText={passwordHasError ? "Requer no mínimo 6 caracteres" : ""}
           />
-  
+
           <Button
             className="button-settings button-font"
             type="submit"
@@ -244,7 +251,7 @@ function Login() {
               LOGAR
             </Text>
           </Button>
-  
+
           <Link href="/registerhublocal" style={{ textDecoration: "none" }}>
             <Button
               className="button-settings button-font"

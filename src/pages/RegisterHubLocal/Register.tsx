@@ -4,14 +4,7 @@ import Login_Logo from "../../assets/HubLocal/Login_Logo.webp";
 import Login_Image from "../../assets/HubLocal/Login_Image.webp";
 
 import { toast } from "react-toastify";
-import {
-  Button,
-  InputGroup,
-  Stack,
-  Box,
-  Text,
-  Link,
-} from "@chakra-ui/react";
+import { Button, InputGroup, Stack, Box, Text, Link } from "@chakra-ui/react";
 import { Field, Input } from "@chakra-ui/react";
 import {
   reset,
@@ -267,140 +260,131 @@ function Register() {
   const content = isLoading ? (
     <LoadingPage />
   ) : (
+    <Box minW={{ md: "31vw" }} style={{ marginTop: "0" }}>
+      <form onSubmit={handleSubmit} autoComplete="off">
+        <Stack w={{ base: "90vw", md: "auto" }} gap={2} bg="whiteAlpha.900">
+          <Field.Root id="name" required invalid={nameHasError}>
+            <Field.Label>Nome</Field.Label>
+            <Input
+              name="name"
+              id="name"
+              type="text"
+              value={name}
+              onChange={nameChangeHandler}
+              onBlur={nameBlurHandler}
+              className="input-setting"
+            />
+            {nameHasError && <Field.ErrorText>Nome inválido</Field.ErrorText>}
+          </Field.Root>
 
-<Box minW={{ md: "31vw" }} style={{ marginTop: "0" }}>
-  <form onSubmit={handleSubmit} autoComplete="off">
-    <Stack
-      w={{ base: "90vw", md: "auto" }}
-      gap={2}
-      bg="whiteAlpha.900"
-    >
-      <Field.Root id="name" required invalid={nameHasError}>
-        <Field.Label>Nome</Field.Label>
-        <Input
-          name="name"
-          id="name"
-          type="text"
-          value={name}
-          onChange={nameChangeHandler}
-          onBlur={nameBlurHandler}
-          className="input-setting"
-        />
-        {nameHasError && (
-          <Field.ErrorText>Nome inválido</Field.ErrorText>
-        )}
-      </Field.Root>
-
-      <Field.Root
-        id="email"
-        required
-        invalid={emailHasError}
-        className="input-pattern"
-      >
-        <Field.Label className="letter-spacing-text poppins-text-label text-pattern">
-          Email
-        </Field.Label>
-        <Input
-          type="text"
-          name="email"
-          id="email"
-          value={email}
-          onChange={emailChangeHandler}
-          onBlur={emailBlurHandler}
-          className="input-setting"
-        />
-        {emailHasError && (
-          <Field.ErrorText>Email inválido</Field.ErrorText>
-        )}
-      </Field.Root>
-
-      <Field.Root
-        id="password"
-        required
-        invalid={passwordHasError}
-        className="input-pattern"
-      >
-        <Field.Label className="letter-spacing-text poppins-text-label text-pattern">
-          Senha
-        </Field.Label>
-        <Input
-          type="password"
-          name="password"
-          id="password"
-          value={password}
-          onChange={passwordChangeHandler}
-          onBlur={passwordBlurHandler}
-          placeholder="Mínimo de 6 caracteres"
-          className="input-setting"
-        />
-        {passwordHasError && (
-          <Field.ErrorText>Requer no mínimo 6 caracteres</Field.ErrorText>
-        )}
-      </Field.Root>
-
-      <Field.Root
-        id="confirmpassword"
-        required
-        invalid={confirmPassword.length > 0 && password !== confirmPassword}
-        className="input-pattern"
-      >
-        <Field.Label className="letter-spacing-text poppins-text-label text-pattern">
-          Repetir Senha
-        </Field.Label>
-        <Input
-          type="password"
-          name="confirmpassword"
-          id="confirmpassword"
-          value={confirmPassword}
-          onChange={confirmPasswordChangeHandler}
-          onBlur={confirmPasswordBlurHandler}
-          placeholder="Mínimo de 6 caracteres"
-          className="input-setting"
-        />
-        {confirmPassword.length > 0 && password !== confirmPassword && (
-          <Field.ErrorText>Requer mínimo de 6 caracteres</Field.ErrorText>
-        )}
-      </Field.Root>
-
-      <Button
-          className="button-setting button-font"
-          type="submit"
-          variant="solid"
-          style={{
-            boxShadow: "0px 2px 2px 0px #00000040",
-            marginTop: "4vh",
-            marginBottom: "1.5vh",
-            backgroundColor: "#0385FD",
-          }}
-        >
-          <Text
-            className="letter-spacing-button poppins-text-button"
-            fontSize="larger"
+          <Field.Root
+            id="email"
+            required
+            invalid={emailHasError}
+            className="input-pattern"
           >
-            REGISTRAR
-          </Text>
-        </Button>
-        <Link href="/loginhublocal" style={{ textDecoration: "none" }}>
+            <Field.Label className="letter-spacing-text poppins-text-label text-pattern">
+              Email
+            </Field.Label>
+            <Input
+              type="text"
+              name="email"
+              id="email"
+              value={email}
+              onChange={emailChangeHandler}
+              onBlur={emailBlurHandler}
+              className="input-setting"
+            />
+            {emailHasError && <Field.ErrorText>Email inválido</Field.ErrorText>}
+          </Field.Root>
+
+          <Field.Root
+            id="password"
+            required
+            invalid={passwordHasError}
+            className="input-pattern"
+          >
+            <Field.Label className="letter-spacing-text poppins-text-label text-pattern">
+              Senha
+            </Field.Label>
+            <Input
+              type="password"
+              name="password"
+              id="password"
+              value={password}
+              onChange={passwordChangeHandler}
+              onBlur={passwordBlurHandler}
+              placeholder="Mínimo de 6 caracteres"
+              className="input-setting"
+            />
+            {passwordHasError && (
+              <Field.ErrorText>Requer no mínimo 6 caracteres</Field.ErrorText>
+            )}
+          </Field.Root>
+
+          <Field.Root
+            id="confirmpassword"
+            required
+            invalid={confirmPassword.length > 0 && password !== confirmPassword}
+            className="input-pattern"
+          >
+            <Field.Label className="letter-spacing-text poppins-text-label text-pattern">
+              Repetir Senha
+            </Field.Label>
+            <Input
+              type="password"
+              name="confirmpassword"
+              id="confirmpassword"
+              value={confirmPassword}
+              onChange={confirmPasswordChangeHandler}
+              onBlur={confirmPasswordBlurHandler}
+              placeholder="Mínimo de 6 caracteres"
+              className="input-setting"
+            />
+            {confirmPassword.length > 0 && password !== confirmPassword && (
+              <Field.ErrorText>Requer mínimo de 6 caracteres</Field.ErrorText>
+            )}
+          </Field.Root>
+
           <Button
             className="button-setting button-font"
+            type="submit"
             variant="solid"
             style={{
-              backgroundColor: "#00CC99",
               boxShadow: "0px 2px 2px 0px #00000040",
+              marginTop: "4vh",
+              marginBottom: "1.5vh",
+              backgroundColor: "#0385FD",
             }}
           >
             <Text
               className="letter-spacing-button poppins-text-button"
               fontSize="larger"
             >
-              LOGAR
+              REGISTRAR
             </Text>
           </Button>
-        </Link>
-      </Stack>
-    </form>
-  </Box>
-);
+          <Link href="/loginhublocal" style={{ textDecoration: "none" }}>
+            <Button
+              className="button-setting button-font"
+              variant="solid"
+              style={{
+                backgroundColor: "#00CC99",
+                boxShadow: "0px 2px 2px 0px #00000040",
+              }}
+            >
+              <Text
+                className="letter-spacing-button poppins-text-button"
+                fontSize="larger"
+              >
+                LOGAR
+              </Text>
+            </Button>
+          </Link>
+        </Stack>
+      </form>
+    </Box>
+  );
 
   return ModeloLadoEsquerdoPage({
     realHeight,

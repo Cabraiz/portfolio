@@ -13,10 +13,7 @@ const ShimmerPlaceholder: React.FC<ShimmerPlaceholderProps> = ({
   style = {},
 }) => {
   return (
-    <div
-      className="shimmer-wrapper"
-      style={{ height, width, ...style }}
-    >
+    <div className="shimmer-wrapper" style={{ height, width, ...style }}>
       <div className="shimmer"></div>
     </div>
   );

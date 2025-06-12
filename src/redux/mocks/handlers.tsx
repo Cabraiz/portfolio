@@ -1,4 +1,4 @@
-import { http, HttpResponse, PathParams } from 'msw';
+import { http, HttpResponse, PathParams } from "msw";
 import { nanoid } from "@reduxjs/toolkit";
 
 // Token simulado
@@ -15,31 +15,32 @@ export const handlers = [
       if (authorization !== `Bearer ${token}`) {
         return HttpResponse.json(
           { message: "You shall not pass. Please login first." },
-          { status: 401 }
+          { status: 401 },
         );
       }
 
       return HttpResponse.json(
         { message: "Alright, you are authorized" },
-        { status: 200 }
+        { status: 200 },
       );
-    }
+    },
   ),
 
   // Handler para POST "/loginhublocal"
-  http.post<PathParams, never, { user: { first_name: string; last_name: string }; token: string }>(
-    "/loginhublocal",
-    async () => {
-      return HttpResponse.json(
-        {
-          user: {
-            first_name: "Test",
-            last_name: "User",
-          },
-          token,
+  http.post<
+    PathParams,
+    never,
+    { user: { first_name: string; last_name: string }; token: string }
+  >("/loginhublocal", async () => {
+    return HttpResponse.json(
+      {
+        user: {
+          first_name: "Test",
+          last_name: "User",
         },
-        { status: 200 }
-      );
-    }
-  ),
+        token,
+      },
+      { status: 200 },
+    );
+  }),
 ];

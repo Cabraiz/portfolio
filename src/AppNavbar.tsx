@@ -1,4 +1,3 @@
-// AppNavbar.tsx
 import React, { useEffect, useRef, useState } from "react";
 import { Button, Image, Nav, Navbar } from "react-bootstrap";
 import { Link } from "react-router-dom";
@@ -43,17 +42,16 @@ const AppNavbar: React.FC<AppNavbarProps> = ({
     const container = navContainerRef.current;
     if (current && container) {
       setUnderlineStyle({
-  width: current.offsetWidth,
-  left: current.offsetLeft,
-  opacity: 1,
-  transition: "all 300ms ease-in-out",
-  position: "absolute",
-  bottom: "-8px",
-  height: "3px",
-  backgroundColor: "white",
-  borderRadius: "3px",
-});
-
+        width: current.offsetWidth,
+        left: current.offsetLeft,
+        opacity: 1,
+        transition: "all 300ms ease-in-out",
+        position: "absolute",
+        bottom: "-8px",
+        height: "3px",
+        backgroundColor: "white",
+        borderRadius: "3px",
+      });
     }
   }, [selectedLink]);
 
@@ -122,7 +120,14 @@ const AppNavbar: React.FC<AppNavbarProps> = ({
               }}
             >
               {[...Array(3)].map((_, i) => (
-                <div key={i} style={{ width: "24px", height: "2px", backgroundColor: "#fff" }} />
+                <div
+                  key={i}
+                  style={{
+                    width: "24px",
+                    height: "2px",
+                    backgroundColor: "#fff",
+                  }}
+                />
               ))}
             </Button>
           </>
@@ -155,55 +160,56 @@ const AppNavbar: React.FC<AppNavbarProps> = ({
                   }}
                 >
                   <Nav.Link
-  as="div"
-  ref={(el) => { navRefs.current[link] = el; }}
-  className={`nav-link-custom ${selectedLink === link ? "active" : ""}`}
-  style={{
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
-    fontWeight: 100,
-    letterSpacing: 1.3,
-    fontSize: "1.8rem",
-    fontFamily: "Modernist, sans-serif",
-    cursor: "pointer",
-    userSelect: "none",
-    transition: "all 0.25s ease-in-out",
-    paddingBottom: "10px",
-    position: "relative", // importante
-  }}
-  onMouseEnter={(e) => {
-    e.currentTarget.style.opacity = "0.85";
-    e.currentTarget.style.transform = "scale(1.035)";
-  }}
-  onMouseLeave={(e) => {
-    e.currentTarget.style.opacity = "1";
-    e.currentTarget.style.transform = "scale(1)";
-  }}
->
-  {/* container com posição relativa */}
-  <div style={{ position: "relative" }}>
-    {/* bolinha decorativa fixa */}
-    {link === "live" && (
-      <div
-        style={{
-          position: "absolute",
-          left: "-2rem",
-          top: "0",
-          transform: "translateY(-50%) scale(0.5)",
-          pointerEvents: "none", // impede clique
-        }}
-      >
-        <LiveAnimation />
-      </div>
-    )}
+                    as="div"
+                    ref={(el) => {
+                      navRefs.current[link] = el;
+                    }}
+                    className={`nav-link-custom ${selectedLink === link ? "active" : ""}`}
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontWeight: 100,
+                      letterSpacing: 1.3,
+                      fontSize: "1.8rem",
+                      fontFamily: "Modernist, sans-serif",
+                      cursor: "pointer",
+                      userSelect: "none",
+                      transition: "all 0.25s ease-in-out",
+                      paddingBottom: "10px",
+                      position: "relative",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.opacity = "0.85";
+                      e.currentTarget.style.transform = "scale(1.035)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.opacity = "1";
+                      e.currentTarget.style.transform = "scale(1)";
+                    }}
+                  >
+                    {/* container com posição relativa */}
+                    <div style={{ position: "relative" }}>
+                      {/* bolinha decorativa fixa */}
+                      {link === "live" && (
+                        <div
+                          style={{
+                            position: "absolute",
+                            left: "-2rem",
+                            top: "0",
+                            transform: "translateY(-50%) scale(0.5)",
+                            pointerEvents: "none", // impede clique
+                          }}
+                        >
+                          <LiveAnimation />
+                        </div>
+                      )}
 
-    {/* texto centralizado normalmente */}
-    <span>{t(`nav.${link}`)}</span>
-  </div>
-</Nav.Link>
-
+                      {/* texto centralizado normalmente */}
+                      <span>{t(`nav.${link}`)}</span>
+                    </div>
+                  </Nav.Link>
                 </button>
               ))}
               {/* 🔥 Traço animado */}

@@ -21,7 +21,7 @@ interface TokenData {
 // create a new mutex
 const mutex = new Mutex();
 const baseQuery = fetchBaseQuery({
-  baseUrl: 'https://cabraiz.com',
+  baseUrl: "https://cabraiz.com",
   credentials: "include",
   prepareHeaders: (headers, { getState }) => {
     const jwt = (getState() as RootState).auth.jwt;

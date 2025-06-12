@@ -6,8 +6,8 @@ import icognitaBlock from "../../../assets/Surprise/IcognitaBlock.png";
 import icognitaDone from "../../../assets/Surprise/icognitaDone.png";
 import circle from "../../../assets/Surprise/circle.png";
 
-const convertVhToPx = (vh: number) => window.innerHeight / 100 * vh;
-const convertVwToPx = (vw: number) => window.innerWidth / 100 * vw;
+const convertVhToPx = (vh: number) => (window.innerHeight / 100) * vh;
+const convertVwToPx = (vw: number) => (window.innerWidth / 100) * vw;
 
 const cardCustomStyle = {
   brushSrc: circle,
@@ -64,4 +64,3 @@ export const Done = (props: Omit<ContainerProps, "imageSrc">) => (
 export const Default = (props: Omit<ContainerProps, "imageSrc">) => (
   <ScratchCardComponent imageSrc={icognita} {...props} />
 );
-

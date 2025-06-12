@@ -8,8 +8,7 @@ import { ChakraProvider } from "@chakra-ui/react";
 import { system } from "./theme";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./index.css";
-import './i18n/i18n';
-
+import "./i18n/i18n";
 
 // Componente principal encapsulando toda a aplicação
 const MainApp: React.FC = () => {

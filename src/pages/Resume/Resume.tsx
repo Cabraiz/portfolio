@@ -1,16 +1,20 @@
-import React from 'react';
-import MateusPDF from './Mateus_Resume.pdf';
+import React from "react";
+import MateusPDF from "./Mateus_Resume.pdf";
 
 const Resume = () => {
   const iframeStyle = {
-    width: '100%',
-    height: '100vh',  
-    border: 'none',  
+    width: "100%",
+    height: "100vh",
+    border: "none",
   };
 
   return (
     <div>
-      <iframe src={MateusPDF} title="Mateus Resume" style={iframeStyle}></iframe>
+      <iframe
+        src={MateusPDF}
+        title="Mateus Resume"
+        style={iframeStyle}
+      ></iframe>
     </div>
   );
 };

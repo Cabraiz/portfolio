@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { Modal, Button } from 'react-bootstrap';
-import { QRCodeSVG } from 'qrcode.react';
-import { FaCreditCard, FaCopy } from 'react-icons/fa';
+import React, { useState } from "react";
+import { Modal, Button } from "react-bootstrap";
+import { QRCodeSVG } from "qrcode.react";
+import { FaCreditCard, FaCopy } from "react-icons/fa";
 
 const PaymentModal: React.FC<{
   show: boolean;
@@ -34,30 +34,32 @@ const PaymentModal: React.FC<{
         <Modal.Title>Pagamento</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-  {pixCode && (
-    <>
-      <QRCodeSVG
-        value={pixCode}
-        size={200}
-        onClick={handleQRClick}
-        title="Clique para copiar"
-      />
-      {copied && <div className="copy-feedback show">Código copiado!</div>}
-      <button
-        onClick={handleCopyToClipboard}
-        className="copy-button mt-3 payment-button"
-      >
-        <FaCopy /> Copiar QR Code
-      </button>
-      <button
-        onClick={handleRedirectToCreditCard}
-        className="payment-button credit-card mt-3"
-      >
-        <FaCreditCard /> Pagar com Cartão de Crédito
-      </button>
-    </>
-  )}
-</Modal.Body>
+        {pixCode && (
+          <>
+            <QRCodeSVG
+              value={pixCode}
+              size={200}
+              onClick={handleQRClick}
+              title="Clique para copiar"
+            />
+            {copied && (
+              <div className="copy-feedback show">Código copiado!</div>
+            )}
+            <button
+              onClick={handleCopyToClipboard}
+              className="copy-button mt-3 payment-button"
+            >
+              <FaCopy /> Copiar QR Code
+            </button>
+            <button
+              onClick={handleRedirectToCreditCard}
+              className="payment-button credit-card mt-3"
+            >
+              <FaCreditCard /> Pagar com Cartão de Crédito
+            </button>
+          </>
+        )}
+      </Modal.Body>
 
       <Modal.Footer>
         <Button variant="secondary" onClick={onClose}>

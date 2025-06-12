@@ -10,7 +10,9 @@ export default function FloatingChat() {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const { t } = useTranslation();
-  const phrases = t("floatingChat.phrases", { returnObjects: true }) as string[];
+  const phrases = t("floatingChat.phrases", {
+    returnObjects: true,
+  }) as string[];
 
   const [currentPhraseIndex, setCurrentPhraseIndex] = useState(0);
 
@@ -59,7 +61,7 @@ export default function FloatingChat() {
     }
   };
 
-  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
 
   return (
     <div
@@ -74,29 +76,28 @@ export default function FloatingChat() {
     >
       {!isOpen && (
         <button
-  onClick={() => setIsOpen(true)}
-  style={{
-    display: "flex",
-    alignItems: "center",
-    gap: "0.7rem",
-    background: "rgba(255, 255, 255, 0.08)",
-    backdropFilter: "blur(12px)",
-    WebkitBackdropFilter: "blur(12px)",
-    border: "1px solid rgba(255, 255, 255, 0.2)",
-    padding: "1rem 2rem",
-    borderRadius: isMobile ? "16px 0 0 0" : "16px",
-    boxShadow: "0 8px 24px rgba(0, 0, 0, 0.3)",
-    color: "#ffffff",
-    fontWeight: "600",
-    fontSize: "1.1rem",
-    cursor: "pointer",
-    minWidth: "250px",
-  }}
->
-  <FaEnvelope size={20} />
-  {phrases[currentPhraseIndex]}
-</button>
-
+          onClick={() => setIsOpen(true)}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "0.7rem",
+            background: "rgba(255, 255, 255, 0.08)",
+            backdropFilter: "blur(12px)",
+            WebkitBackdropFilter: "blur(12px)",
+            border: "1px solid rgba(255, 255, 255, 0.2)",
+            padding: "1rem 2rem",
+            borderRadius: isMobile ? "16px 0 0 0" : "16px",
+            boxShadow: "0 8px 24px rgba(0, 0, 0, 0.3)",
+            color: "#ffffff",
+            fontWeight: "600",
+            fontSize: "1.1rem",
+            cursor: "pointer",
+            minWidth: "250px",
+          }}
+        >
+          <FaEnvelope size={20} />
+          {phrases[currentPhraseIndex]}
+        </button>
       )}
 
       <AnimatePresence>
@@ -122,9 +123,14 @@ export default function FloatingChat() {
               position: "relative",
               fontSize: "1rem",
             }}
-
           >
-            <div style={{ marginBottom: "0.8rem", fontWeight: "bold", fontSize: "1.3rem" }}>
+            <div
+              style={{
+                marginBottom: "0.8rem",
+                fontWeight: "bold",
+                fontSize: "1.3rem",
+              }}
+            >
               {t("floatingChat.title")}
             </div>
 
@@ -140,12 +146,14 @@ export default function FloatingChat() {
               }}
             >
               <span>
-                {t("floatingChat.greeting").split('\n').map((line, index) => (
-                  <span key={index}>
-                    {line}
-                    <br />
-                  </span>
-                ))}
+                {t("floatingChat.greeting")
+                  .split("\n")
+                  .map((line, index) => (
+                    <span key={index}>
+                      {line}
+                      <br />
+                    </span>
+                  ))}
               </span>
 
               {messages.map((msg, index) => (
@@ -163,7 +171,6 @@ export default function FloatingChat() {
                     backdropFilter: "blur(8px)",
                     WebkitBackdropFilter: "blur(8px)",
                   }}
-
                 >
                   {msg}
                 </div>

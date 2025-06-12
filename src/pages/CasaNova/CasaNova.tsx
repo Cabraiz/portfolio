@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import './CasaNova.css';
-import { isMobile } from 'react-device-detect';
-import { fetchItems, fetchTotalItems } from './api';
-import { generatePixPayload } from './utils';
-import MobileView from './MobileView';
-import DesktopView from './DesktopView';
-import { Item } from './types';
-import { clearDB, saveToDB } from './dbHelpers';
-import PaymentModal from './PaymentModal';
+import React, { useState, useEffect } from "react";
+import "bootstrap/dist/css/bootstrap.min.css";
+import "./CasaNova.css";
+import { isMobile } from "react-device-detect";
+import { fetchItems, fetchTotalItems } from "./api";
+import { generatePixPayload } from "./utils";
+import MobileView from "./MobileView";
+import DesktopView from "./DesktopView";
+import { Item } from "./types";
+import { clearDB, saveToDB } from "./dbHelpers";
+import PaymentModal from "./PaymentModal";
 
 const NewHomeGiftPage: React.FC = () => {
   const [totalItems, setTotalItems] = useState<number>(0);
@@ -21,19 +21,19 @@ const NewHomeGiftPage: React.FC = () => {
   const [selectedItem, setSelectedItem] = useState<Item | null>(null);
   const [pixCode, setPixCode] = useState<string | null>(null);
   const [transitioning, setTransitioning] = useState<boolean>(false);
-  const [sortCriterion, setSortCriterion] = useState<'price' | 'name'>('price');
+  const [sortCriterion, setSortCriterion] = useState<"price" | "name">("price");
 
   const loadItems = async (pagesToLoad: number[]) => {
     try {
       setLoading(true);
-  
+
       const fetchedPages = await Promise.all(
         pagesToLoad.map(async (page) => {
           const items = await fetchItems(page, itemsPerPage, sortCriterion); // Passa o critério de ordenação
           return { page, items };
-        })
+        }),
       );
-  
+
       setItems((prev) => {
         const updatedItems = { ...prev };
         fetchedPages.forEach(({ page, items }) => {
@@ -42,13 +42,11 @@ const NewHomeGiftPage: React.FC = () => {
         return updatedItems;
       });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro desconhecido.');
+      setError(err instanceof Error ? err.message : "Erro desconhecido.");
     } finally {
       setLoading(false);
     }
   };
-  
-  
 
   const getMaxInstallments = (price: number): number => {
     if (price > 200) {
@@ -62,21 +60,24 @@ const NewHomeGiftPage: React.FC = () => {
     }
     return 1; // 1x (à vista) para valores abaixo de R$80
   };
-  
-  
+
   useEffect(() => {
     const loadPages = async () => {
       const nextPages = [currentPage];
       const pagesToLoad = nextPages.filter((page) => !items[page]);
-  
+
       if (pagesToLoad.length > 0) {
         const loadedPages = await Promise.all(
           pagesToLoad.map(async (page) => {
-            const pageItems = await fetchItems(page, itemsPerPage, sortCriterion); // Passa o critério
+            const pageItems = await fetchItems(
+              page,
+              itemsPerPage,
+              sortCriterion,
+            ); // Passa o critério
             return { page, pageItems };
-          })
+          }),
         );
-  
+
         setItems((prev) => {
           const updatedItems = { ...prev };
           loadedPages.forEach(({ page, pageItems }) => {
@@ -86,19 +87,17 @@ const NewHomeGiftPage: React.FC = () => {
         });
       }
     };
-  
+
     loadPages(); // Carrega os itens
   }, [currentPage, sortCriterion]); // Dispara sempre que o critério muda
-  
-  
 
   const handleShowPayment = (item: Item) => {
     console.log("Abrindo modal para o item:", item); // Log para verificar
     const payload = generatePixPayload(
       item.price,
-      '61070800317',
-      'Mateus Cardoso Cabral',
-      'SAO PAULO'
+      "61070800317",
+      "Mateus Cardoso Cabral",
+      "SAO PAULO",
     );
     setPixCode(payload);
     setSelectedItem(item);
@@ -111,47 +110,47 @@ const NewHomeGiftPage: React.FC = () => {
     setPixCode(null);
   };
 
-  const handleSwipe = (direction: 'up' | 'down') => {
+  const handleSwipe = (direction: "up" | "down") => {
     if (transitioning) return;
-  
+
     const totalItemsFlat = Object.values(items).flat(); // Unifica todos os itens em um único array
     const totalItemsCount = totalItemsFlat.length;
-  
+
     let newIndex = currentPage;
-  
-    if (direction === 'up') {
+
+    if (direction === "up") {
       newIndex = Math.min(currentPage + 1, totalItemsCount - 1); // Vai para o próximo item
-    } else if (direction === 'down') {
+    } else if (direction === "down") {
       newIndex = Math.max(currentPage - 1, 0); // Volta para o item anterior
     }
-  
+
     if (newIndex !== currentPage) {
       setTransitioning(true); // Ativa transição
       setTimeout(() => setTransitioning(false), 300); // Duração da animação (300ms)
       setCurrentPage(newIndex); // Atualiza o índice atual
     }
   };
-  
+
   const handleRedirectToCreditCard = async () => {
     if (!selectedItem) {
       console.error("Nenhum item selecionado para pagamento.");
       return;
     }
-  
+
     try {
       const formattedPrice = parseFloat(selectedItem.price.toFixed(2));
       const maxInstallments = getMaxInstallments(formattedPrice);
-  
+
       const response = await fetch(import.meta.env.VITE_MP_BACKEND_URL, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           Authorization: `Bearer ${import.meta.env.VITE_MP_ACCESS_TOKEN}`,
         },
         body: JSON.stringify({
           items: [
             {
-              title: selectedItem.name || 'Sem título',
+              title: selectedItem.name || "Sem título",
               quantity: 1,
               unit_price: formattedPrice,
             },
@@ -161,20 +160,20 @@ const NewHomeGiftPage: React.FC = () => {
             failure: `${import.meta.env.REACT_APP_BASE_API}/failure`,
             pending: `${import.meta.env.REACT_APP_BASE_API}/pending`,
           },
-          auto_return: 'approved',
+          auto_return: "approved",
           payment_methods: {
             installments: maxInstallments, // Define o número máximo de parcelas
             default_installments: 1, // Padrão: pagamento à vista
           },
         }),
       });
-  
+
       if (!response.ok) {
         const errorDetails = await response.json();
         console.error("Erro ao criar preferência de pagamento:", errorDetails);
         throw new Error(`Erro: ${response.statusText}`);
       }
-  
+
       const data = await response.json();
       console.log("Redirecionando para:", data.init_point);
       window.location.href = data.init_point; // Redireciona para o checkout
@@ -182,29 +181,28 @@ const NewHomeGiftPage: React.FC = () => {
       console.error("Erro ao redirecionar para pagamento:", error);
     }
   };
-  
-  const sortItems = (criterion: 'price' | 'name') => {
+
+  const sortItems = (criterion: "price" | "name") => {
     setSortCriterion(criterion); // Define o novo critério de ordenação
     setCurrentPage(0); // Reseta a página atual
     setItems({}); // Limpa os itens atuais para forçar o recarregamento
   };
 
-  const handlePageChange = (direction: 'next' | 'prev') => {
+  const handlePageChange = (direction: "next" | "prev") => {
     setCurrentPage((prevPage) => {
       const nextPage =
-        direction === 'next' ? prevPage + 1 : Math.max(prevPage - 1, 0);
-  
+        direction === "next" ? prevPage + 1 : Math.max(prevPage - 1, 0);
+
       // Retorna o próximo número de página
       return nextPage;
     });
-  
+
     // Pré-carregar as próximas páginas (opcional)
     loadItems([currentPage + 1, currentPage + 2]);
   };
 
-
   return (
-    <div className={`loading-container ${isMobile ? 'mobile-margins' : ''}`}>
+    <div className={`loading-container ${isMobile ? "mobile-margins" : ""}`}>
       {error ? (
         <div className="error-container">Erro: {error}</div>
       ) : isMobile ? (
@@ -234,7 +232,7 @@ const NewHomeGiftPage: React.FC = () => {
         handleRedirectToCreditCard={handleRedirectToCreditCard}
       />
     </div>
-  );  
+  );
 };
 
 export default NewHomeGiftPage;
