@@ -80,13 +80,25 @@ const DigitalCodeUnlock: React.FC<Props> = ({ routeKey, next }) => {
         <div className="led-timer">{timer}</div>
       ) : (
         <div className="keypad-wrapper">
-          <div className="lcd-display">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="lcd-digit">
-                {digits[i] ?? "•"}
-              </div>
-            ))}
-          </div>
+<div className="lcd-display">
+  {Array.from({ length: 4 }).map((_, i) => (
+    <div key={i} className="lcd-digit">
+      <span className="digit-char">{digits[i] ?? "•"}</span>
+      <svg
+        className="digit-blood"
+        viewBox="0 0 100 100"
+        preserveAspectRatio="none"
+      >
+        <path
+          d="M20,0 Q25,30 20,50 Q30,60 20,80"
+          stroke="none"
+          fill="rgba(255, 0, 0, 0.3)"
+        />
+      </svg>
+    </div>
+  ))}
+</div>
+
 
           <div className="keypad">
             {keys.map((key) => (
