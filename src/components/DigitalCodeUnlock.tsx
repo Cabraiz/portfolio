@@ -106,34 +106,32 @@ const DigitalCodeUnlock: React.FC<Props> = ({ routeKey, next }) => {
 
 
           <div className="keypad">
-            {keys.map((key, idx) => {
-  const randomDelay = Math.random() * 4; // entre 0s e 4s
-  return (
-    <button
-      key={key}
-      onClick={() => handleKeyPress(key)}
-      className={`key ${key}`}
-    >
-      <span className="key-label">{key}</span>
-
-      <svg
-        className="crack-overlay"
-        viewBox="0 0 100 100"
-        preserveAspectRatio="none"
-        style={{ animationDelay: `${randomDelay}s` }}
+  {keys.map((key, idx) => {
+    const delayClass = `delay-${Math.floor(Math.random() * 18)}`;
+    return (
+      <button
+        key={key}
+        onClick={() => handleKeyPress(key)}
+        className={`key ${key} ${delayClass}`}
       >
-        <path
-          d={crackPaths[Math.floor(Math.random() * crackPaths.length)]}
-          stroke="#fff"
-          strokeWidth="0.3"
-          fill="none"
-        />
-      </svg>
-    </button>
-  );
-})}
+        <span className="key-label">{key}</span>
 
-          </div>
+        <svg
+          className="crack-overlay"
+          viewBox="0 0 100 100"
+          preserveAspectRatio="none"
+        >
+          <path
+            d={crackPaths[Math.floor(Math.random() * crackPaths.length)]}
+            stroke="#fff"
+            strokeWidth="0.3"
+            fill="none"
+          />
+        </svg>
+      </button>
+    );
+  })}
+</div>
         </div>
       )}
     </div>
