@@ -1,12 +1,12 @@
 @font-face {
   font-family: "Brutal";
-  src: local("Brutal"), url("./fonts/Brutal/Brutal-Type-Medium.ttf");
+  src: local("Brutal"), url("/fonts/Brutal/Brutal-Type-Medium.ttf");
 }
 
 
 @font-face {
   font-family: "BlommingElegant";
-  src: local("BlommingElegant"), url("fonts/BloomingElegant/Blooming\ Elegant\ Sans.otf");
+  src: local("BlommingElegant"), url("/fonts/BloomingElegant/Blooming/Elegant/Sans.otf");
 }
 
 html {
