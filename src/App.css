@@ -9,6 +9,13 @@
   src: local("BlommingElegant"), url("/fonts/BloomingElegant/Blooming/Elegant/Sans.otf");
 }
 
+@font-face {
+    font-family: "Modernist";
+    src: local("Modernist"), url("/fonts/Modernist/Modernist.otf") format("truetype");
+    font-weight: 700;
+}
+
+
 html {
   height: auto !important;
 }

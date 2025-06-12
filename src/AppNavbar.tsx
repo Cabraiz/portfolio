@@ -166,7 +166,7 @@ const AppNavbar: React.FC<AppNavbarProps> = ({
     fontWeight: 100,
     letterSpacing: 1.3,
     fontSize: "1.8rem",
-    fontFamily: "Poppins, sans-serif",
+    fontFamily: "Modernist, sans-serif",
     cursor: "pointer",
     userSelect: "none",
     transition: "all 0.25s ease-in-out",
