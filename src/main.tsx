@@ -10,6 +10,11 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "./index.css";
 import "./i18n/i18n";
 
+const redirectedPath = window.location.search.slice(1);
+if (redirectedPath && redirectedPath.startsWith("/")) {
+  window.history.replaceState({}, "", redirectedPath);
+}
+
 // Componente principal encapsulando toda a aplicação
 const MainApp: React.FC = () => {
   return (

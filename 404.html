@@ -79,7 +79,8 @@
 
     <script>
       function redirectToHome() {
-        window.location.href = "/";
+        const path = window.location.pathname + window.location.search + window.location.hash;
+        window.location.href = "/?" + encodeURIComponent(path);
       }
 
       // Auto-redirect fallback after 5 seconds
