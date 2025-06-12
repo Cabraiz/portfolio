@@ -9,9 +9,9 @@ interface Props {
 
 const CODES: Record<string, string> = {
   enigma: "0000",
-  libras: "1234",
-  rosa: "4321",
-  vinho: "7890",
+  libras: "2624",
+  rosa: "3388",
+  vinho: "8392",
 };
 
 const keys = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "clear", "0", "enter"];

@@ -13,9 +13,9 @@ export const UnlockRoute: React.FC<UnlockRouteProps> = ({ route, next }) => {
   // Códigos por rota
   const codes: Record<UnlockRouteProps["route"], string> = {
     enigma: "0000",
-    libras: "1234",
-    rosa: "4321",
-    vinho: "7890",
+    libras: "2624",
+    rosa: "3388",
+    vinho: "8392",
   };
 
   const handleSubmit = () => {
