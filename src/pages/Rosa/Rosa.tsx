@@ -1,16 +1,17 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import AncientPaper from "../../components/AncientPaper"; // ajuste se o caminho for diferente
 
 const Rosa: React.FC = () => {
   return (
-    <div style={{ padding: "2rem" }}>
-      <h1>Página ROSA</h1>
-      <p>Você avançou com sucesso para a etapa Rosa.</p>
+    <AncientPaper>
+      <h1>🌹 Etapa ROSA</h1>
+      <p>Você avançou com sucesso para a etapa Rosa do contrato.</p>
 
       <Link to="/vinho-unlock">
-        <button>Ir para etapa final (Vinho)</button>
+        <button className="btn-continue">Ir para etapa final (Vinho)</button>
       </Link>
-    </div>
+    </AncientPaper>
   );
 };
 
