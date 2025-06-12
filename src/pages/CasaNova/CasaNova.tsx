@@ -31,7 +31,7 @@ const NewHomeGiftPage: React.FC = () => {
         pagesToLoad.map(async (page) => {
           const items = await fetchItems(page, itemsPerPage, sortCriterion); // Passa o critério de ordenação
           return { page, items };
-        }),
+        })
       );
 
       setItems((prev) => {
@@ -72,10 +72,10 @@ const NewHomeGiftPage: React.FC = () => {
             const pageItems = await fetchItems(
               page,
               itemsPerPage,
-              sortCriterion,
+              sortCriterion
             ); // Passa o critério
             return { page, pageItems };
-          }),
+          })
         );
 
         setItems((prev) => {
@@ -97,7 +97,7 @@ const NewHomeGiftPage: React.FC = () => {
       item.price,
       "61070800317",
       "Mateus Cardoso Cabral",
-      "SAO PAULO",
+      "SAO PAULO"
     );
     setPixCode(payload);
     setSelectedItem(item);

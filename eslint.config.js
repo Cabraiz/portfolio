@@ -33,6 +33,7 @@ export default defineConfig([
       ...pluginReact.configs.recommended.rules,
       "prettier/prettier": "error",
       indent: ["error", 2],
+      "no-unused-vars": "warn",
       "react/react-in-jsx-scope": "off",
       "react/prop-types": "off",
     },

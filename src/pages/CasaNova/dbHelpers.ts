@@ -1,9 +1,8 @@
-import { openDB, IDBPDatabase } from 'idb';
-import { Item } from './types';
+import { openDB, IDBPDatabase } from "idb";
+import { Item } from "./types";
 
-const DB_NAME = 'lazyLoadingDB';
-const STORE_NAME = 'images';
-
+const DB_NAME = "lazyLoadingDB";
+const STORE_NAME = "images";
 
 // Inicializa o banco de dados
 export const initDB = async (): Promise<IDBPDatabase> => {
@@ -11,15 +10,17 @@ export const initDB = async (): Promise<IDBPDatabase> => {
     upgrade(db) {
       if (!db.objectStoreNames.contains(STORE_NAME)) {
         // Criação da ObjectStore com keyPath
-        db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+        db.createObjectStore(STORE_NAME, { keyPath: "id" });
       }
     },
   });
   return db;
 };
 
-
-export const syncDBWithServer = async (fetchItemsFn: (page: number, itemsPerPage: number) => Promise<Item[]>, itemsPerPage: number): Promise<void> => {
+export const syncDBWithServer = async (
+  fetchItemsFn: (page: number, itemsPerPage: number) => Promise<Item[]>,
+  itemsPerPage: number
+): Promise<void> => {
   const db = await initDB();
 
   // Limpa os dados locais antes de sincronizar
@@ -44,15 +45,12 @@ export const syncDBWithServer = async (fetchItemsFn: (page: number, itemsPerPage
   }
 };
 
-
 // Salva um valor no IndexedDB
 export const saveToDB = async (key: string, value: string): Promise<void> => {
   const db = await initDB();
   // Salva apenas o valor da imagem no IndexedDB
   await db.put(STORE_NAME, { id: key, value });
 };
-
-
 
 // Recupera um valor do IndexedDB
 export const getFromDB = async (key: string): Promise<string | undefined> => {

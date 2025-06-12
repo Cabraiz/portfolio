@@ -14,18 +14,18 @@
 }
 
 .font-dot {
-  font-family: "Fira Code", Consolas, 'Courier New', monospace;
+  font-family: "Fira Code", Consolas, "Courier New", monospace;
   font-size: calc(60px + 2.2vw);
 }
 
-.font-dot-space{
+.font-dot-space {
   letter-spacing: -0.2em;
 }
 
 .font-sequel {
   font-size: calc(50px + 2vw);
   background-clip: text;
-  color:transparent;
+  color: transparent;
   font-family: "Sequel_2", sans-serif;
   letter-spacing: 1.2px;
   line-height: 110%;
@@ -47,7 +47,7 @@
   transition: 0.5s;
 }
 
-.btn-trasn{
+.btn-trasn {
   background-color: transparent !important;
   border: none !important;
   margin: 0;
@@ -56,25 +56,25 @@
   height: auto;
 }
 
-.btn-trasn:hover{
-  background-color:transparent;
+.btn-trasn:hover {
+  background-color: transparent;
   border: none;
 }
 
-.imagesize:hover{
+.imagesize:hover {
   filter: none;
 }
 
 .btn-trasn-w-border {
   background-color: transparent !important;
-  color: rgb(220 220 220); 
-  border-color: rgb(220 220 220)!important; 
+  color: rgb(220 220 220);
+  border-color: rgb(220 220 220) !important;
 }
 
 .btn-yellow {
-  color:  rgb(220 220 220);
+  color: rgb(220 220 220);
   background-color: #eec211 !important;
-  border-color: #eec211 !important; 
+  border-color: #eec211 !important;
 }
 
 .btn-yellow,
@@ -90,7 +90,7 @@
   border-radius: 7px;
   box-shadow: 0 7px 0px #6d4c41;
   display: inline-block;
-  transition: all .2s;
+  transition: all 0.2s;
   position: relative;
   cursor: pointer;
 }
@@ -98,7 +98,7 @@
 .btn-press-effect:active {
   top: 3px;
   box-shadow: 0 2px 0px #6d4c41;
-  transition: all .2s;
+  transition: all 0.2s;
 }
 
 .btn-tran-effect {
@@ -107,8 +107,8 @@
   border: 1px solid #fff;
   cursor: pointer;
   letter-spacing: 2px;
-  position:relative;
-  overflow:hidden;
+  position: relative;
+  overflow: hidden;
 }
 
 .btn-tran-effect:before {
@@ -116,11 +116,11 @@
   position: absolute;
   height: 150px;
   width: 50px;
-  background : #fff;
+  background: #fff;
   right: -40px;
   top: -40px;
   transform: rotate(37deg);
-  transition: all .3s;
+  transition: all 0.3s;
   opacity: 0.3;
 }
 
@@ -142,8 +142,8 @@ img {
   border-radius: 12px;
   background: #1ebe61;
   box-shadow:
-    0 2px 2px rgba(0, 0, 0, 0.1),      /* sombra superior leve */
-    0 6px 0 #543c34;                  /* sombra inferior tipo "barra sólida" como no botão currículo */
+    0 2px 2px rgba(0, 0, 0, 0.1),
+    /* sombra superior leve */ 0 6px 0 #543c34; /* sombra inferior tipo "barra sólida" como no botão currículo */
   overflow: hidden;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -156,7 +156,6 @@ img {
     0 6px 0 #543c34;
 }
 
-
 .lux-button div {
   transform: translateY(0px);
   width: 100%;
@@ -164,7 +163,7 @@ img {
 
 .lux-button,
 .lux-button div {
-  transition: 0.6s cubic-bezier(.16,1,.3,1);
+  transition: 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .lux-button div span {
@@ -181,7 +180,7 @@ img {
 }
 
 .lux-button div:nth-child(2) {
-  background-color: #128C7E;
+  background-color: #128c7e;
 }
 
 .lux-button p {
@@ -207,9 +206,8 @@ img {
 .lux-button.lux-hover:hover div,
 .lux-button.lux-hover div {
   transform: translateY(-6vh); /* força a animação hover */
-  transition: transform 0.6s cubic-bezier(.16,1,.3,1);
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
-
 
 .lux-button::after {
   content: "";
@@ -230,7 +228,11 @@ img {
   width: 100%;
   height: 4px;
   border-radius: 4px;
-  background: linear-gradient(90deg, rgba(255,255,255,0.3), rgba(255,255,255,0.9));
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.3),
+    rgba(255, 255, 255, 0.9)
+  );
   animation: loadingBar 1s ease-in-out forwards;
 }
 
@@ -291,33 +293,40 @@ img {
 }
 
 .tooltip-linkedin {
-  background-color: #0077b5!important;
-  color: white!important;
+  background-color: #0077b5 !important;
+  color: white !important;
 }
 
 .tooltip-gmail {
-  background-color: #ea4335!important;
-  color: white!important;
+  background-color: #ea4335 !important;
+  color: white !important;
 }
 
 .tooltip-insta {
-  background: radial-gradient(circle at 30% 107%, #f3c44c 0%, #f3c44c 10%, #d26637 40%, #d26637 70%, #2ed0f8 100%)!important;
-  color: rgb(226, 226, 226)!important;
+  background: radial-gradient(
+    circle at 30% 107%,
+    #f3c44c 0%,
+    #f3c44c 10%,
+    #d26637 40%,
+    #d26637 70%,
+    #2ed0f8 100%
+  ) !important;
+  color: rgb(226, 226, 226) !important;
 }
 
 .tooltip-tiktok {
-  background-color: #000000!important;
-  color: white!important;
+  background-color: #000000 !important;
+  color: white !important;
 }
 
 .tooltip-whatsapp {
-  background-color: #25d366!important;
-  color: white!important;
+  background-color: #25d366 !important;
+  color: white !important;
 }
 
 .tooltip-meet {
-  background-color: #00ac47!important;
-  color: white!important;
+  background-color: #00ac47 !important;
+  color: white !important;
 }
 
 .max-80vh-column {
@@ -337,4 +346,3 @@ img {
     padding: 4vh 4vw;
   }
 }
-

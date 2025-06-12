@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { makeWhiteTransparent } from './utils';
+import { useState, useEffect } from "react";
+import { makeWhiteTransparent } from "./utils";
 
 export const useProcessedImage = (imgSrc: string): string | null => {
   const [processedImg, setProcessedImg] = useState<string | null>(null);

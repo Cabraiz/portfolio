@@ -3,7 +3,7 @@ import { ValidatorFn } from "./models/ValidatorFn";
 
 const _validateLength: ValidatorFn = (
   text: string,
-  options?: LenghtOptions,
+  options?: LenghtOptions
 ): boolean => {
   const textLength = text.trim().length;
 

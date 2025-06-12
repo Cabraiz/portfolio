@@ -72,7 +72,7 @@ function App() {
   );
 
   const buttons = Array.from({ length: links.length }).map((_, index) =>
-    createButton(index + 1, links[index] === selectedLink),
+    createButton(index + 1, links[index] === selectedLink)
   );
 
   const { pathname } = useLocation();

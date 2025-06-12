@@ -170,7 +170,7 @@ function Mateus() {
                         isPT
                           ? "https://wa.me/5585998575707"
                           : "https://meet.google.com/SEULINK",
-                        "_blank",
+                        "_blank"
                       );
                       setIsLoading(false);
                       setForceHover(false);

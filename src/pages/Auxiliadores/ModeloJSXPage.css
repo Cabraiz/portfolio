@@ -1,43 +1,49 @@
 /* Fonts */
 @font-face {
-    font-family: "Poppins";
-    src: local("Poppins"), url("/fonts/Poppins/Poppins-Bold.ttf") format("truetype");
-    font-weight: 700;
+  font-family: "Poppins";
+  src:
+    local("Poppins"),
+    url("/fonts/Poppins/Poppins-Bold.ttf") format("truetype");
+  font-weight: 700;
 }
 
 @font-face {
-    font-family: "Poppins";
-    src: local("Poppins"), url("/fonts/Poppins/Poppins-Medium.ttf") format("truetype");
-    font-weight: 500;
+  font-family: "Poppins";
+  src:
+    local("Poppins"),
+    url("/fonts/Poppins/Poppins-Medium.ttf") format("truetype");
+  font-weight: 500;
 }
 
 @font-face {
-    font-family: 'Poppins';
-    src: local('Poppins'), url('/fonts/Poppins/Poppins-Regular.ttf') format("truetype");
-    font-weight: 400;
+  font-family: "Poppins";
+  src:
+    local("Poppins"),
+    url("/fonts/Poppins/Poppins-Regular.ttf") format("truetype");
+  font-weight: 400;
 }
 
 .subfrase-imagem-logo {
-    font-family: 'Poppins', sans-serif;
-    font-weight: 400;
-    font-size: 16px;
-    line-height: 130%;
-    text-align: center;
-    color: white;
+  font-family: "Poppins", sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 130%;
+  text-align: center;
+  color: white;
 }
 
 .column {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .columnB {
-    grid-column: span 2; /* B takes 2 columns */
+  grid-column: span 2; /* B takes 2 columns */
 }
 
 .form-helper-font {
-    font-family: 'Poppins', sans-serif;
-    font-weight: 500;
-    color: red;
+  font-family: "Poppins", sans-serif;
+  font-weight: 500;
+  color: red;
 }

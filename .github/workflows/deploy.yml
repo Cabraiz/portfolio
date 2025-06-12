@@ -102,7 +102,7 @@ jobs:
             echo "❌ CSS não encontrado. Abortando build."
             exit 1
           fi
-      
+
       - name: 🛠️ Build app
         run: npx vite build && cp 404.html dist/
 

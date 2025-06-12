@@ -189,7 +189,6 @@ const AppNavbar: React.FC<AppNavbarProps> = ({
                       e.currentTarget.style.transform = "scale(1)";
                     }}
                   >
-                    {/* container com posição relativa */}
                     <div style={{ position: "relative" }}>
                       {/* bolinha decorativa fixa */}
                       {link === "live" && (

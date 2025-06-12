@@ -36,7 +36,7 @@ export const register = createAsyncThunk(
     } catch (err) {
       return thunkAPI.rejectWithValue("Não foi possível registrar!");
     }
-  },
+  }
 );
 
 export const authSlice = createSlice({
@@ -50,7 +50,7 @@ export const authSlice = createSlice({
     },
     tokenReceived: (
       state,
-      action: PayloadAction<{ user: DisplayUser; jwt: Jwt }>,
+      action: PayloadAction<{ user: DisplayUser; jwt: Jwt }>
     ) => {
       const { user, jwt } = action.payload;
       state.user = user;

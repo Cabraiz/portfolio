@@ -3,27 +3,30 @@
   src: local("Brutal"), url("/fonts/Brutal/Brutal-Type-Medium.ttf");
 }
 
-
 @font-face {
   font-family: "BlommingElegant";
-  src: local("BlommingElegant"), url("/fonts/BloomingElegant/Blooming/Elegant/Sans.otf");
+  src:
+    local("BlommingElegant"),
+    url("/fonts/BloomingElegant/Blooming/Elegant/Sans.otf");
 }
 
 @font-face {
-    font-family: "Modernist";
-    src: local("Modernist"), url("/fonts/Modernist/Modernist.otf") format("truetype");
-    font-weight: 700;
+  font-family: "Modernist";
+  src:
+    local("Modernist"),
+    url("/fonts/Modernist/Modernist.otf") format("truetype");
+  font-weight: 700;
 }
-
 
 html {
   height: auto !important;
 }
 
 body {
-  font-family: 'Playfair Display', serif;
+  font-family: "Playfair Display", serif;
   background-color: #0b0b0b; /* preto veludo */
-  background-image: radial-gradient(
+  background-image:
+    radial-gradient(
       circle at top left,
       rgba(255, 215, 0, 0.12),
       transparent 60%
@@ -33,19 +36,13 @@ body {
       rgba(255, 215, 0, 0.08),
       transparent 70%
     ),
-    linear-gradient(
-      135deg,
-      #0b0b0b 0%,
-      #1a1a1a 50%,
-      #0b0b0b 100%
-    );
+    linear-gradient(135deg, #0b0b0b 0%, #1a1a1a 50%, #0b0b0b 100%);
   background-blend-mode: screen, overlay, normal;
   background-repeat: no-repeat;
   background-size: cover;
   background-attachment: fixed;
   color: #fdf5e6; /* branco perolado, elegante */
 }
-
 
 body::before {
   content: "";
@@ -62,7 +59,6 @@ body::before {
   );
   z-index: -1;
 }
-
 
 .font-face-gm {
   font-family: "Brutal", sans-serif;
@@ -151,19 +147,45 @@ body::before {
 }
 
 @keyframes bounceToFinal {
-  0%   { margin-top: -11vh; }
-  50%  { margin-top: -1.6vh; }
-  60%  { margin-top: -3vh; }
-  68%  { margin-top: -1.7vh; }
-  74%  { margin-top: -2.6vh; }
-  80%  { margin-top: -1.9vh; }
-  85%  { margin-top: -2.4vh; }
-  89%  { margin-top: -1.97vh; }
-  92%  { margin-top: -2.2vh; }
-  95%  { margin-top: -2.01vh; }
-  97%  { margin-top: -2.07vh; }
-  99%  { margin-top: -1.995vh; }
-  100% { margin-top: -2vh; }
+  0% {
+    margin-top: -11vh;
+  }
+  50% {
+    margin-top: -1.6vh;
+  }
+  60% {
+    margin-top: -3vh;
+  }
+  68% {
+    margin-top: -1.7vh;
+  }
+  74% {
+    margin-top: -2.6vh;
+  }
+  80% {
+    margin-top: -1.9vh;
+  }
+  85% {
+    margin-top: -2.4vh;
+  }
+  89% {
+    margin-top: -1.97vh;
+  }
+  92% {
+    margin-top: -2.2vh;
+  }
+  95% {
+    margin-top: -2.01vh;
+  }
+  97% {
+    margin-top: -2.07vh;
+  }
+  99% {
+    margin-top: -1.995vh;
+  }
+  100% {
+    margin-top: -2vh;
+  }
 }
 
 .google-animate-bounce {

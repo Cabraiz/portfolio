@@ -1,6 +1,6 @@
 body {
   margin: 0 !important;
-  font-family: 'Roboto', sans-serif !important;
+  font-family: "Roboto", sans-serif !important;
   height: 100vh !important;
   overflow-x: hidden !important;
 }
@@ -40,7 +40,12 @@ body {
   flex-direction: column !important;
   justify-content: space-between !important;
   padding: 20px !important;
-  background: linear-gradient(90deg, #ececec 25%, #f3f3f3 50%, #ececec 75%) !important;
+  background: linear-gradient(
+    90deg,
+    #ececec 25%,
+    #f3f3f3 50%,
+    #ececec 75%
+  ) !important;
   background-size: 200% 100% !important;
   animation: skeleton-loading 1.5s infinite !important;
   border-radius: 10px !important;
@@ -148,7 +153,12 @@ body.casanova-page {
   transform: translateY(-50%); /* Ajusta para alinhar ao centro */
   width: 10%; /* Largura de 10% da tela */
   height: 50%; /* Altura de 50% da tela */
-  background-color: rgba(0, 0, 255, 0.7); /* Fundo semi-transparente (exemplo) */
+  background-color: rgba(
+    0,
+    0,
+    255,
+    0.7
+  ); /* Fundo semi-transparente (exemplo) */
   border: none;
   outline: none;
   cursor: pointer;
@@ -172,7 +182,12 @@ body.casanova-page {
 }
 
 .navigation-arrow.disabled {
-  background-color: rgba(0, 0, 255, 0.3); /* Fundo mais claro para indicar desativado */
+  background-color: rgba(
+    0,
+    0,
+    255,
+    0.3
+  ); /* Fundo mais claro para indicar desativado */
   cursor: not-allowed;
   pointer-events: none; /* Evita cliques */
 }
@@ -334,14 +349,15 @@ body.casanova-page {
   color: #333;
 }
 
-.modal-header, .modal-footer {
+.modal-header,
+.modal-footer {
   background: #ffe4b3;
   border-radius: 15px 15px 0 0;
   text-align: center;
 }
 
 .modal-title {
-  font-family: 'Poppins', sans-serif;
+  font-family: "Poppins", sans-serif;
   font-size: 1.5rem;
   font-weight: bold;
   color: #333;
@@ -396,7 +412,7 @@ body.casanova-page {
   background-color: #ffd700;
   border: none;
   color: white;
-  font-family: 'Poppins', sans-serif;
+  font-family: "Poppins", sans-serif;
   font-weight: bold;
   font-size: 1rem;
   text-transform: uppercase;
@@ -404,7 +420,9 @@ body.casanova-page {
   padding: 12px 20px;
   border-radius: 10px;
   cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease;
+  transition:
+    background-color 0.3s ease,
+    transform 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -428,4 +446,3 @@ body.casanova-page {
 .payment-button.credit-card:hover {
   background-color: #0056b3;
 }
-

@@ -1,73 +1,76 @@
 /* Fonts */
 @font-face {
-    font-family: "Poppins";
-    src: local("Poppins"), url("../../fonts/Poppins/Poppins-Bold.ttf") format("truetype");
-    font-weight: 700;
+  font-family: "Poppins";
+  src:
+    local("Poppins"),
+    url("../../fonts/Poppins/Poppins-Bold.ttf") format("truetype");
+  font-weight: 700;
 }
 
 @font-face {
-font-family: "Poppins";
-src: local("Poppins"), url("../../fonts/Poppins/Poppins-Medium.ttf") format("truetype");
-font-weight: 500;
+  font-family: "Poppins";
+  src:
+    local("Poppins"),
+    url("../../fonts/Poppins/Poppins-Medium.ttf") format("truetype");
+  font-weight: 500;
 }
 
 /* Typography */
 .letter-spacing-text {
-    letter-spacing: 0.4px;
+  letter-spacing: 0.4px;
 }
 
 .letter-spacing-button {
-    letter-spacing: 1px;
+  letter-spacing: 1px;
 }
 
 .poppins-text-label {
-    font-family: 'Poppins', sans-serif;
-    font-weight: 500;
-    font-size: 16px;
-    color: #373737;
-    margin-bottom: 0;
+  font-family: "Poppins", sans-serif;
+  font-weight: 500;
+  font-size: 16px;
+  color: #373737;
+  margin-bottom: 0;
 }
 
 .poppins-text-button {
-    font-family: 'Poppins', sans-serif;
-    font-weight: 700;
+  font-family: "Poppins", sans-serif;
+  font-weight: 700;
 }
 
 .frase-imagem-logo {
-    font-family: 'Poppins', sans-serif;
-    font-weight: 700;
-    font-size: 35px;
-    letter-spacing: 0.5px;
-    line-height: 105%;
-    text-align: center;
-    color: #fff;
-    align-items: center;
-    vertical-align: top;
+  font-family: "Poppins", sans-serif;
+  font-weight: 700;
+  font-size: 35px;
+  letter-spacing: 0.5px;
+  line-height: 105%;
+  text-align: center;
+  color: #fff;
+  align-items: center;
+  vertical-align: top;
 }
 
 /* Buttons and Inputs */
-    .button-settings,
-    .input-setting {
-    min-height: 50px;
-    height: 7.3vh !important;
+.button-settings,
+.input-setting {
+  min-height: 50px;
+  height: 7.3vh !important;
 }
 
 .button-font {
-    font-weight: 700;
-    color: #fff;
+  font-weight: 700;
+  color: #fff;
 }
 
 /* Animations */
 .fastAnimation {
-    animation: run 0s linear;
+  animation: run 0s linear;
 }
 
 @keyframes run {
-    0% {
+  0% {
     width: 50%;
-    }
-    100% {
+  }
+  100% {
     width: 100%;
-    }
+  }
 }
-    

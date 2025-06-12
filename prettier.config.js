@@ -2,6 +2,7 @@
 import organizeImports from "prettier-plugin-organize-imports";
 
 export default {
+  endOfLine: "lf",
   semi: true,
   singleQuote: true,
   printWidth: 80,

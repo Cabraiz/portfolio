@@ -15,15 +15,15 @@ export const handlers = [
       if (authorization !== `Bearer ${token}`) {
         return HttpResponse.json(
           { message: "You shall not pass. Please login first." },
-          { status: 401 },
+          { status: 401 }
         );
       }
 
       return HttpResponse.json(
         { message: "Alright, you are authorized" },
-        { status: 200 },
+        { status: 200 }
       );
-    },
+    }
   ),
 
   // Handler para POST "/loginhublocal"
@@ -40,7 +40,7 @@ export const handlers = [
         },
         token,
       },
-      { status: 200 },
+      { status: 200 }
     );
   }),
 ];

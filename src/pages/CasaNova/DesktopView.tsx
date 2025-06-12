@@ -17,7 +17,7 @@ interface DesktopViewProps {
 const loadImage = async (
   id: string,
   imgSrc: string,
-  inMemoryCache: { [id: string]: string | null },
+  inMemoryCache: { [id: string]: string | null }
 ): Promise<string | null> => {
   if (inMemoryCache[id]) {
     return inMemoryCache[id];
@@ -36,7 +36,7 @@ const loadImage = async (
     const processedImage = await makeWhiteTransparent(img);
     if (!processedImage) {
       console.warn(
-        `Processamento falhou para o item ${id}. Salvando imagem original.`,
+        `Processamento falhou para o item ${id}. Salvando imagem original.`
       );
       await saveToDB(id, imgSrc);
       inMemoryCache[id] = imgSrc;
@@ -75,18 +75,18 @@ const DesktopView: React.FC<DesktopViewProps> = ({
           const img = await loadImage(
             item.id.toString(),
             item.img,
-            inMemoryCache,
+            inMemoryCache
           );
           if (img) {
             updates[item.id] = img;
           } else {
             console.warn(
-              `Imagem quebrada ou não processada para o item ${item.id}`,
+              `Imagem quebrada ou não processada para o item ${item.id}`
             );
             updates[item.id] = item.img; // Use a imagem original como fallback
           }
           updates[item.id] = img;
-        }),
+        })
       );
       setProcessedImages((prev) => ({ ...prev, ...updates }));
     };

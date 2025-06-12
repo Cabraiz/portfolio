@@ -48,7 +48,7 @@ const baseQueryWithReauth: BaseQueryFn<
         const refreshResult = await baseQuery(
           "/refreshToken",
           api,
-          extraOptions,
+          extraOptions
         );
         if (refreshResult.data) {
           const tokenData = refreshResult.data as TokenData;
