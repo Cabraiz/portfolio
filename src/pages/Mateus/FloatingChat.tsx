@@ -1,4 +1,4 @@
-import type * as React from 'react'; // ← Importa apenas tipos
+import type * as React from 'react';
 import { useState, useRef, useEffect } from "react";
 import { FaEnvelope } from "react-icons/fa";
 import { AnimatePresence, motion } from "framer-motion";
@@ -8,6 +8,8 @@ export default function FloatingChat() {
   const [isOpen, setIsOpen] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const [messages, setMessages] = useState<string[]>([]);
+  const chatRef = useRef<HTMLDivElement>(null);
+
   const inputRef = useRef<HTMLInputElement>(null);
 
   const { t } = useTranslation();
@@ -17,11 +19,28 @@ export default function FloatingChat() {
 
   const [currentPhraseIndex, setCurrentPhraseIndex] = useState(0);
 
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+  const scale = (value: number) => isMobile ? value * 0.8 : value;
+
+  useEffect(() => {
+  if (!isOpen) return;
+
+  const handleClickOutside = (event: MouseEvent) => {
+      if (chatRef.current && !chatRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isOpen]);
+
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentPhraseIndex((prevIndex) => (prevIndex + 1) % phrases.length);
     }, 10000);
-
     return () => clearInterval(interval);
   }, [phrases.length]);
 
@@ -62,17 +81,13 @@ export default function FloatingChat() {
     }
   };
 
-  const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
-
   return (
     <div
       style={{
         position: "fixed",
-        bottom: isMobile ? "0px" : "20px",
-        right: isMobile ? "0px" : "20px",
+        bottom: "20px",
+        right: "20px",
         zIndex: 9999,
-        paddingRight: isMobile ? 0 : undefined,
-        paddingBottom: isMobile ? 0 : undefined,
       }}
     >
       {!isOpen && (
@@ -81,22 +96,22 @@ export default function FloatingChat() {
           style={{
             display: "flex",
             alignItems: "center",
-            gap: "0.7rem",
+            gap: `${scale(0.7)}rem`,
             background: "rgba(255, 255, 255, 0.08)",
             backdropFilter: "blur(12px)",
             WebkitBackdropFilter: "blur(12px)",
             border: "1px solid rgba(255, 255, 255, 0.2)",
-            padding: "1rem 2rem",
-            borderRadius: isMobile ? "16px 0 0 0" : "16px",
+            padding: `${scale(1)}rem ${scale(2)}rem`,
+            borderRadius: "16px",
             boxShadow: "0 8px 24px rgba(0, 0, 0, 0.3)",
             color: "#ffffff",
             fontWeight: "600",
-            fontSize: "1.1rem",
+            fontSize: `${scale(1.1)}rem`,
             cursor: "pointer",
-            minWidth: "250px",
+            minWidth: isMobile ? "140px" : "250px",
           }}
         >
-          <FaEnvelope size={20} />
+          <FaEnvelope size={scale(20)} />
           {phrases[currentPhraseIndex]}
         </button>
       )}
@@ -104,32 +119,35 @@ export default function FloatingChat() {
       <AnimatePresence>
         {isOpen && (
           <motion.div
+            ref={chatRef}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20, transition: { duration: 0 } }}
             transition={{ duration: 0.8, ease: [0.23, 1, 0.32, 1] }}
             style={{
-              width: isMobile ? "100vw" : "480px",
-              height: isMobile ? "100vh" : "600px",
+              width: isMobile ? "70vw" : "480px",
+              height: isMobile ? "50vh" : "600px",
               background: "rgba(255, 255, 255, 0.06)",
               backdropFilter: "blur(18px)",
               WebkitBackdropFilter: "blur(18px)",
               border: "1px solid rgba(255, 255, 255, 0.15)",
-              borderRadius: isMobile ? "0" : "20px",
+              borderRadius: "20px",
               boxShadow: "0 12px 32px rgba(0, 0, 0, 0.35)",
               display: "flex",
               flexDirection: "column",
-              padding: "1.5rem",
+              padding: `${scale(1.5)}rem`,
               color: "#fff",
-              position: "relative",
-              fontSize: "1rem",
+              fontSize: `${scale(1)}rem`,
+              position: "fixed",
+              bottom: "20px",
+              right: "20px",
             }}
           >
             <div
               style={{
-                marginBottom: "0.8rem",
+                marginBottom: `${scale(0.8)}rem`,
                 fontWeight: "bold",
-                fontSize: "1.3rem",
+                fontSize: `${scale(1.3)}rem`,
               }}
             >
               {t("floatingChat.title")}
@@ -139,11 +157,11 @@ export default function FloatingChat() {
               style={{
                 flex: 1,
                 overflowY: "auto",
-                fontSize: "1.05rem",
-                lineHeight: "1.6",
+                fontSize: `${scale(1.05)}rem`,
+                lineHeight: scale(1.6),
                 display: "flex",
                 flexDirection: "column",
-                gap: "0.5rem",
+                gap: `${scale(0.5)}rem`,
               }}
             >
               <span>
@@ -164,13 +182,14 @@ export default function FloatingChat() {
                     alignSelf: "flex-end",
                     background: "rgba(255, 255, 255, 0.12)",
                     border: "1px solid rgba(255, 255, 255, 0.2)",
-                    padding: "0.6rem 1rem",
+                    padding: `${scale(0.6)}rem ${scale(1)}rem`,
                     borderRadius: "12px",
                     maxWidth: "80%",
                     wordWrap: "break-word",
                     color: "#fff",
                     backdropFilter: "blur(8px)",
                     WebkitBackdropFilter: "blur(8px)",
+                    fontSize: `${scale(1)}rem`,
                   }}
                 >
                   {msg}
@@ -178,7 +197,7 @@ export default function FloatingChat() {
               ))}
             </div>
 
-            <div style={{ display: "flex", marginTop: "1rem", gap: "0.5rem" }}>
+            <div style={{ display: "flex", marginTop: `${scale(1)}rem`, gap: `${scale(0.5)}rem` }}>
               <input
                 ref={inputRef}
                 type="text"
@@ -188,25 +207,26 @@ export default function FloatingChat() {
                 onKeyDown={handleKeyDown}
                 style={{
                   flex: 1,
-                  padding: "1rem",
+                  padding: `${scale(1)}rem`,
                   borderRadius: "10px",
                   border: "none",
                   outline: "none",
                   backgroundColor: "#2c2c2c",
                   color: "white",
-                  fontSize: "1rem",
+                  fontSize: `${scale(1)}rem`,
                 }}
               />
               <button
                 onClick={sendMessage}
                 style={{
-                  padding: "0 1rem",
+                  padding: `0 ${scale(1)}rem`,
                   backgroundColor: "#f1c40f",
                   color: "#000",
                   border: "none",
                   borderRadius: "8px",
                   cursor: "pointer",
                   fontWeight: "bold",
+                  fontSize: `${scale(1)}rem`,
                 }}
               >
                 {t("floatingChat.send")}
@@ -216,14 +236,15 @@ export default function FloatingChat() {
             <button
               onClick={() => setIsOpen(false)}
               style={{
-                marginTop: "1rem",
+                marginTop: `${scale(1)}rem`,
                 backgroundColor: "#f1c40f",
                 color: "#000",
                 border: "none",
-                padding: "0.6rem 1rem",
+                padding: `${scale(0.6)}rem ${scale(1)}rem`,
                 borderRadius: "8px",
                 cursor: "pointer",
                 fontWeight: "bold",
+                fontSize: `${scale(1)}rem`,
               }}
             >
               {t("floatingChat.close")}
