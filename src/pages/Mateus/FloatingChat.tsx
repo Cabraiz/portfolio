@@ -1,3 +1,4 @@
+import type * as React from 'react'; // ← Importa apenas tipos
 import { useState, useRef, useEffect } from "react";
 import { FaEnvelope } from "react-icons/fa";
 import { AnimatePresence, motion } from "framer-motion";
