@@ -1,6 +1,6 @@
 import type * as React from 'react';
 import { useState, useRef, useEffect } from "react";
-import { FaEnvelope } from "react-icons/fa";
+import { FaCommentDots, FaEnvelope } from "react-icons/fa";
 import { AnimatePresence, motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 
@@ -91,30 +91,34 @@ export default function FloatingChat() {
       }}
     >
       {!isOpen && (
-        <button
-          onClick={() => setIsOpen(true)}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: `${scale(0.7)}rem`,
-            background: "rgba(255, 255, 255, 0.08)",
-            backdropFilter: "blur(12px)",
-            WebkitBackdropFilter: "blur(12px)",
-            border: "1px solid rgba(255, 255, 255, 0.2)",
-            padding: `${scale(1)}rem ${scale(2)}rem`,
-            borderRadius: "16px",
-            boxShadow: "0 8px 24px rgba(0, 0, 0, 0.3)",
-            color: "#ffffff",
-            fontWeight: "600",
-            fontSize: `${scale(1.1)}rem`,
-            cursor: "pointer",
-            minWidth: isMobile ? "140px" : "250px",
-          }}
-        >
-          <FaEnvelope size={scale(20)} />
-          {phrases[currentPhraseIndex]}
-        </button>
-      )}
+  <button
+    onClick={() => setIsOpen(true)}
+    style={{
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: isMobile ? 0 : `${scale(0.7)}rem`,
+      background: "rgba(255, 255, 255, 0.08)",
+      backdropFilter: "blur(12px)",
+      WebkitBackdropFilter: "blur(12px)",
+      border: "1px solid rgba(255, 255, 255, 0.2)",
+      padding: isMobile ? `${scale(1)}rem` : `${scale(1)}rem ${scale(2)}rem`,
+      borderRadius: isMobile ? "50%" : "16px",
+      boxShadow: "0 8px 24px rgba(0, 0, 0, 0.3)",
+      color: "#ffffff",
+      fontWeight: "600",
+      fontSize: `${scale(1.1)}rem`,
+      cursor: "pointer",
+      width: isMobile ? "60px" : "auto",
+      height: isMobile ? "60px" : "auto",
+      minWidth: isMobile ? "unset" : "250px",
+    }}
+    title="Abrir chat"
+  >
+    <FaCommentDots size={isMobile ? 28 : scale(22)} />
+    {!isMobile && phrases[currentPhraseIndex]}
+  </button>
+)}
 
       <AnimatePresence>
         {isOpen && (

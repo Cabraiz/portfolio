@@ -20,12 +20,14 @@ import { Button } from "react-bootstrap";
 function App() {
   const [windowSize, setWindowSize] = useState(getWindowSize());
   const [signInStatus] = useState(["", false]);
-  const [selectedLink, setSelectedLink] = useState("Home");
+  const [selectedLink, setSelectedLink] = useState("home");
   const [animateGoogle, setAnimateGoogle] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
-  const links = ["home", "portfolio", "roadMap", "pricing", "live", "contact"];
   const isMobileView = windowSize.innerWidth < 768;
+
+  const baseLinks = ["home", "portfolio", "roadMap", "pricing", "live", "contact"];
+  const links = isMobileView ? baseLinks.filter(link => link !== "home") : baseLinks;
 
   useEffect(() => {
     const timeout = setTimeout(() => {

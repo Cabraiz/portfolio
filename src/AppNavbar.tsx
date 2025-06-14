@@ -265,9 +265,11 @@ const AppNavbar: React.FC<AppNavbarProps> = ({
               {t(`nav.${link}`)}
             </a>
           ))}
-          <div style={{ marginTop: "1rem" }}>
-            <GoogleSignInButton animate={animateGoogle} />
-          </div>
+          {!isMobileView && (
+            <div style={{ marginTop: "1rem" }}>
+              <GoogleSignInButton animate={animateGoogle} />
+            </div>
+          )}
         </div>
       )}
     </>

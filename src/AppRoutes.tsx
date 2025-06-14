@@ -8,17 +8,16 @@ import Surprise from "./pages/Surprise/Surprise";
 import Resume from "./pages/Resume/Resume";
 import Doris from "./pages/Doris.mobi/principal";
 import CasaNova from "./pages/CasaNova/CasaNova";
-import Mateus from "./pages/Mateus/Mateus";
 
 import { PrivateOutlet } from "./redux/shared/utils/PrivateOutlet";
 
-import { UnlockRoute } from "./pages/UnlockRoute/UnlockRoute";
 import { RouteGuard } from "./components/RouteGuard";
 import Libras from "./pages/Libras/Libras";
 import Rosa from "./pages/Rosa/Rosa";
 import Vinho from "./pages/Vinho/Vinho";
 import Enigma from "./pages/Enigma/Enigma";
 import DigitalCodeUnlock from "./components/DigitalCodeUnlock";
+import Mateus from "./pages/Mateus/Mateus";
 
 const AppRoutes = () => {
   return (
@@ -29,14 +28,44 @@ const AppRoutes = () => {
       {/* Página de introdução do enigma com botão */}
       <Route path="/enigma" element={<Enigma />} />
 
-      <Route path="/libras-unlock" element={<DigitalCodeUnlock routeKey="libras" next="/libras" />} />
-      <Route path="/libras" element={<RouteGuard routeKey="libras"><Libras /></RouteGuard>} />
+      <Route
+        path="/libras-unlock"
+        element={<DigitalCodeUnlock routeKey="libras" next="/libras" />}
+      />
+      <Route
+        path="/libras"
+        element={
+          <RouteGuard routeKey="libras">
+            <Libras />
+          </RouteGuard>
+        }
+      />
 
-      <Route path="/rosa-unlock" element={<DigitalCodeUnlock routeKey="rosa" next="/rosa" />} />
-      <Route path="/rosa" element={<RouteGuard routeKey="rosa"><Rosa /></RouteGuard>} />
+      <Route
+        path="/rosa-unlock"
+        element={<DigitalCodeUnlock routeKey="rosa" next="/rosa" />}
+      />
+      <Route
+        path="/rosa"
+        element={
+          <RouteGuard routeKey="rosa">
+            <Rosa />
+          </RouteGuard>
+        }
+      />
 
-      <Route path="/vinho-unlock" element={<DigitalCodeUnlock routeKey="vinho" next="/vinho" />} />
-      <Route path="/vinho" element={<RouteGuard routeKey="vinho"><Vinho /></RouteGuard>} />
+      <Route
+        path="/vinho-unlock"
+        element={<DigitalCodeUnlock routeKey="vinho" next="/vinho" />}
+      />
+      <Route
+        path="/vinho"
+        element={
+          <RouteGuard routeKey="vinho">
+            <Vinho />
+          </RouteGuard>
+        }
+      />
 
       {/* Outras rotas do app */}
       <Route path="/registerhublocal" element={<RegisterHubLocal />} />
