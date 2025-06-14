@@ -71,31 +71,72 @@ const AppNavbar: React.FC<AppNavbarProps> = ({
         {isMobileView ? (
           <>
             <Button
-              onClick={() => setMenuOpen(!menuOpen)}
-              style={{
-                backgroundColor: "transparent",
-                border: "none",
-                marginLeft: "5vw",
-                padding: "0",
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
-                alignItems: "center",
-                gap: "8px",
-                zIndex: 2,
-              }}
-            >
-              {[...Array(3)].map((_, i) => (
-                <div
-                  key={i}
-                  style={{
-                    width: "7vw",
-                    height: "3px",
-                    backgroundColor: "#fff",
-                  }}
-                />
-              ))}
-            </Button>
+  onClick={() => setMenuOpen(!menuOpen)}
+  style={{
+    backgroundColor: "transparent",
+    border: "none",
+    marginLeft: "5vw",
+    padding: "0",
+    width: "7vw",
+    height: "7vw",
+    display: menuOpen ? "block" : "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: menuOpen ? undefined : "8px",
+    position: "relative",
+    zIndex: 2,
+  }}
+>
+  {/* Linha de cima */}
+  <div
+    style={{
+      width: "7vw",
+      height: "3px",
+      backgroundColor: "#fff",
+      borderRadius: "2px",
+      position: menuOpen ? "absolute" : "static",
+      top: menuOpen ? "50%" : undefined,
+      left: menuOpen ? "0" : undefined,
+      transform: menuOpen
+        ? "translateY(-50%) rotate(45deg)"
+        : "none",
+      transition: "0.4s",
+    }}
+  />
+  {/* Linha do meio */}
+  <div
+    style={{
+      width: "7vw",
+      height: "3px",
+      backgroundColor: "#fff",
+      borderRadius: "2px",
+      position: menuOpen ? "absolute" : "static",
+      top: menuOpen ? "50%" : undefined,
+      left: menuOpen ? "0" : undefined,
+      opacity: menuOpen ? 0 : 1,
+      transform: menuOpen ? "translateY(-50%)" : "none",
+      transition: "0.4s",
+    }}
+  />
+  {/* Linha de baixo */}
+  <div
+    style={{
+      width: "7vw",
+      height: "3px",
+      backgroundColor: "#fff",
+      borderRadius: "2px",
+      position: menuOpen ? "absolute" : "static",
+      top: menuOpen ? "50%" : undefined,
+      left: menuOpen ? "0" : undefined,
+      transform: menuOpen
+        ? "translateY(-50%) rotate(-45deg)"
+        : "none",
+      transition: "0.4s",
+    }}
+  />
+</Button>
+
 
             <Link to="/" style={{ textDecoration: "none" }}>
               <Image
