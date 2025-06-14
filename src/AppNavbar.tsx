@@ -63,34 +63,60 @@ const AppNavbar: React.FC<AppNavbarProps> = ({
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          height: "11vh",
+          height: isMobileView ? "8vh" : "11vh",
           fontWeight: "600",
           marginTop: "0.1vh",
         }}
       >
-        <Link to="/" style={{ textDecoration: "none" }}>
-          <Image
-            src={logo}
-            style={{
-              marginLeft: isMobileView ? "5vw" : `${convertMultiplyVwToPx()}px`,
-              marginRight: "20px",
-              marginTop: "0.5vh",
-              borderRadius: "20%",
-              width: "8.5vh",
-              height: "8.5vh",
-              cursor: "pointer",
-            }}
-            alt="Logo"
-          />
-        </Link>
-
         {isMobileView ? (
           <>
+            <Button
+              onClick={() => setMenuOpen(!menuOpen)}
+              style={{
+                backgroundColor: "transparent",
+                border: "none",
+                marginLeft: "5vw",
+                padding: "0",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+                alignItems: "center",
+                gap: "8px",
+                zIndex: 2,
+              }}
+            >
+              {[...Array(3)].map((_, i) => (
+                <div
+                  key={i}
+                  style={{
+                    width: "7vw",
+                    height: "3px",
+                    backgroundColor: "#fff",
+                  }}
+                />
+              ))}
+            </Button>
+
+            <Link to="/" style={{ textDecoration: "none" }}>
+              <Image
+                src={logo}
+                style={{
+                  marginLeft: "4vw",
+                  marginRight: "1vw",
+                  borderRadius: "20%",
+                  width: "4.8vh",
+                  height: "4.8vh",
+                  cursor: "pointer",
+                }}
+                alt="Logo"
+              />
+            </Link>
+
             <div style={{ position: "relative", flexGrow: 1 }}>
               <span
                 style={{
                   position: "absolute",
-                  left: "42%",
+                  left: "40%",
                   transform: "translate(-50%, -40%)",
                   fontSize: "1.5rem",
                   fontWeight: "600",
@@ -103,36 +129,25 @@ const AppNavbar: React.FC<AppNavbarProps> = ({
                 Cabraiz
               </span>
             </div>
-
-            <Button
-              onClick={() => setMenuOpen(!menuOpen)}
-              style={{
-                backgroundColor: "transparent",
-                border: "none",
-                marginRight: "5vw",
-                padding: "0",
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
-                alignItems: "center",
-                gap: "4px",
-                zIndex: 2,
-              }}
-            >
-              {[...Array(3)].map((_, i) => (
-                <div
-                  key={i}
-                  style={{
-                    width: "24px",
-                    height: "2px",
-                    backgroundColor: "#fff",
-                  }}
-                />
-              ))}
-            </Button>
           </>
         ) : (
           <>
+            <Link to="/" style={{ textDecoration: "none" }}>
+              <Image
+                src={logo}
+                style={{
+                  marginLeft: `${convertMultiplyVwToPx()}px`,
+                  marginRight: "20px",
+                  marginTop: "0.5vh",
+                  borderRadius: "20%",
+                  width: "8.5vh",
+                  height: "8.5vh",
+                  cursor: "pointer",
+                }}
+                alt="Logo"
+              />
+            </Link>
+
             <Nav
               ref={navContainerRef}
               style={{
@@ -164,7 +179,9 @@ const AppNavbar: React.FC<AppNavbarProps> = ({
                     ref={(el) => {
                       navRefs.current[link] = el;
                     }}
-                    className={`nav-link-custom ${selectedLink === link ? "active" : ""}`}
+                    className={`nav-link-custom ${
+                      selectedLink === link ? "active" : ""
+                    }`}
                     style={{
                       display: "flex",
                       flexDirection: "column",
@@ -190,7 +207,6 @@ const AppNavbar: React.FC<AppNavbarProps> = ({
                     }}
                   >
                     <div style={{ position: "relative" }}>
-                      {/* bolinha decorativa fixa */}
                       {link === "live" && (
                         <div
                           style={{
@@ -198,20 +214,17 @@ const AppNavbar: React.FC<AppNavbarProps> = ({
                             left: "-2rem",
                             top: "0",
                             transform: "translateY(-50%) scale(0.5)",
-                            pointerEvents: "none", // impede clique
+                            pointerEvents: "none",
                           }}
                         >
                           <LiveAnimation />
                         </div>
                       )}
-
-                      {/* texto centralizado normalmente */}
                       <span>{t(`nav.${link}`)}</span>
                     </div>
                   </Nav.Link>
                 </button>
               ))}
-              {/* 🔥 Traço animado */}
               <div style={underlineStyle} />
             </Nav>
 
