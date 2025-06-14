@@ -8,17 +8,21 @@ const MateusMobile: React.FC = () => {
   return (
     <>
       <Container
-        fluid
-        style={{
-          minHeight: "100vh",
-          background: "linear-gradient(to bottom, #0f0f0f, #1a1a1a)",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "flex-start",
-          padding: "4vh 2vw",
-        }}
-      >
+  fluid
+  style={{
+    minHeight: "100vh",
+    background: "linear-gradient(to bottom, #0f0f0f, #1a1a1a)",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "flex-start",
+    padding: "4vh 2vw",
+    userSelect: "none",
+    WebkitUserSelect: "none",
+    msUserSelect: "none",
+  }}
+>
+
         {/* Header */}
         <div
           style={{
