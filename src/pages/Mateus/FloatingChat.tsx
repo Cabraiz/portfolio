@@ -22,6 +22,9 @@ export default function FloatingChat() {
   const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
   const scale = (value: number) => isMobile ? value * 0.8 : value;
 
+  const bottomOffset = isMobile ? "3vh" : "60px";
+  const rightOffset = isMobile ? "2vw" : "20px";
+
   useEffect(() => {
   if (!isOpen) return;
 
@@ -85,8 +88,8 @@ export default function FloatingChat() {
     <div
       style={{
         position: "fixed",
-        bottom: "20px",
-        right: "20px",
+        bottom: bottomOffset,
+        right: rightOffset,
         zIndex: 9999,
       }}
     >

@@ -146,7 +146,7 @@ img {
     /* sombra superior leve */ 0 6px 0 #543c34; /* sombra inferior tipo "barra sólida" como no botão currículo */
   overflow: hidden;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.3s ease; 
 }
 
 .lux-button:hover {
