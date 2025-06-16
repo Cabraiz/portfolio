@@ -111,95 +111,6 @@ body::before {
   border: none;
 }
 
-.google-signin-button {
-  margin-top: -11vh;
-  position: relative;
-  overflow: hidden;
-  background: rgba(255, 255, 255, 0.65);
-  color: #1a1a1a;
-  transform: scale(1.018);
-  border: 1px solid #d6d6d6;
-  backdrop-filter: blur(4px) saturate(120%);
-  -webkit-backdrop-filter: blur(4px) saturate(120%);
-  box-shadow:
-    inset 0 0 0.5px rgba(255, 255, 255, 0.4),
-    0 1px 3px rgba(0, 0, 0, 0.05),
-    0 4px 12px rgba(0, 0, 0, 0.07);
-  letter-spacing: 1.3px;
-  transition: all 1s ease;
-  cursor: pointer;
-  z-index: 0;
-}
-
-.google-signin-button::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: -75%;
-  width: 50%;
-  height: 100%;
-  background: linear-gradient(
-    120deg,
-    rgba(255, 255, 255, 0) 0%,
-    rgba(255, 255, 255, 0.8) 50%,
-    rgba(255, 255, 255, 0) 100%
-  );
-  transform: skewX(-25deg);
-  transition: all 0.7s ease;
-  z-index: 1;
-  pointer-events: none;
-}
-
-.google-signin-button:hover::after {
-  left: 100%;
-}
-
-@keyframes bounceToFinal {
-  0% {
-    margin-top: -11vh;
-  }
-  50% {
-    margin-top: -1.6vh;
-  }
-  60% {
-    margin-top: -3vh;
-  }
-  68% {
-    margin-top: -1.7vh;
-  }
-  74% {
-    margin-top: -2.6vh;
-  }
-  80% {
-    margin-top: -1.9vh;
-  }
-  85% {
-    margin-top: -2.4vh;
-  }
-  89% {
-    margin-top: -1.97vh;
-  }
-  92% {
-    margin-top: -2.2vh;
-  }
-  95% {
-    margin-top: -2.01vh;
-  }
-  97% {
-    margin-top: -2.07vh;
-  }
-  99% {
-    margin-top: -1.995vh;
-  }
-  100% {
-    margin-top: -2vh;
-  }
-}
-
-.google-animate-bounce {
-  animation: bounceToFinal 3s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-}
-
 .google-circle-button {
   position: relative;
   overflow: hidden;
@@ -230,7 +141,7 @@ body::before {
 }
 
 .google-circle-button:hover img {
-  transform: scale(1.5); /* opcional: pequeno efeito de zoom */
+  transform: scale(1.5);
 }
 
 body.no-background {

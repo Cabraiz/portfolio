@@ -230,7 +230,7 @@ const AppNavbar: React.FC<AppNavbarProps> = ({
                       justifyContent: "center",
                       fontWeight: 100,
                       letterSpacing: 1.3,
-                      fontSize: "1.8rem",
+                      fontSize: "1.5vw",
                       fontFamily: "Modernist, sans-serif",
                       cursor: "pointer",
                       userSelect: "none",
@@ -269,7 +269,18 @@ const AppNavbar: React.FC<AppNavbarProps> = ({
               <div style={underlineStyle} />
             </Nav>
 
-            <GoogleSignInButton animate={animateGoogle} />
+            <div
+              style={{
+                width: "16vw",
+                display: "flex",
+                justifyContent: "flex-end",
+                alignItems: "center",
+                marginRight: "2vw",
+              }}
+            >
+              <GoogleSignInButton />
+            </div>
+
           </>
         )}
       </Navbar>
@@ -308,7 +319,7 @@ const AppNavbar: React.FC<AppNavbarProps> = ({
           ))}
           {!isMobileView && (
             <div style={{ marginTop: "1rem" }}>
-              <GoogleSignInButton animate={animateGoogle} />
+              <GoogleSignInButton />
             </div>
           )}
         </div>
