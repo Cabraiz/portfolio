@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 
@@ -8,7 +8,6 @@ import "./pages/Mateus/Mateus.css";
 import "./pages/Surprise/Surprise.css";
 
 import AppRoutes from "./AppRoutes";
-import GoogleSignInButton from "./GoogleSignInButton";
 import AppNavbar from "./AppNavbar";
 
 import "react-toastify/dist/ReactToastify.css";
@@ -16,6 +15,9 @@ import "react-toastify/dist/ReactToastify.css";
 import TitleWebsite from "./pages/PrincipalPage/TitleWebsite/title_website";
 import { useTranslation } from "react-i18next";
 import { Button } from "react-bootstrap";
+
+import Particles from "react-tsparticles";
+import { loadFull } from "tsparticles";
 
 function App() {
   const [windowSize, setWindowSize] = useState(getWindowSize());
@@ -28,6 +30,10 @@ function App() {
 
   const baseLinks = ["home", "portfolio", "roadMap", "pricing", "live", "contact"];
   const links = isMobileView ? baseLinks.filter(link => link !== "home") : baseLinks;
+
+  const particlesInit = async (main: any) => {
+    await loadFull(main);
+  };
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -59,18 +65,40 @@ function App() {
       variant="primary"
       size="sm"
       style={{
-        width: selected ? "23px" : "",
-        height: selected ? "22px" : "12px",
-        marginRight: selected ? "-2px" : "",
-        marginBottom: selected ? "2.5vh" : "3vh",
-        transform: selected ? "" : "rotate(45deg) scaleX(0.7)",
-        transformOrigin: selected ? "" : "center",
-        backgroundColor: selected ? "#00000000" : "#9b59b6",
-        borderColor: selected ? "#9b59b6" : "#00000000",
-        borderWidth: selected ? "3px" : "",
-        borderRadius: "1px",
+        width: selected ? "24px" : "12px",
+        height: selected ? "24px" : "12px",
+        marginBottom: "2vh",
+        transform: selected ? "none" : "rotate(45deg) scaleX(0.8)",
+        transformOrigin: "center",
+        background: selected 
+          ? "radial-gradient(circle at 30% 30%, #0b0b0b, #1a1a1a)"
+          : "linear-gradient(135deg, #fcd535, #ffb347)",
+        border: selected ? "3px solid #fcd535" : "none",
+        borderRadius: selected ? "8px" : "2px",
+        boxShadow: selected
+          ? "0 0 12px #fcd535, inset 0 0 8px #fcd53588"
+          : "0 0 8px rgba(252, 213, 53, 0.6)",
+        transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
+        cursor: "pointer",
       }}
-    ></Button>
+      onMouseEnter={(e) => {
+        e.currentTarget.style.transform = selected
+          ? "scale(1.15)"
+          : "rotate(45deg) scale(1.15)";
+        e.currentTarget.style.boxShadow = selected
+          ? "0 0 20px #fcd535, inset 0 0 12px #fcd53588"
+          : "0 0 14px rgba(252, 213, 53, 0.8)";
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.transform = selected
+          ? "none"
+          : "rotate(45deg) scaleX(0.8)";
+        e.currentTarget.style.boxShadow = selected
+          ? "0 0 12px #fcd535, inset 0 0 8px #fcd53588"
+          : "0 0 8px rgba(252, 213, 53, 0.6)";
+      }}
+      onClick={() => setSelectedLink(links[buttonNumber - 1])}
+    />
   );
 
   const buttons = Array.from({ length: links.length }).map((_, index) =>

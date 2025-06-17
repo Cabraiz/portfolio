@@ -1,3 +1,6 @@
+/* ===========================
+   🎨 Fontes Personalizadas
+=========================== */
 @font-face {
   font-family: "Brutal";
   src: local("Brutal"), url("/fonts/Brutal/Brutal-Type-Medium.ttf");
@@ -5,24 +8,18 @@
 
 @font-face {
   font-family: "BlommingElegant";
-  src:
-    local("BlommingElegant"),
-    url("/fonts/BloomingElegant/Blooming/Elegant/Sans.otf");
+  src: local("BlommingElegant"), url("/fonts/BloomingElegant/Blooming/Elegant/Sans.otf");
 }
 
 @font-face {
   font-family: "Modernist";
-  src:
-    local("Modernist"),
-    url("/fonts/Modernist/Modernist.otf") format("truetype");
+  src: local("Modernist"), url("/fonts/Modernist/Modernist.otf") format("truetype");
   font-weight: 700;
 }
 
 @font-face {
   font-family: "Orbitron";
-  src:
-    local("Orbitron"),
-    url("/fonts/Orbitron/Orbitron-Bold.ttf") format("truetype");
+  src: local("Orbitron"), url("/fonts/Orbitron/Orbitron-Bold.ttf") format("truetype");
   font-weight: 700;
 }
 
@@ -32,30 +29,25 @@
   font-weight: 600;
 }
 
+/* ===========================
+   🎨 Background Geral
+=========================== */
 html {
   height: auto !important;
 }
 
 body {
   font-family: "Playfair Display", serif;
-  background-color: #0b0b0b; /* preto veludo */
+  background-color: #0b0b0b;
   background-image:
-    radial-gradient(
-      circle at top left,
-      rgba(255, 215, 0, 0.12),
-      transparent 60%
-    ),
-    radial-gradient(
-      circle at bottom right,
-      rgba(255, 215, 0, 0.08),
-      transparent 70%
-    ),
+    radial-gradient(circle at top left, rgba(255, 215, 0, 0.12), transparent 60%),
+    radial-gradient(circle at bottom right, rgba(255, 215, 0, 0.08), transparent 70%),
     linear-gradient(135deg, #0b0b0b 0%, #1a1a1a 50%, #0b0b0b 100%);
   background-blend-mode: screen, overlay, normal;
   background-repeat: no-repeat;
   background-size: cover;
   background-attachment: fixed;
-  color: #fdf5e6; /* branco perolado, elegante */
+  color: #fdf5e6;
 }
 
 body::before {
@@ -66,14 +58,133 @@ body::before {
   width: 100%;
   height: 100%;
   pointer-events: none;
-  background: radial-gradient(
-    ellipse at 70% 30%,
-    rgba(255, 255, 255, 0.06),
-    transparent 70%
-  );
+  background: radial-gradient(ellipse at 70% 30%, rgba(255, 255, 255, 0.06), transparent 70%);
   z-index: -1;
 }
 
+/* ===========================
+   ✨ Neon nos Títulos
+=========================== */
+.neon-title {
+  text-shadow:
+    0 0 5px #fcd535,
+    0 0 10px #fcd535,
+    0 0 15px #fcd53588;
+}
+
+/* ===========================
+   ✨ Card da Foto com Borda Neon
+=========================== */
+.profile-card {
+  box-shadow:
+    0 0 12px rgba(252, 213, 53, 0.7),
+    0 0 24px rgba(252, 213, 53, 0.5),
+    inset 0 0 12px rgba(252, 213, 53, 0.4);
+  border: 2px solid #fcd535;
+  border-radius: 16px;
+  transition: all 0.3s ease-in-out;
+}
+
+.profile-card:hover {
+  box-shadow:
+    0 0 18px rgba(252, 213, 53, 0.9),
+    0 0 36px rgba(252, 213, 53, 0.7),
+    inset 0 0 18px rgba(252, 213, 53, 0.5);
+}
+
+/* ===========================
+   ✨ Glow nos Botões (WhatsApp, Currículo)
+=========================== */
+button.whatsapp,
+button.curriculo {
+  transition: all 0.3s ease;
+}
+
+button.whatsapp:hover,
+button.curriculo:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 15px #fcd53599;
+}
+
+/* ===========================
+   ✨ Glow Pulsante nos Círculos Laterais
+=========================== */
+.glow-pulse {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 6px rgba(252, 213, 53, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 12px rgba(252, 213, 53, 1);
+  }
+  100% {
+    box-shadow: 0 0 6px rgba(252, 213, 53, 0.5);
+  }
+}
+
+/* ===========================
+   ✨ Navbar & Itens
+=========================== */
+#nav-dropdown {
+  font-family: "BlommingElegant", sans-serif;
+  font-weight: 300;
+  font-size: 1.4vw;
+}
+
+.nav-link-custom {
+  color: rgba(255, 255, 255, 0.596) !important;
+  margin: 0 1vw 0 1vw;
+  padding: 0 !important;
+}
+
+.nav-link-custom.active,
+.nav-link-custom:hover {
+  color: rgba(255, 255, 255, 0.9) !important;
+  border: none;
+}
+
+/* ===========================
+   ✨ Google Login Button
+=========================== */
+.google-circle-button {
+  position: relative;
+  overflow: hidden;
+  margin-right: 20px;
+  padding: 0;
+}
+
+.google-circle-button::before {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 0%;
+  width: 100%;
+  background-color: #ea4335;
+  z-index: 0;
+  transition: height 0.6s ease;
+}
+
+.google-circle-button:hover::before {
+  height: 100%;
+}
+
+.google-circle-button img {
+  position: relative;
+  z-index: 1;
+  transition: transform 0.3s ease;
+}
+
+.google-circle-button:hover img {
+  transform: scale(1.5);
+}
+
+/* ===========================
+   🎨 Itens Específicos
+=========================== */
 .font-face-gm {
   font-family: "Brutal", sans-serif;
   letter-spacing: 5px;
@@ -100,56 +211,10 @@ body::before {
     )
     100% 0 100% 0/0.3vh 0 0.3vh 0 stretch;
 }
-#nav-dropdown {
-  font-family: "BlommingElegant", sans-serif;
-  font-weight: 300;
-  font-size: 1.4vw;
-}
 
-.nav-link-custom {
-  color: rgba(255, 255, 255, 0.596) !important;
-  margin: 0 1vw 0 1vw;
-  padding: 0 !important;
-}
-.nav-link-custom.active,
-.nav-link-custom:hover {
-  color: rgba(255, 255, 255, 0.9) !important;
-  border: none;
-}
-
-.google-circle-button {
-  position: relative;
-  overflow: hidden;
-  margin-right: 20px;
-  padding: 0;
-}
-
-.google-circle-button::before {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  height: 0%;
-  width: 100%;
-  background-color: #ea4335; /* Cor Gmail */
-  z-index: 0;
-  transition: height 0.6s ease;
-}
-
-.google-circle-button:hover::before {
-  height: 100%;
-}
-
-.google-circle-button img {
-  position: relative;
-  z-index: 1;
-  transition: transform 0.3s ease;
-}
-
-.google-circle-button:hover img {
-  transform: scale(1.5);
-}
-
+/* ===========================
+   🚫 Desativa Background
+=========================== */
 body.no-background {
   background-image: none !important;
   background-color: #ffffff !important;
