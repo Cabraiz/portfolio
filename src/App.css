@@ -26,6 +26,12 @@
   font-weight: 700;
 }
 
+@font-face {
+  font-family: 'Sirichana';
+  src: url('/fonts/Sirichana/SirichanaBold.ttf') format('opentype');
+  font-weight: 600;
+}
+
 html {
   height: auto !important;
 }

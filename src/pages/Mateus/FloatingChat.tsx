@@ -1,6 +1,7 @@
 import type * as React from 'react';
 import { useState, useRef, useEffect } from "react";
-import { FaCommentDots, FaEnvelope } from "react-icons/fa";
+import msgIcon from '../../assets/Mateus/msgIcon.png';
+import mySelf from '../../assets/Mateus/mySelf.png';
 import { AnimatePresence, motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 
@@ -101,15 +102,13 @@ export default function FloatingChat() {
       alignItems: "center",
       justifyContent: "center",
       gap: isMobile ? 0 : `${scale(0.7)}rem`,
-      background: "rgba(255, 255, 255, 0.08)",
-      backdropFilter: "blur(12px)",
-      WebkitBackdropFilter: "blur(12px)",
-      border: "1px solid rgba(255, 255, 255, 0.2)",
-      padding: isMobile ? `${scale(1)}rem` : `${scale(1)}rem ${scale(2)}rem`,
-      borderRadius: isMobile ? "50%" : "16px",
-      boxShadow: "0 8px 24px rgba(0, 0, 0, 0.3)",
-      color: "#ffffff",
-      fontWeight: "600",
+      background: "rgba(33, 35, 40, 1)",
+      color: "#fff",
+      border: "none",
+      padding: isMobile ? `${scale(1)}rem` : "16px 20px",
+      borderRadius: "50px",
+      boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+      fontWeight: "500",
       fontSize: `${scale(1.1)}rem`,
       cursor: "pointer",
       width: isMobile ? "60px" : "auto",
@@ -118,10 +117,119 @@ export default function FloatingChat() {
     }}
     title="Abrir chat"
   >
-    <FaCommentDots size={isMobile ? 28 : scale(22)} />
-    {!isMobile && phrases[currentPhraseIndex]}
+    {/* Ícone + Badge */}
+    <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
+  <img
+  src={msgIcon}
+  alt="Mensagem"
+  style={{
+    width: isMobile ? 24 : 20,
+    height: isMobile ? 24 : 20,
+    objectFit: 'contain',
+    filter: 'invert(1)',
+  }}
+/>
+
+  <div
+    style={{
+      position: "absolute",
+      top: -6,
+      right: -6,
+      backgroundColor: "red",
+      color: "white",
+      borderRadius: "50%",
+      width: 16,
+      height: 16,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      fontSize: "10px",
+      fontWeight: "bold",
+    }}
+  >
+    3
+  </div>
+</div>
+
+
+    {/* Texto dinâmico */}
+{!isMobile && (
+  <div
+    style={{
+      fontSize: '0.9vw',
+      fontFamily: 'Khula, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif',
+      fontWeight: 600,
+      WebkitFontSmoothing: 'antialiased',
+      MozOsxFontSmoothing: 'grayscale',
+    }}
+  >
+    {phrases[currentPhraseIndex]}
+  </div>
+  )}
+
+
+    {/* Fotos de Perfil */}
+{/* Fotos de Perfil */}
+{!isMobile && (
+  <div
+    style={{
+      display: 'flex',
+      alignItems: 'center',
+      position: 'relative',
+    }}
+  >
+    {/* Sua imagem — esquerda e na frente */}
+    <div
+      style={{
+        width: '28px',
+        height: '28px',
+        borderRadius: '50%',
+        overflow: 'hidden',
+        border: '2px solid rgba(33, 35, 40, 1)',
+        zIndex: 2,
+        backgroundColor: '#000',
+      }}
+    >
+      <img
+        src={mySelf}
+        alt="Myself"
+        style={{
+          width: '100%',
+          height: '100%',
+          objectFit: 'cover',
+        }}
+      />
+    </div>
+
+    {/* Aleatório — direita e atrás */}
+    <div
+      style={{
+        width: '28px',
+        height: '28px',
+        borderRadius: '50%',
+        overflow: 'hidden',
+        border: '2px solid rgba(33, 35, 40, 1)',
+        marginLeft: '-10px',
+        zIndex: 1,
+        backgroundColor: '#000',
+      }}
+    >
+      <img
+        src="https://i.pravatar.cc/300"
+        alt="Perfil"
+        style={{
+          width: '100%',
+          height: '100%',
+          objectFit: 'cover',
+        }}
+      />
+    </div>
+  </div>
+)}
+
   </button>
 )}
+
 
       <AnimatePresence>
         {isOpen && (
