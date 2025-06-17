@@ -16,9 +16,6 @@ import TitleWebsite from "./pages/PrincipalPage/TitleWebsite/title_website";
 import { useTranslation } from "react-i18next";
 import { Button } from "react-bootstrap";
 
-import Particles from "react-tsparticles";
-import { loadFull } from "tsparticles";
-
 function App() {
   const [windowSize, setWindowSize] = useState(getWindowSize());
   const [signInStatus] = useState(["", false]);
@@ -30,10 +27,6 @@ function App() {
 
   const baseLinks = ["home", "portfolio", "roadMap", "pricing", "live", "contact"];
   const links = isMobileView ? baseLinks.filter(link => link !== "home") : baseLinks;
-
-  const particlesInit = async (main: any) => {
-    await loadFull(main);
-  };
 
   useEffect(() => {
     const timeout = setTimeout(() => {
