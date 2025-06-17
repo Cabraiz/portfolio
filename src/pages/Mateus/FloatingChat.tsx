@@ -22,8 +22,8 @@ export default function FloatingChat() {
   const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
   const scale = (value: number) => isMobile ? value * 0.8 : value;
 
-  const bottomOffset = isMobile ? "3vh" : "60px";
-  const rightOffset = isMobile ? "2vw" : "20px";
+  const bottomOffset = isMobile ? "30px" : "3vh";
+  const rightOffset = isMobile ? "30px" : "3vw";
 
   useEffect(() => {
   if (!isOpen) return;
