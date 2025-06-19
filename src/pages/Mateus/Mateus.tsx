@@ -4,7 +4,19 @@ import MateusMobile from "./MateusMobile";
 const isMobile = window.innerWidth < 768;
 
 const Mateus = () => {
-  return isMobile ? <MateusMobile /> : <MateusDesktop />;
+  return (
+    <div
+      style={{
+        width: "100%",
+        minHeight: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "flex-start", 
+      }}
+    >
+      {isMobile ? <MateusMobile /> : <MateusDesktop />}
+    </div>
+  );
 };
 
 export default Mateus;

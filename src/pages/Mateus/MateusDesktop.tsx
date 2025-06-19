@@ -1,7 +1,12 @@
 import { Col, Row, Image, Button, Container } from "react-bootstrap";
 import { isMobile } from "react-device-detect";
-import IconWhatsAppVector from "../../assets/Mateus/icon/IconWhatsAppVector.svg";
+import { useTranslation } from "react-i18next";
+import { useState } from "react";
+import i18n from "@/i18n/i18n";
+import Tippy from "@tippyjs/react";
+import "tippy.js/dist/tippy.css";
 
+import IconWhatsAppVector from "../../assets/Mateus/icon/IconWhatsAppVector.svg";
 import perfil from "../../assets/Mateus/perfil.webp";
 import IconGmail from "../../assets/Mateus/icon/IconGmail.png";
 import IconInsta from "../../assets/Mateus/icon/IconInsta.png";
@@ -13,21 +18,15 @@ import seloBNB from "../../assets/Mateus/Selos/BNB.svg";
 import seloUNIFOR from "../../assets/Mateus/Selos/UNIFOR.svg";
 import seloSANA from "../../assets/Mateus/Selos/SANA.svg";
 import seloSEDIH from "../../assets/Mateus/Selos/SEDIH.svg";
-import RoleTitle from "./RoleTitle";
-import FloatingChat from "./FloatingChat";
 
 import cat1 from "../../assets/Mateus/cutieIcons/Cat1.png";
 import cat2 from "../../assets/Mateus/cutieIcons/Cat2.png";
 import cat3 from "../../assets/Mateus/cutieIcons/Cat3.png";
 import cat4 from "../../assets/Mateus/cutieIcons/Cat4.png";
 
-import Tippy from "@tippyjs/react";
+import RoleTitle from "./RoleTitle";
+import FloatingChat from "./FloatingChat";
 import "../../styles/styles.css";
-import "tippy.js/dist/tippy.css";
-
-import { useTranslation } from "react-i18next";
-import i18n from "@/i18n/i18n";
-import { useState } from "react";
 
 interface SocialButtonProps {
   href: string;
@@ -37,21 +36,9 @@ interface SocialButtonProps {
 }
 
 const selos = [
-  {
-    key: "BNB",
-    src: seloBNB,
-    alt: "Banco do Nordeste",
-    cat: cat1,
-    style: { scale: "0.9", marginTop: "5px" },
-  },
+  { key: "BNB", src: seloBNB, alt: "Banco do Nordeste", cat: cat1, style: { scale: "0.9", marginTop: "5px" } },
   { key: "UNIFOR", src: seloUNIFOR, alt: "UNIFOR", cat: cat2, style: {} },
-  {
-    key: "SANA",
-    src: seloSANA,
-    alt: "SANA",
-    cat: cat3,
-    style: { scale: "0.75", marginTop: "5px" },
-  },
+  { key: "SANA", src: seloSANA, alt: "SANA", cat: cat3, style: { scale: "0.75", marginTop: "5px" } },
   { key: "SEDIH", src: seloSEDIH, alt: "SEDIH", cat: cat4, style: {} },
 ];
 
@@ -60,23 +47,23 @@ function MateusDesktop() {
     ? "linear-gradient(90deg,#f1c40f 0%,#f1c40f 71.5%,#9b59b6 71.5%, #9b59b6 100%)"
     : "linear-gradient(90deg,#f1c40f 100%, #f1c40f 100%)";
 
-  const openResumeTab = () => window.open("/resume", "_blank");
   const { t } = useTranslation();
   const isPT = i18n.language === "pt" || i18n.language.startsWith("pt");
   const [isLoading, setIsLoading] = useState(false);
   const [forceHover, setForceHover] = useState(false);
 
+  const openResumeTab = () => window.open("/resume", "_blank");
+
   return (
     <>
-      <Container fluid>
-        <Row className="custom-section-row max-80vh-column">
+      <Container fluid className="mt-4">
+        <Row className="custom-section-row">
           <Col
-            className="col-md-5 max-80vh-column"
+            className="col-md-5"
             style={{ paddingTop: isMobile ? "0" : "11vh" }}
           >
             <div
               style={{
-                fontFamily: "var(--bs-body-font-family)",
                 fontSize: "4rem",
                 fontWeight: 700,
                 color: "#f1c40f",
@@ -85,6 +72,7 @@ function MateusDesktop() {
             >
               Senior
             </div>
+
             <div
               className="font-sequel"
               style={{
@@ -98,40 +86,27 @@ function MateusDesktop() {
             >
               <RoleTitle />
             </div>
+
             <div
               style={{
                 display: "flex",
                 justifyContent: "center",
                 alignItems: "center",
                 gap: "2rem",
-                flexWrap: "nowrap",
-                marginBottom: "max(10px, 4vh)",
                 padding: "1.2rem 2rem",
                 backgroundColor: "rgba(255, 255, 255, 0.05)",
                 borderRadius: "20px",
                 backdropFilter: "blur(10px)",
+                marginBottom: "max(10px, 4vh)",
               }}
             >
               {selos.map((selo) => (
                 <Tippy
                   key={selo.key}
                   content={
-                    <div
-                      style={{
-                        display: "flex",
-                        gap: "1rem",
-                        maxWidth: "280px",
-                        padding: "4px",
-                      }}
-                    >
-                      <img
-                        src={selo.cat}
-                        alt="Cat"
-                        style={{ height: "11vh", borderRadius: "8px" }}
-                      />
-                      <p style={{ fontSize: "12px", margin: 0 }}>
-                        {t(`selo.${selo.key}`)}
-                      </p>
+                    <div style={{ display: "flex", gap: "1rem", maxWidth: "280px", padding: "4px" }}>
+                      <img src={selo.cat} alt="Cat" style={{ height: "11vh", borderRadius: "8px" }} />
+                      <p style={{ fontSize: "12px", margin: 0 }}>{t(`selo.${selo.key}`)}</p>
                     </div>
                   }
                   placement="top"
@@ -156,21 +131,18 @@ function MateusDesktop() {
                 </Tippy>
               ))}
             </div>
+
             <Row className="pb-2 justify-content-end">
               <Col md={2} />
-
               <Col md={5}>
                 <button
                   className={`lux-button ${forceHover ? "lux-hover" : ""} ${isLoading ? "lux-loading" : ""}`}
-                  
                   onClick={() => {
                     setIsLoading(true);
                     setForceHover(true);
                     setTimeout(() => {
                       window.open(
-                        isPT
-                          ? "https://wa.me/5585998575707"
-                          : "https://meet.google.com/SEULINK",
+                        isPT ? "https://wa.me/5585998575707" : "https://meet.google.com/SEULINK",
                         "_blank"
                       );
                       setIsLoading(false);
@@ -181,28 +153,14 @@ function MateusDesktop() {
                   <div>
                     <span>
                       {isPT && (
-                        <img
-                          src={IconWhatsAppVector}
-                          alt="WhatsApp"
-                          style={{
-                            height: "22px",
-                            width: "22px",
-                            marginRight: "0.4rem",
-                          }}
-                        />
+                        <img src={IconWhatsAppVector} alt="WhatsApp" style={{ height: "22px", width: "22px", marginRight: "0.4rem" }} />
                       )}
                       {!isLoading && <p>{isPT ? "WHATSAPP" : "MEET"}</p>}
                     </span>
                   </div>
                   <div>
                     <span>
-                      {isPT && (
-                        <img
-                          src={IconWhatsAppVector}
-                          alt="WhatsApp"
-                          style={{ height: "22px", width: "22px" }}
-                        />
-                      )}
+                      {isPT && <img src={IconWhatsAppVector} alt="WhatsApp" style={{ height: "22px", width: "22px" }} />}
                       {!isLoading ? (
                         <p>{isPT ? "VAMOS CONVERSAR" : "LET'S TALK"}</p>
                       ) : (
@@ -212,7 +170,6 @@ function MateusDesktop() {
                   </div>
                 </button>
               </Col>
-
               <Col md={5}>
                 <Button
                   className="btn-trasn-w-border py-3 btn-tran-effect btn-press-effect w-100"
@@ -229,7 +186,7 @@ function MateusDesktop() {
               style={{
                 backgroundColor: "rgba(255, 255, 255, 0.1)",
                 marginLeft: "10vw",
-                padding: "4vh max(40px, 2vw) 4vh max(40px, 2vw)",
+                padding: "4vh max(40px, 2vw)",
                 borderRadius: "20px",
                 display: "flex",
                 flexDirection: "column",
@@ -241,7 +198,6 @@ function MateusDesktop() {
                 gap: "4vh",
               }}
             >
-              {/* Wrapper da Imagem */}
               <div
                 style={{
                   borderRadius: "3rem",
@@ -262,44 +218,22 @@ function MateusDesktop() {
                 />
               </div>
 
-              {/* Redes */}
               <div
                 style={{
                   display: "flex",
                   justifyContent: "center",
-                  alignItems: "spac",
-                  flexWrap: "nowrap",
+                  alignItems: "center",
                   gap: "1rem",
                   width: "100%",
                 }}
               >
-                <SocialButton
-                  href="https://www.linkedin.com/in/cabraiz/"
-                  icon={IconLinkendin}
-                  alt="LinkedIn"
-                />
-                <SocialButton
-                  href="mailto:mateusccabr@gmail.com?subject=Freelance..."
-                  icon={IconGmail}
-                  alt="Gmail"
-                />
-                <SocialButton
-                  href="https://www.instagram.com/cabraiz/"
-                  icon={IconInsta}
-                  alt="Insta"
-                />
+                <SocialButton href="https://www.linkedin.com/in/cabraiz/" icon={IconLinkendin} alt="LinkedIn" />
+                <SocialButton href="mailto:mateusccabr@gmail.com?subject=Freelance..." icon={IconGmail} alt="Gmail" />
+                <SocialButton href="https://www.instagram.com/cabraiz/" icon={IconInsta} alt="Insta" />
                 {isPT ? (
-                  <SocialButton
-                    href="https://meet.google.com/SEULINK"
-                    icon={IconMeet}
-                    alt="Meet"
-                  />
+                  <SocialButton href="https://meet.google.com/SEULINK" icon={IconMeet} alt="Meet" />
                 ) : (
-                  <SocialButton
-                    href="https://wa.me/SEUNUMERO"
-                    icon={IconWhatsApp}
-                    alt="WhatsApp"
-                  />
+                  <SocialButton href="https://wa.me/SEUNUMERO" icon={IconWhatsApp} alt="WhatsApp" />
                 )}
               </div>
             </div>
@@ -311,22 +245,10 @@ function MateusDesktop() {
   );
 }
 
-export function SocialButton({
-  href,
-  icon,
-  alt,
-  isScrollToTop,
-}: SocialButtonProps) {
+export function SocialButton({ href, icon, alt, isScrollToTop }: SocialButtonProps) {
   return (
-    <a
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="social-wrapper"
-    >
-      <div
-        className={`social-link ${isScrollToTop ? "scrollToTopButton" : ""}`}
-      >
+    <a href={href} target="_blank" rel="noopener noreferrer" className="social-wrapper">
+      <div className={`social-link ${isScrollToTop ? "scrollToTopButton" : ""}`}>
         <Image className="imagesize" src={icon} alt={alt} />
       </div>
       <div

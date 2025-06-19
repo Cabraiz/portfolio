@@ -1,11 +1,26 @@
+/* ===========================
+   🔥 Scroll Global Correto
+=========================== */
+body {
+  overscroll-behavior: none;
+  background-color: #0b0b0b;
+  background-image:
+    radial-gradient(circle at top left, rgba(255, 215, 0, 0.12), transparent 60%),
+    radial-gradient(circle at bottom right, rgba(255, 215, 0, 0.08), transparent 70%),
+    linear-gradient(135deg, #0b0b0b 0%, #1a1a1a 50%, #0b0b0b 100%);
+  background-attachment: fixed;
+  background-blend-mode: screen, overlay, normal;
+  background-repeat: no-repeat;
+  background-size: cover;
+  color: #fdf5e6;
+}
+
+/* ===========================
+   🔤 Fontes Personalizadas
+=========================== */
 @font-face {
   font-family: "Sequel_Light";
   src: local("Sequel"), url("../../fonts/Sequel/sequel-sans-light-disp.otf");
-}
-
-@font-face {
-  font-family: "Sequel_2";
-  src: local("Sequel"), url("../../fonts/Sequel/sequel-sans-heavy-disp-2.otf");
 }
 
 @font-face {
@@ -40,6 +55,13 @@
   line-height: 140%;
 }
 
+/* ===========================
+   🖼️ Imagens
+=========================== */
+img {
+  border-radius: 6%;
+}
+
 .imagesize {
   padding: 0 1vh 0 0;
   filter: grayscale(100%) contrast(130%);
@@ -47,22 +69,22 @@
   transition: 0.5s;
 }
 
+.imagesize:hover {
+  filter: none;
+}
+
+/* ===========================
+   🎯 Botões Genéricos
+=========================== */
 .btn-trasn {
   background-color: transparent !important;
   border: none !important;
   margin: 0;
   padding: 0;
-  width: auto;
-  height: auto;
 }
 
 .btn-trasn:hover {
   background-color: transparent;
-  border: none;
-}
-
-.imagesize:hover {
-  filter: none;
 }
 
 .btn-trasn-w-border {
@@ -77,33 +99,30 @@
   border-color: #eec211 !important;
 }
 
-.btn-yellow,
-.btn-trasn-w-border {
+.btn-yellow, .btn-trasn-w-border {
   font-weight: 600 !important;
   width: 100%;
 }
 
+/* 🔥 Efeito Pressão */
 .btn-press-effect {
   background: #8d6e63;
-  font-size: 20px;
   color: white;
   border-radius: 7px;
   box-shadow: 0 7px 0px #6d4c41;
   display: inline-block;
-  transition: all 0.2s;
-  position: relative;
   cursor: pointer;
+  transition: all 0.2s;
 }
 
 .btn-press-effect:active {
   top: 3px;
   box-shadow: 0 2px 0px #6d4c41;
-  transition: all 0.2s;
 }
 
+/* 🔥 Efeito Shine */
 .btn-tran-effect {
   text-align: center;
-  display: inline-block;
   border: 1px solid #fff;
   cursor: pointer;
   letter-spacing: 2px;
@@ -120,49 +139,40 @@
   right: -40px;
   top: -40px;
   transform: rotate(37deg);
-  transition: all 0.3s;
   opacity: 0.3;
+  transition: all 0.3s;
 }
 
 .btn-tran-effect:hover:before {
   right: 105%;
 }
 
-img {
-  border-radius: 6%;
-}
-
+/* ===========================
+   💎 Botão Luxuoso
+=========================== */
 .lux-button {
   outline: none;
-  border: 1px solid rgba(255, 255, 255, 0.3); /* borda fina e elegante */
+  border: 1px solid rgba(255, 255, 255, 0.3);
   display: flex;
   flex-direction: column;
   width: 100%;
   height: 6vh;
   border-radius: 12px;
   background: #1ebe61;
-  box-shadow:
-    0 2px 2px rgba(0, 0, 0, 0.1),
-    /* sombra superior leve */ 0 6px 0 #543c34; /* sombra inferior tipo "barra sólida" como no botão currículo */
+  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1), 0 6px 0 #543c34;
   overflow: hidden;
   cursor: pointer;
-  transition: all 0.3s ease; 
+  transition: all 0.3s ease;
 }
 
 .lux-button:hover {
   background: #168b56;
-  box-shadow:
-    0 2px 6px rgba(0, 0, 0, 0.15),
-    0 6px 0 #543c34;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15), 0 6px 0 #543c34;
 }
 
 .lux-button div {
   transform: translateY(0px);
   width: 100%;
-}
-
-.lux-button,
-.lux-button div {
   transition: 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -196,17 +206,16 @@ img {
 }
 
 .lux-button div:nth-child(2) span {
-  height: 5.8vh; /* aumenta levemente a camada do fundo */
+  height: 5.8vh;
 }
 
 .lux-button:hover div {
-  transform: translateY(-6vh); /* sobe com precisão a altura da frente */
+  transform: translateY(-6vh);
 }
 
 .lux-button.lux-hover:hover div,
 .lux-button.lux-hover div {
-  transform: translateY(-6vh); /* força a animação hover */
-  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: translateY(-6vh);
 }
 
 .lux-button::after {
@@ -224,15 +233,12 @@ img {
   width: 100%;
 }
 
+/* 🔥 Loading interno */
 .lux-loading-bar {
   width: 100%;
   height: 4px;
   border-radius: 4px;
-  background: linear-gradient(
-    90deg,
-    rgba(255, 255, 255, 0.3),
-    rgba(255, 255, 255, 0.9)
-  );
+  background: linear-gradient(90deg, rgba(255,255,255,0.3), rgba(255,255,255,0.9));
   animation: loadingBar 1s ease-in-out forwards;
 }
 
@@ -251,6 +257,9 @@ img {
   }
 }
 
+/* ===========================
+   🎯 Tooltips Redes Sociais
+=========================== */
 .social-wrapper {
   position: relative;
   display: inline-block;
@@ -292,57 +301,39 @@ img {
   transform: translateX(-50%) translateY(0px);
 }
 
-.tooltip-linkedin {
-  background-color: #0077b5 !important;
-  color: white !important;
-}
+/* 🟢 Cores específicas dos tooltips */
+.tooltip-linkedin { background-color: #0077b5; color: white; }
+.tooltip-gmail { background-color: #ea4335; color: white; }
+.tooltip-insta { background: radial-gradient(circle at 30% 107%, #f3c44c 0%, #f3c44c 10%, #d26637 40%, #d26637 70%, #2ed0f8 100%); color: white; }
+.tooltip-tiktok { background-color: #000; color: white; }
+.tooltip-whatsapp { background-color: #25d366; color: white; }
+.tooltip-meet { background-color: #00ac47; color: white; }
 
-.tooltip-gmail {
-  background-color: #ea4335 !important;
-  color: white !important;
-}
-
-.tooltip-insta {
-  background: radial-gradient(
-    circle at 30% 107%,
-    #f3c44c 0%,
-    #f3c44c 10%,
-    #d26637 40%,
-    #d26637 70%,
-    #2ed0f8 100%
-  ) !important;
-  color: rgb(226, 226, 226) !important;
-}
-
-.tooltip-tiktok {
-  background-color: #000000 !important;
-  color: white !important;
-}
-
-.tooltip-whatsapp {
-  background-color: #25d366 !important;
-  color: white !important;
-}
-
-.tooltip-meet {
-  background-color: #00ac47 !important;
-  color: white !important;
-}
-
+/* ===========================
+   📐 Layout Helper
+=========================== */
 .max-80vh-column {
   max-height: 80vh;
-  overflow-y: auto; /* permite scroll interno se ultrapassar */
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start; /* ou center, se quiser centralizado */
+  justify-content: flex-start;
 }
 
 .custom-section-row {
-  padding: 6vh 6vw 6vh 6vw;
+  padding: 4vh 6vw 6vh 6vw; 
 }
 
 @media (max-width: 768px) {
   .custom-section-row {
     padding: 4vh 4vw;
   }
+}
+
+/* ===========================
+   🚫 Desativa background (rotas específicas)
+=========================== */
+body.no-background {
+  background: white !important;
+  background-image: none !important;
 }

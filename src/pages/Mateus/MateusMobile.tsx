@@ -11,7 +11,6 @@ const MateusMobile: React.FC = () => {
   fluid
   style={{
     minHeight: "100vh",
-    background: "linear-gradient(to bottom, #0f0f0f, #1a1a1a)",
     display: "flex",
     flexDirection: "column",
     alignItems: "center",

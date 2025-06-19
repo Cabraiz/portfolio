@@ -1,31 +1,30 @@
-import React from "react";
 import { Routes, Route } from "react-router-dom";
 
-import RegisterHubLocal from "./pages/RegisterHubLocal/Register";
-import LoginHubLocal from "./pages/LoginHubLocal/login";
-import Hublocal from "./pages/Hublocal/Hublocal";
-import Surprise from "./pages/Surprise/Surprise";
-import Resume from "./pages/Resume/Resume";
-import Doris from "./pages/Doris.mobi/principal";
-import CasaNova from "./pages/CasaNova/CasaNova";
+import RegisterHubLocal from "../pages/RegisterHubLocal/Register";
+import LoginHubLocal from "../pages/LoginHubLocal/login";
+import Hublocal from "../pages/Hublocal/Hublocal";
+import Resume from "../pages/Resume/Resume";
+import Doris from "../pages/Doris.mobi/principal";
+import CasaNova from "../pages/CasaNova/CasaNova";
+import Surprise from "../pages/Surprise/Surprise";
 
-import { PrivateOutlet } from "./redux/shared/utils/PrivateOutlet";
+import Enigma from "../pages/Enigma/Enigma";
+import Libras from "../pages/Libras/Libras";
+import Rosa from "../pages/Rosa/Rosa";
+import Vinho from "../pages/Vinho/Vinho";
 
-import { RouteGuard } from "./components/RouteGuard";
-import Libras from "./pages/Libras/Libras";
-import Rosa from "./pages/Rosa/Rosa";
-import Vinho from "./pages/Vinho/Vinho";
-import Enigma from "./pages/Enigma/Enigma";
-import DigitalCodeUnlock from "./components/DigitalCodeUnlock";
-import Mateus from "./pages/Mateus/Mateus";
+import { PrivateOutlet } from "../redux/shared/utils/PrivateOutlet";
+import { RouteGuard } from "../components/RouteGuard";
+import DigitalCodeUnlock from "../components/DigitalCodeUnlock";
+
+import LandingPage from "../pages/Mateus/LandingPage/LandingPage"; // <-- 🚀 Aqui
 
 const AppRoutes = () => {
   return (
     <Routes>
-      {/* Página inicial padrão */}
-      <Route path="/" element={<Mateus />} />
+      {/* ✅ Landing page (home) */}
+      <Route path="/" element={<LandingPage />} />
 
-      {/* Página de introdução do enigma com botão */}
       <Route path="/enigma" element={<Enigma />} />
 
       <Route
@@ -67,12 +66,13 @@ const AppRoutes = () => {
         }
       />
 
-      {/* Outras rotas do app */}
       <Route path="/registerhublocal" element={<RegisterHubLocal />} />
       <Route path="/loginhublocal" element={<LoginHubLocal />} />
       <Route path="/resume" element={<Resume />} />
       <Route path="/doris" element={<Doris />} />
       <Route path="/casanova" element={<CasaNova />} />
+      <Route path="/surprise" element={<Surprise />} />
+
       <Route path="/hublocal" element={<PrivateOutlet />}>
         <Route index element={<Hublocal />} />
       </Route>

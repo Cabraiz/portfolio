@@ -1,24 +1,32 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
+import Lenis from "@studio-freight/lenis";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 import "./App.css";
 import "./pages/LoginHubLocal/login.css";
 import "./pages/Mateus/Mateus.css";
 import "./pages/Surprise/Surprise.css";
 
-import AppRoutes from "./AppRoutes";
+import AppRoutes from "./routes/AppRoutes";
 import AppNavbar from "./AppNavbar";
+import LandingPage from "./pages/Mateus/LandingPage/LandingPage";
 
 import "react-toastify/dist/ReactToastify.css";
 
 import TitleWebsite from "./pages/PrincipalPage/TitleWebsite/title_website";
 import { useTranslation } from "react-i18next";
 import { Button } from "react-bootstrap";
+import { LenisContext } from "./pages/Mateus/Context/LenisContext";
+
+gsap.registerPlugin(ScrollTrigger);
 
 function App() {
+  const lenis = useRef<Lenis | null>(null);
+
   const [windowSize, setWindowSize] = useState(getWindowSize());
-  const [signInStatus] = useState(["", false]);
   const [selectedLink, setSelectedLink] = useState("home");
   const [animateGoogle, setAnimateGoogle] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -28,13 +36,63 @@ function App() {
   const baseLinks = ["home", "portfolio", "roadMap", "pricing", "live", "contact"];
   const links = isMobileView ? baseLinks.filter(link => link !== "home") : baseLinks;
 
+  // 🚀 Lenis + ScrollTrigger
   useEffect(() => {
-    const timeout = setTimeout(() => {
-      setAnimateGoogle(true);
-    }, 200);
+    const l = new Lenis({
+      lerp: 0.07,
+      wheelMultiplier: 1.2,
+      smoothWheel: true,
+    });
+
+    lenis.current = l;
+
+    function raf(time: number) {
+      l.raf(time);
+      requestAnimationFrame(raf);
+    }
+    requestAnimationFrame(raf);
+
+    ScrollTrigger.scrollerProxy(document.body, {
+      scrollTop(value) {
+        if (value !== undefined) {
+          l.scrollTo(value);
+        }
+        return l.scroll;
+      },
+      getBoundingClientRect() {
+        return {
+          top: 0,
+          left: 0,
+          width: window.innerWidth,
+          height: window.innerHeight,
+        };
+      },
+      pinType: document.body.style.transform ? "transform" : "fixed",
+    });
+
+    const update = () => {
+      ScrollTrigger.update();
+    };
+
+    l.on("scroll", update);
+    ScrollTrigger.addEventListener("refresh", update);
+    ScrollTrigger.defaults({ scroller: document.body });
+    ScrollTrigger.refresh();
+
+    return () => {
+      l.destroy();
+      ScrollTrigger.removeEventListener("refresh", update);
+      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+    };
+  }, []);
+
+  // 🎯 Botão Google animado
+  useEffect(() => {
+    const timeout = setTimeout(() => setAnimateGoogle(true), 200);
     return () => clearTimeout(timeout);
   }, []);
 
+  // 🎯 Resize Window
   useEffect(() => {
     function handleWindowResize() {
       setWindowSize(getWindowSize());
@@ -63,7 +121,7 @@ function App() {
         marginBottom: "2vh",
         transform: selected ? "none" : "rotate(45deg) scaleX(0.8)",
         transformOrigin: "center",
-        background: selected 
+        background: selected
           ? "radial-gradient(circle at 30% 30%, #0b0b0b, #1a1a1a)"
           : "linear-gradient(135deg, #fcd535, #ffb347)",
         border: selected ? "3px solid #fcd535" : "none",
@@ -108,6 +166,12 @@ function App() {
     "/rosa",
     "/vinho-unlock",
     "/vinho",
+    "/loginhublocal",
+    "/registerhublocal",
+    "/resume",
+    "/doris",
+    "/casanova",
+    "/hublocal",
   ];
 
   const isNavHidden = hiddenNavbarRoutes.includes(pathname);
@@ -124,7 +188,7 @@ function App() {
   const { t } = useTranslation();
 
   return (
-    <>
+    <LenisContext.Provider value={lenis.current}>
       <TitleWebsite title1="Bem Vindo! 🤝" title2="Cabraiz" />
 
       {!isNavHidden && (
@@ -139,6 +203,8 @@ function App() {
           convertMultiplyVwToPx={convertMultiplyVwToPx}
         />
       )}
+
+      {!isNavHidden && <LandingPage />}
 
       <AppRoutes />
 
@@ -160,7 +226,7 @@ function App() {
       )}
 
       <ToastContainer />
-    </>
+    </LenisContext.Provider>
   );
 }
 
