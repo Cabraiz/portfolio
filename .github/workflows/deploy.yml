@@ -72,10 +72,15 @@ jobs:
             done
           done
 
-      - name: 🛠️ Fix imports to match lowercase folder paths
+      - name: 🛠️ Fix imports to match lowercase folder paths (ignora node_modules e libs)
         run: |
           find ./src -type f \( -name "*.ts" -o -name "*.tsx" \) | while read file; do
             grep -oE "from\s+['\"][^'\"]+['\"]" "$file" | sed -E "s/from\s+['\"](.*)['\"]/\\1/" | while read path; do
+              # Se for gsap ou outros pacotes, ignora
+              if [[ "$path" =~ ^gsap ]]; then
+                continue
+              fi
+
               corrected=$(echo "$path" | sed -E 's@/([^/]+)@/\L\1@g')
               if [ "$path" != "$corrected" ]; then
                 echo "📂 Corrigindo import em $file: $path → $corrected"
