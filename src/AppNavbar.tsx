@@ -39,37 +39,44 @@ const AppNavbar: React.FC<AppNavbarProps> = ({
     opacity: 0,
   });
 
-  const handleScrollTo = (link: string) => {
-  const section = document.querySelector(`#${link.toLowerCase()}`);
-  if (section instanceof HTMLElement && lenis) {
-    lenis.scrollTo(section, { offset: -100, duration: 1.3, easing: (t: number) => t });
-  }
-    setSelectedLink(link);
-    setMenuOpen(false);
-  };
-
+  // 🔥 Handle scroll hide/show
   useEffect(() => {
     const handleScroll = () => {
+      if (menuOpen) return; // 🔥 Menu aberto → não esconde navbar
+
       const currentScrollY = window.scrollY;
-
       if (currentScrollY > lastScrollY.current && currentScrollY > 150) {
-        // Descendo → esconde
-        setShowNavbar(false);
+        setShowNavbar(false); // 🔽 Scroll down → hide
       } else {
-        // Subindo → mostra
-        setShowNavbar(true);
+        setShowNavbar(true);  // 🔼 Scroll up → show
       }
-
       lastScrollY.current = currentScrollY;
     };
 
     window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [menuOpen]);
 
+  // 🔥 Block scroll when menu is open
+  useEffect(() => {
+    if (menuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
     return () => {
-      window.removeEventListener("scroll", handleScroll);
+      document.body.style.overflow = "auto";
     };
-  }, []);
+  }, [menuOpen]);
 
+  const handleScrollTo = (link: string) => {
+    const section = document.querySelector(`#${link.toLowerCase()}`);
+    if (section instanceof HTMLElement && lenis) {
+      lenis.scrollTo(section, { offset: -100, duration: 1.3, easing: (t: number) => t });
+    }
+    setSelectedLink(link);
+    setMenuOpen(false);
+  };
 
   useEffect(() => {
     const current = navRefs.current[selectedLink];
@@ -91,6 +98,7 @@ const AppNavbar: React.FC<AppNavbarProps> = ({
 
   return (
     <>
+      {/* 🔥 Navbar */}
       <Navbar
         className="border-gradient-green"
         style={{
@@ -98,13 +106,11 @@ const AppNavbar: React.FC<AppNavbarProps> = ({
           opacity: showNavbar ? 1 : 0,
           transition: "transform 0.4s ease, opacity 0.4s ease",
           boxShadow: showNavbar ? "0 4px 18px rgba(0,0,0,0.35)" : "none",
-          backdropFilter: showNavbar ? "blur(6px)" : "none", 
+          backdropFilter: showNavbar ? "blur(6px)" : "none",
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
           height: isMobileView ? "8vh" : "11vh",
-          fontWeight: "600",
-          marginTop: "0.1vh",
           zIndex: 9999,
           position: "fixed",
           width: "100%",
@@ -112,9 +118,10 @@ const AppNavbar: React.FC<AppNavbarProps> = ({
           left: 0,
         }}
       >
-
+        {/* 🔥 Mobile Navbar */}
         {isMobileView ? (
           <>
+            {/* Hamburger Button */}
             <Button
               onClick={() => setMenuOpen(!menuOpen)}
               style={{
@@ -141,10 +148,7 @@ const AppNavbar: React.FC<AppNavbarProps> = ({
                   borderRadius: "2px",
                   position: menuOpen ? "absolute" : "static",
                   top: menuOpen ? "50%" : undefined,
-                  left: menuOpen ? "0" : undefined,
-                  transform: menuOpen
-                    ? "translateY(-50%) rotate(45deg)"
-                    : "none",
+                  transform: menuOpen ? "translateY(-50%) rotate(45deg)" : "none",
                   transition: "0.4s",
                 }}
               />
@@ -154,11 +158,7 @@ const AppNavbar: React.FC<AppNavbarProps> = ({
                   height: "3px",
                   backgroundColor: "#fff",
                   borderRadius: "2px",
-                  position: menuOpen ? "absolute" : "static",
-                  top: menuOpen ? "50%" : undefined,
-                  left: menuOpen ? "0" : undefined,
                   opacity: menuOpen ? 0 : 1,
-                  transform: menuOpen ? "translateY(-50%)" : "none",
                   transition: "0.4s",
                 }}
               />
@@ -170,10 +170,7 @@ const AppNavbar: React.FC<AppNavbarProps> = ({
                   borderRadius: "2px",
                   position: menuOpen ? "absolute" : "static",
                   top: menuOpen ? "50%" : undefined,
-                  left: menuOpen ? "0" : undefined,
-                  transform: menuOpen
-                    ? "translateY(-50%) rotate(-45deg)"
-                    : "none",
+                  transform: menuOpen ? "translateY(-50%) rotate(-45deg)" : "none",
                   transition: "0.4s",
                 }}
               />
@@ -212,13 +209,13 @@ const AppNavbar: React.FC<AppNavbarProps> = ({
           </>
         ) : (
           <>
+            {/* 🔥 Desktop Navbar */}
             <Image
               src={logo}
               alt="Logo"
               style={{
                 marginLeft: `${convertMultiplyVwToPx()}px`,
                 marginRight: "20px",
-                marginTop: "0.5vh",
                 borderRadius: "20%",
                 width: "8.5vh",
                 height: "8.5vh",
@@ -233,7 +230,6 @@ const AppNavbar: React.FC<AppNavbarProps> = ({
                 display: "flex",
                 alignItems: "stretch",
                 marginLeft: "-4vw",
-                marginTop: "1vh",
                 gap: "1rem",
               }}
             >
@@ -251,9 +247,7 @@ const AppNavbar: React.FC<AppNavbarProps> = ({
                 >
                   <Nav.Link
                     as="div"
-                    ref={(el) => {
-                      navRefs.current[link] = el;
-                    }}
+                    ref={(el) => (navRefs.current[link] = el)}
                     className={`nav-link-custom ${selectedLink === link ? "active" : ""}`}
                     style={{
                       display: "flex",
@@ -263,20 +257,11 @@ const AppNavbar: React.FC<AppNavbarProps> = ({
                       fontWeight: 100,
                       letterSpacing: 1.3,
                       fontSize: "1.5vw",
-                      fontFamily: "Modernist, sans-serif",
                       cursor: "pointer",
                       userSelect: "none",
                       transition: "all 0.25s ease-in-out",
                       paddingBottom: "10px",
                       position: "relative",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.opacity = "0.85";
-                      e.currentTarget.style.transform = "scale(1.035)";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.opacity = "1";
-                      e.currentTarget.style.transform = "scale(1)";
                     }}
                   >
                     <div style={{ position: "relative" }}>
@@ -316,36 +301,61 @@ const AppNavbar: React.FC<AppNavbarProps> = ({
         )}
       </Navbar>
 
-      {isMobileView && (
-        <div
-          style={{
-            maxHeight: menuOpen ? "500px" : "0px",
-            overflow: "hidden",
-            transition: "max-height 0.4s ease",
-            backgroundColor: "#121212",
-            padding: menuOpen ? "1rem 2rem" : "0 2rem",
-            display: "flex",
-            flexDirection: "column",
-            gap: "1rem",
-            borderBottom: menuOpen ? "1px solid #444" : "none",
-          }}
-        >
-          {links.map((link) => (
-            <a
-              key={link}
-              onClick={() => handleScrollTo(link)}
-              style={{
-                color: "#fff",
-                textDecoration: "none",
-                fontSize: "1.1rem",
-                fontWeight: "500",
-                cursor: "pointer",
-              }}
-            >
-              {t(`nav.${link}`)}
-            </a>
-          ))}
-        </div>
+      {/* 🔥 Mobile Menu Dropdown */}
+      {isMobileView && menuOpen && (
+        <>
+          <div
+            style={{
+              position: "fixed",
+              top: "8vh",
+              left: 0,
+              width: "100%",
+              backgroundColor: "#121212",
+              padding: "2rem",
+              display: "flex",
+              flexDirection: "column",
+              gap: "1.2rem",
+              borderBottom: "1px solid #444",
+              zIndex: 9998,
+              boxShadow: "0 8px 20px rgba(0,0,0,0.5)",
+              transition: "opacity 0.3s ease",
+              opacity: menuOpen ? 1 : 0,
+            }}
+          >
+            {links.map((link) => (
+              <a
+                key={link}
+                onClick={() => handleScrollTo(link)}
+                style={{
+                  color: "#fff",
+                  textDecoration: "none",
+                  fontSize: "1.1rem",
+                  fontWeight: "500",
+                  cursor: "pointer",
+                }}
+              >
+                {t(`nav.${link}`)}
+              </a>
+            ))}
+          </div>
+
+          {/* 🔥 Overlay */}
+          <div
+            onClick={() => setMenuOpen(false)}
+            style={{
+              position: "fixed",
+              top: "8vh",
+              left: 0,
+              width: "100%",
+              height: "100vh",
+              backgroundColor: "rgba(0, 0, 0, 0.5)",
+              backdropFilter: "blur(2px)",
+              zIndex: 9997,
+              opacity: menuOpen ? 1 : 0,
+              transition: "opacity 0.3s ease",
+            }}
+          />
+        </>
       )}
     </>
   );

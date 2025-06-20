@@ -1,6 +1,5 @@
 import React from "react";
 import { Container, Image } from "react-bootstrap";
-import { FaLinkedin, FaInstagram } from "react-icons/fa";
 import perfil from "../../assets/Mateus/perfil.webp";
 import FloatingChat from "./FloatingChat";
 
@@ -15,7 +14,7 @@ const MateusMobile: React.FC = () => {
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "flex-start",
-    padding: "13vh 2vw 4vh 2vw",
+    padding: "16vh 2vw 4vh 2vw",
     userSelect: "none",
     WebkitUserSelect: "none",
     msUserSelect: "none",
