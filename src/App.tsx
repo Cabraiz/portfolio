@@ -17,7 +17,6 @@ import LandingPage from "./pages/Mateus/LandingPage/LandingPage";
 import "react-toastify/dist/ReactToastify.css";
 
 import TitleWebsite from "./pages/PrincipalPage/TitleWebsite/title_website";
-import { useTranslation } from "react-i18next";
 import { Button } from "react-bootstrap";
 import { LenisContext } from "./pages/Mateus/Context/LenisContext";
 
@@ -32,6 +31,7 @@ function App() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const isMobileView = windowSize.innerWidth < 768;
+  const dropdownHeight = 270;
 
   const baseLinks = ["home", "portfolio", "roadMap", "pricing", "live", "contact"];
   const links = isMobileView ? baseLinks.filter(link => link !== "home") : baseLinks;
@@ -70,9 +70,7 @@ function App() {
       pinType: document.body.style.transform ? "transform" : "fixed",
     });
 
-    const update = () => {
-      ScrollTrigger.update();
-    };
+    const update = () => ScrollTrigger.update();
 
     l.on("scroll", update);
     ScrollTrigger.addEventListener("refresh", update);
@@ -86,13 +84,13 @@ function App() {
     };
   }, []);
 
-  // 🎯 Botão Google animado
+  // 🔥 Google button animation
   useEffect(() => {
     const timeout = setTimeout(() => setAnimateGoogle(true), 200);
     return () => clearTimeout(timeout);
   }, []);
 
-  // 🎯 Resize Window
+  // 🎯 Window resize
   useEffect(() => {
     function handleWindowResize() {
       setWindowSize(getWindowSize());
@@ -109,6 +107,20 @@ function App() {
   const convertMultiplyVwToPx = () => {
     return (windowSize.innerWidth / 100) * 14;
   };
+
+  // 🔥 HACKER PUSH-UP — Solução definitiva de sanfona
+  useEffect(() => {
+    const body = document.body;
+    if (menuOpen && isMobileView) {
+      body.style.paddingTop = `${dropdownHeight}px`;
+    } else {
+      body.style.paddingTop = "0px";
+    }
+
+    return () => {
+      body.style.paddingTop = "0px";
+    };
+  }, [menuOpen, isMobileView]);
 
   const createButton = (buttonNumber: number, selected: boolean) => (
     <Button
@@ -189,6 +201,7 @@ function App() {
     <LenisContext.Provider value={lenis.current}>
       <TitleWebsite title1="Bem Vindo! 🤝" title2="Cabraiz" />
 
+      {/* 🔥 Navbar */}
       {!isNavHidden && (
         <AppNavbar
           isMobileView={isMobileView}
@@ -202,9 +215,9 @@ function App() {
       )}
 
       {!isNavHidden && <LandingPage />}
-
       <AppRoutes />
 
+      {/* 🔥 Floating Buttons */}
       {!isNavHidden && !isMobileView && (
         <div
           style={{
