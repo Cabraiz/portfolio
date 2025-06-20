@@ -36,6 +36,8 @@ function App() {
   const baseLinks = ["home", "portfolio", "roadMap", "pricing", "live", "contact"];
   const links = isMobileView ? baseLinks.filter(link => link !== "home") : baseLinks;
 
+  const appWrapperRef = useRef<HTMLDivElement>(null);
+
   // 🚀 Lenis + ScrollTrigger
   useEffect(() => {
     const l = new Lenis({
@@ -84,13 +86,31 @@ function App() {
     };
   }, []);
 
-  // 🔥 Google button animation
+  // 🎯 Sanfona com animação nível Apple
   useEffect(() => {
-    const timeout = setTimeout(() => setAnimateGoogle(true), 200);
-    return () => clearTimeout(timeout);
-  }, []);
+    const wrapper = appWrapperRef.current;
+    if (!wrapper) return;
 
-  // 🎯 Window resize
+    if (menuOpen && isMobileView) {
+      gsap.to(wrapper, {
+        y: dropdownHeight,
+        duration: 0.8,
+        ease: "elastic.out(1, 0.5)",
+        backdropFilter: "blur(8px) brightness(0.9)",
+        backgroundColor: "rgba(0,0,0,0.3)",
+      });
+    } else {
+      gsap.to(wrapper, {
+        y: 0,
+        duration: 0.5,
+        ease: "expo.inOut",
+        backdropFilter: "blur(0px) brightness(1)",
+        backgroundColor: "rgba(0,0,0,0)",
+      });
+    }
+  }, [menuOpen, isMobileView]);
+
+  // 🎯 Resize
   useEffect(() => {
     function handleWindowResize() {
       setWindowSize(getWindowSize());
@@ -107,20 +127,6 @@ function App() {
   const convertMultiplyVwToPx = () => {
     return (windowSize.innerWidth / 100) * 14;
   };
-
-  // 🔥 HACKER PUSH-UP — Solução definitiva de sanfona
-  useEffect(() => {
-    const body = document.body;
-    if (menuOpen && isMobileView) {
-      body.style.paddingTop = `${dropdownHeight}px`;
-    } else {
-      body.style.paddingTop = "0px";
-    }
-
-    return () => {
-      body.style.paddingTop = "0px";
-    };
-  }, [menuOpen, isMobileView]);
 
   const createButton = (buttonNumber: number, selected: boolean) => (
     <Button
@@ -214,8 +220,11 @@ function App() {
         />
       )}
 
-      {!isNavHidden && <LandingPage />}
-      <AppRoutes />
+      {/* 🔥 App Wrapper — Aqui entra a sanfona */}
+      <div ref={appWrapperRef}>
+        {!isNavHidden && <LandingPage />}
+        <AppRoutes />
+      </div>
 
       {/* 🔥 Floating Buttons */}
       {!isNavHidden && !isMobileView && (

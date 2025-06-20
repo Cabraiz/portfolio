@@ -247,7 +247,9 @@ const AppNavbar: React.FC<AppNavbarProps> = ({
                 >
                   <Nav.Link
                     as="div"
-                    ref={(el) => (navRefs.current[link] = el)}
+                    ref={(el) => {
+                      navRefs.current[link] = el;
+                    }}
                     className={`nav-link-custom ${selectedLink === link ? "active" : ""}`}
                     style={{
                       display: "flex",
