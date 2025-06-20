@@ -185,8 +185,6 @@ function App() {
     }
   }, [isNavHidden]);
 
-  const { t } = useTranslation();
-
   return (
     <LenisContext.Provider value={lenis.current}>
       <TitleWebsite title1="Bem Vindo! 🤝" title2="Cabraiz" />
@@ -196,7 +194,6 @@ function App() {
           isMobileView={isMobileView}
           selectedLink={selectedLink}
           setSelectedLink={setSelectedLink}
-          animateGoogle={animateGoogle}
           menuOpen={menuOpen}
           setMenuOpen={setMenuOpen}
           links={links}

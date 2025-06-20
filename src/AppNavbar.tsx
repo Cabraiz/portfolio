@@ -10,7 +10,6 @@ interface AppNavbarProps {
   isMobileView: boolean;
   selectedLink: string;
   setSelectedLink: (link: string) => void;
-  animateGoogle: boolean;
   menuOpen: boolean;
   setMenuOpen: (open: boolean) => void;
   links: string[];
@@ -21,7 +20,6 @@ const AppNavbar: React.FC<AppNavbarProps> = ({
   isMobileView,
   selectedLink,
   setSelectedLink,
-  animateGoogle,
   menuOpen,
   setMenuOpen,
   links,
@@ -29,6 +27,9 @@ const AppNavbar: React.FC<AppNavbarProps> = ({
 }) => {
   const { t } = useTranslation();
   const lenis = useLenis();
+
+  const [showNavbar, setShowNavbar] = useState(true);
+  const lastScrollY = useRef(0);
 
   const navRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
   const navContainerRef = useRef<HTMLDivElement>(null);
@@ -46,6 +47,29 @@ const AppNavbar: React.FC<AppNavbarProps> = ({
     setSelectedLink(link);
     setMenuOpen(false);
   };
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+
+      if (currentScrollY > lastScrollY.current && currentScrollY > 150) {
+        // Descendo → esconde
+        setShowNavbar(false);
+      } else {
+        // Subindo → mostra
+        setShowNavbar(true);
+      }
+
+      lastScrollY.current = currentScrollY;
+    };
+
+    window.addEventListener("scroll", handleScroll);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
 
   useEffect(() => {
     const current = navRefs.current[selectedLink];
@@ -70,14 +94,25 @@ const AppNavbar: React.FC<AppNavbarProps> = ({
       <Navbar
         className="border-gradient-green"
         style={{
+          transform: showNavbar ? "translateY(0)" : "translateY(-120%)",
+          opacity: showNavbar ? 1 : 0,
+          transition: "transform 0.4s ease, opacity 0.4s ease",
+          boxShadow: showNavbar ? "0 4px 18px rgba(0,0,0,0.35)" : "none",
+          backdropFilter: showNavbar ? "blur(6px)" : "none", 
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
           height: isMobileView ? "8vh" : "11vh",
           fontWeight: "600",
           marginTop: "0.1vh",
+          zIndex: 9999,
+          position: "fixed",
+          width: "100%",
+          top: 0,
+          left: 0,
         }}
       >
+
         {isMobileView ? (
           <>
             <Button

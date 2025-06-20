@@ -15,7 +15,7 @@ const MateusMobile: React.FC = () => {
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "flex-start",
-    padding: "4vh 2vw",
+    padding: "13vh 2vw 4vh 2vw",
     userSelect: "none",
     WebkitUserSelect: "none",
     msUserSelect: "none",

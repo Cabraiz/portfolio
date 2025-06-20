@@ -1,5 +1,4 @@
 import { Col, Row, Image, Button, Container } from "react-bootstrap";
-import { isMobile } from "react-device-detect";
 import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import i18n from "@/i18n/i18n";
@@ -43,9 +42,7 @@ const selos = [
 ];
 
 function MateusDesktop() {
-  const gradient = isMobile
-    ? "linear-gradient(90deg,#f1c40f 0%,#f1c40f 71.5%,#9b59b6 71.5%, #9b59b6 100%)"
-    : "linear-gradient(90deg,#f1c40f 100%, #f1c40f 100%)";
+  const gradient = "linear-gradient(90deg,#f1c40f 100%, #f1c40f 100%)";
 
   const { t } = useTranslation();
   const isPT = i18n.language === "pt" || i18n.language.startsWith("pt");
@@ -56,12 +53,9 @@ function MateusDesktop() {
 
   return (
     <>
-      <Container fluid className="mt-4">
+      <Container fluid style={{ paddingTop: "12vh" }} className="mt-4">
         <Row className="custom-section-row">
-          <Col
-            className="col-md-5"
-            style={{ paddingTop: isMobile ? "0" : "11vh" }}
-          >
+          <Col className="col-md-5" style={{ paddingTop: "11vh" }}>
             <div
               style={{
                 fontSize: "4rem",
