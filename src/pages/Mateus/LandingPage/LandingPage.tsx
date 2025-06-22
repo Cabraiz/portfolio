@@ -43,7 +43,7 @@ const sectionStyle: React.CSSProperties = {
 
 const contentContainerStyle: React.CSSProperties = {
   width: "100%",
-  padding: "0 4vw",
+  padding: "0",
   boxSizing: "border-box",
   userSelect: "none",
 };

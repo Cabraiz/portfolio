@@ -36,7 +36,7 @@ export const navbarStyles = {
 
   underline: {
     position: "absolute",
-    bottom: "-8px",
+    bottom: "2px",
     height: "3px",
     backgroundColor: "white",
     borderRadius: "3px",

@@ -187,7 +187,7 @@ const AppNavbar: React.FC<AppNavbarProps> = ({
               src={logo}
               alt="Logo"
               style={{
-                marginLeft: `10vw`,
+                marginLeft: `14vw`,
                 marginRight: "20px",
                 borderRadius: "20%",
                 width: "8.5vh",
@@ -203,7 +203,7 @@ const AppNavbar: React.FC<AppNavbarProps> = ({
                 display: "flex",
                 alignItems: "stretch",
                 marginLeft: "-4vw",
-                gap: "1rem",
+                gap: "2.8rem",
               }}
             >
               {links.map((link) => (

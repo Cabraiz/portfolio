@@ -53,7 +53,7 @@ function MateusDesktop() {
 
   return (
     <>
-      <Container fluid style={{ paddingTop: "12vh" }} className="mt-4">
+      <Container fluid style={{ paddingTop: "12vh" }}>
         <Row className="custom-section-row">
           <Col className="col-md-5" style={{ paddingTop: "11vh" }}>
             <div
