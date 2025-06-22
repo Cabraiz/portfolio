@@ -1,7 +1,6 @@
 import React from "react";
 import { Image } from "react-bootstrap";
 import perfil from "../../assets/Mateus/perfil.webp";
-import FloatingChat from "./FloatingChat";
 
 const MateusMobile: React.FC = () => {
   return (

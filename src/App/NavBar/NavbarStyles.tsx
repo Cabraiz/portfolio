@@ -15,15 +15,22 @@ export const navbarStyles = {
   } as CSSProperties,
 
   navLink: {
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
     color: "rgba(255, 255, 255, 0.6)",
     fontWeight: 100,
     letterSpacing: 1.3,
     cursor: "pointer",
     userSelect: "none",
     transition: "all 0.25s ease-in-out",
-    paddingBottom: "10px",
     position: "relative",
     fontSize: "1.5vw",
+    margin: 0,
+    paddingLeft: 0,
+    paddingRight: 0,
+    paddingTop: 0,
+    paddingBottom: 10,
   } as CSSProperties,
 
   navLinkActive: {

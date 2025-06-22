@@ -199,11 +199,12 @@ const AppNavbar: React.FC<AppNavbarProps> = ({
             <Nav
               ref={navContainerRef}
               style={{
+                marginTop: "1.5vh",
                 position: "relative",
                 display: "flex",
-                alignItems: "stretch",
+                alignItems: "center",
                 marginLeft: "-4vw",
-                gap: "2.8rem",
+                gap: "3vw",
               }}
             >
               {links.map((link) => (
@@ -212,36 +213,34 @@ const AppNavbar: React.FC<AppNavbarProps> = ({
                   onClick={() => handleScrollTo(link)}
                   style={{
                     all: "unset",
-                    height: "100%",
-                    display: "flex",
+                    display: "inline-flex",
                     alignItems: "center",
                     justifyContent: "center",
+                    cursor: "pointer",
                   }}
                 >
                   <Nav.Link
-  as="div"
-  ref={(el) => {
-    navRefs.current[link] = el;
-  }}
-  style={{
-    ...navbarStyles.navLink,
-    ...(selectedLink === link ? navbarStyles.navLinkActive : {}),
-  }}
-  onMouseEnter={(e) => {
-    if (selectedLink !== link) {
-      Object.assign(e.currentTarget.style, navbarStyles.navLinkHover);
-    }
-  }}
-  onMouseLeave={(e) => {
-    if (selectedLink !== link) {
-      Object.assign(e.currentTarget.style, navbarStyles.navLink);
-    } else {
-      Object.assign(e.currentTarget.style, navbarStyles.navLinkActive);
-    }
-  }}
->
-
-
+                    as="div"
+                    ref={(el) => {
+                      navRefs.current[link] = el;
+                    }}
+                    style={{
+                      ...navbarStyles.navLink,
+                      ...(selectedLink === link ? navbarStyles.navLinkActive : {}),
+                    }}
+                    onMouseEnter={(e) => {
+                      if (selectedLink !== link) {
+                        Object.assign(e.currentTarget.style, navbarStyles.navLinkHover);
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (selectedLink !== link) {
+                        Object.assign(e.currentTarget.style, navbarStyles.navLink);
+                      } else {
+                        Object.assign(e.currentTarget.style, navbarStyles.navLinkActive);
+                      }
+                    }}
+                  >
                     <div style={{ position: "relative" }}>
                       {link === "live" && (
                         <div
