@@ -1,22 +1,17 @@
+import { useEffect, useState } from "react";
 import MateusDesktop from "./MateusDesktop";
 import MateusMobile from "./MateusMobile";
 
-const isMobile = window.innerWidth < 768;
-
 const Mateus = () => {
-  return (
-    <div
-      style={{
-        width: "100%",
-        minHeight: "100vh",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "flex-start", 
-      }}
-    >
-      {isMobile ? <MateusMobile /> : <MateusDesktop />}
-    </div>
-  );
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  return isMobile ? <MateusMobile /> : <MateusDesktop />;
 };
 
 export default Mateus;

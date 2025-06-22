@@ -271,7 +271,6 @@ export default function FloatingChat() {
             <div
               style={{
                 flex: 1,
-                overflowY: "auto",
                 fontSize: `${scale(1.05)}rem`,
                 lineHeight: scale(1.6),
                 display: "flex",

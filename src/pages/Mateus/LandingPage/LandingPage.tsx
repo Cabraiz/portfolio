@@ -1,8 +1,7 @@
 import React, { useEffect } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-
-import { useLenis } from "../../../pages/Mateus/Context/LenisContext";
+import { useLenis } from "lenis/react";
 
 import Portfolio from "../Portfolio/Portfolio";
 import RoadMap from "../RoadMap/RoadMap";
@@ -19,7 +18,7 @@ const containerStyle: React.CSSProperties = {
   userSelect: "none",
 };
 
-const sectionBackground = {
+const sectionBackground: React.CSSProperties = {
   backgroundImage: `
     radial-gradient(circle at top left, rgba(255, 215, 0, 0.12), transparent 60%),
     radial-gradient(circle at bottom right, rgba(255, 215, 0, 0.08), transparent 70%),
@@ -44,6 +43,7 @@ const sectionStyle: React.CSSProperties = {
 
 const contentContainerStyle: React.CSSProperties = {
   width: "100%",
+  padding: "0 4vw",
   boxSizing: "border-box",
   userSelect: "none",
 };
@@ -54,6 +54,7 @@ const LandingPage: React.FC = () => {
   useEffect(() => {
     if (!lenis) return;
 
+    // 🔥 Scroll automático para hash na URL ao abrir a página
     const hash = window.location.hash;
     if (hash) {
       const target = document.querySelector(hash) as HTMLElement;
@@ -64,6 +65,7 @@ const LandingPage: React.FC = () => {
       }
     }
 
+    // 🔥 ScrollTrigger para atualizar URL conforme navega
     const sections = gsap.utils.toArray<HTMLElement>("section");
     sections.forEach((section) => {
       ScrollTrigger.create({

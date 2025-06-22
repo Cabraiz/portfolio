@@ -1,0 +1,125 @@
+/* 🔥 Liquid Circle Button */
+.google-liquid-button {
+  position: relative;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s ease;
+}
+
+.google-liquid-fill {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 0%;
+  background-color: #ea4335;
+  z-index: 1;
+  transition: height 0.4s ease;
+}
+
+.google-liquid-button:hover .google-liquid-fill {
+  height: 100%;
+}
+
+.google-liquid-icon {
+  position: relative;
+  z-index: 2;
+  width: 24px;
+  height: 24px;
+  transition: transform 0.3s ease;
+}
+
+.google-liquid-button:hover .google-liquid-icon {
+  transform: scale(1.15);
+}
+
+
+/* 🔥 Full Login Card — Refinado */
+.google-login-card {
+  display: flex;
+  align-items: center;
+  gap: 1vw;
+  padding: 1vh 1vw;
+  border-radius: 50px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(12px) saturate(120%);
+  -webkit-backdrop-filter: blur(12px) saturate(120%);
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  box-shadow:
+    0 4px 20px rgba(0, 0, 0, 0.2),
+    inset 0 0 0.5px rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: all 0.5s ease;
+  width: fit-content;
+  max-height: 52px;
+  justify-content: center;
+  overflow: hidden;
+  animation: fadeInCard 0.5s ease forwards;
+}
+
+.google-login-card:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    inset 0 0 0.7px rgba(255, 255, 255, 0.6);
+}
+
+.google-login-icon img {
+  width: 32px;
+  height: 32px;
+  transition: transform 0.3s ease;
+}
+
+.google-login-card:hover .google-login-icon img {
+  transform: scale(1.12);
+}
+
+.google-login-text {
+  color: rgba(255, 255, 255, 0.92);
+  font-family: "Modernist", sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.8px;
+  font-size: 1rem;
+  white-space: nowrap;
+  opacity: 0;
+  animation: fadeInText 0.4s ease forwards;
+  animation-delay: 0.2s;
+}
+
+.google-login-card:active {
+  transform: scale(0.98);
+}
+
+/* 🔥 Animações */
+@keyframes fadeInCard {
+  from {
+    opacity: 0;
+    transform: scaleX(0.7) scaleY(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scaleX(1) scaleY(1);
+  }
+}
+
+@keyframes fadeInText {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

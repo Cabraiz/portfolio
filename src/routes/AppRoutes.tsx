@@ -17,14 +17,9 @@ import { PrivateOutlet } from "../redux/shared/utils/PrivateOutlet";
 import { RouteGuard } from "../components/RouteGuard";
 import DigitalCodeUnlock from "../components/DigitalCodeUnlock";
 
-import LandingPage from "../pages/Mateus/LandingPage/LandingPage"; // <-- 🚀 Aqui
-
 const AppRoutes = () => {
   return (
     <Routes>
-      {/* ✅ Landing page (home) */}
-      <Route path="/" element={<LandingPage />} />
-
       <Route path="/enigma" element={<Enigma />} />
 
       <Route
@@ -76,6 +71,8 @@ const AppRoutes = () => {
       <Route path="/hublocal" element={<PrivateOutlet />}>
         <Route index element={<Hublocal />} />
       </Route>
+
+      {/* 🚫 Não coloque rota "/" aqui */}
     </Routes>
   );
 };

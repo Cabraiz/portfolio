@@ -10,4 +10,8 @@ export default defineConfig({
   build: {
     sourcemap: true,
   },
+  server: {
+    host: true, // 🔥 libera acesso via IP local, ex: 192.168.0.5:5173
+    port: 5173, // (opcional) mantém a porta padrão
+  },
 });

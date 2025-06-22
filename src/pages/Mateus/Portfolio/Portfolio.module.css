@@ -1,4 +1,6 @@
-/* 🔥 Container principal */
+/* ===========================
+   🎨 Container
+=========================== */
 .container {
   width: 100%;
   min-height: 100vh;
@@ -8,64 +10,67 @@
   background-blend-mode: screen, overlay, normal;
   background-repeat: no-repeat;
   background-size: cover;
-
   color: #fdf5e6;
 }
 
-/* 🎯 Título principal */
+@media (max-width: 768px) {
+  .container {
+    background-attachment: scroll; /* 🔥 Mobile → remove fixed */
+  }
+}
+
+/* ===========================
+   🎯 Título principal
+=========================== */
 .title {
-  font-size: 3.2rem;
+  font-size: clamp(2.5rem, 5vw, 3.5rem);
   text-align: center;
-  font-weight: bold;
+  font-weight: 800;
   background: linear-gradient(90deg, #fcd535, #ffb347);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   margin-bottom: 5vh;
+  letter-spacing: 1px;
 }
 
-/* 🏆 Tier */
+/* ===========================
+   🏆 Tier
+=========================== */
 .tier {
   margin-bottom: 8vh;
 }
 
-/* 🏷️ Título do tier */
+/* Título do tier */
 .tierTitle {
-  font-size: 2rem;
+  font-size: clamp(1.8rem, 4vw, 2.4rem);
   margin-bottom: 2vh;
   text-align: left;
-  font-weight: 600;
+  font-weight: 700;
 }
 
-/* 🥇 Tier S */
-.tierS {
-  color: #ffd700;
-}
+.tierS { color: #ffd700; }
+.tierA { color: #c0c0c0; }
+.tierB { color: #cd7f32; }
 
-/* 🥈 Tier A */
-.tierA {
-  color: #c0c0c0;
-}
-
-/* 🥉 Tier B */
-.tierB {
-  color: #cd7f32;
-}
-
-/* 🗂️ Cards */
+/* ===========================
+   🗂️ Cards Wrapper
+=========================== */
 .cards {
   display: flex;
-  gap: 2rem;
+  gap: clamp(1rem, 3vw, 2rem);
   flex-wrap: wrap;
   justify-content: center;
 }
 
-/* 📦 Card individual */
+/* ===========================
+   📦 Card individual
+=========================== */
 .card {
   background-color: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 16px;
   padding: 1.2rem;
-  width: clamp(180px, 18vw, 240px);
+  width: clamp(160px, 18vw, 240px);
   text-align: center;
   backdrop-filter: blur(16px);
   box-shadow:
@@ -76,7 +81,16 @@
   cursor: pointer;
 }
 
-/* ✨ Efeito hover */
+/* 🔥 Mobile → Remove blur e reduz sombra */
+@media (max-width: 768px) {
+  .card {
+    backdrop-filter: none;
+    background-color: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  }
+}
+
+/* ✨ Hover Effect (desktop) */
 .card:hover {
   transform: translateY(-8px) scale(1.02);
   box-shadow:
@@ -84,15 +98,20 @@
     inset 0 0 16px rgba(255, 255, 255, 0.08);
 }
 
-/* 🖼️ Imagem do card */
+/* ===========================
+   🖼️ Imagem do Card
+=========================== */
 .cardImage {
   width: 100%;
   border-radius: 12px;
   margin-bottom: 1rem;
   object-fit: cover;
+  aspect-ratio: 4 / 3;
 }
 
-/* 📝 Nome do projeto */
+/* ===========================
+   📝 Nome do Projeto
+=========================== */
 .cardName {
   color: #eee;
   font-weight: 600;

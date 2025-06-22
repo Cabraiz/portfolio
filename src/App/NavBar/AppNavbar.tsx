@@ -1,10 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Button, Image, Nav, Navbar } from "react-bootstrap";
-import logo from "./assets/icones/logo.svg";
-import LiveAnimation from "./pages/PrincipalPage/Animation/live_animation";
+import logo from "../../assets/icones/logo.svg";
+import LiveAnimation from "../../pages/PrincipalPage/Animation/live_animation";
 import GoogleSignInButton from "./GoogleSignInButton";
 import { useTranslation } from "react-i18next";
-import { useLenis } from "./pages/Mateus/Context/LenisContext";
+import { useLenis } from "../../pages/Mateus/Context/LenisContext";
+import { navbarStyles } from "./NavbarStyles";
 
 interface AppNavbarProps {
   isMobileView: boolean;
@@ -13,7 +14,6 @@ interface AppNavbarProps {
   menuOpen: boolean;
   setMenuOpen: (open: boolean) => void;
   links: string[];
-  convertMultiplyVwToPx: () => number;
 }
 
 const AppNavbar: React.FC<AppNavbarProps> = ({
@@ -23,7 +23,6 @@ const AppNavbar: React.FC<AppNavbarProps> = ({
   menuOpen,
   setMenuOpen,
   links,
-  convertMultiplyVwToPx,
 }) => {
   const { t } = useTranslation();
   const lenis = useLenis();
@@ -39,45 +38,49 @@ const AppNavbar: React.FC<AppNavbarProps> = ({
     opacity: 0,
   });
 
-  // 🔥 Handle scroll hide/show
+  // 🔥 Handle scroll hide/show (Desktop only)
   useEffect(() => {
+    if (isMobileView) return;
+
     const handleScroll = () => {
-      if (menuOpen) return; // 🔥 Menu aberto → não esconde navbar
+      if (menuOpen) return;
 
       const currentScrollY = window.scrollY;
       if (currentScrollY > lastScrollY.current && currentScrollY > 150) {
-        setShowNavbar(false); // 🔽 Scroll down → hide
+        setShowNavbar(false);
       } else {
-        setShowNavbar(true);  // 🔼 Scroll up → show
+        setShowNavbar(true);
       }
       lastScrollY.current = currentScrollY;
     };
 
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [menuOpen]);
+  }, [menuOpen, isMobileView]);
 
-  // 🔥 Block scroll when menu is open
+  // 🔥 Lock scroll when menu open (Mobile)
   useEffect(() => {
-    if (menuOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "auto";
-    }
+    document.body.style.overflow = menuOpen ? "hidden" : "auto";
     return () => {
       document.body.style.overflow = "auto";
     };
   }, [menuOpen]);
 
+  // 🔥 Scroll to section
   const handleScrollTo = (link: string) => {
     const section = document.querySelector(`#${link.toLowerCase()}`);
     if (section instanceof HTMLElement && lenis) {
-      lenis.scrollTo(section, { offset: -100, duration: 1.3, easing: (t: number) => t });
+      lenis.scrollTo(section, {
+        offset: -100,
+        duration: 1.3,
+        easing: (t: number) => t,
+      });
     }
     setSelectedLink(link);
     setMenuOpen(false);
   };
 
+  // 🔥 Underline animation
   useEffect(() => {
     const current = navRefs.current[selectedLink];
     const container = navContainerRef.current;
@@ -86,42 +89,25 @@ const AppNavbar: React.FC<AppNavbarProps> = ({
         width: current.offsetWidth,
         left: current.offsetLeft,
         opacity: 1,
-        transition: "all 300ms ease-in-out",
-        position: "absolute",
-        bottom: "-8px",
-        height: "3px",
-        backgroundColor: "white",
-        borderRadius: "3px",
       });
     }
   }, [selectedLink]);
 
   return (
     <>
-      {/* 🔥 Navbar */}
       <Navbar
-        className="border-gradient-green"
         style={{
+          ...navbarStyles.container,
+          ...navbarStyles.borderGradient,
           transform: showNavbar ? "translateY(0)" : "translateY(-120%)",
           opacity: showNavbar ? 1 : 0,
           transition: "transform 0.4s ease, opacity 0.4s ease",
-          boxShadow: showNavbar ? "0 4px 18px rgba(0,0,0,0.35)" : "none",
-          backdropFilter: showNavbar ? "blur(6px)" : "none",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
           height: isMobileView ? "8vh" : "11vh",
-          zIndex: 9999,
-          position: "fixed",
-          width: "100%",
-          top: 0,
-          left: 0,
         }}
       >
-        {/* 🔥 Mobile Navbar */}
         {isMobileView ? (
           <>
-            {/* Hamburger Button */}
+            {/* 🔥 Mobile */}
             <Button
               onClick={() => setMenuOpen(!menuOpen)}
               style={{
@@ -131,7 +117,7 @@ const AppNavbar: React.FC<AppNavbarProps> = ({
                 padding: "0",
                 width: "7vw",
                 height: "7vw",
-                display: menuOpen ? "block" : "flex",
+                display: "flex",
                 flexDirection: "column",
                 justifyContent: "center",
                 alignItems: "center",
@@ -140,40 +126,27 @@ const AppNavbar: React.FC<AppNavbarProps> = ({
                 zIndex: 2,
               }}
             >
-              <div
-                style={{
-                  width: "7vw",
-                  height: "3px",
-                  backgroundColor: "#fff",
-                  borderRadius: "2px",
-                  position: menuOpen ? "absolute" : "static",
-                  top: menuOpen ? "50%" : undefined,
-                  transform: menuOpen ? "translateY(-50%) rotate(45deg)" : "none",
-                  transition: "0.4s",
-                }}
-              />
-              <div
-                style={{
-                  width: "7vw",
-                  height: "3px",
-                  backgroundColor: "#fff",
-                  borderRadius: "2px",
-                  opacity: menuOpen ? 0 : 1,
-                  transition: "0.4s",
-                }}
-              />
-              <div
-                style={{
-                  width: "7vw",
-                  height: "3px",
-                  backgroundColor: "#fff",
-                  borderRadius: "2px",
-                  position: menuOpen ? "absolute" : "static",
-                  top: menuOpen ? "50%" : undefined,
-                  transform: menuOpen ? "translateY(-50%) rotate(-45deg)" : "none",
-                  transition: "0.4s",
-                }}
-              />
+              {["rotate(45deg)", "", "rotate(-45deg)"].map((rotation, i) => (
+                <div
+                  key={i}
+                  style={{
+                    width: "7vw",
+                    height: "3px",
+                    backgroundColor: "#fff",
+                    borderRadius: "2px",
+                    position: menuOpen && i !== 1 ? "absolute" : "static",
+                    top: menuOpen && i !== 1 ? "50%" : undefined,
+                    transform:
+                      menuOpen && i === 0
+                        ? "translateY(-50%) rotate(45deg)"
+                        : menuOpen && i === 2
+                          ? "translateY(-50%) rotate(-45deg)"
+                          : "none",
+                    opacity: menuOpen && i === 1 ? 0 : 1,
+                    transition: "0.4s",
+                  }}
+                />
+              ))}
             </Button>
 
             <Image
@@ -209,12 +182,12 @@ const AppNavbar: React.FC<AppNavbarProps> = ({
           </>
         ) : (
           <>
-            {/* 🔥 Desktop Navbar */}
+            {/* 🔥 Desktop */}
             <Image
               src={logo}
               alt="Logo"
               style={{
-                marginLeft: `${convertMultiplyVwToPx()}px`,
+                marginLeft: `10vw`,
                 marginRight: "20px",
                 borderRadius: "20%",
                 width: "8.5vh",
@@ -246,26 +219,29 @@ const AppNavbar: React.FC<AppNavbarProps> = ({
                   }}
                 >
                   <Nav.Link
-                    as="div"
-                    ref={(el) => {
-                      navRefs.current[link] = el;
-                    }}
-                    className={`nav-link-custom ${selectedLink === link ? "active" : ""}`}
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontWeight: 100,
-                      letterSpacing: 1.3,
-                      fontSize: "1.5vw",
-                      cursor: "pointer",
-                      userSelect: "none",
-                      transition: "all 0.25s ease-in-out",
-                      paddingBottom: "10px",
-                      position: "relative",
-                    }}
-                  >
+  as="div"
+  ref={(el) => {
+    navRefs.current[link] = el;
+  }}
+  style={{
+    ...navbarStyles.navLink,
+    ...(selectedLink === link ? navbarStyles.navLinkActive : {}),
+  }}
+  onMouseEnter={(e) => {
+    if (selectedLink !== link) {
+      Object.assign(e.currentTarget.style, navbarStyles.navLinkHover);
+    }
+  }}
+  onMouseLeave={(e) => {
+    if (selectedLink !== link) {
+      Object.assign(e.currentTarget.style, navbarStyles.navLink);
+    } else {
+      Object.assign(e.currentTarget.style, navbarStyles.navLinkActive);
+    }
+  }}
+>
+
+
                     <div style={{ position: "relative" }}>
                       {link === "live" && (
                         <div
@@ -285,7 +261,7 @@ const AppNavbar: React.FC<AppNavbarProps> = ({
                   </Nav.Link>
                 </button>
               ))}
-              <div style={underlineStyle} />
+              <div style={{ ...navbarStyles.underline, ...underlineStyle }} />
             </Nav>
 
             <div
@@ -303,7 +279,7 @@ const AppNavbar: React.FC<AppNavbarProps> = ({
         )}
       </Navbar>
 
-      {/* 🔥 Mobile Menu Dropdown */}
+      {/* 🔥 Mobile Dropdown Menu */}
       {isMobileView && menuOpen && (
         <>
           <div
@@ -320,8 +296,6 @@ const AppNavbar: React.FC<AppNavbarProps> = ({
               borderBottom: "1px solid #444",
               zIndex: 9998,
               boxShadow: "0 8px 20px rgba(0,0,0,0.5)",
-              transition: "opacity 0.3s ease",
-              opacity: menuOpen ? 1 : 0,
             }}
           >
             {links.map((link) => (
@@ -353,8 +327,6 @@ const AppNavbar: React.FC<AppNavbarProps> = ({
               backgroundColor: "rgba(0, 0, 0, 0.5)",
               backdropFilter: "blur(2px)",
               zIndex: 9997,
-              opacity: menuOpen ? 1 : 0,
-              transition: "opacity 0.3s ease",
             }}
           />
         </>

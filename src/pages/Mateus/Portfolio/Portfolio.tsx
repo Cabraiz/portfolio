@@ -11,7 +11,6 @@ import imagem3 from "../../../assets/Mateus/portfolio/imagem3.png";
 import imagem4 from "../../../assets/Mateus/portfolio/imagem4.png";
 import imagem5 from "../../../assets/Mateus/portfolio/imagem5.png";
 
-
 gsap.registerPlugin(ScrollTrigger);
 
 const portfolioData = {
@@ -27,10 +26,12 @@ const portfolioData = {
 };
 
 const Portfolio: React.FC = () => {
-  const lenis = useLenis();
+  const isMobile = window.innerWidth < 768;
 
-  // 🎯 Animações de entrada
+  // 🎯 Animações de entrada (somente no desktop)
   useEffect(() => {
+    if (isMobile) return;
+
     const tierAnim = gsap.from(`.${styles.tier}`, {
       opacity: 0,
       y: 80,
@@ -58,8 +59,9 @@ const Portfolio: React.FC = () => {
     return () => {
       tierAnim.scrollTrigger?.kill();
       cardAnim.scrollTrigger?.kill();
+      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
-  }, []);
+  }, [isMobile]);
 
   return (
     <div className={styles.container}>

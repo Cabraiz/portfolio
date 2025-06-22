@@ -1,7 +1,5 @@
 body {
-  font-family:
-    -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu",
-    "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  font-family: var(--font-family-base);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -11,30 +9,8 @@ code {
     source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
 }
 
-/* 🔥 AQUI ENTRA */
-html {
-  scroll-behavior: auto !important;
-}
-
-html.lenis {
-  height: auto !important;
-}
-
-.lenis.lenis-smooth {
-  scroll-behavior: auto !important;
-}
-
-.lenis.lenis-smooth [data-lenis-prevent] {
-  overscroll-behavior: contain !important;
-}
-
-.lenis.lenis-stopped {
-  overflow: hidden !important;
-}
-
-.section-fullscreen {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+html, body {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
 }
