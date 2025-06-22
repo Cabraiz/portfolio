@@ -1,19 +1,4 @@
 /* ===========================
-   🎨 Background Geral
-=========================== */
-body {
-  font-family: "Playfair Display", serif;
-  background-blend-mode: screen, overlay, normal;
-  background-repeat: no-repeat;
-  background-size: cover;
-  background-attachment: scroll; /* 🔥 Mobile padrão */
-}
-
-#root {
-  min-height: 100%;
-}
-
-/* ===========================
    🎨 Fontes Personalizadas
 =========================== */
 @font-face {

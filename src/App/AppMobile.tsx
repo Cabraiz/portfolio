@@ -9,7 +9,7 @@ import "../pages/Surprise/Surprise.css";
 
 import AppRoutes from "../routes/AppRoutes";
 import AppNavbar from "./NavBar/AppNavbar";
-import LandingPage from "../pages/Mateus/LandingPage/LandingPage";
+import LandingPageMobile from "../pages/Mateus/LandingPage/LandingPageMobile";
 
 import "react-toastify/dist/ReactToastify.css";
 
@@ -60,7 +60,7 @@ function AppMobile() {
         />
       )}
 
-      {!isNavHidden && <LandingPage />}
+      {!isNavHidden && <LandingPageMobile />}
 
       <div ref={appWrapperRef}>
         <AppRoutes />

@@ -1,21 +1,4 @@
 /* ===========================
-   🔥 Scroll Global Correto
-=========================== */
-body {
-  overscroll-behavior: none;
-  background-color: #0b0b0b;
-  background-image:
-    radial-gradient(circle at top left, rgba(255, 215, 0, 0.12), transparent 60%),
-    radial-gradient(circle at bottom right, rgba(255, 215, 0, 0.08), transparent 70%),
-    linear-gradient(135deg, #0b0b0b 0%, #1a1a1a 50%, #0b0b0b 100%);
-  background-attachment: fixed;
-  background-blend-mode: screen, overlay, normal;
-  background-repeat: no-repeat;
-  background-size: cover;
-  color: #fdf5e6;
-}
-
-/* ===========================
    🔤 Fontes Personalizadas
 =========================== */
 @font-face {
