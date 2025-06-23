@@ -57,24 +57,13 @@ const LandingPage: React.FC = () => {
   useEffect(() => {
     if (!lenis) return;
 
-    // 🔥 Scroll automático para hash na URL ao abrir a página
-    const hash = window.location.hash;
-    if (hash) {
-      const target = document.querySelector(hash) as HTMLElement;
-      if (target) {
-        setTimeout(() => {
-          lenis.scrollTo(target, { offset: -100, duration: 1.3 });
-        }, 300);
-      }
-    }
-
-    // 🔥 ScrollTrigger para atualizar URL conforme navega
     const sections = gsap.utils.toArray<HTMLElement>("section");
+
     sections.forEach((section) => {
       ScrollTrigger.create({
         trigger: section,
-        start: "top center",
-        end: "bottom center",
+        start: "top top",
+        end: "bottom top",
         onEnter: () => {
           window.history.replaceState(null, "", `#${section.id}`);
         },
@@ -88,6 +77,7 @@ const LandingPage: React.FC = () => {
       ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
     };
   }, [lenis]);
+
 
   return (
     <div style={containerStyle}>

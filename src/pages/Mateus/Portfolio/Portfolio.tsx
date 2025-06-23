@@ -1,7 +1,6 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useLenis } from "lenis/react";
 
 import styles from "./Portfolio.module.css";
 
@@ -26,45 +25,43 @@ const portfolioData = {
 };
 
 const Portfolio: React.FC = () => {
-  const isMobile = window.innerWidth < 768;
-  const lenis = useLenis();
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (isMobile) return;
+    const ctx = gsap.context(() => {
+      const tiers = gsap.utils.toArray(`.${styles.tier}`);
+      const cards = gsap.utils.toArray(`.${styles.card}`);
 
-    const tierAnim = gsap.from(`.${styles.tier}`, {
-      opacity: 0,
-      y: 80,
-      duration: 1,
-      stagger: 0.3,
-      scrollTrigger: {
-        trigger: `.${styles.tier}`,
-        start: "top 80%",
-        toggleActions: "play none none reverse",
-      },
-    });
+      gsap.from(tiers, {
+        opacity: 0,
+        y: 80,
+        duration: 1,
+        stagger: 0.3,
+        scrollTrigger: {
+          trigger: `.${styles.tier}`,
+          start: "top 80%",
+          toggleActions: "play none none reverse",
+        },
+      });
 
-    const cardAnim = gsap.from(`.${styles.card}`, {
-      opacity: 0,
-      y: 50,
-      duration: 0.8,
-      stagger: 0.2,
-      scrollTrigger: {
-        trigger: `.${styles.cards}`,
-        start: "top 85%",
-        toggleActions: "play none none reverse",
-      },
-    });
+      gsap.from(cards, {
+        opacity: 0,
+        y: 50,
+        duration: 0.8,
+        stagger: 0.2,
+        scrollTrigger: {
+          trigger: `.${styles.cards}`,
+          start: "top 85%",
+          toggleActions: "play none none reverse",
+        },
+      });
+    }, containerRef);
 
-    return () => {
-      tierAnim.scrollTrigger?.kill();
-      cardAnim.scrollTrigger?.kill();
-      ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
-    };
-  }, [isMobile]);
+    return () => ctx.revert();
+  }, []);
 
   return (
-    <div className={styles.container}>
+    <div className={styles.container} ref={containerRef}>
       <h1 className={styles.title}>Portfolio</h1>
 
       {Object.entries(portfolioData).map(([tier, items]) => (
