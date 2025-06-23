@@ -1,7 +1,5 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { ToastContainer } from "react-toastify";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 import AppRoutes from "../routes/AppRoutes";
 import AppNavbar from "./NavBar/AppNavbar";
@@ -12,8 +10,7 @@ import FloatingButtons from "./FloatingButtons";
 import { useSectionVisibility } from "../hooks/useSectionVisibility";
 
 import "react-toastify/dist/ReactToastify.css";
-
-gsap.registerPlugin(ScrollTrigger);
+import { LenisRef, ReactLenis } from "lenis/react";
 
 const links = ["home", "portfolio", "roadMap", "pricing", "live", "contact"];
 
@@ -26,58 +23,53 @@ export default function AppDesktop() {
   const [selectedLink, setSelectedLink] = useState("home");
   const [menuOpen, setMenuOpen] = useState(false);
 
-  // 🔥 Dropdown Animation
-  useEffect(() => {
-    const wrapper = appWrapperRef.current;
-    if (!wrapper) return;
-
-    const y = menuOpen ? 270 : 0;
-    const backdrop = menuOpen
-      ? "blur(8px) brightness(0.9)"
-      : "blur(0) brightness(1)";
-    const bg = menuOpen ? "rgba(0,0,0,0.3)" : "rgba(0,0,0,0)";
-
-    gsap.to(wrapper, {
-      y,
-      backdropFilter: backdrop,
-      backgroundColor: bg,
-      ease: menuOpen ? "elastic.out(1, 0.5)" : "expo.inOut",
-      duration: menuOpen ? 0.8 : 0.5,
-    });
-  }, [menuOpen]);
+  const lenisRef = useRef<LenisRef>(null);
 
   return (
-    <>
-      <TitleWebsite title1="Bem Vindo! 🤝" title2="Cabraiz" />
+    <ReactLenis
+      ref={lenisRef}
+      className="lenis-wrapper"
+      style={{ height: "100vh", overflow: "hidden" }}
+      options={{
+        smoothWheel: true,
+        gestureOrientation: "vertical",
+        orientation: "vertical",
+        lerp: 0.07,
+        wheelMultiplier: 1,
+        touchMultiplier: 1.2,
+      }}
+    >
+      <div
+        className="lenis-content"
+        style={{ height: "auto", minHeight: "100%" }}
+      >
+        <TitleWebsite title1="Bem Vindo! 🤝" title2="Cabraiz" />
 
-      {/* 🔥 Navbar */}
-      {!isNavHidden && (
-        <AppNavbar
-          isMobileView={false}
-          selectedLink={selectedLink}
-          setSelectedLink={setSelectedLink}
-          menuOpen={menuOpen}
-          setMenuOpen={setMenuOpen}
-          links={links}
-        />
-      )}
+        {!isNavHidden && (
+          <AppNavbar
+            isMobileView={false}
+            selectedLink={selectedLink}
+            setSelectedLink={setSelectedLink}
+            menuOpen={menuOpen}
+            setMenuOpen={setMenuOpen}
+            links={links}
+          />
+        )}
 
-      <div ref={appWrapperRef}>
-        {/* 🔥 LandingPage */}
-        {!isLandingHidden && <LandingPage />}
-        <AppRoutes />
+        <div ref={appWrapperRef}>
+          {!isLandingHidden && <LandingPage />}
+          <AppRoutes />
+        </div>
+
+        {!isFloatingHidden && (
+          <FloatingButtons
+            links={links}
+            selectedLink={selectedLink}
+            setSelectedLink={setSelectedLink}
+          />
+        )}
       </div>
-
-      {/* 🔥 Floating Buttons */}
-      {!isFloatingHidden && (
-        <FloatingButtons
-          links={links}
-          selectedLink={selectedLink}
-          setSelectedLink={setSelectedLink}
-        />
-      )}
-
       <ToastContainer />
-    </>
+    </ReactLenis>
   );
 }

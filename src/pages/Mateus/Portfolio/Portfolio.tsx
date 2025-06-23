@@ -1,8 +1,8 @@
 import React, { useEffect } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useLenis } from "lenis/react";
 
-import { useLenis } from "../../../pages/Mateus/Context/LenisContext";
 import styles from "./Portfolio.module.css";
 
 import imagem1 from "../../../assets/Mateus/portfolio/imagem1.png";
@@ -27,8 +27,8 @@ const portfolioData = {
 
 const Portfolio: React.FC = () => {
   const isMobile = window.innerWidth < 768;
+  const lenis = useLenis();
 
-  // 🎯 Animações de entrada (somente no desktop)
   useEffect(() => {
     if (isMobile) return;
 
@@ -59,7 +59,7 @@ const Portfolio: React.FC = () => {
     return () => {
       tierAnim.scrollTrigger?.kill();
       cardAnim.scrollTrigger?.kill();
-      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+      ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
     };
   }, [isMobile]);
 

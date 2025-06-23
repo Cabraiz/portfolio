@@ -4,7 +4,6 @@ import logo from "../../assets/icones/logo.svg";
 import LiveAnimation from "../../pages/PrincipalPage/Animation/live_animation";
 import GoogleSignInButton from "./GoogleSignInButton";
 import { useTranslation } from "react-i18next";
-import { useLenis } from "../../pages/Mateus/Context/LenisContext";
 import { navbarStyles } from "./NavbarStyles";
 
 interface AppNavbarProps {
@@ -25,7 +24,6 @@ const AppNavbar: React.FC<AppNavbarProps> = ({
   links,
 }) => {
   const { t } = useTranslation();
-  const lenis = useLenis();
 
   const [showNavbar, setShowNavbar] = useState(true);
   const lastScrollY = useRef(0);
@@ -69,13 +67,15 @@ const AppNavbar: React.FC<AppNavbarProps> = ({
   // 🔥 Scroll to section
   const handleScrollTo = (link: string) => {
     const section = document.querySelector(`#${link.toLowerCase()}`);
-    if (section instanceof HTMLElement && lenis) {
-      lenis.scrollTo(section, {
-        offset: -100,
-        duration: 1.3,
-        easing: (t: number) => t,
-      });
+    if (section instanceof HTMLElement) {
+      section.scrollIntoView({ behavior: "smooth", block: "start" });
+
+      // Compensação do navbar fixo
+      setTimeout(() => {
+        window.scrollBy(0, -100);
+      }, 400);
     }
+
     setSelectedLink(link);
     setMenuOpen(false);
   };
@@ -140,8 +140,8 @@ const AppNavbar: React.FC<AppNavbarProps> = ({
                       menuOpen && i === 0
                         ? "translateY(-50%) rotate(45deg)"
                         : menuOpen && i === 2
-                          ? "translateY(-50%) rotate(-45deg)"
-                          : "none",
+                        ? "translateY(-50%) rotate(-45deg)"
+                        : "none",
                     opacity: menuOpen && i === 1 ? 0 : 1,
                     transition: "0.4s",
                   }}

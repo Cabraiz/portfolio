@@ -10,6 +10,8 @@ import Live from "../Live/Live";
 import Contact from "../Contact/Contact";
 import Mateus from "../Mateus";
 
+import { useLenisScrollTrigger } from "../../../hooks/useSmoothScroll";
+
 gsap.registerPlugin(ScrollTrigger);
 
 const containerStyle: React.CSSProperties = {
@@ -50,6 +52,7 @@ const contentContainerStyle: React.CSSProperties = {
 
 const LandingPage: React.FC = () => {
   const lenis = useLenis();
+  useLenisScrollTrigger();
 
   useEffect(() => {
     if (!lenis) return;

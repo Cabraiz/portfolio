@@ -1,20 +1,19 @@
-import App from "./App/App";
+import React from "react";
 import ReactDOM from "react-dom/client";
-import React, { Suspense } from "react";
 import { BrowserRouter } from "react-router-dom";
 import { Provider } from "react-redux";
 import { ChakraProvider } from "@chakra-ui/react";
-import { ReactLenis } from "lenis/react";
-import type { LenisRef } from "lenis/react";
+
+import App from "./App/App";
+import FloatingChat from "./pages/Mateus/FloatingChat";
 
 import { store } from "./redux/app/store";
 import { system } from "./theme";
+
 import "bootstrap/dist/css/bootstrap.min.css";
 import "lenis/dist/lenis.css";
 import "./index.css";
 import "./i18n/i18n";
-
-import FloatingChat from "./pages/Mateus/FloatingChat";
 
 // ✅ Fonte dinâmica responsiva
 const setFontFamily = () => {
@@ -30,9 +29,8 @@ const setFontFamily = () => {
     );
   }
 };
-
 window.addEventListener("resize", setFontFamily);
-setFontFamily(); // Executa na primeira carga
+setFontFamily();
 
 // ✅ Redirecionamento de URL opcional
 const redirectedPath = window.location.search.slice(1);
@@ -40,7 +38,7 @@ if (redirectedPath && redirectedPath.startsWith("/")) {
   window.history.replaceState({}, "", redirectedPath);
 }
 
-// ✅ App principal com Lenis aplicado globalmente
+// ✅ App principal encapsulado com Lenis para smooth scroll completo
 const MainApp: React.FC = () => {
   return (
     <React.StrictMode>
