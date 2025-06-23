@@ -71,7 +71,7 @@ const AppNavbar: React.FC<AppNavbarProps> = ({
   const handleScrollTo = (link: string) => {
     const section = document.querySelector(`#${link.toLowerCase()}`);
     if (section instanceof HTMLElement) {
-      const OFFSET_VH = -10;
+      const OFFSET_VH = 10;
       const offset = -window.innerHeight * (OFFSET_VH / 100);
 
       lenis?.scrollTo(section, {

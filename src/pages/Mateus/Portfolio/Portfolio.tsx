@@ -54,7 +54,6 @@ const Portfolio: React.FC<{ isActive: boolean }> = ({ isActive }) => {
       ref={containerRef}
       style={{ opacity: 0, filter: "blur(4px)", transform: "translateY(40px)" }}
     >
-      <h1 className={styles.title}>Portfolio</h1>
 
       {Object.entries(portfolioData).map(([tier, items]) => (
         <div key={tier} className={styles.tier}>
