@@ -1,6 +1,5 @@
 import React, { useEffect, useRef } from "react";
 import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 import styles from "./Portfolio.module.css";
 
@@ -9,8 +8,6 @@ import imagem2 from "../../../assets/Mateus/portfolio/imagem2.png";
 import imagem3 from "../../../assets/Mateus/portfolio/imagem3.png";
 import imagem4 from "../../../assets/Mateus/portfolio/imagem4.png";
 import imagem5 from "../../../assets/Mateus/portfolio/imagem5.png";
-
-gsap.registerPlugin(ScrollTrigger);
 
 const portfolioData = {
   S: [
@@ -24,44 +21,39 @@ const portfolioData = {
   B: [{ name: "Projeto Básico 1", image: imagem5 }],
 };
 
-const Portfolio: React.FC = () => {
+const Portfolio: React.FC<{ isActive: boolean }> = ({ isActive }) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const ctx = gsap.context(() => {
-      const tiers = gsap.utils.toArray(`.${styles.tier}`);
-      const cards = gsap.utils.toArray(`.${styles.card}`);
+    if (!containerRef.current) return;
 
-      gsap.from(tiers, {
-        opacity: 0,
-        y: 80,
-        duration: 1,
-        stagger: 0.3,
-        scrollTrigger: {
-          trigger: `.${styles.tier}`,
-          start: "top 80%",
-          toggleActions: "play none none reverse",
-        },
-      });
+    const container = containerRef.current;
 
-      gsap.from(cards, {
-        opacity: 0,
-        y: 50,
+    if (isActive) {
+      gsap.to(container, {
+        opacity: 1,
+        y: 0,
+        filter: "blur(0px)",
         duration: 0.8,
-        stagger: 0.2,
-        scrollTrigger: {
-          trigger: `.${styles.cards}`,
-          start: "top 85%",
-          toggleActions: "play none none reverse",
-        },
+        ease: "power3.out",
       });
-    }, containerRef);
-
-    return () => ctx.revert();
-  }, []);
+    } else {
+      gsap.to(container, {
+        opacity: 0,
+        y: 40,
+        filter: "blur(4px)",
+        duration: 0.6,
+        ease: "power3.inOut",
+      });
+    }
+  }, [isActive]);
 
   return (
-    <div className={styles.container} ref={containerRef}>
+    <div
+      className={styles.container}
+      ref={containerRef}
+      style={{ opacity: 0, filter: "blur(4px)", transform: "translateY(40px)" }}
+    >
       <h1 className={styles.title}>Portfolio</h1>
 
       {Object.entries(portfolioData).map(([tier, items]) => (
