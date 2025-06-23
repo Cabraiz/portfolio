@@ -34,7 +34,7 @@ const sectionBackground: CSSProperties = {
 
 const sectionStyle: CSSProperties = {
   ...sectionBackground,
-  minHeight: "90vh",
+  minHeight: "100vh",
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
