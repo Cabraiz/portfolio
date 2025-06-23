@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { CSSProperties, useEffect, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useLenis } from "lenis/react";
@@ -14,13 +14,13 @@ import { useLenisScrollTrigger } from "../../../hooks/useSmoothScroll";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const containerStyle: React.CSSProperties = {
+const containerStyle: CSSProperties = {
   overflowX: "hidden",
   width: "100%",
   userSelect: "none",
 };
 
-const sectionBackground: React.CSSProperties = {
+const sectionBackground: CSSProperties = {
   backgroundImage: `
     radial-gradient(circle at top left, rgba(255, 215, 0, 0.12), transparent 60%),
     radial-gradient(circle at bottom right, rgba(255, 215, 0, 0.08), transparent 70%),
@@ -32,9 +32,9 @@ const sectionBackground: React.CSSProperties = {
   backgroundSize: "cover",
 };
 
-const sectionStyle: React.CSSProperties = {
+const sectionStyle: CSSProperties = {
   ...sectionBackground,
-  minHeight: "100vh",
+  minHeight: "90vh",
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
@@ -43,7 +43,7 @@ const sectionStyle: React.CSSProperties = {
   userSelect: "none",
 };
 
-const contentContainerStyle: React.CSSProperties = {
+const contentContainerStyle: CSSProperties = {
   width: "100%",
   padding: "0",
   boxSizing: "border-box",
@@ -64,8 +64,8 @@ const LandingPage: React.FC = () => {
     sections.forEach((section) => {
       ScrollTrigger.create({
         trigger: section,
-        start: "top top",
-        end: "bottom top",
+        start: "top center",
+        end: "bottom center",
         onEnter: () => {
           const id = section.id;
           setActiveSection(id);

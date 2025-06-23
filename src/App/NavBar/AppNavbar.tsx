@@ -1,9 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Button, Image, Nav, Navbar } from "react-bootstrap";
+import { useLenis } from "lenis/react";
+import { useTranslation } from "react-i18next";
+
 import logo from "../../assets/icones/logo.svg";
 import LiveAnimation from "../../pages/PrincipalPage/Animation/live_animation";
 import GoogleSignInButton from "./GoogleSignInButton";
-import { useTranslation } from "react-i18next";
 import { navbarStyles } from "./NavbarStyles";
 
 interface AppNavbarProps {
@@ -24,6 +26,7 @@ const AppNavbar: React.FC<AppNavbarProps> = ({
   links,
 }) => {
   const { t } = useTranslation();
+  const lenis = useLenis();
 
   const [showNavbar, setShowNavbar] = useState(true);
   const lastScrollY = useRef(0);
@@ -64,16 +67,18 @@ const AppNavbar: React.FC<AppNavbarProps> = ({
     };
   }, [menuOpen]);
 
-  // 🔥 Scroll to section
+  // 🔥 Scroll to section com Lenis + offset dinâmico
   const handleScrollTo = (link: string) => {
     const section = document.querySelector(`#${link.toLowerCase()}`);
     if (section instanceof HTMLElement) {
-      section.scrollIntoView({ behavior: "smooth", block: "start" });
+      const OFFSET_VH = -10;
+      const offset = -window.innerHeight * (OFFSET_VH / 100);
 
-      // Compensação do navbar fixo
-      setTimeout(() => {
-        window.scrollBy(0, -100);
-      }, 400);
+      lenis?.scrollTo(section, {
+        offset: offset,
+        duration: 1.2,
+        easing: (t) => 1 - Math.pow(1 - t, 3), // EaseOutCubic
+      });
     }
 
     setSelectedLink(link);
