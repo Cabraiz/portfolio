@@ -7,8 +7,8 @@ import Portfolio from "../Portfolio/Portfolio";
 import RoadMap from "../RoadMap/RoadMap";
 import Pricing from "../Pricing/Pricing";
 import Live from "../Live/Live";
-import Contact from "../Contact/Contact";
-import Mateus from "../Mateus";
+import ContactDesktop from "../Contact/ContactDesktop";
+import MateusDesktop from "../MateusDesktop";
 
 import { useLenisScrollTrigger } from "../../../hooks/useSmoothScroll";
 
@@ -88,7 +88,7 @@ const LandingPage: React.FC = () => {
     <div style={containerStyle}>
       <section id="home" style={sectionStyle}>
         <div style={contentContainerStyle}>
-          <Mateus isActive={activeSection === "home"} />
+          <MateusDesktop isActive={activeSection === "home"} />
         </div>
       </section>
 
@@ -118,7 +118,7 @@ const LandingPage: React.FC = () => {
 
       <section id="contact" style={sectionStyle}>
         <div style={contentContainerStyle}>
-          <Contact isActive={activeSection === "contact"} />
+          <ContactDesktop isActive={activeSection === "contact"} />
         </div>
       </section>
     </div>

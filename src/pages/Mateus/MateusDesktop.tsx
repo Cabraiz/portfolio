@@ -1,9 +1,13 @@
+import React, { FC, useEffect, useRef, useState } from "react";
 import { Col, Row, Image, Button, Container } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
-import { useState } from "react";
 import i18n from "@/i18n/i18n";
 import Tippy from "@tippyjs/react";
 import "tippy.js/dist/tippy.css";
+import gsap from "gsap";
+
+import FloatingChat from "./FloatingChat";
+import RoleTitle from "./RoleTitle";
 
 import IconWhatsAppVector from "../../assets/Mateus/icon/IconWhatsAppVector.svg";
 import perfil from "../../assets/Mateus/perfil.webp";
@@ -23,9 +27,11 @@ import cat2 from "../../assets/Mateus/cutieIcons/Cat2.png";
 import cat3 from "../../assets/Mateus/cutieIcons/Cat3.png";
 import cat4 from "../../assets/Mateus/cutieIcons/Cat4.png";
 
-import RoleTitle from "./RoleTitle";
-import FloatingChat from "./FloatingChat";
 import "../../styles/styles.css";
+
+interface MateusDesktopProps {
+  isActive: boolean;
+}
 
 interface SocialButtonProps {
   href: string;
@@ -41,8 +47,8 @@ const selos = [
   { key: "SEDIH", src: seloSEDIH, alt: "SEDIH", cat: cat4, style: {} },
 ];
 
-function MateusDesktop() {
-  const gradient = "linear-gradient(90deg,#f1c40f 100%, #f1c40f 100%)";
+const MateusDesktop: FC<MateusDesktopProps> = ({ isActive }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const { t } = useTranslation();
   const isPT = i18n.language === "pt" || i18n.language.startsWith("pt");
@@ -51,26 +57,49 @@ function MateusDesktop() {
 
   const openResumeTab = () => window.open("/resume", "_blank");
 
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    if (isActive) {
+      gsap.to(container, {
+        opacity: 1,
+        y: 0,
+        filter: "blur(0px)",
+        duration: 0.8,
+        ease: "power3.out",
+      });
+    } else {
+      gsap.to(container, {
+        opacity: 0,
+        y: 40,
+        filter: "blur(4px)",
+        duration: 0.6,
+        ease: "power3.inOut",
+      });
+    }
+  }, [isActive]);
+
   return (
-    <>
+    <div
+      ref={containerRef}
+      style={{
+        opacity: 0,
+        filter: "blur(4px)",
+        transform: "translateY(40px)",
+      }}
+    >
       <Container fluid style={{ paddingTop: "12vh" }}>
         <Row className="custom-section-row">
           <Col className="col-md-5" style={{ paddingTop: "11vh" }}>
-            <div
-              style={{
-                fontSize: "4rem",
-                fontWeight: 700,
-                color: "#f1c40f",
-                marginBottom: "1.5rem",
-              }}
-            >
+            <div style={{ fontSize: "4rem", fontWeight: 700, color: "#f1c40f", marginBottom: "1.5rem" }}>
               Senior
             </div>
 
             <div
               className="font-sequel"
               style={{
-                backgroundImage: gradient,
+                backgroundImage: "linear-gradient(90deg,#f1c40f 100%, #f1c40f 100%)",
                 marginBottom: "max(10px, 4vh)",
                 display: "flex",
                 alignItems: "center",
@@ -227,17 +256,16 @@ function MateusDesktop() {
                 {isPT ? (
                   <SocialButton href="https://meet.google.com/SEULINK" icon={IconMeet} alt="Meet" />
                 ) : (
-                  <SocialButton href="https://wa.me/SEUNUMERO" icon={IconWhatsApp} alt="WhatsApp" />
+                  <SocialButton href="https://wa.me/5585998575707" icon={IconWhatsApp} alt="WhatsApp" />
                 )}
               </div>
             </div>
           </Col>
         </Row>
       </Container>
-      <FloatingChat />
-    </>
+    </div>
   );
-}
+};
 
 export function SocialButton({ href, icon, alt, isScrollToTop }: SocialButtonProps) {
   return (
