@@ -78,10 +78,10 @@ const MateusMobile: React.FC<{ style?: React.CSSProperties }> = ({ style }) => {
         alt="Decorativo Esquerda"
         style={{
           position: "absolute",
-          top: "2%",
+          top: "15%",
           left: "2%",
-          width: "25vw",
-          maxWidth: "150px",
+          width: "60vw",
+          
           zIndex: 8,
           opacity: 0.8,
         }}
@@ -93,10 +93,10 @@ const MateusMobile: React.FC<{ style?: React.CSSProperties }> = ({ style }) => {
         alt="Decorativo Direita"
         style={{
           position: "absolute",
-          bottom: "2%",
-          right: "2%",
-          width: "25vw",
-          maxWidth: "150px",
+          bottom: "18%",
+          right: "-8%",
+          width: "60vw",
+          
           zIndex: 8,
           opacity: 0.8,
         }}
@@ -106,8 +106,8 @@ const MateusMobile: React.FC<{ style?: React.CSSProperties }> = ({ style }) => {
 <div
   style={{
     position: "absolute",
-    left: "25%",
-    top: "50%",
+    left: "75%",
+    top: "20%",
     transform: "translate(-50%, -50%) scale(1.2)", // 20% maior
     fontSize: "clamp(3rem, 8vw, 8rem)",
     fontWeight: "900",
@@ -125,8 +125,8 @@ const MateusMobile: React.FC<{ style?: React.CSSProperties }> = ({ style }) => {
 <div
   style={{
     position: "absolute",
-    left: "25%",
-    top: "50%",
+    left: "75%",
+    top: "20%",
     transform: "translate(-50%, -50%)",
     fontSize: "clamp(3rem, 8vw, 8rem)",
     fontWeight: "900",
@@ -155,8 +155,8 @@ const MateusMobile: React.FC<{ style?: React.CSSProperties }> = ({ style }) => {
 <div
   style={{
     position: "absolute",
-    right: "25%",
-    top: "50%",
+    right: "70%",
+    top: "60%",
     transform: "translate(50%, -50%) scale(1.2)",
     fontSize: "clamp(3rem, 8vw, 8rem)",
     fontWeight: "900",
@@ -174,8 +174,8 @@ const MateusMobile: React.FC<{ style?: React.CSSProperties }> = ({ style }) => {
 <div
   style={{
     position: "absolute",
-    right: "25%",
-    top: "50%",
+    right: "70%",
+    top: "60%",
     transform: "translate(50%, -50%)",
     fontSize: "clamp(3rem, 8vw, 8rem)",
     fontWeight: "900",
@@ -205,7 +205,7 @@ const MateusMobile: React.FC<{ style?: React.CSSProperties }> = ({ style }) => {
         style={{
           position: "absolute",
           left: "50%",
-          bottom: "20%",
+          bottom: "10%",
           transform: "translateX(-50%) skewX(-10deg) scaleY(1.2)",
           background: `
             linear-gradient(
