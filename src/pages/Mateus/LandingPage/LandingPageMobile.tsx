@@ -34,7 +34,7 @@ const sectionBackground: CSSProperties = {
 
 const sectionStyle: CSSProperties = {
   ...sectionBackground,
-  minHeight: "100vh",
+  minHeight: "100dvh",
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
@@ -50,7 +50,7 @@ const contentContainerStyle: CSSProperties = {
   userSelect: "none",
 };
 
-const LandingPage: React.FC = () => {
+const LandingPageMobile: React.FC = () => {
   const lenis = useLenis();
   useLenisScrollTrigger();
 
@@ -88,7 +88,7 @@ const LandingPage: React.FC = () => {
     <div style={containerStyle}>
       <section id="home" style={sectionStyle}>
         <div style={contentContainerStyle}>
-          <MateusMobile />
+          <MateusMobile style={sectionStyle} />
         </div>
       </section>
 
@@ -125,4 +125,4 @@ const LandingPage: React.FC = () => {
   );
 };
 
-export default LandingPage;
+export default LandingPageMobile;

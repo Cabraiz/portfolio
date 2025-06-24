@@ -3,13 +3,13 @@ import zeroUm from "../../assets/Mateus/home/02.png";
 
 import React from "react";
 
-const MateusMobile: React.FC = () => {
+const MateusMobile: React.FC<{ style?: React.CSSProperties }> = ({ style }) => {
   return (
     <div
       style={{
-        minHeight: "100vh",
+        minHeight: style?.minHeight,
         width: "100%",
-        backgroundColor: "#000",
+        backgroundColor: "#000", 
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -102,7 +102,26 @@ const MateusMobile: React.FC = () => {
         }}
       />
 
-      {/* 🅰️ Texto App */}
+      {/* 🔲 Texto App Outline atrás */}
+<div
+  style={{
+    position: "absolute",
+    left: "25%",
+    top: "50%",
+    transform: "translate(-50%, -50%) scale(1.2)", // 20% maior
+    fontSize: "clamp(3rem, 8vw, 8rem)",
+    fontWeight: "900",
+    letterSpacing: "2px",
+    zIndex: 9, // 🔥 Atrás do texto principal
+    color: "transparent",
+    WebkitTextStroke: "2px rgba(255,255,255,0.4)", // Borda branca semi-transparente
+    pointerEvents: "none", // 🔥 Não interfere no clique do texto da frente
+  }}
+>
+  APP
+</div>
+
+{/* 🅰️ Texto App Principal */}
 <div
   style={{
     position: "absolute",
@@ -132,7 +151,26 @@ const MateusMobile: React.FC = () => {
   APP
 </div>
 
-{/* 🖥️ Texto Site */}
+{/* 🔲 Texto Site Outline atrás */}
+<div
+  style={{
+    position: "absolute",
+    right: "25%",
+    top: "50%",
+    transform: "translate(50%, -50%) scale(1.2)",
+    fontSize: "clamp(3rem, 8vw, 8rem)",
+    fontWeight: "900",
+    letterSpacing: "2px",
+    zIndex: 9,
+    color: "transparent",
+    WebkitTextStroke: "2px rgba(255,255,255,0.4)",
+    pointerEvents: "none",
+  }}
+>
+  SITE
+</div>
+
+{/* 🖥️ Texto Site Principal */}
 <div
   style={{
     position: "absolute",
@@ -161,7 +199,6 @@ const MateusMobile: React.FC = () => {
 >
   SITE
 </div>
-
 
       {/* 🕹️ Texto Escolha seu lado */}
       <div
