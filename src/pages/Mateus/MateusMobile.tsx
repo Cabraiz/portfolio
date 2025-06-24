@@ -103,40 +103,65 @@ const MateusMobile: React.FC = () => {
       />
 
       {/* 🅰️ Texto App */}
-      <div
-        style={{
-          position: "absolute",
-          left: "25%",
-          top: "50%",
-          transform: "translate(-50%, -50%)",
-          color: "white",
-          fontSize: "clamp(3rem, 8vw, 8rem)",
-          fontWeight: "900",
-          letterSpacing: "2px",
-          zIndex: 10,
-          cursor: "pointer",
-        }}
-      >
-        APP
-      </div>
+<div
+  style={{
+    position: "absolute",
+    left: "25%",
+    top: "50%",
+    transform: "translate(-50%, -50%)",
+    fontSize: "clamp(3rem, 8vw, 8rem)",
+    fontWeight: "900",
+    letterSpacing: "2px",
+    zIndex: 10,
+    cursor: "pointer",
+    background: `
+      linear-gradient(
+        to bottom,
+        rgba(255,255,255,1) 0%,
+        rgba(255,255,255,0.8) 60%,
+        rgba(255,255,255,0.6) 70%,
+        rgba(255,255,255,0.2) 100%
+      )
+    `,
+    WebkitBackgroundClip: "text",
+    backgroundClip: "text",
+    color: "transparent",
+    WebkitTextFillColor: "transparent",
+  }}
+>
+  APP
+</div>
 
-      {/* 🖥️ Texto Site */}
-      <div
-        style={{
-          position: "absolute",
-          right: "25%",
-          top: "50%",
-          transform: "translate(50%, -50%)",
-          color: "white",
-          fontSize: "clamp(3rem, 8vw, 8rem)",
-          fontWeight: "900",
-          letterSpacing: "2px",
-          zIndex: 10,
-          cursor: "pointer",
-        }}
-      >
-        SITE
-      </div>
+{/* 🖥️ Texto Site */}
+<div
+  style={{
+    position: "absolute",
+    right: "25%",
+    top: "50%",
+    transform: "translate(50%, -50%)",
+    fontSize: "clamp(3rem, 8vw, 8rem)",
+    fontWeight: "900",
+    letterSpacing: "2px",
+    zIndex: 10,
+    cursor: "pointer",
+    background: `
+      linear-gradient(
+        to bottom,
+        rgba(255,255,255,1) 0%,
+        rgba(255,255,255,0.8) 60%,
+        rgba(255,255,255,0.6) 70%,
+        rgba(255,255,255,0.2) 100%
+      )
+    `,
+    WebkitBackgroundClip: "text",
+    backgroundClip: "text",
+    color: "transparent",
+    WebkitTextFillColor: "transparent",
+  }}
+>
+  SITE
+</div>
+
 
       {/* 🕹️ Texto Escolha seu lado */}
       <div
@@ -144,7 +169,7 @@ const MateusMobile: React.FC = () => {
           position: "absolute",
           left: "50%",
           bottom: "20%",
-          transform: "translateX(-50%) skewX(-5deg)",
+          transform: "translateX(-50%) skewX(-10deg) scaleY(1.2)",
           background: `
             linear-gradient(
               to right,
@@ -154,10 +179,10 @@ const MateusMobile: React.FC = () => {
               rgba(0,0,0,0) 100%
             )
           `,
-          padding: "0.5vw 7vw",
+          padding: "0.5vw 14vw",
           borderRadius: "8px",
           color: "#b3174e",
-          fontSize: "5vw",
+          fontSize: "4vw",
           fontWeight: "600",
           letterSpacing: "1.5px",
           whiteSpace: "nowrap",
