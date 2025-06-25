@@ -1,4 +1,4 @@
-import React, { CSSProperties, useEffect, useState } from "react";
+import React, { CSSProperties, useEffect } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useLenis } from "lenis/react";
@@ -54,93 +54,57 @@ const LandingPage: React.FC = () => {
   const lenis = useLenis();
   useLenisScrollTrigger();
 
-  const [activeSection, setActiveSection] = useState<string>("home");
-
   useEffect(() => {
-  if (!lenis) return;
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        lenis?.stop?.();
+      } else {
+        lenis?.start?.();
+        ScrollTrigger.refresh();
+      }
+    };
 
-  const triggers: ScrollTrigger[] = [];
-
-  const sections = gsap.utils.toArray<HTMLElement>("section");
-
-  sections.forEach((section) => {
-    const trigger = ScrollTrigger.create({
-      trigger: section,
-      start: "top center",
-      end: "bottom center",
-      onEnter: () => {
-        const id = section.id;
-        setActiveSection(id);
-        window.history.replaceState(null, "", `#${id}`);
-      },
-      onEnterBack: () => {
-        const id = section.id;
-        setActiveSection(id);
-        window.history.replaceState(null, "", `#${id}`);
-      },
-    });
-
-    triggers.push(trigger);
-  });
-
-  return () => {
-    triggers.forEach((trigger) => trigger.kill()); // mata apenas os criados aqui
-  };
-}, [lenis]);
-
-  useEffect(() => {
-  const handleVisibilityChange = () => {
-    if (document.hidden) {
-      lenis?.stop?.(); // ✅ pausa animações
-    } else {
-      lenis?.start?.(); // ✅ retoma animações
-      ScrollTrigger.refresh(); // ✅ recalcula posições de triggers
-    }
-  };
-
-  document.addEventListener("visibilitychange", handleVisibilityChange);
-
-  return () => {
-    document.removeEventListener("visibilitychange", handleVisibilityChange);
-  };
-}, [lenis]);
-
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [lenis]);
 
   return (
     <div style={containerStyle}>
       <section id="home" style={sectionStyle}>
         <div style={contentContainerStyle}>
-          <MateusDesktop isActive={activeSection === "home"} />
+          <MateusDesktop />
         </div>
       </section>
 
       <section id="portfolio" style={sectionStyle}>
         <div style={contentContainerStyle}>
-          <Portfolio isActive={activeSection === "portfolio"} />
+          <Portfolio />
         </div>
       </section>
 
       <section id="roadmap" style={sectionStyle}>
         <div style={contentContainerStyle}>
-          <RoadMap isActive={activeSection === "roadmap"} />
+          <RoadMap />
         </div>
       </section>
 
       <section id="pricing" style={sectionStyle}>
         <div style={contentContainerStyle}>
-          <Pricing isActive={activeSection === "pricing"} />
+          <Pricing />
         </div>
       </section>
 
       <section id="live" style={sectionStyle}>
         <div style={contentContainerStyle}>
-          <Live isActive={activeSection === "live"} />
+          <Live />
         </div>
       </section>
 
       <section id="contact" style={sectionStyle}>
         <div style={contentContainerStyle}>
-          <ContactDesktop isActive={activeSection === "contact"} />
+          <ContactDesktop />
         </div>
       </section>
     </div>

@@ -1,36 +1,36 @@
 import React, { useEffect, useRef } from "react";
 import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 
-interface ContactProps {
-  isActive: boolean;
-}
+gsap.registerPlugin(ScrollTrigger);
 
-const Contact: React.FC<ContactProps> = ({ isActive }) => {
+const Contact: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!containerRef.current) return;
 
-    const container = containerRef.current;
-
-    if (isActive) {
-      gsap.to(container, {
-        opacity: 1,
-        y: 0,
-        filter: "blur(0px)",
-        duration: 0.8,
-        ease: "power3.out",
-      });
-    } else {
-      gsap.to(container, {
+    gsap.fromTo(
+      containerRef.current,
+      {
         opacity: 0,
         y: 40,
         filter: "blur(4px)",
-        duration: 0.6,
-        ease: "power3.inOut",
-      });
-    }
-  }, [isActive]);
+      },
+      {
+        opacity: 1,
+        y: 0,
+        filter: "blur(0px)",
+        duration: 1,
+        ease: "power3.out",
+        scrollTrigger: {
+          trigger: containerRef.current,
+          start: "top 80%",
+          toggleActions: "play none none reverse",
+        },
+      }
+    );
+  }, []);
 
   return (
     <div

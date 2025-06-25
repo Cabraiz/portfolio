@@ -5,8 +5,8 @@ import i18n from "@/i18n/i18n";
 import Tippy from "@tippyjs/react";
 import "tippy.js/dist/tippy.css";
 import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 
-import FloatingChat from "./FloatingChat";
 import RoleTitle from "./RoleTitle";
 
 import IconWhatsAppVector from "../../assets/Mateus/icon/IconWhatsAppVector.svg";
@@ -29,9 +29,7 @@ import cat4 from "../../assets/Mateus/cutieIcons/Cat4.png";
 
 import "../../styles/styles.css";
 
-interface MateusDesktopProps {
-  isActive: boolean;
-}
+gsap.registerPlugin(ScrollTrigger);
 
 interface SocialButtonProps {
   href: string;
@@ -47,9 +45,8 @@ const selos = [
   { key: "SEDIH", src: seloSEDIH, alt: "SEDIH", cat: cat4, style: {} },
 ];
 
-const MateusDesktop: FC<MateusDesktopProps> = ({ isActive }) => {
+const MateusDesktop: FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
-
   const { t } = useTranslation();
   const isPT = i18n.language === "pt" || i18n.language.startsWith("pt");
   const [isLoading, setIsLoading] = useState(false);
@@ -61,24 +58,28 @@ const MateusDesktop: FC<MateusDesktopProps> = ({ isActive }) => {
     const container = containerRef.current;
     if (!container) return;
 
-    if (isActive) {
-      gsap.to(container, {
+    gsap.fromTo(
+      container,
+      {
+        opacity: 0,
+        y: 40,
+        filter: "blur(4px)",
+        willChange: "transform, opacity",
+      },
+      {
         opacity: 1,
         y: 0,
         filter: "blur(0px)",
         duration: 0.8,
         ease: "power3.out",
-      });
-    } else {
-      gsap.to(container, {
-        opacity: 0,
-        y: 40,
-        filter: "blur(4px)",
-        duration: 0.6,
-        ease: "power3.inOut",
-      });
-    }
-  }, [isActive]);
+        scrollTrigger: {
+          trigger: container,
+          start: "top 80%",
+          toggleActions: "play none none none",
+        },
+      }
+    );
+  }, []);
 
   return (
     <div
@@ -87,6 +88,7 @@ const MateusDesktop: FC<MateusDesktopProps> = ({ isActive }) => {
         opacity: 0,
         filter: "blur(4px)",
         transform: "translateY(40px)",
+        willChange: "transform, opacity",
       }}
     >
       <Container fluid style={{ paddingTop: "12vh" }}>
@@ -175,9 +177,7 @@ const MateusDesktop: FC<MateusDesktopProps> = ({ isActive }) => {
                 >
                   <div>
                     <span>
-                      {isPT && (
-                        <img src={IconWhatsAppVector} alt="WhatsApp" style={{ height: "22px", width: "22px", marginRight: "0.4rem" }} />
-                      )}
+                      {isPT && <img src={IconWhatsAppVector} alt="WhatsApp" style={{ height: "22px", width: "22px", marginRight: "0.4rem" }} />}
                       {!isLoading && <p>{isPT ? "WHATSAPP" : "MEET"}</p>}
                     </span>
                   </div>

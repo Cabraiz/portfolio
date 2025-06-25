@@ -1,6 +1,4 @@
-import React, { useEffect, useRef } from "react";
-import gsap from "gsap";
-
+import React from "react";
 import styles from "./Portfolio.module.css";
 
 import imagem1 from "../../../assets/Mateus/portfolio/imagem1.png";
@@ -21,40 +19,9 @@ const portfolioData = {
   B: [{ name: "Projeto Básico 1", image: imagem5 }],
 };
 
-const Portfolio: React.FC<{ isActive: boolean }> = ({ isActive }) => {
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!containerRef.current) return;
-
-    const container = containerRef.current;
-
-    if (isActive) {
-      gsap.to(container, {
-        opacity: 1,
-        y: 0,
-        filter: "blur(0px)",
-        duration: 0.8,
-        ease: "power3.out",
-      });
-    } else {
-      gsap.to(container, {
-        opacity: 0,
-        y: 40,
-        filter: "blur(4px)",
-        duration: 0.6,
-        ease: "power3.inOut",
-      });
-    }
-  }, [isActive]);
-
+const Portfolio: React.FC = () => {
   return (
-    <div
-      className={styles.container}
-      ref={containerRef}
-      style={{ opacity: 0, filter: "blur(4px)", transform: "translateY(40px)" }}
-    >
-
+    <div className={styles.container}>
       {Object.entries(portfolioData).map(([tier, items]) => (
         <div key={tier} className={styles.tier}>
           <h2
