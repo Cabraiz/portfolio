@@ -1,20 +1,26 @@
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useLenis } from "lenis/react";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 gsap.registerPlugin(ScrollTrigger);
 
 export function useLenisScrollTrigger() {
   const lenis = useLenis();
+  const initialized = useRef(false); // evita reexecução desnecessária
 
   useEffect(() => {
-    if (!lenis) return;
+    if (!lenis || initialized.current) return;
+    initialized.current = true;
 
     const root = lenis.rootElement;
 
+    // ✅ Função nomeada para add/remove do ticker
+    const rafCallback = (time: number) => {
+      lenis.raf(time * 1000);
+    };
+
     if (root) {
-      // 🔥 Informa ao ScrollTrigger qual é o container de scroll
       ScrollTrigger.scrollerProxy(root, {
         scrollTop(value) {
           if (value !== undefined) {
@@ -37,23 +43,24 @@ export function useLenisScrollTrigger() {
     }
 
     lenis.on("scroll", ScrollTrigger.update);
-
-    gsap.ticker.add((time) => {
-      lenis.raf(time * 1000); // 🔥 muito importante
-    });
-
-    gsap.ticker.lagSmoothing(0); // 🔥 tira delay
-
-    ScrollTrigger.refresh(); // 🔥 atualiza ScrollTrigger
+    gsap.ticker.add(rafCallback);
+    gsap.ticker.lagSmoothing(0);
+    ScrollTrigger.refresh();
 
     return () => {
+      // ✅ Remove listener e ticker corretamente
       lenis.off("scroll", ScrollTrigger.update);
-      gsap.ticker.remove((time) => {
-        lenis.raf(time * 1000);
-      });
+      gsap.ticker.remove(rafCallback);
+
+      // ✅ Limpa todos os triggers ativos (sem erro de tipo)
+      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+      ScrollTrigger.clearMatchMedia?.();
+
       if (root) {
         ScrollTrigger.scrollerProxy(root, null as any);
       }
+
+      initialized.current = false; // opcional: permitir nova init se desmontar/montar
     };
   }, [lenis]);
 }

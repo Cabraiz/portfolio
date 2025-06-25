@@ -57,32 +57,54 @@ const LandingPage: React.FC = () => {
   const [activeSection, setActiveSection] = useState<string>("home");
 
   useEffect(() => {
-    if (!lenis) return;
+  if (!lenis) return;
 
-    const sections = gsap.utils.toArray<HTMLElement>("section");
+  const triggers: ScrollTrigger[] = [];
 
-    sections.forEach((section) => {
-      ScrollTrigger.create({
-        trigger: section,
-        start: "top center",
-        end: "bottom center",
-        onEnter: () => {
-          const id = section.id;
-          setActiveSection(id);
-          window.history.replaceState(null, "", `#${id}`);
-        },
-        onEnterBack: () => {
-          const id = section.id;
-          setActiveSection(id);
-          window.history.replaceState(null, "", `#${id}`);
-        },
-      });
+  const sections = gsap.utils.toArray<HTMLElement>("section");
+
+  sections.forEach((section) => {
+    const trigger = ScrollTrigger.create({
+      trigger: section,
+      start: "top center",
+      end: "bottom center",
+      onEnter: () => {
+        const id = section.id;
+        setActiveSection(id);
+        window.history.replaceState(null, "", `#${id}`);
+      },
+      onEnterBack: () => {
+        const id = section.id;
+        setActiveSection(id);
+        window.history.replaceState(null, "", `#${id}`);
+      },
     });
 
-    return () => {
-      ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
-    };
-  }, [lenis]);
+    triggers.push(trigger);
+  });
+
+  return () => {
+    triggers.forEach((trigger) => trigger.kill()); // mata apenas os criados aqui
+  };
+}, [lenis]);
+
+  useEffect(() => {
+  const handleVisibilityChange = () => {
+    if (document.hidden) {
+      lenis?.stop?.(); // ✅ pausa animações
+    } else {
+      lenis?.start?.(); // ✅ retoma animações
+      ScrollTrigger.refresh(); // ✅ recalcula posições de triggers
+    }
+  };
+
+  document.addEventListener("visibilitychange", handleVisibilityChange);
+
+  return () => {
+    document.removeEventListener("visibilitychange", handleVisibilityChange);
+  };
+}, [lenis]);
+
 
   return (
     <div style={containerStyle}>
