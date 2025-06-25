@@ -31,6 +31,7 @@ export default function AppDesktop() {
       className="lenis-wrapper"
       style={{ height: "100vh", overflow: "hidden" }}
       options={{
+        autoRaf: false,
         smoothWheel: true,
         gestureOrientation: "vertical",
         orientation: "vertical",
