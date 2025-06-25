@@ -65,17 +65,23 @@ const MateusDesktop: FC<MateusDesktopProps> = ({ isActive }) => {
 
   const openResumeTab = () => window.open("/resume", "_blank");
 
-  return (
+ return (
+  <div
+    ref={containerRef}
+    style={{
+      position: "relative",
+    }}
+  >
+    {/* Conteúdo com transições suaves */}
     <div
-      ref={containerRef}
       style={{
-        opacity: isActive ? 1 : 0,
-        transform: isActive ? "translateY(0)" : "translateY(40px)",
+        opacity: isActive ? 1 : 0.01, // nunca totalmente invisível no mount
+        transform: isActive ? "translateY(0)" : "translateY(30px)",
         filter: isActive ? "blur(0px)" : "blur(4px)",
-        transition: "opacity 0.8s ease-out, transform 0.8s ease-out, filter 0.8s ease-out",
+        transition: "opacity 0.6s ease-out, transform 0.6s ease-out, filter 0.6s ease-out",
         willChange: "transform, opacity, filter",
-        visibility: isVisible ? "visible" : "hidden",
         pointerEvents: isActive ? "auto" : "none",
+        userSelect: isActive ? "auto" : "none",
       }}
     >
       <Container fluid style={{ paddingTop: "12vh" }}>
@@ -164,13 +170,25 @@ const MateusDesktop: FC<MateusDesktopProps> = ({ isActive }) => {
                 >
                   <div>
                     <span>
-                      {isPT && <img src={IconWhatsAppVector} alt="WhatsApp" style={{ height: "22px", width: "22px", marginRight: "0.4rem" }} />}
+                      {isPT && (
+                        <img
+                          src={IconWhatsAppVector}
+                          alt="WhatsApp"
+                          style={{ height: "22px", width: "22px", marginRight: "0.4rem" }}
+                        />
+                      )}
                       {!isLoading && <p>{isPT ? "WHATSAPP" : "MEET"}</p>}
                     </span>
                   </div>
                   <div>
                     <span>
-                      {isPT && <img src={IconWhatsAppVector} alt="WhatsApp" style={{ height: "22px", width: "22px" }} />}
+                      {isPT && (
+                        <img
+                          src={IconWhatsAppVector}
+                          alt="WhatsApp"
+                          style={{ height: "22px", width: "22px" }}
+                        />
+                      )}
                       {!isLoading ? (
                         <p>{isPT ? "VAMOS CONVERSAR" : "LET'S TALK"}</p>
                       ) : (
@@ -251,8 +269,23 @@ const MateusDesktop: FC<MateusDesktopProps> = ({ isActive }) => {
         </Row>
       </Container>
     </div>
-  );
-};
+
+    {/* 🔒 Cobertura invisível que impede interação (sem remover DOM) */}
+    {!isActive && (
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          backgroundColor: "transparent",
+          zIndex: 999,
+          pointerEvents: "auto",
+        }}
+      />
+    )}
+  </div>
+);
+
+}
 
 export function SocialButton({ href, icon, alt, isScrollToTop }: SocialButtonProps) {
   return (
