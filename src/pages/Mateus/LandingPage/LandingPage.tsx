@@ -1,4 +1,4 @@
-import React, { CSSProperties, useEffect } from "react";
+import React, { CSSProperties, useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useLenis } from "lenis/react";
@@ -53,6 +53,36 @@ const contentContainerStyle: CSSProperties = {
 const LandingPage: React.FC = () => {
   const lenis = useLenis();
   useLenisScrollTrigger();
+  const [activeSection, setActiveSection] = useState("home");
+
+  useEffect(() => {
+    if (!lenis) return;
+
+    const triggers: ScrollTrigger[] = [];
+    const sections = gsap.utils.toArray<HTMLElement>("section");
+
+    sections.forEach((section) => {
+      const trigger = ScrollTrigger.create({
+        trigger: section,
+        start: "top center",
+        end: "bottom center",
+        onEnter: () => {
+          setActiveSection(section.id);
+          window.history.replaceState(null, "", `#${section.id}`);
+        },
+        onEnterBack: () => {
+          setActiveSection(section.id);
+          window.history.replaceState(null, "", `#${section.id}`);
+        },
+      });
+
+      triggers.push(trigger);
+    });
+
+    return () => {
+      triggers.forEach((trigger) => trigger.kill());
+    };
+  }, [lenis]);
 
   useEffect(() => {
     const handleVisibilityChange = () => {
@@ -74,37 +104,37 @@ const LandingPage: React.FC = () => {
     <div style={containerStyle}>
       <section id="home" style={sectionStyle}>
         <div style={contentContainerStyle}>
-          <MateusDesktop />
+          <MateusDesktop isActive={activeSection === "home"} />
         </div>
       </section>
 
       <section id="portfolio" style={sectionStyle}>
         <div style={contentContainerStyle}>
-          <Portfolio />
+          <Portfolio isActive={activeSection === "portfolio"} />
         </div>
       </section>
 
       <section id="roadmap" style={sectionStyle}>
         <div style={contentContainerStyle}>
-          <RoadMap />
+          <RoadMap isActive={activeSection === "roadmap"} />
         </div>
       </section>
 
       <section id="pricing" style={sectionStyle}>
         <div style={contentContainerStyle}>
-          <Pricing />
+          <Pricing isActive={activeSection === "pricing"} />
         </div>
       </section>
 
       <section id="live" style={sectionStyle}>
         <div style={contentContainerStyle}>
-          <Live />
+          <Live isActive={activeSection === "live"} />
         </div>
       </section>
 
       <section id="contact" style={sectionStyle}>
         <div style={contentContainerStyle}>
-          <ContactDesktop />
+          <ContactDesktop isActive={activeSection === "contact"} />
         </div>
       </section>
     </div>

@@ -4,8 +4,6 @@ import { useTranslation } from "react-i18next";
 import i18n from "@/i18n/i18n";
 import Tippy from "@tippyjs/react";
 import "tippy.js/dist/tippy.css";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 import RoleTitle from "./RoleTitle";
 
@@ -29,7 +27,9 @@ import cat4 from "../../assets/Mateus/cutieIcons/Cat4.png";
 
 import "../../styles/styles.css";
 
-gsap.registerPlugin(ScrollTrigger);
+interface MateusDesktopProps {
+  isActive: boolean;
+}
 
 interface SocialButtonProps {
   href: string;
@@ -45,50 +45,37 @@ const selos = [
   { key: "SEDIH", src: seloSEDIH, alt: "SEDIH", cat: cat4, style: {} },
 ];
 
-const MateusDesktop: FC = () => {
+const MateusDesktop: FC<MateusDesktopProps> = ({ isActive }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const { t } = useTranslation();
   const isPT = i18n.language === "pt" || i18n.language.startsWith("pt");
+
   const [isLoading, setIsLoading] = useState(false);
   const [forceHover, setForceHover] = useState(false);
-
-  const openResumeTab = () => window.open("/resume", "_blank");
+  const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
+    if (isActive) {
+      setIsVisible(true);
+    } else {
+      const timeout = setTimeout(() => setIsVisible(false), 600); // delay para sair suavemente
+      return () => clearTimeout(timeout);
+    }
+  }, [isActive]);
 
-    gsap.fromTo(
-      container,
-      {
-        opacity: 0,
-        y: 40,
-        filter: "blur(4px)",
-        willChange: "transform, opacity",
-      },
-      {
-        opacity: 1,
-        y: 0,
-        filter: "blur(0px)",
-        duration: 0.8,
-        ease: "power3.out",
-        scrollTrigger: {
-          trigger: container,
-          start: "top 80%",
-          toggleActions: "play none none none",
-        },
-      }
-    );
-  }, []);
+  const openResumeTab = () => window.open("/resume", "_blank");
 
   return (
     <div
       ref={containerRef}
       style={{
-        opacity: 0,
-        filter: "blur(4px)",
-        transform: "translateY(40px)",
-        willChange: "transform, opacity",
+        opacity: isActive ? 1 : 0,
+        transform: isActive ? "translateY(0)" : "translateY(40px)",
+        filter: isActive ? "blur(0px)" : "blur(4px)",
+        transition: "opacity 0.8s ease-out, transform 0.8s ease-out, filter 0.8s ease-out",
+        willChange: "transform, opacity, filter",
+        visibility: isVisible ? "visible" : "hidden",
+        pointerEvents: isActive ? "auto" : "none",
       }}
     >
       <Container fluid style={{ paddingTop: "12vh" }}>
