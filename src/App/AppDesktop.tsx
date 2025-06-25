@@ -14,8 +14,22 @@ import { LenisRef, ReactLenis } from "lenis/react";
 
 const links = ["home", "portfolio", "roadMap", "pricing", "live", "contact"];
 
+// ✅ Detectar máquina fraca
+function getSmoothSettings() {
+  const cores = navigator.hardwareConcurrency || 4;
+  const memory = (navigator as any).deviceMemory || 4;
+  const isWeak = cores <= 4 || memory <= 4;
+
+  return {
+    lerp: isWeak ? 0.15 : 0.07,
+    wheelMultiplier: isWeak ? 0.6 : 1,
+    touchMultiplier: isWeak ? 1.05 : 1.2,
+  };
+}
+
 export default function AppDesktop() {
   const appWrapperRef = useRef<HTMLDivElement>(null);
+  const lenisRef = useRef<LenisRef>(null);
 
   const { isNavHidden, isFloatingHidden, isLandingHidden } =
     useSectionVisibility();
@@ -23,7 +37,7 @@ export default function AppDesktop() {
   const [selectedLink, setSelectedLink] = useState("home");
   const [menuOpen, setMenuOpen] = useState(false);
 
-  const lenisRef = useRef<LenisRef>(null);
+  const smoothOptions = getSmoothSettings();
 
   return (
     <ReactLenis
@@ -31,13 +45,11 @@ export default function AppDesktop() {
       className="lenis-wrapper"
       style={{ height: "100vh", overflow: "hidden" }}
       options={{
-        autoRaf: false,
+        autoRaf: false, // mantém compatibilidade com GSAP ScrollTrigger
         smoothWheel: true,
         gestureOrientation: "vertical",
         orientation: "vertical",
-        lerp: 0.07,
-        wheelMultiplier: 1,
-        touchMultiplier: 1.2,
+        ...smoothOptions, // ✅ ajusta automaticamente para máquinas fracas
       }}
     >
       <div

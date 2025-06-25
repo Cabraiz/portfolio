@@ -65,7 +65,7 @@ const MateusDesktop: FC<MateusDesktopProps> = ({ isActive }) => {
 
   const openResumeTab = () => window.open("/resume", "_blank");
 
- return (
+return (
   <div
     ref={containerRef}
     style={{
@@ -76,9 +76,12 @@ const MateusDesktop: FC<MateusDesktopProps> = ({ isActive }) => {
     <div
       style={{
         opacity: isActive ? 1 : 0.01, // nunca totalmente invisível no mount
-        transform: isActive ? "translateY(0)" : "translateY(30px)",
+        transform: isActive
+          ? "scale(1) translateY(0)"
+          : "scale(0.98) translateY(30px)",
         filter: isActive ? "blur(0px)" : "blur(4px)",
-        transition: "opacity 0.6s ease-out, transform 0.6s ease-out, filter 0.6s ease-out",
+        transition:
+          "opacity 1.2s ease-out, transform 1.2s ease-out, filter 1.2s ease-out",
         willChange: "transform, opacity, filter",
         pointerEvents: isActive ? "auto" : "none",
         userSelect: isActive ? "auto" : "none",
@@ -270,7 +273,7 @@ const MateusDesktop: FC<MateusDesktopProps> = ({ isActive }) => {
       </Container>
     </div>
 
-    {/* 🔒 Cobertura invisível que impede interação (sem remover DOM) */}
+     {/* 🔒 Cobertura invisível que impede interação (sem remover DOM) */}
     {!isActive && (
       <div
         style={{
