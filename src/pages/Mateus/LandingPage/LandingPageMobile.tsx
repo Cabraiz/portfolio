@@ -10,7 +10,7 @@ import Live from "../Live/Live";
 import ContactMobile from "../Contact/ContactMobile";
 import MateusMobile from "../MateusMobile";
 
-import { useLenisScrollTrigger } from "../../../hooks/useSmoothScroll";
+import { useLenisScrollTrigger } from "../../../hooks/useLenisScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 

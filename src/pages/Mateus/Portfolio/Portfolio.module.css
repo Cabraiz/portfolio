@@ -13,12 +13,6 @@
   color: #fdf5e6;
 }
 
-@media (max-width: 768px) {
-  .container {
-    background-attachment: scroll; /* 🔥 Mobile → remove fixed */
-  }
-}
-
 /* ===========================
    🎯 Título principal
 =========================== */

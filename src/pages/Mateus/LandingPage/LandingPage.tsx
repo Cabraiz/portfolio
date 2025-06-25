@@ -10,7 +10,7 @@ import Live from "../Live/Live";
 import ContactDesktop from "../Contact/ContactDesktop";
 import MateusDesktop from "../MateusDesktop";
 
-import { useLenisScrollTrigger } from "../../../hooks/useSmoothScroll";
+import { useLenisScrollTrigger } from "../../../hooks/useLenisScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
