@@ -156,7 +156,7 @@ export default function FloatingChat() {
 {!isMobile && (
   <div
     style={{
-      fontSize: '0.9vw',
+      fontSize: '16px',
       fontFamily: 'Khula, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif',
       fontWeight: 600,
       WebkitFontSmoothing: 'antialiased',
