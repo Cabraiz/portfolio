@@ -13,14 +13,14 @@ interface PortfolioProps {
 
 const portfolioData = {
   S: [
-    { name: ".", image: imagem1 },
-    { name: ".", image: imagem2 },
+    { name: "ERP VAREJO", image: imagem1 },
+    { name: "APP BANK", image: imagem2 },
   ],
   A: [
-    { name: ".", image: imagem3 },
-    { name: ".", image: imagem4 },
+    { name: "APP BARBER", image: imagem3 },
+    { name: "SITE ADV", image: imagem4 },
   ],
-  B: [{ name: ".", image: imagem5 }],
+  B: [{ name: "SITE CABELEIREIRA", image: imagem5 }],
 };
 
 const Portfolio: React.FC<PortfolioProps> = ({ isActive }) => {
