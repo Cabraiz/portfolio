@@ -34,7 +34,6 @@
   margin-bottom: 8vh;
 }
 
-/* Título do tier */
 .tierTitle {
   font-size: clamp(1.8rem, 4vw, 2.4rem);
   margin-bottom: 2vh;
@@ -45,70 +44,3 @@
 .tierS { color: #ffd700; }
 .tierA { color: #c0c0c0; }
 .tierB { color: #cd7f32; }
-
-/* ===========================
-   🗂️ Cards Wrapper
-=========================== */
-.cards {
-  display: flex;
-  gap: clamp(1rem, 3vw, 2rem);
-  flex-wrap: wrap;
-  justify-content: center;
-}
-
-/* ===========================
-   📦 Card individual
-=========================== */
-.card {
-  background-color: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 16px;
-  padding: 1.2rem;
-  width: clamp(160px, 18vw, 240px);
-  text-align: center;
-  backdrop-filter: blur(16px);
-  box-shadow:
-    0 8px 24px rgba(0, 0, 0, 0.2),
-    inset 0 0 8px rgba(255, 255, 255, 0.04);
-  transition: transform 0.35s ease, box-shadow 0.35s ease;
-  will-change: transform, box-shadow;
-  cursor: pointer;
-}
-
-/* 🔥 Mobile → Remove blur e reduz sombra */
-@media (max-width: 768px) {
-  .card {
-    backdrop-filter: none;
-    background-color: rgba(255, 255, 255, 0.08);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-  }
-}
-
-/* ✨ Hover Effect (desktop) */
-.card:hover {
-  transform: translateY(-8px) scale(1.02);
-  box-shadow:
-    0 12px 28px rgba(255, 255, 255, 0.15),
-    inset 0 0 16px rgba(255, 255, 255, 0.08);
-}
-
-/* ===========================
-   🖼️ Imagem do Card
-=========================== */
-.cardImage {
-  width: 100%;
-  border-radius: 12px;
-  margin-bottom: 1rem;
-  object-fit: cover;
-  aspect-ratio: 4 / 3;
-}
-
-/* ===========================
-   📝 Nome do Projeto
-=========================== */
-.cardName {
-  color: #eee;
-  font-weight: 600;
-  font-size: 1rem;
-  letter-spacing: 0.5px;
-}
