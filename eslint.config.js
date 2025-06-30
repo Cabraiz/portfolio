@@ -23,6 +23,11 @@ export default defineConfig([
         ...globals.node,
       },
     },
+    settings: {
+      react: {
+        version: "detect",
+      },
+    },
     plugins: {
       prettier: pluginPrettier,
       react: pluginReact,

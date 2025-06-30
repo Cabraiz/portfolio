@@ -53,200 +53,67 @@ const MateusDesktop: FC<MateusDesktopProps> = ({ isActive }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [forceHover, setForceHover] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
+  const [isImageLoaded, setIsImageLoaded] = useState(false);
+  const [mountImage, setMountImage] = useState(false);
 
   useEffect(() => {
     if (isActive) {
       setIsVisible(true);
     } else {
-      const timeout = setTimeout(() => setIsVisible(false), 600); // delay para sair suavemente
+      const timeout = setTimeout(() => setIsVisible(false), 600);
       return () => clearTimeout(timeout);
     }
   }, [isActive]);
 
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setMountImage(true);
+    }, 300);
+    return () => clearTimeout(timeout);
+  }, []);
+
   const openResumeTab = () => window.open("/resume", "_blank");
 
-return (
-  <div
-    ref={containerRef}
-    style={{
-      position: "relative",
-    }}
-  >
-    {/* Conteúdo com transições suaves */}
+  return (
     <div
+      ref={containerRef}
       style={{
-        opacity: isActive ? 1 : 0.01, // nunca totalmente invisível no mount
-        transform: isActive
-          ? "scale(1) translateY(0)"
-          : "scale(0.98) translateY(30px)",
-        filter: isActive ? "blur(0px)" : "blur(4px)",
-        transition:
-          "opacity 1.2s ease-out, transform 1.2s ease-out, filter 1.2s ease-out",
-        willChange: "transform, opacity, filter",
-        pointerEvents: isActive ? "auto" : "none",
-        userSelect: isActive ? "auto" : "none",
+        position: "relative",
       }}
     >
-      <Container fluid style={{ paddingTop: "12vh" }}>
-        <Row className="custom-section-row">
-          <Col className="col-md-5" style={{ paddingTop: "11vh" }}>
-            <div style={{ fontSize: "4rem", fontWeight: 700, color: "#f1c40f", marginBottom: "1.5rem" }}>
-              Senior
-            </div>
+      <div
+        style={{
+          opacity: isActive ? 1 : 0.01,
+          transform: isActive
+            ? "scale(1) translateY(0)"
+            : "scale(0.98) translateY(30px)",
+          filter: isActive ? "blur(0px)" : "blur(4px)",
+          transition:
+            "opacity 1.2s ease-out, transform 1.2s ease-out, filter 1.2s ease-out",
+          willChange: "transform, opacity, filter",
+          pointerEvents: isActive ? "auto" : "none",
+          userSelect: isActive ? "auto" : "none",
+        }}
+      >
+        <Container fluid style={{ paddingTop: "12vh" }}>
+          <Row className="custom-section-row">
+            <Col className="col-md-5" style={{ paddingTop: "11vh" }}>
+              <div style={{ fontSize: "4rem", fontWeight: 700, color: "#f1c40f", marginBottom: "1.5rem" }}>
+                Senior
+              </div>
 
-            <div
-              className="font-sequel"
-              style={{
-                backgroundImage: "linear-gradient(90deg,#f1c40f 100%, #f1c40f 100%)",
-                marginBottom: "max(10px, 4vh)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "start",
-                height: "3.5rem",
-              }}
-            >
-              <RoleTitle />
-            </div>
-
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                gap: "2rem",
-                padding: "1.2rem 2rem",
-                backgroundColor: "rgba(255, 255, 255, 0.05)",
-                borderRadius: "20px",
-                backdropFilter: "blur(10px)",
-                marginBottom: "max(10px, 4vh)",
-              }}
-            >
-              {selos.map((selo) => (
-                <Tippy
-                  key={selo.key}
-                  content={
-                    <div style={{ display: "flex", gap: "1rem", maxWidth: "280px", padding: "4px" }}>
-                      <img src={selo.cat} alt="Cat" style={{ height: "11vh", borderRadius: "8px" }} />
-                      <p style={{ fontSize: "12px", margin: 0 }}>{t(`selo.${selo.key}`)}</p>
-                    </div>
-                  }
-                  placement="top"
-                  animation="fade"
-                  arrow
-                  delay={[500, 100]}
-                  theme="bubble"
-                  offset={[0, 20]}
-                >
-                  <div>
-                    <img
-                      src={selo.src}
-                      alt={selo.alt}
-                      style={{
-                        height: "40px",
-                        filter: "grayscale(100%)",
-                        opacity: 0.8,
-                        ...selo.style,
-                      }}
-                    />
-                  </div>
-                </Tippy>
-              ))}
-            </div>
-
-            <Row className="pb-2 justify-content-end">
-              <Col md={2} />
-              <Col md={5}>
-                <button
-                  className={`lux-button ${forceHover ? "lux-hover" : ""} ${isLoading ? "lux-loading" : ""}`}
-                  onClick={() => {
-                    setIsLoading(true);
-                    setForceHover(true);
-                    setTimeout(() => {
-                      window.open(
-                        isPT ? "https://wa.me/5585998575707" : "https://meet.google.com/SEULINK",
-                        "_blank"
-                      );
-                      setIsLoading(false);
-                      setForceHover(false);
-                    }, 1000);
-                  }}
-                >
-                  <div>
-                    <span>
-                      {isPT && (
-                        <img
-                          src={IconWhatsAppVector}
-                          alt="WhatsApp"
-                          style={{ height: "22px", width: "22px", marginRight: "0.4rem" }}
-                        />
-                      )}
-                      {!isLoading && <p>{isPT ? "WHATSAPP" : "MEET"}</p>}
-                    </span>
-                  </div>
-                  <div>
-                    <span>
-                      {isPT && (
-                        <img
-                          src={IconWhatsAppVector}
-                          alt="WhatsApp"
-                          style={{ height: "22px", width: "22px" }}
-                        />
-                      )}
-                      {!isLoading ? (
-                        <p>{isPT ? "VAMOS CONVERSAR" : "LET'S TALK"}</p>
-                      ) : (
-                        <div className="lux-loading-bar" />
-                      )}
-                    </span>
-                  </div>
-                </button>
-              </Col>
-              <Col md={5}>
-                <Button
-                  className="btn-trasn-w-border py-3 btn-tran-effect btn-press-effect w-100"
-                  onClick={openResumeTab}
-                >
-                  {t("buttons.downloadCV")}
-                </Button>
-              </Col>
-            </Row>
-          </Col>
-
-          <Col className="col-md-7">
-            <div
-              style={{
-                backgroundColor: "rgba(255, 255, 255, 0.1)",
-                marginLeft: "10vw",
-                padding: "4vh max(40px, 2vw)",
-                borderRadius: "20px",
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "space-evenly",
-                alignItems: "center",
-                width: "fit-content",
-                height: "100%",
-                backdropFilter: "blur(8px)",
-                gap: "4vh",
-              }}
-            >
               <div
+                className="font-sequel"
                 style={{
-                  borderRadius: "3rem",
-                  overflow: "hidden",
-                  height: "50vh",
-                  boxShadow: "0 10px 30px rgba(0,0,0,0.2)",
+                  backgroundImage: "linear-gradient(90deg,#f1c40f 100%, #f1c40f 100%)",
+                  marginBottom: "max(10px, 4vh)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "start",
+                  height: "3.5rem",
                 }}
               >
-                <Image
-                  src={perfil}
-                  alt="Profile Image"
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
-                    objectPosition: "center top",
-                  }}
-                />
+                <RoleTitle />
               </div>
 
               <div
@@ -254,41 +121,201 @@ return (
                   display: "flex",
                   justifyContent: "center",
                   alignItems: "center",
-                  gap: "1rem",
-                  width: "100%",
+                  gap: "2rem",
+                  padding: "1.2rem 2rem",
+                  backgroundColor: "rgba(255, 255, 255, 0.05)",
+                  borderRadius: "20px",
+                  backdropFilter: "blur(10px)",
+                  marginBottom: "max(10px, 4vh)",
                 }}
               >
-                <SocialButton href="https://www.linkedin.com/in/cabraiz/" icon={IconLinkendin} alt="LinkedIn" />
-                <SocialButton href="mailto:mateusccabr@gmail.com?subject=Freelance..." icon={IconGmail} alt="Gmail" />
-                <SocialButton href="https://www.instagram.com/cabraiz/" icon={IconInsta} alt="Insta" />
-                {isPT ? (
-                  <SocialButton href="https://meet.google.com/SEULINK" icon={IconMeet} alt="Meet" />
-                ) : (
-                  <SocialButton href="https://wa.me/5585998575707" icon={IconWhatsApp} alt="WhatsApp" />
-                )}
+                {selos.map((selo) => (
+                  <Tippy
+                    key={selo.key}
+                    content={
+                      <div style={{ display: "flex", gap: "1rem", maxWidth: "280px", padding: "4px" }}>
+                        <img src={selo.cat} alt="Cat" style={{ height: "11vh", borderRadius: "8px" }} />
+                        <p style={{ fontSize: "12px", margin: 0 }}>{t(`selo.${selo.key}`)}</p>
+                      </div>
+                    }
+                    placement="top"
+                    animation="fade"
+                    arrow
+                    delay={[500, 100]}
+                    theme="bubble"
+                    offset={[0, 20]}
+                  >
+                    <div>
+                      <img
+                        src={selo.src}
+                        alt={selo.alt}
+                        style={{
+                          height: "40px",
+                          filter: "grayscale(100%)",
+                          opacity: 0.8,
+                          ...selo.style,
+                        }}
+                      />
+                    </div>
+                  </Tippy>
+                ))}
               </div>
-            </div>
-          </Col>
-        </Row>
-      </Container>
+
+              <Row className="pb-2 justify-content-end">
+                <Col md={2} />
+                <Col md={5}>
+                  <button
+                    className={`lux-button ${forceHover ? "lux-hover" : ""} ${isLoading ? "lux-loading" : ""}`}
+                    onClick={() => {
+                      setIsLoading(true);
+                      setForceHover(true);
+                      setTimeout(() => {
+                        window.open(
+                          isPT ? "https://wa.me/5585998575707" : "https://meet.google.com/SEULINK",
+                          "_blank"
+                        );
+                        setIsLoading(false);
+                        setForceHover(false);
+                      }, 1000);
+                    }}
+                  >
+                    <div>
+                      <span>
+                        {isPT && (
+                          <img
+                            src={IconWhatsAppVector}
+                            alt="WhatsApp"
+                            style={{ height: "22px", width: "22px", marginRight: "0.4rem" }}
+                          />
+                        )}
+                        {!isLoading && <p>{isPT ? "WHATSAPP" : "MEET"}</p>}
+                      </span>
+                    </div>
+                    <div>
+                      <span>
+                        {isPT && (
+                          <img
+                            src={IconWhatsAppVector}
+                            alt="WhatsApp"
+                            style={{ height: "22px", width: "22px" }}
+                          />
+                        )}
+                        {!isLoading ? (
+                          <p>{isPT ? "VAMOS CONVERSAR" : "LET'S TALK"}</p>
+                        ) : (
+                          <div className="lux-loading-bar" />
+                        )}
+                      </span>
+                    </div>
+                  </button>
+                </Col>
+                <Col md={5}>
+                  <Button
+                    className="btn-trasn-w-border py-3 btn-tran-effect btn-press-effect w-100"
+                    onClick={openResumeTab}
+                  >
+                    {t("buttons.downloadCV")}
+                  </Button>
+                </Col>
+              </Row>
+            </Col>
+
+            <Col className="col-md-7">
+              <div
+                style={{
+                  backgroundColor: "rgba(255, 255, 255, 0.1)",
+                  marginLeft: "10vw",
+                  padding: "4vh max(40px, 2vw)",
+                  borderRadius: "20px",
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "space-evenly",
+                  alignItems: "center",
+                  width: "fit-content",
+                  height: "100%",
+                  backdropFilter: "blur(8px)",
+                  gap: "4vh",
+                }}
+              >
+<div
+  style={{
+    borderRadius: "3rem",
+    overflow: "hidden",
+    width: "29vw",
+    height: "29vw",
+    position: "relative",
+    boxShadow: "0 10px 30px rgba(0,0,0,0.2)",
+  }}
+>
+                  {mountImage ? (
+                    <img
+                      src={perfil}
+                      alt="Profile Image"
+                      loading="lazy"
+                      decoding="async"
+                      fetchPriority="low"
+                      onLoad={() => setIsImageLoaded(true)}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                        objectPosition: "center top",
+                        filter: isImageLoaded ? "blur(0px)" : "blur(20px)",
+                        transform: isImageLoaded ? "scale(1)" : "scale(1.1)",
+                        transition: "filter 0.7s ease, transform 0.7s ease",
+                        display: "block",
+                      }}
+                    />
+                  ) : (
+                    <div
+      style={{
+        width: "100%",
+        height: "100%",
+        background: "rgba(255,255,255,0.02)",
+        backdropFilter: "blur(4px)",
+      }}
+    />
+  )}
+</div>
+
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    gap: "1rem",
+                    width: "100%",
+                  }}
+                >
+                  <SocialButton href="https://www.linkedin.com/in/cabraiz/" icon={IconLinkendin} alt="LinkedIn" />
+                  <SocialButton href="mailto:mateusccabr@gmail.com?subject=Freelance..." icon={IconGmail} alt="Gmail" />
+                  <SocialButton href="https://www.instagram.com/cabraiz/" icon={IconInsta} alt="Insta" />
+                  {isPT ? (
+                    <SocialButton href="https://meet.google.com/SEULINK" icon={IconMeet} alt="Meet" />
+                  ) : (
+                    <SocialButton href="https://wa.me/5585998575707" icon={IconWhatsApp} alt="WhatsApp" />
+                  )}
+                </div>
+              </div>
+            </Col>
+          </Row>
+        </Container>
+      </div>
+
+      {!isActive && (
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            backgroundColor: "transparent",
+            zIndex: 999,
+            pointerEvents: "auto",
+          }}
+        />
+      )}
     </div>
-
-     {/* 🔒 Cobertura invisível que impede interação (sem remover DOM) */}
-    {!isActive && (
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          backgroundColor: "transparent",
-          zIndex: 999,
-          pointerEvents: "auto",
-        }}
-      />
-    )}
-  </div>
-);
-
-}
+  );
+};
 
 export function SocialButton({ href, icon, alt, isScrollToTop }: SocialButtonProps) {
   return (

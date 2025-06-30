@@ -18,3 +18,41 @@ html, body {
 .lenis.lenis-smooth {
   scroll-behavior: auto !important;
 }
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.lux-skeleton {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(241, 196, 15, 0.2);
+  border-radius: 3rem;
+  z-index: 1;
+}
+
+.lux-spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid rgba(241, 196, 15, 0.3);
+  border-top-color: #f1c40f;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+

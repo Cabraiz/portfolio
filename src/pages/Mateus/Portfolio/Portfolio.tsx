@@ -37,17 +37,15 @@ const Portfolio: React.FC<PortfolioProps> = ({ isActive }) => {
   }, [isActive]);
 
   return (
-    <div
-      ref={containerRef}
-      style={{ position: "relative" }}
-    >
+    <div ref={containerRef} style={{ position: "relative" }}>
       <div
         className={styles.container}
         style={{
           opacity: isActive ? 1 : 0.01, // nunca zera 100%
           transform: isActive ? "translateY(0)" : "translateY(30px)",
           filter: isActive ? "blur(0px)" : "blur(4px)",
-          transition: "opacity 0.6s ease-out, transform 0.6s ease-out, filter 0.6s ease-out",
+          transition:
+            "opacity 0.6s ease-out, transform 0.6s ease-out, filter 0.6s ease-out",
           willChange: "transform, opacity, filter",
           pointerEvents: isActive ? "auto" : "none",
           userSelect: isActive ? "auto" : "none",
@@ -60,8 +58,8 @@ const Portfolio: React.FC<PortfolioProps> = ({ isActive }) => {
                 tier === "S"
                   ? styles.tierS
                   : tier === "A"
-                  ? styles.tierA
-                  : styles.tierB
+                    ? styles.tierA
+                    : styles.tierB
               }`}
             >
               {tier} Tier
