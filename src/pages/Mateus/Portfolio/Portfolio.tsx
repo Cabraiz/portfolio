@@ -28,35 +28,52 @@ const Portfolio: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const lenis = useLenis();
 
-  useLayoutEffect(() => {
-    if (!containerRef.current || !lenis?.rootElement) return;
+useLayoutEffect(() => {
+  if (!containerRef.current || !lenis?.rootElement) return;
 
-    const ctx = gsap.context(() => {
-      gsap.fromTo(
-        containerRef.current,
-        {
-          opacity: 0,
-          y: 30,
-          filter: "blur(4px)",
+  const cards = containerRef.current.querySelectorAll(".animatedCard");
+
+  const ctx = gsap.context(() => {
+    cards.forEach((card) => {
+      ScrollTrigger.create({
+        trigger: card,
+        scroller: lenis.rootElement,
+        start: "top 70%",
+        end: "bottom 30%",
+        onEnter: () => {
+          gsap.to(card, {
+            height: "60vh",
+            duration: 1,
+            ease: "power3.out",
+          });
         },
-        {
-          opacity: 1,
-          y: 0,
-          filter: "blur(0px)",
-          duration: 0.8,
-          ease: "power3.out",
-          scrollTrigger: {
-            trigger: containerRef.current,
-            scroller: lenis.rootElement,
-            start: "top 80%",
-            toggleActions: "play none none reverse",
-          },
-        }
-      );
+        onLeave: () => {
+          gsap.to(card, {
+            height: "20vh",
+            duration: 1,
+            ease: "power3.inOut",
+          });
+        },
+        onEnterBack: () => {
+          gsap.to(card, {
+            height: "60vh",
+            duration: 1,
+            ease: "power3.out",
+          });
+        },
+        onLeaveBack: () => {
+          gsap.to(card, {
+            height: "20vh",
+            duration: 1,
+            ease: "power3.inOut",
+          });
+        },
+      });
     });
+  });
 
-    return () => ctx.revert();
-  }, [lenis]);
+  return () => ctx.revert();
+}, [lenis]);
 
   return (
     <div ref={containerRef} style={{ position: "relative" }}>
@@ -85,7 +102,8 @@ const Portfolio: React.FC = () => {
             >
               {items.map((item) => (
                 <div
-                  key={item.name}
+                    key={item.name}
+  className="animatedCard"
                   style={{
                     backgroundColor: "rgba(255, 255, 255, 0.05)",
                     border: "1px solid rgba(255, 255, 255, 0.1)",
