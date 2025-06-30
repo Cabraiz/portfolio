@@ -1,4 +1,4 @@
-import React, { CSSProperties, useEffect, useRef, useState } from "react";
+import React, { CSSProperties, useEffect, useLayoutEffect } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useLenis } from "lenis/react";
@@ -53,36 +53,31 @@ const contentContainerStyle: CSSProperties = {
 const LandingPage: React.FC = () => {
   const lenis = useLenis();
   useLenisScrollTrigger();
-  const [activeSection, setActiveSection] = useState("home");
 
-  useEffect(() => {
-    if (!lenis) return;
+  // ✅ Agora não usamos mais activeSection!
+  useLayoutEffect(() => {
+  if (!lenis) return;
 
-    const triggers: ScrollTrigger[] = [];
-    const sections = gsap.utils.toArray<HTMLElement>("section");
+  const sections = gsap.utils.toArray<HTMLElement>("section");
 
-    sections.forEach((section) => {
-      const trigger = ScrollTrigger.create({
-        trigger: section,
-        start: "top center",
-        end: "bottom center",
-        onEnter: () => {
-          setActiveSection(section.id);
-          window.history.replaceState(null, "", `#${section.id}`);
-        },
-        onEnterBack: () => {
-          setActiveSection(section.id);
-          window.history.replaceState(null, "", `#${section.id}`);
-        },
-      });
-
-      triggers.push(trigger);
+  sections.forEach((section) => {
+    ScrollTrigger.create({
+      trigger: section,
+      start: "top center",
+      end: "bottom center",
+      toggleClass: { targets: section, className: "is-active" },
+      scroller: lenis.rootElement, // ESSENCIAL para Lenis
     });
+  });
 
-    return () => {
-      triggers.forEach((trigger) => trigger.kill());
-    };
-  }, [lenis]);
+  // ESSENCIAL para recalcular tudo depois que criou os triggers
+  ScrollTrigger.refresh();
+
+  return () => {
+    ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
+  };
+}, [lenis]);
+
 
   useEffect(() => {
     const handleVisibilityChange = () => {
@@ -104,37 +99,37 @@ const LandingPage: React.FC = () => {
     <div style={containerStyle}>
       <section id="home" style={sectionStyle}>
         <div style={contentContainerStyle}>
-          <MateusDesktop isActive={activeSection === "home"} />
+          <MateusDesktop />
         </div>
       </section>
 
       <section id="portfolio" style={sectionStyle}>
         <div style={contentContainerStyle}>
-          <Portfolio isActive={activeSection === "portfolio"} />
+          <Portfolio />
         </div>
       </section>
 
       <section id="roadmap" style={sectionStyle}>
         <div style={contentContainerStyle}>
-          <RoadMap isActive={activeSection === "roadmap"} />
+          <RoadMap />
         </div>
       </section>
 
       <section id="pricing" style={sectionStyle}>
         <div style={contentContainerStyle}>
-          <Pricing isActive={activeSection === "pricing"} />
+          <Pricing />
         </div>
       </section>
 
       <section id="live" style={sectionStyle}>
         <div style={contentContainerStyle}>
-          <Live isActive={activeSection === "live"} />
+          <Live />
         </div>
       </section>
 
       <section id="contact" style={sectionStyle}>
         <div style={contentContainerStyle}>
-          <ContactDesktop isActive={activeSection === "contact"} />
+          <ContactDesktop />
         </div>
       </section>
     </div>

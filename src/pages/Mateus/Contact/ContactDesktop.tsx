@@ -1,21 +1,43 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useLayoutEffect, useRef } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useLenis } from "lenis/react";
 
-interface ContactProps {
-  isActive: boolean;
-}
+gsap.registerPlugin(ScrollTrigger);
 
-const Contact: React.FC<ContactProps> = ({ isActive }) => {
+const Contact: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [isVisible, setIsVisible] = useState(false);
+  const lenis = useLenis(); // ✅ Pegando Lenis
 
-  useEffect(() => {
-    if (isActive) {
-      setIsVisible(true);
-    } else {
-      const timeout = setTimeout(() => setIsVisible(false), 600);
-      return () => clearTimeout(timeout);
-    }
-  }, [isActive]);
+  useLayoutEffect(() => {
+    if (!containerRef.current || !lenis?.rootElement) return;
+
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        containerRef.current,
+        {
+          opacity: 0,
+          y: 40,
+          filter: "blur(4px)",
+        },
+        {
+          opacity: 1,
+          y: 0,
+          filter: "blur(0px)",
+          duration: 1,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: containerRef.current,
+            scroller: lenis.rootElement, // ✅ ESSENCIAL para Lenis
+            start: "top 80%",
+            toggleActions: "play none none reverse",
+          },
+        }
+      );
+    });
+
+    return () => ctx.revert();
+  }, [lenis]);
 
   return (
     <div
@@ -28,13 +50,6 @@ const Contact: React.FC<ContactProps> = ({ isActive }) => {
         alignItems: "center",
         justifyContent: "center",
         flexDirection: "column",
-        opacity: isActive ? 1 : 0,
-        transform: isActive ? "translateY(0)" : "translateY(40px)",
-        filter: isActive ? "blur(0px)" : "blur(4px)",
-        transition: "opacity 0.8s ease-out, transform 0.8s ease-out, filter 0.8s ease-out",
-        willChange: "transform, opacity, filter",
-        visibility: isVisible ? "visible" : "hidden",
-        pointerEvents: isActive ? "auto" : "none",
       }}
     >
       <h1 style={{ fontSize: "4vw" }}>Contact</h1>
