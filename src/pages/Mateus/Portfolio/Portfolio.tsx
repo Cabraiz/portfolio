@@ -2,7 +2,6 @@ import React, { useLayoutEffect, useRef } from "react";
 import styles from "./Portfolio.module.css";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useLenis } from "lenis/react";
 
 import imagem1 from "../../../assets/Mateus/portfolio/imagem1.png";
 import imagem2 from "../../../assets/Mateus/portfolio/imagem2.png";
@@ -26,10 +25,9 @@ const portfolioData = {
 
 const Portfolio: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const lenis = useLenis(); // ✅ Aqui pegamos o Lenis
 
   useLayoutEffect(() => {
-    if (!containerRef.current || !lenis?.rootElement) return;
+    if (!containerRef.current) return;
 
     const ctx = gsap.context(() => {
       gsap.fromTo(
@@ -47,7 +45,6 @@ const Portfolio: React.FC = () => {
           ease: "power3.out",
           scrollTrigger: {
             trigger: containerRef.current,
-            scroller: lenis.rootElement, // ✅ ESSENCIAL!
             start: "top 80%",
             toggleActions: "play none none reverse",
           },
@@ -56,7 +53,7 @@ const Portfolio: React.FC = () => {
     });
 
     return () => ctx.revert();
-  }, [lenis]);
+  }, []);
 
   return (
     <div ref={containerRef} style={{ position: "relative" }}>
