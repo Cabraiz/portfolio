@@ -54,7 +54,6 @@ const MateusDesktop: FC<MateusDesktopProps> = ({ isActive }) => {
   const [forceHover, setForceHover] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [isImageLoaded, setIsImageLoaded] = useState(false);
-  const [mountImage, setMountImage] = useState(false);
 
   useEffect(() => {
     if (isActive) {
@@ -64,13 +63,6 @@ const MateusDesktop: FC<MateusDesktopProps> = ({ isActive }) => {
       return () => clearTimeout(timeout);
     }
   }, [isActive]);
-
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      setMountImage(true);
-    }, 300);
-    return () => clearTimeout(timeout);
-  }, []);
 
   const openResumeTab = () => window.open("/resume", "_blank");
 
@@ -237,46 +229,35 @@ const MateusDesktop: FC<MateusDesktopProps> = ({ isActive }) => {
                   gap: "4vh",
                 }}
               >
-<div
-  style={{
-    borderRadius: "3rem",
-    overflow: "hidden",
-    width: "29vw",
-    height: "29vw",
-    position: "relative",
-    boxShadow: "0 10px 30px rgba(0,0,0,0.2)",
-  }}
->
-                  {mountImage ? (
-                    <img
-                      src={perfil}
-                      alt="Profile Image"
-                      loading="lazy"
-                      decoding="async"
-                      fetchPriority="low"
-                      onLoad={() => setIsImageLoaded(true)}
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "cover",
-                        objectPosition: "center top",
-                        filter: isImageLoaded ? "blur(0px)" : "blur(20px)",
-                        transform: isImageLoaded ? "scale(1)" : "scale(1.1)",
-                        transition: "filter 0.7s ease, transform 0.7s ease",
-                        display: "block",
-                      }}
-                    />
-                  ) : (
-                    <div
-      style={{
-        width: "100%",
-        height: "100%",
-        background: "rgba(255,255,255,0.02)",
-        backdropFilter: "blur(4px)",
-      }}
-    />
-  )}
-</div>
+                <div
+                  style={{
+                    borderRadius: "3rem",
+                    overflow: "hidden",
+                    width: "29vw",
+                    height: "29vw",
+                    position: "relative",
+                    boxShadow: "0 10px 30px rgba(0,0,0,0.2)",
+                  }}
+                >
+                  <img
+                    src={perfil}
+                    alt="Mateus"
+                    loading="eager"
+                    decoding="async"
+                    fetchPriority="high"
+                    onLoad={() => setIsImageLoaded(true)}
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                      objectPosition: "center top",
+                      filter: isImageLoaded ? "blur(0px)" : "blur(20px)",
+                      transform: isImageLoaded ? "scale(1)" : "scale(1.1)",
+                      transition: "filter 0.7s ease, transform 0.7s ease",
+                      display: "block",
+                    }}
+                  />
+                </div>
 
                 <div
                   style={{
