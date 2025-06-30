@@ -78,74 +78,73 @@ const Portfolio: React.FC = () => {
             <div
               style={{
                 display: "flex",
+                flexDirection: "column",
                 gap: "clamp(1rem, 3vw, 2rem)",
-                flexWrap: "wrap",
-                justifyContent: "center",
+                alignItems: "center",
               }}
             >
               {items.map((item) => (
                 <div
-  key={item.name}
-  style={{
-    backgroundColor: "rgba(255, 255, 255, 0.05)",
-    border: "1px solid rgba(255, 255, 255, 0.1)",
-    borderRadius: "16px",
-    padding: "0",
-    height: "60vh",             // ✅ altura fixa
-    aspectRatio: item.aspectRatio, // ✅ largura calculada pelo ratio
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "flex-end",
-    textAlign: "center",
-    overflow: "hidden",
-    backdropFilter: "blur(16px)",
-    boxShadow:
-      "0 8px 24px rgba(0,0,0,0.2), inset 0 0 8px rgba(255,255,255,0.04)",
-    transition: "transform 0.35s ease, box-shadow 0.35s ease",
-    willChange: "transform, box-shadow",
-    cursor: "pointer",
-    position: "relative",
-  }}
-  onMouseEnter={(e) => {
-    const el = e.currentTarget;
-    el.style.transform = "translateY(-8px) scale(1.02)";
-    el.style.boxShadow =
-      "0 12px 28px rgba(255,255,255,0.15), inset 0 0 16px rgba(255,255,255,0.08)";
-  }}
-  onMouseLeave={(e) => {
-    const el = e.currentTarget;
-    el.style.transform = "none";
-    el.style.boxShadow =
-      "0 8px 24px rgba(0,0,0,0.2), inset 0 0 8px rgba(255,255,255,0.04)";
-  }}
->
-  <img
-    src={item.image}
-    alt={item.name}
-    style={{
-      width: "100%",
-      height: "100%",
-      objectFit: "cover",
-    }}
-  />
-  <span
-    style={{
-      position: "absolute",
-      bottom: "0",
-      width: "100%",
-      background: "rgba(0,0,0,0.5)",
-      padding: "0.5rem",
-      color: "#eee",
-      fontWeight: 600,
-      fontSize: "1rem",
-      letterSpacing: "0.5px",
-    }}
-  >
-    {item.name}
-  </span>
-</div>
-
-
+                  key={item.name}
+                  style={{
+                    backgroundColor: "rgba(255, 255, 255, 0.05)",
+                    border: "1px solid rgba(255, 255, 255, 0.1)",
+                    borderRadius: "16px",
+                    padding: "0",
+                    height: "20vh",
+                    aspectRatio: item.aspectRatio,
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "flex-end",
+                    textAlign: "center",
+                    overflow: "hidden",
+                    backdropFilter: "blur(16px)",
+                    boxShadow:
+                      "0 8px 24px rgba(0,0,0,0.2), inset 0 0 8px rgba(255,255,255,0.04)",
+                    transition: "transform 0.35s ease, box-shadow 0.35s ease",
+                    willChange: "transform, box-shadow",
+                    cursor: "pointer",
+                    position: "relative",
+                    width: "min(90%, 800px)", // opcional: limitar largura máxima
+                  }}
+                  onMouseEnter={(e) => {
+                    const el = e.currentTarget;
+                    el.style.transform = "translateY(-8px) scale(1.02)";
+                    el.style.boxShadow =
+                      "0 12px 28px rgba(255,255,255,0.15), inset 0 0 16px rgba(255,255,255,0.08)";
+                  }}
+                  onMouseLeave={(e) => {
+                    const el = e.currentTarget;
+                    el.style.transform = "none";
+                    el.style.boxShadow =
+                      "0 8px 24px rgba(0,0,0,0.2), inset 0 0 8px rgba(255,255,255,0.04)";
+                  }}
+                >
+                  <img
+                    src={item.image}
+                    alt={item.name}
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                  />
+                  <span
+                    style={{
+                      position: "absolute",
+                      bottom: "0",
+                      width: "100%",
+                      background: "rgba(0,0,0,0.5)",
+                      padding: "0.5rem",
+                      color: "#eee",
+                      fontWeight: 600,
+                      fontSize: "1rem",
+                      letterSpacing: "0.5px",
+                    }}
+                  >
+                    {item.name}
+                  </span>
+                </div>
               ))}
             </div>
           </div>
