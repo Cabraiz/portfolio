@@ -28,55 +28,135 @@ const Portfolio: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const lenis = useLenis();
 
-useLayoutEffect(() => {
-  if (!containerRef.current || !lenis?.rootElement) return;
+  useLayoutEffect(() => {
+    if (!containerRef.current || !lenis?.rootElement) return;
 
-  const cards = containerRef.current.querySelectorAll(".animatedCard");
+    const cards = Array.from(
+      containerRef.current.querySelectorAll(".animatedCard")
+    ) as HTMLElement[];
 
-  const ctx = gsap.context(() => {
+    const triggers: ScrollTrigger[] = [];
+
     cards.forEach((card) => {
-      ScrollTrigger.create({
-        trigger: card,
-        scroller: lenis.rootElement,
-        start: "top 70%",
-        end: "bottom 30%",
-        onEnter: () => {
-          gsap.to(card, {
-            height: "60vh",
-            duration: 1,
-            ease: "power3.out",
-          });
-        },
-        onLeave: () => {
-          gsap.to(card, {
-            height: "20vh",
-            duration: 1,
-            ease: "power3.inOut",
-          });
-        },
-        onEnterBack: () => {
-          gsap.to(card, {
-            height: "60vh",
-            duration: 1,
-            ease: "power3.out",
-          });
-        },
-        onLeaveBack: () => {
-          gsap.to(card, {
-            height: "20vh",
-            duration: 1,
-            ease: "power3.inOut",
-          });
-        },
-      });
-    });
-  });
+      const caption = card.querySelector("span");
+      if (!caption) return;
 
-  return () => ctx.revert();
-}, [lenis]);
+      // Inicializa estado contraído
+      gsap.set(card, {
+        height: "20vh",
+        scale: 0.95,
+        opacity: 0.8,
+        boxShadow:
+          "0 8px 24px rgba(0,0,0,0.2), inset 0 0 8px rgba(255,255,255,0.04)",
+      });
+      gsap.set(caption, {
+        opacity: 0.6,
+        y: 10,
+      });
+
+      const trigger = ScrollTrigger.create({
+  trigger: card,
+  scroller: lenis.rootElement,
+  start: "center center",
+  end: "+=40%", 
+  pin: true,
+  pinSpacing: true,
+  scrub: true,
+  onEnter: () => {
+    gsap.to(card, {
+      height: "60vh",
+      scale: 1,
+      opacity: 1,
+      boxShadow:
+        "0 24px 48px rgba(0,0,0,0.4), inset 0 0 16px rgba(255,255,255,0.15)",
+      duration: 0.4, // levemente mais rápido
+      ease: "power3.out",
+      overwrite: "auto",
+    });
+    gsap.to(caption, {
+      opacity: 1,
+      y: 0,
+      duration: 0.3,
+      ease: "power2.out",
+      overwrite: "auto",
+    });
+  },
+  onLeave: () => {
+    gsap.to(card, {
+      height: "20vh",
+      scale: 0.95,
+      opacity: 0.8,
+      boxShadow:
+        "0 8px 24px rgba(0,0,0,0.2), inset 0 0 8px rgba(255,255,255,0.04)",
+      duration: 0.4,
+      ease: "power3.inOut",
+      overwrite: "auto",
+    });
+    gsap.to(caption, {
+      opacity: 0.6,
+      y: 10,
+      duration: 0.3,
+      ease: "power3.inOut",
+      overwrite: "auto",
+    });
+  },
+  onEnterBack: () => {
+    gsap.to(card, {
+      height: "60vh",
+      scale: 1,
+      opacity: 1,
+      boxShadow:
+        "0 24px 48px rgba(0,0,0,0.4), inset 0 0 16px rgba(255,255,255,0.15)",
+      duration: 0.4,
+      ease: "power3.out",
+      overwrite: "auto",
+    });
+    gsap.to(caption, {
+      opacity: 1,
+      y: 0,
+      duration: 0.3,
+      ease: "power2.out",
+      overwrite: "auto",
+    });
+  },
+  onLeaveBack: () => {
+    gsap.to(card, {
+      height: "20vh",
+      scale: 0.95,
+      opacity: 0.8,
+      boxShadow:
+        "0 8px 24px rgba(0,0,0,0.2), inset 0 0 8px rgba(255,255,255,0.04)",
+      duration: 0.4,
+      ease: "power3.inOut",
+      overwrite: "auto",
+    });
+    gsap.to(caption, {
+      opacity: 0.6,
+      y: 10,
+      duration: 0.3,
+      ease: "power3.inOut",
+      overwrite: "auto",
+    });
+  },
+});
+
+
+      triggers.push(trigger);
+    });
+
+    return () => {
+      triggers.forEach((t) => t.kill());
+    };
+  }, [lenis]);
 
   return (
-    <div ref={containerRef} style={{ position: "relative" }}>
+    <div
+      ref={containerRef}
+      style={{
+        position: "relative",
+        paddingBottom: "200vh", // mais espaço no fim para scroll total
+      }}
+    >
       <div className={styles.container}>
         {Object.entries(portfolioData).map(([tier, items]) => (
           <div key={tier} className={styles.tier}>
@@ -102,67 +182,57 @@ useLayoutEffect(() => {
             >
               {items.map((item) => (
                 <div
-                    key={item.name}
+  key={item.name}
   className="animatedCard"
-                  style={{
-                    backgroundColor: "rgba(255, 255, 255, 0.05)",
-                    border: "1px solid rgba(255, 255, 255, 0.1)",
-                    borderRadius: "16px",
-                    padding: "0",
-                    height: "20vh",
-                    aspectRatio: item.aspectRatio,
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "flex-end",
-                    textAlign: "center",
-                    overflow: "hidden",
-                    backdropFilter: "blur(16px)",
-                    boxShadow:
-                      "0 8px 24px rgba(0,0,0,0.2), inset 0 0 8px rgba(255,255,255,0.04)",
-                    transition: "transform 0.35s ease, box-shadow 0.35s ease",
-                    willChange: "transform, box-shadow",
-                    cursor: "pointer",
-                    position: "relative",
-                    width: "min(90%, 800px)", // opcional: limitar largura máxima
-                  }}
-                  onMouseEnter={(e) => {
-                    const el = e.currentTarget;
-                    el.style.transform = "translateY(-8px) scale(1.02)";
-                    el.style.boxShadow =
-                      "0 12px 28px rgba(255,255,255,0.15), inset 0 0 16px rgba(255,255,255,0.08)";
-                  }}
-                  onMouseLeave={(e) => {
-                    const el = e.currentTarget;
-                    el.style.transform = "none";
-                    el.style.boxShadow =
-                      "0 8px 24px rgba(0,0,0,0.2), inset 0 0 8px rgba(255,255,255,0.04)";
-                  }}
-                >
-                  <img
-                    src={item.image}
-                    alt={item.name}
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "cover",
-                    }}
-                  />
-                  <span
-                    style={{
-                      position: "absolute",
-                      bottom: "0",
-                      width: "100%",
-                      background: "rgba(0,0,0,0.5)",
-                      padding: "0.5rem",
-                      color: "#eee",
-                      fontWeight: 600,
-                      fontSize: "1rem",
-                      letterSpacing: "0.5px",
-                    }}
-                  >
-                    {item.name}
-                  </span>
-                </div>
+  style={{
+    backgroundColor: "rgba(255, 255, 255, 0.05)",
+    border: "1px solid rgba(255, 255, 255, 0.1)",
+    borderRadius: "16px",
+    padding: "0",
+    height: "20vh", // continua com altura inicial 20vh
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "flex-end",
+    textAlign: "center",
+    overflow: "hidden",
+    backdropFilter: "blur(16px)",
+    boxShadow:
+      "0 8px 24px rgba(0,0,0,0.2), inset 0 0 8px rgba(255,255,255,0.04)",
+    transition: "transform 0.35s ease, box-shadow 0.35s ease",
+    willChange: "transform, box-shadow",
+    cursor: "pointer",
+    position: "relative",
+    width: "min(90%, 800px)", // largura permanece
+  }}
+>
+  <img
+    src={item.image}
+    alt={item.name}
+    style={{
+      width: "100%",
+      height: "100%",
+      objectFit: "cover",
+      transition: "none",
+    }}
+  />
+  <span
+    style={{
+      position: "absolute",
+      bottom: "0",
+      width: "100%",
+      background: "rgba(0,0,0,0.5)",
+      padding: "0.5rem",
+      color: "#eee",
+      fontWeight: 600,
+      fontSize: "1rem",
+      letterSpacing: "0.5px",
+      opacity: 0.6,
+    }}
+  >
+    {item.name}
+  </span>
+</div>
+
               ))}
             </div>
           </div>
