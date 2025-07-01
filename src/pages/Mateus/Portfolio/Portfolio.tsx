@@ -57,13 +57,12 @@ const Portfolio: React.FC = () => {
         trigger: card,
         scroller: lenis.rootElement,
         start: "center center",
-        end: "+=40%",
+        end: "+=80%", // Mais tempo de animação
         pin: true,
-        anticipatePin: 1, // importante para reduzir conflitos
+        anticipatePin: 1,
         scrub: true,
 
         onUpdate: (self) => {
-          // Atualiza label
           if (movingLabel && movingLabel.textContent !== itemName) {
             movingLabel.textContent = itemName;
           }
@@ -153,15 +152,15 @@ const Portfolio: React.FC = () => {
       ref={containerRef}
       style={{
         position: "relative",
-        paddingBottom: "300vh", // Extra espaço no final
+        paddingBottom: "300vh",
       }}
     >
       <div className={styles.container} style={{ position: "relative" }}>
-        {/* Label que cruza a tela */}
+        {/* Label fora dos cards, centralizado na linha */}
         <div
           className="movingLabel"
           style={{
-            position: "absolute",
+            position: "fixed",
             top: "50%",
             left: "0",
             width: "100%",
@@ -171,7 +170,7 @@ const Portfolio: React.FC = () => {
             fontSize: "clamp(2rem, 8vw, 5rem)",
             fontWeight: 900,
             color: "transparent",
-            WebkitTextStroke: "1px rgba(255,255,255,0.5)",
+            WebkitTextStroke: "1px rgba(255,255,255,0.6)",
             textTransform: "uppercase",
             letterSpacing: "0.1em",
             whiteSpace: "nowrap",
@@ -199,7 +198,7 @@ const Portfolio: React.FC = () => {
               style={{
                 display: "flex",
                 flexDirection: "column",
-                gap: "clamp(12rem, 25vh, 16rem)", // GAP GRANDE
+                gap: "clamp(12rem, 25vh, 16rem)",
                 alignItems: "center",
               }}
             >
@@ -215,9 +214,8 @@ const Portfolio: React.FC = () => {
                     padding: "0",
                     height: "20vh",
                     display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "flex-end",
-                    textAlign: "center",
+                    justifyContent: "center",
+                    alignItems: "center",
                     overflow: "hidden",
                     backdropFilter: "blur(16px)",
                     boxShadow:
@@ -236,7 +234,6 @@ const Portfolio: React.FC = () => {
                       width: "100%",
                       height: "100%",
                       objectFit: "cover",
-                      transition: "none",
                     }}
                   />
                 </div>
