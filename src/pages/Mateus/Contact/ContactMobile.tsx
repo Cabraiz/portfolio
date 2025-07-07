@@ -1,4 +1,4 @@
-import React, { FC } from "react";
+import { FC } from "react";
 import { Image } from "react-bootstrap";
 import perfil from "../../../assets/Mateus/perfil.webp";
 

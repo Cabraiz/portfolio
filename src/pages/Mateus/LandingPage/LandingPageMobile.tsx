@@ -1,4 +1,4 @@
-import React, { CSSProperties, useEffect, useState } from "react";
+import React, { CSSProperties, useEffect, useLayoutEffect } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useLenis } from "lenis/react";
@@ -7,10 +7,11 @@ import Portfolio from "../Portfolio/Portfolio";
 import RoadMap from "../RoadMap/RoadMap";
 import Pricing from "../Pricing/Pricing";
 import Live from "../Live/Live";
-import ContactMobile from "../Contact/ContactMobile";
-import MateusMobile from "../MateusMobile";
 
 import { useLenisScrollTrigger } from "../../../hooks/useLenisScrollTrigger";
+import MateusMobile from "../MateusMobile";
+import ContactMobile from "../Contact/ContactMobile";
+import RoadMapMobile from "../RoadMap/RoadMapMobile";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -26,7 +27,7 @@ const sectionBackground: CSSProperties = {
     radial-gradient(circle at bottom right, rgba(255, 215, 0, 0.08), transparent 70%),
     linear-gradient(135deg, #0b0b0b 0%, #1a1a1a 50%, #0b0b0b 100%)
   `,
-  backgroundAttachment: "fixed",
+  backgroundAttachment: "scroll",
   backgroundBlendMode: "screen, overlay, normal",
   backgroundRepeat: "no-repeat",
   backgroundSize: "cover",
@@ -34,7 +35,7 @@ const sectionBackground: CSSProperties = {
 
 const sectionStyle: CSSProperties = {
   ...sectionBackground,
-  minHeight: "100dvh",
+  minHeight: "100vh",
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
@@ -54,65 +55,77 @@ const LandingPageMobile: React.FC = () => {
   const lenis = useLenis();
   useLenisScrollTrigger();
 
-  const [activeSection, setActiveSection] = useState<string>("home");
+  // ✅ Agora não usamos mais activeSection!
+  useLayoutEffect(() => {
+  if (!lenis) return;
+
+  const sections = gsap.utils.toArray<HTMLElement>("section");
+
+  sections.forEach((section) => {
+    ScrollTrigger.create({
+      trigger: section,
+      start: "top center",
+      end: "bottom center",
+      toggleClass: { targets: section, className: "is-active" },
+      scroller: lenis.rootElement, // ESSENCIAL para Lenis
+    });
+  });
+
+  // ESSENCIAL para recalcular tudo depois que criou os triggers
+  ScrollTrigger.refresh();
+
+  return () => {
+    ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
+  };
+}, [lenis]);
+
 
   useEffect(() => {
-    if (!lenis) return;
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        lenis?.stop?.();
+      } else {
+        lenis?.start?.();
+        ScrollTrigger.refresh();
+      }
+    };
 
-    const sections = gsap.utils.toArray<HTMLElement>("section");
-
-    sections.forEach((section) => {
-      ScrollTrigger.create({
-        trigger: section,
-        start: "top center",
-        end: "bottom center",
-        onEnter: () => {
-          const id = section.id;
-          setActiveSection(id);
-          window.history.replaceState(null, "", `#${id}`);
-        },
-        onEnterBack: () => {
-          const id = section.id;
-          setActiveSection(id);
-          window.history.replaceState(null, "", `#${id}`);
-        },
-      });
-    });
-
+    document.addEventListener("visibilitychange", handleVisibilityChange);
     return () => {
-      ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, [lenis]);
 
   return (
     <div style={containerStyle}>
+      
       <section id="home" style={sectionStyle}>
         <div style={contentContainerStyle}>
-          <MateusMobile style={sectionStyle} />
+          <MateusMobile />
         </div>
       </section>
 
       <section id="portfolio" style={sectionStyle}>
         <div style={contentContainerStyle}>
-          <Portfolio isActive={activeSection === "portfolio"} />
-        </div>
-      </section>
-
-      <section id="roadmap" style={sectionStyle}>
-        <div style={contentContainerStyle}>
-          <RoadMap isActive={activeSection === "roadmap"} />
+          <Portfolio />
         </div>
       </section>
 
       <section id="pricing" style={sectionStyle}>
         <div style={contentContainerStyle}>
-          <Pricing isActive={activeSection === "pricing"} />
+          <Pricing />
         </div>
       </section>
 
       <section id="live" style={sectionStyle}>
         <div style={contentContainerStyle}>
-          <Live isActive={activeSection === "live"} />
+          <Live />
+        </div>
+      </section>
+
+      <section id="roadmap" style={sectionStyle}>
+        <div style={contentContainerStyle}>
+          <RoadMapMobile />
         </div>
       </section>
 

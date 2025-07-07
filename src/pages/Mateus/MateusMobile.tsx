@@ -1,235 +1,153 @@
-import zeroDois from "../../assets/Mateus/home/01.png";
-import zeroUm from "../../assets/Mateus/home/02.png";
+import React, { useLayoutEffect, useRef } from "react";
+import styled, { keyframes } from "styled-components";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useLenis } from "lenis/react";
+import logo from "../../assets/icones/logo.svg";
 
-import React from "react";
+gsap.registerPlugin(ScrollTrigger);
 
-const MateusMobile: React.FC<{ style?: React.CSSProperties }> = ({ style }) => {
+// Animação de brilho dourado
+const shine = keyframes`
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+`;
+
+// Partículas flutuantes
+const float = keyframes`
+  0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
+`;
+
+const Container = styled.div`
+  position: relative;
+  min-height: 100vh;
+  background: linear-gradient(160deg, #0a0a0a, #1a1a1a);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 2rem;
+`;
+
+const Logo = styled.img`
+  width: 120px;
+  height: auto;
+  margin-bottom: 2rem;
+  animation: ${shine} 4s linear infinite;
+  background: linear-gradient(90deg, #d4af37, #fff, #d4af37);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+`;
+
+const Title = styled.h1`
+  font-size: 4vw;
+  font-weight: 700;
+  background: linear-gradient(90deg, #d4af37, #fff);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  text-align: center;
+  margin: 0;
+`;
+
+const Subtitle = styled.p`
+  font-size: 4vw;
+  opacity: 0.8;
+  text-align: center;
+  max-width: 600px;
+  margin-top: 1rem;
+`;
+
+const CallToAction = styled.button`
+  margin-top: 2rem;
+  background: #d4af37;
+  color: #111;
+  border: none;
+  padding: 1rem 2rem;
+  font-size: 4vw;
+  font-weight: 600;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  &:hover {
+    background: #fff;
+    color: #000;
+  }
+`;
+
+// Partículas decorativas
+const Particle = styled.span<{ left: string; size: string; delay: string; duration: string }>`
+  position: absolute;
+  bottom: -10vh;
+  left: ${(props) => props.left};
+  width: ${(props) => props.size};
+  height: ${(props) => props.size};
+  background: radial-gradient(circle, #d4af37 0%, transparent 70%);
+  border-radius: 50%;
+  opacity: 0.6;
+  animation: ${float} ${(props) => props.duration} linear infinite;
+  animation-delay: ${(props) => props.delay};
+`;
+
+const MateusMobile: React.FC = () => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const lenis = useLenis();
+
+  useLayoutEffect(() => {
+    if (!containerRef.current || !lenis?.rootElement) return;
+
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        containerRef.current,
+        {
+          opacity: 0,
+          y: 40,
+          filter: "blur(10px)",
+        },
+        {
+          opacity: 1,
+          y: 0,
+          filter: "blur(0)",
+          duration: 1.2,
+          ease: "power4.out",
+          scrollTrigger: {
+            trigger: containerRef.current,
+            scroller: lenis.rootElement,
+            start: "top 80%",
+            toggleActions: "play none none reverse",
+          },
+        }
+      );
+    });
+
+    return () => ctx.revert();
+  }, [lenis]);
+
   return (
-    <div
-      style={{
-        minHeight: style?.minHeight,
-        width: "100%",
-        backgroundColor: "#000", 
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        position: "relative",
-        overflow: "hidden",
-      }}
-    >
-      {/* 🔴 Fundo Vermelho */}
-      <div
-        style={{
-          position: "absolute",
-          width: "100%",
-          height: "100%",
-          background: `
-            radial-gradient(
-              circle at 40% 40%,
-              rgba(172,17,66) 30%,
-              rgba(0,0,0,0.7) 100%
-            )
-          `,
-          backgroundColor: "#ac1142",
-          clipPath: "polygon(0 0, 100% 0, 100% 40%, 0 55%)",
-          zIndex: 1,
-        }}
-      />
-
-      {/* 🚨 Linha de Luz Neon Vermelha */}
-<div
-  style={{
-    position: "absolute",
-    width: "10px",
-    height: "180%",
-    background: "rgba(255, 40, 80, 1)",
-    borderRadius: "10px",
-    transform: "rotate(74deg)",
-    left: "50%",
-    top: "-42.5%",
-    filter: "drop-shadow(0 0 10px rgba(255,40,80,0.9)) drop-shadow(0 0 20px rgba(255,40,80,0.7))",
-    zIndex: 5,
-  }}
-/>
-
-
-      {/* 🔵 Fundo Azul */}
-      <div
-        style={{
-          position: "absolute",
-          width: "100%",
-          height: "100%",
-          background: `
-            radial-gradient(
-              circle at 55% 55%,
-              rgba(57,170,255) 30%,
-              rgba(0,0,0,0.7) 100%
-            )
-          `,
-          backgroundColor: "#39aaff",
-          clipPath: "polygon(0 55%, 100% 40%, 100% 100%, 0 100%)",
-          zIndex: 1,
-        }}
-      />
-
-      {/* 🎨 Imagem canto superior esquerdo */}
-      <img
-        src={zeroUm}
-        alt="Decorativo Esquerda"
-        style={{
-          position: "absolute",
-          top: "15%",
-          left: "2%",
-          width: "60vw",
-          
-          zIndex: 8,
-          opacity: 0.8,
-        }}
-      />
-
-      {/* 🎨 Imagem canto inferior direito */}
-      <img
-        src={zeroDois}
-        alt="Decorativo Direita"
-        style={{
-          position: "absolute",
-          bottom: "18%",
-          right: "-8%",
-          width: "60vw",
-          
-          zIndex: 8,
-          opacity: 0.8,
-        }}
-      />
-
-      {/* 🔲 Texto App Outline atrás */}
-<div
-  style={{
-    position: "absolute",
-    left: "75%",
-    top: "20%",
-    transform: "translate(-50%, -50%) scale(1.2)", // 20% maior
-    fontSize: "clamp(3rem, 8vw, 8rem)",
-    fontWeight: "900",
-    letterSpacing: "2px",
-    zIndex: 9, // 🔥 Atrás do texto principal
-    color: "transparent",
-    WebkitTextStroke: "2px rgba(255,255,255,0.4)", // Borda branca semi-transparente
-    pointerEvents: "none", // 🔥 Não interfere no clique do texto da frente
-  }}
->
-  APP
-</div>
-
-{/* 🅰️ Texto App Principal */}
-<div
-  style={{
-    position: "absolute",
-    left: "75%",
-    top: "20%",
-    transform: "translate(-50%, -50%)",
-    fontSize: "clamp(3rem, 8vw, 8rem)",
-    fontWeight: "900",
-    letterSpacing: "2px",
-    zIndex: 10,
-    cursor: "pointer",
-    background: `
-      linear-gradient(
-        to bottom,
-        rgba(255,255,255,1) 0%,
-        rgba(255,255,255,0.8) 60%,
-        rgba(255,255,255,0.6) 70%,
-        rgba(255,255,255,0.2) 100%
-      )
-    `,
-    WebkitBackgroundClip: "text",
-    backgroundClip: "text",
-    color: "transparent",
-    WebkitTextFillColor: "transparent",
-  }}
->
-  APP
-</div>
-
-{/* 🔲 Texto Site Outline atrás */}
-<div
-  style={{
-    position: "absolute",
-    right: "70%",
-    top: "60%",
-    transform: "translate(50%, -50%) scale(1.2)",
-    fontSize: "clamp(3rem, 8vw, 8rem)",
-    fontWeight: "900",
-    letterSpacing: "2px",
-    zIndex: 9,
-    color: "transparent",
-    WebkitTextStroke: "2px rgba(255,255,255,0.4)",
-    pointerEvents: "none",
-  }}
->
-  SITE
-</div>
-
-{/* 🖥️ Texto Site Principal */}
-<div
-  style={{
-    position: "absolute",
-    right: "70%",
-    top: "60%",
-    transform: "translate(50%, -50%)",
-    fontSize: "clamp(3rem, 8vw, 8rem)",
-    fontWeight: "900",
-    letterSpacing: "2px",
-    zIndex: 10,
-    cursor: "pointer",
-    background: `
-      linear-gradient(
-        to bottom,
-        rgba(255,255,255,1) 0%,
-        rgba(255,255,255,0.8) 60%,
-        rgba(255,255,255,0.6) 70%,
-        rgba(255,255,255,0.2) 100%
-      )
-    `,
-    WebkitBackgroundClip: "text",
-    backgroundClip: "text",
-    color: "transparent",
-    WebkitTextFillColor: "transparent",
-  }}
->
-  SITE
-</div>
-
-      {/* 🕹️ Texto Escolha seu lado */}
-      <div
-        style={{
-          position: "absolute",
-          left: "50%",
-          bottom: "10%",
-          transform: "translateX(-50%) skewX(-10deg) scaleY(1.2)",
-          background: `
-            linear-gradient(
-              to right,
-              rgba(0,0,0,0) 0%,
-              rgba(0,0,0,0.9) 15%,
-              rgba(0,0,0,0.9) 85%,
-              rgba(0,0,0,0) 100%
-            )
-          `,
-          padding: "0.5vw 14vw",
-          borderRadius: "8px",
-          color: "#b3174e",
-          fontSize: "4vw",
-          fontWeight: "600",
-          letterSpacing: "1.5px",
-          whiteSpace: "nowrap",
-          fontStyle: "italic",
-          zIndex: 10,
-        }}
-      >
-        ESCOLHA SEU LADO
-      </div>
-    </div>
+    <Container ref={containerRef}>
+      {/* Partículas */}
+      {Array.from({ length: 15 }).map((_, i) => (
+        <Particle
+          key={i}
+          left={`${Math.random() * 100}%`}
+          size={`${Math.random() * 8 + 4}px`}
+          delay={`${Math.random() * 5}s`}
+          duration={`${Math.random() * 15 + 10}s`}
+        />
+      ))}
+      <Logo src={logo} alt="Logo" />
+      <Title>O Verdadeiro Profissional</Title>
+      <Subtitle>
+        Transforme sua presença digital com consultoria de alto nível: websites, vídeos, redes sociais e muito mais.
+      </Subtitle>
+      <CallToAction onClick={() => window.location.href = "/contato"}>
+        Quero Criar Meu Site
+      </CallToAction>
+    </Container>
   );
 };
 
