@@ -19,16 +19,7 @@ const float = keyframes`
   100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
 `;
 
-// Fundo piscando
-const flash = keyframes`
-  0% { background: #0a0a0a; }
-  20% { background: #d4af37; }
-  40% { background: #0a0a0a; }
-  60% { background: #d4af37; }
-  100% { background: #0a0a0a; }
-`;
-
-const Container = styled.div<{ flashing: boolean }>`
+const Container = styled.div`
   position: relative;
   min-height: 100vh;
   background: linear-gradient(160deg, #0a0a0a, #1a1a1a);
@@ -39,11 +30,6 @@ const Container = styled.div<{ flashing: boolean }>`
   justify-content: center;
   overflow: hidden;
   padding: 2rem;
-  ${(props) =>
-    props.flashing &&
-    css`
-      animation: ${flash} 1.2s ease forwards;
-    `}
 `;
 
 const LogoWrapper = styled.div`
@@ -112,18 +98,6 @@ const Subtitle = styled.button`
   }
 `;
 
-const AnimatedBrand = styled.div`
-  font-size: 6vw;
-  font-weight: 900;
-  background: linear-gradient(90deg, #d4af37, #fff, #d4af37);
-  background-clip: text;
-  -webkit-background-clip: text;
-  color: transparent;
-  text-align: center;
-  opacity: 0;
-  transform: scale(0.8);
-`;
-
 const CallToAction = styled.button`
   margin-top: 2rem;
   background: #d4af37;
@@ -159,11 +133,41 @@ const Particle = styled.span<{
   animation-delay: ${(props) => props.delay};
 `;
 
+// Buraco Negro
+const BlackHole = styled.div<{ active: boolean }>`
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: radial-gradient(circle, rgba(0,0,0,1) 0%, rgba(0,0,0,0.8) 80%, transparent 100%);
+  border-radius: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  pointer-events: none;
+  ${(props) =>
+    props.active &&
+    css`
+      animation: growHole 2s forwards;
+    `}
+
+  @keyframes growHole {
+    0% {
+      width: 0;
+      height: 0;
+      transform: translate(-50%, -50%) scale(0);
+    }
+    100% {
+      width: 300vh;
+      height: 300vh;
+      transform: translate(-50%, -50%) scale(1);
+    }
+  }
+`;
+
 const MateusMobile: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const brandRef = useRef<HTMLDivElement>(null);
-  const [flashing, setFlashing] = useState(false);
-  const [showBrand, setShowBrand] = useState(false);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [holeActive, setHoleActive] = useState(false);
   const lenis = useLenis();
 
   useLayoutEffect(() => {
@@ -193,39 +197,50 @@ const MateusMobile: React.FC = () => {
   }, [lenis]);
 
   const handleSubtitleClick = () => {
-    setShowBrand(true);
-    setFlashing(true);
+    if (!contentRef.current) return;
 
-    if (brandRef.current) {
-      gsap.fromTo(
-        brandRef.current,
-        { opacity: 0, scale: 0.8, rotate: 0 },
-        {
-          opacity: 1,
-          scale: 1,
-          rotate: 360,
-          duration: 1,
-          ease: "power3.out",
-        }
-      );
-    }
+    setHoleActive(true);
 
+    // Tudo sendo sugado
+    gsap.to(contentRef.current.children, {
+      x: () => (Math.random() - 0.5) * 400,
+      y: () => (Math.random() - 0.5) * 400,
+      rotation: () => (Math.random() - 0.5) * 360,
+      scale: 0,
+      opacity: 0,
+      duration: 2,
+      ease: "power3.in",
+    });
+
+    // Volta ao normal depois de 3s
     setTimeout(() => {
-      if (brandRef.current) {
-        gsap.to(brandRef.current, {
-          opacity: 0,
-          scale: 0.8,
-          duration: 0.6,
-          ease: "power3.in",
-        });
-      }
-      setFlashing(false);
-      setTimeout(() => setShowBrand(false), 600);
-    }, 2000);
+    if (contentRef.current) {
+      gsap.to(contentRef.current.children, {
+        x: 0,
+        y: 0,
+        rotation: 0,
+        scale: 1,
+        opacity: 1,
+        duration: 1,
+        ease: "power3.out",
+      });
+    }
+    setHoleActive(false);
+  }, 3000);
+
   };
 
-  return (
-    <Container ref={containerRef} flashing={flashing}>
+return (
+  <Container ref={containerRef}>
+    <BlackHole active={holeActive} />
+    <div
+      ref={contentRef}
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+      }}
+    >
       {Array.from({ length: 15 }).map((_, i) => (
         <Particle
           key={i}
@@ -240,19 +255,16 @@ const MateusMobile: React.FC = () => {
         <DiscountBadge>75% OFF</DiscountBadge>
       </LogoWrapper>
       <Title>Confiança Digital</Title>
-      {!showBrand && (
-        <Subtitle onClick={handleSubtitleClick}>
-          Clique aqui e veja algo especial.
-        </Subtitle>
-      )}
-      {showBrand && (
-        <AnimatedBrand ref={brandRef}>CABRAIZ</AnimatedBrand>
-      )}
+      <Subtitle onClick={handleSubtitleClick}>
+        Clique aqui e veja algo especial
+      </Subtitle>
       <CallToAction onClick={() => window.location.href = "/contato"}>
         Agendar Consultoria Exclusiva
       </CallToAction>
-    </Container>
-  );
+    </div>
+  </Container>
+);
+
 };
 
 export default MateusMobile;
