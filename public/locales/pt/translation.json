@@ -28,8 +28,11 @@
       "Manda um OI 😉",
       "Tipo Bate-Papo UOL"
     ],
-    "title": "Como Seria Seu Projeto?",
-    "greeting": "Olá! Pronto para tirar sua ideia do papel?\nVamos conversar sobre seu projeto.",
+    "firstMessage": "Como seria seu projeto ideal?",
+    "secondMessage": "Olá! Pronto para tirar sua ideia do papel?",
+    "greetingMorning": "Bom dia!",
+    "greetingAfternoon": "Boa tarde!",
+    "greetingEvening": "Boa noite!",
     "placeholder": "Digite sua mensagem...",
     "send": "Enviar",
     "close": "Fechar",

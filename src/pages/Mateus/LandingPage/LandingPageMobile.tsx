@@ -9,7 +9,7 @@ import Pricing from "../Pricing/Pricing";
 import Live from "../Live/Live";
 
 import { useLenisScrollTrigger } from "../../../hooks/useLenisScrollTrigger";
-import MateusMobile from "../MateusMobile";
+import MateusMobile from "../MateusMobile/MateusMobile";
 import ContactMobile from "../Contact/ContactMobile";
 import RoadMapMobile from "../RoadMap/RoadMapMobile";
 

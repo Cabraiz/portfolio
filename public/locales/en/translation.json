@@ -30,8 +30,11 @@
       "Real Talk, No Delay",
       "Let's Chat Like Old Times"
     ],
-    "title": "Let's Discuss Your Project",
-    "greeting": "Hi there! Ready to bring your idea to life?\nLet’s talk about your project.",
+    "firstMessage": "How would your ideal project look?",
+    "secondMessage": "Hi there! Ready to bring your idea to life?",
+    "greetingMorning": "Good morning!",
+    "greetingAfternoon": "Good afternoon!",
+    "greetingEvening": "Good evening!",
     "placeholder": "Type your message...",
     "send": "Send",
     "close": "Close",
