@@ -3,7 +3,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useLenis } from "lenis/react";
 import logo from "../../../assets/icones/logo.svg";
-import vortexSound from "/sounds/vortex.mp3";
+import vortexSound from "public/sounds/vortex.mp3";
 
 import {
   Container,
