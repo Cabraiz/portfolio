@@ -35,15 +35,9 @@ const Portfolio: React.FC = () => {
       containerRef.current.querySelectorAll(".animatedCard")
     ) as HTMLElement[];
 
-    const movingLabel = containerRef.current.querySelector(
-      ".movingLabel"
-    ) as HTMLElement;
-
     const triggers: ScrollTrigger[] = [];
 
     cards.forEach((card) => {
-      const itemName = card.getAttribute("data-name") || "";
-
       // Inicializa estado contraído
       gsap.set(card, {
         height: "20vh",
@@ -54,90 +48,68 @@ const Portfolio: React.FC = () => {
       });
 
       const trigger = ScrollTrigger.create({
-        trigger: card,
-        scroller: lenis.rootElement,
-        start: "center center",
-        end: "+=80%", // Mais tempo de animação
-        pin: true,
-        anticipatePin: 1,
-        scrub: true,
+  trigger: card.parentElement,
+  scroller: lenis.rootElement,
+  start: "center center",
+  end: "+=80%",
+  pin: true,
+  anticipatePin: 1,
+  scrub: true,
 
-        onUpdate: (self) => {
-          if (movingLabel && movingLabel.textContent !== itemName) {
-            movingLabel.textContent = itemName;
-          }
-          gsap.to(movingLabel, {
-            opacity: 1,
-            duration: 0.2,
-            overwrite: "auto",
-          });
-          gsap.to(movingLabel, {
-            x: `${-100 + self.progress * 200}%`,
-            duration: 0,
-            ease: "none",
-            overwrite: "auto",
-          });
-        },
+  onEnter: () => {
+    gsap.to(card, {
+      height: "60vh",
+      width: "70%",
+      scale: 1,
+      opacity: 1,
+      boxShadow:
+        "0 24px 48px rgba(0,0,0,0.4), inset 0 0 16px rgba(255,255,255,0.15)",
+      duration: 0.4,
+      ease: "power3.out",
+      overwrite: "auto",
+    });
+  },
+  onEnterBack: () => {
+    gsap.to(card, {
+      height: "60vh",
+      width: "70%",
+      scale: 1,
+      opacity: 1,
+      boxShadow:
+        "0 24px 48px rgba(0,0,0,0.4), inset 0 0 16px rgba(255,255,255,0.15)",
+      duration: 0.4,
+      ease: "power3.out",
+      overwrite: "auto",
+    });
+  },
+  onLeave: () => {
+    gsap.to(card, {
+      height: "20vh",
+      width: "40%",
+      scale: 0.95,
+      opacity: 0.8,
+      boxShadow:
+        "0 8px 24px rgba(0,0,0,0.2), inset 0 0 8px rgba(255,255,255,0.04)",
+      duration: 0.4,
+      ease: "power3.inOut",
+      overwrite: "auto",
+    });
+  },
+  onLeaveBack: () => {
+    gsap.to(card, {
+      height: "20vh",
+      width: "40%",
+      scale: 0.95,
+      opacity: 0.8,
+      boxShadow:
+        "0 8px 24px rgba(0,0,0,0.2), inset 0 0 8px rgba(255,255,255,0.04)",
+      duration: 0.4,
+      ease: "power3.inOut",
+      overwrite: "auto",
+    });
+  },
+});
 
-        onEnter: () => {
-          gsap.to(card, {
-            height: "60vh",
-            scale: 1,
-            opacity: 1,
-            boxShadow:
-              "0 24px 48px rgba(0,0,0,0.4), inset 0 0 16px rgba(255,255,255,0.15)",
-            duration: 0.4,
-            ease: "power3.out",
-            overwrite: "auto",
-          });
-        },
-        onEnterBack: () => {
-          gsap.to(card, {
-            height: "60vh",
-            scale: 1,
-            opacity: 1,
-            boxShadow:
-              "0 24px 48px rgba(0,0,0,0.4), inset 0 0 16px rgba(255,255,255,0.15)",
-            duration: 0.4,
-            ease: "power3.out",
-            overwrite: "auto",
-          });
-        },
-        onLeave: () => {
-          gsap.to(card, {
-            height: "20vh",
-            scale: 0.95,
-            opacity: 0.8,
-            boxShadow:
-              "0 8px 24px rgba(0,0,0,0.2), inset 0 0 8px rgba(255,255,255,0.04)",
-            duration: 0.4,
-            ease: "power3.inOut",
-            overwrite: "auto",
-          });
-          gsap.to(movingLabel, {
-            opacity: 0,
-            duration: 0.3,
-            overwrite: "auto",
-          });
-        },
-        onLeaveBack: () => {
-          gsap.to(card, {
-            height: "20vh",
-            scale: 0.95,
-            opacity: 0.8,
-            boxShadow:
-              "0 8px 24px rgba(0,0,0,0.2), inset 0 0 8px rgba(255,255,255,0.04)",
-            duration: 0.4,
-            ease: "power3.inOut",
-            overwrite: "auto",
-          });
-          gsap.to(movingLabel, {
-            opacity: 0,
-            duration: 0.3,
-            overwrite: "auto",
-          });
-        },
-      });
 
       triggers.push(trigger);
     });
@@ -156,30 +128,6 @@ const Portfolio: React.FC = () => {
       }}
     >
       <div className={styles.container} style={{ position: "relative" }}>
-        {/* Label fora dos cards, centralizado na linha */}
-        <div
-          className="movingLabel"
-          style={{
-            position: "fixed",
-            top: "50%",
-            left: "0",
-            width: "100%",
-            textAlign: "center",
-            transform: "translateY(-50%)",
-            pointerEvents: "none",
-            fontSize: "clamp(2rem, 8vw, 5rem)",
-            fontWeight: 900,
-            color: "transparent",
-            WebkitTextStroke: "1px rgba(255,255,255,0.6)",
-            textTransform: "uppercase",
-            letterSpacing: "0.1em",
-            whiteSpace: "nowrap",
-            opacity: 0,
-          }}
-        >
-          {/* Conteúdo dinâmico */}
-        </div>
-
         {Object.entries(portfolioData).map(([tier, items]) => (
           <div key={tier} className={styles.tier}>
             <h2
@@ -204,39 +152,78 @@ const Portfolio: React.FC = () => {
             >
               {items.map((item) => (
                 <div
-                  key={item.name}
-                  className="animatedCard"
-                  data-name={item.name}
-                  style={{
-                    backgroundColor: "rgba(255, 255, 255, 0.05)",
-                    border: "1px solid rgba(255, 255, 255, 0.1)",
-                    borderRadius: "16px",
-                    padding: "0",
-                    height: "20vh",
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    overflow: "hidden",
-                    backdropFilter: "blur(16px)",
-                    boxShadow:
-                      "0 8px 24px rgba(0,0,0,0.2), inset 0 0 8px rgba(255,255,255,0.04)",
-                    transition: "transform 0.35s ease, box-shadow 0.35s ease",
-                    willChange: "transform, box-shadow",
-                    cursor: "pointer",
-                    position: "relative",
-                    width: "min(90%, 800px)",
-                  }}
-                >
-                  <img
-                    src={item.image}
-                    alt={item.name}
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "cover",
-                    }}
-                  />
-                </div>
+  key={item.name}
+  style={{
+    position: "relative",
+    width: "100%",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    minHeight: "20vh",
+  }}
+>
+  <span
+    style={{
+      position: "absolute",
+      left: "2rem",
+      color: "#fff",
+      fontSize: "clamp(1rem, 2vw, 1.5rem)",
+      fontWeight: "500",
+      textAlign: "left",
+    }}
+  >
+    {item.name}
+  </span>
+
+  <div
+    className="animatedCard"
+    data-name={item.name}
+    style={{
+      backgroundColor: "rgba(255, 255, 255, 0.05)",
+      border: "1px solid rgba(255, 255, 255, 0.1)",
+      borderRadius: "16px",
+      padding: "0",
+      height: "20vh",
+      width: "40%",
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      overflow: "hidden",
+      backdropFilter: "blur(16px)",
+      boxShadow:
+        "0 8px 24px rgba(0,0,0,0.2), inset 0 0 8px rgba(255,255,255,0.04)",
+      transition: "transform 0.35s ease, box-shadow 0.35s ease",
+      willChange: "transform, box-shadow",
+      cursor: "pointer",
+      position: "relative",
+    }}
+  >
+    <img
+      src={item.image}
+      alt={item.name}
+      style={{
+        width: "100%",
+        height: "100%",
+        objectFit: "cover",
+        borderRadius: "8px",
+      }}
+    />
+  </div>
+
+  <span
+    style={{
+      position: "absolute",
+      right: "2rem",
+      color: "#ccc",
+      fontSize: "clamp(0.9rem, 1.8vw, 1.3rem)",
+      fontWeight: "400",
+      textAlign: "right",
+    }}
+  >
+    Descrição Exemplo
+  </span>
+</div>
+
               ))}
             </div>
           </div>

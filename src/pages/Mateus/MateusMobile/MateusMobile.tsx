@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useRef, useState } from "react";
+import React, { useLayoutEffect, useRef, useState, useEffect } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useLenis } from "lenis/react";
@@ -34,6 +34,18 @@ const MateusMobile: React.FC = () => {
   const [selectedTime, setSelectedTime] = useState("");
   const lenis = useLenis();
 
+  // Criar o objeto Audio uma única vez e pré-carregar
+  const [audio] = useState(() => {
+    const a = new Audio(vortexSound);
+    a.preload = "auto";
+    return a;
+  });
+
+  // Forçar carregamento ao montar
+  useEffect(() => {
+    audio.load();
+  }, [audio]);
+
   useLayoutEffect(() => {
     if (!containerRef.current || !lenis?.rootElement) return;
 
@@ -63,7 +75,6 @@ const MateusMobile: React.FC = () => {
   const handleSubtitleClick = () => {
     if (!contentRef.current) return;
 
-    const audio = new Audio(vortexSound);
     audio.play();
 
     setHoleActive(true);
