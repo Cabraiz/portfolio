@@ -10,14 +10,20 @@ import imagem3 from "../../../assets/Mateus/portfolio/imagem3.png";
 import imagem4 from "../../../assets/Mateus/portfolio/imagem4.png";
 import imagem5 from "../../../assets/Mateus/portfolio/imagem5.png";
 
+import logo1 from "../../../assets/Mateus/portfolio/logos/logo1.png";
+import logo2 from "../../../assets/Mateus/portfolio/logos/logo2.png";
+import logo3 from "../../../assets/Mateus/portfolio/logos/logo3.png";
+import logo4 from "../../../assets/Mateus/portfolio/logos/logo4.png";
+import logo5 from "../../../assets/Mateus/portfolio/logos/logo5.png";
+
 gsap.registerPlugin(ScrollTrigger);
 
 const portfolioData = [
-  { name: "ERP VAREJO", image: imagem1 },
-  { name: "APP BANK", image: imagem2 },
-  { name: "APP BARBER", image: imagem3 },
-  { name: "SITE ADV", image: imagem4 },
-  { name: "SITE CABELEIREIRA", image: imagem5 },
+  { name: "ERP VAREJO", image: imagem1, date: "2021", logo: logo1 },
+  { name: "APP BANK", image: imagem2, date: "2022", logo: logo2 },
+  { name: "APP BARBER", image: imagem3, date: "2023", logo: logo3 },
+  { name: "SITE ADV", image: imagem4, date: "2020", logo: logo4 },
+  { name: "SITE CABELEIREIRA", image: imagem5, date: "2021", logo: logo5 },
 ];
 
 const Portfolio: React.FC = () => {
@@ -130,79 +136,95 @@ const Portfolio: React.FC = () => {
           }}
         >
           {portfolioData.map((item) => (
-            <div
-              key={item.name}
-              style={{
-                position: "relative",
-                width: "100%",
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                minHeight: "20vh",
-              }}
-            >
-              <span
-                style={{
-                  position: "absolute",
-                  left: "2rem",
-                  color: "#fff",
-                  fontSize: "clamp(1rem, 2vw, 1.5rem)",
-                  fontWeight: "500",
-                  textAlign: "left",
-                }}
-              >
-                {item.name}
-              </span>
+  <div
+    key={item.name}
+    style={{
+      position: "relative",
+      width: "100%",
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      minHeight: "20vh",
+    }}
+  >
+    {/* Data do projeto à esquerda */}
+    <span
+      style={{
+        position: "absolute",
+        left: "2rem",
+        color: "#aaa",
+        fontSize: "clamp(0.9rem, 1.5vw, 1.2rem)",
+        fontWeight: "400",
+      }}
+    >
+      {item.date}
+    </span>
 
-              <div
-                className="animatedCard"
-                data-name={item.name}
-                style={{
-                  backgroundColor: "rgba(255, 255, 255, 0.05)",
-                  border: "1px solid rgba(255, 255, 255, 0.1)",
-                  borderRadius: "16px",
-                  padding: "0",
-                  height: "20vh",
-                  width: "40%",
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  overflow: "hidden",
-                  backdropFilter: "blur(16px)",
-                  boxShadow:
-                    "0 8px 24px rgba(0,0,0,0.2), inset 0 0 8px rgba(255,255,255,0.04)",
-                  transition: "transform 0.35s ease, box-shadow 0.35s ease",
-                  willChange: "transform, box-shadow",
-                  cursor: "pointer",
-                  position: "relative",
-                }}
-              >
-                <img
-                  src={item.image}
-                  alt={item.name}
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
-                    borderRadius: "8px",
-                  }}
-                />
-              </div>
+    {/* Card central */}
+    <div
+      className="animatedCard"
+      data-name={item.name}
+      style={{
+        backgroundColor: "rgba(255, 255, 255, 0.05)",
+        border: "1px solid rgba(255, 255, 255, 0.1)",
+        borderRadius: "16px",
+        padding: "0",
+        height: "20vh",
+        width: "40%",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        flexDirection: "column",
+        overflow: "hidden",
+        backdropFilter: "blur(16px)",
+        boxShadow:
+          "0 8px 24px rgba(0,0,0,0.2), inset 0 0 8px rgba(255,255,255,0.04)",
+        transition: "transform 0.35s ease, box-shadow 0.35s ease",
+        willChange: "transform, box-shadow",
+        cursor: "pointer",
+        position: "relative",
+      }}
+    >
+      <img
+        src={item.image}
+        alt={item.name}
+        style={{
+          width: "100%",
+          height: "100%",
+          objectFit: "cover",
+          borderRadius: "8px",
+        }}
+      />
+      <span
+        style={{
+          position: "absolute",
+          bottom: "0.5rem",
+          left: "0.5rem",
+          color: "#fff",
+          fontSize: "clamp(1rem, 2vw, 1.5rem)",
+          fontWeight: "500",
+          background: "rgba(0,0,0,0.4)",
+          padding: "0.2rem 0.6rem",
+          borderRadius: "4px",
+        }}
+      >
+        {item.name}
+      </span>
+    </div>
 
-              <span
-                style={{
-                  position: "absolute",
-                  right: "2rem",
-                  color: "#ccc",
-                  fontSize: "clamp(0.9rem, 1.8vw, 1.3rem)",
-                  fontWeight: "400",
-                  textAlign: "right",
-                }}
-              >
-                Descrição Exemplo
-              </span>
-            </div>
-          ))}
+    {/* Logo da empresa à direita */}
+    <img
+      src={item.logo}
+      alt={`Logo ${item.name}`}
+      style={{
+        position: "absolute",
+        right: "2rem",
+        height: "2rem",
+        objectFit: "contain",
+      }}
+    />
+  </div>
+))}
         </div>
       </div>
     </div>
