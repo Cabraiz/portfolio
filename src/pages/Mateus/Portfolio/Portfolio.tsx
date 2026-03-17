@@ -118,117 +118,108 @@ const Portfolio: React.FC = () => {
     };
   }, [lenis]);
 
-  return (
-    <div
-      ref={containerRef}
-      style={{
-        position: "relative",
-        paddingBottom: "300vh",
-      }}
-    >
-      <div className={styles.container} style={{ position: "relative" }}>
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "clamp(12rem, 25vh, 16rem)",
-            alignItems: "center",
-          }}
-        >
-          {portfolioData.map((item) => (
+return (
   <div
-    key={item.name}
+    ref={containerRef}
     style={{
       position: "relative",
-      width: "100%",
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-      minHeight: "20vh",
+      paddingBottom: "300vh",
     }}
   >
-    {/* Data do projeto à esquerda */}
-    <span
-      style={{
-        position: "absolute",
-        left: "2rem",
-        color: "#aaa",
-        fontSize: "clamp(0.9rem, 1.5vw, 1.2rem)",
-        fontWeight: "400",
-      }}
-    >
-      {item.date}
-    </span>
-
-    {/* Card central */}
-    <div
-      className="animatedCard"
-      data-name={item.name}
-      style={{
-        backgroundColor: "rgba(255, 255, 255, 0.05)",
-        border: "1px solid rgba(255, 255, 255, 0.1)",
-        borderRadius: "16px",
-        padding: "0",
-        height: "20vh",
-        width: "40%",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        flexDirection: "column",
-        overflow: "hidden",
-        backdropFilter: "blur(16px)",
-        boxShadow:
-          "0 8px 24px rgba(0,0,0,0.2), inset 0 0 8px rgba(255,255,255,0.04)",
-        transition: "transform 0.35s ease, box-shadow 0.35s ease",
-        willChange: "transform, box-shadow",
-        cursor: "pointer",
-        position: "relative",
-      }}
-    >
-      <img
-        src={item.image}
-        alt={item.name}
+    <div className={styles.container} style={{ position: "relative" }}>
+      <div
         style={{
-          width: "100%",
-          height: "100%",
-          objectFit: "cover",
-          borderRadius: "8px",
-        }}
-      />
-      <span
-        style={{
-          position: "absolute",
-          bottom: "0.5rem",
-          left: "0.5rem",
-          color: "#fff",
-          fontSize: "clamp(1rem, 2vw, 1.5rem)",
-          fontWeight: "500",
-          background: "rgba(0,0,0,0.4)",
-          padding: "0.2rem 0.6rem",
-          borderRadius: "4px",
+          display: "flex",
+          flexDirection: "column",
+          gap: "clamp(12rem, 25vh, 16rem)",
+          alignItems: "center",
         }}
       >
-        {item.name}
-      </span>
-    </div>
+        {portfolioData.map((item) => (
+          <div
+            key={item.name}
+            style={{
+              position: "relative",
+              width: "100%",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              minHeight: "20vh",
+            }}
+          >
+            {/* Data do projeto à esquerda */}
+            <span
+              style={{
+                position: "absolute",
+                left: "2rem",
+                color: "#aaa",
+                fontSize: "clamp(0.9rem, 1.5vw, 1.2rem)",
+                fontWeight: "400",
+              }}
+            >
+              {item.date}
+            </span>
 
-    {/* Logo da empresa à direita */}
-    <img
-      src={item.logo}
-      alt={`Logo ${item.name}`}
-      style={{
-        position: "absolute",
-        right: "2rem",
-        height: "2rem",
-        objectFit: "contain",
-      }}
-    />
-  </div>
-))}
-        </div>
+            {/* Card central com logo dentro */}
+            <div
+  className="animatedCard"
+  data-name={item.name}
+  style={{
+    backgroundColor: "rgba(255, 255, 255, 0.05)",
+    border: "1px solid rgba(255, 255, 255, 0.1)",
+    borderRadius: "16px",
+    padding: "0",
+    height: "20vh",
+    width: "65%", // Mais largura geral
+    display: "flex",
+    flexDirection: "row",           // lado a lado
+    justifyContent: "flex-start",   // começar tudo da esquerda
+    alignItems: "center",
+    overflow: "hidden",
+    backdropFilter: "blur(16px)",
+    boxShadow:
+      "0 8px 24px rgba(0,0,0,0.2), inset 0 0 8px rgba(255,255,255,0.04)",
+    transition: "transform 0.35s ease, box-shadow 0.35s ease",
+    willChange: "transform, box-shadow",
+    cursor: "pointer",
+    position: "relative",
+  }}
+>
+  {/* Imagem do projeto */}
+  <img
+    src={item.image}
+    alt={item.name}
+    style={{
+      width: "60%", // imagem menor
+      height: "100%",
+      objectFit: "cover",
+      borderRadius: "8px 0 0 8px",
+    }}
+  />
+
+  {/* Logo alinhado à direita */}
+  <img
+    src={item.logo}
+    alt={`Logo ${item.name}`}
+    style={{
+      height: "100%",
+      width: "auto",
+      maxWidth: "35%",
+      objectFit: "contain",
+      marginLeft: "auto",   // empurra para a direita
+      padding: "1rem",
+    }}
+  />
+</div>
+
+
+          </div>
+        ))}
       </div>
     </div>
-  );
+  </div>
+);
+
 };
 
 export default Portfolio;

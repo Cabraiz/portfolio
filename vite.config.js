@@ -1,4 +1,4 @@
-import react from "@vitejs/plugin-react-swc";
+import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
 
@@ -11,7 +11,7 @@ export default defineConfig({
     sourcemap: true,
   },
   server: {
-    host: true, // 🔥 libera acesso via IP local, ex: 192.168.0.5:5173
-    port: 5173, // (opcional) mantém a porta padrão
+    host: true,
+    port: 5173,
   },
 });
