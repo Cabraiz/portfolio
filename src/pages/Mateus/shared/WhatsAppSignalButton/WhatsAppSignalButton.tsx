@@ -1,7 +1,13 @@
 import { memo, type AnchorHTMLAttributes, type ReactNode } from "react";
 import styles from "./WhatsAppSignalButton.module.css";
+import WhatsAppSignalCorners from "./components/WhatsAppSignalCorners";
+import WhatsAppSignalDrawers from "./components/WhatsAppSignalDrawers";
+import {
+  getWhatsAppSignalCssVars,
+  type WhatsAppSignalDensity,
+} from "./whatsAppSignal.tokens";
 
-type WhatsAppSignalButtonProps = {
+export type WhatsAppSignalButtonProps = Readonly<{
   href: string;
   label?: string;
   topLabel?: string;
@@ -9,13 +15,13 @@ type WhatsAppSignalButtonProps = {
   ariaLabel?: string;
   fullWidth?: boolean;
   compact?: boolean;
+  hero?: boolean;
   disabled?: boolean;
   icon?: ReactNode;
   className?: string;
-  hero?: boolean;
   target?: AnchorHTMLAttributes<HTMLAnchorElement>["target"];
   rel?: string;
-};
+}>;
 
 function joinClasses(
   ...classes: Array<string | false | null | undefined>
@@ -39,23 +45,48 @@ function DefaultWhatsAppIcon() {
   );
 }
 
-type CornerProps = {
+type SignalActionProps = Readonly<{
+  disabled: boolean;
+  href: string;
+  target?: AnchorHTMLAttributes<HTMLAnchorElement>["target"];
+  rel?: string;
+  ariaLabel: string;
   className: string;
-};
+  children: ReactNode;
+}>;
 
-function Corner({ className }: CornerProps) {
+function SignalAction({
+  disabled,
+  href,
+  target,
+  rel,
+  ariaLabel,
+  className,
+  children,
+}: SignalActionProps) {
+  if (disabled) {
+    return (
+      <button
+        type="button"
+        className={className}
+        aria-label={ariaLabel}
+        disabled
+      >
+        {children}
+      </button>
+    );
+  }
+
   return (
-    <svg
-      viewBox="0 0 40 40"
-      aria-hidden="true"
-      focusable="false"
+    <a
+      href={href}
+      target={target}
+      rel={rel}
+      aria-label={ariaLabel}
       className={className}
     >
-      <path
-        d="M34 6H16a10 10 0 0 0-10 10v18"
-        className={styles.cornerPath}
-      />
-    </svg>
+      {children}
+    </a>
   );
 }
 
@@ -67,15 +98,29 @@ function WhatsAppSignalButton({
   ariaLabel,
   fullWidth = false,
   compact = false,
+  hero = false,
   disabled = false,
   icon,
   className,
-  hero = false,
   target = "_blank",
   rel,
 }: WhatsAppSignalButtonProps) {
+  const density: WhatsAppSignalDensity = compact ? "compact" : "default";
   const resolvedRel =
-    target === "_blank" ? rel ?? "noreferrer noopener" : rel;
+    target === "_blank" ? rel ?? "noopener noreferrer" : rel;
+  const resolvedAriaLabel = ariaLabel ?? label;
+
+  const buttonContent = (
+    <span className={styles.buttonSurface}>
+      <span className={styles.leadingIcon} aria-hidden="true">
+        {icon ?? <DefaultWhatsAppIcon />}
+      </span>
+
+      <span className={styles.labelWrap}>
+        <span className={styles.label}>{label}</span>
+      </span>
+    </span>
+  );
 
   return (
     <div
@@ -88,49 +133,37 @@ function WhatsAppSignalButton({
         className
       )}
       data-disabled={disabled ? "true" : "false"}
+      data-density={density}
+      data-hero={hero ? "true" : "false"}
+      style={getWhatsAppSignalCssVars(density)}
     >
       <div className={styles.frame}>
-        <span
-          className={joinClasses(styles.drawer, styles.drawerTop)}
-          aria-hidden="true"
-        >
-          {topLabel}
-        </span>
+        <WhatsAppSignalDrawers
+          topLabel={topLabel}
+          bottomLabel={bottomLabel}
+          drawerClassName={styles.drawer}
+          topDrawerClassName={styles.drawerTop}
+          bottomDrawerClassName={styles.drawerBottom}
+        />
 
-        <a
-          href={disabled ? undefined : href}
-          target={disabled ? undefined : target}
-          rel={disabled ? undefined : resolvedRel}
-          aria-label={ariaLabel ?? label}
-          aria-disabled={disabled || undefined}
-          tabIndex={disabled ? -1 : undefined}
+        <SignalAction
+          disabled={disabled}
+          href={href}
+          target={target}
+          rel={resolvedRel}
+          ariaLabel={resolvedAriaLabel}
           className={styles.button}
         >
-          <span className={styles.buttonSurface}>
-            <span className={styles.leadingIcon} aria-hidden="true">
-              {icon ?? <DefaultWhatsAppIcon />}
-            </span>
+          {buttonContent}
+        </SignalAction>
 
-            <span className={styles.labelWrap}>
-              <span className={styles.label}>{label}</span>
-            </span>
-          </span>
-        </a>
-
-        <span
-          className={joinClasses(styles.drawer, styles.drawerBottom)}
-          aria-hidden="true"
-        >
-          {bottomLabel}
-        </span>
-
-        <Corner className={joinClasses(styles.corner, styles.cornerTopLeft)} />
-        <Corner className={joinClasses(styles.corner, styles.cornerTopRight)} />
-        <Corner
-          className={joinClasses(styles.corner, styles.cornerBottomRight)}
-        />
-        <Corner
-          className={joinClasses(styles.corner, styles.cornerBottomLeft)}
+        <WhatsAppSignalCorners
+          cornerClassName={styles.corner}
+          cornerPathClassName={styles.cornerPath}
+          topLeftClassName={styles.cornerTopLeft}
+          topRightClassName={styles.cornerTopRight}
+          bottomRightClassName={styles.cornerBottomRight}
+          bottomLeftClassName={styles.cornerBottomLeft}
         />
       </div>
     </div>
@@ -141,4 +174,3 @@ const MemoizedWhatsAppSignalButton = memo(WhatsAppSignalButton);
 MemoizedWhatsAppSignalButton.displayName = "WhatsAppSignalButton";
 
 export default MemoizedWhatsAppSignalButton;
-export type { WhatsAppSignalButtonProps };

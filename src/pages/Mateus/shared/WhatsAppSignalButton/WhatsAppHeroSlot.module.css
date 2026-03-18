@@ -1,0 +1,150 @@
+.root {
+  --hero-slot-bleed-top: 0px;
+  --hero-slot-bleed-bottom: clamp(12px, 1.8vh, 18px);
+  --hero-slot-gap: clamp(14px, 1.5vw, 22px);
+  --hero-slot-align-top: clamp(8px, 1.2vh, 14px);
+  --hero-slot-overlap-top: clamp(12px, 1.8vh, 18px);
+  --hero-slot-offset-inline: clamp(52px, 5vw, 84px);
+
+  position: relative;
+  z-index: var(--hero-slot-z-root, 6);
+  width: 100%;
+  min-width: 0;
+  isolation: isolate;
+  overflow: visible;
+}
+
+.compact {
+  --hero-slot-bleed-top: 0px;
+  --hero-slot-bleed-bottom: 12px;
+  --hero-slot-gap: 12px;
+  --hero-slot-align-top: 0px;
+  --hero-slot-overlap-top: 0px;
+  --hero-slot-offset-inline: 0px;
+}
+
+.noDesktopOffset {
+  --hero-slot-offset-inline: 0px;
+}
+
+.rail {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  padding-top: var(--hero-slot-bleed-top);
+  padding-bottom: var(--hero-slot-bleed-bottom);
+  isolation: isolate;
+  overflow: visible;
+}
+
+.grid {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.08fr) minmax(0, 1fr);
+  align-items: start;
+  column-gap: var(--hero-slot-gap);
+  row-gap: 12px;
+  width: 100%;
+  min-width: 0;
+  padding-inline-start: var(--hero-slot-offset-inline);
+  overflow: visible;
+}
+
+.singleAction .grid {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.slot {
+  position: relative;
+  min-width: 0;
+  width: 100%;
+  overflow: visible;
+}
+
+.slot > * {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+}
+
+.primarySlot {
+  z-index: var(--hero-slot-z-primary, 4);
+  isolation: isolate;
+  margin-top: calc(-1 * var(--hero-slot-overlap-top));
+}
+
+.primarySlot > * {
+  position: relative;
+  z-index: var(--hero-slot-z-primary, 4);
+}
+
+.secondarySlot {
+  z-index: var(--hero-slot-z-secondary, 1);
+  padding-top: var(--hero-slot-align-top);
+}
+
+.secondarySlot > * {
+  position: relative;
+  z-index: var(--hero-slot-z-secondary, 1);
+}
+
+@media (max-width: 960px) {
+  .root {
+    --hero-slot-bleed-top: 0px;
+    --hero-slot-bleed-bottom: 8px;
+    --hero-slot-gap: 12px;
+    --hero-slot-align-top: 0px;
+    --hero-slot-overlap-top: 0px;
+    --hero-slot-offset-inline: 0px;
+  }
+
+  .grid,
+  .singleAction .grid {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 12px;
+    padding-inline-start: 0;
+  }
+
+  .primarySlot {
+    margin-top: 0;
+  }
+
+  .secondarySlot {
+    padding-top: 0;
+  }
+}
+
+@media (max-height: 720px) and (min-width: 961px) {
+  .root {
+    --hero-slot-bleed-top: 0px;
+    --hero-slot-bleed-bottom: 10px;
+    --hero-slot-gap: 12px;
+    --hero-slot-align-top: 0px;
+    --hero-slot-overlap-top: 40px;
+    --hero-slot-offset-inline: 0px;
+  }
+
+  .grid {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    padding-inline-start: 0;
+  }
+
+  .singleAction .grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .secondarySlot {
+    padding-top: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .root,
+  .rail,
+  .grid,
+  .slot,
+  .primarySlot,
+  .secondarySlot {
+    transition: none;
+  }
+}

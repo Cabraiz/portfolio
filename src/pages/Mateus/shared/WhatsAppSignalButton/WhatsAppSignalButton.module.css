@@ -15,41 +15,43 @@
   --signal-padding-top: calc(var(--signal-drawer-height) + 10px);
   --signal-padding-bottom: calc(var(--signal-drawer-height) + 10px);
   --signal-padding-inline: calc(var(--signal-corner-offset-hover) + 10px);
-  --signal-frame-shift-y: 0px;
 
-  --signal-background:
+  --signal-z-root: 0;
+  --signal-z-drawers: 2;
+  --signal-z-button: 3;
+  --signal-z-corners: 1;
+
+  --signal-button-background:
     linear-gradient(180deg, rgba(78, 239, 136, 0.98), rgba(37, 211, 102, 0.98));
-  --signal-border: 1px solid rgba(14, 101, 49, 0.16);
-  --signal-text: #0f2618;
-  --signal-shadow:
-    0 10px 22px rgba(11, 45, 24, 0.18),
-    0 4px 10px rgba(11, 45, 24, 0.12),
-    inset 0 1px 0 rgba(255, 255, 255, 0.26);
-  --signal-shadow-hover:
-    0 18px 34px rgba(11, 45, 24, 0.22),
-    0 8px 18px rgba(11, 45, 24, 0.16),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3);
 
-  --signal-drawer-top:
-    linear-gradient(180deg, rgba(255, 197, 102, 0.96), rgba(232, 154, 55, 0.96));
-  --signal-drawer-bottom:
-    linear-gradient(180deg, rgba(248, 186, 92, 0.96), rgba(220, 142, 49, 0.96));
-  --signal-drawer-text: rgba(109, 58, 11, 0.96);
+  --signal-border: transparent;
+  --signal-label-color: #ffffff;
+  --signal-icon-color: #000000;
+
+  --signal-glow: none;
+  --signal-glow-hover:
+    0 12px 24px rgba(11, 45, 24, 0.18),
+    0 6px 14px rgba(11, 45, 24, 0.12);
+
+  --signal-drawer-background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(240, 240, 240, 0.98));
+  --signal-drawer-background-bottom:
+    linear-gradient(180deg, rgba(248, 248, 248, 0.98), rgba(232, 232, 232, 0.98));
+  --signal-drawer-text-color: rgba(18, 18, 18, 0.92);
   --signal-drawer-shadow:
     0 10px 20px rgba(0, 0, 0, 0.12),
     inset 0 1px 0 rgba(255, 255, 255, 0.22);
 
-  --signal-corner-color: rgba(255, 255, 255, 0.2);
+  --signal-corner-stroke: rgba(255, 255, 255, 0.28);
   --signal-corner-shadow: rgba(0, 0, 0, 0.16);
   --signal-focus-ring: rgba(114, 255, 163, 0.42);
 
   position: relative;
+  z-index: var(--signal-z-root);
   display: inline-grid;
   width: max-content;
   min-width: 0;
-  padding:
-    var(--signal-padding-top)
-    var(--signal-padding-inline)
+  padding: var(--signal-padding-top) var(--signal-padding-inline)
     var(--signal-padding-bottom);
   isolation: isolate;
   overflow: visible;
@@ -69,18 +71,16 @@
   --signal-corner-size: 38px;
   --signal-corner-offset: 14px;
   --signal-corner-offset-hover: 24px;
+  --signal-padding-top: calc(var(--signal-drawer-height) + 8px);
+  --signal-padding-bottom: calc(var(--signal-drawer-height) + 8px);
 }
 
 .hero {
-  --signal-padding-top: calc(var(--signal-drawer-height) + 12px);
-  --signal-padding-bottom: calc(var(--signal-drawer-height) + 18px);
-  --signal-frame-shift-y: -10px;
+  /* Contexto de bleed/stacking agora pertence ao wrapper externo. */
 }
 
 .hero.compact {
-  --signal-padding-top: calc(var(--signal-drawer-height) + 10px);
-  --signal-padding-bottom: calc(var(--signal-drawer-height) + 16px);
-  --signal-frame-shift-y: -12px;
+  /* Mantido apenas por compatibilidade de API. */
 }
 
 .disabled {
@@ -95,7 +95,6 @@
   display: grid;
   align-items: center;
   justify-items: stretch;
-  transform: translateY(var(--signal-frame-shift-y));
   overflow: visible;
 }
 
@@ -105,7 +104,7 @@
 
 .button {
   position: relative;
-  z-index: 2;
+  z-index: var(--signal-z-button);
   width: 100%;
   min-width: 0;
   min-height: var(--signal-height);
@@ -113,11 +112,11 @@
   align-items: center;
   justify-content: center;
   padding-inline: var(--signal-padding-x);
-  border: var(--signal-border);
+  border: none;
   border-radius: var(--signal-radius);
-  background: var(--signal-background);
-  box-shadow: var(--signal-shadow);
-  color: var(--signal-text);
+  background: var(--signal-button-background);
+  box-shadow: var(--signal-glow);
+  color: var(--signal-label-color);
   text-decoration: none;
   overflow: hidden;
   -webkit-tap-highlight-color: transparent;
@@ -126,6 +125,18 @@
     box-shadow 240ms cubic-bezier(0.22, 1, 0.36, 1),
     filter 240ms cubic-bezier(0.22, 1, 0.36, 1),
     background 240ms ease;
+  appearance: none;
+  cursor: pointer;
+}
+
+.button:link,
+.button:visited,
+.button:hover,
+.button:active,
+.button:focus,
+.button:focus-visible {
+  color: var(--signal-label-color);
+  text-decoration: none;
 }
 
 .button::before {
@@ -133,8 +144,8 @@
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.18), transparent 42%),
-    linear-gradient(180deg, transparent 58%, rgba(0, 0, 0, 0.05));
+    linear-gradient(180deg, rgba(255, 255, 255, 0.14), transparent 42%),
+    linear-gradient(180deg, transparent 58%, rgba(0, 0, 0, 0.04));
   pointer-events: none;
 }
 
@@ -156,12 +167,14 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  color: var(--signal-icon-color);
 }
 
 .iconSvg {
   width: 100%;
   height: 100%;
   display: block;
+  fill: currentColor;
 }
 
 .labelWrap {
@@ -183,6 +196,15 @@
   overflow: hidden;
   text-overflow: ellipsis;
   text-transform: uppercase;
+  color: var(--signal-label-color);
+}
+
+.button:hover .label,
+.button:active .label,
+.button:focus .label,
+.button:focus-visible .label,
+.button:visited .label {
+  color: var(--signal-label-color);
 }
 
 .compact .label {
@@ -192,7 +214,7 @@
 .drawer {
   position: absolute;
   left: 50%;
-  z-index: 1;
+  z-index: var(--signal-z-drawers);
   width: var(--signal-drawer-width);
   min-width: 0;
   height: var(--signal-drawer-height);
@@ -202,7 +224,7 @@
   padding-inline: 14px;
   border-radius: var(--signal-drawer-radius);
   box-shadow: var(--signal-drawer-shadow);
-  color: var(--signal-drawer-text);
+  color: var(--signal-drawer-text-color);
   font-family: inherit;
   font-size: 0.74rem;
   font-weight: 800;
@@ -221,19 +243,19 @@
 
 .drawerTop {
   top: 0;
-  background: var(--signal-drawer-top);
+  background: var(--signal-drawer-background);
   transform: translate(-50%, 14px) rotate(-1deg) scale(0.94);
 }
 
 .drawerBottom {
   bottom: 0;
-  background: var(--signal-drawer-bottom);
+  background: var(--signal-drawer-background-bottom);
   transform: translate(-50%, -14px) rotate(1deg) scale(0.94);
 }
 
 .corner {
   position: absolute;
-  z-index: 0;
+  z-index: var(--signal-z-corners);
   width: var(--signal-corner-size);
   height: var(--signal-corner-size);
   overflow: visible;
@@ -246,7 +268,7 @@
 
 .cornerPath {
   fill: none;
-  stroke: var(--signal-corner-color);
+  stroke: var(--signal-corner-stroke);
   stroke-width: 1.8;
   stroke-linecap: round;
   stroke-linejoin: round;
@@ -279,7 +301,7 @@
 .root:hover .button,
 .root:focus-within .button {
   transform: translateY(-2px) scale(1.025);
-  box-shadow: var(--signal-shadow-hover);
+  box-shadow: var(--signal-glow-hover);
   filter: saturate(1.04);
 }
 
@@ -332,19 +354,21 @@
   transform: translateY(1px) scale(0.985);
   box-shadow:
     0 8px 14px rgba(11, 45, 24, 0.18),
-    0 3px 8px rgba(11, 45, 24, 0.12),
-    inset 0 1px 0 rgba(255, 255, 255, 0.22);
+    0 3px 8px rgba(11, 45, 24, 0.12);
 }
 
 .button:active .labelWrap {
   transform: translateY(0);
 }
 
+.button:disabled {
+  cursor: not-allowed;
+}
+
 .disabled .button {
   pointer-events: none;
   box-shadow:
-    0 8px 14px rgba(11, 45, 24, 0.12),
-    inset 0 1px 0 rgba(255, 255, 255, 0.16);
+    0 8px 14px rgba(11, 45, 24, 0.12);
 }
 
 .disabled .drawer,
@@ -407,16 +431,11 @@
     --signal-corner-size: 38px;
   }
 
-  .hero {
-    --signal-padding-top: calc(var(--signal-drawer-height) + 10px);
-    --signal-padding-bottom: calc(var(--signal-drawer-height) + 14px);
-    --signal-frame-shift-y: -30px;
-  }
-
-  .hero.compact {
-    --signal-padding-top: calc(var(--signal-drawer-height) + 8px);
-    --signal-padding-bottom: calc(var(--signal-drawer-height) + 12px);
-    --signal-frame-shift-y: -32px;
+  .compact {
+    --signal-height: 56px;
+    --signal-padding-x: 16px;
+    --signal-drawer-height: 28px;
+    --signal-corner-size: 36px;
   }
 
   .label {

@@ -15,6 +15,7 @@ import "tippy.js/dist/tippy.css";
 import RoleTitle from "./RoleTitle";
 import CTAButton from "./shared/CTAButton/CTAButton";
 import WhatsAppSignalButton from "./shared/WhatsAppSignalButton/WhatsAppSignalButton";
+import WhatsAppHeroSlot from "./shared/WhatsAppSignalButton/WhatsAppHeroSlot";
 
 import perfil from "../../assets/Mateus/perfil.webp";
 import IconGmail from "../../assets/Mateus/icon/IconGmail.png";
@@ -117,7 +118,26 @@ const sealsContainerStyle: CSSProperties = {
   backgroundColor: "rgba(255, 255, 255, 0.05)",
   borderRadius: "20px",
   backdropFilter: "blur(10px)",
-  marginBottom: "max(10px, 4vh)",
+  marginBottom: "-1vh",
+};
+
+const heroTextColumnBaseStyle: CSSProperties = {
+  position: "relative",
+  zIndex: 2,
+  overflow: "visible",
+};
+
+const heroActionsWrapperStyle: CSSProperties = {
+  position: "relative",
+  zIndex: 6,
+  width: "100%",
+  overflow: "visible",
+  isolation: "isolate",
+};
+
+const heroProfileColumnStyle: CSSProperties = {
+  position: "relative",
+  zIndex: 1,
 };
 
 const profileCardStyle: CSSProperties = {
@@ -150,15 +170,6 @@ const socialRowStyle: CSSProperties = {
   alignItems: "center",
   gap: "1rem",
   width: "100%",
-};
-
-const ctaRowStyle: CSSProperties = {
-  alignItems: "flex-start",
-};
-
-const ctaColStyle: CSSProperties = {
-  display: "flex",
-  alignItems: "flex-start",
 };
 
 function normalizeTooltipClassName(value: string): string {
@@ -203,6 +214,20 @@ function useCompactDesktop(): boolean {
   return isCompactDesktop;
 }
 
+function getWhatsAppGreeting(): string {
+  const hour = new Date().getHours();
+
+  if (hour < 12) {
+    return "Bom dia!";
+  }
+
+  if (hour < 18) {
+    return "Boa tarde!";
+  }
+
+  return "Boa noite!";
+}
+
 function MateusDesktop() {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -221,6 +246,66 @@ function MateusDesktop() {
   const secondaryLabel = useMemo(() => {
     return t("buttons.downloadCV");
   }, [t]);
+
+  const whatsappTopLabel = useMemo(() => {
+    return getWhatsAppGreeting();
+  }, []);
+
+  const heroTextColumnStyle = useMemo<CSSProperties>(() => {
+    return {
+      ...heroTextColumnBaseStyle,
+      paddingTop: isCompactDesktop ? "8vh" : "11vh",
+    };
+  }, [isCompactDesktop]);
+
+  const primaryHeroAction = useMemo(() => {
+    if (isPT) {
+      return (
+        <WhatsAppSignalButton
+          href={WHATSAPP_HREF}
+          label="WhatsApp"
+          topLabel={whatsappTopLabel}
+          bottomLabel="Vamos Nessa?"
+          ariaLabel="Abrir conversa no WhatsApp"
+          fullWidth
+          compact={isCompactDesktop}
+          hero
+        />
+      );
+    }
+
+    return (
+      <CTAButton
+        label="MEET"
+        backLabel="LET'S TALK"
+        ariaLabel="Open meeting link"
+        href={MEET_HREF}
+        target="_blank"
+        rel="noopener noreferrer"
+        variant="heroPrimary"
+        size={isCompactDesktop ? "compact" : "default"}
+        align="center"
+        fullWidth
+      />
+    );
+  }, [isCompactDesktop, isPT, whatsappTopLabel]);
+
+  const secondaryHeroAction = useMemo(() => {
+    return (
+      <CTAButton
+        label={secondaryLabel}
+        backLabel={secondaryLabel}
+        ariaLabel={secondaryLabel}
+        href="/resume"
+        target="_blank"
+        rel="noopener noreferrer"
+        variant="heroSecondary"
+        size={isCompactDesktop ? "compact" : "default"}
+        align="center"
+        fullWidth
+      />
+    );
+  }, [isCompactDesktop, secondaryLabel]);
 
   const supportSocialButton = isPT ? (
     <SocialButton href={MEET_HREF} icon={IconMeet} alt="Meet" />
@@ -263,13 +348,10 @@ function MateusDesktop() {
   }, [lenis]);
 
   return (
-    <div ref={containerRef} style={{ position: "relative" }}>
+    <div ref={containerRef} style={{ position: "relative", overflow: "visible" }}>
       <Container fluid style={{ paddingTop: isCompactDesktop ? "9vh" : "12vh" }}>
         <Row className="custom-section-row">
-          <Col
-            className="col-md-5"
-            style={{ paddingTop: isCompactDesktop ? "8vh" : "11vh" }}
-          >
+          <Col className="col-md-5" style={heroTextColumnStyle}>
             <div style={seniorTitleStyle}>Senior</div>
 
             <div className="font-sequel" style={roleContainerStyle}>
@@ -322,55 +404,17 @@ function MateusDesktop() {
               ))}
             </div>
 
-            <Row className="pb-2 justify-content-end g-3" style={ctaRowStyle}>
-              {!isCompactDesktop && <Col md={2} />}
-
-              <Col md={isCompactDesktop ? 7 : 5} style={ctaColStyle}>
-                {isPT ? (
-                  <WhatsAppSignalButton
-                    href={WHATSAPP_HREF}
-                    label="WhatsApp"
-                    topLabel="Contato direto"
-                    bottomLabel="Resposta rápida"
-                    ariaLabel="Abrir conversa no WhatsApp"
-                    fullWidth
-                    compact={isCompactDesktop}
-                    hero
-                  />
-                ) : (
-                  <CTAButton
-                    label="MEET"
-                    backLabel="LET'S TALK"
-                    ariaLabel="Open meeting link"
-                    href={MEET_HREF}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    variant="heroPrimary"
-                    size={isCompactDesktop ? "compact" : "default"}
-                    align="center"
-                    fullWidth
-                  />
-                )}
-              </Col>
-
-              <Col md={5} style={ctaColStyle}>
-                <CTAButton
-                  label={secondaryLabel}
-                  backLabel={secondaryLabel}
-                  ariaLabel={secondaryLabel}
-                  href="/resume"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  variant="heroSecondary"
-                  size={isCompactDesktop ? "compact" : "default"}
-                  align="center"
-                  fullWidth
-                />
-              </Col>
-            </Row>
+            <div style={heroActionsWrapperStyle}>
+              <WhatsAppHeroSlot
+                compact={isCompactDesktop}
+                preserveDesktopOffset={!isCompactDesktop}
+                primary={primaryHeroAction}
+                secondary={secondaryHeroAction}
+              />
+            </div>
           </Col>
 
-          <Col className="col-md-7">
+          <Col className="col-md-7" style={heroProfileColumnStyle}>
             <div style={profileCardStyle}>
               <div style={profileImageWrapperStyle}>
                 <img
