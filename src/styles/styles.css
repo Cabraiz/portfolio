@@ -1,6 +1,14 @@
-/* styles.css */
+/* ==========================================================================
+   Global styles
+   --------------------------------------------------------------------------
+   Este arquivo deve conter apenas estilos globais compartilhados.
+   Componentes de seção, CTA e variações responsivas locais devem permanecer
+   em CSS Modules próprios.
+   ========================================================================== */
+
+/* Tooltip theme used in MateusDesktop seals */
 .tippy-box[data-theme~="bubble"] {
-  background-color: #e0f2ff; /* azul fofo */
+  background-color: #e0f2ff;
   color: #0a2540;
   font-size: 0.9rem;
   line-height: 1.4;
@@ -16,17 +24,14 @@
   border-top-color: #e0f2ff;
 }
 
-.tippy-box[data-theme~="bubble"][data-placement^="bottom"]
-  > .tippy-arrow::before {
+.tippy-box[data-theme~="bubble"][data-placement^="bottom"] > .tippy-arrow::before {
   border-bottom-color: #e0f2ff;
 }
 
-.tippy-box[data-theme~="bubble"][data-placement^="left"]
-  > .tippy-arrow::before {
+.tippy-box[data-theme~="bubble"][data-placement^="left"] > .tippy-arrow::before {
   border-left-color: #e0f2ff;
 }
 
-.tippy-box[data-theme~="bubble"][data-placement^="right"]
-  > .tippy-arrow::before {
+.tippy-box[data-theme~="bubble"][data-placement^="right"] > .tippy-arrow::before {
   border-right-color: #e0f2ff;
 }

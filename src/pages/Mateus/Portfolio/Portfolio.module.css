@@ -1,46 +1,342 @@
-/* ===========================
-   🎨 Container
-=========================== */
-.container {
+.root {
+  position: relative;
   width: 100%;
   min-height: 100vh;
-  padding: 5vh clamp(16px, 5vw, 60px);
+  color: #fdf5e6;
+}
+
+.portfolioSection {
+  width: 100%;
+  min-height: 100vh;
+  padding: clamp(40px, 6vh, 72px) clamp(16px, 5vw, 60px)
+    clamp(72px, 12vh, 160px);
   box-sizing: border-box;
   background-attachment: fixed;
   background-blend-mode: screen, overlay, normal;
   background-repeat: no-repeat;
   background-size: cover;
-  color: #fdf5e6;
 }
 
-/* ===========================
-   🎯 Título principal
-=========================== */
+.header {
+  width: min(100%, 1180px);
+  margin: 0 auto;
+  display: grid;
+  gap: 14px;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  max-width: 100%;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(252, 213, 53, 0.1);
+  border: 1px solid rgba(252, 213, 53, 0.2);
+  color: rgba(255, 229, 145, 0.95);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
 .title {
+  margin: 0;
   font-size: clamp(2.5rem, 5vw, 3.5rem);
-  text-align: center;
   font-weight: 800;
+  line-height: 0.98;
+  letter-spacing: 0.02em;
   background: linear-gradient(90deg, #fcd535, #ffb347);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  margin-bottom: 5vh;
-  letter-spacing: 1px;
 }
 
-/* ===========================
-   🏆 Tier
-=========================== */
-.tier {
-  margin-bottom: 8vh;
+.description {
+  margin: 0;
+  max-width: 68ch;
+  font-size: clamp(1rem, 1.15vw, 1.08rem);
+  line-height: 1.65;
+  color: rgba(253, 245, 230, 0.74);
 }
 
-.tierTitle {
-  font-size: clamp(1.8rem, 4vw, 2.4rem);
-  margin-bottom: 2vh;
-  text-align: left;
+.cardsStack {
+  width: min(100%, 1280px);
+  margin: clamp(36px, 6vh, 56px) auto 0;
+  display: grid;
+  gap: clamp(9rem, 24vh, 14rem);
+  padding-bottom: clamp(5rem, 14vh, 10rem);
+}
+
+.cardRow {
+  position: relative;
+  width: 100%;
+  min-height: clamp(26rem, 88vh, 52rem);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.cardDate {
+  position: absolute;
+  left: clamp(0.5rem, 1.6vw, 1.5rem);
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(253, 245, 230, 0.55);
+  font-size: clamp(0.92rem, 1.5vw, 1.16rem);
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  z-index: 1;
+}
+
+.animatedCard {
+  position: relative;
+  width: min(100%, 960px);
+  min-width: 320px;
+  min-height: 320px;
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(220px, 0.8fr);
+  align-items: stretch;
+  overflow: hidden;
+  cursor: pointer;
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.025)),
+    rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(16px);
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.2),
+    inset 0 0 8px rgba(255, 255, 255, 0.04);
+  transition:
+    transform 0.35s ease,
+    box-shadow 0.35s ease,
+    border-color 0.35s ease;
+  will-change: width, height, transform, opacity, box-shadow;
+  transform-origin: center center;
+}
+
+.animatedCard:hover {
+  border-color: rgba(255, 255, 255, 0.16);
+}
+
+.projectVisual {
+  min-width: 0;
+  height: 100%;
+}
+
+.projectImage {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.projectMeta {
+  min-width: 0;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: 18px;
+  align-items: center;
+  padding: clamp(18px, 2vw, 28px);
+  background:
+    radial-gradient(circle at top right, rgba(252, 213, 53, 0.08), transparent 40%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.025), rgba(255, 255, 255, 0.01));
+}
+
+.projectTextBlock {
+  min-width: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.projectLabel {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  max-width: 100%;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(253, 245, 230, 0.68);
+  font-size: 0.78rem;
   font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
-.tierS { color: #ffd700; }
-.tierA { color: #c0c0c0; }
-.tierB { color: #cd7f32; }
+.projectName {
+  margin: 0;
+  font-size: clamp(1.2rem, 2vw, 1.8rem);
+  line-height: 1.05;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.96);
+  word-break: break-word;
+}
+
+.projectYear {
+  color: rgba(253, 245, 230, 0.6);
+  font-size: 0.95rem;
+  line-height: 1.2;
+}
+
+.projectLogoBox {
+  min-width: 0;
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-end;
+  height: 100%;
+}
+
+.projectLogo {
+  width: min(100%, 220px);
+  max-height: 120px;
+  object-fit: contain;
+  display: block;
+}
+
+.conversationSection {
+  margin-top: clamp(1rem, 3vh, 3rem);
+  padding-bottom: clamp(24px, 5vh, 48px);
+}
+
+/* Desktop compacto / 720p */
+@media (max-height: 720px) and (min-width: 961px) {
+  .portfolioSection {
+    padding-top: 32px;
+    padding-bottom: 96px;
+  }
+
+  .cardsStack {
+    gap: clamp(6rem, 18vh, 9rem);
+    margin-top: 28px;
+  }
+
+  .cardRow {
+    min-height: clamp(20rem, 72vh, 34rem);
+  }
+
+  .cardDate {
+    left: 0.25rem;
+    font-size: 0.95rem;
+  }
+
+  .animatedCard {
+    min-height: 240px;
+    border-radius: 20px;
+  }
+
+  .projectMeta {
+    gap: 12px;
+    padding: 18px;
+  }
+
+  .projectLogo {
+    max-height: 88px;
+  }
+}
+
+@media (max-width: 1080px) {
+  .cardsStack {
+    gap: clamp(6rem, 14vh, 8rem);
+  }
+
+  .animatedCard {
+    grid-template-columns: minmax(0, 1fr) minmax(200px, 0.8fr);
+  }
+
+  .projectLogo {
+    width: min(100%, 180px);
+  }
+}
+
+@media (max-width: 960px) {
+  .portfolioSection {
+    padding-inline: 16px;
+    padding-bottom: 56px;
+  }
+
+  .cardsStack {
+    gap: 32px;
+    padding-bottom: 0;
+  }
+
+  .cardRow {
+    min-height: auto;
+    display: grid;
+    gap: 12px;
+    justify-items: stretch;
+    align-items: start;
+  }
+
+  .cardDate {
+    position: static;
+    transform: none;
+    color: rgba(253, 245, 230, 0.62);
+  }
+
+  .animatedCard {
+    width: 100% !important;
+    height: auto !important;
+    min-width: 0;
+    min-height: auto;
+    grid-template-columns: 1fr;
+    border-radius: 18px;
+  }
+
+  .projectVisual {
+    min-height: 220px;
+  }
+
+  .projectMeta {
+    grid-template-rows: auto;
+    justify-items: start;
+    gap: 16px;
+    padding: 16px;
+  }
+
+  .projectLogoBox {
+    justify-content: flex-start;
+    align-items: center;
+  }
+
+  .projectLogo {
+    width: min(100%, 160px);
+    max-height: 76px;
+  }
+}
+
+@media (max-width: 560px) {
+  .portfolioSection {
+    padding-top: 28px;
+    padding-bottom: 44px;
+  }
+
+  .header {
+    gap: 10px;
+  }
+
+  .title {
+    font-size: clamp(2rem, 10vw, 2.8rem);
+  }
+
+  .description {
+    font-size: 0.96rem;
+    line-height: 1.55;
+  }
+
+  .cardsStack {
+    margin-top: 24px;
+  }
+
+  .projectVisual {
+    min-height: 190px;
+  }
+
+  .projectName {
+    font-size: 1.08rem;
+  }
+
+  .projectYear {
+    font-size: 0.9rem;
+  }
+}

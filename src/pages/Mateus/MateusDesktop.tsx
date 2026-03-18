@@ -1,13 +1,21 @@
-import React, { FC, useLayoutEffect, useRef, useState } from "react";
-import { Col, Row, Image, Button, Container } from "react-bootstrap";
+import {
+  type CSSProperties,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { Col, Row, Image, Container } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import i18n from "@/i18n/i18n";
 import Tippy from "@tippyjs/react";
 import "tippy.js/dist/tippy.css";
 
 import RoleTitle from "./RoleTitle";
+import CTAButton from "./shared/CTAButton/CTAButton";
+import WhatsAppSignalButton from "./shared/WhatsAppSignalButton/WhatsAppSignalButton";
 
-import IconWhatsAppVector from "../../assets/Mateus/icon/IconWhatsAppVector.svg";
 import perfil from "../../assets/Mateus/perfil.webp";
 import IconGmail from "../../assets/Mateus/icon/IconGmail.png";
 import IconInsta from "../../assets/Mateus/icon/IconInsta.png";
@@ -33,34 +41,197 @@ import { useLenis } from "lenis/react";
 
 gsap.registerPlugin(ScrollTrigger);
 
-interface SocialButtonProps {
+type SocialButtonProps = Readonly<{
   href: string;
   icon: string;
   alt: string;
   isScrollToTop?: boolean;
-}
+}>;
 
-const selos = [
-  { key: "BNB", src: seloBNB, alt: "Banco do Nordeste", cat: cat1, style: { scale: "0.9", marginTop: "5px" } },
-  { key: "UNIFOR", src: seloUNIFOR, alt: "UNIFOR", cat: cat2, style: {} },
-  { key: "SANA", src: seloSANA, alt: "SANA", cat: cat3, style: { scale: "0.75", marginTop: "5px" } },
-  { key: "SEDIH", src: seloSEDIH, alt: "SEDIH", cat: cat4, style: {} },
+type SealItem = Readonly<{
+  key: string;
+  src: string;
+  alt: string;
+  cat: string;
+  style?: CSSProperties;
+}>;
+
+const COMPACT_DESKTOP_MEDIA_QUERY =
+  "(max-height: 720px) and (min-width: 961px)";
+
+const WHATSAPP_HREF = "https://wa.me/5585998575707";
+const MEET_HREF = "https://meet.google.com/SEULINK";
+
+const seals: readonly SealItem[] = [
+  {
+    key: "BNB",
+    src: seloBNB,
+    alt: "Banco do Nordeste",
+    cat: cat1,
+    style: { scale: "0.9", marginTop: "5px" },
+  },
+  {
+    key: "UNIFOR",
+    src: seloUNIFOR,
+    alt: "UNIFOR",
+    cat: cat2,
+  },
+  {
+    key: "SANA",
+    src: seloSANA,
+    alt: "SANA",
+    cat: cat3,
+    style: { scale: "0.75", marginTop: "5px" },
+  },
+  {
+    key: "SEDIH",
+    src: seloSEDIH,
+    alt: "SEDIH",
+    cat: cat4,
+  },
 ];
 
-const MateusDesktop: FC = () => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const { t } = useTranslation();
-  const isPT = i18n.language === "pt" || i18n.language.startsWith("pt");
-  const lenis = useLenis();
+const seniorTitleStyle: CSSProperties = {
+  fontSize: "4rem",
+  fontWeight: 700,
+  color: "#f1c40f",
+  marginBottom: "1.5rem",
+  lineHeight: 1,
+};
 
-  const [isLoading, setIsLoading] = useState(false);
-  const [forceHover, setForceHover] = useState(false);
+const roleContainerStyle: CSSProperties = {
+  backgroundImage: "linear-gradient(90deg, #f1c40f 100%, #f1c40f 100%)",
+  marginBottom: "max(10px, 4vh)",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "flex-start",
+  height: "3.5rem",
+};
+
+const sealsContainerStyle: CSSProperties = {
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  gap: "2rem",
+  padding: "1.2rem 2rem",
+  backgroundColor: "rgba(255, 255, 255, 0.05)",
+  borderRadius: "20px",
+  backdropFilter: "blur(10px)",
+  marginBottom: "max(10px, 4vh)",
+};
+
+const profileCardStyle: CSSProperties = {
+  backgroundColor: "rgba(255, 255, 255, 0.1)",
+  marginLeft: "10vw",
+  padding: "4vh max(40px, 2vw)",
+  borderRadius: "20px",
+  display: "flex",
+  flexDirection: "column",
+  justifyContent: "space-evenly",
+  alignItems: "center",
+  width: "fit-content",
+  height: "100%",
+  backdropFilter: "blur(8px)",
+  gap: "4vh",
+};
+
+const profileImageWrapperStyle: CSSProperties = {
+  borderRadius: "3rem",
+  overflow: "hidden",
+  width: "29vw",
+  height: "29vw",
+  position: "relative",
+  boxShadow: "0 10px 30px rgba(0,0,0,0.2)",
+};
+
+const socialRowStyle: CSSProperties = {
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  gap: "1rem",
+  width: "100%",
+};
+
+const ctaRowStyle: CSSProperties = {
+  alignItems: "flex-start",
+};
+
+const ctaColStyle: CSSProperties = {
+  display: "flex",
+  alignItems: "flex-start",
+};
+
+function normalizeTooltipClassName(value: string): string {
+  return value
+    .toLowerCase()
+    .replaceAll(/\s+/g, "")
+    .normalize("NFD")
+    .replaceAll(/[\u0300-\u036f]/g, "");
+}
+
+function useCompactDesktop(): boolean {
+  const [isCompactDesktop, setIsCompactDesktop] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return undefined;
+    }
+
+    const mediaQuery = window.matchMedia(COMPACT_DESKTOP_MEDIA_QUERY);
+
+    const syncState = (event?: MediaQueryListEvent) => {
+      setIsCompactDesktop(event ? event.matches : mediaQuery.matches);
+    };
+
+    syncState();
+
+    if (typeof mediaQuery.addEventListener === "function") {
+      mediaQuery.addEventListener("change", syncState);
+
+      return () => {
+        mediaQuery.removeEventListener("change", syncState);
+      };
+    }
+
+    mediaQuery.addListener(syncState);
+
+    return () => {
+      mediaQuery.removeListener(syncState);
+    };
+  }, []);
+
+  return isCompactDesktop;
+}
+
+function MateusDesktop() {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const { t } = useTranslation();
+  const lenis = useLenis();
+  const isCompactDesktop = useCompactDesktop();
+
   const [isImageLoaded, setIsImageLoaded] = useState(false);
 
-  const openResumeTab = () => window.open("/resume", "_blank");
+  const currentLanguage = i18n.resolvedLanguage ?? i18n.language ?? "pt";
+
+  const isPT = useMemo(() => {
+    return currentLanguage === "pt" || currentLanguage.startsWith("pt");
+  }, [currentLanguage]);
+
+  const secondaryLabel = useMemo(() => {
+    return t("buttons.downloadCV");
+  }, [t]);
+
+  const supportSocialButton = isPT ? (
+    <SocialButton href={MEET_HREF} icon={IconMeet} alt="Meet" />
+  ) : (
+    <SocialButton href={WHATSAPP_HREF} icon={IconWhatsApp} alt="WhatsApp" />
+  );
 
   useLayoutEffect(() => {
-    if (!containerRef.current || !lenis?.rootElement) return;
+    if (!containerRef.current || !lenis?.rootElement) {
+      return undefined;
+    }
 
     const ctx = gsap.context(() => {
       gsap.fromTo(
@@ -80,7 +251,7 @@ const MateusDesktop: FC = () => {
           ease: "power3.out",
           scrollTrigger: {
             trigger: containerRef.current,
-            scroller: lenis.rootElement, // ✅ ESSENCIAL para Lenis
+            scroller: lenis.rootElement,
             start: "top 80%",
             toggleActions: "play none none reverse",
           },
@@ -93,47 +264,39 @@ const MateusDesktop: FC = () => {
 
   return (
     <div ref={containerRef} style={{ position: "relative" }}>
-      <Container fluid style={{ paddingTop: "12vh" }}>
+      <Container fluid style={{ paddingTop: isCompactDesktop ? "9vh" : "12vh" }}>
         <Row className="custom-section-row">
-          <Col className="col-md-5" style={{ paddingTop: "11vh" }}>
-            <div style={{ fontSize: "4rem", fontWeight: 700, color: "#f1c40f", marginBottom: "1.5rem" }}>
-              Senior
-            </div>
+          <Col
+            className="col-md-5"
+            style={{ paddingTop: isCompactDesktop ? "8vh" : "11vh" }}
+          >
+            <div style={seniorTitleStyle}>Senior</div>
 
-            <div
-              className="font-sequel"
-              style={{
-                backgroundImage: "linear-gradient(90deg,#f1c40f 100%, #f1c40f 100%)",
-                marginBottom: "max(10px, 4vh)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "start",
-                height: "3.5rem",
-              }}
-            >
+            <div className="font-sequel" style={roleContainerStyle}>
               <RoleTitle />
             </div>
 
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                gap: "2rem",
-                padding: "1.2rem 2rem",
-                backgroundColor: "rgba(255, 255, 255, 0.05)",
-                borderRadius: "20px",
-                backdropFilter: "blur(10px)",
-                marginBottom: "max(10px, 4vh)",
-              }}
-            >
-              {selos.map((selo) => (
+            <div style={sealsContainerStyle}>
+              {seals.map((seal) => (
                 <Tippy
-                  key={selo.key}
+                  key={seal.key}
                   content={
-                    <div style={{ display: "flex", gap: "1rem", maxWidth: "280px", padding: "4px" }}>
-                      <img src={selo.cat} alt="Cat" style={{ height: "11vh", borderRadius: "8px" }} />
-                      <p style={{ fontSize: "12px", margin: 0 }}>{t(`selo.${selo.key}`)}</p>
+                    <div
+                      style={{
+                        display: "flex",
+                        gap: "1rem",
+                        maxWidth: "280px",
+                        padding: "4px",
+                      }}
+                    >
+                      <img
+                        src={seal.cat}
+                        alt={`${seal.alt} mascot`}
+                        style={{ height: "11vh", borderRadius: "8px" }}
+                      />
+                      <p style={{ fontSize: "12px", margin: 0 }}>
+                        {t(`selo.${seal.key}`)}
+                      </p>
                     </div>
                   }
                   placement="top"
@@ -145,13 +308,13 @@ const MateusDesktop: FC = () => {
                 >
                   <div>
                     <img
-                      src={selo.src}
-                      alt={selo.alt}
+                      src={seal.src}
+                      alt={seal.alt}
                       style={{
                         height: "40px",
                         filter: "grayscale(100%)",
                         opacity: 0.8,
-                        ...selo.style,
+                        ...seal.style,
                       }}
                     />
                   </div>
@@ -159,92 +322,57 @@ const MateusDesktop: FC = () => {
               ))}
             </div>
 
-            <Row className="pb-2 justify-content-end">
-              <Col md={2} />
-              <Col md={5}>
-                <button
-                  className={`lux-button ${forceHover ? "lux-hover" : ""} ${isLoading ? "lux-loading" : ""}`}
-                  onClick={() => {
-                    setIsLoading(true);
-                    setForceHover(true);
-                    setTimeout(() => {
-                      window.open(
-                        isPT ? "https://wa.me/5585998575707" : "https://meet.google.com/SEULINK",
-                        "_blank"
-                      );
-                      setIsLoading(false);
-                      setForceHover(false);
-                    }, 1000);
-                  }}
-                >
-                  <div>
-                    <span>
-                      {isPT && (
-                        <img
-                          src={IconWhatsAppVector}
-                          alt="WhatsApp"
-                          style={{ height: "22px", width: "22px", marginRight: "0.4rem" }}
-                        />
-                      )}
-                      {!isLoading && <p>{isPT ? "WHATSAPP" : "MEET"}</p>}
-                    </span>
-                  </div>
-                  <div>
-                    <span>
-                      {isPT && (
-                        <img
-                          src={IconWhatsAppVector}
-                          alt="WhatsApp"
-                          style={{ height: "22px", width: "22px" }}
-                        />
-                      )}
-                      {!isLoading ? (
-                        <p>{isPT ? "VAMOS CONVERSAR" : "LET'S TALK"}</p>
-                      ) : (
-                        <div className="lux-loading-bar" />
-                      )}
-                    </span>
-                  </div>
-                </button>
+            <Row className="pb-2 justify-content-end g-3" style={ctaRowStyle}>
+              {!isCompactDesktop && <Col md={2} />}
+
+              <Col md={isCompactDesktop ? 7 : 5} style={ctaColStyle}>
+                {isPT ? (
+                  <WhatsAppSignalButton
+                    href={WHATSAPP_HREF}
+                    label="WhatsApp"
+                    topLabel="Contato direto"
+                    bottomLabel="Resposta rápida"
+                    ariaLabel="Abrir conversa no WhatsApp"
+                    fullWidth
+                    compact={isCompactDesktop}
+                    hero
+                  />
+                ) : (
+                  <CTAButton
+                    label="MEET"
+                    backLabel="LET'S TALK"
+                    ariaLabel="Open meeting link"
+                    href={MEET_HREF}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    variant="heroPrimary"
+                    size={isCompactDesktop ? "compact" : "default"}
+                    align="center"
+                    fullWidth
+                  />
+                )}
               </Col>
-              <Col md={5}>
-                <Button
-                  className="btn-trasn-w-border py-3 btn-tran-effect btn-press-effect w-100"
-                  onClick={openResumeTab}
-                >
-                  {t("buttons.downloadCV")}
-                </Button>
+
+              <Col md={5} style={ctaColStyle}>
+                <CTAButton
+                  label={secondaryLabel}
+                  backLabel={secondaryLabel}
+                  ariaLabel={secondaryLabel}
+                  href="/resume"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  variant="heroSecondary"
+                  size={isCompactDesktop ? "compact" : "default"}
+                  align="center"
+                  fullWidth
+                />
               </Col>
             </Row>
           </Col>
 
           <Col className="col-md-7">
-            <div
-              style={{
-                backgroundColor: "rgba(255, 255, 255, 0.1)",
-                marginLeft: "10vw",
-                padding: "4vh max(40px, 2vw)",
-                borderRadius: "20px",
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "space-evenly",
-                alignItems: "center",
-                width: "fit-content",
-                height: "100%",
-                backdropFilter: "blur(8px)",
-                gap: "4vh",
-              }}
-            >
-              <div
-                style={{
-                  borderRadius: "3rem",
-                  overflow: "hidden",
-                  width: "29vw",
-                  height: "29vw",
-                  position: "relative",
-                  boxShadow: "0 10px 30px rgba(0,0,0,0.2)",
-                }}
-              >
+            <div style={profileCardStyle}>
+              <div style={profileImageWrapperStyle}>
                 <img
                   src={perfil}
                   alt="Mateus"
@@ -265,23 +393,23 @@ const MateusDesktop: FC = () => {
                 />
               </div>
 
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  gap: "1rem",
-                  width: "100%",
-                }}
-              >
-                <SocialButton href="https://www.linkedin.com/in/cabraiz/" icon={IconLinkendin} alt="LinkedIn" />
-                <SocialButton href="mailto:mateusccabr@gmail.com?subject=Freelance..." icon={IconGmail} alt="Gmail" />
-                <SocialButton href="https://www.instagram.com/cabraiz/" icon={IconInsta} alt="Insta" />
-                {isPT ? (
-                  <SocialButton href="https://meet.google.com/SEULINK" icon={IconMeet} alt="Meet" />
-                ) : (
-                  <SocialButton href="https://wa.me/5585998575707" icon={IconWhatsApp} alt="WhatsApp" />
-                )}
+              <div style={socialRowStyle}>
+                <SocialButton
+                  href="https://www.linkedin.com/in/cabraiz/"
+                  icon={IconLinkendin}
+                  alt="LinkedIn"
+                />
+                <SocialButton
+                  href="mailto:mateusccabr@gmail.com?subject=Freelance..."
+                  icon={IconGmail}
+                  alt="Gmail"
+                />
+                <SocialButton
+                  href="https://www.instagram.com/cabraiz/"
+                  icon={IconInsta}
+                  alt="Instagram"
+                />
+                {supportSocialButton}
               </div>
             </div>
           </Col>
@@ -289,21 +417,28 @@ const MateusDesktop: FC = () => {
       </Container>
     </div>
   );
-};
+}
 
-export function SocialButton({ href, icon, alt, isScrollToTop }: SocialButtonProps) {
+export function SocialButton({
+  href,
+  icon,
+  alt,
+  isScrollToTop,
+}: SocialButtonProps) {
+  const normalizedTooltipClass = normalizeTooltipClassName(alt);
+
   return (
-    <a href={href} target="_blank" rel="noopener noreferrer" className="social-wrapper">
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="social-wrapper"
+      aria-label={alt}
+    >
       <div className={`social-link ${isScrollToTop ? "scrollToTopButton" : ""}`}>
         <Image className="imagesize" src={icon} alt={alt} />
       </div>
-      <div
-        className={`tooltip-custom tooltip-${alt
-          .toLowerCase()
-          .replace(/\s+/g, "")
-          .normalize("NFD")
-          .replace(/[\u0300-\u036f]/g, "")}`}
-      >
+      <div className={`tooltip-custom tooltip-${normalizedTooltipClass}`}>
         {alt}
       </div>
     </a>

@@ -1,0 +1,471 @@
+.root {
+  --signal-width: clamp(220px, 24vw, 320px);
+  --signal-height: 64px;
+  --signal-radius: 18px;
+  --signal-padding-x: 22px;
+
+  --signal-drawer-width: clamp(132px, 14vw, 172px);
+  --signal-drawer-height: 34px;
+  --signal-drawer-radius: 12px;
+
+  --signal-corner-size: 42px;
+  --signal-corner-offset: 16px;
+  --signal-corner-offset-hover: 28px;
+
+  --signal-padding-top: calc(var(--signal-drawer-height) + 10px);
+  --signal-padding-bottom: calc(var(--signal-drawer-height) + 10px);
+  --signal-padding-inline: calc(var(--signal-corner-offset-hover) + 10px);
+  --signal-frame-shift-y: 0px;
+
+  --signal-background:
+    linear-gradient(180deg, rgba(78, 239, 136, 0.98), rgba(37, 211, 102, 0.98));
+  --signal-border: 1px solid rgba(14, 101, 49, 0.16);
+  --signal-text: #0f2618;
+  --signal-shadow:
+    0 10px 22px rgba(11, 45, 24, 0.18),
+    0 4px 10px rgba(11, 45, 24, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.26);
+  --signal-shadow-hover:
+    0 18px 34px rgba(11, 45, 24, 0.22),
+    0 8px 18px rgba(11, 45, 24, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+
+  --signal-drawer-top:
+    linear-gradient(180deg, rgba(255, 197, 102, 0.96), rgba(232, 154, 55, 0.96));
+  --signal-drawer-bottom:
+    linear-gradient(180deg, rgba(248, 186, 92, 0.96), rgba(220, 142, 49, 0.96));
+  --signal-drawer-text: rgba(109, 58, 11, 0.96);
+  --signal-drawer-shadow:
+    0 10px 20px rgba(0, 0, 0, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22);
+
+  --signal-corner-color: rgba(255, 255, 255, 0.2);
+  --signal-corner-shadow: rgba(0, 0, 0, 0.16);
+  --signal-focus-ring: rgba(114, 255, 163, 0.42);
+
+  position: relative;
+  display: inline-grid;
+  width: max-content;
+  min-width: 0;
+  padding:
+    var(--signal-padding-top)
+    var(--signal-padding-inline)
+    var(--signal-padding-bottom);
+  isolation: isolate;
+  overflow: visible;
+}
+
+.fullWidth {
+  display: grid;
+  width: 100%;
+}
+
+.compact {
+  --signal-height: 58px;
+  --signal-radius: 16px;
+  --signal-padding-x: 18px;
+  --signal-drawer-width: clamp(118px, 13vw, 156px);
+  --signal-drawer-height: 30px;
+  --signal-corner-size: 38px;
+  --signal-corner-offset: 14px;
+  --signal-corner-offset-hover: 24px;
+}
+
+.hero {
+  --signal-padding-top: calc(var(--signal-drawer-height) + 12px);
+  --signal-padding-bottom: calc(var(--signal-drawer-height) + 18px);
+  --signal-frame-shift-y: -10px;
+}
+
+.hero.compact {
+  --signal-padding-top: calc(var(--signal-drawer-height) + 10px);
+  --signal-padding-bottom: calc(var(--signal-drawer-height) + 16px);
+  --signal-frame-shift-y: -12px;
+}
+
+.disabled {
+  opacity: 0.72;
+}
+
+.frame {
+  position: relative;
+  width: var(--signal-width);
+  min-width: 0;
+  min-height: var(--signal-height);
+  display: grid;
+  align-items: center;
+  justify-items: stretch;
+  transform: translateY(var(--signal-frame-shift-y));
+  overflow: visible;
+}
+
+.fullWidth .frame {
+  width: 100%;
+}
+
+.button {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  min-width: 0;
+  min-height: var(--signal-height);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-inline: var(--signal-padding-x);
+  border: var(--signal-border);
+  border-radius: var(--signal-radius);
+  background: var(--signal-background);
+  box-shadow: var(--signal-shadow);
+  color: var(--signal-text);
+  text-decoration: none;
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    transform 240ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 240ms cubic-bezier(0.22, 1, 0.36, 1),
+    filter 240ms cubic-bezier(0.22, 1, 0.36, 1),
+    background 240ms ease;
+}
+
+.button::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.18), transparent 42%),
+    linear-gradient(180deg, transparent 58%, rgba(0, 0, 0, 0.05));
+  pointer-events: none;
+}
+
+.buttonSurface {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.leadingIcon {
+  flex: 0 0 auto;
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.iconSvg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.labelWrap {
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.label {
+  display: block;
+  min-width: 0;
+  font-family: inherit;
+  font-size: 1.03rem;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+}
+
+.compact .label {
+  font-size: 0.96rem;
+}
+
+.drawer {
+  position: absolute;
+  left: 50%;
+  z-index: 1;
+  width: var(--signal-drawer-width);
+  min-width: 0;
+  height: var(--signal-drawer-height);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding-inline: 14px;
+  border-radius: var(--signal-drawer-radius);
+  box-shadow: var(--signal-drawer-shadow);
+  color: var(--signal-drawer-text);
+  font-family: inherit;
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  text-transform: uppercase;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  filter: blur(2px);
+  transition:
+    transform 200ms ease,
+    opacity 180ms ease,
+    filter 180ms ease;
+}
+
+.drawerTop {
+  top: 0;
+  background: var(--signal-drawer-top);
+  transform: translate(-50%, 14px) rotate(-1deg) scale(0.94);
+}
+
+.drawerBottom {
+  bottom: 0;
+  background: var(--signal-drawer-bottom);
+  transform: translate(-50%, -14px) rotate(1deg) scale(0.94);
+}
+
+.corner {
+  position: absolute;
+  z-index: 0;
+  width: var(--signal-corner-size);
+  height: var(--signal-corner-size);
+  overflow: visible;
+  opacity: 0.8;
+  transition:
+    transform 240ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 240ms ease,
+    filter 240ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.cornerPath {
+  fill: none;
+  stroke: var(--signal-corner-color);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.cornerTopLeft {
+  top: calc(-1 * var(--signal-corner-offset));
+  left: calc(-1 * var(--signal-corner-offset));
+  transform: rotate(0deg);
+}
+
+.cornerTopRight {
+  top: calc(-1 * var(--signal-corner-offset));
+  right: calc(-1 * var(--signal-corner-offset));
+  transform: rotate(90deg);
+}
+
+.cornerBottomRight {
+  right: calc(-1 * var(--signal-corner-offset));
+  bottom: calc(-1 * var(--signal-corner-offset));
+  transform: rotate(180deg);
+}
+
+.cornerBottomLeft {
+  bottom: calc(-1 * var(--signal-corner-offset));
+  left: calc(-1 * var(--signal-corner-offset));
+  transform: rotate(270deg);
+}
+
+.root:hover .button,
+.root:focus-within .button {
+  transform: translateY(-2px) scale(1.025);
+  box-shadow: var(--signal-shadow-hover);
+  filter: saturate(1.04);
+}
+
+.root:hover .drawerTop,
+.root:focus-within .drawerTop {
+  opacity: 1;
+  filter: blur(0);
+  transform: translate(-50%, calc(-1 * (var(--signal-drawer-height) * 0.72)))
+    rotate(-4deg) scale(1);
+}
+
+.root:hover .drawerBottom,
+.root:focus-within .drawerBottom {
+  opacity: 1;
+  filter: blur(0);
+  transform: translate(-50%, calc(var(--signal-drawer-height) * 0.72))
+    rotate(4deg) scale(1);
+}
+
+.root:hover .cornerTopLeft,
+.root:focus-within .cornerTopLeft {
+  transform: translate(-8px, -8px) rotate(0deg);
+  filter: drop-shadow(-10px 10px 8px var(--signal-corner-shadow));
+}
+
+.root:hover .cornerTopRight,
+.root:focus-within .cornerTopRight {
+  transform: translate(8px, -8px) rotate(90deg);
+  filter: drop-shadow(-10px 10px 8px var(--signal-corner-shadow));
+}
+
+.root:hover .cornerBottomRight,
+.root:focus-within .cornerBottomRight {
+  transform: translate(8px, 8px) rotate(180deg);
+  filter: drop-shadow(-10px 10px 8px var(--signal-corner-shadow));
+}
+
+.root:hover .cornerBottomLeft,
+.root:focus-within .cornerBottomLeft {
+  transform: translate(-8px, 8px) rotate(270deg);
+  filter: drop-shadow(-10px 10px 8px var(--signal-corner-shadow));
+}
+
+.button:focus-visible {
+  outline: 3px solid var(--signal-focus-ring);
+  outline-offset: 4px;
+}
+
+.button:active {
+  transform: translateY(1px) scale(0.985);
+  box-shadow:
+    0 8px 14px rgba(11, 45, 24, 0.18),
+    0 3px 8px rgba(11, 45, 24, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+
+.button:active .labelWrap {
+  transform: translateY(0);
+}
+
+.disabled .button {
+  pointer-events: none;
+  box-shadow:
+    0 8px 14px rgba(11, 45, 24, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.16);
+}
+
+.disabled .drawer,
+.disabled .corner {
+  opacity: 0.5;
+  filter: none;
+}
+
+@media (max-width: 820px) {
+  .root {
+    --signal-width: min(100%, 300px);
+  }
+
+  .compact {
+    --signal-width: min(100%, 276px);
+  }
+
+  .label {
+    font-size: 0.98rem;
+  }
+}
+
+@media (max-width: 560px) {
+  .root {
+    --signal-height: 60px;
+    --signal-padding-x: 18px;
+    --signal-corner-size: 36px;
+    --signal-corner-offset: 12px;
+    --signal-corner-offset-hover: 18px;
+    --signal-padding-top: calc(var(--signal-drawer-height) + 8px);
+    --signal-padding-bottom: calc(var(--signal-drawer-height) + 8px);
+    --signal-padding-inline: calc(var(--signal-corner-offset-hover) + 6px);
+  }
+
+  .compact {
+    --signal-height: 54px;
+    --signal-padding-x: 16px;
+    --signal-drawer-height: 28px;
+  }
+
+  .drawer {
+    font-size: 0.68rem;
+    padding-inline: 12px;
+  }
+
+  .label {
+    font-size: 0.94rem;
+  }
+
+  .compact .label {
+    font-size: 0.88rem;
+  }
+}
+
+@media (max-height: 720px) and (min-width: 961px) {
+  .root {
+    --signal-height: 58px;
+    --signal-padding-x: 18px;
+    --signal-drawer-height: 30px;
+    --signal-corner-size: 38px;
+  }
+
+  .hero {
+    --signal-padding-top: calc(var(--signal-drawer-height) + 10px);
+    --signal-padding-bottom: calc(var(--signal-drawer-height) + 14px);
+    --signal-frame-shift-y: -30px;
+  }
+
+  .hero.compact {
+    --signal-padding-top: calc(var(--signal-drawer-height) + 8px);
+    --signal-padding-bottom: calc(var(--signal-drawer-height) + 12px);
+    --signal-frame-shift-y: -32px;
+  }
+
+  .label {
+    font-size: 0.96rem;
+  }
+
+  .compact .label {
+    font-size: 0.9rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .button,
+  .drawer,
+  .corner {
+    transition: none;
+  }
+
+  .root:hover .button,
+  .root:focus-within .button,
+  .button:active {
+    transform: none;
+    filter: none;
+  }
+
+  .root:hover .drawerTop,
+  .root:focus-within .drawerTop {
+    opacity: 1;
+    filter: none;
+    transform: translate(-50%, calc(-1 * (var(--signal-drawer-height) * 0.55)))
+      rotate(-2deg) scale(1);
+  }
+
+  .root:hover .drawerBottom,
+  .root:focus-within .drawerBottom {
+    opacity: 1;
+    filter: none;
+    transform: translate(-50%, calc(var(--signal-drawer-height) * 0.55))
+      rotate(2deg) scale(1);
+  }
+
+  .root:hover .cornerTopLeft,
+  .root:hover .cornerTopRight,
+  .root:hover .cornerBottomRight,
+  .root:hover .cornerBottomLeft,
+  .root:focus-within .cornerTopLeft,
+  .root:focus-within .cornerTopRight,
+  .root:focus-within .cornerBottomRight,
+  .root:focus-within .cornerBottomLeft {
+    filter: none;
+  }
+}
