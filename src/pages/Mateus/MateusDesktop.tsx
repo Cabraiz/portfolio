@@ -14,6 +14,7 @@ import "tippy.js/dist/tippy.css";
 
 import RoleTitle from "./RoleTitle";
 import CTAButton from "./shared/CTAButton/CTAButton";
+import ResumeDownloadButton from "./shared/ResumeDownloadButton/ResumeDownloadButton";
 import WhatsAppSignalButton from "./shared/WhatsAppSignalButton/WhatsAppSignalButton";
 import WhatsAppHeroSlot from "./shared/WhatsAppSignalButton/WhatsAppHeroSlot";
 
@@ -62,6 +63,7 @@ const COMPACT_DESKTOP_MEDIA_QUERY =
 
 const WHATSAPP_HREF = "https://wa.me/5585998575707";
 const MEET_HREF = "https://meet.google.com/SEULINK";
+const RESUME_HREF = "/resume";
 
 const seals: readonly SealItem[] = [
   {
@@ -292,16 +294,13 @@ function MateusDesktop() {
 
   const secondaryHeroAction = useMemo(() => {
     return (
-      <CTAButton
+      <ResumeDownloadButton
         label={secondaryLabel}
-        backLabel={secondaryLabel}
         ariaLabel={secondaryLabel}
-        href="/resume"
+        href={RESUME_HREF}
         target="_blank"
         rel="noopener noreferrer"
-        variant="heroSecondary"
         size={isCompactDesktop ? "compact" : "default"}
-        align="center"
         fullWidth
       />
     );
