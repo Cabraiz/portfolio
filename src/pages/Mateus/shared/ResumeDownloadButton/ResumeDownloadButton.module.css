@@ -13,6 +13,12 @@
   --resume-green-top: rgba(78, 255, 158, 0.98);
   --resume-green-bottom: rgba(18, 214, 99, 0.98);
 
+  /* hierarquia para o botão poder ficar na frente quando expandir */
+  --resume-z-root: 3;
+  --resume-z-root-active: 16;
+  --resume-z-docs: 2;
+  --resume-z-tray: 4;
+
   /* topo vidro mais limpo, sem camada escura fumê */
   --resume-docs-bg:
     linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.08));
@@ -27,6 +33,7 @@
   max-width: 100%;
   display: inline-flex;
   position: relative;
+  z-index: var(--resume-z-root);
   padding: 0;
   border: 0;
   background: transparent;
@@ -65,12 +72,13 @@
     var(--resume-tray-height) +
     10px
   );
-  overflow: hidden;
+  overflow: visible;
+  isolation: isolate;
 }
 
 .docs {
   position: relative;
-  z-index: 2;
+  z-index: var(--resume-z-docs);
   width: 100%;
   min-height: var(--resume-button-height);
   display: flex;
@@ -184,7 +192,7 @@
   position: absolute;
   left: 50%;
   top: calc(var(--resume-button-height) / 2);
-  z-index: 1;
+  z-index: var(--resume-z-tray);
   width: var(--resume-tray-width);
   max-width: calc(100% - 28px);
   height: var(--resume-tray-height);
@@ -276,8 +284,15 @@
   display: block;
 }
 
+.root:hover,
+.root:focus-visible,
+.root:focus-within {
+  z-index: var(--resume-z-root-active);
+}
+
 .root:hover .docs,
-.root:focus-visible .docs {
+.root:focus-visible .docs,
+.root:focus-within .docs {
   transform: translateY(-2px);
   border-color: rgba(255, 255, 255, 0.3);
   background:
@@ -289,13 +304,15 @@
 }
 
 .root:hover .docsIcon,
-.root:focus-visible .docsIcon {
+.root:focus-visible .docsIcon,
+.root:focus-within .docsIcon {
   transform: translateY(-1px);
   color: #ffffff;
 }
 
 .root:hover .tray,
-.root:focus-visible .tray {
+.root:focus-visible .tray,
+.root:focus-within .tray {
   opacity: 1;
   transform: translate(-50%, calc(-50% + var(--resume-tray-hover-shift))) scale(1);
   filter: saturate(1.02) brightness(1.02);
@@ -306,7 +323,8 @@
 }
 
 .root:hover .trayIcon,
-.root:focus-visible .trayIcon {
+.root:focus-visible .trayIcon,
+.root:focus-within .trayIcon {
   transform: translateY(1px);
   color: #000000;
 }
@@ -315,7 +333,8 @@
   outline: none;
 }
 
-.root:focus-visible .docs {
+.root:focus-visible .docs,
+.root:focus-within .docs {
   box-shadow:
     0 0 0 2px rgba(255, 255, 255, 0.18),
     inset 0 1px 0 rgba(255, 255, 255, 0.22),

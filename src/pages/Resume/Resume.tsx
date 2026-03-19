@@ -1,21 +1,48 @@
-import React from "react";
-import MateusPDF from "./Mateus_Resume.pdf";
+import { useEffect, type CSSProperties } from "react";
+
+const CANONICAL_RESUME_URL = "/files/mateus-cabral-resume.pdf";
+
+const pageStyle: CSSProperties = {
+  minHeight: "100vh",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  padding: "24px",
+  background: "#000",
+  color: "#fff",
+  textAlign: "center",
+};
+
+const textStyle: CSSProperties = {
+  margin: 0,
+};
+
+const linkStyle: CSSProperties = {
+  color: "#4eff9e",
+  textDecoration: "none",
+  fontWeight: 600,
+};
 
 const Resume = () => {
-  const iframeStyle = {
-    width: "100%",
-    height: "100vh",
-    border: "none",
-  };
+  useEffect(() => {
+    globalThis.location.replace(CANONICAL_RESUME_URL);
+  }, []);
 
   return (
-    <div>
-      <iframe
-        src={MateusPDF}
-        title="Mateus Resume"
-        style={iframeStyle}
-      ></iframe>
-    </div>
+    <main style={pageStyle}>
+      <p style={textStyle}>
+        <span>Redirecionando para o currículo. Caso isso não aconteça, acesse </span>
+        <a
+          href={CANONICAL_RESUME_URL}
+          style={linkStyle}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          o PDF diretamente
+        </a>
+        <span>.</span>
+      </p>
+    </main>
   );
 };
 

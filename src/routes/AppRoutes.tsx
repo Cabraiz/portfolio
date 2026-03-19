@@ -63,7 +63,10 @@ const AppRoutes = () => {
 
       <Route path="/registerhublocal" element={<RegisterHubLocal />} />
       <Route path="/loginhublocal" element={<LoginHubLocal />} />
+
+      {/* compatibilidade legada: /resume agora redireciona para o PDF público canônico */}
       <Route path="/resume" element={<Resume />} />
+
       <Route path="/doris" element={<Doris />} />
       <Route path="/casanova" element={<CasaNova />} />
       <Route path="/surprise" element={<Surprise />} />

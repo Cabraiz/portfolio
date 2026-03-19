@@ -32,7 +32,7 @@ function resolveRel(
     return rel;
   }
 
-  return target === "_blank" ? "noreferrer noopener" : undefined;
+  return target === "_blank" ? "noopener noreferrer" : undefined;
 }
 
 function DocumentIcon() {
@@ -142,7 +142,12 @@ export default function ResumeDownloadButton({
               <DocumentIcon />
             </span>
 
-            <span className={joinClasses(styles.label, compact && styles.labelCompact)}>
+            <span
+              className={joinClasses(
+                styles.label,
+                compact && styles.labelCompact,
+              )}
+            >
               {label}
             </span>
           </span>

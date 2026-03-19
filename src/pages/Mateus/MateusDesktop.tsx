@@ -63,7 +63,7 @@ const COMPACT_DESKTOP_MEDIA_QUERY =
 
 const WHATSAPP_HREF = "https://wa.me/5585998575707";
 const MEET_HREF = "https://meet.google.com/SEULINK";
-const RESUME_HREF = "/resume";
+const RESUME_HREF = "/files/mateus-cabral-resume.pdf";
 
 const seals: readonly SealItem[] = [
   {
