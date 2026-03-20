@@ -1,22 +1,30 @@
-import React, { CSSProperties, useEffect, useLayoutEffect } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useLenis } from "lenis/react";
+import React, { type CSSProperties, useCallback, useRef } from "react";
 
-import Portfolio from "../Portfolio/Portfolio";
-import RoadMap from "../RoadMap/RoadMap";
-import Pricing from "../Pricing/Pricing";
-import Live from "../Live/Live";
-import ContactDesktop from "../Contact/ContactDesktop";
 import MateusDesktop from "../MateusDesktop";
+import ContactDesktop from "../Contact/ContactDesktop";
+import Live from "../Live/Live";
+import Portfolio from "../Portfolio/Portfolio";
+import Pricing from "../Pricing/Pricing";
+import RoadMap from "../RoadMap/RoadMap";
 
-import { useLenisScrollTrigger } from "../../../hooks/useLenisScrollTrigger";
+import useHashSectionSync from "../../../features/scroll/useHashSectionSync";
+import useLenisEngine from "../../../features/scroll/useLenisEngine";
+import useDocumentVisibilitySync from "../../../features/scroll/useDocumentVisibilitySync";
+import useSectionTriggers from "../../../features/scroll/useSectionTriggers";
 
-gsap.registerPlugin(ScrollTrigger);
+type LandingSection = Readonly<{
+  id: string;
+  content: React.ReactNode;
+}>;
 
 const containerStyle: CSSProperties = {
-  overflowX: "hidden",
   width: "100%",
+  minWidth: 0,
+  margin: 0,
+  padding: 0,
+  overflowX: "clip",
+  overflowY: "visible",
+  position: "relative",
   userSelect: "none",
 };
 
@@ -26,7 +34,6 @@ const sectionBackground: CSSProperties = {
     radial-gradient(circle at bottom right, rgba(255, 215, 0, 0.08), transparent 70%),
     linear-gradient(135deg, #0b0b0b 0%, #1a1a1a 50%, #0b0b0b 100%)
   `,
-  backgroundAttachment: "scroll",
   backgroundBlendMode: "screen, overlay, normal",
   backgroundRepeat: "no-repeat",
   backgroundSize: "cover",
@@ -34,105 +41,106 @@ const sectionBackground: CSSProperties = {
 
 const sectionStyle: CSSProperties = {
   ...sectionBackground,
-  minHeight: "100vh",
+  width: "100%",
+  minWidth: 0,
+  minHeight: "100dvh",
+  margin: 0,
+  padding: 0,
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-  width: "100%",
+  position: "relative",
+  overflowX: "clip",
+  overflowY: "visible",
   boxSizing: "border-box",
   userSelect: "none",
+  scrollMarginTop: "88px",
 };
 
 const contentContainerStyle: CSSProperties = {
   width: "100%",
-  padding: "0",
+  minWidth: 0,
+  margin: 0,
+  padding: 0,
   boxSizing: "border-box",
+  position: "relative",
   userSelect: "none",
 };
 
+const sections: ReadonlyArray<LandingSection> = [
+  {
+    id: "home",
+    content: <MateusDesktop />,
+  },
+  {
+    id: "portfolio",
+    content: <Portfolio />,
+  },
+  {
+    id: "roadMap",
+    content: <RoadMap />,
+  },
+  {
+    id: "pricing",
+    content: <Pricing />,
+  },
+  {
+    id: "live",
+    content: <Live />,
+  },
+  {
+    id: "contact",
+    content: <ContactDesktop />,
+  },
+];
+
 const LandingPage: React.FC = () => {
-  const lenis = useLenis();
-  useLenisScrollTrigger();
+  const containerRef = useRef<HTMLDivElement | null>(null);
 
-  // ✅ Agora não usamos mais activeSection!
-  useLayoutEffect(() => {
-  if (!lenis) return;
+  /**
+   * O scroller real continua sendo o root do ReactLenis em AppDesktop.
+   * Esta página é apenas o conteúdo vertical observado por GSAP/ScrollTrigger.
+   */
+  useLenisEngine();
+  useDocumentVisibilitySync();
 
-  const sections = gsap.utils.toArray<HTMLElement>("section");
-
-  sections.forEach((section) => {
-    ScrollTrigger.create({
-      trigger: section,
-      start: "top center",
-      end: "bottom center",
-      toggleClass: { targets: section, className: "is-active" },
-      scroller: lenis.rootElement, // ESSENCIAL para Lenis
-    });
+  const { writeSectionHash } = useHashSectionSync({
+    defaultSectionId: "home",
+    writeDefaultHashOnMount: true,
+    historyMode: "replace",
   });
 
-  // ESSENCIAL para recalcular tudo depois que criou os triggers
-  ScrollTrigger.refresh();
+  const handleSectionChange = useCallback(
+    (sectionId: string) => {
+      writeSectionHash(sectionId, { historyMode: "replace" });
+    },
+    [writeSectionHash],
+  );
 
-  return () => {
-    ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
-  };
-}, [lenis]);
-
-
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.hidden) {
-        lenis?.stop?.();
-      } else {
-        lenis?.start?.();
-        ScrollTrigger.refresh();
-      }
-    };
-
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-    return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-    };
-  }, [lenis]);
+  useSectionTriggers({
+    containerRef,
+    sectionSelector: ":scope > section[data-page-section='true']",
+    activeClassName: "is-active",
+    triggerStart: "top 55%",
+    triggerEnd: "bottom 45%",
+    refreshOnMount: false,
+    onSectionChange: handleSectionChange,
+  });
 
   return (
-    <div style={containerStyle}>
-      <section id="home" style={sectionStyle}>
-        <div style={contentContainerStyle}>
-          <MateusDesktop />
-        </div>
-      </section>
-
-      <section id="portfolio" style={sectionStyle}>
-        <div style={contentContainerStyle}>
-          <Portfolio />
-        </div>
-      </section>
-
-      <section id="roadmap" style={sectionStyle}>
-        <div style={contentContainerStyle}>
-          <RoadMap />
-        </div>
-      </section>
-
-      <section id="pricing" style={sectionStyle}>
-        <div style={contentContainerStyle}>
-          <Pricing />
-        </div>
-      </section>
-
-      <section id="live" style={sectionStyle}>
-        <div style={contentContainerStyle}>
-          <Live />
-        </div>
-      </section>
-
-      <section id="contact" style={sectionStyle}>
-        <div style={contentContainerStyle}>
-          <ContactDesktop />
-        </div>
-      </section>
-    </div>
+    <main ref={containerRef} style={containerStyle} aria-label="Landing page">
+      {sections.map((section) => (
+        <section
+          key={section.id}
+          id={section.id}
+          data-section={section.id}
+          data-page-section="true"
+          style={sectionStyle}
+        >
+          <div style={contentContainerStyle}>{section.content}</div>
+        </section>
+      ))}
+    </main>
   );
 };
 

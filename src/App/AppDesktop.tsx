@@ -1,87 +1,119 @@
-import { useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { ToastContainer } from "react-toastify";
+import { ReactLenis } from "lenis/react";
 
 import AppRoutes from "../routes/AppRoutes";
 import AppNavbar from "./NavBar/AppNavbar";
 import TitleWebsite from "../pages/PrincipalPage/TitleWebsite/title_website";
 import LandingPage from "../pages/Mateus/LandingPage/LandingPage";
 import FloatingButtons from "./FloatingButtons";
-
 import { useSectionVisibility } from "../hooks/useSectionVisibility";
 
 import "react-toastify/dist/ReactToastify.css";
-import { LenisRef, ReactLenis } from "lenis/react";
 
 const links = ["home", "portfolio", "roadMap", "pricing", "live", "contact"];
 
-// ✅ Detectar máquina fraca
-function getSmoothSettings() {
-  const cores = navigator.hardwareConcurrency || 4;
-  const memory = (navigator as any).deviceMemory || 4;
+type SmoothSettings = Readonly<{
+  lerp: number;
+  wheelMultiplier: number;
+  touchMultiplier: number;
+  smoothWheel: boolean;
+}>;
+
+function getSmoothSettings(): SmoothSettings {
+  const hasNavigator = "navigator" in globalThis;
+
+  if (!hasNavigator) {
+    return {
+      lerp: 0.09,
+      wheelMultiplier: 1,
+      touchMultiplier: 1.12,
+      smoothWheel: true,
+    };
+  }
+
+  const nav = globalThis.navigator as Navigator & { deviceMemory?: number };
+  const cores = nav.hardwareConcurrency ?? 4;
+  const memory = nav.deviceMemory ?? 4;
+
+  const prefersReducedMotion =
+    "matchMedia" in globalThis &&
+    globalThis.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
   const isWeak = cores <= 4 || memory <= 4;
 
-  return {
-    lerp: isWeak ? 0.15 : 0.07,
-    wheelMultiplier: isWeak ? 0.6 : 1,
-    touchMultiplier: isWeak ? 1.05 : 1.2,
-  };
+  if (prefersReducedMotion) {
+    return {
+      lerp: 1,
+      wheelMultiplier: 1,
+      touchMultiplier: 1,
+      smoothWheel: false,
+    };
+  }
+
+  return isWeak
+    ? {
+        lerp: 0.11,
+        wheelMultiplier: 0.92,
+        touchMultiplier: 1.08,
+        smoothWheel: true,
+      }
+    : {
+        lerp: 0.08,
+        wheelMultiplier: 1.02,
+        touchMultiplier: 1.16,
+        smoothWheel: true,
+      };
 }
 
 export default function AppDesktop() {
-  const appWrapperRef = useRef<HTMLDivElement>(null);
-  const lenisRef = useRef<LenisRef>(null);
-
   const { isNavHidden, isFloatingHidden, isLandingHidden } =
     useSectionVisibility();
 
   const [selectedLink, setSelectedLink] = useState("home");
   const [menuOpen, setMenuOpen] = useState(false);
 
-  const smoothOptions = getSmoothSettings();
+  const smoothOptions = useMemo(getSmoothSettings, []);
 
   return (
     <ReactLenis
-      ref={lenisRef}
-      className="lenis-wrapper"
-      style={{ height: "100vh", overflow: "hidden" }}
+      root
       options={{
-        autoRaf: false, // mantém compatibilidade com GSAP ScrollTrigger
-        smoothWheel: true,
-        gestureOrientation: "vertical",
+        autoRaf: false,
         orientation: "vertical",
-        ...smoothOptions, // ✅ ajusta automaticamente para máquinas fracas
+        gestureOrientation: "vertical",
+        smoothWheel: smoothOptions.smoothWheel,
+        lerp: smoothOptions.lerp,
+        wheelMultiplier: smoothOptions.wheelMultiplier,
+        touchMultiplier: smoothOptions.touchMultiplier,
       }}
     >
-      <div
-        className="lenis-content"
-        style={{ height: "auto", minHeight: "100%" }}
-      >
-        <TitleWebsite title1="Bem Vindo! 🤝" title2="Cabraiz" />
+      <TitleWebsite title1="Bem Vindo! 🤝" title2="Cabraiz" />
 
-        {!isNavHidden && (
-          <AppNavbar
-            isMobileView={false}
-            selectedLink={selectedLink}
-            setSelectedLink={setSelectedLink}
-            menuOpen={menuOpen}
-            setMenuOpen={setMenuOpen}
-            links={links}
-          />
-        )}
+      {!isNavHidden && (
+        <AppNavbar
+          isMobileView={false}
+          selectedLink={selectedLink}
+          setSelectedLink={setSelectedLink}
+          menuOpen={menuOpen}
+          setMenuOpen={setMenuOpen}
+          links={links}
+        />
+      )}
 
-        <div ref={appWrapperRef}>
-          {!isLandingHidden && <LandingPage />}
-          <AppRoutes />
-        </div>
+      <>
+        {!isLandingHidden && <LandingPage />}
+        <AppRoutes />
+      </>
 
-        {!isFloatingHidden && (
-          <FloatingButtons
-            links={links}
-            selectedLink={selectedLink}
-            setSelectedLink={setSelectedLink}
-          />
-        )}
-      </div>
+      {!isFloatingHidden && (
+        <FloatingButtons
+          links={links}
+          selectedLink={selectedLink}
+          setSelectedLink={setSelectedLink}
+        />
+      )}
+
       <ToastContainer />
     </ReactLenis>
   );

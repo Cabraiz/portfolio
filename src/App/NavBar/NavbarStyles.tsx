@@ -3,8 +3,13 @@ import { CSSProperties } from "react";
 export const navbarLayoutTokens = {
   heights: {
     mobile: 72,
+
+    /**
+     * Mantém a navbar desktop na mesma altura base,
+     * sem crescer em viewports altos como 1080p.
+     */
     desktop: 70,
-    desktopTall: 78,
+    desktopTall: 70,
   },
 
   container: {
@@ -16,41 +21,51 @@ export const navbarLayoutTokens = {
   },
 
   desktop: {
+    /**
+     * Mantido para compatibilidade com AppNavbar,
+     * mas os valores default foram alinhados ao compacto
+     * para 1080p ficar mais próximo do 720p.
+     */
     compactBreakpoint: 1240,
-    tallViewportBreakpoint: 900,
 
     /**
-     * Aumentado para o botão Google ocupar mais largura
-     * tanto em 1080p (default) quanto em 720p (compact).
+     * Na prática, desativa o modo "tall desktop".
+     * Mesmo que AppNavbar cheque viewportHeight,
+     * a navbar não ficará maior.
+     */
+    tallViewportBreakpoint: 99999,
+
+    /**
+     * Default alinhado ao visual compacto.
      */
     sideColumnWidth: {
-      default: "272px",
+      default: "232px",
       compact: "232px",
     },
 
     logoOffsetX: "10px",
 
     logoGap: {
-      default: "12px",
+      default: "8px",
       compact: "8px",
     },
 
     logoSize: {
-      default: "60px",
+      default: "54px",
       compact: "54px",
     },
 
-    navOffsetY: "10px",
+    navOffsetY: "8px",
     navContainerPaddingX: "6px",
     navContainerPaddingBottom: "8px",
 
     navGap: {
-      default: "clamp(0.75rem, 0.45rem + 0.8vw, 1.35rem)",
+      default: "clamp(0.55rem, 0.35rem + 0.4vw, 0.9rem)",
       compact: "clamp(0.55rem, 0.35rem + 0.4vw, 0.9rem)",
     },
 
     liveAnimationLeft: {
-      default: "-1.9rem",
+      default: "-1rem",
       compact: "-1rem",
     },
   },

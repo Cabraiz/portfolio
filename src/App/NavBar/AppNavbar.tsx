@@ -48,44 +48,37 @@ interface MobileNavItemButtonProps {
   onClick: () => void;
 }
 
-const NAVBAR_HEIGHTS = navbarLayoutTokens.heights as typeof navbarLayoutTokens.heights & {
-  desktopTall?: number;
-};
+type LenisScrollEvent = Readonly<{
+  scroll?: number;
+  animatedScroll?: number;
+  actualScroll?: number;
+}>;
 
-const DESKTOP_SETTINGS = navbarLayoutTokens.desktop as typeof navbarLayoutTokens.desktop & {
-  tallViewportBreakpoint?: number;
-};
+/**
+ * Alinhado ao hero desktop:
+ * o modo compacto agora depende da altura do viewport,
+ * não mais só da largura.
+ */
+const DESKTOP_COMPACT_MIN_WIDTH = 961;
+const DESKTOP_COMPACT_MAX_HEIGHT = 1080;
 
 const MOBILE_NAV_HEIGHT = navbarLayoutTokens.heights.mobile;
 const DESKTOP_NAV_HEIGHT = navbarLayoutTokens.heights.desktop;
-const DESKTOP_TALL_NAV_HEIGHT =
-  NAVBAR_HEIGHTS.desktopTall ?? navbarLayoutTokens.heights.desktop;
-
-const DESKTOP_COMPACT_BREAKPOINT =
-  navbarLayoutTokens.desktop.compactBreakpoint;
-
-/**
- * Ajuste fino:
- * acima dessa altura de viewport, a navbar desktop usa a altura "desktopTall".
- * 900 costuma separar bem 720p de 1080p.
- */
-const DESKTOP_TALL_VIEWPORT_BREAKPOINT =
-  DESKTOP_SETTINGS.tallViewportBreakpoint ?? 900;
 
 function getInitialViewportWidth(): number {
-  if (typeof window === "undefined") {
+  if (!("innerWidth" in globalThis)) {
     return 1440;
   }
 
-  return window.innerWidth;
+  return globalThis.innerWidth;
 }
 
 function getInitialViewportHeight(): number {
-  if (typeof window === "undefined") {
+  if (!("innerHeight" in globalThis)) {
     return 900;
   }
 
-  return window.innerHeight;
+  return globalThis.innerHeight;
 }
 
 function getUnderlineHiddenStyle(): CSSProperties {
@@ -96,17 +89,24 @@ function getUnderlineHiddenStyle(): CSSProperties {
   };
 }
 
-function getNavbarHeight(
+function getNavbarHeight(isMobileView: boolean): number {
+  return isMobileView ? MOBILE_NAV_HEIGHT : DESKTOP_NAV_HEIGHT;
+}
+
+function getIsCompactDesktopViewport(
   isMobileView: boolean,
-  viewportHeight: number
-): number {
+  viewportWidth: number,
+  viewportHeight: number,
+): boolean {
   if (isMobileView) {
-    return MOBILE_NAV_HEIGHT;
+    return false;
   }
 
-  return viewportHeight >= DESKTOP_TALL_VIEWPORT_BREAKPOINT
-    ? DESKTOP_TALL_NAV_HEIGHT
-    : DESKTOP_NAV_HEIGHT;
+  if (viewportWidth < DESKTOP_COMPACT_MIN_WIDTH) {
+    return false;
+  }
+
+  return viewportHeight <= DESKTOP_COMPACT_MAX_HEIGHT;
 }
 
 function getDesktopNavGap(isCompactDesktop: boolean): string {
@@ -189,7 +189,7 @@ function getBurgerLineStyle(index: number, menuOpen: boolean): CSSProperties {
 function applyDesktopNavStyle(
   element: HTMLButtonElement,
   isActive: boolean,
-  hover: boolean
+  hover: boolean,
 ): void {
   Object.assign(element.style, navbarStyles.navLink);
 
@@ -202,6 +202,26 @@ function applyDesktopNavStyle(
     Object.assign(element.style, navbarStyles.navLinkHover);
     return;
   }
+}
+
+function getScrollValue(event?: LenisScrollEvent): number {
+  if (!event) {
+    return 0;
+  }
+
+  if (typeof event.animatedScroll === "number") {
+    return event.animatedScroll;
+  }
+
+  if (typeof event.actualScroll === "number") {
+    return event.actualScroll;
+  }
+
+  if (typeof event.scroll === "number") {
+    return event.scroll;
+  }
+
+  return 0;
 }
 
 const MobileMenuToggleButton: React.FC<MobileMenuToggleButtonProps> = ({
@@ -431,10 +451,10 @@ const AppNavbar: React.FC<AppNavbarProps> = ({
 
   const [showNavbar, setShowNavbar] = useState(true);
   const [viewportWidth, setViewportWidth] = useState<number>(
-    getInitialViewportWidth
+    getInitialViewportWidth,
   );
   const [viewportHeight, setViewportHeight] = useState<number>(
-    getInitialViewportHeight
+    getInitialViewportHeight,
   );
 
   const lastScrollY = useRef(0);
@@ -442,33 +462,36 @@ const AppNavbar: React.FC<AppNavbarProps> = ({
   const navContainerRef = useRef<HTMLDivElement | null>(null);
 
   const [underlineStyle, setUnderlineStyle] = useState<CSSProperties>(
-    getUnderlineHiddenStyle()
+    getUnderlineHiddenStyle(),
   );
 
-  const isCompactDesktop =
-    isMobileView === false && viewportWidth <= DESKTOP_COMPACT_BREAKPOINT;
+  const isCompactDesktop = getIsCompactDesktopViewport(
+    isMobileView,
+    viewportWidth,
+    viewportHeight,
+  );
 
-  const isTallDesktop =
-    isMobileView === false &&
-    viewportHeight >= DESKTOP_TALL_VIEWPORT_BREAKPOINT;
-
-  const navbarHeight = getNavbarHeight(isMobileView, viewportHeight);
+  const navbarHeight = getNavbarHeight(isMobileView);
 
   const desktopGoogleButtonWidth = getDesktopGoogleButtonWidth(
-    isCompactDesktop
+    isCompactDesktop,
   );
   const desktopSideColumnWidth = getDesktopSideColumnWidth(isCompactDesktop);
 
   useEffect(() => {
+    if (!("addEventListener" in globalThis)) {
+      return;
+    }
+
     const handleResize = () => {
-      setViewportWidth(window.innerWidth);
-      setViewportHeight(window.innerHeight);
+      setViewportWidth(getInitialViewportWidth());
+      setViewportHeight(getInitialViewportHeight());
     };
 
     handleResize();
-    window.addEventListener("resize", handleResize);
+    globalThis.addEventListener("resize", handleResize);
 
-    return () => window.removeEventListener("resize", handleResize);
+    return () => globalThis.removeEventListener("resize", handleResize);
   }, []);
 
   useEffect(() => {
@@ -477,12 +500,38 @@ const AppNavbar: React.FC<AppNavbarProps> = ({
       return;
     }
 
-    const handleScroll = () => {
-      if (menuOpen) {
-        return;
-      }
+    if (menuOpen) {
+      setShowNavbar(true);
+      return;
+    }
 
-      const currentScrollY = window.scrollY;
+    if (lenis) {
+      const handleLenisScroll = (event: LenisScrollEvent) => {
+        const currentScrollY = getScrollValue(event);
+        const isScrollingDown = currentScrollY > lastScrollY.current;
+
+        if (isScrollingDown && currentScrollY > 150) {
+          setShowNavbar(false);
+        } else {
+          setShowNavbar(true);
+        }
+
+        lastScrollY.current = currentScrollY;
+      };
+
+      lenis.on("scroll", handleLenisScroll);
+
+      return () => {
+        lenis.off("scroll", handleLenisScroll);
+      };
+    }
+
+    if (!("addEventListener" in globalThis)) {
+      return;
+    }
+
+    const handleWindowScroll = () => {
+      const currentScrollY = "scrollY" in globalThis ? globalThis.scrollY : 0;
       const isScrollingDown = currentScrollY > lastScrollY.current;
 
       if (isScrollingDown && currentScrollY > 150) {
@@ -494,18 +543,42 @@ const AppNavbar: React.FC<AppNavbarProps> = ({
       lastScrollY.current = currentScrollY;
     };
 
-    window.addEventListener("scroll", handleScroll, { passive: true });
-
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [isMobileView, menuOpen]);
-
-  useEffect(() => {
-    document.body.style.overflow = menuOpen ? "hidden" : "auto";
+    globalThis.addEventListener("scroll", handleWindowScroll, {
+      passive: true,
+    });
 
     return () => {
-      document.body.style.overflow = "auto";
+      globalThis.removeEventListener("scroll", handleWindowScroll);
     };
-  }, [menuOpen]);
+  }, [isMobileView, lenis, menuOpen]);
+
+  useEffect(() => {
+    if (!("document" in globalThis)) {
+      return;
+    }
+
+    const root = globalThis.document.documentElement;
+    const body = globalThis.document.body;
+
+    if (!isMobileView) {
+      root.style.removeProperty("overflow");
+      body.style.removeProperty("overflow");
+      return;
+    }
+
+    if (menuOpen) {
+      root.style.overflow = "hidden";
+      body.style.overflow = "hidden";
+    } else {
+      root.style.removeProperty("overflow");
+      body.style.removeProperty("overflow");
+    }
+
+    return () => {
+      root.style.removeProperty("overflow");
+      body.style.removeProperty("overflow");
+    };
+  }, [isMobileView, menuOpen]);
 
   useEffect(() => {
     if (isMobileView) {
@@ -531,23 +604,41 @@ const AppNavbar: React.FC<AppNavbarProps> = ({
     viewportHeight,
     isMobileView,
     isCompactDesktop,
-    isTallDesktop,
     links.length,
   ]);
 
   const handleScrollTo = (link: string) => {
-    const section = document.querySelector(`#${link.toLowerCase()}`);
+    if (typeof document === "undefined") {
+      return;
+    }
 
-    if (section instanceof HTMLElement) {
+    const exactSection = document.getElementById(link);
+    const loweredSection = document.getElementById(link.toLowerCase());
+
+    const section =
+      exactSection instanceof HTMLElement
+        ? exactSection
+        : loweredSection instanceof HTMLElement
+          ? loweredSection
+          : null;
+
+    if (section) {
       const offset = isMobileView
         ? -(MOBILE_NAV_HEIGHT + 16)
         : -(navbarHeight + 18);
 
-      lenis?.scrollTo(section, {
-        offset,
-        duration: 1.05,
-        easing: (value) => 1 - Math.pow(1 - value, 3),
-      });
+      if (lenis) {
+        lenis.scrollTo(section, {
+          offset,
+          duration: 1.05,
+          easing: (value: number) => 1 - Math.pow(1 - value, 3),
+        });
+      } else {
+        section.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }
     }
 
     setSelectedLink(link);
@@ -555,10 +646,17 @@ const AppNavbar: React.FC<AppNavbarProps> = ({
   };
 
   const handleBrandClick = () => {
-    lenis?.scrollTo(0, {
-      duration: 1,
-      easing: (value) => 1 - Math.pow(1 - value, 3),
-    });
+    if (lenis) {
+      lenis.scrollTo(0, {
+        duration: 1,
+        easing: (value: number) => 1 - Math.pow(1 - value, 3),
+      });
+    } else if ("scrollTo" in globalThis) {
+      globalThis.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
+    }
 
     if (links.length > 0) {
       setSelectedLink(links[0]);

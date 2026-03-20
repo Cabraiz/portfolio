@@ -1,43 +1,74 @@
 import React, { useLayoutEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useLenis } from "lenis/react";
 
 gsap.registerPlugin(ScrollTrigger);
 
+function prefersReducedMotion(): boolean {
+  return (
+    "matchMedia" in globalThis &&
+    globalThis.matchMedia("(prefers-reduced-motion: reduce)").matches
+  );
+}
+
 const Pricing: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const lenis = useLenis(); // ✅ Pegando Lenis
 
   useLayoutEffect(() => {
-    if (!containerRef.current || !lenis?.rootElement) return;
+    const container = containerRef.current;
+
+    if (!container) {
+      return;
+    }
+
+    if (prefersReducedMotion()) {
+      gsap.set(container, {
+        autoAlpha: 1,
+        y: 0,
+        clearProps: "transform,opacity,willChange",
+      });
+
+      return;
+    }
 
     const ctx = gsap.context(() => {
-      gsap.fromTo(
-        containerRef.current,
-        {
-          opacity: 0,
-          y: 40,
-          filter: "blur(4px)",
-        },
-        {
-          opacity: 1,
-          y: 0,
-          filter: "blur(0px)",
-          duration: 1,
-          ease: "power3.out",
-          scrollTrigger: {
-            trigger: containerRef.current,
-            scroller: lenis.rootElement, // ✅ ESSENCIAL para Lenis
-            start: "top 80%",
-            toggleActions: "play none none reverse",
-          },
-        }
-      );
-    });
+      gsap.set(container, {
+        autoAlpha: 0,
+        y: 36,
+        willChange: "transform, opacity",
+        force3D: true,
+      });
 
-    return () => ctx.revert();
-  }, [lenis]);
+      gsap.to(container, {
+        autoAlpha: 1,
+        y: 0,
+        duration: 0.8,
+        ease: "power3.out",
+        overwrite: "auto",
+        onStart: () => {
+          container.style.willChange = "transform, opacity";
+        },
+        onComplete: () => {
+          container.style.willChange = "auto";
+        },
+        onReverseComplete: () => {
+          container.style.willChange = "auto";
+        },
+        scrollTrigger: {
+          trigger: container,
+          start: "top 82%",
+          end: "bottom 28%",
+          toggleActions: "play none none reverse",
+          fastScrollEnd: true,
+          invalidateOnRefresh: true,
+        },
+      });
+    }, container);
+
+    return () => {
+      ctx.revert();
+    };
+  }, []);
 
   return (
     <div

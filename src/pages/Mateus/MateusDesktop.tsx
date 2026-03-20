@@ -58,8 +58,16 @@ type SealItem = Readonly<{
   style?: CSSProperties;
 }>;
 
+/**
+ * Antes:
+ * "(max-height: 720px) and (min-width: 961px)"
+ *
+ * Agora:
+ * 1080p também entra no modo compacto para herdar o mesmo
+ * comportamento visual e custo de render mais próximo do 720p.
+ */
 const COMPACT_DESKTOP_MEDIA_QUERY =
-  "(max-height: 720px) and (min-width: 961px)";
+  "(max-height: 1080px) and (min-width: 961px)";
 
 const WHATSAPP_HREF = "https://wa.me/5585998575707";
 const MEET_HREF = "https://meet.google.com/SEULINK";
@@ -94,35 +102,6 @@ const seals: readonly SealItem[] = [
   },
 ];
 
-const seniorTitleStyle: CSSProperties = {
-  fontSize: "4rem",
-  fontWeight: 700,
-  color: "#f1c40f",
-  marginBottom: "1.5rem",
-  lineHeight: 1,
-};
-
-const roleContainerStyle: CSSProperties = {
-  backgroundImage: "linear-gradient(90deg, #f1c40f 100%, #f1c40f 100%)",
-  marginBottom: "max(10px, 4vh)",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "flex-start",
-  height: "3.5rem",
-};
-
-const sealsContainerStyle: CSSProperties = {
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "center",
-  gap: "2rem",
-  padding: "1.2rem 2rem",
-  backgroundColor: "rgba(255, 255, 255, 0.05)",
-  borderRadius: "20px",
-  backdropFilter: "blur(10px)",
-  marginBottom: "-1vh",
-};
-
 const heroTextColumnBaseStyle: CSSProperties = {
   position: "relative",
   zIndex: 2,
@@ -140,30 +119,6 @@ const heroActionsWrapperStyle: CSSProperties = {
 const heroProfileColumnStyle: CSSProperties = {
   position: "relative",
   zIndex: 1,
-};
-
-const profileCardStyle: CSSProperties = {
-  backgroundColor: "rgba(255, 255, 255, 0.1)",
-  marginLeft: "10vw",
-  padding: "4vh max(40px, 2vw)",
-  borderRadius: "20px",
-  display: "flex",
-  flexDirection: "column",
-  justifyContent: "space-evenly",
-  alignItems: "center",
-  width: "fit-content",
-  height: "100%",
-  backdropFilter: "blur(8px)",
-  gap: "4vh",
-};
-
-const profileImageWrapperStyle: CSSProperties = {
-  borderRadius: "3rem",
-  overflow: "hidden",
-  width: "29vw",
-  height: "29vw",
-  position: "relative",
-  boxShadow: "0 10px 30px rgba(0,0,0,0.2)",
 };
 
 const socialRowStyle: CSSProperties = {
@@ -253,10 +208,77 @@ function MateusDesktop() {
     return getWhatsAppGreeting();
   }, []);
 
+  const seniorTitleStyle = useMemo<CSSProperties>(() => {
+    return {
+      fontSize: isCompactDesktop ? "3.25rem" : "4rem",
+      fontWeight: 700,
+      color: "#f1c40f",
+      marginBottom: isCompactDesktop ? "1rem" : "1.5rem",
+      lineHeight: 1,
+    };
+  }, [isCompactDesktop]);
+
+  const roleContainerStyle = useMemo<CSSProperties>(() => {
+    return {
+      backgroundImage: "linear-gradient(90deg, #f1c40f 100%, #f1c40f 100%)",
+      marginBottom: isCompactDesktop ? "max(8px, 2.5vh)" : "max(10px, 4vh)",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "flex-start",
+      height: isCompactDesktop ? "3rem" : "3.5rem",
+    };
+  }, [isCompactDesktop]);
+
+  const sealsContainerStyle = useMemo<CSSProperties>(() => {
+    return {
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      gap: isCompactDesktop ? "1.15rem" : "2rem",
+      padding: isCompactDesktop ? "0.85rem 1.25rem" : "1.2rem 2rem",
+      backgroundColor: "rgba(255, 255, 255, 0.05)",
+      borderRadius: isCompactDesktop ? "16px" : "20px",
+      backdropFilter: isCompactDesktop ? "blur(6px)" : "blur(10px)",
+      marginBottom: "-1vh",
+    };
+  }, [isCompactDesktop]);
+
   const heroTextColumnStyle = useMemo<CSSProperties>(() => {
     return {
       ...heroTextColumnBaseStyle,
       paddingTop: isCompactDesktop ? "8vh" : "11vh",
+    };
+  }, [isCompactDesktop]);
+
+  const profileCardStyle = useMemo<CSSProperties>(() => {
+    return {
+      backgroundColor: "rgba(255, 255, 255, 0.1)",
+      marginLeft: isCompactDesktop ? "6vw" : "10vw",
+      padding: isCompactDesktop ? "2.75vh max(28px, 1.4vw)" : "4vh max(40px, 2vw)",
+      borderRadius: isCompactDesktop ? "16px" : "20px",
+      display: "flex",
+      flexDirection: "column",
+      justifyContent: "space-evenly",
+      alignItems: "center",
+      width: "fit-content",
+      height: "100%",
+      backdropFilter: isCompactDesktop ? "blur(6px)" : "blur(8px)",
+      gap: isCompactDesktop ? "2.5vh" : "4vh",
+    };
+  }, [isCompactDesktop]);
+
+  const profileImageWrapperStyle = useMemo<CSSProperties>(() => {
+    return {
+      borderRadius: isCompactDesktop ? "2.25rem" : "3rem",
+      overflow: "hidden",
+      width: isCompactDesktop ? "23vw" : "29vw",
+      height: isCompactDesktop ? "23vw" : "29vw",
+      minWidth: isCompactDesktop ? "280px" : "360px",
+      minHeight: isCompactDesktop ? "280px" : "360px",
+      maxWidth: isCompactDesktop ? "420px" : "520px",
+      maxHeight: isCompactDesktop ? "420px" : "520px",
+      position: "relative",
+      boxShadow: "0 10px 30px rgba(0,0,0,0.2)",
     };
   }, [isCompactDesktop]);
 
@@ -322,29 +344,27 @@ function MateusDesktop() {
         containerRef.current,
         {
           opacity: 0,
-          scale: 0.98,
-          filter: "blur(4px)",
-          y: 30,
+          scale: 0.985,
+          y: 24,
         },
         {
           opacity: 1,
           scale: 1,
-          filter: "blur(0px)",
           y: 0,
-          duration: 1.2,
+          duration: isCompactDesktop ? 0.85 : 1,
           ease: "power3.out",
           scrollTrigger: {
             trigger: containerRef.current,
             scroller: lenis.rootElement,
-            start: "top 80%",
+            start: "top 82%",
             toggleActions: "play none none reverse",
           },
-        }
+        },
       );
     });
 
     return () => ctx.revert();
-  }, [lenis]);
+  }, [isCompactDesktop, lenis]);
 
   return (
     <div ref={containerRef} style={{ position: "relative", overflow: "visible" }}>
@@ -392,7 +412,7 @@ function MateusDesktop() {
                       src={seal.src}
                       alt={seal.alt}
                       style={{
-                        height: "40px",
+                        height: isCompactDesktop ? "34px" : "40px",
                         filter: "grayscale(100%)",
                         opacity: 0.8,
                         ...seal.style,
@@ -428,9 +448,9 @@ function MateusDesktop() {
                     height: "100%",
                     objectFit: "cover",
                     objectPosition: "center top",
-                    filter: isImageLoaded ? "blur(0px)" : "blur(20px)",
-                    transform: isImageLoaded ? "scale(1)" : "scale(1.1)",
-                    transition: "filter 0.7s ease, transform 0.7s ease",
+                    filter: isImageLoaded ? "blur(0px)" : "blur(12px)",
+                    transform: isImageLoaded ? "scale(1)" : "scale(1.04)",
+                    transition: "filter 0.45s ease, transform 0.45s ease",
                     display: "block",
                   }}
                 />

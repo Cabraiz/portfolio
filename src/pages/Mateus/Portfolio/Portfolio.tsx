@@ -1,7 +1,6 @@
 import { useLayoutEffect, useMemo, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useLenis } from "lenis/react";
 
 import styles from "./Portfolio.module.css";
 import ConversationSection from "./sections/ConversationSection/ConversationSection";
@@ -43,12 +42,13 @@ type PortfolioMediaConditions = Readonly<{
   prefersReducedMotion: boolean;
 }>;
 
-type PortfolioAnimationMetrics = Readonly<{
-  collapsedHeight: string;
-  expandedHeight: string;
-  collapsedWidth: string;
-  expandedWidth: string;
-  endDistance: string;
+type PortfolioAnimationSettings = Readonly<{
+  cardOffsetY: number;
+  dateOffsetY: number;
+  initialScale: number;
+  duration: number;
+  start: string;
+  end: string;
 }>;
 
 type RawPartner = (typeof rawPartners)[number];
@@ -92,73 +92,62 @@ const conversationSecondaryAction = {
   ariaLabel: "Ir para a seção de currículo",
 } satisfies ConversationCTAAction;
 
-function getAnimationMetrics(isCompactDesktop: boolean): PortfolioAnimationMetrics {
+function getAnimationSettings(
+  isCompactDesktop: boolean,
+): PortfolioAnimationSettings {
   return {
-    collapsedHeight: isCompactDesktop ? "18vh" : "20vh",
-    expandedHeight: isCompactDesktop ? "52vh" : "60vh",
-    collapsedWidth: isCompactDesktop ? "54%" : "58%",
-    expandedWidth: isCompactDesktop ? "76%" : "72%",
-    endDistance: isCompactDesktop ? "+=65%" : "+=80%",
+    cardOffsetY: isCompactDesktop ? 28 : 36,
+    dateOffsetY: isCompactDesktop ? 16 : 20,
+    initialScale: isCompactDesktop ? 0.992 : 0.985,
+    duration: isCompactDesktop ? 0.62 : 0.72,
+    start: isCompactDesktop ? "top 88%" : "top 84%",
+    end: "bottom 24%",
   };
 }
 
-function setInitialCardState(
+function setInitialAnimatedState(
   card: HTMLElement,
-  metrics: PortfolioAnimationMetrics,
+  date: HTMLElement | null,
+  settings: PortfolioAnimationSettings,
 ): void {
   gsap.set(card, {
-    width: metrics.collapsedWidth,
-    height: metrics.collapsedHeight,
-    scale: 0.96,
-    opacity: 0.86,
-    boxShadow:
-      "0 8px 24px rgba(0,0,0,0.2), inset 0 0 8px rgba(255,255,255,0.04)",
+    autoAlpha: 0,
+    y: settings.cardOffsetY,
+    scale: settings.initialScale,
+    force3D: true,
+    willChange: "transform, opacity",
+    transformOrigin: "center center",
   });
+
+  if (date) {
+    gsap.set(date, {
+      autoAlpha: 0,
+      y: settings.dateOffsetY,
+      force3D: true,
+      willChange: "transform, opacity",
+    });
+  }
 }
 
-function animateCardExpanded(
-  card: HTMLElement,
-  metrics: PortfolioAnimationMetrics,
+function clearAnimatedInlineProps(
+  cards: readonly HTMLElement[],
+  dates: readonly HTMLElement[],
 ): void {
-  gsap.to(card, {
-    width: metrics.expandedWidth,
-    height: metrics.expandedHeight,
-    scale: 1,
-    opacity: 1,
-    boxShadow:
-      "0 24px 48px rgba(0,0,0,0.4), inset 0 0 16px rgba(255,255,255,0.15)",
-    duration: 0.35,
-    ease: "power3.out",
-    overwrite: "auto",
-  });
-}
-
-function animateCardCollapsed(
-  card: HTMLElement,
-  metrics: PortfolioAnimationMetrics,
-): void {
-  gsap.to(card, {
-    width: metrics.collapsedWidth,
-    height: metrics.collapsedHeight,
-    scale: 0.96,
-    opacity: 0.86,
-    boxShadow:
-      "0 8px 24px rgba(0,0,0,0.2), inset 0 0 8px rgba(255,255,255,0.04)",
-    duration: 0.35,
-    ease: "power3.inOut",
-    overwrite: "auto",
-  });
-}
-
-function clearCardInlineProps(cards: readonly HTMLElement[]): void {
   gsap.set(cards, {
-    clearProps: "width,height,scale,opacity,boxShadow",
+    clearProps: "transform,opacity,willChange",
   });
+
+  if (dates.length) {
+    gsap.set(dates, {
+      clearProps: "transform,opacity,willChange",
+    });
+  }
 }
 
 function destroyScrollState(
   triggers: readonly ScrollTrigger[],
   cards: readonly HTMLElement[],
+  dates: readonly HTMLElement[],
 ): void {
   for (const trigger of triggers) {
     trigger.kill();
@@ -166,55 +155,101 @@ function destroyScrollState(
 
   for (const card of cards) {
     gsap.killTweensOf(card);
+    card.style.willChange = "auto";
+  }
+
+  for (const date of dates) {
+    gsap.killTweensOf(date);
+    date.style.willChange = "auto";
   }
 }
 
-function createCardTrigger(args: Readonly<{
+function createCardRevealTrigger(args: Readonly<{
   card: HTMLElement;
   row: HTMLElement;
-  metrics: PortfolioAnimationMetrics;
-  scrollerElement?: HTMLElement;
+  date: HTMLElement | null;
+  settings: PortfolioAnimationSettings;
 }>): ScrollTrigger {
-  const { card, row, metrics, scrollerElement } = args;
+  const { card, row, date, settings } = args;
+
+  const timeline = gsap.timeline({
+    paused: true,
+    defaults: {
+      duration: settings.duration,
+      ease: "power3.out",
+      overwrite: "auto",
+    },
+    onStart: () => {
+      card.style.willChange = "transform, opacity";
+
+      if (date) {
+        date.style.willChange = "transform, opacity";
+      }
+    },
+    onComplete: () => {
+      card.style.willChange = "auto";
+
+      if (date) {
+        date.style.willChange = "auto";
+      }
+    },
+    onReverseComplete: () => {
+      card.style.willChange = "auto";
+
+      if (date) {
+        date.style.willChange = "auto";
+      }
+    },
+  });
+
+  timeline.to(
+    card,
+    {
+      autoAlpha: 1,
+      y: 0,
+      scale: 1,
+    },
+    0,
+  );
+
+  if (date) {
+    timeline.to(
+      date,
+      {
+        autoAlpha: 1,
+        y: 0,
+      },
+      0.06,
+    );
+  }
 
   return ScrollTrigger.create({
     trigger: row,
-    scroller: scrollerElement,
-    start: "center center",
-    end: metrics.endDistance,
-    pin: true,
-    pinSpacing: true,
-    anticipatePin: 1,
-    scrub: true,
-    onEnter: () => {
-      animateCardExpanded(card, metrics);
-    },
-    onEnterBack: () => {
-      animateCardExpanded(card, metrics);
-    },
-    onLeave: () => {
-      animateCardCollapsed(card, metrics);
-    },
-    onLeaveBack: () => {
-      animateCardCollapsed(card, metrics);
-    },
+    start: settings.start,
+    end: settings.end,
+    animation: timeline,
+    toggleActions: "play none none reverse",
+    fastScrollEnd: true,
+    invalidateOnRefresh: true,
   });
 }
 
 function setupPortfolioScrollAnimations(args: Readonly<{
   scope: HTMLDivElement;
-  scrollerElement?: HTMLElement;
   conditions: PortfolioMediaConditions;
 }>): CleanupFn | undefined {
-  const { scope, scrollerElement, conditions } = args;
-  const { isCompactDesktop, isMobileOrTablet, prefersReducedMotion } = conditions;
+  const { scope, conditions } = args;
+  const { isCompactDesktop, isMobileOrTablet, prefersReducedMotion } =
+    conditions;
 
   const cards = Array.from(
     scope.querySelectorAll<HTMLElement>("[data-portfolio-card='true']"),
   );
-
   const rows = Array.from(
     scope.querySelectorAll<HTMLElement>("[data-portfolio-row='true']"),
+  );
+  const dates = Array.from(
+    scope.querySelectorAll<HTMLElement>("[data-portfolio-date='true']"),
   );
 
   if (!cards.length || !rows.length) {
@@ -222,40 +257,43 @@ function setupPortfolioScrollAnimations(args: Readonly<{
   }
 
   if (isMobileOrTablet || prefersReducedMotion) {
-    clearCardInlineProps(cards);
+    clearAnimatedInlineProps(cards, dates);
     return undefined;
   }
 
-  const metrics = getAnimationMetrics(isCompactDesktop);
+  const settings = getAnimationSettings(isCompactDesktop);
   const triggers: ScrollTrigger[] = [];
   const itemCount = Math.min(cards.length, rows.length);
 
   for (let index = 0; index < itemCount; index += 1) {
     const card = cards[index];
     const row = rows[index];
+    const date = dates[index] ?? null;
 
-    setInitialCardState(card, metrics);
+    setInitialAnimatedState(card, date, settings);
 
     triggers.push(
-      createCardTrigger({
+      createCardRevealTrigger({
         card,
         row,
-        metrics,
-        scrollerElement,
+        date,
+        settings,
       }),
     );
   }
 
-  ScrollTrigger.refresh();
-
   return () => {
-    destroyScrollState(triggers, cards);
+    destroyScrollState(triggers, cards, dates);
   };
 }
 
-function mapPartnerToConversationPartner(partner: RawPartner): ConversationPartner {
+function mapPartnerToConversationPartner(
+  partner: RawPartner,
+): ConversationPartner {
   const alt =
-    "imageAlt" in partner && typeof partner.imageAlt === "string" && partner.imageAlt
+    "imageAlt" in partner &&
+    typeof partner.imageAlt === "string" &&
+    partner.imageAlt
       ? partner.imageAlt
       : partner.name;
 
@@ -281,7 +319,6 @@ function mapPartnerToConversationPartner(partner: RawPartner): ConversationPartn
 
 export default function Portfolio() {
   const containerRef = useRef<HTMLDivElement>(null);
-  const lenis = useLenis();
 
   const conversationPartners = useMemo(
     () => rawPartners.map(mapPartnerToConversationPartner),
@@ -298,7 +335,6 @@ export default function Portfolio() {
 
     mm.add(
       {
-        isDesktop: "(min-width: 961px)",
         isCompactDesktop: "(max-height: 720px) and (min-width: 961px)",
         isMobileOrTablet: "(max-width: 960px)",
         prefersReducedMotion: "(prefers-reduced-motion: reduce)",
@@ -306,7 +342,6 @@ export default function Portfolio() {
       (context) =>
         setupPortfolioScrollAnimations({
           scope,
-          scrollerElement: lenis?.rootElement ?? undefined,
           conditions: context.conditions as PortfolioMediaConditions,
         }),
     );
@@ -314,11 +349,14 @@ export default function Portfolio() {
     return () => {
       mm.revert();
     };
-  }, [lenis]);
+  }, []);
 
   return (
     <div ref={containerRef} className={styles.root}>
-      <section className={styles.portfolioSection} aria-labelledby="portfolio-title">
+      <section
+        className={styles.portfolioSection}
+        aria-labelledby="portfolio-title"
+      >
         <div className={styles.header}>
           <span className={styles.eyebrow}>Projetos selecionados</span>
 
@@ -328,8 +366,8 @@ export default function Portfolio() {
 
           <p className={styles.description}>
             Alguns trabalhos com foco em produto, interface e execução visual.
-            A animação abaixo foi organizada para ficar mais estável em desktop
-            compacto, inclusive em telas 720p.
+            A seção foi simplificada para priorizar fluidez, legibilidade e uma
+            rolagem mais estável no desktop.
           </p>
         </div>
 
@@ -340,7 +378,9 @@ export default function Portfolio() {
               className={styles.cardRow}
               data-portfolio-row="true"
             >
-              <span className={styles.cardDate}>{item.date}</span>
+              <span className={styles.cardDate} data-portfolio-date="true">
+                {item.date}
+              </span>
 
               <div
                 className={styles.animatedCard}
