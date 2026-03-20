@@ -9,11 +9,22 @@ const titles = [
   "📱 Mobile Developer",
 ];
 
+function getWindowSize() {
+  if (typeof window === "undefined") {
+    return { innerWidth: 1440, innerHeight: 900 };
+  }
+
+  const { innerWidth, innerHeight } = window;
+  return { innerWidth, innerHeight };
+}
+
 export default function RoleTitle() {
   const [index, setIndex] = useState(0);
-  const [windowSize, setWindowSize] = useState(getWindowSize());
+  const [windowSize, setWindowSize] = useState(() => getWindowSize());
 
   const isMobileView = windowSize.innerWidth < 768;
+  const is1080pDesktop =
+    windowSize.innerWidth >= 1024 && windowSize.innerHeight >= 900;
 
   useEffect(() => {
     function handleWindowResize() {
@@ -27,22 +38,18 @@ export default function RoleTitle() {
     };
   }, []);
 
-  function getWindowSize() {
-    const { innerWidth, innerHeight } = window;
-    return { innerWidth, innerHeight };
-  }
-
   useEffect(() => {
     const interval = setInterval(() => {
       setIndex((prev) => (prev + 1) % titles.length);
     }, 3500);
+
     return () => clearInterval(interval);
   }, []);
 
   return (
     <div
       style={{
-        height: "5rem",
+        height: isMobileView ? "5rem" : is1080pDesktop ? "6.4rem" : "5rem",
         overflow: "hidden",
         width: "100%",
         position: "relative",
@@ -50,7 +57,12 @@ export default function RoleTitle() {
         background: "rgba(0, 0, 0, 0.2)",
         borderTop: "2px solid #f1c40f",
         borderBottom: "2px solid #f1c40f",
-        padding: "0.5rem 1.5rem",
+        padding: isMobileView
+          ? "0.5rem 1rem"
+          : is1080pDesktop
+            ? "0.85rem 1.5rem"
+            : "0.5rem 1.5rem",
+        boxSizing: "border-box",
       }}
     >
       <AnimatePresence mode="wait">
@@ -67,16 +79,20 @@ export default function RoleTitle() {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            fontSize: isMobileView ? "calc(7vw)" : "calc(2.5vw)",
+            fontSize: isMobileView
+              ? "calc(7vw)"
+              : is1080pDesktop
+                ? "calc(2.45vw)"
+                : "calc(2.5vw)",
             fontWeight: 700,
             fontFamily: '"Brutal", sans-serif',
             color: "#f1c40f",
             textAlign: "center",
-            lineHeight: 1.2,
+            lineHeight: 1.1,
             whiteSpace: "nowrap",
             overflow: "hidden",
             boxSizing: "border-box",
-            padding: "0 1rem",
+            padding: isMobileView ? "0 0.75rem" : "0 1rem",
           }}
         >
           {titles[index]}

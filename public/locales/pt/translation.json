@@ -19,14 +19,9 @@
   },
   "floatingChat": {
     "phrases": [
-      "Vamos falar do projeto",
+      "Chat",
       "Fale comigo",
-      "Entender seu desafio",
-      "Posso ajudar aqui",
-      "Avaliamos juntos",
-      "Fale direto comigo",
-      "Buscar a melhor solução",
-      "Pensar no melhor caminho"
+      "Posso ajudar?"
     ],
     "firstMessage": "Como seria seu projeto ideal?",
     "secondMessage": "Olá! Pronto para tirar sua ideia do papel?",
