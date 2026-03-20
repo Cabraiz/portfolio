@@ -13,18 +13,15 @@
   --resume-green-top: rgba(78, 255, 158, 0.98);
   --resume-green-bottom: rgba(18, 214, 99, 0.98);
 
-  /* hierarquia para o botão poder ficar na frente quando expandir */
   --resume-z-root: 3;
   --resume-z-root-active: 16;
   --resume-z-docs: 2;
   --resume-z-tray: 4;
 
-  /* topo vidro mais limpo, sem camada escura fumê */
   --resume-docs-bg:
     linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.08));
   --resume-docs-border: rgba(255, 255, 255, 0.22);
 
-  /* bandeja verde */
   --resume-tray-bg:
     linear-gradient(180deg, var(--resume-green-top), var(--resume-green-bottom));
   --resume-tray-border: rgba(210, 255, 227, 0.3);
@@ -145,7 +142,6 @@
   gap: 9px;
 }
 
-/* ícone do topo branco */
 .docsIcon {
   width: 16px;
   height: 16px;
@@ -263,7 +259,6 @@
   letter-spacing: 0.1em;
 }
 
-/* ícone da bandeja preto */
 .trayIcon {
   width: 18px;
   height: 18px;
@@ -284,15 +279,11 @@
   display: block;
 }
 
-.root:hover,
-.root:focus-visible,
-.root:focus-within {
+.root:is(:hover, :focus-visible):not([data-suspend-motion="true"]) {
   z-index: var(--resume-z-root-active);
 }
 
-.root:hover .docs,
-.root:focus-visible .docs,
-.root:focus-within .docs {
+.root:is(:hover, :focus-visible):not([data-suspend-motion="true"]) .docs {
   transform: translateY(-2px);
   border-color: rgba(255, 255, 255, 0.3);
   background:
@@ -303,16 +294,12 @@
   filter: brightness(1.02);
 }
 
-.root:hover .docsIcon,
-.root:focus-visible .docsIcon,
-.root:focus-within .docsIcon {
+.root:is(:hover, :focus-visible):not([data-suspend-motion="true"]) .docsIcon {
   transform: translateY(-1px);
   color: #ffffff;
 }
 
-.root:hover .tray,
-.root:focus-visible .tray,
-.root:focus-within .tray {
+.root:is(:hover, :focus-visible):not([data-suspend-motion="true"]) .tray {
   opacity: 1;
   transform: translate(-50%, calc(-50% + var(--resume-tray-hover-shift))) scale(1);
   filter: saturate(1.02) brightness(1.02);
@@ -322,19 +309,34 @@
     0 10px 22px rgba(0, 0, 0, 0.1);
 }
 
-.root:hover .trayIcon,
-.root:focus-visible .trayIcon,
-.root:focus-within .trayIcon {
+.root:is(:hover, :focus-visible):not([data-suspend-motion="true"]) .trayIcon {
   transform: translateY(1px);
   color: #000000;
+}
+
+.root[data-suspend-motion="true"] {
+  z-index: var(--resume-z-root);
+}
+
+.root[data-suspend-motion="true"] .docs {
+  transform: none;
+  filter: none;
+}
+
+.root[data-suspend-motion="true"] .tray {
+  opacity: 0;
+  transform:
+    translate(-50%, calc(-50% + var(--resume-tray-idle-shift)))
+    scale(var(--resume-tray-idle-scale));
+  box-shadow: none;
+  filter: saturate(0.96) brightness(0.98);
 }
 
 .root:focus-visible {
   outline: none;
 }
 
-.root:focus-visible .docs,
-.root:focus-within .docs {
+.root:focus-visible .docs {
   box-shadow:
     0 0 0 2px rgba(255, 255, 255, 0.18),
     inset 0 1px 0 rgba(255, 255, 255, 0.22),

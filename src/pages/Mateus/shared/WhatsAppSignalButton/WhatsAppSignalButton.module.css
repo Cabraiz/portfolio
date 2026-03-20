@@ -102,6 +102,41 @@
   width: 100%;
 }
 
+.hitArea {
+  position: absolute;
+  inset: 0;
+  z-index: calc(var(--signal-z-button) + 2);
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: none;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border-radius: calc(
+    var(--signal-radius) + var(--signal-padding-inline) + 2px
+  );
+  color: inherit;
+  text-decoration: none;
+  appearance: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.hitArea:link,
+.hitArea:visited,
+.hitArea:hover,
+.hitArea:active,
+.hitArea:focus,
+.hitArea:focus-visible {
+  color: inherit;
+  text-decoration: none;
+}
+
+.hitArea:focus-visible {
+  outline: none;
+}
+
 .button {
   position: relative;
   z-index: var(--signal-z-button);
@@ -127,16 +162,7 @@
     background 240ms ease;
   appearance: none;
   cursor: pointer;
-}
-
-.button:link,
-.button:visited,
-.button:hover,
-.button:active,
-.button:focus,
-.button:focus-visible {
-  color: var(--signal-label-color);
-  text-decoration: none;
+  pointer-events: none;
 }
 
 .button::before {
@@ -298,77 +324,114 @@
   transform: rotate(270deg);
 }
 
-.root:hover .button,
-.root:focus-within .button {
+.root:not([data-suspend-motion="true"]):hover .button,
+.root:not([data-suspend-motion="true"]) .hitArea:focus-visible + .frame .button {
   transform: translateY(-2px) scale(1.025);
   box-shadow: var(--signal-glow-hover);
   filter: saturate(1.04);
 }
 
-.root:hover .drawerTop,
-.root:focus-within .drawerTop {
+.root:not([data-suspend-motion="true"]):hover .drawerTop,
+.root:not([data-suspend-motion="true"]) .hitArea:focus-visible + .frame .drawerTop {
   opacity: 1;
   filter: blur(0);
   transform: translate(-50%, calc(-1 * (var(--signal-drawer-height) * 0.72)))
     rotate(-4deg) scale(1);
 }
 
-.root:hover .drawerBottom,
-.root:focus-within .drawerBottom {
+.root:not([data-suspend-motion="true"]):hover .drawerBottom,
+.root:not([data-suspend-motion="true"]) .hitArea:focus-visible + .frame .drawerBottom {
   opacity: 1;
   filter: blur(0);
   transform: translate(-50%, calc(var(--signal-drawer-height) * 0.72))
     rotate(4deg) scale(1);
 }
 
-.root:hover .cornerTopLeft,
-.root:focus-within .cornerTopLeft {
+.root:not([data-suspend-motion="true"]):hover .cornerTopLeft,
+.root:not([data-suspend-motion="true"]) .hitArea:focus-visible + .frame .cornerTopLeft {
   transform: translate(-8px, -8px) rotate(0deg);
   filter: drop-shadow(-10px 10px 8px var(--signal-corner-shadow));
 }
 
-.root:hover .cornerTopRight,
-.root:focus-within .cornerTopRight {
+.root:not([data-suspend-motion="true"]):hover .cornerTopRight,
+.root:not([data-suspend-motion="true"]) .hitArea:focus-visible + .frame .cornerTopRight {
   transform: translate(8px, -8px) rotate(90deg);
   filter: drop-shadow(-10px 10px 8px var(--signal-corner-shadow));
 }
 
-.root:hover .cornerBottomRight,
-.root:focus-within .cornerBottomRight {
+.root:not([data-suspend-motion="true"]):hover .cornerBottomRight,
+.root:not([data-suspend-motion="true"]) .hitArea:focus-visible + .frame .cornerBottomRight {
   transform: translate(8px, 8px) rotate(180deg);
   filter: drop-shadow(-10px 10px 8px var(--signal-corner-shadow));
 }
 
-.root:hover .cornerBottomLeft,
-.root:focus-within .cornerBottomLeft {
+.root:not([data-suspend-motion="true"]):hover .cornerBottomLeft,
+.root:not([data-suspend-motion="true"]) .hitArea:focus-visible + .frame .cornerBottomLeft {
   transform: translate(-8px, 8px) rotate(270deg);
   filter: drop-shadow(-10px 10px 8px var(--signal-corner-shadow));
 }
 
-.button:focus-visible {
+.root[data-suspend-motion="true"] .button {
+  transform: none;
+  filter: none;
+  box-shadow: var(--signal-glow);
+}
+
+.root[data-suspend-motion="true"] .drawer {
+  opacity: 0;
+  filter: blur(2px);
+}
+
+.root[data-suspend-motion="true"] .drawerTop {
+  transform: translate(-50%, 14px) rotate(-1deg) scale(0.94);
+}
+
+.root[data-suspend-motion="true"] .drawerBottom {
+  transform: translate(-50%, -14px) rotate(1deg) scale(0.94);
+}
+
+.root[data-suspend-motion="true"] .corner {
+  filter: none;
+}
+
+.root[data-suspend-motion="true"] .cornerTopLeft {
+  transform: rotate(0deg);
+}
+
+.root[data-suspend-motion="true"] .cornerTopRight {
+  transform: rotate(90deg);
+}
+
+.root[data-suspend-motion="true"] .cornerBottomRight {
+  transform: rotate(180deg);
+}
+
+.root[data-suspend-motion="true"] .cornerBottomLeft {
+  transform: rotate(270deg);
+}
+
+.hitArea:focus-visible + .frame .button {
   outline: 3px solid var(--signal-focus-ring);
   outline-offset: 4px;
 }
 
-.button:active {
+.hitArea:active + .frame .button {
   transform: translateY(1px) scale(0.985);
   box-shadow:
     0 8px 14px rgba(11, 45, 24, 0.18),
     0 3px 8px rgba(11, 45, 24, 0.12);
 }
 
-.button:active .labelWrap {
+.hitArea:active + .frame .button .labelWrap {
   transform: translateY(0);
 }
 
-.button:disabled {
+.hitArea:disabled {
   cursor: not-allowed;
 }
 
 .disabled .button {
-  pointer-events: none;
-  box-shadow:
-    0 8px 14px rgba(11, 45, 24, 0.12);
+  box-shadow: 0 8px 14px rgba(11, 45, 24, 0.12);
 }
 
 .disabled .drawer,
@@ -454,37 +517,37 @@
     transition: none;
   }
 
-  .root:hover .button,
-  .root:focus-within .button,
-  .button:active {
+  .root:not([data-suspend-motion="true"]):hover .button,
+  .root:not([data-suspend-motion="true"]) .hitArea:focus-visible + .frame .button,
+  .hitArea:active + .frame .button {
     transform: none;
     filter: none;
   }
 
-  .root:hover .drawerTop,
-  .root:focus-within .drawerTop {
+  .root:not([data-suspend-motion="true"]):hover .drawerTop,
+  .root:not([data-suspend-motion="true"]) .hitArea:focus-visible + .frame .drawerTop {
     opacity: 1;
     filter: none;
     transform: translate(-50%, calc(-1 * (var(--signal-drawer-height) * 0.55)))
       rotate(-2deg) scale(1);
   }
 
-  .root:hover .drawerBottom,
-  .root:focus-within .drawerBottom {
+  .root:not([data-suspend-motion="true"]):hover .drawerBottom,
+  .root:not([data-suspend-motion="true"]) .hitArea:focus-visible + .frame .drawerBottom {
     opacity: 1;
     filter: none;
     transform: translate(-50%, calc(var(--signal-drawer-height) * 0.55))
       rotate(2deg) scale(1);
   }
 
-  .root:hover .cornerTopLeft,
-  .root:hover .cornerTopRight,
-  .root:hover .cornerBottomRight,
-  .root:hover .cornerBottomLeft,
-  .root:focus-within .cornerTopLeft,
-  .root:focus-within .cornerTopRight,
-  .root:focus-within .cornerBottomRight,
-  .root:focus-within .cornerBottomLeft {
+  .root:not([data-suspend-motion="true"]):hover .cornerTopLeft,
+  .root:not([data-suspend-motion="true"]):hover .cornerTopRight,
+  .root:not([data-suspend-motion="true"]):hover .cornerBottomRight,
+  .root:not([data-suspend-motion="true"]):hover .cornerBottomLeft,
+  .root:not([data-suspend-motion="true"]) .hitArea:focus-visible + .frame .cornerTopLeft,
+  .root:not([data-suspend-motion="true"]) .hitArea:focus-visible + .frame .cornerTopRight,
+  .root:not([data-suspend-motion="true"]) .hitArea:focus-visible + .frame .cornerBottomRight,
+  .root:not([data-suspend-motion="true"]) .hitArea:focus-visible + .frame .cornerBottomLeft {
     filter: none;
   }
 }

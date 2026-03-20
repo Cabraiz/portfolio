@@ -1,4 +1,14 @@
-import { memo, type AnchorHTMLAttributes, type ReactNode } from "react";
+import {
+  memo,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type AnchorHTMLAttributes,
+  type MouseEvent,
+  type MouseEventHandler,
+  type ReactNode,
+} from "react";
 import styles from "./WhatsAppSignalButton.module.css";
 import WhatsAppSignalCorners from "./components/WhatsAppSignalCorners";
 import WhatsAppSignalDrawers from "./components/WhatsAppSignalDrawers";
@@ -6,6 +16,9 @@ import {
   getWhatsAppSignalCssVars,
   type WhatsAppSignalDensity,
 } from "./whatsAppSignal.tokens";
+
+export type WhatsAppSignalButtonClickHandler =
+  MouseEventHandler<HTMLAnchorElement | HTMLButtonElement>;
 
 export type WhatsAppSignalButtonProps = Readonly<{
   href: string;
@@ -21,6 +34,7 @@ export type WhatsAppSignalButtonProps = Readonly<{
   className?: string;
   target?: AnchorHTMLAttributes<HTMLAnchorElement>["target"];
   rel?: string;
+  onClick?: WhatsAppSignalButtonClickHandler;
 }>;
 
 function joinClasses(
@@ -52,7 +66,8 @@ type SignalActionProps = Readonly<{
   rel?: string;
   ariaLabel: string;
   className: string;
-  children: ReactNode;
+  onClick: WhatsAppSignalButtonClickHandler;
+  actionRef: (node: HTMLAnchorElement | HTMLButtonElement | null) => void;
 }>;
 
 function SignalAction({
@@ -62,31 +77,31 @@ function SignalAction({
   rel,
   ariaLabel,
   className,
-  children,
+  onClick,
+  actionRef,
 }: SignalActionProps) {
   if (disabled) {
     return (
       <button
+        ref={actionRef}
         type="button"
         className={className}
         aria-label={ariaLabel}
         disabled
-      >
-        {children}
-      </button>
+      />
     );
   }
 
   return (
     <a
+      ref={actionRef}
       href={href}
       target={target}
       rel={rel}
       aria-label={ariaLabel}
       className={className}
-    >
-      {children}
-    </a>
+      onClick={onClick}
+    />
   );
 }
 
@@ -104,11 +119,88 @@ function WhatsAppSignalButton({
   className,
   target = "_blank",
   rel,
+  onClick,
 }: WhatsAppSignalButtonProps) {
   const density: WhatsAppSignalDensity = compact ? "compact" : "default";
   const resolvedRel =
     target === "_blank" ? rel ?? "noopener noreferrer" : rel;
   const resolvedAriaLabel = ariaLabel ?? label;
+
+  const actionRef = useRef<HTMLAnchorElement | HTMLButtonElement | null>(null);
+  const [suspendMotion, setSuspendMotion] = useState(false);
+
+  const clearInteractiveState = useCallback(() => {
+    setSuspendMotion(false);
+    actionRef.current?.blur();
+  }, []);
+
+  useEffect(() => {
+    const handleGlobalBlur = () => {
+      setSuspendMotion(true);
+      actionRef.current?.blur();
+    };
+
+    const handleGlobalFocus = () => {
+      clearInteractiveState();
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        setSuspendMotion(true);
+        actionRef.current?.blur();
+        return;
+      }
+
+      clearInteractiveState();
+    };
+
+    const handlePageHide = () => {
+      setSuspendMotion(true);
+      actionRef.current?.blur();
+    };
+
+    globalThis.addEventListener("blur", handleGlobalBlur);
+    globalThis.addEventListener("focus", handleGlobalFocus);
+    globalThis.addEventListener("pagehide", handlePageHide);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      globalThis.removeEventListener("blur", handleGlobalBlur);
+      globalThis.removeEventListener("focus", handleGlobalFocus);
+      globalThis.removeEventListener("pagehide", handlePageHide);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [clearInteractiveState]);
+
+  const handleActionClick = useCallback(
+    (mouseEvent: MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => {
+      onClick?.(mouseEvent);
+
+      if (mouseEvent.defaultPrevented) {
+        return;
+      }
+
+      setSuspendMotion(true);
+
+      if (typeof globalThis.queueMicrotask === "function") {
+        globalThis.queueMicrotask(() => {
+          actionRef.current?.blur();
+        });
+      }
+
+      globalThis.setTimeout(() => {
+        actionRef.current?.blur();
+      }, 0);
+    },
+    [onClick],
+  );
+
+  const setActionRef = useCallback(
+    (node: HTMLAnchorElement | HTMLButtonElement | null) => {
+      actionRef.current = node;
+    },
+    [],
+  );
 
   const buttonContent = (
     <span className={styles.buttonSurface}>
@@ -135,9 +227,21 @@ function WhatsAppSignalButton({
       data-disabled={disabled ? "true" : "false"}
       data-density={density}
       data-hero={hero ? "true" : "false"}
+      data-suspend-motion={suspendMotion ? "true" : "false"}
       style={getWhatsAppSignalCssVars(density)}
     >
-      <div className={styles.frame}>
+      <SignalAction
+        disabled={disabled}
+        href={href}
+        target={target}
+        rel={resolvedRel}
+        ariaLabel={resolvedAriaLabel}
+        className={styles.hitArea}
+        onClick={handleActionClick}
+        actionRef={setActionRef}
+      />
+
+      <div className={styles.frame} aria-hidden="true">
         <WhatsAppSignalDrawers
           topLabel={topLabel}
           bottomLabel={bottomLabel}
@@ -146,16 +250,7 @@ function WhatsAppSignalButton({
           bottomDrawerClassName={styles.drawerBottom}
         />
 
-        <SignalAction
-          disabled={disabled}
-          href={href}
-          target={target}
-          rel={resolvedRel}
-          ariaLabel={resolvedAriaLabel}
-          className={styles.button}
-        >
-          {buttonContent}
-        </SignalAction>
+        <div className={styles.button}>{buttonContent}</div>
 
         <WhatsAppSignalCorners
           cornerClassName={styles.corner}

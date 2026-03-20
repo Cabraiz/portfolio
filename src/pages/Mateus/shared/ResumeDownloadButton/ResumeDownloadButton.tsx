@@ -1,8 +1,17 @@
-import type { MouseEvent } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type MouseEvent,
+  type MouseEventHandler,
+} from "react";
 import styles from "./ResumeDownloadButton.module.css";
 
 export type ResumeDownloadButtonSize = "default" | "compact";
 export type ResumeDownloadButtonType = "button" | "submit" | "reset";
+export type ResumeDownloadButtonClickHandler =
+  MouseEventHandler<HTMLAnchorElement | HTMLButtonElement>;
 
 export type ResumeDownloadButtonProps = Readonly<{
   label: string;
@@ -17,7 +26,7 @@ export type ResumeDownloadButtonProps = Readonly<{
   disabled?: boolean;
   type?: ResumeDownloadButtonType;
   trayLabel?: string;
-  onClick?: (event: MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => void;
+  onClick?: ResumeDownloadButtonClickHandler;
 }>;
 
 function joinClasses(...values: Array<string | false | null | undefined>): string {
@@ -123,6 +132,82 @@ export default function ResumeDownloadButton({
   const accessibleLabel = ariaLabel ?? label;
   const resolvedRel = resolveRel(target, rel);
 
+  const rootRef = useRef<HTMLAnchorElement | HTMLButtonElement | null>(null);
+  const [suspendMotion, setSuspendMotion] = useState(false);
+
+  const clearInteractiveState = useCallback(() => {
+    setSuspendMotion(false);
+    rootRef.current?.blur();
+  }, []);
+
+  useEffect(() => {
+    const handleGlobalBlur = () => {
+      setSuspendMotion(true);
+      rootRef.current?.blur();
+    };
+
+    const handleGlobalFocus = () => {
+      clearInteractiveState();
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        setSuspendMotion(true);
+        rootRef.current?.blur();
+        return;
+      }
+
+      clearInteractiveState();
+    };
+
+    const handlePageHide = () => {
+      setSuspendMotion(true);
+      rootRef.current?.blur();
+    };
+
+    globalThis.addEventListener("blur", handleGlobalBlur);
+    globalThis.addEventListener("focus", handleGlobalFocus);
+    globalThis.addEventListener("pagehide", handlePageHide);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      globalThis.removeEventListener("blur", handleGlobalBlur);
+      globalThis.removeEventListener("focus", handleGlobalFocus);
+      globalThis.removeEventListener("pagehide", handlePageHide);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [clearInteractiveState]);
+
+  const handleClick = useCallback(
+    (mouseEvent: MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => {
+      onClick?.(mouseEvent);
+
+      if (mouseEvent.defaultPrevented) {
+        return;
+      }
+
+      setSuspendMotion(true);
+
+      if (typeof globalThis.queueMicrotask === "function") {
+        globalThis.queueMicrotask(() => {
+          rootRef.current?.blur();
+        });
+      }
+
+      globalThis.setTimeout(() => {
+        rootRef.current?.blur();
+      }, 0);
+    },
+    [onClick],
+  );
+
+  const setRootRef = useCallback(
+    (node: HTMLAnchorElement | HTMLButtonElement | null) => {
+      rootRef.current = node;
+    },
+    [],
+  );
+
   const rootClassName = joinClasses(
     styles.root,
     compact && styles.rootCompact,
@@ -178,13 +263,15 @@ export default function ResumeDownloadButton({
   if (href && !disabled) {
     return (
       <a
+        ref={setRootRef}
         className={rootClassName}
         href={href}
         target={target}
         rel={resolvedRel}
         download={download}
         aria-label={accessibleLabel}
-        onClick={onClick}
+        data-suspend-motion={suspendMotion ? "true" : "false"}
+        onClick={handleClick}
       >
         {content}
       </a>
@@ -193,11 +280,13 @@ export default function ResumeDownloadButton({
 
   return (
     <button
+      ref={setRootRef}
       type={type}
       className={rootClassName}
       aria-label={accessibleLabel}
       disabled={disabled}
-      onClick={onClick}
+      data-suspend-motion={suspendMotion ? "true" : "false"}
+      onClick={handleClick}
     >
       {content}
     </button>

@@ -1,5 +1,80 @@
 import { CSSProperties } from "react";
 
+export const navbarLayoutTokens = {
+  heights: {
+    mobile: 72,
+    desktop: 70,
+    desktopTall: 78,
+  },
+
+  container: {
+    maxWidth: "1360px",
+    desktopPaddingX: "20px",
+    mobilePaddingX: "12px",
+    desktopGap: "16px",
+    mobileGap: "12px",
+  },
+
+  desktop: {
+    compactBreakpoint: 1240,
+    tallViewportBreakpoint: 900,
+
+    /**
+     * Aumentado para o botão Google ocupar mais largura
+     * tanto em 1080p (default) quanto em 720p (compact).
+     */
+    sideColumnWidth: {
+      default: "272px",
+      compact: "232px",
+    },
+
+    logoOffsetX: "10px",
+
+    logoGap: {
+      default: "12px",
+      compact: "8px",
+    },
+
+    logoSize: {
+      default: "60px",
+      compact: "54px",
+    },
+
+    navOffsetY: "10px",
+    navContainerPaddingX: "6px",
+    navContainerPaddingBottom: "8px",
+
+    navGap: {
+      default: "clamp(0.75rem, 0.45rem + 0.8vw, 1.35rem)",
+      compact: "clamp(0.55rem, 0.35rem + 0.4vw, 0.9rem)",
+    },
+
+    liveAnimationLeft: {
+      default: "-1.9rem",
+      compact: "-1rem",
+    },
+  },
+
+  mobile: {
+    menuTopOffset: 10,
+    logoOffsetX: "0px",
+    logoSize: "40px",
+    brandGap: "10px",
+  },
+
+  navLink: {
+    fontSize: "clamp(1rem, 0.9rem + 0.28vw, 1.28rem)",
+    letterSpacing: 1.05,
+    paddingBottom: 8,
+  },
+
+  underline: {
+    bottom: "8px",
+    height: "3px",
+    borderRadius: "3px",
+  },
+} as const;
+
 export const navbarStyles = {
   container: {
     backdropFilter: "blur(6px)",
@@ -20,21 +95,23 @@ export const navbarStyles = {
     justifyContent: "center",
     color: "rgba(255, 255, 255, 0.6)",
     fontWeight: 100,
-    letterSpacing: 1.3,
+    letterSpacing: navbarLayoutTokens.navLink.letterSpacing,
     cursor: "pointer",
     userSelect: "none",
-    transition: "all 0.25s ease-in-out",
+    transition: "color 0.25s ease-in-out, transform 0.25s ease-in-out",
     position: "relative",
-    fontSize: "1.5vw",
+    fontSize: navbarLayoutTokens.navLink.fontSize,
+    lineHeight: 1.05,
+    whiteSpace: "nowrap",
     margin: 0,
     paddingLeft: 0,
     paddingRight: 0,
     paddingTop: 0,
-    paddingBottom: 10,
+    paddingBottom: navbarLayoutTokens.navLink.paddingBottom,
   } as CSSProperties,
 
   navLinkActive: {
-    color: "rgba(255, 255, 255, 0.9)",
+    color: "rgba(255, 255, 255, 0.92)",
   } as CSSProperties,
 
   navLinkHover: {
@@ -43,16 +120,18 @@ export const navbarStyles = {
 
   underline: {
     position: "absolute",
-    bottom: "2px",
-    height: "3px",
+    bottom: navbarLayoutTokens.underline.bottom,
+    height: navbarLayoutTokens.underline.height,
     backgroundColor: "white",
-    borderRadius: "3px",
+    borderRadius: navbarLayoutTokens.underline.borderRadius,
     transition: "all 300ms ease-in-out",
+    zIndex: 1,
+    pointerEvents: "none",
   } as CSSProperties,
 
   borderGradient: {
     borderStyle: "solid",
     borderImage:
-      "linear-gradient(to left, #ffffff00 -20%, #ffffff33 60%, #ffffffbd 80%, #ffffffbd 86%, #ffffff33 92%, #ffffff00 100%) 100% 0 100% 0/0.3vh 0 0.3vh 0 stretch",
+      "linear-gradient(to left, #ffffff00 -20%, #ffffff33 60%, #ffffffbd 80%, #ffffffbd 86%, #ffffff33 92%, #ffffff00 100%) 100% 0 100% 0/1px 0 1px 0 stretch",
   } as CSSProperties,
 };
