@@ -3,6 +3,17 @@
   width: 100%;
   min-height: 100vh;
   color: #fdf5e6;
+  content-visibility: auto;
+  contain-intrinsic-size: 960px;
+}
+
+.portfolioRoot {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  color: #fdf5e6;
+  content-visibility: auto;
+  contain-intrinsic-size: 960px;
 }
 
 .portfolioSection {
@@ -29,14 +40,36 @@
   background-size: cover;
 }
 
-.header {
+.portfolioLayout {
+  width: min(100%, 1280px);
+  margin: clamp(30px, 5vh, 46px) auto 0;
+  display: grid;
+  grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);
+  gap: clamp(20px, 3vw, 34px);
+  align-items: start;
+}
+
+.portfolioSidebarColumn {
+  min-width: 0;
+  position: sticky;
+  top: clamp(88px, 10vh, 120px);
+}
+
+.portfolioViewportColumn {
+  min-width: 0;
+}
+
+.portfolioHeader {
   width: min(100%, 1180px);
   margin: 0 auto;
+}
+
+.portfolioHeaderInner {
   display: grid;
   gap: 14px;
 }
 
-.eyebrow {
+.portfolioEyebrow {
   display: inline-flex;
   align-items: center;
   width: fit-content;
@@ -52,7 +85,7 @@
   text-transform: uppercase;
 }
 
-.title {
+.portfolioTitle {
   margin: 0;
   font-size: clamp(2.5rem, 5vw, 3.5rem);
   font-weight: 800;
@@ -63,7 +96,7 @@
   -webkit-text-fill-color: transparent;
 }
 
-.description {
+.portfolioDescription {
   margin: 0;
   max-width: 68ch;
   font-size: clamp(1rem, 1.15vw, 1.08rem);
@@ -71,48 +104,294 @@
   color: rgba(253, 245, 230, 0.74);
 }
 
-.cardsStack {
-  width: min(100%, 1280px);
-  margin: clamp(32px, 5vh, 48px) auto 0;
-  display: grid;
-  gap: clamp(24px, 4.5vh, 40px);
-  padding-bottom: clamp(12px, 3vh, 28px);
-}
-
-.cardRow {
+/* Timeline rail */
+.portfolioTimelineRail {
   position: relative;
-  width: min(100%, 1220px);
-  min-height: clamp(22rem, 46vh, 30rem);
-  margin: 0 auto;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding-left: clamp(3rem, 7vw, 5.5rem);
-  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
 }
 
-.cardDate {
+.portfolioTimelineRailInner {
+  position: relative;
+  min-width: 0;
+  padding: 18px 14px 18px 22px;
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.045),
+      rgba(255, 255, 255, 0.018)
+    ),
+    rgba(255, 255, 255, 0.02);
+  box-shadow:
+    0 12px 28px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  overflow: hidden;
+}
+
+.portfolioTimelineRailLine {
   position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  color: rgba(253, 245, 230, 0.5);
-  font-size: clamp(0.92rem, 1.4vw, 1.12rem);
-  font-weight: 500;
-  letter-spacing: 0.03em;
+  left: 26px;
+  top: 24px;
+  bottom: 24px;
+  width: 1px;
+  background: linear-gradient(
+    180deg,
+    rgba(252, 213, 53, 0.08),
+    rgba(252, 213, 53, 0.26),
+    rgba(252, 213, 53, 0.08)
+  );
+  pointer-events: none;
+}
+
+.portfolioTimelineList {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.portfolioTimelineItem {
+  min-width: 0;
+}
+
+.portfolioTimelineItemActive {
   z-index: 1;
 }
 
-.animatedCard {
-  position: relative;
-  width: min(100%, 1040px);
-  min-width: 320px;
-  min-height: clamp(280px, 34vw, 420px);
+.portfolioTimelineButton {
+  width: 100%;
+  min-width: 0;
   display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(240px, 0.8fr);
+  grid-template-columns: 18px minmax(0, 1fr);
+  gap: 14px;
+  align-items: start;
+  padding: 10px 10px 10px 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 14px;
+  transition:
+    transform 0.22s ease,
+    opacity 0.22s ease,
+    background-color 0.22s ease;
+}
+
+.portfolioTimelineButton:hover {
+  transform: translate3d(2px, 0, 0);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.portfolioTimelineButtonActive {
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.portfolioTimelineMarker {
+  position: relative;
+  display: block;
+  width: 11px;
+  height: 11px;
+  margin-top: 6px;
+  margin-left: 1px;
+  border-radius: 999px;
+  border: 1px solid rgba(252, 213, 53, 0.36);
+  background: rgba(15, 15, 18, 0.96);
+  box-shadow: 0 0 0 4px rgba(252, 213, 53, 0.05);
+  transition:
+    transform 0.22s ease,
+    background-color 0.22s ease,
+    border-color 0.22s ease,
+    box-shadow 0.22s ease;
+}
+
+.portfolioTimelineMarkerActive {
+  transform: scale(1.08);
+  background: rgba(252, 213, 53, 0.92);
+  border-color: rgba(252, 213, 53, 0.98);
+  box-shadow:
+    0 0 0 5px rgba(252, 213, 53, 0.1),
+    0 0 22px rgba(252, 213, 53, 0.22);
+}
+
+.portfolioTimelineContent {
+  min-width: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.portfolioTimelineMetaRow {
+  min-width: 0;
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: center;
+}
+
+.portfolioTimelineYear {
+  color: rgba(253, 245, 230, 0.56);
+  font-size: 0.84rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.portfolioTimelineIndex {
+  color: rgba(253, 245, 230, 0.32);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.portfolioTimelineProjectName {
+  color: rgba(255, 255, 255, 0.94);
+  font-size: 0.98rem;
+  line-height: 1.32;
+  font-weight: 700;
+  word-break: break-word;
+}
+
+/* Viewport */
+.portfolioViewport {
+  width: 100%;
+  min-width: 0;
+}
+
+.portfolioViewportInner {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 260px);
+  gap: clamp(16px, 2vw, 24px);
+  align-items: stretch;
+}
+
+.portfolioViewportStage {
+  min-width: 0;
+  display: grid;
+  gap: 16px;
+}
+
+.portfolioViewportStageFrame {
+  min-width: 0;
+}
+
+.portfolioViewportActiveCard {
+  width: 100%;
+}
+
+.portfolioViewportControls {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+}
+
+.portfolioViewportControlButton {
+  width: 48px;
+  height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.05),
+      rgba(255, 255, 255, 0.02)
+    ),
+    rgba(255, 255, 255, 0.025);
+  color: rgba(255, 255, 255, 0.92);
+  cursor: pointer;
+  transition:
+    transform 0.22s ease,
+    border-color 0.22s ease,
+    opacity 0.22s ease,
+    background-color 0.22s ease;
+}
+
+.portfolioViewportControlButton:hover {
+  transform: translate3d(0, -2px, 0);
+  border-color: rgba(252, 213, 53, 0.28);
+}
+
+.portfolioViewportControlButtonDisabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+}
+
+.portfolioViewportControlButtonDisabled:hover {
+  transform: none;
+}
+
+.portfolioViewportActiveMeta {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+  text-align: center;
+}
+
+.portfolioViewportActiveYear {
+  color: rgba(253, 245, 230, 0.56);
+  font-size: 0.86rem;
+  letter-spacing: 0.03em;
+}
+
+.portfolioViewportActiveName {
+  display: block;
+  color: rgba(255, 255, 255, 0.96);
+  font-size: clamp(1rem, 1.3vw, 1.18rem);
+  line-height: 1.24;
+  font-weight: 800;
+  word-break: break-word;
+}
+
+.portfolioViewportSidebar {
+  min-width: 0;
+  display: grid;
+  gap: 16px;
+  align-content: start;
+}
+
+.portfolioViewportSidebarGroup {
+  min-width: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.portfolioViewportSidebarLabel {
+  color: rgba(253, 245, 230, 0.6);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.portfolioViewportPlaceholderCard {
+  min-width: 0;
+}
+
+.portfolioViewportPlaceholderEmpty {
+  min-height: 182px;
+  border-radius: 18px;
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.015);
+}
+
+/* Active project card */
+.portfolioProjectCard {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  min-height: clamp(300px, 38vw, 468px);
+  display: grid;
+  grid-template-columns: minmax(0, 1.18fr) minmax(250px, 0.82fr);
   align-items: stretch;
   overflow: hidden;
-  border-radius: 22px;
+  border-radius: 24px;
   border: 1px solid rgba(255, 255, 255, 0.09);
   background:
     radial-gradient(
@@ -129,40 +408,27 @@
   box-shadow:
     0 12px 28px rgba(0, 0, 0, 0.22),
     inset 0 1px 0 rgba(255, 255, 255, 0.04);
-  transition:
-    transform 0.28s ease,
-    box-shadow 0.28s ease,
-    border-color 0.28s ease;
   transform: translate3d(0, 0, 0);
 }
 
-.animatedCard:hover {
-  transform: translate3d(0, -4px, 0);
-  border-color: rgba(255, 255, 255, 0.14);
-  box-shadow:
-    0 18px 36px rgba(0, 0, 0, 0.28),
-    inset 0 1px 0 rgba(255, 255, 255, 0.05);
-}
-
-.projectVisual {
+.portfolioProjectCardMedia {
   min-width: 0;
   height: 100%;
   background: rgba(10, 10, 12, 0.92);
 }
 
-.projectImage {
+.portfolioProjectCardImage {
   width: 100%;
   height: 100%;
   display: block;
   object-fit: cover;
 }
 
-.projectMeta {
+.portfolioProjectCardOverlay {
   min-width: 0;
   display: grid;
   grid-template-rows: auto 1fr;
   gap: 18px;
-  align-items: center;
   padding: clamp(18px, 2vw, 28px);
   background:
     radial-gradient(
@@ -177,13 +443,15 @@
     );
 }
 
-.projectTextBlock {
+.portfolioProjectCardTopRow {
   min-width: 0;
-  display: grid;
-  gap: 8px;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
 }
 
-.projectLabel {
+.portfolioProjectCardLabel {
   display: inline-flex;
   align-items: center;
   width: fit-content;
@@ -198,39 +466,166 @@
   text-transform: uppercase;
 }
 
-.projectName {
+.portfolioProjectCardYear {
+  color: rgba(253, 245, 230, 0.6);
+  font-size: 0.92rem;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.portfolioProjectCardBottomRow {
+  min-width: 0;
+  display: flex;
+  align-items: flex-end;
+  height: 100%;
+}
+
+.portfolioProjectCardIdentity {
+  min-width: 0;
+  width: 100%;
+  display: grid;
+  gap: 18px;
+  align-items: end;
+}
+
+.portfolioProjectCardLogoBox {
+  min-width: 0;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.portfolioProjectCardLogo {
+  width: min(100%, 220px);
+  max-height: 96px;
+  object-fit: contain;
+  display: block;
+}
+
+.portfolioProjectCardTextGroup {
+  min-width: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.portfolioProjectCardTitle {
   margin: 0;
-  font-size: clamp(1.2rem, 2vw, 1.8rem);
+  font-size: clamp(1.28rem, 2vw, 1.92rem);
   line-height: 1.05;
   font-weight: 800;
   color: rgba(255, 255, 255, 0.96);
   word-break: break-word;
 }
 
-.projectYear {
-  color: rgba(253, 245, 230, 0.6);
-  font-size: 0.95rem;
-  line-height: 1.2;
+.portfolioProjectCardMeta {
+  margin: 0;
+  color: rgba(253, 245, 230, 0.64);
+  font-size: 0.96rem;
+  line-height: 1.5;
 }
 
-.projectLogoBox {
+/* Placeholder cards */
+.portfolioProjectPlaceholder {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  min-height: 182px;
+  display: grid;
+  grid-template-rows: 1fr;
+  overflow: hidden;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.035),
+      rgba(255, 255, 255, 0.014)
+    ),
+    rgba(255, 255, 255, 0.018);
+}
+
+.portfolioProjectPlaceholderPrevious {}
+
+.portfolioProjectPlaceholderNext {}
+
+.portfolioProjectPlaceholderMedia {
+  position: absolute;
+  inset: 0;
+  background: rgba(10, 10, 12, 0.88);
+}
+
+.portfolioProjectPlaceholderImage {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  opacity: 0.24;
+  transform: scale(1.04);
+}
+
+.portfolioProjectPlaceholderOverlay {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+  min-height: 182px;
+  display: grid;
+  align-content: space-between;
+  gap: 12px;
+  padding: 14px;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(8, 8, 10, 0.12),
+      rgba(8, 8, 10, 0.56) 42%,
+      rgba(8, 8, 10, 0.86)
+    );
+}
+
+.portfolioProjectPlaceholderDirection {
+  color: rgba(253, 245, 230, 0.6);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.portfolioProjectPlaceholderContent {
+  min-width: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.portfolioProjectPlaceholderLogoBox {
   min-width: 0;
   display: flex;
-  justify-content: flex-end;
-  align-items: flex-end;
-  height: 100%;
+  align-items: center;
 }
 
-.projectLogo {
-  width: min(100%, 220px);
-  max-height: 120px;
+.portfolioProjectPlaceholderLogo {
+  width: min(100%, 128px);
+  max-height: 56px;
   object-fit: contain;
   display: block;
+  filter: saturate(0.96);
 }
 
-.conversationSection {
-  margin-top: clamp(1rem, 3vh, 3rem);
-  padding-bottom: clamp(24px, 5vh, 48px);
+.portfolioProjectPlaceholderTextGroup {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.portfolioProjectPlaceholderTitle {
+  color: rgba(255, 255, 255, 0.95);
+  font-size: 0.95rem;
+  line-height: 1.28;
+  font-weight: 800;
+  word-break: break-word;
+}
+
+.portfolioProjectPlaceholderYear {
+  color: rgba(253, 245, 230, 0.56);
+  font-size: 0.84rem;
 }
 
 /* Desktop compacto / 720p */
@@ -240,42 +635,58 @@
     padding-bottom: 84px;
   }
 
-  .cardsStack {
-    gap: 24px;
+  .portfolioLayout {
     margin-top: 28px;
+    gap: 18px;
   }
 
-  .cardRow {
-    min-height: clamp(18rem, 40vh, 24rem);
-    padding-left: 3.25rem;
+  .portfolioSidebarColumn {
+    top: 82px;
   }
 
-  .cardDate {
-    font-size: 0.92rem;
+  .portfolioTimelineRailInner {
+    padding: 14px 12px 14px 18px;
+    border-radius: 18px;
   }
 
-  .animatedCard {
-    min-height: 240px;
+  .portfolioTimelineRailLine {
+    left: 22px;
+    top: 18px;
+    bottom: 18px;
+  }
+
+  .portfolioProjectCard {
+    min-height: 258px;
     border-radius: 20px;
   }
 
-  .projectMeta {
+  .portfolioProjectCardOverlay {
     gap: 12px;
     padding: 18px;
   }
 
-  .projectLogo {
-    max-height: 88px;
+  .portfolioProjectCardLogo {
+    max-height: 72px;
+  }
+
+  .portfolioViewportPlaceholderEmpty,
+  .portfolioProjectPlaceholder,
+  .portfolioProjectPlaceholderOverlay {
+    min-height: 150px;
   }
 }
 
-@media (max-width: 1080px) {
-  .animatedCard {
-    grid-template-columns: minmax(0, 1fr) minmax(200px, 0.8fr);
+@media (max-width: 1180px) {
+  .portfolioLayout {
+    grid-template-columns: 240px minmax(0, 1fr);
   }
 
-  .projectLogo {
-    width: min(100%, 180px);
+  .portfolioViewportInner {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .portfolioViewportSidebar {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -285,57 +696,89 @@
     padding-bottom: 56px;
   }
 
-  .cardsStack {
-    gap: 28px;
-    padding-bottom: 0;
+  .portfolioLayout {
+    grid-template-columns: 1fr;
+    gap: 22px;
   }
 
-  .cardRow {
-    min-height: auto;
-    display: grid;
-    gap: 12px;
-    justify-items: stretch;
-    align-items: start;
-    padding-left: 0;
+  .portfolioSidebarColumn {
+    position: relative;
+    top: auto;
   }
 
-  .cardDate {
-    position: static;
-    transform: none;
-    color: rgba(253, 245, 230, 0.62);
+  .portfolioTimelineRailInner {
+    padding: 14px;
+    border-radius: 18px;
   }
 
-  .animatedCard {
-    width: 100%;
-    min-width: 0;
+  .portfolioTimelineRailLine {
+    display: none;
+  }
+
+  .portfolioTimelineList {
+    gap: 10px;
+  }
+
+  .portfolioTimelineButton {
+    grid-template-columns: 14px minmax(0, 1fr);
+    gap: 10px;
+    padding: 10px;
+  }
+
+  .portfolioViewportInner {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .portfolioViewportSidebar {
+    grid-template-columns: 1fr;
+  }
+
+  .portfolioProjectCard {
     min-height: auto;
     grid-template-columns: 1fr;
     border-radius: 18px;
   }
 
-  .animatedCard:hover {
-    transform: none;
-  }
-
-  .projectVisual {
+  .portfolioProjectCardMedia {
     min-height: 220px;
   }
 
-  .projectMeta {
-    grid-template-rows: auto;
-    justify-items: start;
+  .portfolioProjectCardOverlay {
     gap: 16px;
     padding: 16px;
   }
 
-  .projectLogoBox {
-    justify-content: flex-start;
-    align-items: center;
+  .portfolioProjectCardTopRow {
+    align-items: flex-start;
   }
 
-  .projectLogo {
+  .portfolioProjectCardBottomRow {
+    height: auto;
+  }
+
+  .portfolioProjectCardIdentity {
+    gap: 14px;
+  }
+
+  .portfolioProjectCardLogo {
     width: min(100%, 160px);
-    max-height: 76px;
+    max-height: 68px;
+  }
+
+  .portfolioViewportControls {
+    grid-template-columns: 44px minmax(0, 1fr) 44px;
+  }
+
+  .portfolioViewportControlButton {
+    width: 44px;
+    height: 44px;
+  }
+
+  .portfolioViewportPlaceholderEmpty,
+  .portfolioProjectPlaceholder,
+  .portfolioProjectPlaceholderOverlay {
+    min-height: 158px;
   }
 }
 
@@ -345,38 +788,42 @@
     padding-bottom: 44px;
   }
 
-  .header {
+  .portfolioHeaderInner {
     gap: 10px;
   }
 
-  .title {
+  .portfolioTitle {
     font-size: clamp(2rem, 10vw, 2.8rem);
   }
 
-  .description {
+  .portfolioDescription {
     font-size: 0.96rem;
     line-height: 1.55;
   }
 
-  .cardsStack {
+  .portfolioLayout {
     margin-top: 24px;
   }
 
-  .projectVisual {
+  .portfolioProjectCardMedia {
     min-height: 190px;
   }
 
-  .projectName {
+  .portfolioProjectCardTitle {
     font-size: 1.08rem;
   }
 
-  .projectYear {
+  .portfolioProjectCardMeta,
+  .portfolioProjectCardYear,
+  .portfolioProjectPlaceholderYear {
     font-size: 0.9rem;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .animatedCard {
+  .portfolioTimelineButton,
+  .portfolioTimelineMarker,
+  .portfolioViewportControlButton {
     transition: none;
   }
 }

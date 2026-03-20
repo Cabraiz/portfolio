@@ -123,14 +123,17 @@ export const navbarStyles = {
     paddingRight: 0,
     paddingTop: 0,
     paddingBottom: navbarLayoutTokens.navLink.paddingBottom,
+    transform: "translateY(10%)",
   } as CSSProperties,
 
   navLinkActive: {
     color: "rgba(255, 255, 255, 0.92)",
+    transform: "translateY(0)",
   } as CSSProperties,
 
   navLinkHover: {
     color: "rgba(255, 255, 255, 0.9)",
+    transform: "translateY(0)",
   } as CSSProperties,
 
   underline: {

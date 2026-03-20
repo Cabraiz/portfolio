@@ -1,4 +1,10 @@
-import React, { type CSSProperties, useCallback, useRef } from "react";
+import React, {
+  type CSSProperties,
+  type ReactNode,
+  useCallback,
+  useRef,
+  useState,
+} from "react";
 
 import MateusDesktop from "../MateusDesktop";
 import ContactDesktop from "../Contact/ContactDesktop";
@@ -12,9 +18,13 @@ import useLenisEngine from "../../../features/scroll/useLenisEngine";
 import useDocumentVisibilitySync from "../../../features/scroll/useDocumentVisibilitySync";
 import useSectionTriggers from "../../../features/scroll/useSectionTriggers";
 
+import LandingSectionShell from "./LandingSectionShell";
+import useSectionRenderPolicy from "./useSectionRenderPolicy";
+
 type LandingSection = Readonly<{
   id: string;
-  content: React.ReactNode;
+  content: ReactNode;
+  placeholderMinHeight?: CSSProperties["minHeight"];
 }>;
 
 const containerStyle: CSSProperties = {
@@ -71,31 +81,38 @@ const sections: ReadonlyArray<LandingSection> = [
   {
     id: "home",
     content: <MateusDesktop />,
+    placeholderMinHeight: "100dvh",
   },
   {
     id: "portfolio",
     content: <Portfolio />,
+    placeholderMinHeight: "100dvh",
   },
   {
     id: "roadMap",
     content: <RoadMap />,
+    placeholderMinHeight: "100dvh",
   },
   {
     id: "pricing",
     content: <Pricing />,
+    placeholderMinHeight: "100dvh",
   },
   {
     id: "live",
     content: <Live />,
+    placeholderMinHeight: "100dvh",
   },
   {
     id: "contact",
     content: <ContactDesktop />,
+    placeholderMinHeight: "100dvh",
   },
 ];
 
 const LandingPage: React.FC = () => {
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const [activeSectionId, setActiveSectionId] = useState("home");
 
   /**
    * O scroller real continua sendo o root do ReactLenis em AppDesktop.
@@ -112,10 +129,17 @@ const LandingPage: React.FC = () => {
 
   const handleSectionChange = useCallback(
     (sectionId: string) => {
+      setActiveSectionId(sectionId);
       writeSectionHash(sectionId, { historyMode: "replace" });
     },
     [writeSectionHash],
   );
+
+  const renderPolicy = useSectionRenderPolicy({
+    sections,
+    activeSectionId,
+    nearDistance: 1,
+  });
 
   useSectionTriggers({
     containerRef,
@@ -130,15 +154,16 @@ const LandingPage: React.FC = () => {
   return (
     <main ref={containerRef} style={containerStyle} aria-label="Landing page">
       {sections.map((section) => (
-        <section
+        <LandingSectionShell
           key={section.id}
           id={section.id}
-          data-section={section.id}
-          data-page-section="true"
-          style={sectionStyle}
+          state={renderPolicy.getSectionState(section.id)}
+          placeholderMinHeight={section.placeholderMinHeight ?? "100dvh"}
+          sectionStyle={sectionStyle}
+          contentStyle={contentContainerStyle}
         >
-          <div style={contentContainerStyle}>{section.content}</div>
-        </section>
+          {section.content}
+        </LandingSectionShell>
       ))}
     </main>
   );
