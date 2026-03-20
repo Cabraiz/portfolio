@@ -1,0 +1,22 @@
+:global([data-wa-signal-root]:not([data-suspend-motion="true"]):hover)
+  :global([data-wa-signal-button]),
+:global([data-wa-signal-root]:not([data-suspend-motion="true"]))
+  :global([data-wa-signal-hit-area]:focus-visible)
+  + :global([data-wa-signal-frame])
+  :global([data-wa-signal-button]) {
+  transform: translateY(-2px) scale(1.025);
+  box-shadow: var(--signal-glow-hover);
+  filter: saturate(1.04);
+}
+
+:global([data-wa-signal-root][data-suspend-motion="true"])
+  :global([data-wa-signal-button]) {
+  transform: none;
+  filter: none;
+  box-shadow: var(--signal-glow);
+}
+
+:global([data-wa-signal-root][data-wa-signal-disabled="true"])
+  :global([data-wa-signal-button]) {
+  box-shadow: 0 8px 14px rgba(11, 45, 24, 0.12);
+}

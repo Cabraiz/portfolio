@@ -1,11 +1,9 @@
 import { memo, type ReactNode } from "react";
+import styles from "./WhatsAppSignalDrawers.module.css";
 
 export type WhatsAppSignalDrawersProps = Readonly<{
   topLabel?: ReactNode;
   bottomLabel?: ReactNode;
-  drawerClassName: string;
-  topDrawerClassName: string;
-  bottomDrawerClassName: string;
   hideTopWhenEmpty?: boolean;
   hideBottomWhenEmpty?: boolean;
 }>;
@@ -31,9 +29,6 @@ function hasRenderableContent(content: ReactNode): boolean {
 function WhatsAppSignalDrawers({
   topLabel = "Contato direto",
   bottomLabel = "Resposta rápida",
-  drawerClassName,
-  topDrawerClassName,
-  bottomDrawerClassName,
   hideTopWhenEmpty = true,
   hideBottomWhenEmpty = true,
 }: WhatsAppSignalDrawersProps) {
@@ -49,7 +44,7 @@ function WhatsAppSignalDrawers({
     <>
       {shouldRenderTop ? (
         <span
-          className={joinClasses(drawerClassName, topDrawerClassName)}
+          className={joinClasses(styles.drawer, styles.drawerTop)}
           aria-hidden="true"
         >
           {topLabel}
@@ -58,7 +53,7 @@ function WhatsAppSignalDrawers({
 
       {shouldRenderBottom ? (
         <span
-          className={joinClasses(drawerClassName, bottomDrawerClassName)}
+          className={joinClasses(styles.drawer, styles.drawerBottom)}
           aria-hidden="true"
         >
           {bottomLabel}

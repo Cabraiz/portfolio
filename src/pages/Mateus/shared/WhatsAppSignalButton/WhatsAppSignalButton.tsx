@@ -9,7 +9,13 @@ import {
   type MouseEventHandler,
   type ReactNode,
 } from "react";
-import styles from "./WhatsAppSignalButton.module.css";
+
+import rootStyles from "./styles/WhatsAppSignalRoot.module.css";
+import baseStyles from "./styles/WhatsAppSignalButtonBase.module.css";
+import "./styles/WhatsAppSignalAccessibility.module.css";
+import "./styles/WhatsAppSignalStates.module.css";
+import "./styles/WhatsAppSignalResponsive.module.css";
+
 import WhatsAppSignalCorners from "./components/WhatsAppSignalCorners";
 import WhatsAppSignalDrawers from "./components/WhatsAppSignalDrawers";
 import {
@@ -49,7 +55,7 @@ function DefaultWhatsAppIcon() {
       viewBox="0 0 32 32"
       aria-hidden="true"
       focusable="false"
-      className={styles.iconSvg}
+      className={baseStyles.iconSvg}
     >
       <path
         fill="currentColor"
@@ -88,6 +94,7 @@ function SignalAction({
         className={className}
         aria-label={ariaLabel}
         disabled
+        data-wa-signal-hit-area="true"
       />
     );
   }
@@ -101,6 +108,7 @@ function SignalAction({
       aria-label={ariaLabel}
       className={className}
       onClick={onClick}
+      data-wa-signal-hit-area="true"
     />
   );
 }
@@ -203,13 +211,25 @@ function WhatsAppSignalButton({
   );
 
   const buttonContent = (
-    <span className={styles.buttonSurface}>
-      <span className={styles.leadingIcon} aria-hidden="true">
+    <span
+      className={baseStyles.buttonSurface}
+      data-wa-signal-button-surface="true"
+    >
+      <span
+        className={baseStyles.leadingIcon}
+        aria-hidden="true"
+        data-wa-signal-leading-icon="true"
+      >
         {icon ?? <DefaultWhatsAppIcon />}
       </span>
 
-      <span className={styles.labelWrap}>
-        <span className={styles.label}>{label}</span>
+      <span
+        className={baseStyles.labelWrap}
+        data-wa-signal-label-wrap="true"
+      >
+        <span className={baseStyles.label} data-wa-signal-label="true">
+          {label}
+        </span>
       </span>
     </span>
   );
@@ -217,16 +237,18 @@ function WhatsAppSignalButton({
   return (
     <div
       className={joinClasses(
-        styles.root,
-        fullWidth && styles.fullWidth,
-        compact && styles.compact,
-        hero && styles.hero,
-        disabled && styles.disabled,
-        className
+        rootStyles.root,
+        fullWidth && rootStyles.fullWidth,
+        compact && rootStyles.compact,
+        hero && rootStyles.hero,
+        hero && compact && rootStyles.heroCompact,
+        disabled && rootStyles.disabled,
+        className,
       )}
-      data-disabled={disabled ? "true" : "false"}
-      data-density={density}
-      data-hero={hero ? "true" : "false"}
+      data-wa-signal-root="true"
+      data-wa-signal-density={density}
+      data-wa-signal-disabled={disabled ? "true" : "false"}
+      data-wa-signal-hero={hero ? "true" : "false"}
       data-suspend-motion={suspendMotion ? "true" : "false"}
       style={getWhatsAppSignalCssVars(density)}
     >
@@ -236,30 +258,29 @@ function WhatsAppSignalButton({
         target={target}
         rel={resolvedRel}
         ariaLabel={resolvedAriaLabel}
-        className={styles.hitArea}
+        className={baseStyles.hitArea}
         onClick={handleActionClick}
         actionRef={setActionRef}
       />
 
-      <div className={styles.frame} aria-hidden="true">
+      <div
+        className={rootStyles.frame}
+        aria-hidden="true"
+        data-wa-signal-frame="true"
+      >
         <WhatsAppSignalDrawers
           topLabel={topLabel}
           bottomLabel={bottomLabel}
-          drawerClassName={styles.drawer}
-          topDrawerClassName={styles.drawerTop}
-          bottomDrawerClassName={styles.drawerBottom}
         />
 
-        <div className={styles.button}>{buttonContent}</div>
+        <div
+          className={baseStyles.button}
+          data-wa-signal-button="true"
+        >
+          {buttonContent}
+        </div>
 
-        <WhatsAppSignalCorners
-          cornerClassName={styles.corner}
-          cornerPathClassName={styles.cornerPath}
-          topLeftClassName={styles.cornerTopLeft}
-          topRightClassName={styles.cornerTopRight}
-          bottomRightClassName={styles.cornerBottomRight}
-          bottomLeftClassName={styles.cornerBottomLeft}
-        />
+        <WhatsAppSignalCorners />
       </div>
     </div>
   );

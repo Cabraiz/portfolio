@@ -60,8 +60,8 @@ export const navbarLayoutTokens = {
     navContainerPaddingBottom: "8px",
 
     navGap: {
-      default: "clamp(0.55rem, 0.35rem + 0.4vw, 0.9rem)",
-      compact: "clamp(0.55rem, 0.35rem + 0.4vw, 0.9rem)",
+      default: "clamp(0.8rem, 0.45rem + 0.85vw, 1.4rem)",
+      compact: "clamp(0.8rem, 0.45rem + 0.85vw, 1.4rem)",
     },
 
     liveAnimationLeft: {

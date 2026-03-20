@@ -1,0 +1,103 @@
+.root {
+  --signal-width: clamp(220px, 24vw, 320px);
+  --signal-height: 64px;
+  --signal-radius: 18px;
+  --signal-padding-x: 22px;
+
+  --signal-drawer-width: clamp(132px, 14vw, 172px);
+  --signal-drawer-height: 34px;
+  --signal-drawer-radius: 12px;
+
+  --signal-corner-size: 42px;
+  --signal-corner-offset: 16px;
+  --signal-corner-offset-hover: 28px;
+
+  --signal-padding-top: calc(var(--signal-drawer-height) + 10px);
+  --signal-padding-bottom: calc(var(--signal-drawer-height) + 10px);
+  --signal-padding-inline: calc(var(--signal-corner-offset-hover) + 10px);
+
+  --signal-z-root: 0;
+  --signal-z-drawers: 2;
+  --signal-z-button: 3;
+  --signal-z-corners: 1;
+
+  --signal-button-background:
+    linear-gradient(180deg, rgba(78, 239, 136, 0.98), rgba(37, 211, 102, 0.98));
+
+  --signal-border: transparent;
+  --signal-label-color: #ffffff;
+  --signal-icon-color: #000000;
+
+  --signal-glow: none;
+  --signal-glow-hover:
+    0 12px 24px rgba(11, 45, 24, 0.18),
+    0 6px 14px rgba(11, 45, 24, 0.12);
+
+  --signal-drawer-background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(240, 240, 240, 0.98));
+  --signal-drawer-background-bottom:
+    linear-gradient(180deg, rgba(248, 248, 248, 0.98), rgba(232, 232, 232, 0.98));
+  --signal-drawer-text-color: rgba(18, 18, 18, 0.92);
+  --signal-drawer-shadow:
+    0 10px 20px rgba(0, 0, 0, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22);
+
+  --signal-corner-stroke: rgba(255, 255, 255, 0.28);
+  --signal-corner-shadow: rgba(0, 0, 0, 0.16);
+  --signal-focus-ring: rgba(114, 255, 163, 0.42);
+
+  position: relative;
+  z-index: var(--signal-z-root);
+  display: inline-grid;
+  width: max-content;
+  min-width: 0;
+  padding: var(--signal-padding-top) var(--signal-padding-inline)
+    var(--signal-padding-bottom);
+  isolation: isolate;
+  overflow: visible;
+}
+
+.fullWidth {
+  display: grid;
+  width: 100%;
+}
+
+.compact {
+  --signal-height: 58px;
+  --signal-radius: 16px;
+  --signal-padding-x: 18px;
+  --signal-drawer-width: clamp(118px, 13vw, 156px);
+  --signal-drawer-height: 30px;
+  --signal-corner-size: 38px;
+  --signal-corner-offset: 14px;
+  --signal-corner-offset-hover: 24px;
+  --signal-padding-top: calc(var(--signal-drawer-height) + 8px);
+  --signal-padding-bottom: calc(var(--signal-drawer-height) + 8px);
+}
+
+.hero {
+  /* Contexto de bleed/stacking pertence ao wrapper externo. */
+}
+
+.heroCompact {
+  /* Mantido apenas por compatibilidade de API visual. */
+}
+
+.disabled {
+  opacity: 0.72;
+}
+
+.frame {
+  position: relative;
+  width: var(--signal-width);
+  min-width: 0;
+  min-height: var(--signal-height);
+  display: grid;
+  align-items: center;
+  justify-items: stretch;
+  overflow: visible;
+}
+
+.fullWidth .frame {
+  width: 100%;
+}

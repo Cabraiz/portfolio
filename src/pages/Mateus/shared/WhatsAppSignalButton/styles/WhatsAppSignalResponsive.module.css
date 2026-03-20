@@ -1,0 +1,151 @@
+@media (min-width: 1024px) and (min-height: 900px) {
+  :global([data-wa-signal-root]) {
+    --signal-width: clamp(264px, 28.8vw, 384px);
+    --signal-height: 77px;
+    --signal-radius: 22px;
+    --signal-padding-x: 26px;
+
+    --signal-drawer-width: clamp(158px, 16.8vw, 206px);
+    --signal-drawer-height: 41px;
+    --signal-drawer-radius: 14px;
+
+    --signal-corner-size: 50px;
+    --signal-corner-offset: 19px;
+    --signal-corner-offset-hover: 34px;
+
+    --signal-padding-top: calc(var(--signal-drawer-height) + 12px);
+    --signal-padding-bottom: calc(var(--signal-drawer-height) + 12px);
+    --signal-padding-inline: calc(var(--signal-corner-offset-hover) + 12px);
+  }
+
+  :global([data-wa-signal-root][data-wa-signal-density="compact"]) {
+    --signal-height: 70px;
+    --signal-radius: 19px;
+    --signal-padding-x: 22px;
+
+    --signal-drawer-width: clamp(142px, 15.6vw, 188px);
+    --signal-drawer-height: 36px;
+    --signal-drawer-radius: 13px;
+
+    --signal-corner-size: 46px;
+    --signal-corner-offset: 17px;
+    --signal-corner-offset-hover: 29px;
+
+    --signal-padding-top: calc(var(--signal-drawer-height) + 10px);
+    --signal-padding-bottom: calc(var(--signal-drawer-height) + 10px);
+    --signal-padding-inline: calc(var(--signal-corner-offset-hover) + 10px);
+  }
+
+  :global([data-wa-signal-leading-icon]) {
+    width: 28px;
+    height: 28px;
+  }
+
+  :global([data-wa-signal-button-surface]) {
+    gap: 14px;
+  }
+
+  :global([data-wa-signal-label]) {
+    font-size: 1.15rem;
+  }
+
+  :global([data-wa-signal-root][data-wa-signal-density="compact"])
+    :global([data-wa-signal-label]) {
+    font-size: 1.06rem;
+    letter-spacing: 0.18em;
+  }
+}
+
+@media (max-width: 820px) {
+  :global([data-wa-signal-root]) {
+    --signal-width: min(100%, 300px);
+  }
+
+  :global([data-wa-signal-root][data-wa-signal-density="compact"]) {
+    --signal-width: min(100%, 276px);
+  }
+
+  :global([data-wa-signal-label]) {
+    font-size: 1rem;
+  }
+
+  :global([data-wa-signal-root][data-wa-signal-density="compact"])
+    :global([data-wa-signal-label]) {
+    font-size: 1rem;
+    letter-spacing: 0.2em;
+  }
+}
+
+@media (max-width: 560px) {
+  :global([data-wa-signal-root]) {
+    --signal-height: 60px;
+    --signal-padding-x: 18px;
+    --signal-corner-size: 36px;
+    --signal-corner-offset: 12px;
+    --signal-corner-offset-hover: 18px;
+    --signal-padding-top: calc(var(--signal-drawer-height) + 8px);
+    --signal-padding-bottom: calc(var(--signal-drawer-height) + 8px);
+    --signal-padding-inline: calc(var(--signal-corner-offset-hover) + 6px);
+  }
+
+  :global([data-wa-signal-root][data-wa-signal-density="compact"]) {
+    --signal-height: 54px;
+    --signal-padding-x: 16px;
+    --signal-drawer-height: 28px;
+  }
+
+  :global([data-wa-signal-label]) {
+    font-size: 1rem;
+  }
+
+  :global([data-wa-signal-root][data-wa-signal-density="compact"])
+    :global([data-wa-signal-label]) {
+    font-size: 1rem;
+    letter-spacing: 0.2em;
+  }
+}
+
+@media (max-height: 720px) and (min-width: 961px) {
+  :global([data-wa-signal-root]) {
+    --signal-height: 58px;
+    --signal-padding-x: 18px;
+    --signal-drawer-height: 30px;
+    --signal-corner-size: 38px;
+  }
+
+  :global([data-wa-signal-root][data-wa-signal-density="compact"]) {
+    --signal-height: 56px;
+    --signal-padding-x: 16px;
+    --signal-drawer-height: 28px;
+    --signal-corner-size: 36px;
+  }
+
+  :global([data-wa-signal-label]) {
+    font-size: 1rem;
+  }
+
+  :global([data-wa-signal-root][data-wa-signal-density="compact"])
+    :global([data-wa-signal-label]) {
+    font-size: 1rem;
+    letter-spacing: 0.2em;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :global([data-wa-signal-button]) {
+    transition: none;
+  }
+
+  :global([data-wa-signal-root]:not([data-suspend-motion="true"]):hover)
+    :global([data-wa-signal-button]),
+  :global([data-wa-signal-root]:not([data-suspend-motion="true"]))
+    :global([data-wa-signal-hit-area]:focus-visible)
+    + :global([data-wa-signal-frame])
+    :global([data-wa-signal-button]),
+  :global([data-wa-signal-hit-area]:active)
+    + :global([data-wa-signal-frame])
+    :global([data-wa-signal-button]) {
+    transform: none;
+    filter: none;
+  }
+}

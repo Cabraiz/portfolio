@@ -1,0 +1,68 @@
+.drawer {
+  position: absolute;
+  left: 50%;
+  z-index: var(--signal-z-drawers);
+  width: var(--signal-drawer-width);
+  min-width: 0;
+  height: var(--signal-drawer-height);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding-inline: 14px;
+  border-radius: var(--signal-drawer-radius);
+  box-shadow: var(--signal-drawer-shadow);
+  color: var(--signal-drawer-text-color);
+  font-family: inherit;
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  text-transform: uppercase;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  filter: blur(2px);
+  transition:
+    transform 200ms ease,
+    opacity 180ms ease,
+    filter 180ms ease;
+}
+
+.drawerTop {
+  top: 0;
+  background: var(--signal-drawer-background);
+  transform: translate(-50%, 14px) rotate(-1deg) scale(0.94);
+}
+
+.drawerBottom {
+  bottom: 0;
+  background: var(--signal-drawer-background-bottom);
+  transform: translate(-50%, -14px) rotate(1deg) scale(0.94);
+}
+
+:global([data-suspend-motion="false"]:hover) .drawerTop {
+  opacity: 1;
+  filter: blur(0);
+  transform: translate(-50%, calc(-1 * (var(--signal-drawer-height) * 0.72)))
+    rotate(-4deg) scale(1);
+}
+
+:global([data-suspend-motion="false"]:hover) .drawerBottom {
+  opacity: 1;
+  filter: blur(0);
+  transform: translate(-50%, calc(var(--signal-drawer-height) * 0.72))
+    rotate(4deg) scale(1);
+}
+
+:global([data-suspend-motion="true"]) .drawer {
+  opacity: 0;
+  filter: blur(2px);
+}
+
+:global([data-suspend-motion="true"]) .drawerTop {
+  transform: translate(-50%, 14px) rotate(-1deg) scale(0.94);
+}
+
+:global([data-suspend-motion="true"]) .drawerBottom {
+  transform: translate(-50%, -14px) rotate(1deg) scale(0.94);
+}

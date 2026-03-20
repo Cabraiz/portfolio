@@ -1,0 +1,39 @@
+:global([data-wa-signal-hit-area]:link),
+:global([data-wa-signal-hit-area]:visited),
+:global([data-wa-signal-hit-area]:hover),
+:global([data-wa-signal-hit-area]:active),
+:global([data-wa-signal-hit-area]:focus),
+:global([data-wa-signal-hit-area]:focus-visible) {
+  color: inherit;
+  text-decoration: none;
+}
+
+:global([data-wa-signal-hit-area]:focus-visible) {
+  outline: none;
+}
+
+:global([data-wa-signal-hit-area]:focus-visible)
+  + :global([data-wa-signal-frame])
+  :global([data-wa-signal-button]) {
+  outline: 3px solid var(--signal-focus-ring);
+  outline-offset: 4px;
+}
+
+:global([data-wa-signal-hit-area]:active)
+  + :global([data-wa-signal-frame])
+  :global([data-wa-signal-button]) {
+  transform: translateY(1px) scale(0.985);
+  box-shadow:
+    0 8px 14px rgba(11, 45, 24, 0.18),
+    0 3px 8px rgba(11, 45, 24, 0.12);
+}
+
+:global([data-wa-signal-hit-area]:active)
+  + :global([data-wa-signal-frame])
+  :global([data-wa-signal-label-wrap]) {
+  transform: translateY(0);
+}
+
+:global([data-wa-signal-hit-area]:disabled) {
+  cursor: not-allowed;
+}

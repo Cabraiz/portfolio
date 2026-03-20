@@ -62,6 +62,13 @@ type LenisScrollEvent = Readonly<{
 const DESKTOP_COMPACT_MIN_WIDTH = 961;
 const DESKTOP_COMPACT_MAX_HEIGHT = 1080;
 
+/**
+ * Toggle de teste:
+ * false = navbar sempre visível, sem esconder no scroll
+ * true = comportamento atual de esconder/exibir no scroll
+ */
+const ENABLE_NAVBAR_HIDE_ON_SCROLL = false;
+
 const MOBILE_NAV_HEIGHT = navbarLayoutTokens.heights.mobile;
 const DESKTOP_NAV_HEIGHT = navbarLayoutTokens.heights.desktop;
 
@@ -495,6 +502,12 @@ const AppNavbar: React.FC<AppNavbarProps> = ({
   }, []);
 
   useEffect(() => {
+    if (!ENABLE_NAVBAR_HIDE_ON_SCROLL) {
+      setShowNavbar(true);
+      lastScrollY.current = 0;
+      return;
+    }
+
     if (isMobileView) {
       setShowNavbar(true);
       return;
@@ -784,10 +797,15 @@ const AppNavbar: React.FC<AppNavbarProps> = ({
           padding: isMobileView
             ? `0 ${navbarLayoutTokens.container.mobilePaddingX}`
             : `0 ${navbarLayoutTokens.container.desktopPaddingX}`,
-          transform: showNavbar ? "translateY(0)" : "translateY(-120%)",
-          opacity: showNavbar ? 1 : 0,
-          transition:
-            "transform 0.35s ease, opacity 0.35s ease, height 0.25s ease",
+          transform: ENABLE_NAVBAR_HIDE_ON_SCROLL
+            ? showNavbar
+              ? "translateY(0)"
+              : "translateY(-120%)"
+            : "translateY(0)",
+          opacity: ENABLE_NAVBAR_HIDE_ON_SCROLL ? (showNavbar ? 1 : 0) : 1,
+          transition: ENABLE_NAVBAR_HIDE_ON_SCROLL
+            ? "transform 0.35s ease, opacity 0.35s ease, height 0.25s ease"
+            : "height 0.25s ease",
           backdropFilter: "blur(14px)",
         }}
       >
