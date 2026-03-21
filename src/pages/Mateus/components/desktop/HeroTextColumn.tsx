@@ -47,10 +47,10 @@ export default function HeroTextColumn({
 
   const seniorTitleStyle = useMemo<CSSProperties>(() => {
     return {
-      fontSize: isCompactDesktop ? "3.25rem" : "4rem",
+      fontSize: isCompactDesktop ? "3.1rem" : "4rem",
       fontWeight: 700,
       color: "#f1c40f",
-      marginBottom: isCompactDesktop ? "1.9rem" : "2.8rem",
+      marginBottom: isCompactDesktop ? "2rem" : "3.2rem",
       lineHeight: 1,
     };
   }, [isCompactDesktop]);
@@ -58,7 +58,7 @@ export default function HeroTextColumn({
   const roleContainerStyle = useMemo<CSSProperties>(() => {
     return {
       backgroundImage: "linear-gradient(90deg, #f1c40f 100%, #f1c40f 100%)",
-      marginBottom: isCompactDesktop ? "max(26px, 4.4vh)" : "max(34px, 6.2vh)",
+      marginBottom: isCompactDesktop ? "28px" : "52px",
       display: "flex",
       alignItems: "center",
       justifyContent: "flex-start",
@@ -71,12 +71,12 @@ export default function HeroTextColumn({
       display: "flex",
       justifyContent: "center",
       alignItems: "center",
-      gap: isCompactDesktop ? "1.15rem" : "2rem",
-      padding: isCompactDesktop ? "0.85rem 1.25rem" : "1.2rem 2rem",
+      gap: isCompactDesktop ? "1rem" : "2rem",
+      padding: isCompactDesktop ? "0.75rem 1rem" : "1.2rem 2rem",
       backgroundColor: "rgba(255, 255, 255, 0.035)",
       border: "1px solid rgba(255, 255, 255, 0.06)",
       borderRadius: isCompactDesktop ? "16px" : "20px",
-      marginBottom: "-1vh",
+      marginBottom: isCompactDesktop ? "6px" : "-1vh",
       boxSizing: "border-box",
     };
   }, [isCompactDesktop]);
@@ -84,7 +84,7 @@ export default function HeroTextColumn({
   const heroTextColumnStyle = useMemo<CSSProperties>(() => {
     return {
       ...heroTextColumnBaseStyle,
-      paddingTop: isCompactDesktop ? "8vh" : "11vh",
+      paddingTop: isCompactDesktop ? "clamp(100px, 2.6vh, 24px)" : "11vh",
     };
   }, [isCompactDesktop]);
 
@@ -177,7 +177,7 @@ export default function HeroTextColumn({
                 src={seal.src}
                 alt={seal.alt}
                 style={{
-                  height: isCompactDesktop ? "34px" : "40px",
+                  height: isCompactDesktop ? "32px" : "40px",
                   filter: "grayscale(100%)",
                   opacity: 0.8,
                   ...seal.style,

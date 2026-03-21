@@ -131,6 +131,8 @@ export function useMateusHeroLayout(): UseMateusHeroLayoutResult {
       paddingBottom: mateusHeroTokens.section.paddingBottom[mode],
       display: "flex",
       alignItems: "stretch",
+      justifyContent: mode === "compact" ? "center" : "flex-start",
+      height: "100%",
       boxSizing: "border-box",
     };
   }, [mode]);
@@ -144,6 +146,7 @@ export function useMateusHeroLayout(): UseMateusHeroLayoutResult {
       alignItems: "center",
       paddingLeft: mateusHeroTokens.profileColumn.paddingLeft[mode],
       paddingRight: mateusHeroTokens.profileColumn.paddingRight[mode],
+      paddingTop: "0px",
       boxSizing: "border-box",
     };
   }, [mode]);

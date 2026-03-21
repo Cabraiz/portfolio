@@ -30,7 +30,7 @@ const baseSectionStyle: ExtendedCSSProperties = {
   width: "100%",
   boxSizing: "border-box",
   overflow: "clip",
-  contain: "layout paint style",
+  contain: "layout paint",
   contentVisibility: "auto",
   containIntrinsicSize: "100vh",
 };
@@ -42,22 +42,23 @@ function getBaseContentStyle(disableScrollFades: boolean): CSSProperties {
     boxSizing: "border-box",
     transition: disableScrollFades
       ? "none"
-      : "opacity 240ms ease, transform 240ms ease, visibility 240ms ease",
-    willChange: disableScrollFades ? "auto" : "transform, opacity",
+      : "opacity 140ms ease, transform 140ms ease, visibility 140ms ease",
+    willChange: disableScrollFades ? "auto" : "opacity, transform",
     transformOrigin: "center top",
+    backfaceVisibility: "hidden",
   };
 }
 
 function getContentVisualStyle(
   state: SectionRenderState,
-  disableScrollFades: boolean
+  disableScrollFades: boolean,
 ): CSSProperties {
   if (disableScrollFades) {
     switch (state) {
       case "active":
         return {
           opacity: 1,
-          transform: "translate3d(0, 0, 0) scale(1)",
+          transform: "translate3d(0, 0, 0)",
           pointerEvents: "auto",
           visibility: "visible",
         };
@@ -65,7 +66,7 @@ function getContentVisualStyle(
       case "near":
         return {
           opacity: 1,
-          transform: "translate3d(0, 0, 0) scale(1)",
+          transform: "translate3d(0, 0, 0)",
           pointerEvents: "none",
           visibility: "visible",
         };
@@ -74,7 +75,7 @@ function getContentVisualStyle(
       default:
         return {
           opacity: 1,
-          transform: "translate3d(0, 0, 0) scale(1)",
+          transform: "translate3d(0, 0, 0)",
           pointerEvents: "none",
           visibility: "hidden",
         };
@@ -85,15 +86,15 @@ function getContentVisualStyle(
     case "active":
       return {
         opacity: 1,
-        transform: "translate3d(0, 0, 0) scale(1)",
+        transform: "translate3d(0, 0, 0)",
         pointerEvents: "auto",
         visibility: "visible",
       };
 
     case "near":
       return {
-        opacity: 0.58,
-        transform: "translate3d(0, 8px, 0) scale(0.988)",
+        opacity: 0.96,
+        transform: "translate3d(0, 2px, 0)",
         pointerEvents: "none",
         visibility: "visible",
       };
@@ -102,7 +103,7 @@ function getContentVisualStyle(
     default:
       return {
         opacity: 0,
-        transform: "translate3d(0, 12px, 0) scale(0.98)",
+        transform: "translate3d(0, 6px, 0)",
         pointerEvents: "none",
         visibility: "hidden",
       };
@@ -110,7 +111,7 @@ function getContentVisualStyle(
 }
 
 function getPlaceholderStyle(
-  placeholderMinHeight: CSSProperties["minHeight"]
+  placeholderMinHeight: CSSProperties["minHeight"],
 ): CSSProperties {
   return {
     minHeight: placeholderMinHeight,

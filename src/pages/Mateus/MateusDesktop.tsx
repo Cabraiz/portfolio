@@ -48,16 +48,46 @@ function MateusDesktop() {
     return getWhatsAppGreeting();
   }, []);
 
+  const rootStyle = useMemo<CSSProperties>(() => {
+    return {
+      position: "relative",
+      width: "100%",
+      minHeight: "100%",
+      display: "flex",
+      flexDirection: "column",
+      overflow: "visible",
+      boxSizing: "border-box",
+    };
+  }, []);
+
+  const containerStyle = useMemo<CSSProperties>(() => {
+    return {
+      ...sectionStyle,
+      width: "100%",
+      display: "flex",
+      flexDirection: "column",
+      flex: 1,
+      alignItems: "stretch",
+      justifyContent:
+        sectionStyle.justifyContent ?? (isCompactDesktop ? "center" : "flex-start"),
+      boxSizing: "border-box",
+    };
+  }, [isCompactDesktop, sectionStyle]);
+
   const rowStyle = useMemo<CSSProperties>(() => {
     return {
       width: "100%",
-      flex: 1,
-      minHeight: 0,
+      flex: "1 1 auto",
+      minHeight: "100%",
+      height: "100%",
       margin: 0,
       paddingTop: 0,
       paddingBottom: 0,
       display: "flex",
+      flexWrap: "nowrap",
       alignItems: "center",
+      alignContent: "stretch",
+      boxSizing: "border-box",
     };
   }, []);
 
@@ -123,14 +153,8 @@ function MateusDesktop() {
   }, [isCompactDesktop, lenis]);
 
   return (
-    <div
-      ref={containerRef}
-      style={{
-        position: "relative",
-        overflow: "visible",
-      }}
-    >
-      <Container fluid style={sectionStyle}>
+    <div ref={containerRef} style={rootStyle}>
+      <Container fluid style={containerStyle}>
         <Row className="custom-section-row" style={rowStyle}>
           <HeroTextColumn
             isCompactDesktop={isCompactDesktop}

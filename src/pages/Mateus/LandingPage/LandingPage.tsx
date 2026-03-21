@@ -57,8 +57,8 @@ const sectionStyle: CSSProperties = {
   margin: 0,
   padding: 0,
   display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
+  alignItems: "stretch",
+  justifyContent: "flex-start",
   position: "relative",
   overflowX: "clip",
   overflowY: "visible",
@@ -70,6 +70,7 @@ const sectionStyle: CSSProperties = {
 const contentContainerStyle: CSSProperties = {
   width: "100%",
   minWidth: 0,
+  minHeight: "100%",
   margin: 0,
   padding: 0,
   boxSizing: "border-box",
@@ -114,10 +115,6 @@ const LandingPage: React.FC = () => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [activeSectionId, setActiveSectionId] = useState("home");
 
-  /**
-   * O scroller real continua sendo o root do ReactLenis em AppDesktop.
-   * Esta página é apenas o conteúdo vertical observado por GSAP/ScrollTrigger.
-   */
   useLenisEngine();
   useDocumentVisibilitySync();
 
@@ -138,6 +135,10 @@ const LandingPage: React.FC = () => {
   const renderPolicy = useSectionRenderPolicy({
     sections,
     activeSectionId,
+    /**
+     * 1 evita que a seção anterior suma cedo demais e deixe
+     * um placeholder alto visível quando a próxima assume foco.
+     */
     nearDistance: 1,
   });
 

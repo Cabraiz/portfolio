@@ -13,13 +13,24 @@ export const mateusHeroTokens = {
       default: "calc(100vh - 78px)",
       tall: "calc(100vh - 78px)",
     },
+
+    /**
+     * Compact/720p:
+     * mantemos um respiro superior um pouco maior para o hero
+     * não ficar colado demais no topo após a remoção da centralização.
+     */
     paddingTop: {
-      compact: "16px",
+      compact: "28px",
       default: "20px",
       tall: "24px",
     },
+
+    /**
+     * Compact/720p:
+     * leve compensação inferior para manter balanço visual.
+     */
     paddingBottom: {
-      compact: "16px",
+      compact: "20px",
       default: "20px",
       tall: "24px",
     },
