@@ -58,7 +58,7 @@ export default function HeroTextColumn({
   const roleContainerStyle = useMemo<CSSProperties>(() => {
     return {
       backgroundImage: "linear-gradient(90deg, #f1c40f 100%, #f1c40f 100%)",
-      marginBottom: isCompactDesktop ? "28px" : "52px",
+      marginBottom: isCompactDesktop ? "28px" : "40px",
       display: "flex",
       alignItems: "center",
       justifyContent: "flex-start",

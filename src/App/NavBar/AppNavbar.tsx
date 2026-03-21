@@ -398,7 +398,7 @@ const DesktopNavItemButton: React.FC<DesktopNavItemButtonProps> = ({
               position: "absolute",
               left: getLiveAnimationLeft(isCompactDesktop),
               top: "50%",
-              transform: "translateY(calc(-50% - 15px)) scale(0.42)",
+              transform: "translateY(calc(-50% - 16px)) scale(0.42)",
               pointerEvents: "none",
             }}
           >

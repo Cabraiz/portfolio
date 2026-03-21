@@ -65,8 +65,8 @@ export const navbarLayoutTokens = {
     },
 
     liveAnimationLeft: {
-      default: "-1rem",
-      compact: "-1rem",
+      default: "-1.6rem",
+      compact: "-1.6rem",
     },
   },
 
