@@ -1,4 +1,10 @@
-import { useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import {
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+} from "react";
 import { Container, Row } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import i18n from "@/i18n/i18n";
@@ -14,6 +20,7 @@ import HeroTextColumn from "./components/desktop/HeroTextColumn";
 import HeroProfileColumn from "./components/desktop/HeroProfileColumn";
 import { useMateusHeroLayout } from "./hooks/useMateusHeroLayout";
 import { getWhatsAppGreeting } from "./mateusDesktop.utils";
+import { shouldDisableScrollFades } from "../../features/scroll/scrollMotionFlags";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -41,49 +48,78 @@ function MateusDesktop() {
     return getWhatsAppGreeting();
   }, []);
 
-const rowStyle = useMemo<CSSProperties>(() => {
-  return {
-    width: "100%",
-    flex: 1,
-    minHeight: 0,
-    margin: 0,
-    paddingTop: 0,
-    paddingBottom: 0,
-    display: "flex",
-    alignItems: "center",
-  };
-}, []);
+  const rowStyle = useMemo<CSSProperties>(() => {
+    return {
+      width: "100%",
+      flex: 1,
+      minHeight: 0,
+      margin: 0,
+      paddingTop: 0,
+      paddingBottom: 0,
+      display: "flex",
+      alignItems: "center",
+    };
+  }, []);
 
   useLayoutEffect(() => {
-    if (!containerRef.current || !lenis?.rootElement) {
+    const container = containerRef.current;
+
+    if (!container || !lenis?.rootElement) {
+      return undefined;
+    }
+
+    if (shouldDisableScrollFades()) {
+      gsap.set(container, {
+        opacity: 1,
+        scale: 1,
+        y: 0,
+        clearProps: "transform,opacity,willChange",
+      });
+
+      container.style.willChange = "auto";
       return undefined;
     }
 
     const ctx = gsap.context(() => {
-      gsap.fromTo(
-        containerRef.current,
-        {
-          opacity: 0,
-          scale: 0.985,
-          y: 24,
-        },
-        {
-          opacity: 1,
-          scale: 1,
-          y: 0,
-          duration: isCompactDesktop ? 0.85 : 1,
-          ease: "power3.out",
-          scrollTrigger: {
-            trigger: containerRef.current,
-            scroller: lenis.rootElement,
-            start: "top 82%",
-            toggleActions: "play none none reverse",
-          },
-        },
-      );
-    });
+      gsap.set(container, {
+        opacity: 0,
+        scale: 0.985,
+        y: 24,
+        willChange: "transform, opacity",
+        force3D: true,
+      });
 
-    return () => ctx.revert();
+      gsap.to(container, {
+        opacity: 1,
+        scale: 1,
+        y: 0,
+        duration: isCompactDesktop ? 0.85 : 1,
+        ease: "power3.out",
+        overwrite: "auto",
+        onStart: () => {
+          container.style.willChange = "transform, opacity";
+        },
+        onComplete: () => {
+          container.style.willChange = "auto";
+        },
+        onReverseComplete: () => {
+          container.style.willChange = "auto";
+        },
+        scrollTrigger: {
+          trigger: container,
+          scroller: lenis.rootElement,
+          start: "top 82%",
+          toggleActions: "play none none reverse",
+          fastScrollEnd: true,
+          invalidateOnRefresh: true,
+        },
+      });
+    }, container);
+
+    return () => {
+      ctx.revert();
+      container.style.willChange = "auto";
+    };
   }, [isCompactDesktop, lenis]);
 
   return (

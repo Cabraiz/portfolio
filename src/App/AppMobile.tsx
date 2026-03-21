@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import { ReactLenis } from "lenis/react";
@@ -15,67 +15,64 @@ import LandingPageMobile from "../pages/Mateus/LandingPage/LandingPageMobile";
 import "react-toastify/dist/ReactToastify.css";
 
 import TitleWebsite from "../pages/PrincipalPage/TitleWebsite/title_website";
+import { getLenisScrollSettings } from "../features/scroll/getLenisScrollSettings";
+import type {
+  LenisScrollSettings,
+  ScrollHardwareInfo,
+  ScrollViewport,
+} from "../features/scroll/lenisScrollProfiles";
 
 const APP_LENIS_SCROLL_CLASS = "desktop-lenis-scroll";
 
-type SmoothSettings = Readonly<{
-  lerp: number;
-  wheelMultiplier: number;
-  touchMultiplier: number;
-  smoothWheel: boolean;
-}>;
-
-function getSmoothSettings(): SmoothSettings {
-  const hasNavigator = "navigator" in globalThis;
-
-  if (!hasNavigator) {
+function getViewportInfo(): ScrollViewport {
+  if (typeof window === "undefined") {
     return {
-      lerp: 0.1,
-      wheelMultiplier: 1,
-      touchMultiplier: 1.08,
-      smoothWheel: true,
+      width: 390,
+      height: 844,
     };
   }
 
-  const nav = globalThis.navigator as Navigator & { deviceMemory?: number };
-  const cores = nav.hardwareConcurrency ?? 4;
-  const memory = nav.deviceMemory ?? 4;
+  return {
+    width: window.innerWidth,
+    height: window.innerHeight,
+  };
+}
 
-  const prefersReducedMotion =
-    "matchMedia" in globalThis &&
-    globalThis.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-  const isWeak = cores <= 4 || memory <= 4;
-
-  if (prefersReducedMotion) {
-    return {
-      lerp: 1,
-      wheelMultiplier: 1,
-      touchMultiplier: 1,
-      smoothWheel: false,
-    };
+function getHardwareInfo(): ScrollHardwareInfo {
+  if (typeof navigator === "undefined") {
+    return {};
   }
 
-  return isWeak
-    ? {
-        lerp: 0.12,
-        wheelMultiplier: 0.94,
-        touchMultiplier: 1.02,
-        smoothWheel: true,
-      }
-    : {
-        lerp: 0.09,
-        wheelMultiplier: 1,
-        touchMultiplier: 1.1,
-        smoothWheel: true,
-      };
+  const nav = navigator as Navigator & { deviceMemory?: number };
+
+  return {
+    deviceMemoryGb: nav.deviceMemory ?? null,
+    hardwareConcurrency: nav.hardwareConcurrency ?? null,
+  };
+}
+
+function getPrefersReducedMotion(): boolean {
+  return (
+    typeof globalThis.matchMedia === "function" &&
+    globalThis.matchMedia("(prefers-reduced-motion: reduce)").matches
+  );
+}
+
+function buildSmoothSettings(): LenisScrollSettings {
+  return getLenisScrollSettings({
+    viewport: getViewportInfo(),
+    hardware: getHardwareInfo(),
+    prefersReducedMotion: getPrefersReducedMotion(),
+    platform: "mobile",
+  });
 }
 
 function AppMobile() {
   const [selectedLink, setSelectedLink] = useState("home");
   const [menuOpen, setMenuOpen] = useState(false);
-
-  const smoothOptions = useMemo(getSmoothSettings, []);
+  const [smoothOptions, setSmoothOptions] = useState<LenisScrollSettings>(() =>
+    buildSmoothSettings(),
+  );
 
   const baseLinks = ["portfolio", "roadMap", "pricing", "live", "contact"];
   const links = baseLinks;
@@ -99,6 +96,31 @@ function AppMobile() {
   ];
 
   const isNavHidden = hiddenNavbarRoutes.includes(pathname);
+
+  useEffect(() => {
+    let frame = 0;
+
+    const updateSmoothOptions = () => {
+      cancelAnimationFrame(frame);
+
+      frame = window.requestAnimationFrame(() => {
+        setSmoothOptions(buildSmoothSettings());
+      });
+    };
+
+    updateSmoothOptions();
+
+    window.addEventListener("resize", updateSmoothOptions, { passive: true });
+    window.addEventListener("orientationchange", updateSmoothOptions, {
+      passive: true,
+    });
+
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("resize", updateSmoothOptions);
+      window.removeEventListener("orientationchange", updateSmoothOptions);
+    };
+  }, []);
 
   useEffect(() => {
     const html = document.documentElement;

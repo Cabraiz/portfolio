@@ -73,10 +73,11 @@ export default function HeroTextColumn({
       alignItems: "center",
       gap: isCompactDesktop ? "1.15rem" : "2rem",
       padding: isCompactDesktop ? "0.85rem 1.25rem" : "1.2rem 2rem",
-      backgroundColor: "rgba(255, 255, 255, 0.05)",
+      backgroundColor: "rgba(255, 255, 255, 0.035)",
+      border: "1px solid rgba(255, 255, 255, 0.06)",
       borderRadius: isCompactDesktop ? "16px" : "20px",
-      backdropFilter: isCompactDesktop ? "blur(6px)" : "blur(10px)",
       marginBottom: "-1vh",
+      boxSizing: "border-box",
     };
   }, [isCompactDesktop]);
 

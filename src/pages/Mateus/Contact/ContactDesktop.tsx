@@ -2,6 +2,8 @@ import React, { useLayoutEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
+import { shouldDisableScrollFades } from "../../../features/scroll/scrollMotionFlags";
+
 gsap.registerPlugin(ScrollTrigger);
 
 function prefersReducedMotion(): boolean {
@@ -21,13 +23,14 @@ const Contact: React.FC = () => {
       return;
     }
 
-    if (prefersReducedMotion()) {
+    if (prefersReducedMotion() || shouldDisableScrollFades()) {
       gsap.set(container, {
         autoAlpha: 1,
         y: 0,
         clearProps: "transform,opacity,willChange",
       });
 
+      container.style.willChange = "auto";
       return;
     }
 
@@ -67,6 +70,7 @@ const Contact: React.FC = () => {
 
     return () => {
       ctx.revert();
+      container.style.willChange = "auto";
     };
   }, []);
 

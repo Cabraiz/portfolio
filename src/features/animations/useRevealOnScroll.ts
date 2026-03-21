@@ -6,6 +6,7 @@ import {
   gsap,
   refreshScrollRuntime,
 } from "../scroll/gsapRuntime";
+import { shouldDisableScrollFades } from "../scroll/scrollMotionFlags";
 
 type RevealPreset = "fadeUp" | "blurIn" | "softReveal";
 
@@ -151,6 +152,7 @@ export function useRevealOnScroll({
 
     const shouldReduceMotion =
       respectReducedMotion && isReducedMotionPreferred();
+    const disableScrollFades = shouldDisableScrollFades();
 
     const presetConfig = getPresetConfig(preset, {
       duration,
@@ -163,14 +165,18 @@ export function useRevealOnScroll({
       opacity,
     });
 
-    if (shouldReduceMotion) {
+    if (shouldReduceMotion || disableScrollFades) {
       gsap.set(target, {
         autoAlpha: 1,
         x: 0,
         y: 0,
         scale: 1,
-        clearProps: "transform,opacity,willChange",
+        clearProps: "transform,opacity,filter,willChange",
       });
+
+      if (onReveal) {
+        onReveal();
+      }
 
       return;
     }

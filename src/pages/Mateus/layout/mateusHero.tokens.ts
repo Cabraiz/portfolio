@@ -39,7 +39,7 @@ export const mateusHeroTokens = {
   },
 
   profileCard: {
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    backgroundColor: "rgba(255, 255, 255, 0.06)",
     marginLeft: {
       compact: "0px",
       default: "0px",
@@ -66,9 +66,19 @@ export const mateusHeroTokens = {
       tall: "28px",
     },
     blur: {
-      compact: "blur(6px)",
-      default: "blur(7px)",
-      tall: "blur(8px)",
+      compact: "none",
+      default: "none",
+      tall: "none",
+    },
+    border: {
+      compact: "1px solid rgba(255, 255, 255, 0.07)",
+      default: "1px solid rgba(255, 255, 255, 0.07)",
+      tall: "1px solid rgba(255, 255, 255, 0.08)",
+    },
+    shadow: {
+      compact: "0 10px 24px rgba(0, 0, 0, 0.16)",
+      default: "0 12px 28px rgba(0, 0, 0, 0.18)",
+      tall: "0 14px 32px rgba(0, 0, 0, 0.2)",
     },
   },
 

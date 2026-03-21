@@ -75,15 +75,25 @@ export function useMateusHeroLayout(): UseMateusHeroLayoutResult {
       return undefined;
     }
 
-    const visualViewport = browserWindow.visualViewport;
     let frameId = 0;
 
     const updateViewport = () => {
       frameId = 0;
 
-      setViewport({
+      const nextViewport = {
         width: browserWindow.innerWidth,
         height: browserWindow.innerHeight,
+      };
+
+      setViewport((currentViewport) => {
+        if (
+          currentViewport.width === nextViewport.width &&
+          currentViewport.height === nextViewport.height
+        ) {
+          return currentViewport;
+        }
+
+        return nextViewport;
       });
     };
 
@@ -97,14 +107,12 @@ export function useMateusHeroLayout(): UseMateusHeroLayoutResult {
 
     browserWindow.addEventListener("resize", handleResize);
     browserWindow.addEventListener("orientationchange", handleResize);
-    visualViewport?.addEventListener("resize", handleResize);
 
     handleResize();
 
     return () => {
       browserWindow.removeEventListener("resize", handleResize);
       browserWindow.removeEventListener("orientationchange", handleResize);
-      visualViewport?.removeEventListener("resize", handleResize);
 
       if (frameId !== 0) {
         globalThis.cancelAnimationFrame(frameId);
@@ -153,8 +161,8 @@ export function useMateusHeroLayout(): UseMateusHeroLayoutResult {
       width: mateusHeroTokens.profileCard.width[mode],
       height: "auto",
       gap: mateusHeroTokens.profileCard.gap[mode],
-      backdropFilter: mateusHeroTokens.profileCard.blur[mode],
-      WebkitBackdropFilter: mateusHeroTokens.profileCard.blur[mode],
+      border: mateusHeroTokens.profileCard.border[mode],
+      boxShadow: mateusHeroTokens.profileCard.shadow[mode],
       boxSizing: "border-box",
     };
   }, [mode]);

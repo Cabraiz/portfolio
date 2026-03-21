@@ -5,6 +5,7 @@ import {
   type ReactNode,
 } from "react";
 
+import { shouldDisableScrollFades } from "../../../features/scroll/scrollMotionFlags";
 import type { SectionRenderState } from "./useSectionRenderPolicy";
 
 type LandingSectionShellProps = Readonly<{
@@ -34,17 +35,52 @@ const baseSectionStyle: ExtendedCSSProperties = {
   containIntrinsicSize: "100vh",
 };
 
-const baseContentStyle: CSSProperties = {
-  width: "100%",
-  minHeight: "100%",
-  boxSizing: "border-box",
-  transition:
-    "opacity 240ms ease, transform 240ms ease, visibility 240ms ease",
-  willChange: "transform, opacity",
-  transformOrigin: "center top",
-};
+function getBaseContentStyle(disableScrollFades: boolean): CSSProperties {
+  return {
+    width: "100%",
+    minHeight: "100%",
+    boxSizing: "border-box",
+    transition: disableScrollFades
+      ? "none"
+      : "opacity 240ms ease, transform 240ms ease, visibility 240ms ease",
+    willChange: disableScrollFades ? "auto" : "transform, opacity",
+    transformOrigin: "center top",
+  };
+}
 
-function getContentVisualStyle(state: SectionRenderState): CSSProperties {
+function getContentVisualStyle(
+  state: SectionRenderState,
+  disableScrollFades: boolean
+): CSSProperties {
+  if (disableScrollFades) {
+    switch (state) {
+      case "active":
+        return {
+          opacity: 1,
+          transform: "translate3d(0, 0, 0) scale(1)",
+          pointerEvents: "auto",
+          visibility: "visible",
+        };
+
+      case "near":
+        return {
+          opacity: 1,
+          transform: "translate3d(0, 0, 0) scale(1)",
+          pointerEvents: "none",
+          visibility: "visible",
+        };
+
+      case "far":
+      default:
+        return {
+          opacity: 1,
+          transform: "translate3d(0, 0, 0) scale(1)",
+          pointerEvents: "none",
+          visibility: "hidden",
+        };
+    }
+  }
+
   switch (state) {
     case "active":
       return {
@@ -74,7 +110,7 @@ function getContentVisualStyle(state: SectionRenderState): CSSProperties {
 }
 
 function getPlaceholderStyle(
-  placeholderMinHeight: CSSProperties["minHeight"],
+  placeholderMinHeight: CSSProperties["minHeight"]
 ): CSSProperties {
   return {
     minHeight: placeholderMinHeight,
@@ -95,6 +131,7 @@ function LandingSectionShellComponent({
   contentStyle,
   ...rest
 }: LandingSectionShellProps) {
+  const disableScrollFades = shouldDisableScrollFades();
   const shouldMountRealContent = state !== "far";
 
   return (
@@ -116,8 +153,8 @@ function LandingSectionShellComponent({
         <div
           data-section-content="true"
           style={{
-            ...baseContentStyle,
-            ...getContentVisualStyle(state),
+            ...getBaseContentStyle(disableScrollFades),
+            ...getContentVisualStyle(state, disableScrollFades),
             ...contentStyle,
           }}
         >

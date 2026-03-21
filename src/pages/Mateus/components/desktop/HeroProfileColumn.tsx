@@ -48,7 +48,12 @@ export default function HeroProfileColumn({
       }}
     >
       <div style={profileCardStyle}>
-        <div style={profileImageWrapperStyle}>
+        <div
+          style={{
+            ...profileImageWrapperStyle,
+            background: "rgba(255, 255, 255, 0.02)",
+          }}
+        >
           <img
             src={PROFILE_IMAGE}
             alt="Mateus"
@@ -61,9 +66,8 @@ export default function HeroProfileColumn({
               height: "100%",
               objectFit: "cover",
               objectPosition: "center top",
-              filter: isImageLoaded ? "blur(0px)" : "blur(12px)",
-              transform: isImageLoaded ? "scale(1)" : "scale(1.04)",
-              transition: "filter 0.45s ease, transform 0.45s ease",
+              opacity: isImageLoaded ? 1 : 0.98,
+              transition: "opacity 160ms ease",
               display: "block",
             }}
           />
