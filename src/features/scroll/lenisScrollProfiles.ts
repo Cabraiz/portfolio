@@ -63,7 +63,7 @@ export const LENIS_SCROLL_PROFILES: Record<
    */
   desktop1080p: {
     smoothWheel: true,
-    lerp: 0.07,
+    lerp: 0.1,
     wheelMultiplier: 1,
     touchMultiplier: 1,
   },

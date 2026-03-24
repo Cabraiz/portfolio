@@ -82,7 +82,8 @@ img {
   border-color: #eec211 !important;
 }
 
-.btn-yellow, .btn-trasn-w-border {
+.btn-yellow,
+.btn-trasn-w-border {
   font-weight: 600 !important;
   width: 100%;
 }
@@ -221,7 +222,11 @@ img {
   width: 100%;
   height: 4px;
   border-radius: 4px;
-  background: linear-gradient(90deg, rgba(255,255,255,0.3), rgba(255,255,255,0.9));
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.3),
+    rgba(255, 255, 255, 0.9)
+  );
   animation: loadingBar 1s ease-in-out forwards;
 }
 
@@ -285,12 +290,42 @@ img {
 }
 
 /* 🟢 Cores específicas dos tooltips */
-.tooltip-linkedin { background-color: #0077b5; color: white; }
-.tooltip-gmail { background-color: #ea4335; color: white; }
-.tooltip-insta { background: radial-gradient(circle at 30% 107%, #f3c44c 0%, #f3c44c 10%, #d26637 40%, #d26637 70%, #2ed0f8 100%); color: white; }
-.tooltip-tiktok { background-color: #000; color: white; }
-.tooltip-whatsapp { background-color: #25d366; color: white; }
-.tooltip-meet { background-color: #00ac47; color: white; }
+.tooltip-linkedin {
+  background-color: #0077b5;
+  color: white;
+}
+
+.tooltip-gmail {
+  background-color: #ea4335;
+  color: white;
+}
+
+.tooltip-insta {
+  background: radial-gradient(
+    circle at 30% 107%,
+    #f3c44c 0%,
+    #f3c44c 10%,
+    #d26637 40%,
+    #d26637 70%,
+    #2ed0f8 100%
+  );
+  color: white;
+}
+
+.tooltip-tiktok {
+  background-color: #000;
+  color: white;
+}
+
+.tooltip-whatsapp {
+  background-color: #25d366;
+  color: white;
+}
+
+.tooltip-meet {
+  background-color: #00ac47;
+  color: white;
+}
 
 /* ===========================
    📐 Layout Helper
@@ -302,13 +337,20 @@ img {
   justify-content: flex-start;
 }
 
+/**
+ * A row não deve mais introduzir espaçamento vertical,
+ * porque esse papel já é do layout/tokens da seção.
+ * Aqui mantemos apenas o respiro horizontal.
+ */
 .custom-section-row {
-  padding: 4vh 6vw 6vh 6vw; 
+  min-height: 100%;
+  padding: 0 6vw;
+  box-sizing: border-box;
 }
 
 @media (max-width: 768px) {
   .custom-section-row {
-    padding: 4vh 4vw;
+    padding: 0 4vw;
   }
 }
 

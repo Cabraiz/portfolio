@@ -31,6 +31,7 @@ const baseSectionStyle: CSSProperties = {
   width: "100%",
   minWidth: 0,
   minHeight: "100vh",
+  height: "100vh",
   margin: 0,
   padding: 0,
   boxSizing: "border-box",
@@ -43,14 +44,12 @@ const baseSectionStyle: CSSProperties = {
   isolation: "isolate",
 };
 
-function getBaseContentStyle(
-  disableScrollFades: boolean,
-  isAlwaysMounted: boolean,
-): CSSProperties {
+function getBaseContentStyle(disableTransitions: boolean): CSSProperties {
   return {
     width: "100%",
     minWidth: 0,
-    minHeight: "100%",
+    height: "100%",
+    minHeight: 0,
     margin: 0,
     padding: 0,
     boxSizing: "border-box",
@@ -59,31 +58,31 @@ function getBaseContentStyle(
     flexDirection: "column",
     alignItems: "stretch",
     justifyContent: "flex-start",
-    transition:
-      disableScrollFades || isAlwaysMounted
-        ? "none"
-        : "opacity 160ms ease, transform 160ms ease, visibility 160ms ease",
-    willChange:
-      disableScrollFades || isAlwaysMounted ? "auto" : "opacity, transform",
+    flex: "1 1 auto",
+    overflow: "visible",
+    transition: disableTransitions
+      ? "none"
+      : "opacity 160ms ease, transform 160ms ease, visibility 160ms ease",
+    willChange: disableTransitions ? "auto" : "opacity, transform",
     transformOrigin: "center top",
     backfaceVisibility: "hidden",
   };
 }
 
-function getContentVisualStyle(
+function getStableContentVisualStyle(): CSSProperties {
+  return {
+    opacity: 1,
+    transform: "none",
+    pointerEvents: "auto",
+    visibility: "visible",
+    willChange: "auto",
+  };
+}
+
+function getDynamicContentVisualStyle(
   state: SectionRenderState,
   disableScrollFades: boolean,
-  isAlwaysMounted: boolean,
 ): CSSProperties {
-  if (isAlwaysMounted) {
-    return {
-      opacity: 1,
-      transform: "translate3d(0, 0, 0)",
-      pointerEvents: "auto",
-      visibility: "visible",
-    };
-  }
-
   if (disableScrollFades) {
     switch (state) {
       case "active":
@@ -190,10 +189,60 @@ function LandingSectionShellComponent({
 }: LandingSectionShellProps) {
   const disableScrollFades = shouldDisableScrollFades();
   const resolvedBehavior = resolveLandingSectionBehavior(behavior);
-  const isAlwaysMounted = resolvedBehavior.renderStrategy === "always-mounted";
+
+  const isStableSection =
+    resolvedBehavior.renderStrategy === "always-mounted" &&
+    resolvedBehavior.measurementStrategy === "none";
 
   const resolvedPlaceholderMinHeight =
     placeholderMinHeight ?? resolvedBehavior.placeholderFallbackMinHeight;
+
+  const resolvedSectionMinHeight =
+    sectionStyle?.minHeight ??
+    resolvedPlaceholderMinHeight ??
+    DEFAULT_PLACEHOLDER_MIN_HEIGHT;
+
+  const resolvedSectionHeight =
+    sectionStyle?.height ?? resolvedSectionMinHeight;
+
+  const resolvedSectionStyle: CSSProperties = {
+    ...baseSectionStyle,
+    ...sectionStyle,
+    minHeight: resolvedSectionMinHeight,
+    height: resolvedSectionHeight,
+    display: sectionStyle?.display ?? "flex",
+    flexDirection: sectionStyle?.flexDirection ?? "column",
+    alignItems: sectionStyle?.alignItems ?? "stretch",
+    justifyContent: sectionStyle?.justifyContent ?? "flex-start",
+  };
+
+  if (isStableSection) {
+    const resolvedStableContentStyle: CSSProperties = {
+      ...getBaseContentStyle(true),
+      ...contentStyle,
+      ...getStableContentVisualStyle(),
+    };
+
+    return (
+      <section
+        id={id}
+        data-section={id}
+        data-page-section="true"
+        data-render-state={state}
+        data-render-strategy={resolvedBehavior.renderStrategy}
+        data-section-stable="true"
+        data-section-active={state === "active" ? "true" : "false"}
+        data-section-mounted="true"
+        className={className}
+        style={resolvedSectionStyle}
+        {...rest}
+      >
+        <div data-section-content="true" style={resolvedStableContentStyle}>
+          {children}
+        </div>
+      </section>
+    );
+  }
 
   const shouldMountRealContent = shouldRenderRealContent(
     state,
@@ -204,19 +253,10 @@ function LandingSectionShellComponent({
     !shouldMountRealContent &&
     resolvedBehavior.renderStrategy === "placeholder-when-far";
 
-  const resolvedSectionStyle: CSSProperties = {
-    ...baseSectionStyle,
-    minHeight:
-      sectionStyle?.minHeight ??
-      resolvedPlaceholderMinHeight ??
-      DEFAULT_PLACEHOLDER_MIN_HEIGHT,
-    ...sectionStyle,
-  };
-
-  const resolvedContentStyle: CSSProperties = {
-    ...getBaseContentStyle(disableScrollFades, isAlwaysMounted),
-    ...getContentVisualStyle(state, disableScrollFades, isAlwaysMounted),
+  const resolvedDynamicContentStyle: CSSProperties = {
+    ...getBaseContentStyle(disableScrollFades),
     ...contentStyle,
+    ...getDynamicContentVisualStyle(state, disableScrollFades),
   };
 
   return (
@@ -226,6 +266,7 @@ function LandingSectionShellComponent({
       data-page-section="true"
       data-render-state={state}
       data-render-strategy={resolvedBehavior.renderStrategy}
+      data-section-stable="false"
       data-section-active={state === "active" ? "true" : "false"}
       data-section-mounted={shouldMountRealContent ? "true" : "false"}
       className={className}
@@ -234,10 +275,7 @@ function LandingSectionShellComponent({
       {...rest}
     >
       {shouldMountRealContent ? (
-        <div
-          data-section-content="true"
-          style={resolvedContentStyle}
-        >
+        <div data-section-content="true" style={resolvedDynamicContentStyle}>
           {children}
         </div>
       ) : null}

@@ -8,31 +8,36 @@ export const mateusHeroTokens = {
   },
 
   section: {
+    /**
+     * A LandingSectionShell já é a dona da altura da seção.
+     * O hero não recalcula viewport nem desconta navbar aqui;
+     * ele apenas ocupa 100% do bloco recebido do pai.
+     */
     minHeight: {
-      compact: "calc(100vh - 78px)",
-      default: "calc(100vh - 78px)",
-      tall: "calc(100vh - 78px)",
+      compact: "100%",
+      default: "100%",
+      tall: "100%",
     },
 
     /**
-     * Compact/720p:
-     * mantemos um respiro superior um pouco maior para o hero
-     * não ficar colado demais no topo após a remoção da centralização.
+     * Respiro superior pequeno e controlado.
+     * Sem exagero para não empurrar o conteúdo para baixo.
      */
     paddingTop: {
-      compact: "28px",
-      default: "20px",
-      tall: "24px",
+      compact: "16px",
+      default: "12px",
+      tall: "16px",
     },
 
     /**
-     * Compact/720p:
-     * leve compensação inferior para manter balanço visual.
+     * Respiro inferior reduzido.
+     * O excesso anterior, somado ao padding da row,
+     * era parte da causa da faixa da próxima seção aparecer.
      */
     paddingBottom: {
-      compact: "20px",
-      default: "20px",
-      tall: "24px",
+      compact: "8px",
+      default: "8px",
+      tall: "10px",
     },
   },
 

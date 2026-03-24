@@ -46,6 +46,16 @@ export type LandingSectionConfig = Readonly<{
   mobile: LandingSectionViewportConfig;
 }>;
 
+const DESKTOP_HERO_STABLE_BEHAVIOR: LandingSectionBehavior = {
+  renderStrategy: "always-mounted",
+  measurementStrategy: "none",
+  cacheMeasurements: false,
+  keepMountedWhenNear: true,
+  placeholderFallbackMinHeight: resolveLandingSectionMinHeight("desktop", {
+    preferDynamicViewport: true,
+  }),
+};
+
 const DESKTOP_VIRTUALIZED_BEHAVIOR: LandingSectionBehavior = {
   renderStrategy: "placeholder-when-far",
   measurementStrategy: "resize-observer",
@@ -68,6 +78,10 @@ function createViewportConfig(
   viewportMode: LandingRenderableViewportMode,
   Component: ComponentType,
   behavior: LandingSectionBehavior,
+  options?: Readonly<{
+    sectionStyle?: CSSProperties;
+    contentStyle?: CSSProperties;
+  }>,
 ): LandingSectionViewportConfig {
   const expectedMinHeight = resolveLandingSectionMinHeight(viewportMode, {
     preferDynamicViewport: viewportMode === "desktop",
@@ -84,10 +98,35 @@ function createViewportConfig(
     sectionStyle: {
       minHeight: expectedMinHeight,
       scrollMarginTop,
+      ...options?.sectionStyle,
     },
     contentStyle: {
       minHeight: "100%",
+      ...options?.contentStyle,
     },
+  };
+}
+
+function normalizeConfigViewportMode(
+  viewportMode?: LandingSectionViewportMode,
+): LandingRenderableViewportMode {
+  return viewportMode === "mobile" ? "mobile" : "desktop";
+}
+
+function toLandingSectionDefinition(
+  config: LandingSectionConfig,
+  viewportMode: LandingRenderableViewportMode,
+): LandingSectionDefinition<LandingSectionId> {
+  const viewportConfig = config[viewportMode];
+
+  return {
+    id: config.id,
+    viewportMode,
+    content: createElement(viewportConfig.Component),
+    placeholderMinHeight: viewportConfig.expectedMinHeight,
+    sectionStyle: viewportConfig.sectionStyle,
+    contentStyle: viewportConfig.contentStyle,
+    behavior: viewportConfig.behavior,
   };
 }
 
@@ -98,7 +137,16 @@ export const LANDING_SECTIONS_CONFIG = [
     desktop: createViewportConfig(
       "desktop",
       MateusDesktop,
-      DESKTOP_VIRTUALIZED_BEHAVIOR,
+      DESKTOP_HERO_STABLE_BEHAVIOR,
+      {
+        sectionStyle: {
+          overflow: "visible",
+        },
+        contentStyle: {
+          minHeight: "100%",
+          overflow: "visible",
+        },
+      },
     ),
     mobile: createViewportConfig(
       "mobile",
@@ -181,12 +229,6 @@ export const LANDING_SECTIONS_CONFIG = [
 export const LANDING_SECTION_ORDER: ReadonlyArray<LandingSectionId> =
   LANDING_SECTIONS_CONFIG.map((section) => section.id);
 
-function normalizeConfigViewportMode(
-  viewportMode?: LandingSectionViewportMode,
-): LandingRenderableViewportMode {
-  return viewportMode === "mobile" ? "mobile" : "desktop";
-}
-
 export function getLandingSectionsConfig(): readonly LandingSectionConfig[] {
   return LANDING_SECTIONS_CONFIG;
 }
@@ -207,18 +249,10 @@ export function getLandingSectionDefinition(
     return null;
   }
 
-  const normalizedViewportMode = normalizeConfigViewportMode(viewportMode);
-  const viewportConfig = config[normalizedViewportMode];
-
-  return {
-    id: config.id,
-    viewportMode: normalizedViewportMode,
-    content: createElement(viewportConfig.Component),
-    placeholderMinHeight: viewportConfig.expectedMinHeight,
-    sectionStyle: viewportConfig.sectionStyle,
-    contentStyle: viewportConfig.contentStyle,
-    behavior: viewportConfig.behavior,
-  };
+  return toLandingSectionDefinition(
+    config,
+    normalizeConfigViewportMode(viewportMode),
+  );
 }
 
 export function getLandingSectionDefinitions(
@@ -229,17 +263,7 @@ export function getLandingSectionDefinitions(
   return LANDING_SECTIONS_CONFIG
     .slice()
     .sort((left, right) => left.order - right.order)
-    .map((section) => {
-      const viewportConfig = section[normalizedViewportMode];
-
-      return {
-        id: section.id,
-        viewportMode: normalizedViewportMode,
-        content: createElement(viewportConfig.Component),
-        placeholderMinHeight: viewportConfig.expectedMinHeight,
-        sectionStyle: viewportConfig.sectionStyle,
-        contentStyle: viewportConfig.contentStyle,
-        behavior: viewportConfig.behavior,
-      } satisfies LandingSectionDefinition<LandingSectionId>;
-    });
+    .map((section) =>
+      toLandingSectionDefinition(section, normalizedViewportMode),
+    );
 }

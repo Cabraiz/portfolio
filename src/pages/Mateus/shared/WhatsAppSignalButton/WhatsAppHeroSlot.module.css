@@ -6,6 +6,9 @@
   --hero-slot-overlap-top: clamp(12px, 1.8vh, 18px);
   --hero-slot-offset-inline: clamp(52px, 5vw, 84px);
 
+  --hero-slot-primary-scale: 1;
+  --hero-slot-primary-shift-inline: 0px;
+
   position: relative;
   z-index: var(--hero-slot-z-root, 6);
   width: 100%;
@@ -21,6 +24,9 @@
   --hero-slot-align-top: 0px;
   --hero-slot-overlap-top: 0px;
   --hero-slot-offset-inline: 0px;
+
+  --hero-slot-primary-scale: 1;
+  --hero-slot-primary-shift-inline: 0px;
 }
 
 .noDesktopOffset {
@@ -71,11 +77,15 @@
   z-index: var(--hero-slot-z-primary, 4);
   isolation: isolate;
   margin-top: calc(-1 * var(--hero-slot-overlap-top));
+  margin-inline-start: var(--hero-slot-primary-shift-inline);
 }
 
 .primarySlot > * {
   position: relative;
   z-index: var(--hero-slot-z-primary, 4);
+  transform: scale(var(--hero-slot-primary-scale));
+  transform-origin: left center;
+  will-change: transform;
 }
 
 .secondarySlot {
@@ -88,6 +98,13 @@
   z-index: var(--hero-slot-z-secondary, 1);
 }
 
+@media (min-width: 1024px) and (min-height: 900px) {
+  .root {
+    --hero-slot-primary-scale: 1.375;
+    --hero-slot-primary-shift-inline: -76px;
+  }
+}
+
 @media (max-width: 960px) {
   .root {
     --hero-slot-bleed-top: 0px;
@@ -96,6 +113,8 @@
     --hero-slot-align-top: 0px;
     --hero-slot-overlap-top: 0px;
     --hero-slot-offset-inline: 0px;
+    --hero-slot-primary-scale: 1;
+    --hero-slot-primary-shift-inline: 0px;
   }
 
   .grid,
@@ -122,6 +141,8 @@
     --hero-slot-align-top: 0px;
     --hero-slot-overlap-top: 40px;
     --hero-slot-offset-inline: 0px;
+    --hero-slot-primary-scale: 1;
+    --hero-slot-primary-shift-inline: 0px;
   }
 
   .grid {
@@ -135,16 +156,5 @@
 
   .secondarySlot {
     padding-top: 0;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .root,
-  .rail,
-  .grid,
-  .slot,
-  .primarySlot,
-  .secondarySlot {
-    transition: none;
   }
 }

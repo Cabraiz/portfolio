@@ -13,8 +13,6 @@ import "tippy.js/dist/tippy.css";
 import "../../styles/styles.css";
 
 import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useLenis } from "lenis/react";
 
 import HeroTextColumn from "./components/desktop/HeroTextColumn";
 import HeroProfileColumn from "./components/desktop/HeroProfileColumn";
@@ -22,13 +20,10 @@ import { useMateusHeroLayout } from "./hooks/useMateusHeroLayout";
 import { getWhatsAppGreeting } from "./mateusDesktop.utils";
 import { shouldDisableScrollFades } from "../../features/scroll/scrollMotionFlags";
 
-gsap.registerPlugin(ScrollTrigger);
-
 function MateusDesktop() {
   const containerRef = useRef<HTMLDivElement>(null);
 
   const { t } = useTranslation();
-  const lenis = useLenis();
 
   const { sectionStyle, isCompactDesktop } = useMateusHeroLayout();
 
@@ -42,17 +37,23 @@ function MateusDesktop() {
 
   const secondaryLabel = useMemo(() => {
     return t("buttons.downloadCV");
-  }, [t]);
+  }, [t, currentLanguage]);
 
   const whatsappTopLabel = useMemo(() => {
     return getWhatsAppGreeting();
   }, []);
 
+  /**
+   * A altura da seção passa a ser responsabilidade do shell/landing.
+   * Aqui o hero só ocupa integralmente o espaço que recebeu do pai.
+   */
   const rootStyle = useMemo<CSSProperties>(() => {
     return {
       position: "relative",
       width: "100%",
+      minWidth: 0,
       minHeight: "100%",
+      height: "100%",
       display: "flex",
       flexDirection: "column",
       overflow: "visible",
@@ -64,21 +65,34 @@ function MateusDesktop() {
     return {
       ...sectionStyle,
       width: "100%",
+      minWidth: 0,
+      minHeight: "100%",
+      height: "100%",
       display: "flex",
       flexDirection: "column",
-      flex: 1,
+      flex: "1 1 auto",
       alignItems: "stretch",
       justifyContent:
-        sectionStyle.justifyContent ?? (isCompactDesktop ? "center" : "flex-start"),
+        sectionStyle.justifyContent ??
+        (isCompactDesktop ? "center" : "flex-start"),
+      overflow: "visible",
       boxSizing: "border-box",
+
+      /**
+       * Importante:
+       * não deixamos o hero recalcular viewport aqui.
+       * O pai já fez isso.
+       */
+      minBlockSize: "100%",
     };
   }, [isCompactDesktop, sectionStyle]);
 
   const rowStyle = useMemo<CSSProperties>(() => {
     return {
       width: "100%",
+      minWidth: 0,
       flex: "1 1 auto",
-      minHeight: "100%",
+      minHeight: 0,
       height: "100%",
       margin: 0,
       paddingTop: 0,
@@ -94,14 +108,15 @@ function MateusDesktop() {
   useLayoutEffect(() => {
     const container = containerRef.current;
 
-    if (!container || !lenis?.rootElement) {
+    if (!container) {
       return undefined;
     }
 
-    if (shouldDisableScrollFades()) {
+    const disableHeroIntro = shouldDisableScrollFades();
+
+    if (disableHeroIntro) {
       gsap.set(container, {
         opacity: 1,
-        scale: 1,
         y: 0,
         clearProps: "transform,opacity,willChange",
       });
@@ -113,35 +128,24 @@ function MateusDesktop() {
     const ctx = gsap.context(() => {
       gsap.set(container, {
         opacity: 0,
-        scale: 0.985,
-        y: 24,
+        y: isCompactDesktop ? 12 : 16,
         willChange: "transform, opacity",
-        force3D: true,
       });
 
       gsap.to(container, {
         opacity: 1,
-        scale: 1,
         y: 0,
-        duration: isCompactDesktop ? 0.85 : 1,
-        ease: "power3.out",
+        duration: isCompactDesktop ? 0.42 : 0.52,
+        ease: "power2.out",
         overwrite: "auto",
         onStart: () => {
           container.style.willChange = "transform, opacity";
         },
         onComplete: () => {
+          gsap.set(container, {
+            clearProps: "transform,opacity",
+          });
           container.style.willChange = "auto";
-        },
-        onReverseComplete: () => {
-          container.style.willChange = "auto";
-        },
-        scrollTrigger: {
-          trigger: container,
-          scroller: lenis.rootElement,
-          start: "top 82%",
-          toggleActions: "play none none reverse",
-          fastScrollEnd: true,
-          invalidateOnRefresh: true,
         },
       });
     }, container);
@@ -150,7 +154,7 @@ function MateusDesktop() {
       ctx.revert();
       container.style.willChange = "auto";
     };
-  }, [isCompactDesktop, lenis]);
+  }, [isCompactDesktop]);
 
   return (
     <div ref={containerRef} style={rootStyle}>

@@ -11,7 +11,10 @@ import useDocumentVisibilitySync from "../../../features/scroll/useDocumentVisib
 import useLenisEngine from "../../../features/scroll/useLenisEngine";
 
 import LandingSectionShell from "./LandingSectionShell";
-import { LANDING_SECTION_ORDER, getLandingSectionDefinitions } from "./landingSections.config";
+import {
+  LANDING_SECTION_ORDER,
+  getLandingSectionDefinitions,
+} from "./landingSections.config";
 import useLandingActiveSection from "./hooks/useLandingActiveSection";
 import {
   resolveLandingResponsiveSpacing,
@@ -56,6 +59,7 @@ const baseSectionStyle: CSSProperties = {
   paddingBottom: mobileSpacing.sectionPaddingBlockEnd,
   paddingLeft: mobileSpacing.sectionPaddingInline,
   display: "flex",
+  flexDirection: "column",
   alignItems: "stretch",
   justifyContent: "flex-start",
   position: "relative",
@@ -68,11 +72,17 @@ const baseSectionStyle: CSSProperties = {
 const baseContentContainerStyle: CSSProperties = {
   width: "100%",
   minWidth: 0,
-  minHeight: "100%",
+  height: "100%",
+  minHeight: 0,
   margin: 0,
   padding: 0,
   boxSizing: "border-box",
   position: "relative",
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "stretch",
+  justifyContent: "flex-start",
+  flex: "1 1 auto",
   userSelect: "none",
 };
 
@@ -92,10 +102,7 @@ const LandingPageMobile: React.FC = () => {
   useLenisEngine();
   useDocumentVisibilitySync();
 
-  const {
-    activeSectionId,
-    refreshActiveSection,
-  } = useLandingActiveSection({
+  const { activeSectionId, refreshActiveSection } = useLandingActiveSection({
     containerRef,
     defaultSectionId: currentSectionId,
     sectionIds: LANDING_SECTION_ORDER,
@@ -133,22 +140,41 @@ const LandingPageMobile: React.FC = () => {
       {sections.map((section) => {
         const behavior = resolveLandingSectionBehavior(section.behavior);
 
+        const resolvedSectionMinHeight =
+          section.sectionStyle?.minHeight ??
+          resolveLandingSectionMinHeight("mobile", {
+            preferDynamicViewport: false,
+          });
+
+        const resolvedSectionHeight =
+          section.sectionStyle?.height ?? resolvedSectionMinHeight;
+
         const resolvedSectionStyle: CSSProperties = {
           ...baseSectionStyle,
-          minHeight:
-            section.sectionStyle?.minHeight ??
-            resolveLandingSectionMinHeight("mobile", {
-              preferDynamicViewport: false,
-            }),
+          ...section.sectionStyle,
+          minHeight: resolvedSectionMinHeight,
+          height: resolvedSectionHeight,
           scrollMarginTop:
             section.sectionStyle?.scrollMarginTop ??
             resolveLandingScrollMarginTop("mobile"),
-          ...section.sectionStyle,
+          display: section.sectionStyle?.display ?? "flex",
+          flexDirection: section.sectionStyle?.flexDirection ?? "column",
+          alignItems: section.sectionStyle?.alignItems ?? "stretch",
+          justifyContent:
+            section.sectionStyle?.justifyContent ?? "flex-start",
         };
 
         const resolvedContentStyle: CSSProperties = {
           ...baseContentContainerStyle,
           ...section.contentStyle,
+          height: section.contentStyle?.height ?? "100%",
+          minHeight: section.contentStyle?.minHeight ?? 0,
+          display: section.contentStyle?.display ?? "flex",
+          flexDirection: section.contentStyle?.flexDirection ?? "column",
+          alignItems: section.contentStyle?.alignItems ?? "stretch",
+          justifyContent:
+            section.contentStyle?.justifyContent ?? "flex-start",
+          flex: section.contentStyle?.flex ?? "1 1 auto",
         };
 
         return (
