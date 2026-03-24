@@ -1,20 +1,34 @@
-import React, { type CSSProperties, useRef } from "react";
+import React, {
+  type CSSProperties,
+  useEffect,
+  useMemo,
+  useRef,
+} from "react";
 
-import ContactMobile from "../Contact/ContactMobile";
-import Live from "../Live/Live";
-import MateusMobile from "../MateusMobile/MateusMobile";
-import Portfolio from "../Portfolio/Portfolio";
-import Pricing from "../Pricing/Pricing";
-import RoadMapMobile from "../RoadMap/RoadMapMobile";
-
+import usePathSectionSync from "../../../features/navigation/usePathSectionSync";
+import { DEFAULT_LANDING_SECTION_ID } from "../../../features/navigation/landingSections";
 import useDocumentVisibilitySync from "../../../features/scroll/useDocumentVisibilitySync";
-import useHashSectionSync from "../../../features/scroll/useHashSectionSync";
 import useLenisEngine from "../../../features/scroll/useLenisEngine";
-import useSectionTriggers from "../../../features/scroll/useSectionTriggers";
+
+import LandingSectionShell from "./LandingSectionShell";
+import { LANDING_SECTION_ORDER, getLandingSectionDefinitions } from "./landingSections.config";
+import useLandingActiveSection from "./hooks/useLandingActiveSection";
+import {
+  resolveLandingResponsiveSpacing,
+  resolveLandingScrollMarginTop,
+  resolveLandingSectionMinHeight,
+} from "./landingLayout.tokens";
+import { resolveLandingSectionBehavior } from "./landing.types";
+import useSectionRenderPolicy from "./useSectionRenderPolicy";
 
 const containerStyle: CSSProperties = {
-  overflowX: "hidden",
   width: "100%",
+  minWidth: 0,
+  margin: 0,
+  padding: 0,
+  overflowX: "clip",
+  overflowY: "visible",
+  position: "relative",
   userSelect: "none",
 };
 
@@ -30,85 +44,131 @@ const sectionBackground: CSSProperties = {
   backgroundSize: "cover",
 };
 
-const sectionStyle: CSSProperties = {
+const mobileSpacing = resolveLandingResponsiveSpacing("mobile");
+
+const baseSectionStyle: CSSProperties = {
   ...sectionBackground,
-  minHeight: "100vh",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
   width: "100%",
+  minWidth: 0,
+  margin: 0,
+  paddingTop: mobileSpacing.sectionPaddingBlockStart,
+  paddingRight: mobileSpacing.sectionPaddingInline,
+  paddingBottom: mobileSpacing.sectionPaddingBlockEnd,
+  paddingLeft: mobileSpacing.sectionPaddingInline,
+  display: "flex",
+  alignItems: "stretch",
+  justifyContent: "flex-start",
+  position: "relative",
+  overflowX: "clip",
+  overflowY: "visible",
   boxSizing: "border-box",
   userSelect: "none",
 };
 
-const contentContainerStyle: CSSProperties = {
+const baseContentContainerStyle: CSSProperties = {
   width: "100%",
-  padding: "0",
+  minWidth: 0,
+  minHeight: "100%",
+  margin: 0,
+  padding: 0,
   boxSizing: "border-box",
+  position: "relative",
   userSelect: "none",
 };
 
 const LandingPageMobile: React.FC = () => {
-  const containerRef = useRef<HTMLDivElement | null>(null);
+  const containerRef = useRef<HTMLElement | null>(null);
+
+  const sections = useMemo(() => {
+    return getLandingSectionDefinitions("mobile");
+  }, []);
+
+  const { currentSectionId, syncSectionFromScroll } = usePathSectionSync({
+    containerRef,
+    defaultSectionId: DEFAULT_LANDING_SECTION_ID,
+    historyMode: "replace",
+  });
 
   useLenisEngine();
   useDocumentVisibilitySync();
 
-  const { writeSectionHash } = useHashSectionSync({
-    defaultSectionId: "home",
-    writeDefaultHashOnMount: true,
-    historyMode: "replace",
+  const {
+    activeSectionId,
+    refreshActiveSection,
+  } = useLandingActiveSection({
+    containerRef,
+    defaultSectionId: currentSectionId,
+    sectionIds: LANDING_SECTION_ORDER,
+    sectionSelector: ":scope > section[data-page-section='true']",
+    viewportMode: "mobile",
+    activationViewportRatio: 0.48,
   });
 
-  useSectionTriggers({
-    containerRef,
-    activeClassName: "is-active",
-    triggerStart: "top center",
-    triggerEnd: "bottom center",
-    refreshOnMount: true,
-    onSectionChange: (sectionId) => {
-      writeSectionHash(sectionId, { historyMode: "replace" });
-    },
+  useEffect(() => {
+    if (currentSectionId !== activeSectionId) {
+      syncSectionFromScroll(activeSectionId, {
+        historyMode: "replace",
+      });
+    }
+  }, [activeSectionId, currentSectionId, syncSectionFromScroll]);
+
+  useEffect(() => {
+    refreshActiveSection("refresh");
+  }, [refreshActiveSection, sections]);
+
+  const renderPolicy = useSectionRenderPolicy({
+    sections,
+    activeSectionId,
+    nearDistance: 1,
   });
 
   return (
-    <div ref={containerRef} style={containerStyle}>
-      <section id="home" data-section="home" style={sectionStyle}>
-        <div style={contentContainerStyle}>
-          <MateusMobile />
-        </div>
-      </section>
+    <main
+      ref={containerRef}
+      style={containerStyle}
+      aria-label="Landing page mobile"
+      data-active-section={activeSectionId}
+      data-landing-viewport="mobile"
+    >
+      {sections.map((section) => {
+        const behavior = resolveLandingSectionBehavior(section.behavior);
 
-      <section id="portfolio" data-section="portfolio" style={sectionStyle}>
-        <div style={contentContainerStyle}>
-          <Portfolio />
-        </div>
-      </section>
+        const resolvedSectionStyle: CSSProperties = {
+          ...baseSectionStyle,
+          minHeight:
+            section.sectionStyle?.minHeight ??
+            resolveLandingSectionMinHeight("mobile", {
+              preferDynamicViewport: false,
+            }),
+          scrollMarginTop:
+            section.sectionStyle?.scrollMarginTop ??
+            resolveLandingScrollMarginTop("mobile"),
+          ...section.sectionStyle,
+        };
 
-      <section id="pricing" data-section="pricing" style={sectionStyle}>
-        <div style={contentContainerStyle}>
-          <Pricing />
-        </div>
-      </section>
+        const resolvedContentStyle: CSSProperties = {
+          ...baseContentContainerStyle,
+          ...section.contentStyle,
+        };
 
-      <section id="live" data-section="live" style={sectionStyle}>
-        <div style={contentContainerStyle}>
-          <Live />
-        </div>
-      </section>
-
-      <section id="roadmap" data-section="roadmap" style={sectionStyle}>
-        <div style={contentContainerStyle}>
-          <RoadMapMobile />
-        </div>
-      </section>
-
-      <section id="contact" data-section="contact" style={sectionStyle}>
-        <div style={contentContainerStyle}>
-          <ContactMobile />
-        </div>
-      </section>
-    </div>
+        return (
+          <LandingSectionShell
+            key={section.id}
+            id={section.id}
+            state={renderPolicy.getSectionState(section.id)}
+            behavior={behavior}
+            placeholderMinHeight={
+              section.placeholderMinHeight ??
+              behavior.placeholderFallbackMinHeight
+            }
+            sectionStyle={resolvedSectionStyle}
+            contentStyle={resolvedContentStyle}
+          >
+            {section.content}
+          </LandingSectionShell>
+        );
+      })}
+    </main>
   );
 };
 

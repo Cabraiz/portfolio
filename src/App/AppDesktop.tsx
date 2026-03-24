@@ -1,14 +1,20 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import { ReactLenis } from "lenis/react";
 
 import AppRoutes from "../routes/AppRoutes";
 import AppNavbar from "./NavBar/AppNavbar";
 import TitleWebsite from "../pages/PrincipalPage/TitleWebsite/title_website";
-import LandingPage from "../pages/Mateus/LandingPage/LandingPage";
 import FloatingButtons from "./FloatingButtons";
 import { useSectionVisibility } from "../hooks/useSectionVisibility";
 import { getLenisScrollSettings } from "../features/scroll/getLenisScrollSettings";
+import {
+  getPathBySectionId,
+  getSectionIdByPath,
+  normalizeLandingSectionId,
+  type LandingSectionId,
+} from "../features/navigation/landingSections";
 import type {
   LenisScrollSettings,
   ScrollHardwareInfo,
@@ -17,10 +23,35 @@ import type {
 
 import "react-toastify/dist/ReactToastify.css";
 
-const links = ["home", "portfolio", "roadMap", "pricing", "live", "contact"];
+const links: LandingSectionId[] = [
+  "home",
+  "portfolio",
+  "roadMap",
+  "pricing",
+  "live",
+  "contact",
+];
+
+function getBrowserWindow(): Window | null {
+  if (globalThis.window === undefined) {
+    return null;
+  }
+
+  return globalThis.window;
+}
+
+function getBrowserNavigator(): Navigator | null {
+  if (globalThis.navigator === undefined) {
+    return null;
+  }
+
+  return globalThis.navigator;
+}
 
 function getViewportInfo(): ScrollViewport {
-  if (typeof window === "undefined") {
+  const browserWindow = getBrowserWindow();
+
+  if (!browserWindow) {
     return {
       width: 1366,
       height: 768,
@@ -28,17 +59,19 @@ function getViewportInfo(): ScrollViewport {
   }
 
   return {
-    width: window.innerWidth,
-    height: window.innerHeight,
+    width: browserWindow.innerWidth,
+    height: browserWindow.innerHeight,
   };
 }
 
 function getHardwareInfo(): ScrollHardwareInfo {
-  if (typeof navigator === "undefined") {
+  const browserNavigator = getBrowserNavigator();
+
+  if (!browserNavigator) {
     return {};
   }
 
-  const nav = navigator as Navigator & { deviceMemory?: number };
+  const nav = browserNavigator as Navigator & { deviceMemory?: number };
 
   return {
     deviceMemoryGb: nav.deviceMemory ?? null,
@@ -63,38 +96,65 @@ function buildSmoothSettings(viewport: ScrollViewport): LenisScrollSettings {
 }
 
 export default function AppDesktop() {
-  const { isNavHidden, isFloatingHidden, isLandingHidden } =
-    useSectionVisibility();
+  const { isNavHidden, isFloatingHidden } = useSectionVisibility();
 
-  const [selectedLink, setSelectedLink] = useState("home");
+  const location = useLocation();
+  const navigate = useNavigate();
+
   const [menuOpen, setMenuOpen] = useState(false);
 
   const [smoothOptions, setSmoothOptions] = useState<LenisScrollSettings>(() =>
     buildSmoothSettings(getViewportInfo()),
   );
 
+  const selectedLink = useMemo(() => {
+    return getSectionIdByPath(location.pathname) ?? "";
+  }, [location.pathname]);
+
+  const handleSelectLink = useCallback(
+    (nextLink: string) => {
+      const normalizedSectionId = normalizeLandingSectionId(nextLink);
+
+      if (!normalizedSectionId) {
+        return;
+      }
+
+      navigate(getPathBySectionId(normalizedSectionId));
+      setMenuOpen(false);
+    },
+    [navigate],
+  );
+
   useEffect(() => {
+    const browserWindow = getBrowserWindow();
+
+    if (!browserWindow) {
+      return;
+    }
+
     let frame = 0;
 
     const updateSmoothOptions = () => {
-      cancelAnimationFrame(frame);
+      browserWindow.cancelAnimationFrame(frame);
 
-      frame = window.requestAnimationFrame(() => {
+      frame = browserWindow.requestAnimationFrame(() => {
         setSmoothOptions(buildSmoothSettings(getViewportInfo()));
       });
     };
 
     updateSmoothOptions();
 
-    window.addEventListener("resize", updateSmoothOptions, { passive: true });
-    window.addEventListener("orientationchange", updateSmoothOptions, {
+    browserWindow.addEventListener("resize", updateSmoothOptions, {
+      passive: true,
+    });
+    browserWindow.addEventListener("orientationchange", updateSmoothOptions, {
       passive: true,
     });
 
     return () => {
-      cancelAnimationFrame(frame);
-      window.removeEventListener("resize", updateSmoothOptions);
-      window.removeEventListener("orientationchange", updateSmoothOptions);
+      browserWindow.cancelAnimationFrame(frame);
+      browserWindow.removeEventListener("resize", updateSmoothOptions);
+      browserWindow.removeEventListener("orientationchange", updateSmoothOptions);
     };
   }, []);
 
@@ -118,23 +178,20 @@ export default function AppDesktop() {
         <AppNavbar
           isMobileView={false}
           selectedLink={selectedLink}
-          setSelectedLink={setSelectedLink}
+          setSelectedLink={handleSelectLink}
           menuOpen={menuOpen}
           setMenuOpen={setMenuOpen}
           links={links}
         />
       )}
 
-      <>
-        {!isLandingHidden && <LandingPage />}
-        <AppRoutes />
-      </>
+      <AppRoutes />
 
       {!isFloatingHidden && (
         <FloatingButtons
           links={links}
           selectedLink={selectedLink}
-          setSelectedLink={setSelectedLink}
+          setSelectedLink={handleSelectLink}
         />
       )}
 

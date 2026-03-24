@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import { ReactLenis } from "lenis/react";
 
@@ -10,12 +10,17 @@ import "../pages/Surprise/Surprise.css";
 
 import AppRoutes from "../routes/AppRoutes";
 import AppNavbar from "./NavBar/AppNavbar";
-import LandingPageMobile from "../pages/Mateus/LandingPage/LandingPageMobile";
 
 import "react-toastify/dist/ReactToastify.css";
 
 import TitleWebsite from "../pages/PrincipalPage/TitleWebsite/title_website";
 import { getLenisScrollSettings } from "../features/scroll/getLenisScrollSettings";
+import {
+  getPathBySectionId,
+  getSectionIdByPath,
+  normalizeLandingSectionId,
+  type LandingSectionId,
+} from "../features/navigation/landingSections";
 import type {
   LenisScrollSettings,
   ScrollHardwareInfo,
@@ -24,8 +29,42 @@ import type {
 
 const APP_LENIS_SCROLL_CLASS = "desktop-lenis-scroll";
 
+const links: LandingSectionId[] = [
+  "portfolio",
+  "roadMap",
+  "pricing",
+  "live",
+  "contact",
+];
+
+function getBrowserWindow(): Window | null {
+  if (globalThis.window === undefined) {
+    return null;
+  }
+
+  return globalThis.window;
+}
+
+function getBrowserNavigator(): Navigator | null {
+  if (globalThis.navigator === undefined) {
+    return null;
+  }
+
+  return globalThis.navigator;
+}
+
+function getBrowserDocument(): Document | null {
+  if (globalThis.document === undefined) {
+    return null;
+  }
+
+  return globalThis.document;
+}
+
 function getViewportInfo(): ScrollViewport {
-  if (typeof window === "undefined") {
+  const browserWindow = getBrowserWindow();
+
+  if (!browserWindow) {
     return {
       width: 390,
       height: 844,
@@ -33,17 +72,19 @@ function getViewportInfo(): ScrollViewport {
   }
 
   return {
-    width: window.innerWidth,
-    height: window.innerHeight,
+    width: browserWindow.innerWidth,
+    height: browserWindow.innerHeight,
   };
 }
 
 function getHardwareInfo(): ScrollHardwareInfo {
-  if (typeof navigator === "undefined") {
+  const browserNavigator = getBrowserNavigator();
+
+  if (!browserNavigator) {
     return {};
   }
 
-  const nav = navigator as Navigator & { deviceMemory?: number };
+  const nav = browserNavigator as Navigator & { deviceMemory?: number };
 
   return {
     deviceMemoryGb: nav.deviceMemory ?? null,
@@ -68,63 +109,95 @@ function buildSmoothSettings(): LenisScrollSettings {
 }
 
 function AppMobile() {
-  const [selectedLink, setSelectedLink] = useState("home");
+  const location = useLocation();
+  const navigate = useNavigate();
+
   const [menuOpen, setMenuOpen] = useState(false);
   const [smoothOptions, setSmoothOptions] = useState<LenisScrollSettings>(() =>
     buildSmoothSettings(),
   );
 
-  const baseLinks = ["portfolio", "roadMap", "pricing", "live", "contact"];
-  const links = baseLinks;
+  const hiddenNavbarRoutes = useMemo(
+    () => [
+      "/enigma",
+      "/libras-unlock",
+      "/libras",
+      "/rosa-unlock",
+      "/rosa",
+      "/vinho-unlock",
+      "/vinho",
+      "/loginhublocal",
+      "/registerhublocal",
+      "/resume",
+      "/doris",
+      "/casanova",
+      "/hublocal",
+    ],
+    [],
+  );
 
-  const { pathname } = useLocation();
+  const isNavHidden = hiddenNavbarRoutes.includes(location.pathname);
 
-  const hiddenNavbarRoutes = [
-    "/enigma",
-    "/libras-unlock",
-    "/libras",
-    "/rosa-unlock",
-    "/rosa",
-    "/vinho-unlock",
-    "/vinho",
-    "/loginhublocal",
-    "/registerhublocal",
-    "/resume",
-    "/doris",
-    "/casanova",
-    "/hublocal",
-  ];
+  const selectedLink = useMemo(() => {
+    return getSectionIdByPath(location.pathname) ?? "";
+  }, [location.pathname]);
 
-  const isNavHidden = hiddenNavbarRoutes.includes(pathname);
+  const handleSelectLink = useCallback(
+    (nextLink: string) => {
+      const normalizedSectionId = normalizeLandingSectionId(nextLink);
+
+      if (!normalizedSectionId) {
+        return;
+      }
+
+      navigate(getPathBySectionId(normalizedSectionId));
+      setMenuOpen(false);
+    },
+    [navigate],
+  );
 
   useEffect(() => {
+    const browserWindow = getBrowserWindow();
+
+    if (!browserWindow) {
+      return;
+    }
+
     let frame = 0;
 
     const updateSmoothOptions = () => {
-      cancelAnimationFrame(frame);
+      browserWindow.cancelAnimationFrame(frame);
 
-      frame = window.requestAnimationFrame(() => {
+      frame = browserWindow.requestAnimationFrame(() => {
         setSmoothOptions(buildSmoothSettings());
       });
     };
 
     updateSmoothOptions();
 
-    window.addEventListener("resize", updateSmoothOptions, { passive: true });
-    window.addEventListener("orientationchange", updateSmoothOptions, {
+    browserWindow.addEventListener("resize", updateSmoothOptions, {
+      passive: true,
+    });
+    browserWindow.addEventListener("orientationchange", updateSmoothOptions, {
       passive: true,
     });
 
     return () => {
-      cancelAnimationFrame(frame);
-      window.removeEventListener("resize", updateSmoothOptions);
-      window.removeEventListener("orientationchange", updateSmoothOptions);
+      browserWindow.cancelAnimationFrame(frame);
+      browserWindow.removeEventListener("resize", updateSmoothOptions);
+      browserWindow.removeEventListener("orientationchange", updateSmoothOptions);
     };
   }, []);
 
   useEffect(() => {
-    const html = document.documentElement;
-    const { body } = document;
+    const browserDocument = getBrowserDocument();
+
+    if (!browserDocument) {
+      return;
+    }
+
+    const html = browserDocument.documentElement;
+    const { body } = browserDocument;
 
     const previousHtmlOverflow = html.style.overflow;
     const previousBodyOverflow = body.style.overflow;
@@ -155,11 +228,6 @@ function AppMobile() {
       root
       className="app-lenis-root"
       options={{
-        /**
-         * No mobile, manter autoRaf ligado é a opção mais segura
-         * até a LandingPageMobile estar 100% integrada com bridge
-         * manual de Lenis + GSAP.
-         */
         autoRaf: true,
         orientation: "vertical",
         gestureOrientation: "vertical",
@@ -176,14 +244,12 @@ function AppMobile() {
           <AppNavbar
             isMobileView={true}
             selectedLink={selectedLink}
-            setSelectedLink={setSelectedLink}
+            setSelectedLink={handleSelectLink}
             menuOpen={menuOpen}
             setMenuOpen={setMenuOpen}
             links={links}
           />
         )}
-
-        {!isNavHidden && <LandingPageMobile />}
 
         <AppRoutes />
 

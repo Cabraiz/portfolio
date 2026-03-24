@@ -1,5 +1,7 @@
 import { useMemo } from "react";
-import useHashSectionSync from "@/features/scroll/useHashSectionSync";
+import { useLocation } from "react-router-dom";
+
+import { getSectionIdByPath } from "@/features/navigation/landingSections";
 
 type SectionVisibilityState = Readonly<{
   currentSection: string;
@@ -17,12 +19,37 @@ type UseSectionVisibilityParams = Readonly<{
   narrativeSections?: readonly string[];
 }>;
 
+function normalizeSectionKey(section: string): string {
+  return section
+    .trim()
+    .replace(/^#/, "")
+    .replace(/^\/+/, "")
+    .replace(/\/+$/, "");
+}
+
 function normalizeSectionList(sections: readonly string[]): Set<string> {
-  return new Set(
-    sections
-      .map((section) => section.trim().replace(/^#/, ""))
-      .filter(Boolean)
-  );
+  return new Set(sections.map(normalizeSectionKey).filter(Boolean));
+}
+
+function resolveCurrentSectionFromPathname(
+  pathname: string,
+  defaultSectionId: string,
+): string {
+  const landingSectionId = getSectionIdByPath(pathname);
+
+  if (landingSectionId) {
+    return landingSectionId;
+  }
+
+  const normalizedPath = pathname.trim();
+
+  if (!normalizedPath || normalizedPath === "/") {
+    return defaultSectionId;
+  }
+
+  const routeSection = normalizeSectionKey(normalizedPath);
+
+  return routeSection || defaultSectionId;
 }
 
 export function useSectionVisibility({
@@ -32,31 +59,32 @@ export function useSectionVisibility({
   landingHiddenSections = ["enigma"],
   narrativeSections = ["enigma"],
 }: UseSectionVisibilityParams = {}): SectionVisibilityState {
-  const { currentSectionId } = useHashSectionSync({
-    defaultSectionId,
-  });
+  const location = useLocation();
 
   const navHiddenSet = useMemo(
     () => normalizeSectionList(navHiddenSections),
-    [navHiddenSections]
+    [navHiddenSections],
   );
 
   const floatingHiddenSet = useMemo(
     () => normalizeSectionList(floatingHiddenSections),
-    [floatingHiddenSections]
+    [floatingHiddenSections],
   );
 
   const landingHiddenSet = useMemo(
     () => normalizeSectionList(landingHiddenSections),
-    [landingHiddenSections]
+    [landingHiddenSections],
   );
 
   const narrativeSet = useMemo(
     () => normalizeSectionList(narrativeSections),
-    [narrativeSections]
+    [narrativeSections],
   );
 
-  const currentSection = currentSectionId || defaultSectionId;
+  const currentSection = useMemo(
+    () => resolveCurrentSectionFromPathname(location.pathname, defaultSectionId),
+    [defaultSectionId, location.pathname],
+  );
 
   return useMemo(
     () => ({
@@ -72,7 +100,7 @@ export function useSectionVisibility({
       landingHiddenSet,
       narrativeSet,
       navHiddenSet,
-    ]
+    ],
   );
 }
 

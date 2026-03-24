@@ -1,11 +1,11 @@
-import { CSSProperties } from "react";
+import type { CSSProperties } from "react";
 
 export const navbarLayoutTokens = {
   heights: {
     mobile: 72,
 
     /**
-     * Mantém a navbar desktop na mesma altura base,
+     * Mantém a navbar desktop estável,
      * sem crescer em viewports altos como 1080p.
      */
     desktop: 70,
@@ -22,22 +22,12 @@ export const navbarLayoutTokens = {
 
   desktop: {
     /**
-     * Mantido para compatibilidade com AppNavbar,
-     * mas os valores default foram alinhados ao compacto
-     * para 1080p ficar mais próximo do 720p.
+     * Mantidos por compatibilidade com pontos
+     * de integração legados do navbar.
      */
     compactBreakpoint: 1240,
-
-    /**
-     * Na prática, desativa o modo "tall desktop".
-     * Mesmo que AppNavbar cheque viewportHeight,
-     * a navbar não ficará maior.
-     */
     tallViewportBreakpoint: 99999,
 
-    /**
-     * Default alinhado ao visual compacto.
-     */
     sideColumnWidth: {
       default: "232px",
       compact: "232px",
@@ -92,38 +82,40 @@ export const navbarLayoutTokens = {
 
 export const navbarStyles = {
   container: {
-    backdropFilter: "blur(6px)",
-    boxShadow: "0 4px 18px rgba(0,0,0,0.35)",
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    zIndex: 9999,
     position: "fixed",
-    width: "100%",
     top: 0,
     left: 0,
+    width: "100%",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    zIndex: 9999,
+    boxShadow: "0 4px 18px rgba(0, 0, 0, 0.35)",
+    backdropFilter: "blur(14px)",
+    WebkitBackdropFilter: "blur(14px)",
+    willChange: "transform, opacity",
   } as CSSProperties,
 
   navLink: {
     display: "inline-flex",
     alignItems: "center",
     justifyContent: "center",
-    color: "rgba(255, 255, 255, 0.6)",
-    fontWeight: 100,
-    letterSpacing: navbarLayoutTokens.navLink.letterSpacing,
-    cursor: "pointer",
-    userSelect: "none",
-    transition: "color 0.25s ease-in-out, transform 0.25s ease-in-out",
     position: "relative",
-    fontSize: navbarLayoutTokens.navLink.fontSize,
-    lineHeight: 1.05,
-    whiteSpace: "nowrap",
     margin: 0,
     paddingLeft: 0,
     paddingRight: 0,
     paddingTop: 0,
     paddingBottom: navbarLayoutTokens.navLink.paddingBottom,
+    color: "rgba(255, 255, 255, 0.6)",
+    fontWeight: 100,
+    fontSize: navbarLayoutTokens.navLink.fontSize,
+    lineHeight: 1.05,
+    letterSpacing: navbarLayoutTokens.navLink.letterSpacing,
+    whiteSpace: "nowrap",
+    cursor: "pointer",
+    userSelect: "none",
     transform: "translateY(10%)",
+    transition: "color 0.25s ease-in-out, transform 0.25s ease-in-out",
   } as CSSProperties,
 
   navLinkActive: {
@@ -140,9 +132,10 @@ export const navbarStyles = {
     position: "absolute",
     bottom: navbarLayoutTokens.underline.bottom,
     height: navbarLayoutTokens.underline.height,
-    backgroundColor: "white",
+    backgroundColor: "#ffffff",
     borderRadius: navbarLayoutTokens.underline.borderRadius,
-    transition: "all 300ms ease-in-out",
+    transition:
+      "left 300ms ease-in-out, width 300ms ease-in-out, opacity 200ms ease-in-out",
     zIndex: 1,
     pointerEvents: "none",
   } as CSSProperties,

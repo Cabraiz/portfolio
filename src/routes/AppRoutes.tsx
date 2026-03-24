@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 
 import RegisterHubLocal from "../pages/RegisterHubLocal/Register";
 import LoginHubLocal from "../pages/LoginHubLocal/login";
@@ -12,6 +12,7 @@ import Enigma from "../pages/Enigma/Enigma";
 import Libras from "../pages/Libras/Libras";
 import Rosa from "../pages/Rosa/Rosa";
 import Vinho from "../pages/Vinho/Vinho";
+import LandingRouterPage from "../pages/Mateus/LandingPage/LandingRouterPage";
 
 import { PrivateOutlet } from "../redux/shared/utils/PrivateOutlet";
 import { RouteGuard } from "../components/RouteGuard";
@@ -20,6 +21,15 @@ import DigitalCodeUnlock from "../components/DigitalCodeUnlock";
 const AppRoutes = () => {
   return (
     <Routes>
+      <Route path="/" element={<Navigate to="/home" replace />} />
+
+      <Route path="/home" element={<LandingRouterPage />} />
+      <Route path="/portfolio" element={<LandingRouterPage />} />
+      <Route path="/roadmap" element={<LandingRouterPage />} />
+      <Route path="/pricing" element={<LandingRouterPage />} />
+      <Route path="/live" element={<LandingRouterPage />} />
+      <Route path="/contact" element={<LandingRouterPage />} />
+
       <Route path="/enigma" element={<Enigma />} />
 
       <Route
@@ -64,7 +74,6 @@ const AppRoutes = () => {
       <Route path="/registerhublocal" element={<RegisterHubLocal />} />
       <Route path="/loginhublocal" element={<LoginHubLocal />} />
 
-      {/* compatibilidade legada: /resume agora redireciona para o PDF público canônico */}
       <Route path="/resume" element={<Resume />} />
 
       <Route path="/doris" element={<Doris />} />
@@ -74,8 +83,6 @@ const AppRoutes = () => {
       <Route path="/hublocal" element={<PrivateOutlet />}>
         <Route index element={<Hublocal />} />
       </Route>
-
-      {/* 🚫 Não coloque rota "/" aqui */}
     </Routes>
   );
 };
