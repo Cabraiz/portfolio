@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 
 const titles = [
-  "Software Engineer",
-  "Full Stack Developer",
-  "Front-End Specialist",
-  "Back-End Developer",
-  "📱 Mobile Developer",
+  "Engenheiro de Software",
+  "Dev Full Stack",
+  "Back-End e APIs",
+  "Cloud e DevOps",
+  "Dev Mobile",
 ];
 
 function prefersReducedMotion(): boolean {
