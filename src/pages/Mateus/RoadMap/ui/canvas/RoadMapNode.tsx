@@ -9,6 +9,7 @@ type RoadMapNodeProps = Readonly<{
   positionKey?: RoadMapCanvasPositionKey;
   isActive?: boolean;
   isHovered?: boolean;
+  isDimmed?: boolean;
   onSelect?: (nodeId: string) => void;
   onHover?: (nodeId: string | null) => void;
 }>;
@@ -21,15 +22,15 @@ type NodeDimensions = Readonly<{
 function getNodeDimensions(node: RoadMapNodeModel): NodeDimensions {
   switch (node.kind) {
     case "domain":
-      return { width: 240, minHeight: 72 };
+      return { width: 260, minHeight: 84 };
     case "topic":
-      return { width: 220, minHeight: 64 };
+      return { width: 224, minHeight: 60 };
     case "technology":
-      return { width: 200, minHeight: 64 };
+      return { width: 208, minHeight: 56 };
     case "concept":
-      return { width: 176, minHeight: 52 };
+      return { width: 176, minHeight: 42 };
     default:
-      return { width: 200, minHeight: 60 };
+      return { width: 208, minHeight: 56 };
   }
 }
 
@@ -37,66 +38,67 @@ function getNodePalette(node: RoadMapNodeModel): Readonly<{
   background: string;
   border: string;
   text: string;
-  shadow: string;
   accent: string;
+  eyebrow: string;
 }> {
   switch (node.kind) {
     case "domain":
       return {
-        background: "#fff35c",
-        border: "#191919",
-        text: "#0f0f0f",
-        shadow: "0 12px 28px rgba(0, 0, 0, 0.16)",
-        accent: "#1e5eff",
+        background: "#0f172a",
+        border: "rgba(59, 130, 246, 0.32)",
+        text: "#f8fafc",
+        accent: "#60a5fa",
+        eyebrow: "rgba(191, 219, 254, 0.92)",
       };
     case "topic":
       return {
-        background: "#f3e4a0",
-        border: "#1f1f1f",
-        text: "#161616",
-        shadow: "0 10px 22px rgba(0, 0, 0, 0.12)",
-        accent: "#1e5eff",
+        background: "#ffffff",
+        border: "rgba(37, 99, 235, 0.16)",
+        text: "#0f172a",
+        accent: "#2563eb",
+        eyebrow: "#1d4ed8",
       };
     case "technology":
       return {
-        background: "#efe5c7",
-        border: "#1f1f1f",
-        text: "#181818",
-        shadow: "0 8px 18px rgba(0, 0, 0, 0.10)",
-        accent: "#155eef",
+        background: "#ffffff",
+        border: "rgba(148, 163, 184, 0.2)",
+        text: "#0f172a",
+        accent: "#2563eb",
+        eyebrow: "#2563eb",
       };
     case "concept":
       return {
-        background: "#f5ebc8",
-        border: "#262626",
-        text: "#1a1a1a",
-        shadow: "0 6px 14px rgba(0, 0, 0, 0.08)",
-        accent: "#155eef",
+        background: "#f8fafc",
+        border: "rgba(148, 163, 184, 0.16)",
+        text: "#1e293b",
+        accent: "#2563eb",
+        eyebrow: "#475569",
       };
     default:
       return {
-        background: "#f1e6bf",
-        border: "#1f1f1f",
-        text: "#181818",
-        shadow: "0 8px 18px rgba(0, 0, 0, 0.10)",
-        accent: "#155eef",
+        background: "#ffffff",
+        border: "rgba(148, 163, 184, 0.2)",
+        text: "#0f172a",
+        accent: "#2563eb",
+        eyebrow: "#2563eb",
       };
   }
 }
 
-function getDemandBadgeLabel(node: RoadMapNodeModel): string {
-  switch (node.demand) {
-    case "core":
-      return "Essencial";
-    case "important":
-      return "Importante";
-    case "optional":
-      return "Opcional";
-    case "niche":
-      return "Nicho";
-    default:
-      return "";
+function getNodeEyebrow(node: RoadMapNodeModel): string | null {
+  if (node.kind === "domain") {
+    return "Stack";
   }
+
+  if (node.kind === "topic") {
+    return "Bloco";
+  }
+
+  if (node.kind === "technology" && node.featured) {
+    return "Principal";
+  }
+
+  return null;
 }
 
 function getPosition(
@@ -104,6 +106,7 @@ function getPosition(
   positionKey: RoadMapCanvasPositionKey,
 ): { x: number; y: number } {
   const position = node[positionKey] ?? node.desktop ?? node.mobile ?? { x: 0, y: 0 };
+
   return {
     x: position.x,
     y: position.y,
@@ -115,23 +118,19 @@ function RoadMapNodeComponent({
   positionKey = "desktop",
   isActive = false,
   isHovered = false,
+  isDimmed = false,
   onSelect,
   onHover,
 }: RoadMapNodeProps) {
   const palette = useMemo(() => getNodePalette(node), [node]);
   const dimensions = useMemo(() => getNodeDimensions(node), [node]);
-  const position = useMemo(
-    () => getPosition(node, positionKey),
-    [node, positionKey],
-  );
+  const position = useMemo(() => getPosition(node, positionKey), [node, positionKey]);
+  const eyebrow = useMemo(() => getNodeEyebrow(node), [node]);
 
   const style = useMemo<CSSProperties>(() => {
     const borderColor = isActive ? palette.accent : palette.border;
-    const transform = isActive
-      ? "translate3d(0, 0, 0) scale(1.02)"
-      : isHovered
-        ? "translate3d(0, 0, 0) scale(1.01)"
-        : "translate3d(0, 0, 0) scale(1)";
+    const backgroundColor =
+      isActive && node.kind !== "domain" ? "#eff6ff" : palette.background;
 
     return {
       position: "absolute",
@@ -139,68 +138,104 @@ function RoadMapNodeComponent({
       top: `${position.y}px`,
       width: `${dimensions.width}px`,
       minHeight: `${dimensions.minHeight}px`,
-      padding: node.kind === "concept" ? "8px 12px" : "12px 14px",
-      borderRadius: node.kind === "domain" ? "8px" : "7px",
-      border: `2px solid ${borderColor}`,
-      background: palette.background,
+      padding:
+        node.kind === "domain"
+          ? "14px 16px"
+          : node.kind === "concept"
+            ? "8px 12px"
+            : "10px 14px",
+      borderRadius:
+        node.kind === "domain" ? "18px" : node.kind === "concept" ? "999px" : "14px",
+      border: `1px solid ${borderColor}`,
+      background: backgroundColor,
       color: palette.text,
-      boxShadow: isActive
-        ? `0 0 0 3px rgba(30, 94, 255, 0.15), ${palette.shadow}`
-        : palette.shadow,
       display: "flex",
       flexDirection: "column",
       justifyContent: "center",
-      alignItems: "center",
-      gap: node.kind === "concept" ? "2px" : "6px",
-      textAlign: "center",
+      alignItems: node.kind === "concept" ? "center" : "flex-start",
+      gap: eyebrow ? "4px" : 0,
+      textAlign: node.kind === "concept" ? "center" : "left",
       cursor: "pointer",
       userSelect: "none",
-      transform,
-      transition:
-        "transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease, opacity 180ms ease",
-      zIndex: isActive ? 5 : isHovered ? 4 : 3,
+      opacity: isDimmed ? 0.34 : 1,
+      zIndex: isActive ? 6 : isHovered ? 5 : 3,
       fontFamily:
         'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+      boxSizing: "border-box",
+      outline: isActive ? "2px solid rgba(37, 99, 235, 0.14)" : "none",
+      outlineOffset: "0",
     };
-  }, [dimensions, isActive, isHovered, node.kind, palette, position.x, position.y]);
+  }, [
+    dimensions,
+    eyebrow,
+    isActive,
+    isDimmed,
+    isHovered,
+    node.kind,
+    palette,
+    position.x,
+    position.y,
+  ]);
+
+  const eyebrowStyle = useMemo<CSSProperties>(
+    () => ({
+      display: "inline-flex",
+      alignItems: "center",
+      minHeight: "16px",
+      padding: "0 6px",
+      borderRadius: "999px",
+      background:
+        node.kind === "domain"
+          ? "rgba(255,255,255,0.1)"
+          : "rgba(37, 99, 235, 0.08)",
+      color: palette.eyebrow,
+      fontSize: "0.62rem",
+      fontWeight: 800,
+      lineHeight: 1,
+      letterSpacing: "0.04em",
+      textTransform: "uppercase",
+      whiteSpace: "nowrap",
+    }),
+    [node.kind, palette.eyebrow],
+  );
 
   const titleStyle = useMemo<CSSProperties>(
     () => ({
       margin: 0,
-      lineHeight: 1.15,
-      fontSize: node.kind === "domain" ? "0.96rem" : node.kind === "concept" ? "0.84rem" : "0.9rem",
+      width: "100%",
+      lineHeight: 1.12,
+      fontSize:
+        node.kind === "domain"
+          ? "1rem"
+          : node.kind === "topic"
+            ? "0.9rem"
+            : node.kind === "technology"
+              ? "0.88rem"
+              : "0.8rem",
       fontWeight: node.kind === "domain" ? 800 : 700,
-      letterSpacing: "-0.01em",
+      letterSpacing: "-0.02em",
+      overflowWrap: "anywhere",
     }),
     [node.kind],
   );
 
-  const subtitleStyle = useMemo<CSSProperties>(
+  const accentBarStyle = useMemo<CSSProperties>(
     () => ({
-      margin: 0,
-      fontSize: "0.7rem",
-      lineHeight: 1.2,
-      fontWeight: 600,
-      opacity: 0.85,
+      position: "absolute",
+      top: "0",
+      left: node.kind === "concept" ? "18%" : "14px",
+      right: node.kind === "concept" ? "18%" : "14px",
+      height: "2px",
+      borderTopLeftRadius: "999px",
+      borderTopRightRadius: "999px",
+      background:
+        node.kind === "domain"
+          ? "rgba(96, 165, 250, 0.92)"
+          : node.kind === "technology" && node.featured
+            ? "rgba(37, 99, 235, 0.82)"
+            : "transparent",
     }),
-    [],
-  );
-
-  const badgeStyle = useMemo<CSSProperties>(
-    () => ({
-      display: node.kind === "concept" ? "none" : "inline-flex",
-      alignItems: "center",
-      justifyContent: "center",
-      padding: "2px 8px",
-      borderRadius: "999px",
-      background: "rgba(15, 15, 15, 0.08)",
-      color: "#111111",
-      fontSize: "0.68rem",
-      fontWeight: 700,
-      lineHeight: 1,
-      whiteSpace: "nowrap",
-    }),
-    [node.kind],
+    [node.featured, node.kind],
   );
 
   return (
@@ -213,16 +248,14 @@ function RoadMapNodeComponent({
       onClick={() => onSelect?.(node.id)}
       onMouseEnter={() => onHover?.(node.id)}
       onMouseLeave={() => onHover?.(null)}
+      onFocus={() => onHover?.(node.id)}
+      onBlur={() => onHover?.(null)}
     >
+      <span aria-hidden="true" style={accentBarStyle} />
+
+      {eyebrow ? <span style={eyebrowStyle}>{eyebrow}</span> : null}
+
       <span style={titleStyle}>{node.shortLabel ?? node.label}</span>
-
-      {node.kind !== "concept" && (
-        <span style={badgeStyle}>{getDemandBadgeLabel(node)}</span>
-      )}
-
-      {node.kind === "domain" && node.description && (
-        <span style={subtitleStyle}>{node.description}</span>
-      )}
     </button>
   );
 }

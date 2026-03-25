@@ -11,12 +11,21 @@ export type RoadMapRelationType =
   | "complements"
   | "specializes";
 
+/**
+ * Mantido por compatibilidade com a base atual.
+ * No contexto novo, "demand" representa o peso visual/estratégico
+ * da tecnologia dentro da sua stack, e não prioridade pedagógica.
+ */
 export type RoadMapDemandLevel =
   | "core"
   | "important"
   | "optional"
   | "niche";
 
+/**
+ * Mantidos os ids atuais para evitar quebra imediata dos arquivos de data.
+ * A camada de apresentação pode renomear esses grupos de forma mais profissional.
+ */
 export type RoadMapCategoryId =
   | "fundamentals"
   | "react-core"
@@ -35,6 +44,11 @@ export type RoadMapMarketSignal =
   | "legacy"
   | "rising";
 
+export type RoadMapNodeEmphasis = "high" | "medium" | "low";
+export type RoadMapNodeShape = "card" | "pill" | "chip";
+export type RoadMapRelationStyle = "solid" | "dashed" | "dotted";
+export type RoadMapSemanticWeight = "primary" | "secondary";
+
 export type RoadMapPosition = Readonly<{
   x: number;
   y: number;
@@ -42,11 +56,22 @@ export type RoadMapPosition = Readonly<{
 
 export type RoadMapNodeDetails = Readonly<{
   summary?: string;
+  headline?: string;
+  projectContexts?: readonly string[];
+  responsibilities?: readonly string[];
+  strengths?: readonly string[];
+  relatedStacks?: readonly string[];
+  evidencePoints?: readonly string[];
+  cautions?: readonly string[];
+
+  /**
+   * Campos legados mantidos por compatibilidade durante a transição
+   * do roadmap explicativo para o roadmap de stack.
+   */
   whyItMatters?: string;
   whenToUse?: readonly string[];
   whenNotToUse?: readonly string[];
   useCases?: readonly string[];
-  cautions?: readonly string[];
 }>;
 
 export type RoadMapNode = Readonly<{
@@ -56,8 +81,24 @@ export type RoadMapNode = Readonly<{
   description?: string;
   kind: RoadMapNodeKind;
   category: RoadMapCategoryId;
+
+  /**
+   * Peso visual/estratégico do item na sua stack.
+   * Ex.: core = base principal; important = atuação recorrente.
+   */
   demand: RoadMapDemandLevel;
+
+  /**
+   * Mantido por compatibilidade.
+   * Pode ser reaproveitado como nível de profundidade técnica.
+   */
   difficulty?: 1 | 2 | 3 | 4 | 5;
+
+  /**
+   * Novo campo opcional mais coerente com portfólio.
+   */
+  proficiency?: 1 | 2 | 3 | 4 | 5;
+
   parentId?: string | null;
   tags?: readonly string[];
   aliases?: readonly string[];
@@ -65,6 +106,7 @@ export type RoadMapNode = Readonly<{
   details?: RoadMapNodeDetails;
   desktop?: RoadMapPosition;
   mobile?: RoadMapPosition;
+  featured?: boolean;
   isHidden?: boolean;
   isDeprecated?: boolean;
 }>;
@@ -129,8 +171,8 @@ export type RoadMapNodeRegistryEntry = Readonly<{
   label: string;
   description: string;
   isContainer: boolean;
-  emphasis: "high" | "medium" | "low";
-  defaultShape: "card" | "pill" | "chip";
+  emphasis: RoadMapNodeEmphasis;
+  defaultShape: RoadMapNodeShape;
 }>;
 
 export type RoadMapRelationRegistryEntry = Readonly<{
@@ -138,6 +180,6 @@ export type RoadMapRelationRegistryEntry = Readonly<{
   label: string;
   description: string;
   directed: boolean;
-  style: "solid" | "dashed" | "dotted";
-  semanticWeight: "primary" | "secondary";
+  style: RoadMapRelationStyle;
+  semanticWeight: RoadMapSemanticWeight;
 }>;

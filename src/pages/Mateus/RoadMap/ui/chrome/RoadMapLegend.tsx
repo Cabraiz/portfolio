@@ -8,46 +8,104 @@ import {
   ROADMAP_NODE_REGISTRY,
   ROADMAP_RELATION_REGISTRY,
 } from "../../domain/model/roadmap.registry";
+import type {
+  RoadMapNodeKind,
+  RoadMapRelationStyle,
+  RoadMapRelationType,
+} from "../../domain/model/roadmap.types";
 
-function NodeLegendChip({
-  label,
-  background,
-  border,
-}: Readonly<{
+type NodeLegendChipProps = Readonly<{
+  kind: RoadMapNodeKind;
   label: string;
-  background: string;
-  border: string;
-}>) {
-  const style: CSSProperties = {
+}>;
+
+type RelationLegendChipProps = Readonly<{
+  type: RoadMapRelationType;
+  label: string;
+  borderStyle: RoadMapRelationStyle;
+}>;
+
+function getNodeLegendStyle(kind: RoadMapNodeKind): CSSProperties {
+  switch (kind) {
+    case "domain":
+      return {
+        borderRadius: "14px",
+        background: "linear-gradient(180deg, #0f172a 0%, #16203b 100%)",
+        border: "1px solid rgba(96, 165, 250, 0.34)",
+        color: "#f8fafc",
+      };
+    case "topic":
+      return {
+        borderRadius: "12px",
+        background: "linear-gradient(180deg, #ffffff 0%, #f8fbff 100%)",
+        border: "1px solid rgba(37, 99, 235, 0.18)",
+        color: "#0f172a",
+      };
+    case "technology":
+      return {
+        borderRadius: "12px",
+        background: "linear-gradient(180deg, #ffffff 0%, #fbfdff 100%)",
+        border: "1px solid rgba(148, 163, 184, 0.22)",
+        color: "#0f172a",
+      };
+    case "concept":
+      return {
+        borderRadius: "999px",
+        background: "linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%)",
+        border: "1px solid rgba(148, 163, 184, 0.18)",
+        color: "#1e293b",
+      };
+    default:
+      return {
+        borderRadius: "12px",
+        background: "#ffffff",
+        border: "1px solid rgba(148, 163, 184, 0.22)",
+        color: "#0f172a",
+      };
+  }
+}
+
+function getRelationBorderColor(type: RoadMapRelationType): string {
+  switch (type) {
+    case "contains":
+      return "rgba(59, 130, 246, 0.62)";
+    case "prerequisite":
+      return "rgba(37, 99, 235, 0.82)";
+    case "alternative":
+      return "rgba(100, 116, 139, 0.56)";
+    case "complements":
+      return "rgba(14, 116, 144, 0.62)";
+    case "specializes":
+      return "rgba(99, 102, 241, 0.58)";
+    default:
+      return "rgba(37, 99, 235, 0.70)";
+  }
+}
+
+function NodeLegendChip({ kind, label }: NodeLegendChipProps) {
+  const baseStyle: CSSProperties = {
     display: "inline-flex",
     alignItems: "center",
     justifyContent: "center",
     minHeight: "34px",
     padding: "0 12px",
-    borderRadius: "10px",
-    background,
-    border: `2px solid ${border}`,
-    color: "#111111",
     fontSize: "0.76rem",
     fontWeight: 800,
     lineHeight: 1,
     whiteSpace: "nowrap",
+    boxShadow: "0 8px 18px rgba(15, 23, 42, 0.04)",
     fontFamily:
       'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
   };
 
-  return <span style={style}>{label}</span>;
+  return <span style={{ ...baseStyle, ...getNodeLegendStyle(kind) }}>{label}</span>;
 }
 
 function RelationLegendChip({
+  type,
   label,
   borderStyle,
-  borderColor,
-}: Readonly<{
-  label: string;
-  borderStyle: CSSProperties["borderStyle"];
-  borderColor: string;
-}>) {
+}: RelationLegendChipProps) {
   const style: CSSProperties = {
     display: "inline-flex",
     alignItems: "center",
@@ -55,16 +113,16 @@ function RelationLegendChip({
     minHeight: "34px",
     padding: "0 12px",
     borderRadius: "999px",
-    background: "#ffffff",
+    background: "rgba(255,255,255,0.92)",
     borderWidth: "2px",
     borderStyle,
-    borderColor,
+    borderColor: getRelationBorderColor(type),
     color: "#0f172a",
     fontSize: "0.76rem",
     fontWeight: 800,
     lineHeight: 1,
     whiteSpace: "nowrap",
-    boxShadow: "0 6px 16px rgba(15, 23, 42, 0.04)",
+    boxShadow: "0 8px 18px rgba(15, 23, 42, 0.04)",
     fontFamily:
       'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
   };
@@ -79,9 +137,9 @@ function RoadMapLegendComponent() {
       gap: "16px",
       padding: "20px 22px",
       borderRadius: "24px",
-      border: "1px solid rgba(30, 94, 255, 0.08)",
+      border: "1px solid rgba(148, 163, 184, 0.16)",
       background:
-        "linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(248,250,252,0.96) 100%)",
+        "linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(248,250,252,0.98) 100%)",
       boxShadow:
         "0 18px 50px rgba(15, 23, 42, 0.06), inset 0 1px 0 rgba(255,255,255,0.78)",
     }),
@@ -105,7 +163,7 @@ function RoadMapLegendComponent() {
     () => ({
       margin: 0,
       color: "#334155",
-      fontSize: "0.75rem",
+      fontSize: "0.74rem",
       fontWeight: 900,
       textTransform: "uppercase",
       letterSpacing: "0.08em",
@@ -124,80 +182,72 @@ function RoadMapLegendComponent() {
     [],
   );
 
+  const captionStyle = useMemo<CSSProperties>(
+    () => ({
+      color: "#475569",
+      fontSize: "0.84rem",
+      lineHeight: 1.55,
+      fontFamily:
+        'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+    }),
+    [],
+  );
+
+  const nodeKinds = useMemo(
+    () => [
+      "domain",
+      "topic",
+      "technology",
+      "concept",
+    ] as const satisfies readonly RoadMapNodeKind[],
+    [],
+  );
+
+  const relationTypes = useMemo(
+    () => [
+      "contains",
+      "prerequisite",
+      "alternative",
+      "complements",
+      "specializes",
+    ] as const satisfies readonly RoadMapRelationType[],
+    [],
+  );
+
   return (
     <section style={wrapperStyle}>
-      <h3 style={titleStyle}>Legenda do mapa</h3>
+      <h3 style={titleStyle}>Leitura visual</h3>
 
       <div style={{ display: "grid", gap: "10px" }}>
-        <h4 style={sectionTitleStyle}>Tipos de nó</h4>
+        <h4 style={sectionTitleStyle}>Tipos de item</h4>
         <div style={itemsStyle}>
-          <NodeLegendChip
-            label={ROADMAP_KIND_LABELS.domain}
-            background="#fff35c"
-            border="#191919"
-          />
-          <NodeLegendChip
-            label={ROADMAP_KIND_LABELS.topic}
-            background="#f3e4a0"
-            border="#1f1f1f"
-          />
-          <NodeLegendChip
-            label={ROADMAP_KIND_LABELS.technology}
-            background="#efe5c7"
-            border="#1f1f1f"
-          />
-          <NodeLegendChip
-            label={ROADMAP_KIND_LABELS.concept}
-            background="#f5ebc8"
-            border="#262626"
-          />
+          {nodeKinds.map((kind) => (
+            <NodeLegendChip
+              key={kind}
+              kind={kind}
+              label={ROADMAP_KIND_LABELS[kind]}
+            />
+          ))}
         </div>
       </div>
 
       <div style={{ display: "grid", gap: "10px" }}>
-        <h4 style={sectionTitleStyle}>Relações</h4>
+        <h4 style={sectionTitleStyle}>Conexões</h4>
         <div style={itemsStyle}>
-          <RelationLegendChip
-            label={ROADMAP_RELATION_LABELS.contains}
-            borderStyle="dotted"
-            borderColor="#1e5eff"
-          />
-          <RelationLegendChip
-            label={ROADMAP_RELATION_LABELS.prerequisite}
-            borderStyle="solid"
-            borderColor="#1e5eff"
-          />
-          <RelationLegendChip
-            label={ROADMAP_RELATION_LABELS.alternative}
-            borderStyle="dashed"
-            borderColor="#4a4a4a"
-          />
-          <RelationLegendChip
-            label={ROADMAP_RELATION_LABELS.complements}
-            borderStyle="solid"
-            borderColor="#155eef"
-          />
-          <RelationLegendChip
-            label={ROADMAP_RELATION_LABELS.specializes}
-            borderStyle="dotted"
-            borderColor="#155eef"
-          />
+          {relationTypes.map((relationType) => (
+            <RelationLegendChip
+              key={relationType}
+              type={relationType}
+              label={ROADMAP_RELATION_LABELS[relationType]}
+              borderStyle={ROADMAP_RELATION_REGISTRY[relationType].style}
+            />
+          ))}
         </div>
       </div>
 
-      <div
-        style={{
-          display: "grid",
-          gap: "8px",
-          color: "#475569",
-          fontSize: "0.86rem",
-          lineHeight: 1.5,
-          fontFamily:
-            'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-        }}
-      >
-        <span>{ROADMAP_NODE_REGISTRY.domain.description}</span>
-        <span>{ROADMAP_RELATION_REGISTRY.prerequisite.description}</span>
+      <div style={captionStyle}>
+        <div>{ROADMAP_NODE_REGISTRY.domain.description}</div>
+        <div>{ROADMAP_RELATION_REGISTRY.prerequisite.description}</div>
       </div>
     </section>
   );

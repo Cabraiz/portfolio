@@ -11,20 +11,21 @@ type RoadMapClusterProps = Readonly<{
   cluster: RoadMapClusterModel;
   nodes: readonly RoadMapNode[];
   positionKey?: RoadMapCanvasPositionKey;
+  isDimmed?: boolean;
 }>;
 
 function getNodeDimensions(node: RoadMapNode): { width: number; height: number } {
   switch (node.kind) {
     case "domain":
-      return { width: 240, height: 72 };
+      return { width: 260, height: 84 };
     case "topic":
-      return { width: 220, height: 64 };
+      return { width: 224, height: 60 };
     case "technology":
-      return { width: 200, height: 64 };
+      return { width: 208, height: 56 };
     case "concept":
-      return { width: 176, height: 52 };
+      return { width: 176, height: 42 };
     default:
-      return { width: 200, height: 60 };
+      return { width: 208, height: 56 };
   }
 }
 
@@ -32,9 +33,9 @@ function getClusterBounds(
   clusterNodes: readonly RoadMapNode[],
   positionKey: RoadMapCanvasPositionKey,
 ) {
-  const paddingX = 28;
-  const paddingY = 24;
-  const headerOffsetY = 34;
+  const paddingX = 24;
+  const paddingTop = 42;
+  const paddingBottom = 20;
 
   const positioned = clusterNodes
     .map((node) => {
@@ -64,9 +65,9 @@ function getClusterBounds(
   }
 
   const minX = Math.min(...positioned.map((entry) => entry.x)) - paddingX;
-  const minY = Math.min(...positioned.map((entry) => entry.y)) - paddingY - headerOffsetY;
+  const minY = Math.min(...positioned.map((entry) => entry.y)) - paddingTop;
   const maxRight = Math.max(...positioned.map((entry) => entry.right)) + paddingX;
-  const maxBottom = Math.max(...positioned.map((entry) => entry.bottom)) + paddingY;
+  const maxBottom = Math.max(...positioned.map((entry) => entry.bottom)) + paddingBottom;
 
   return {
     x: minX,
@@ -80,10 +81,13 @@ function RoadMapClusterComponent({
   cluster,
   nodes,
   positionKey = "desktop",
+  isDimmed = false,
 }: RoadMapClusterProps) {
+  const clusterNodeIdSet = useMemo(() => new Set(cluster.nodeIds), [cluster.nodeIds]);
+
   const clusterNodes = useMemo(
-    () => nodes.filter((node) => cluster.nodeIds.includes(node.id)),
-    [cluster.nodeIds, nodes],
+    () => nodes.filter((node) => clusterNodeIdSet.has(node.id)),
+    [clusterNodeIdSet, nodes],
   );
 
   const bounds = useMemo(
@@ -101,31 +105,31 @@ function RoadMapClusterComponent({
     top: `${bounds.y}px`,
     width: `${bounds.width}px`,
     height: `${bounds.height}px`,
-    borderRadius: "18px",
-    border: "1px solid rgba(30, 94, 255, 0.18)",
-    background:
-      "linear-gradient(180deg, rgba(30, 94, 255, 0.06) 0%, rgba(30, 94, 255, 0.02) 100%)",
-    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.7)",
+    borderRadius: "20px",
+    border: "1px solid rgba(148, 163, 184, 0.16)",
+    background: "rgba(255, 255, 255, 0.42)",
+    opacity: isDimmed ? 0.28 : 1,
     pointerEvents: "none",
     zIndex: 1,
   };
 
   const titleStyle: CSSProperties = {
     position: "absolute",
-    top: "10px",
+    top: "12px",
     left: "14px",
     display: "inline-flex",
     alignItems: "center",
-    gap: "8px",
-    padding: "4px 10px",
+    minHeight: "24px",
+    padding: "0 10px",
     borderRadius: "999px",
-    background: "rgba(255,255,255,0.92)",
-    border: "1px solid rgba(30, 94, 255, 0.12)",
-    color: "#15308f",
-    fontSize: "0.72rem",
+    background: "#ffffff",
+    border: "1px solid rgba(148, 163, 184, 0.16)",
+    color: "#334155",
+    fontSize: "0.68rem",
     fontWeight: 800,
     lineHeight: 1,
-    letterSpacing: "0.01em",
+    letterSpacing: "0.06em",
+    textTransform: "uppercase",
     fontFamily:
       'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
   };
