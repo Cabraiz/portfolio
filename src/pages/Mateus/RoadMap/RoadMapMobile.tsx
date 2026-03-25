@@ -1,198 +1,108 @@
-import styled, { keyframes } from "styled-components";
-import zeroDois from "../../../assets/Mateus/home/01.png";
-import zeroUm from "../../../assets/Mateus/home/02.png";
+import { useMemo } from "react";
 
-// 🔹 Fade-in com deslocamento
-const fadeSlide = keyframes`
-  0% {
-    opacity: 0;
-    transform: translateY(40px) scale(1.05);
-    filter: blur(4px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-    filter: blur(0);
-  }
-`;
+import { roadMapGraph } from "./domain/data";
+import { resolveRoadMapRelations } from "./application/services/resolveRoadMapRelations";
+import { useRoadMapState } from "./application/hooks/useRoadMapState";
+import RoadMapCanvas from "./ui/canvas/RoadMapCanvas";
+import RoadMapDetailsPanel from "./ui/chrome/RoadMapDetailsPanel";
+import RoadMapFilters from "./ui/chrome/RoadMapFilters";
+import RoadMapHeader from "./ui/chrome/RoadMapHeader";
+import RoadMapLegend from "./ui/chrome/RoadMapLegend";
+import styles from "./RoadMap.module.css";
 
-// 🔹 Pulsar discreto no texto
-const pulsar = keyframes`
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.7;
-  }
-`;
+type RoadMapProps = Readonly<{
+  className?: string;
+}>;
 
-// 🔹 Brilho correndo no texto principal
-const shine = keyframes`
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
-`;
+function joinClassNames(...values: Array<string | undefined | null | false>) {
+  return values.filter(Boolean).join(" ");
+}
 
-const Container = styled.div`
-	min-height: 100vh;
-	width: 100%;
-	background: #000;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	position: relative;
-	overflow: hidden;
-	animation: ${fadeSlide} 1s ease-out;
-`;
+export default function RoadMap({ className }: RoadMapProps) {
+  const {
+    graph,
+    visibleNodes,
+    visibleEdges,
+    visibleClusters,
+    filtersApi,
+    selectionApi,
+  } = useRoadMapState({
+    graph: roadMapGraph,
+    autoSelectFirstVisibleNode: true,
+  });
 
-const BackgroundRed = styled.div`
-	position: absolute;
-	width: 100%;
-	height: 100%;
-	background: radial-gradient(
-		circle at 40% 40%,
-		rgba(172, 17, 66, 1) 30%,
-		rgba(0, 0, 0, 0.7) 100%
-	);
-	clip-path: polygon(0 0, 100% 0, 100% 40%, 0 55%);
-	z-index: 1;
-`;
+  const resolvedRelations = useMemo(() => {
+    if (!selectionApi.activeNodeId) {
+      return null;
+    }
 
-const BackgroundBlue = styled.div`
-	position: absolute;
-	width: 100%;
-	height: 100%;
-	background: radial-gradient(
-		circle at 55% 55%,
-		rgba(57, 170, 255, 1) 30%,
-		rgba(0, 0, 0, 0.7) 100%
-	);
-	clip-path: polygon(0 55%, 100% 40%, 100% 100%, 0 100%);
-	z-index: 1;
-`;
+    return resolveRoadMapRelations(graph, selectionApi.activeNodeId);
+  }, [graph, selectionApi.activeNodeId]);
 
-const NeonLine = styled.div`
-	position: absolute;
-	width: 10px;
-	height: 180%;
-	background: rgba(255, 40, 80, 1);
-	border-radius: 10px;
-	transform: rotate(74deg);
-	left: 50%;
-	top: -42.5%;
-	filter: drop-shadow(0 0 10px rgba(255, 40, 80, 0.9))
-		drop-shadow(0 0 20px rgba(255, 40, 80, 0.7));
-	z-index: 5;
-`;
+  return (
+    <section className={joinClassNames(styles.root, className)}>
+      <div className={styles.stack}>
+        <RoadMapHeader
+          title={graph.title}
+          subtitle={graph.subtitle}
+          visibleNodeCount={visibleNodes.length}
+          visibleEdgeCount={visibleEdges.length}
+          activeNodeLabel={selectionApi.activeNode?.label ?? null}
+        />
 
-const DecorImage = styled.img<{ floatDirection?: "up" | "down" }>`
-	position: absolute;
-	width: 60vw;
-	opacity: 0;
-	animation:
-		${fadeSlide} 1s forwards,
-		${(props) =>
-			props.floatDirection === "up"
-				? "floatUp 6s ease-in-out infinite alternate"
-				: "floatDown 6s ease-in-out infinite alternate"};
+        <div className={styles.contentGrid}>
+          <div className={styles.mainColumn}>
+            <div className={styles.chromeBlock}>
+              <RoadMapFilters
+                filters={filtersApi.filters}
+                activeFilterCount={filtersApi.activeFilterCount}
+                onQueryChange={filtersApi.setQuery}
+                onReset={filtersApi.resetFilters}
+                onToggleCategory={filtersApi.toggleCategory}
+                onToggleDemand={filtersApi.toggleDemand}
+                onToggleKind={filtersApi.toggleKind}
+                onToggleSignal={filtersApi.toggleSignal}
+                onToggleRelationType={filtersApi.toggleRelationType}
+                onShowDeprecatedChange={filtersApi.setShowDeprecated}
+                onShowHiddenChange={filtersApi.setShowHidden}
+              />
+            </div>
 
-	@keyframes floatUp {
-		to {
-			transform: translateY(-15px);
-		}
-	}
-	@keyframes floatDown {
-		to {
-			transform: translateY(15px);
-		}
-	}
-`;
+            <div className={styles.canvasBlock}>
+              <RoadMapCanvas
+                nodes={visibleNodes}
+                edges={visibleEdges}
+                clusters={visibleClusters}
+                positionKey="desktop"
+                activeNodeId={selectionApi.activeNodeId}
+                hoveredNodeId={selectionApi.hoveredNodeId}
+                onNodeSelect={selectionApi.selectNode}
+                onNodeHover={selectionApi.hoverNode}
+                minHeight={920}
+                emptyTitle="Nenhum item disponível"
+                emptyDescription="Ajuste os filtros para exibir tecnologias, conceitos e relações."
+              />
+            </div>
+          </div>
 
-const TextOutline = styled.div`
-	position: absolute;
-	transform: scale(1.2);
-	font-size: clamp(3rem, 8vw, 8rem);
-	font-weight: 900;
-	letter-spacing: 2px;
-	color: transparent;
-	-webkit-text-stroke: 2px rgba(255, 255, 255, 0.4);
-	pointer-events: none;
-	animation: ${pulsar} 3s infinite;
-`;
+          <aside className={styles.sideColumn}>
+            <div className={styles.chromeBlock}>
+              <RoadMapLegend />
+            </div>
 
-const TextMain = styled.div`
-	position: absolute;
-	font-size: clamp(3rem, 8vw, 8rem);
-	font-weight: 900;
-	letter-spacing: 2px;
-	cursor: pointer;
-	background: linear-gradient(
-		to right,
-		rgba(255, 255, 255, 0.2),
-		rgba(255, 255, 255, 1),
-		rgba(255, 255, 255, 0.2)
-	);
-	background-size: 400%;
-	-webkit-background-clip: text;
-	background-clip: text;
-	color: transparent;
-	-webkit-text-fill-color: transparent;
-	animation: ${shine} 4s linear infinite;
-`;
-
-const BottomBanner = styled.div`
-	position: absolute;
-	left: 50%;
-	bottom: 10%;
-	transform: translateX(-50%);
-	background: linear-gradient(
-		to right,
-		rgba(0, 0, 0, 0) 0%,
-		rgba(0, 0, 0, 0.9) 15%,
-		rgba(0, 0, 0, 0.9) 85%,
-		rgba(0, 0, 0, 0) 100%
-	);
-	padding: 0.5vw 14vw;
-	border-radius: 8px;
-	color: #b3174e;
-	font-size: 4vw;
-	font-weight: 600;
-	letter-spacing: 1.5px;
-	white-space: nowrap;
-	font-style: italic;
-	z-index: 10;
-`;
-
-const RoadMapMobile: React.FC = () => (
-	<Container>
-		<BackgroundRed />
-		<NeonLine />
-		<BackgroundBlue />
-
-		<DecorImage
-			src={zeroUm}
-			alt="Decorativo Esquerda"
-			style={{ top: "15%", left: "2%" }}
-			floatDirection="up"
-		/>
-		<DecorImage
-			src={zeroDois}
-			alt="Decorativo Direita"
-			style={{ bottom: "18%", right: "-8%" }}
-			floatDirection="down"
-		/>
-
-		<TextOutline style={{ left: "75%", top: "20%" }}>APP</TextOutline>
-		<TextMain style={{ left: "75%", top: "20%" }}>APP</TextMain>
-
-		<TextOutline style={{ right: "70%", top: "60%" }}>SITE</TextOutline>
-		<TextMain style={{ right: "70%", top: "60%" }}>SITE</TextMain>
-
-		<BottomBanner>ESCOLHA SEU LADO</BottomBanner>
-	</Container>
-);
-
-export default RoadMapMobile;
+            <div className={styles.chromeBlock}>
+              <RoadMapDetailsPanel
+                node={selectionApi.activeNode}
+                parentNode={selectionApi.parentNode}
+                childNodes={selectionApi.childNodes}
+                relatedNodes={selectionApi.relatedNodes}
+                lineageNodes={selectionApi.lineageNodes}
+                resolvedRelations={resolvedRelations}
+              />
+            </div>
+          </aside>
+        </div>
+      </div>
+    </section>
+  );
+}

@@ -1,0 +1,506 @@
+import type {
+  RoadMapCluster,
+  RoadMapEdge,
+  RoadMapNode,
+} from "../../model/roadmap.types";
+
+export const stateManagementRoadMapNodes: readonly RoadMapNode[] = [
+  {
+    id: "state-management-domain",
+    label: "Gerenciamento de Estado",
+    description:
+      "Gestão de estado local, compartilhado e arquiteturas de store no ecossistema React.",
+    kind: "domain",
+    category: "state-management",
+    demand: "core",
+    difficulty: 3,
+    tags: ["state", "client-state", "react"],
+    marketSignals: ["market-hot", "stable", "enterprise", "freelance"],
+    details: {
+      summary:
+        "Gerenciamento de estado organiza dados mutáveis, sincronização visual e previsibilidade de comportamento.",
+      whyItMatters:
+        "É um dos pontos mais observados em entrevistas e na maturidade arquitetural de aplicações React.",
+      whenToUse: [
+        "Aplicações com múltiplas áreas compartilhando dados",
+        "Fluxos complexos de interface",
+        "Domínio rico ou comportamento reativo extenso",
+      ],
+      whenNotToUse: [
+        "Telas muito pequenas em que estado local simples resolve",
+      ],
+      useCases: [
+        "Estado de autenticação",
+        "Filtros",
+        "Fluxos em etapas",
+        "Feature flags",
+      ],
+      cautions: [
+        "Confundir server state com client state costuma degradar a arquitetura",
+      ],
+    },
+    desktop: { x: 120, y: 120 },
+    mobile: { x: 24, y: 80 },
+  },
+  {
+    id: "state-management-local-topic",
+    label: "Estado Local",
+    description:
+      "Estado de componente e escopo curto, geralmente resolvido sem store global.",
+    kind: "topic",
+    category: "state-management",
+    demand: "core",
+    difficulty: 2,
+    parentId: "state-management-domain",
+    tags: ["local-state", "component-state"],
+    marketSignals: ["stable", "enterprise", "freelance"],
+    desktop: { x: 360, y: 40 },
+    mobile: { x: 24, y: 160 },
+  },
+  {
+    id: "state-management-shared-topic",
+    label: "Estado Compartilhado no Cliente",
+    shortLabel: "Estado Compartilhado",
+    description:
+      "Dados compartilhados entre múltiplos componentes e áreas da aplicação.",
+    kind: "topic",
+    category: "state-management",
+    demand: "core",
+    difficulty: 3,
+    parentId: "state-management-domain",
+    tags: ["shared-state", "global-state"],
+    marketSignals: ["market-hot", "stable", "enterprise"],
+    desktop: { x: 360, y: 140 },
+    mobile: { x: 24, y: 240 },
+  },
+  {
+    id: "state-management-store-libraries-topic",
+    label: "Bibliotecas de Store",
+    description:
+      "Bibliotecas dedicadas para organizar stores, ações e reatividade.",
+    kind: "topic",
+    category: "state-management",
+    demand: "important",
+    difficulty: 3,
+    parentId: "state-management-domain",
+    tags: ["stores", "libraries", "architecture"],
+    marketSignals: ["stable", "enterprise", "rising"],
+    desktop: { x: 360, y: 240 },
+    mobile: { x: 24, y: 320 },
+  },
+  {
+    id: "state-management-boundary-topic",
+    label: "Limite entre Client State e Server State",
+    shortLabel: "Limite de Estado",
+    description:
+      "Separação entre estado de interface e estado oriundo de backend.",
+    kind: "topic",
+    category: "state-management",
+    demand: "important",
+    difficulty: 3,
+    parentId: "state-management-domain",
+    tags: ["server-state", "client-state", "boundary"],
+    marketSignals: ["stable", "enterprise"],
+    desktop: { x: 360, y: 340 },
+    mobile: { x: 24, y: 400 },
+  },
+  {
+    id: "state-management-context-technology",
+    label: "Context API",
+    description:
+      "Compartilhamento nativo de dados na árvore React sem dependência externa.",
+    kind: "technology",
+    category: "state-management",
+    demand: "important",
+    difficulty: 2,
+    parentId: "state-management-shared-topic",
+    tags: ["context", "react-native-api", "shared-state"],
+    marketSignals: ["stable", "enterprise", "freelance"],
+    details: {
+      summary:
+        "Context resolve bem dependências compartilhadas simples e médias sem necessidade de store dedicada.",
+      whyItMatters:
+        "É parte nativa do React e aparece com frequência em bases pequenas e médias.",
+      whenToUse: [
+        "Tema",
+        "Autenticação básica",
+        "Configuração global simples",
+      ],
+      whenNotToUse: [
+        "Alta frequência de atualização distribuída",
+        "Domínio de estado complexo demais",
+      ],
+      useCases: [
+        "Theme provider",
+        "Usuário atual",
+        "Feature flags leves",
+      ],
+      cautions: [
+        "Usar Context como substituto universal de store global costuma escalar mal",
+      ],
+    },
+    desktop: { x: 700, y: 100 },
+    mobile: { x: 24, y: 480 },
+  },
+  {
+    id: "state-management-redux-toolkit-technology",
+    label: "Redux Toolkit",
+    shortLabel: "RTK",
+    description:
+      "Padrão maduro e corporativo para client state previsível baseado em reducers.",
+    kind: "technology",
+    category: "state-management",
+    demand: "important",
+    difficulty: 3,
+    parentId: "state-management-store-libraries-topic",
+    tags: ["redux", "rtk", "enterprise", "predictable"],
+    marketSignals: ["stable", "enterprise", "legacy"],
+    details: {
+      summary:
+        "Redux Toolkit reduz boilerplate e mantém um modelo previsível, explícito e escalável.",
+      whyItMatters:
+        "Ainda aparece bastante em ambientes corporativos, legado e aplicações com regras de negócio densas.",
+      whenToUse: [
+        "Fluxos complexos",
+        "Times grandes",
+        "Necessidade de previsibilidade forte",
+      ],
+      whenNotToUse: [
+        "Aplicações pequenas ou com estado simples demais",
+      ],
+      useCases: [
+        "Autenticação complexa",
+        "Fluxos multi-etapas",
+        "Entidades compartilhadas",
+      ],
+      cautions: [
+        "Não é obrigatório em todo projeto React moderno",
+      ],
+    },
+    desktop: { x: 700, y: 200 },
+    mobile: { x: 24, y: 560 },
+  },
+  {
+    id: "state-management-zustand-technology",
+    label: "Zustand",
+    description:
+      "Store leve e pragmática com API pequena e adoção crescente no ecossistema.",
+    kind: "technology",
+    category: "state-management",
+    demand: "important",
+    difficulty: 2,
+    parentId: "state-management-store-libraries-topic",
+    tags: ["zustand", "lightweight", "stores"],
+    marketSignals: ["market-hot", "rising", "enterprise", "freelance"],
+    details: {
+      summary:
+        "Zustand oferece uma curva de adoção curta com pouca cerimônia e boa ergonomia.",
+      whyItMatters:
+        "Ganhou espaço como alternativa pragmática em times que querem fugir de excesso de boilerplate.",
+      whenToUse: [
+        "Aplicações React modernas",
+        "Estado compartilhado enxuto",
+        "Equipes que buscam simplicidade",
+      ],
+      whenNotToUse: [
+        "Cenários que exigem disciplina arquitetural mais rígida por convenção explícita",
+      ],
+      useCases: [
+        "Estado global de interface",
+        "Filtros",
+        "Estado de painéis",
+        "Entidades selecionadas",
+      ],
+      cautions: [
+        "Simplicidade não substitui modelagem de domínio",
+      ],
+    },
+    desktop: { x: 700, y: 300 },
+    mobile: { x: 24, y: 640 },
+  },
+  {
+    id: "state-management-mobx-technology",
+    label: "MobX",
+    description:
+      "Gerenciamento de estado reativo com observáveis e modelagem mais orientada a objetos.",
+    kind: "technology",
+    category: "state-management",
+    demand: "optional",
+    difficulty: 3,
+    parentId: "state-management-store-libraries-topic",
+    tags: ["mobx", "observables", "reactive", "oop-friendly"],
+    marketSignals: ["stable", "enterprise"],
+    details: {
+      summary:
+        "MobX favorece um modelo reativo e expressivo, com menos boilerplate em muitos cenários.",
+      whyItMatters:
+        "Continua relevante em certos times, bases legadas e aplicações que adotam melhor o paradigma observável.",
+      whenToUse: [
+        "Domínio rico",
+        "Times acostumados com observables",
+        "Modelagem mais orientada a objetos",
+      ],
+      whenNotToUse: [
+        "Times que preferem convenções mais explícitas de fluxo de estado",
+      ],
+      useCases: [
+        "Painéis complexos",
+        "Stores observáveis com regras de negócio",
+      ],
+      cautions: [
+        "Sem disciplina arquitetural, o acoplamento implícito pode crescer",
+      ],
+    },
+    desktop: { x: 700, y: 400 },
+    mobile: { x: 24, y: 720 },
+  },
+  {
+    id: "state-management-jotai-technology",
+    label: "Jotai",
+    description:
+      "Abordagem atômica de estado compartilhado com granularidade fina.",
+    kind: "technology",
+    category: "state-management",
+    demand: "niche",
+    difficulty: 3,
+    parentId: "state-management-store-libraries-topic",
+    tags: ["jotai", "atomic-state", "granular"],
+    marketSignals: ["rising"],
+    desktop: { x: 700, y: 500 },
+    mobile: { x: 24, y: 800 },
+  },
+  {
+    id: "state-management-usestate-concept",
+    label: "Limite entre useState e useReducer",
+    shortLabel: "Limite Local",
+    description:
+      "Ponto de decisão entre manter estado local ou extrair para compartilhamento.",
+    kind: "concept",
+    category: "state-management",
+    demand: "core",
+    difficulty: 2,
+    parentId: "state-management-local-topic",
+    tags: ["local-state", "useState", "useReducer"],
+    marketSignals: ["stable", "enterprise"],
+    desktop: { x: 700, y: 40 },
+    mobile: { x: 24, y: 880 },
+  },
+  {
+    id: "state-management-server-boundary-concept",
+    label: "Server State não é Client State",
+    shortLabel: "Server != Client",
+    description:
+      "Dados remotos, cache e sincronização não devem ser tratados como estado puro de interface.",
+    kind: "concept",
+    category: "state-management",
+    demand: "important",
+    difficulty: 3,
+    parentId: "state-management-boundary-topic",
+    tags: ["server-state", "cache", "remote-data"],
+    marketSignals: ["stable", "enterprise", "rising"],
+    desktop: { x: 700, y: 600 },
+    mobile: { x: 24, y: 960 },
+  },
+];
+
+export const stateManagementRoadMapEdges: readonly RoadMapEdge[] = [
+  {
+    id: "edge-state-domain-local",
+    from: "state-management-domain",
+    to: "state-management-local-topic",
+    type: "contains",
+    strength: 5,
+  },
+  {
+    id: "edge-state-domain-shared",
+    from: "state-management-domain",
+    to: "state-management-shared-topic",
+    type: "contains",
+    strength: 5,
+  },
+  {
+    id: "edge-state-domain-stores",
+    from: "state-management-domain",
+    to: "state-management-store-libraries-topic",
+    type: "contains",
+    strength: 5,
+  },
+  {
+    id: "edge-state-domain-boundary",
+    from: "state-management-domain",
+    to: "state-management-boundary-topic",
+    type: "contains",
+    strength: 4,
+  },
+  {
+    id: "edge-state-local-boundary-concept",
+    from: "state-management-local-topic",
+    to: "state-management-usestate-concept",
+    type: "contains",
+    strength: 4,
+  },
+  {
+    id: "edge-state-shared-context",
+    from: "state-management-shared-topic",
+    to: "state-management-context-technology",
+    type: "contains",
+    strength: 5,
+  },
+  {
+    id: "edge-state-stores-rtk",
+    from: "state-management-store-libraries-topic",
+    to: "state-management-redux-toolkit-technology",
+    type: "contains",
+    strength: 5,
+  },
+  {
+    id: "edge-state-stores-zustand",
+    from: "state-management-store-libraries-topic",
+    to: "state-management-zustand-technology",
+    type: "contains",
+    strength: 5,
+  },
+  {
+    id: "edge-state-stores-mobx",
+    from: "state-management-store-libraries-topic",
+    to: "state-management-mobx-technology",
+    type: "contains",
+    strength: 4,
+  },
+  {
+    id: "edge-state-stores-jotai",
+    from: "state-management-store-libraries-topic",
+    to: "state-management-jotai-technology",
+    type: "contains",
+    strength: 3,
+  },
+  {
+    id: "edge-state-boundary-server-concept",
+    from: "state-management-boundary-topic",
+    to: "state-management-server-boundary-concept",
+    type: "contains",
+    strength: 5,
+  },
+  {
+    id: "edge-state-local-shared",
+    from: "state-management-local-topic",
+    to: "state-management-shared-topic",
+    type: "prerequisite",
+    strength: 4,
+  },
+  {
+    id: "edge-state-shared-stores",
+    from: "state-management-shared-topic",
+    to: "state-management-store-libraries-topic",
+    type: "prerequisite",
+    strength: 4,
+  },
+  {
+    id: "edge-state-boundary-stores",
+    from: "state-management-boundary-topic",
+    to: "state-management-store-libraries-topic",
+    type: "complements",
+    strength: 3,
+    isBidirectional: true,
+  },
+  {
+    id: "edge-state-context-rtk-alternative",
+    from: "state-management-context-technology",
+    to: "state-management-redux-toolkit-technology",
+    type: "alternative",
+    strength: 2,
+    isBidirectional: true,
+  },
+  {
+    id: "edge-state-context-zustand-alternative",
+    from: "state-management-context-technology",
+    to: "state-management-zustand-technology",
+    type: "alternative",
+    strength: 2,
+    isBidirectional: true,
+  },
+  {
+    id: "edge-state-rtk-zustand-alternative",
+    from: "state-management-redux-toolkit-technology",
+    to: "state-management-zustand-technology",
+    type: "alternative",
+    strength: 4,
+    isBidirectional: true,
+  },
+  {
+    id: "edge-state-zustand-mobx-alternative",
+    from: "state-management-zustand-technology",
+    to: "state-management-mobx-technology",
+    type: "alternative",
+    strength: 3,
+    isBidirectional: true,
+  },
+  {
+    id: "edge-state-zustand-jotai-alternative",
+    from: "state-management-zustand-technology",
+    to: "state-management-jotai-technology",
+    type: "alternative",
+    strength: 3,
+    isBidirectional: true,
+  },
+  {
+    id: "edge-state-boundary-server-stores",
+    from: "state-management-server-boundary-concept",
+    to: "state-management-store-libraries-topic",
+    type: "complements",
+    strength: 3,
+    isBidirectional: true,
+  },
+  {
+    id: "edge-state-localboundary-context",
+    from: "state-management-usestate-concept",
+    to: "state-management-context-technology",
+    type: "prerequisite",
+    strength: 3,
+  },
+];
+
+export const stateManagementRoadMapClusters: readonly RoadMapCluster[] = [
+  {
+    id: "cluster-state-management-main",
+    label: "Gerenciamento de Estado",
+    description: "Camadas de decisão entre estado local, compartilhado e store.",
+    category: "state-management",
+    nodeIds: [
+      "state-management-domain",
+      "state-management-local-topic",
+      "state-management-shared-topic",
+      "state-management-store-libraries-topic",
+      "state-management-boundary-topic",
+    ],
+  },
+  {
+    id: "cluster-state-management-core",
+    label: "Decisões Centrais",
+    description: "Primeiras decisões arquiteturais sobre onde o estado mora.",
+    category: "state-management",
+    nodeIds: [
+      "state-management-usestate-concept",
+      "state-management-context-technology",
+      "state-management-server-boundary-concept",
+    ],
+  },
+  {
+    id: "cluster-state-management-libraries",
+    label: "Bibliotecas de Store",
+    description: "Alternativas de mercado para client state compartilhado.",
+    category: "state-management",
+    nodeIds: [
+      "state-management-redux-toolkit-technology",
+      "state-management-zustand-technology",
+      "state-management-mobx-technology",
+      "state-management-jotai-technology",
+    ],
+  },
+];
+
+export const stateManagementRoadMapSegment = {
+  nodes: stateManagementRoadMapNodes,
+  edges: stateManagementRoadMapEdges,
+  clusters: stateManagementRoadMapClusters,
+} as const;
