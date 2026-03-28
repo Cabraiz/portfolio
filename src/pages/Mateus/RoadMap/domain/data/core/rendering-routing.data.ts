@@ -1,3 +1,4 @@
+// src/pages/Mateus/RoadMap/domain/data/core/rendering-routing.data.ts
 import type {
   RoadMapCluster,
   RoadMapEdge,
@@ -9,7 +10,8 @@ export const renderingRoutingRoadMapNodes: readonly RoadMapNode[] = [
     id: "rendering-routing-domain",
     label: "Renderização e Roteamento",
     shortLabel: "Routing",
-    description: "Navegação, entrega de UI e estratégias de renderização no ecossistema React.",
+    description:
+      "Navegação, entrega de UI e estratégias de renderização no ecossistema React.",
     kind: "domain",
     category: "rendering-routing",
     demand: "important",
@@ -47,7 +49,8 @@ export const renderingRoutingRoadMapNodes: readonly RoadMapNode[] = [
     id: "rendering-routing-client-topic",
     label: "Client-Side Routing",
     shortLabel: "Client Routing",
-    description: "Navegação SPA com troca de view sem reload completo.",
+    description:
+      "Navegação SPA com troca de view sem reload completo.",
     kind: "topic",
     category: "rendering-routing",
     demand: "important",
@@ -62,7 +65,9 @@ export const renderingRoutingRoadMapNodes: readonly RoadMapNode[] = [
   {
     id: "rendering-routing-framework-topic",
     label: "Framework Routing",
-    description: "Roteamento acoplado ao framework com layouts e segmentação.",
+    shortLabel: "Framework Routing",
+    description:
+      "Roteamento acoplado ao framework com layouts e segmentação.",
     kind: "topic",
     category: "rendering-routing",
     demand: "important",
@@ -77,7 +82,9 @@ export const renderingRoutingRoadMapNodes: readonly RoadMapNode[] = [
   {
     id: "rendering-routing-strategies-topic",
     label: "Rendering Strategies",
-    description: "CSR, SSR, SSG e ISR com trade-offs distintos.",
+    shortLabel: "Strategies",
+    description:
+      "CSR, SSR, SSG e ISR com trade-offs distintos.",
     kind: "topic",
     category: "rendering-routing",
     demand: "important",
@@ -93,7 +100,8 @@ export const renderingRoutingRoadMapNodes: readonly RoadMapNode[] = [
     id: "rendering-routing-performance-topic",
     label: "Loading & Performance",
     shortLabel: "Performance",
-    description: "Lazy loading, boundaries e divisão de código.",
+    description:
+      "Lazy loading, boundaries e divisão de código.",
     kind: "topic",
     category: "rendering-routing",
     demand: "important",
@@ -108,7 +116,9 @@ export const renderingRoutingRoadMapNodes: readonly RoadMapNode[] = [
   {
     id: "rendering-routing-react-router-technology",
     label: "React Router",
-    description: "Roteamento consolidado para SPAs React desacopladas.",
+    shortLabel: "React Router",
+    description:
+      "Roteamento consolidado para SPAs React desacopladas.",
     kind: "technology",
     category: "rendering-routing",
     demand: "important",
@@ -144,7 +154,8 @@ export const renderingRoutingRoadMapNodes: readonly RoadMapNode[] = [
     id: "rendering-routing-next-app-router-technology",
     label: "Next.js App Router",
     shortLabel: "App Router",
-    description: "Roteamento moderno do Next.js com layouts e server capabilities.",
+    description:
+      "Roteamento moderno do Next.js com layouts e server capabilities.",
     kind: "technology",
     category: "rendering-routing",
     demand: "important",
@@ -180,7 +191,8 @@ export const renderingRoutingRoadMapNodes: readonly RoadMapNode[] = [
     id: "rendering-routing-route-params-concept",
     label: "Route Params & Search Params",
     shortLabel: "Params",
-    description: "Parâmetros dinâmicos e query string na navegação.",
+    description:
+      "Parâmetros dinâmicos e query string na navegação.",
     kind: "concept",
     category: "rendering-routing",
     demand: "important",
@@ -195,7 +207,9 @@ export const renderingRoutingRoadMapNodes: readonly RoadMapNode[] = [
   {
     id: "rendering-routing-nested-layouts-concept",
     label: "Nested Layouts",
-    description: "Shells persistentes e hierarquia de páginas por rota.",
+    shortLabel: "Nested Layouts",
+    description:
+      "Shells persistentes e hierarquia de páginas por rota.",
     kind: "concept",
     category: "rendering-routing",
     demand: "important",
@@ -210,7 +224,9 @@ export const renderingRoutingRoadMapNodes: readonly RoadMapNode[] = [
   {
     id: "rendering-routing-csr-concept",
     label: "CSR",
-    description: "Client-Side Rendering como estratégia pura de UI.",
+    shortLabel: "CSR",
+    description:
+      "Client-Side Rendering como estratégia pura de UI.",
     kind: "concept",
     category: "rendering-routing",
     demand: "important",
@@ -225,7 +241,9 @@ export const renderingRoutingRoadMapNodes: readonly RoadMapNode[] = [
   {
     id: "rendering-routing-ssr-concept",
     label: "SSR",
-    description: "Renderização no servidor para primeira resposta pronta.",
+    shortLabel: "SSR",
+    description:
+      "Renderização no servidor para primeira resposta pronta.",
     kind: "concept",
     category: "rendering-routing",
     demand: "important",
@@ -238,9 +256,11 @@ export const renderingRoutingRoadMapNodes: readonly RoadMapNode[] = [
     mobile: { x: 24, y: 890 },
   },
   {
-    id: "rendering-routing-ssg-concept",
+    id: "rendering-routing-ssg-isr-concept",
     label: "SSG / ISR",
-    description: "Pré-renderização estática com ou sem revalidação.",
+    shortLabel: "SSG / ISR",
+    description:
+      "Pré-renderização estática com ou sem revalidação.",
     kind: "concept",
     category: "rendering-routing",
     demand: "important",
@@ -253,10 +273,11 @@ export const renderingRoutingRoadMapNodes: readonly RoadMapNode[] = [
     mobile: { x: 24, y: 970 },
   },
   {
-    id: "rendering-routing-lazy-concept",
+    id: "rendering-routing-code-splitting-concept",
     label: "Code Splitting & Lazy Loading",
     shortLabel: "Code Splitting",
-    description: "Carregamento sob demanda para reduzir custo inicial.",
+    description:
+      "Carregamento sob demanda para reduzir custo inicial.",
     kind: "concept",
     category: "rendering-routing",
     demand: "important",
@@ -272,7 +293,8 @@ export const renderingRoutingRoadMapNodes: readonly RoadMapNode[] = [
     id: "rendering-routing-suspense-concept",
     label: "Suspense Boundaries",
     shortLabel: "Suspense",
-    description: "Limites declarativos de loading e transição.",
+    description:
+      "Limites declarativos de loading e transição.",
     kind: "concept",
     category: "rendering-routing",
     demand: "important",
@@ -360,14 +382,14 @@ export const renderingRoutingRoadMapEdges: readonly RoadMapEdge[] = [
   {
     id: "edge-rendering-strategies-ssg",
     from: "rendering-routing-strategies-topic",
-    to: "rendering-routing-ssg-concept",
+    to: "rendering-routing-ssg-isr-concept",
     type: "contains",
     strength: 4,
   },
   {
     id: "edge-rendering-performance-lazy",
     from: "rendering-routing-performance-topic",
-    to: "rendering-routing-lazy-concept",
+    to: "rendering-routing-code-splitting-concept",
     type: "contains",
     strength: 5,
   },
@@ -411,7 +433,7 @@ export const renderingRoutingRoadMapEdges: readonly RoadMapEdge[] = [
   {
     id: "edge-rendering-framework-ssg",
     from: "rendering-routing-framework-topic",
-    to: "rendering-routing-ssg-concept",
+    to: "rendering-routing-ssg-isr-concept",
     type: "complements",
     strength: 4,
     isBidirectional: true,
@@ -419,7 +441,7 @@ export const renderingRoutingRoadMapEdges: readonly RoadMapEdge[] = [
   {
     id: "edge-rendering-performance-csr",
     from: "rendering-routing-csr-concept",
-    to: "rendering-routing-lazy-concept",
+    to: "rendering-routing-code-splitting-concept",
     type: "complements",
     strength: 3,
     isBidirectional: true,
@@ -438,7 +460,8 @@ export const renderingRoutingRoadMapClusters: readonly RoadMapCluster[] = [
   {
     id: "cluster-rendering-routing-main",
     label: "Navegação e Entrega de UI",
-    description: "Rotas, estratégia de rendering e organização de tela.",
+    description:
+      "Rotas, estratégia de rendering e organização de tela.",
     category: "rendering-routing",
     nodeIds: [
       "rendering-routing-domain",
@@ -451,7 +474,8 @@ export const renderingRoutingRoadMapClusters: readonly RoadMapCluster[] = [
   {
     id: "cluster-rendering-routing-routing",
     label: "Sistemas de Routing",
-    description: "Tecnologias e conceitos usados para navegação.",
+    description:
+      "Tecnologias e conceitos usados para navegação.",
     category: "rendering-routing",
     nodeIds: [
       "rendering-routing-react-router-technology",
@@ -463,13 +487,14 @@ export const renderingRoutingRoadMapClusters: readonly RoadMapCluster[] = [
   {
     id: "cluster-rendering-routing-strategies",
     label: "Rendering e Performance",
-    description: "Modelos de renderização e boundaries de carregamento.",
+    description:
+      "Modelos de renderização e boundaries de carregamento.",
     category: "rendering-routing",
     nodeIds: [
       "rendering-routing-csr-concept",
       "rendering-routing-ssr-concept",
-      "rendering-routing-ssg-concept",
-      "rendering-routing-lazy-concept",
+      "rendering-routing-ssg-isr-concept",
+      "rendering-routing-code-splitting-concept",
       "rendering-routing-suspense-concept",
     ],
   },

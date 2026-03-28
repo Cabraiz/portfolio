@@ -8,6 +8,7 @@ import type {
   RoadMapGraph,
   RoadMapNode,
 } from "../model/roadmap.types";
+
 import {
   coreRoadMapClusters,
   coreRoadMapEdges,
@@ -63,15 +64,15 @@ export const roadMapGraph: RoadMapGraph = {
 };
 
 export {
-  coreRoadMapSegments,
-  coreRoadMapNodes,
-  coreRoadMapEdges,
   coreRoadMapClusters,
+  coreRoadMapEdges,
+  coreRoadMapNodes,
+  coreRoadMapSegments,
 } from "./core";
 
 export {
-  ecosystemRoadMapSegments,
-  ecosystemRoadMapNodes,
-  ecosystemRoadMapEdges,
   ecosystemRoadMapClusters,
+  ecosystemRoadMapEdges,
+  ecosystemRoadMapNodes,
+  ecosystemRoadMapSegments,
 } from "./ecosystem";

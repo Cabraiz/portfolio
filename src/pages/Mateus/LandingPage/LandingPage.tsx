@@ -1,26 +1,25 @@
 import React, {
   type CSSProperties,
-  useEffect,
   useMemo,
   useRef,
 } from "react";
 
-import usePathSectionSync from "../../../features/navigation/usePathSectionSync";
-import { DEFAULT_LANDING_SECTION_ID } from "../../../features/navigation/landingSections";
+import {
+  DEFAULT_LANDING_SECTION_ID,
+} from "../../../features/navigation/landingSections";
+import useLandingSectionNavigation from "../../../features/navigation/useLandingSectionNavigation";
 import useDocumentVisibilitySync from "../../../features/scroll/useDocumentVisibilitySync";
 import useLenisEngine from "../../../features/scroll/useLenisEngine";
+import RoadMapErrorBoundary from "../RoadMap/ui/chrome/RoadMapErrorBoundary";
 
 import LandingSectionShell from "./LandingSectionShell";
-import {
-  LANDING_SECTION_ORDER,
-  getLandingSectionDefinitions,
-} from "./landingSections.config";
-import useLandingActiveSection from "./hooks/useLandingActiveSection";
+import { resolveLandingDesktopScrollPolicy } from "./landingDesktopScrollPolicy";
 import useLandingSectionMeasurements from "./hooks/useLandingSectionMeasurements";
+import { getLandingSectionDefinitions } from "./landingSections.config";
 import {
   resolveLandingResponsiveSpacing,
-  resolveLandingSectionMinHeight,
   resolveLandingScrollMarginTop,
+  resolveLandingSectionMinHeight,
 } from "./landingLayout.tokens";
 import { resolveLandingSectionBehavior } from "./landing.types";
 import useSectionRenderPolicy from "./useSectionRenderPolicy";
@@ -72,8 +71,6 @@ const baseSectionStyle: CSSProperties = {
 const baseContentContainerStyle: CSSProperties = {
   width: "100%",
   minWidth: 0,
-  height: "100%",
-  minHeight: 0,
   margin: 0,
   padding: 0,
   boxSizing: "border-box",
@@ -83,14 +80,13 @@ const baseContentContainerStyle: CSSProperties = {
   alignItems: "stretch",
   justifyContent: "flex-start",
   flex: "1 1 auto",
+  minHeight: 0,
   userSelect: "none",
 };
 
 const contentMeasurementWrapperStyle: CSSProperties = {
   width: "100%",
   minWidth: 0,
-  height: "100%",
-  minHeight: 0,
   margin: 0,
   padding: 0,
   boxSizing: "border-box",
@@ -100,8 +96,28 @@ const contentMeasurementWrapperStyle: CSSProperties = {
   alignItems: "stretch",
   justifyContent: "flex-start",
   flex: "1 1 auto",
+  minHeight: 0,
   userSelect: "none",
 };
+
+function resolveLandingSectionRuntimeLabel(sectionId: string): string {
+  switch (sectionId) {
+    case "home":
+      return "Landing home";
+    case "portfolio":
+      return "Landing portfolio";
+    case "roadMap":
+      return "Landing RoadMap";
+    case "pricing":
+      return "Landing pricing";
+    case "live":
+      return "Landing live";
+    case "contact":
+      return "Landing contact";
+    default:
+      return `Landing ${sectionId}`;
+  }
+}
 
 const LandingPage: React.FC = () => {
   const containerRef = useRef<HTMLElement | null>(null);
@@ -110,23 +126,35 @@ const LandingPage: React.FC = () => {
     return getLandingSectionDefinitions("desktop");
   }, []);
 
-  const { currentSectionId, syncSectionFromScroll } = usePathSectionSync({
-    containerRef,
-    defaultSectionId: DEFAULT_LANDING_SECTION_ID,
-    historyMode: "replace",
-  });
+  const desktopScrollPolicy = useMemo(() => {
+    return resolveLandingDesktopScrollPolicy({
+      defaultSectionId: DEFAULT_LANDING_SECTION_ID,
+    });
+  }, []);
 
   useLenisEngine();
   useDocumentVisibilitySync();
 
-  const { activeSectionId, refreshActiveSection } = useLandingActiveSection({
+  const {
+    observedSectionId,
+    committedSectionId,
+    routeSectionId,
+  } = useLandingSectionNavigation({
     containerRef,
-    defaultSectionId: currentSectionId,
-    sectionIds: LANDING_SECTION_ORDER,
-    sectionSelector: ":scope > section[data-page-section='true']",
-    viewportMode: "desktop",
-    activationViewportRatio: 0.42,
+    defaultSectionId: desktopScrollPolicy.defaultSectionId,
+    sectionIds: desktopScrollPolicy.sectionIds,
+    sectionSelector: desktopScrollPolicy.sectionSelector,
+    viewportMode: desktopScrollPolicy.viewportMode,
+    navbarOffsetPx: desktopScrollPolicy.observed.navbarOffsetPx,
+    activationViewportRatio:
+      desktopScrollPolicy.observed.activationViewportRatio,
+    tokens: desktopScrollPolicy.tokens,
+    scheduling: desktopScrollPolicy.scheduling,
+    urlSyncEligibleSectionIds: desktopScrollPolicy.url.eligibleSectionIds,
+    syncUrl: true,
   });
+
+  const renderAnchorSectionId = observedSectionId || committedSectionId;
 
   const { registerSectionElement, getPlaceholderMinHeight } =
     useLandingSectionMeasurements({
@@ -135,22 +163,13 @@ const LandingPage: React.FC = () => {
       }),
     });
 
-  useEffect(() => {
-    if (currentSectionId !== activeSectionId) {
-      syncSectionFromScroll(activeSectionId, {
-        historyMode: "replace",
-      });
-    }
-  }, [activeSectionId, currentSectionId, syncSectionFromScroll]);
-
-  useEffect(() => {
-    refreshActiveSection("refresh");
-  }, [refreshActiveSection, sections]);
-
   const renderPolicy = useSectionRenderPolicy({
     sections,
-    activeSectionId,
-    nearDistance: 1,
+    activeSectionId: renderAnchorSectionId,
+    nearDistance: desktopScrollPolicy.render.nearDistance,
+    stableNearDistance: desktopScrollPolicy.render.stableNearDistance,
+    disableFar: desktopScrollPolicy.render.disableFar,
+    viewportMode: desktopScrollPolicy.viewportMode,
   });
 
   return (
@@ -158,11 +177,16 @@ const LandingPage: React.FC = () => {
       ref={containerRef}
       style={containerStyle}
       aria-label="Landing page"
-      data-active-section={activeSectionId}
+      data-active-section={committedSectionId}
+      data-observed-section={observedSectionId}
+      data-render-anchor-section={renderAnchorSectionId}
+      data-route-section={routeSectionId}
       data-landing-viewport="desktop"
+      data-landing-history-mode={desktopScrollPolicy.url.historyMode}
     >
       {sections.map((section) => {
         const behavior = resolveLandingSectionBehavior(section.behavior);
+        const sectionState = renderPolicy.getSectionState(section.id);
 
         const resolvedSectionMinHeight =
           section.sectionStyle?.minHeight ??
@@ -170,14 +194,11 @@ const LandingPage: React.FC = () => {
             preferDynamicViewport: true,
           });
 
-        const resolvedSectionHeight =
-          section.sectionStyle?.height ?? resolvedSectionMinHeight;
-
         const resolvedSectionStyle: CSSProperties = {
           ...baseSectionStyle,
           ...section.sectionStyle,
           minHeight: resolvedSectionMinHeight,
-          height: resolvedSectionHeight,
+          height: section.sectionStyle?.height,
           scrollMarginTop:
             section.sectionStyle?.scrollMarginTop ??
             resolveLandingScrollMarginTop("desktop"),
@@ -191,7 +212,7 @@ const LandingPage: React.FC = () => {
         const resolvedContentStyle: CSSProperties = {
           ...baseContentContainerStyle,
           ...section.contentStyle,
-          height: section.contentStyle?.height ?? "100%",
+          height: section.contentStyle?.height ?? "auto",
           minHeight: section.contentStyle?.minHeight ?? 0,
           display: section.contentStyle?.display ?? "flex",
           flexDirection: section.contentStyle?.flexDirection ?? "column",
@@ -209,7 +230,7 @@ const LandingPage: React.FC = () => {
           <LandingSectionShell
             key={section.id}
             id={section.id}
-            state={renderPolicy.getSectionState(section.id)}
+            state={sectionState}
             behavior={behavior}
             placeholderMinHeight={getPlaceholderMinHeight(
               section.id,
@@ -225,7 +246,14 @@ const LandingPage: React.FC = () => {
               style={contentMeasurementWrapperStyle}
               data-landing-section-content={section.id}
             >
-              {section.content}
+              <RoadMapErrorBoundary
+                sectionLabel={resolveLandingSectionRuntimeLabel(section.id)}
+                resetKey={section.id}
+                minHeight={resolvedSectionMinHeight}
+                fullHeight
+              >
+                {section.content}
+              </RoadMapErrorBoundary>
             </div>
           </LandingSectionShell>
         );

@@ -1,4 +1,4 @@
-import { memo, useMemo, type CSSProperties, type ReactNode } from "react";
+import { memo, type CSSProperties, type ReactNode } from "react";
 
 import {
   ROADMAP_CATEGORY_IDS,
@@ -39,31 +39,28 @@ type FilterChipProps = Readonly<{
   onClick: () => void;
 }>;
 
+const FONT_FAMILY =
+  'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+
 function FilterChip({ label, active = false, onClick }: FilterChipProps) {
   const style: CSSProperties = {
     display: "inline-flex",
     alignItems: "center",
     justifyContent: "center",
-    minHeight: "34px",
-    padding: "0 12px",
+    minHeight: "32px",
+    padding: "0 10px",
     borderRadius: "999px",
     border: active
-      ? "1px solid rgba(37, 99, 235, 0.24)"
+      ? "1px solid rgba(37, 99, 235, 0.18)"
       : "1px solid rgba(148, 163, 184, 0.16)",
-    background: active ? "rgba(37, 99, 235, 0.08)" : "rgba(255,255,255,0.94)",
-    color: active ? "#1d4ed8" : "#0f172a",
-    fontSize: "0.76rem",
+    background: active ? "rgba(239, 246, 255, 0.96)" : "#ffffff",
+    color: active ? "#1d4ed8" : "#334155",
+    fontSize: "0.74rem",
     fontWeight: 800,
     lineHeight: 1,
     whiteSpace: "nowrap",
     cursor: "pointer",
-    transition:
-      "background 160ms ease, border-color 160ms ease, color 160ms ease, box-shadow 160ms ease",
-    boxShadow: active
-      ? "0 10px 22px rgba(37, 99, 235, 0.10)"
-      : "0 6px 16px rgba(15, 23, 42, 0.04)",
-    fontFamily:
-      'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+    fontFamily: FONT_FAMILY,
   };
 
   return (
@@ -86,22 +83,18 @@ function CheckboxChip({
     display: "inline-flex",
     alignItems: "center",
     gap: "8px",
-    minHeight: "34px",
-    padding: "0 12px",
+    minHeight: "32px",
+    padding: "0 10px",
     borderRadius: "999px",
     border: checked
-      ? "1px solid rgba(37, 99, 235, 0.24)"
+      ? "1px solid rgba(37, 99, 235, 0.18)"
       : "1px solid rgba(148, 163, 184, 0.16)",
-    background: checked ? "rgba(37, 99, 235, 0.08)" : "rgba(255,255,255,0.94)",
-    color: checked ? "#1d4ed8" : "#0f172a",
-    fontSize: "0.76rem",
+    background: checked ? "rgba(239, 246, 255, 0.96)" : "#ffffff",
+    color: checked ? "#1d4ed8" : "#334155",
+    fontSize: "0.74rem",
     fontWeight: 800,
     cursor: "pointer",
-    boxShadow: checked
-      ? "0 10px 22px rgba(37, 99, 235, 0.10)"
-      : "0 6px 16px rgba(15, 23, 42, 0.04)",
-    fontFamily:
-      'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+    fontFamily: FONT_FAMILY,
   };
 
   return (
@@ -125,17 +118,16 @@ function FilterSection({
 }>) {
   const titleStyle: CSSProperties = {
     margin: 0,
-    color: "#334155",
-    fontSize: "0.72rem",
+    color: "#475569",
+    fontSize: "0.7rem",
     fontWeight: 900,
     textTransform: "uppercase",
     letterSpacing: "0.08em",
-    fontFamily:
-      'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+    fontFamily: FONT_FAMILY,
   };
 
   return (
-    <section style={{ display: "grid", gap: "10px" }}>
+    <section style={{ display: "grid", gap: "8px" }}>
       <h3 style={titleStyle}>{title}</h3>
       <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
         {children}
@@ -157,86 +149,63 @@ function RoadMapFiltersComponent({
   onShowDeprecatedChange,
   onShowHiddenChange,
 }: RoadMapFiltersProps) {
-  const wrapperStyle = useMemo<CSSProperties>(
-    () => ({
-      display: "grid",
-      gap: "18px",
-      padding: "20px 22px",
-      borderRadius: "24px",
-      border: "1px solid rgba(148, 163, 184, 0.16)",
-      background:
-        "linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(248,250,252,0.98) 100%)",
-      boxShadow:
-        "0 18px 50px rgba(15, 23, 42, 0.06), inset 0 1px 0 rgba(255,255,255,0.78)",
-    }),
-    [],
-  );
+  const wrapperStyle: CSSProperties = {
+    display: "grid",
+    gap: "16px",
+    padding: "18px 20px",
+    borderRadius: "20px",
+    border: "1px solid rgba(148, 163, 184, 0.16)",
+    background: "#ffffff",
+  };
 
-  const topRowStyle = useMemo<CSSProperties>(
-    () => ({
-      display: "grid",
-      gridTemplateColumns: "minmax(0, 1fr) auto",
-      gap: "12px",
-      alignItems: "center",
-    }),
-    [],
-  );
+  const topRowStyle: CSSProperties = {
+    display: "grid",
+    gridTemplateColumns: "minmax(0, 1fr) auto",
+    gap: "10px",
+    alignItems: "center",
+  };
 
-  const inputStyle = useMemo<CSSProperties>(
-    () => ({
-      width: "100%",
-      minHeight: "46px",
-      padding: "0 14px",
-      borderRadius: "14px",
-      border: "1px solid rgba(148, 163, 184, 0.18)",
-      background: "#ffffff",
-      color: "#0f172a",
-      fontSize: "0.95rem",
-      outline: "none",
-      boxShadow: "0 8px 20px rgba(15, 23, 42, 0.04)",
-      fontFamily:
-        'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-    }),
-    [],
-  );
+  const inputStyle: CSSProperties = {
+    width: "100%",
+    minHeight: "42px",
+    padding: "0 12px",
+    borderRadius: "12px",
+    border: "1px solid rgba(148, 163, 184, 0.18)",
+    background: "#ffffff",
+    color: "#0f172a",
+    fontSize: "0.92rem",
+    outline: "none",
+    fontFamily: FONT_FAMILY,
+  };
 
-  const resetButtonStyle = useMemo<CSSProperties>(
-    () => ({
-      minHeight: "46px",
-      padding: "0 16px",
-      borderRadius: "14px",
-      border: "1px solid rgba(148, 163, 184, 0.16)",
-      background: "#ffffff",
-      color: "#0f172a",
-      fontSize: "0.82rem",
-      fontWeight: 800,
-      cursor: "pointer",
-      boxShadow: "0 8px 20px rgba(15, 23, 42, 0.04)",
-      fontFamily:
-        'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-    }),
-    [],
-  );
+  const resetButtonStyle: CSSProperties = {
+    minHeight: "42px",
+    padding: "0 14px",
+    borderRadius: "12px",
+    border: "1px solid rgba(148, 163, 184, 0.16)",
+    background: "#ffffff",
+    color: "#334155",
+    fontSize: "0.8rem",
+    fontWeight: 800,
+    cursor: "pointer",
+    fontFamily: FONT_FAMILY,
+  };
 
-  const countBadgeStyle = useMemo<CSSProperties>(
-    () => ({
-      display: "inline-flex",
-      alignItems: "center",
-      justifyContent: "center",
-      minHeight: "30px",
-      padding: "0 10px",
-      borderRadius: "999px",
-      background: "rgba(37, 99, 235, 0.08)",
-      color: "#1d4ed8",
-      fontSize: "0.72rem",
-      fontWeight: 800,
-      lineHeight: 1,
-      width: "fit-content",
-      fontFamily:
-        'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-    }),
-    [],
-  );
+  const countBadgeStyle: CSSProperties = {
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    minHeight: "28px",
+    padding: "0 10px",
+    borderRadius: "999px",
+    background: "rgba(239, 246, 255, 0.96)",
+    color: "#1d4ed8",
+    fontSize: "0.7rem",
+    fontWeight: 800,
+    lineHeight: 1,
+    width: "fit-content",
+    fontFamily: FONT_FAMILY,
+  };
 
   return (
     <section style={wrapperStyle}>

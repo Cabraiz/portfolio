@@ -1,12 +1,14 @@
+// src/pages/Mateus/RoadMap/application/services/filterRoadMapGraph.ts
+import { ROADMAP_DEFAULT_FILTERS } from "../../domain/model/roadmap.constants";
 import {
   createRoadMapNodeMap,
   getRoadMapNodeLineage,
   getRoadMapRelatedNodes,
   selectRoadMapFilteredGraph,
-  sortRoadMapEdges,
-  sortRoadMapNodes,
 } from "../../domain/model/roadmap.selectors";
 import type {
+  RoadMapCluster,
+  RoadMapEdge,
   RoadMapFilterState,
   RoadMapFilteredGraph,
   RoadMapGraph,
@@ -22,9 +24,18 @@ function uniqueNodeIds(nodes: readonly RoadMapNode[]): Set<string> {
   return new Set(nodes.map((node) => node.id));
 }
 
+function mergeFilters(
+  filters: Partial<RoadMapFilterState> = {},
+): RoadMapFilterState {
+  return {
+    ...ROADMAP_DEFAULT_FILTERS,
+    ...filters,
+  };
+}
+
 function expandWithAncestors(
   graph: RoadMapGraph,
-  nodeIds: Set<string>,
+  nodeIds: ReadonlySet<string>,
 ): Set<string> {
   const expandedIds = new Set(nodeIds);
 
@@ -41,7 +52,7 @@ function expandWithAncestors(
 
 function expandWithRelated(
   graph: RoadMapGraph,
-  nodeIds: Set<string>,
+  nodeIds: ReadonlySet<string>,
 ): Set<string> {
   const expandedIds = new Set(nodeIds);
 
@@ -56,56 +67,36 @@ function expandWithRelated(
   return expandedIds;
 }
 
-export function filterRoadMapGraph(
+function filterVisibleNodesInGraphOrder(
   graph: RoadMapGraph,
-  filters: Partial<RoadMapFilterState> = {},
-  options: FilterRoadMapGraphOptions = {},
-): RoadMapFilteredGraph {
-  const {
-    includeAncestors = true,
-    includeRelated = false,
-  } = options;
+  visibleNodeIds: ReadonlySet<string>,
+): RoadMapNode[] {
+  return graph.nodes.filter((node) => visibleNodeIds.has(node.id));
+}
 
-  const baseFilteredGraph = selectRoadMapFilteredGraph(graph, filters);
+function filterVisibleEdges(
+  graph: RoadMapGraph,
+  visibleNodeIds: ReadonlySet<string>,
+  filters: RoadMapFilterState,
+): RoadMapEdge[] {
+  return graph.edges.filter((edge) => {
+    const relationAllowed =
+      filters.activeRelationTypes.length === 0 ||
+      filters.activeRelationTypes.includes(edge.type);
 
-  let visibleNodeIds = uniqueNodeIds(baseFilteredGraph.visibleNodes);
+    if (!relationAllowed) {
+      return false;
+    }
 
-  if (includeAncestors && visibleNodeIds.size > 0) {
-    visibleNodeIds = expandWithAncestors(graph, visibleNodeIds);
-  }
+    return visibleNodeIds.has(edge.from) && visibleNodeIds.has(edge.to);
+  });
+}
 
-  if (includeRelated && visibleNodeIds.size > 0) {
-    visibleNodeIds = expandWithRelated(graph, visibleNodeIds);
-  }
-
-  const nodeMap = createRoadMapNodeMap(graph);
-
-  const visibleNodes = sortRoadMapNodes(
-    Array.from(visibleNodeIds)
-      .map((nodeId) => nodeMap.get(nodeId))
-      .filter((node): node is RoadMapNode => Boolean(node)),
-  );
-
-  const visibleEdgeIds = new Set(baseFilteredGraph.visibleEdges.map((edge) => edge.id));
-
-  const visibleEdges = sortRoadMapEdges(
-    graph.edges.filter((edge) => {
-      const bothEndsVisible =
-        visibleNodeIds.has(edge.from) && visibleNodeIds.has(edge.to);
-
-      if (!bothEndsVisible) {
-        return false;
-      }
-
-      if (visibleEdgeIds.size === 0) {
-        return false;
-      }
-
-      return visibleEdgeIds.has(edge.id);
-    }),
-  );
-
-  const visibleClusters = (graph.clusters ?? [])
+function filterVisibleClusters(
+  graph: RoadMapGraph,
+  visibleNodeIds: ReadonlySet<string>,
+): RoadMapCluster[] {
+  return (graph.clusters ?? [])
     .map((cluster) => {
       const nextNodeIds = cluster.nodeIds.filter((nodeId) =>
         visibleNodeIds.has(nodeId),
@@ -117,6 +108,35 @@ export function filterRoadMapGraph(
       };
     })
     .filter((cluster) => cluster.nodeIds.length > 0);
+}
+
+export function filterRoadMapGraph(
+  graph: RoadMapGraph,
+  filters: Partial<RoadMapFilterState> = {},
+  options: FilterRoadMapGraphOptions = {},
+): RoadMapFilteredGraph {
+  const { includeAncestors = true, includeRelated = false } = options;
+
+  const mergedFilters = mergeFilters(filters);
+  const baseFilteredGraph = selectRoadMapFilteredGraph(graph, mergedFilters);
+
+  let visibleNodeIds = uniqueNodeIds(baseFilteredGraph.visibleNodes);
+
+  if (includeAncestors && visibleNodeIds.size > 0) {
+    visibleNodeIds = expandWithAncestors(graph, visibleNodeIds);
+  }
+
+  if (includeRelated && visibleNodeIds.size > 0) {
+    visibleNodeIds = expandWithRelated(graph, visibleNodeIds);
+
+    if (includeAncestors) {
+      visibleNodeIds = expandWithAncestors(graph, visibleNodeIds);
+    }
+  }
+
+  const visibleNodes = filterVisibleNodesInGraphOrder(graph, visibleNodeIds);
+  const visibleEdges = filterVisibleEdges(graph, visibleNodeIds, mergedFilters);
+  const visibleClusters = filterVisibleClusters(graph, visibleNodeIds);
 
   return {
     graph,

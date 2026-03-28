@@ -1,3 +1,4 @@
+// src/pages/Mateus/RoadMap/application/hooks/useRoadMapViewport.ts
 import { useEffect, useMemo, useState } from "react";
 
 type RoadMapViewportMode = "mobile" | "desktop";
@@ -50,20 +51,57 @@ export function useRoadMapViewport({
       return undefined;
     }
 
-    const handleResize = () => {
-      setViewport(getViewportState());
+    let frameId = 0;
+
+    const updateViewport = () => {
+      setViewport((current) => {
+        const next = getViewportState();
+
+        if (
+          current.width === next.width &&
+          current.height === next.height &&
+          current.isClient === next.isClient
+        ) {
+          return current;
+        }
+
+        return next;
+      });
     };
 
-    handleResize();
+    const handleResize = () => {
+      if (frameId) {
+        window.cancelAnimationFrame(frameId);
+      }
+
+      frameId = window.requestAnimationFrame(() => {
+        updateViewport();
+      });
+    };
+
+    updateViewport();
+
     window.addEventListener("resize", handleResize, { passive: true });
+    window.addEventListener("orientationchange", handleResize, {
+      passive: true,
+    });
 
     return () => {
+      if (frameId) {
+        window.cancelAnimationFrame(frameId);
+      }
+
       window.removeEventListener("resize", handleResize);
+      window.removeEventListener("orientationchange", handleResize);
     };
   }, []);
 
-  const isMobile = viewport.width > 0 && viewport.width < mobileBreakpoint;
-  const isDesktop = !isMobile;
+  const isMobile =
+    viewport.isClient &&
+    viewport.width > 0 &&
+    viewport.width < mobileBreakpoint;
+
+  const isDesktop = viewport.isClient ? !isMobile : false;
   const mode: RoadMapViewportMode = isMobile ? "mobile" : "desktop";
 
   return useMemo(
@@ -76,6 +114,13 @@ export function useRoadMapViewport({
       mode,
       positionKey: mode,
     }),
-    [viewport.width, viewport.height, viewport.isClient, isMobile, isDesktop, mode],
+    [
+      viewport.width,
+      viewport.height,
+      viewport.isClient,
+      isMobile,
+      isDesktop,
+      mode,
+    ],
   );
 }

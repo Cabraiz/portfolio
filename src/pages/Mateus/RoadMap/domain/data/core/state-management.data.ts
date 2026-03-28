@@ -1,3 +1,4 @@
+// src/pages/Mateus/RoadMap/domain/data/core/state-management.data.ts
 import type {
   RoadMapCluster,
   RoadMapEdge,
@@ -9,7 +10,8 @@ export const stateManagementRoadMapNodes: readonly RoadMapNode[] = [
     id: "state-management-domain",
     label: "Gerenciamento de Estado",
     shortLabel: "State",
-    description: "Estado local, compartilhado e arquitetura de store no ecossistema React.",
+    description:
+      "Estado local, compartilhado e arquitetura de store no ecossistema React.",
     kind: "domain",
     category: "state-management",
     demand: "core",
@@ -19,7 +21,8 @@ export const stateManagementRoadMapNodes: readonly RoadMapNode[] = [
     tags: ["state", "client-state", "react"],
     marketSignals: ["market-hot", "stable", "enterprise", "freelance"],
     details: {
-      headline: "Bloco central em aplicações React de média e alta complexidade.",
+      headline:
+        "Bloco central em aplicações React de média e alta complexidade.",
       summary:
         "Organiza decisões entre estado local, estado compartilhado, stores e limites entre client state e server state.",
       projectContexts: [
@@ -46,7 +49,9 @@ export const stateManagementRoadMapNodes: readonly RoadMapNode[] = [
   {
     id: "state-management-local-topic",
     label: "Estado Local",
-    description: "Estado de componente e escopo curto, sem store global.",
+    shortLabel: "Local State",
+    description:
+      "Estado de componente e escopo curto, sem store global.",
     kind: "topic",
     category: "state-management",
     demand: "core",
@@ -62,7 +67,8 @@ export const stateManagementRoadMapNodes: readonly RoadMapNode[] = [
     id: "state-management-shared-topic",
     label: "Estado Compartilhado",
     shortLabel: "Shared State",
-    description: "Dados compartilhados entre áreas e componentes da aplicação.",
+    description:
+      "Dados compartilhados entre áreas e componentes da aplicação.",
     kind: "topic",
     category: "state-management",
     demand: "core",
@@ -77,7 +83,9 @@ export const stateManagementRoadMapNodes: readonly RoadMapNode[] = [
   {
     id: "state-management-store-libraries-topic",
     label: "Store Libraries",
-    description: "Bibliotecas para organizar stores, ações e reatividade.",
+    shortLabel: "Stores",
+    description:
+      "Bibliotecas para organizar stores, ações e reatividade.",
     kind: "topic",
     category: "state-management",
     demand: "important",
@@ -93,7 +101,8 @@ export const stateManagementRoadMapNodes: readonly RoadMapNode[] = [
     id: "state-management-boundary-topic",
     label: "Client vs Server State",
     shortLabel: "State Boundary",
-    description: "Separação entre estado de interface e dados remotos.",
+    description:
+      "Separação entre estado de interface e dados remotos.",
     kind: "topic",
     category: "state-management",
     demand: "important",
@@ -106,9 +115,11 @@ export const stateManagementRoadMapNodes: readonly RoadMapNode[] = [
     mobile: { x: 24, y: 410 },
   },
   {
-    id: "state-management-context-technology",
+    id: "state-management-context-api-technology",
     label: "Context API",
-    description: "Compartilhamento nativo de dados na árvore React.",
+    shortLabel: "Context API",
+    description:
+      "Compartilhamento nativo de dados na árvore React.",
     kind: "technology",
     category: "state-management",
     demand: "important",
@@ -143,7 +154,8 @@ export const stateManagementRoadMapNodes: readonly RoadMapNode[] = [
     id: "state-management-redux-toolkit-technology",
     label: "Redux Toolkit",
     shortLabel: "RTK",
-    description: "Abordagem madura e previsível para client state.",
+    description:
+      "Abordagem madura e previsível para client state.",
     kind: "technology",
     category: "state-management",
     demand: "important",
@@ -153,7 +165,8 @@ export const stateManagementRoadMapNodes: readonly RoadMapNode[] = [
     tags: ["redux", "rtk", "enterprise", "predictable"],
     marketSignals: ["stable", "enterprise", "legacy"],
     details: {
-      headline: "Boa aderência a ambientes corporativos e regras densas.",
+      headline:
+        "Boa aderência a ambientes corporativos e regras densas.",
       summary:
         "Modelo explícito, previsível e escalável para times que valorizam convenção e rastreabilidade.",
       projectContexts: [
@@ -166,10 +179,7 @@ export const stateManagementRoadMapNodes: readonly RoadMapNode[] = [
         "Modelar entidades compartilhadas",
         "Dar previsibilidade à mudança de estado",
       ],
-      strengths: [
-        "Boa governança",
-        "Modelo explícito",
-      ],
+      strengths: ["Boa governança", "Modelo explícito"],
       relatedStacks: ["React", "RTK Query"],
     },
     desktop: { x: 540, y: 350 },
@@ -178,7 +188,9 @@ export const stateManagementRoadMapNodes: readonly RoadMapNode[] = [
   {
     id: "state-management-zustand-technology",
     label: "Zustand",
-    description: "Store leve e pragmática com adoção crescente.",
+    shortLabel: "Zustand",
+    description:
+      "Store leve e pragmática com adoção crescente.",
     kind: "technology",
     category: "state-management",
     demand: "important",
@@ -188,7 +200,8 @@ export const stateManagementRoadMapNodes: readonly RoadMapNode[] = [
     tags: ["zustand", "lightweight", "stores"],
     marketSignals: ["market-hot", "rising", "enterprise", "freelance"],
     details: {
-      headline: "Solução pragmática com ótima relação simplicidade x poder.",
+      headline:
+        "Solução pragmática com ótima relação simplicidade x poder.",
       summary:
         "Boa escolha para estado compartilhado enxuto, com baixa cerimônia e boa ergonomia de uso.",
       projectContexts: [
@@ -213,7 +226,9 @@ export const stateManagementRoadMapNodes: readonly RoadMapNode[] = [
   {
     id: "state-management-mobx-technology",
     label: "MobX",
-    description: "Gerenciamento reativo baseado em observáveis.",
+    shortLabel: "MobX",
+    description:
+      "Gerenciamento reativo baseado em observáveis.",
     kind: "technology",
     category: "state-management",
     demand: "optional",
@@ -228,7 +243,9 @@ export const stateManagementRoadMapNodes: readonly RoadMapNode[] = [
   {
     id: "state-management-jotai-technology",
     label: "Jotai",
-    description: "Abordagem atômica para estado compartilhado granular.",
+    shortLabel: "Jotai",
+    description:
+      "Abordagem atômica para estado compartilhado granular.",
     kind: "technology",
     category: "state-management",
     demand: "niche",
@@ -241,10 +258,11 @@ export const stateManagementRoadMapNodes: readonly RoadMapNode[] = [
     mobile: { x: 24, y: 810 },
   },
   {
-    id: "state-management-usestate-concept",
+    id: "state-management-local-boundary-concept",
     label: "useState vs useReducer",
     shortLabel: "Local Boundary",
-    description: "Decisão entre manter local ou estruturar melhor o estado.",
+    description:
+      "Decisão entre manter local ou estruturar melhor o estado.",
     kind: "concept",
     category: "state-management",
     demand: "core",
@@ -260,7 +278,8 @@ export const stateManagementRoadMapNodes: readonly RoadMapNode[] = [
     id: "state-management-server-boundary-concept",
     label: "Server State != Client State",
     shortLabel: "Server != Client",
-    description: "Dados remotos não devem ser tratados como estado puro de interface.",
+    description:
+      "Dados remotos não devem ser tratados como estado puro de interface.",
     kind: "concept",
     category: "state-management",
     demand: "important",
@@ -306,14 +325,14 @@ export const stateManagementRoadMapEdges: readonly RoadMapEdge[] = [
   {
     id: "edge-state-local-boundary-concept",
     from: "state-management-local-topic",
-    to: "state-management-usestate-concept",
+    to: "state-management-local-boundary-concept",
     type: "contains",
     strength: 4,
   },
   {
     id: "edge-state-shared-context",
     from: "state-management-shared-topic",
-    to: "state-management-context-technology",
+    to: "state-management-context-api-technology",
     type: "contains",
     strength: 5,
   },
@@ -376,7 +395,7 @@ export const stateManagementRoadMapEdges: readonly RoadMapEdge[] = [
   },
   {
     id: "edge-state-context-rtk-alternative",
-    from: "state-management-context-technology",
+    from: "state-management-context-api-technology",
     to: "state-management-redux-toolkit-technology",
     type: "alternative",
     strength: 2,
@@ -384,7 +403,7 @@ export const stateManagementRoadMapEdges: readonly RoadMapEdge[] = [
   },
   {
     id: "edge-state-context-zustand-alternative",
-    from: "state-management-context-technology",
+    from: "state-management-context-api-technology",
     to: "state-management-zustand-technology",
     type: "alternative",
     strength: 2,
@@ -424,8 +443,8 @@ export const stateManagementRoadMapEdges: readonly RoadMapEdge[] = [
   },
   {
     id: "edge-state-localboundary-context",
-    from: "state-management-usestate-concept",
-    to: "state-management-context-technology",
+    from: "state-management-local-boundary-concept",
+    to: "state-management-context-api-technology",
     type: "prerequisite",
     strength: 3,
   },
@@ -435,7 +454,8 @@ export const stateManagementRoadMapClusters: readonly RoadMapCluster[] = [
   {
     id: "cluster-state-management-main",
     label: "Arquitetura de Estado",
-    description: "Decisão entre estado local, compartilhado, store e fronteiras.",
+    description:
+      "Decisão entre estado local, compartilhado, store e fronteiras.",
     category: "state-management",
     nodeIds: [
       "state-management-domain",
@@ -448,18 +468,20 @@ export const stateManagementRoadMapClusters: readonly RoadMapCluster[] = [
   {
     id: "cluster-state-management-core",
     label: "Decisões de Base",
-    description: "Pontos centrais para modelar estado de forma saudável.",
+    description:
+      "Pontos centrais para modelar estado de forma saudável.",
     category: "state-management",
     nodeIds: [
-      "state-management-usestate-concept",
-      "state-management-context-technology",
+      "state-management-local-boundary-concept",
+      "state-management-context-api-technology",
       "state-management-server-boundary-concept",
     ],
   },
   {
     id: "cluster-state-management-libraries",
     label: "Stores e Abordagens",
-    description: "Principais bibliotecas e modelos de organização de estado.",
+    description:
+      "Principais bibliotecas e modelos de organização de estado.",
     category: "state-management",
     nodeIds: [
       "state-management-redux-toolkit-technology",

@@ -1,127 +1,119 @@
-import { useCallback } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  type CSSProperties,
+} from "react";
 import { Navbar } from "react-bootstrap";
-import { useLenis } from "lenis/react";
 import { useTranslation } from "react-i18next";
 
 import logo from "../../assets/icones/logo.svg";
 import LiveAnimation from "../../pages/PrincipalPage/Animation/live_animation";
-import type { LandingSectionId } from "../../features/navigation/landingSections";
 import {
-  NAVBAR_DEFAULT_BRAND_LABEL,
-  NAVBAR_DESKTOP_COMPACT_MAX_HEIGHT,
-  NAVBAR_DESKTOP_COMPACT_MIN_WIDTH,
-  NAVBAR_HIDE_ON_SCROLL_ENABLED,
-  NAVBAR_HIDE_ON_SCROLL_THRESHOLD,
-  NAVBAR_MOBILE_MENU_ID,
-} from "./navbar.constants";
-import { navbarLayoutTokens, navbarStyles } from "./NavbarStyles";
+  DEFAULT_LANDING_SECTION_ID,
+  type LandingSectionId,
+} from "../../features/navigation/landingSections";
 import DesktopNavbar from "./components/DesktopNavbar";
-import MobileMenuPanel from "./components/MobileMenuPanel";
 import MobileNavbar from "./components/MobileNavbar";
 import useNavbarBodyScrollLock from "./hooks/useNavbarBodyScrollLock";
-import useNavbarNavigation from "./hooks/useNavbarNavigation";
-import useNavbarScrollBehavior from "./hooks/useNavbarScrollBehavior";
 import useNavbarUnderline from "./hooks/useNavbarUnderline";
-import useNavbarViewport from "./hooks/useNavbarViewport";
 
 export type AppNavbarProps = Readonly<{
   isMobileView: boolean;
-  selectedLink: string;
-  setSelectedLink: (link: string) => void;
+  activeSectionId: LandingSectionId | "";
+  onNavigateToSection: (sectionId: LandingSectionId) => void;
+  items: ReadonlyArray<LandingSectionId>;
   menuOpen: boolean;
   setMenuOpen: (open: boolean) => void;
-  links: ReadonlyArray<LandingSectionId>;
 }>;
 
-function getNavbarTransform(enabled: boolean, showNavbar: boolean): string {
-  if (!enabled) {
-    return "translateY(0)";
+type ViewportState = Readonly<{
+  width: number;
+  height: number;
+}>;
+
+const NAVBAR_HEIGHT_MOBILE = 72;
+const NAVBAR_HEIGHT_DESKTOP = 82;
+const DESKTOP_COMPACT_BREAKPOINT = 1360;
+
+const navbarRootStyle: CSSProperties = {
+  position: "fixed",
+  top: 0,
+  left: 0,
+  right: 0,
+  zIndex: 1000,
+  borderBottom: "1px solid rgba(255, 255, 255, 0.08)",
+  background:
+    "linear-gradient(180deg, rgba(10, 10, 12, 0.95) 0%, rgba(12, 12, 16, 0.88) 100%)",
+  backdropFilter: "blur(14px)",
+  WebkitBackdropFilter: "blur(14px)",
+  boxShadow: "0 12px 32px rgba(0, 0, 0, 0.28)",
+};
+
+function getBrowserWindow(): Window | null {
+  if (typeof globalThis.window === "undefined") {
+    return null;
   }
 
-  return showNavbar ? "translateY(0)" : "translateY(-120%)";
+  return globalThis.window;
 }
 
-function getNavbarOpacity(enabled: boolean, showNavbar: boolean): number {
-  if (!enabled) {
-    return 1;
+function getViewportState(): ViewportState {
+  const browserWindow = getBrowserWindow();
+
+  if (!browserWindow) {
+    return {
+      width: 1440,
+      height: 900,
+    };
   }
 
-  return showNavbar ? 1 : 0;
+  return {
+    width: browserWindow.innerWidth,
+    height: browserWindow.innerHeight,
+  };
 }
 
-function getNavbarTransition(enabled: boolean): string {
-  if (!enabled) {
-    return "height 0.25s ease";
-  }
-
-  return "transform 0.35s ease, opacity 0.35s ease, height 0.25s ease";
+function getNavbarHeight(isMobileView: boolean): number {
+  return isMobileView ? NAVBAR_HEIGHT_MOBILE : NAVBAR_HEIGHT_DESKTOP;
 }
 
 function getNavbarPadding(isMobileView: boolean): string {
-  if (isMobileView) {
-    return `0 ${navbarLayoutTokens.container.mobilePaddingX}`;
-  }
-
-  return `0 ${navbarLayoutTokens.container.desktopPaddingX}`;
+  return isMobileView
+    ? "0 clamp(14px, 4vw, 18px)"
+    : "0 clamp(20px, 3.2vw, 40px)";
 }
 
 function getNavbarGap(isMobileView: boolean): string {
-  if (isMobileView) {
-    return navbarLayoutTokens.container.mobileGap;
-  }
+  return isMobileView ? "12px" : "20px";
+}
 
-  return navbarLayoutTokens.container.desktopGap;
+function getNavbarMaxWidth(): string {
+  return "min(1480px, 100%)";
 }
 
 function getLiveAnimationLeft(isCompactDesktop: boolean): string {
-  return isCompactDesktop
-    ? navbarLayoutTokens.desktop.liveAnimationLeft.compact
-    : navbarLayoutTokens.desktop.liveAnimationLeft.default;
+  return isCompactDesktop ? "-26px" : "-30px";
 }
 
-function applyDesktopNavStyle(
-  element: HTMLButtonElement,
-  isActive: boolean,
-  hover: boolean,
-): void {
-  Object.assign(element.style, navbarStyles.navLink);
-
-  if (isActive) {
-    Object.assign(element.style, navbarStyles.navLinkActive);
-    return;
-  }
-
-  if (hover) {
-    Object.assign(element.style, navbarStyles.navLinkHover);
-  }
-}
-
-export default function AppNavbar(props: AppNavbarProps) {
-  const { isMobileView, selectedLink, menuOpen, setMenuOpen, links } = props;
-
+export default function AppNavbar({
+  isMobileView,
+  activeSectionId,
+  onNavigateToSection,
+  items,
+  menuOpen,
+  setMenuOpen,
+}: AppNavbarProps) {
   const { t } = useTranslation();
-  const lenis = useLenis();
 
-  const {
-    viewportWidth,
-    viewportHeight,
-    isCompactDesktop,
-    navbarHeight,
-    desktopGoogleButtonWidth,
-    desktopSideColumnWidth,
-  } = useNavbarViewport({
-    isMobileView,
-    desktopCompactMinWidth: NAVBAR_DESKTOP_COMPACT_MIN_WIDTH,
-    desktopCompactMaxHeight: NAVBAR_DESKTOP_COMPACT_MAX_HEIGHT,
-  });
+  const [viewport, setViewport] = useState<ViewportState>(() =>
+    getViewportState(),
+  );
 
-  const { showNavbar } = useNavbarScrollBehavior({
-    isMobileView,
-    menuOpen,
-    lenis,
-    enabled: NAVBAR_HIDE_ON_SCROLL_ENABLED,
-    hideThreshold: NAVBAR_HIDE_ON_SCROLL_THRESHOLD,
-  });
+  const navbarHeight = getNavbarHeight(isMobileView);
+  const isCompactDesktop =
+    !isMobileView && viewport.width <= DESKTOP_COMPACT_BREAKPOINT;
 
   useNavbarBodyScrollLock({
     isMobileView,
@@ -129,118 +121,125 @@ export default function AppNavbar(props: AppNavbarProps) {
   });
 
   const { navContainerRef, underlineStyle, setNavRef } = useNavbarUnderline({
-    selectedLink,
+    selectedLink: activeSectionId,
     isMobileView,
-    viewportWidth,
-    viewportHeight,
+    viewportWidth: viewport.width,
+    viewportHeight: viewport.height,
     isCompactDesktop,
-    linksCount: links.length,
+    linksCount: items.length,
   });
 
-  const { handleNavigateToSection, handleBrandClick } = useNavbarNavigation({
-    isMobileView,
-    navbarHeight,
-    lenis,
-    setMenuOpen,
-  });
+  useEffect(() => {
+    const browserWindow = getBrowserWindow();
+
+    if (!browserWindow) {
+      return;
+    }
+
+    let frame = 0;
+
+    const handleResize = () => {
+      browserWindow.cancelAnimationFrame(frame);
+
+      frame = browserWindow.requestAnimationFrame(() => {
+        setViewport(getViewportState());
+      });
+    };
+
+    handleResize();
+
+    browserWindow.addEventListener("resize", handleResize, { passive: true });
+    browserWindow.addEventListener("orientationchange", handleResize, {
+      passive: true,
+    });
+
+    return () => {
+      browserWindow.cancelAnimationFrame(frame);
+      browserWindow.removeEventListener("resize", handleResize);
+      browserWindow.removeEventListener("orientationchange", handleResize);
+    };
+  }, []);
+
+  const handleBrandClick = useCallback(() => {
+    onNavigateToSection(DEFAULT_LANDING_SECTION_ID);
+    setMenuOpen(false);
+  }, [onNavigateToSection, setMenuOpen]);
+
+  const handleNavigate = useCallback(
+    (sectionId: LandingSectionId) => {
+      onNavigateToSection(sectionId);
+      setMenuOpen(false);
+    },
+    [onNavigateToSection, setMenuOpen],
+  );
 
   const handleMobileMenuToggle = useCallback(() => {
     setMenuOpen(!menuOpen);
   }, [menuOpen, setMenuOpen]);
 
+  const containerStyle = useMemo<CSSProperties>(
+    () => ({
+      width: getNavbarMaxWidth(),
+      margin: "0 auto",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+      gap: getNavbarGap(isMobileView),
+      minWidth: 0,
+    }),
+    [isMobileView],
+  );
+
   return (
-    <>
-      <Navbar
-        style={{
-          ...navbarStyles.container,
-          ...navbarStyles.borderGradient,
-          height: `${navbarHeight}px`,
-          padding: getNavbarPadding(isMobileView),
-          transform: getNavbarTransform(
-            NAVBAR_HIDE_ON_SCROLL_ENABLED,
-            showNavbar,
-          ),
-          opacity: getNavbarOpacity(
-            NAVBAR_HIDE_ON_SCROLL_ENABLED,
-            showNavbar,
-          ),
-          transition: getNavbarTransition(NAVBAR_HIDE_ON_SCROLL_ENABLED),
-        }}
-      >
-        <div
-          style={{
-            width: `min(${navbarLayoutTokens.container.maxWidth}, 100%)`,
-            margin: "0 auto",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: getNavbarGap(isMobileView),
-            minWidth: 0,
-          }}
-        >
-          {isMobileView ? (
-            <MobileNavbar
-              menuOpen={menuOpen}
-              onToggleMenu={handleMobileMenuToggle}
-              onBrandClick={handleBrandClick}
-              logoSrc={logo}
-              brandLabel={NAVBAR_DEFAULT_BRAND_LABEL}
-            />
-          ) : (
-            <DesktopNavbar
-              links={links}
-              selectedLink={selectedLink}
-              isCompactDesktop={isCompactDesktop}
-              desktopSideColumnWidth={desktopSideColumnWidth}
-              desktopGoogleButtonWidth={desktopGoogleButtonWidth}
-              underlineStyle={underlineStyle}
-              navContainerRef={navContainerRef}
-              onBrandClick={handleBrandClick}
-              onNavigate={handleNavigateToSection}
-              setNavRef={setNavRef}
-              getLabel={(link) => t(`nav.${link}`)}
-              logoSrc={logo}
-              renderLeadingVisual={(link, compactDesktop) => {
-                if (link !== "live") {
-                  return null;
-                }
+    <Navbar
+      style={{
+        ...navbarRootStyle,
+        height: `${navbarHeight}px`,
+        padding: getNavbarPadding(isMobileView),
+      }}
+    >
+      <div style={containerStyle}>
+        {isMobileView ? (
+          <MobileNavbar
+            isOpen={menuOpen}
+            onToggle={handleMobileMenuToggle}
+            onNavigateToSection={handleNavigate}
+            activeSectionId={activeSectionId}
+          />
+        ) : (
+          <DesktopNavbar
+            items={items}
+            activeSectionId={activeSectionId}
+            isCompactDesktop={isCompactDesktop}
+            underlineStyle={underlineStyle}
+            navContainerRef={navContainerRef}
+            onBrandClick={handleBrandClick}
+            onNavigateToSection={handleNavigate}
+            setNavRef={setNavRef}
+            getLabel={(sectionId) => t(`nav.${sectionId}`)}
+            logoSrc={logo}
+            renderLeadingVisual={(sectionId) => {
+              if (sectionId !== "live") {
+                return null;
+              }
 
-                return (
-                  <span
-                    style={{
-                      position: "absolute",
-                      left: getLiveAnimationLeft(compactDesktop),
-                      top: "50%",
-                      transform: "translateY(calc(-50% - 16px)) scale(0.42)",
-                      pointerEvents: "none",
-                    }}
-                  >
-                    <LiveAnimation />
-                  </span>
-                );
-              }}
-              onItemHoverStart={(link, element) => {
-                applyDesktopNavStyle(element, selectedLink === link, true);
-              }}
-              onItemHoverEnd={(link, element) => {
-                applyDesktopNavStyle(element, selectedLink === link, false);
-              }}
-            />
-          )}
-        </div>
-      </Navbar>
-
-      <MobileMenuPanel
-        open={isMobileView && menuOpen}
-        links={links}
-        selectedLink={selectedLink}
-        panelTop={navbarHeight + navbarLayoutTokens.mobile.menuTopOffset}
-        overlayTop={navbarHeight}
-        getLabel={(link) => t(`nav.${link}`)}
-        onNavigate={handleNavigateToSection}
-        onClose={() => setMenuOpen(false)}
-        menuId={NAVBAR_MOBILE_MENU_ID}
-      />
-    </>
+              return (
+                <span
+                  style={{
+                    position: "absolute",
+                    left: getLiveAnimationLeft(isCompactDesktop),
+                    top: "50%",
+                    transform: "translateY(calc(-50% - 16px)) scale(0.42)",
+                    pointerEvents: "none",
+                  }}
+                >
+                  <LiveAnimation />
+                </span>
+              );
+            }}
+          />
+        )}
+      </div>
+    </Navbar>
   );
 }

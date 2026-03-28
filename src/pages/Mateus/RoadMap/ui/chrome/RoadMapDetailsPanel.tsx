@@ -1,4 +1,4 @@
-import { memo, useMemo, type CSSProperties, type ReactNode } from "react";
+import { memo, type CSSProperties, type ReactNode } from "react";
 
 import {
   ROADMAP_CATEGORY_LABELS,
@@ -19,6 +19,9 @@ type RoadMapDetailsPanelProps = Readonly<{
   resolvedRelations?: RoadMapResolvedRelations | null;
 }>;
 
+const FONT_FAMILY =
+  'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+
 function DetailSection({
   title,
   children,
@@ -28,17 +31,16 @@ function DetailSection({
 }>) {
   const titleStyle: CSSProperties = {
     margin: 0,
-    color: "#334155",
-    fontSize: "0.72rem",
+    color: "#475569",
+    fontSize: "0.7rem",
     fontWeight: 900,
     textTransform: "uppercase",
     letterSpacing: "0.08em",
-    fontFamily:
-      'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+    fontFamily: FONT_FAMILY,
   };
 
   return (
-    <section style={{ display: "grid", gap: "10px" }}>
+    <section style={{ display: "grid", gap: "8px" }}>
       <h4 style={titleStyle}>{title}</h4>
       {children}
     </section>
@@ -56,21 +58,19 @@ function InfoBadge({
     display: "inline-flex",
     alignItems: "center",
     justifyContent: "center",
-    minHeight: "32px",
+    minHeight: "30px",
     padding: "0 10px",
     borderRadius: "999px",
     border: active
       ? "1px solid rgba(37, 99, 235, 0.18)"
       : "1px solid rgba(148, 163, 184, 0.16)",
-    background: active ? "rgba(37, 99, 235, 0.08)" : "#ffffff",
-    color: active ? "#1d4ed8" : "#0f172a",
-    fontSize: "0.74rem",
+    background: active ? "rgba(239, 246, 255, 0.96)" : "#ffffff",
+    color: active ? "#1d4ed8" : "#334155",
+    fontSize: "0.72rem",
     fontWeight: 800,
     lineHeight: 1,
     whiteSpace: "nowrap",
-    boxShadow: "0 6px 16px rgba(15, 23, 42, 0.04)",
-    fontFamily:
-      'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+    fontFamily: FONT_FAMILY,
   };
 
   return <span style={style}>{label}</span>;
@@ -91,12 +91,11 @@ function DetailList({
         margin: 0,
         paddingLeft: "18px",
         display: "grid",
-        gap: "6px",
+        gap: "5px",
         color: "#334155",
-        fontSize: "0.9rem",
+        fontSize: "0.88rem",
         lineHeight: 1.55,
-        fontFamily:
-          'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+        fontFamily: FONT_FAMILY,
       }}
     >
       {items.map((item) => (
@@ -116,10 +115,9 @@ function NodeLinks({
       <span
         style={{
           color: "#64748b",
-          fontSize: "0.88rem",
+          fontSize: "0.84rem",
           lineHeight: 1.5,
-          fontFamily:
-            'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+          fontFamily: FONT_FAMILY,
         }}
       >
         Nenhum item nesta seção.
@@ -157,69 +155,48 @@ function RoadMapDetailsPanelComponent({
   lineageNodes = [],
   resolvedRelations = null,
 }: RoadMapDetailsPanelProps) {
-  const wrapperStyle = useMemo<CSSProperties>(
-    () => ({
-      display: "grid",
-      gap: "18px",
-      padding: "20px 22px",
-      borderRadius: "24px",
-      border: "1px solid rgba(148, 163, 184, 0.16)",
-      background:
-        "linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(248,250,252,0.98) 100%)",
-      boxShadow:
-        "0 18px 50px rgba(15, 23, 42, 0.06), inset 0 1px 0 rgba(255,255,255,0.78)",
-      minHeight: "420px",
-    }),
-    [],
-  );
+  const wrapperStyle: CSSProperties = {
+    display: "grid",
+    gap: "16px",
+    padding: "18px 20px",
+    borderRadius: "20px",
+    border: "1px solid rgba(148, 163, 184, 0.16)",
+    background: "#ffffff",
+    minHeight: "360px",
+  };
 
-  const titleStyle = useMemo<CSSProperties>(
-    () => ({
-      margin: 0,
-      color: "#0f172a",
-      fontSize: "1.12rem",
-      fontWeight: 900,
-      lineHeight: 1.08,
-      letterSpacing: "-0.02em",
-      fontFamily:
-        'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-    }),
-    [],
-  );
+  const titleStyle: CSSProperties = {
+    margin: 0,
+    color: "#0f172a",
+    fontSize: "1.04rem",
+    fontWeight: 900,
+    lineHeight: 1.1,
+    letterSpacing: "-0.02em",
+    fontFamily: FONT_FAMILY,
+  };
 
-  const headlineStyle = useMemo<CSSProperties>(
-    () => ({
-      margin: 0,
-      color: "#1d4ed8",
-      fontSize: "0.9rem",
-      fontWeight: 800,
-      lineHeight: 1.45,
-      fontFamily:
-        'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-    }),
-    [],
-  );
+  const headlineStyle: CSSProperties = {
+    margin: 0,
+    color: "#1d4ed8",
+    fontSize: "0.86rem",
+    fontWeight: 800,
+    lineHeight: 1.45,
+    fontFamily: FONT_FAMILY,
+  };
 
-  const paragraphStyle = useMemo<CSSProperties>(
-    () => ({
-      margin: 0,
-      color: "#475569",
-      fontSize: "0.92rem",
-      lineHeight: 1.6,
-      fontFamily:
-        'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-    }),
-    [],
-  );
+  const paragraphStyle: CSSProperties = {
+    margin: 0,
+    color: "#475569",
+    fontSize: "0.9rem",
+    lineHeight: 1.58,
+    fontFamily: FONT_FAMILY,
+  };
 
-  const metaRowStyle = useMemo<CSSProperties>(
-    () => ({
-      display: "flex",
-      flexWrap: "wrap",
-      gap: "8px",
-    }),
-    [],
-  );
+  const metaRowStyle: CSSProperties = {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: "8px",
+  };
 
   if (!node) {
     return (
@@ -252,7 +229,7 @@ function RoadMapDetailsPanelComponent({
 
   return (
     <aside style={wrapperStyle}>
-      <div style={{ display: "grid", gap: "12px" }}>
+      <div style={{ display: "grid", gap: "10px" }}>
         <h3 style={titleStyle}>{node.label}</h3>
 
         <div style={metaRowStyle}>
@@ -378,24 +355,22 @@ function RoadMapDetailsPanelComponent({
                   key={relation.edge.id}
                   style={{
                     display: "grid",
-                    gap: "6px",
-                    padding: "10px 12px",
-                    borderRadius: "14px",
+                    gap: "4px",
+                    padding: "9px 10px",
+                    borderRadius: "12px",
                     border: isPrimary
-                      ? "1px solid rgba(37, 99, 235, 0.14)"
+                      ? "1px solid rgba(37, 99, 235, 0.16)"
                       : "1px solid rgba(148, 163, 184, 0.14)",
-                    background: "#ffffff",
-                    boxShadow: "0 8px 16px rgba(15, 23, 42, 0.03)",
+                    background: isPrimary ? "rgba(239, 246, 255, 0.62)" : "#ffffff",
                   }}
                 >
                   <span
                     style={{
                       color: "#0f172a",
-                      fontSize: "0.82rem",
+                      fontSize: "0.8rem",
                       fontWeight: 800,
                       lineHeight: 1.35,
-                      fontFamily:
-                        'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                      fontFamily: FONT_FAMILY,
                     }}
                   >
                     {ROADMAP_RELATION_LABELS[relation.type]} ·{" "}
@@ -405,10 +380,9 @@ function RoadMapDetailsPanelComponent({
                   <span
                     style={{
                       color: "#64748b",
-                      fontSize: "0.78rem",
+                      fontSize: "0.76rem",
                       lineHeight: 1.45,
-                      fontFamily:
-                        'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                      fontFamily: FONT_FAMILY,
                     }}
                   >
                     {getDirectionLabel(relation.direction)}

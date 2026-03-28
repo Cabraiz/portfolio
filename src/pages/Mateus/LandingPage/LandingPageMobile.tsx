@@ -9,6 +9,7 @@ import usePathSectionSync from "../../../features/navigation/usePathSectionSync"
 import { DEFAULT_LANDING_SECTION_ID } from "../../../features/navigation/landingSections";
 import useDocumentVisibilitySync from "../../../features/scroll/useDocumentVisibilitySync";
 import useLenisEngine from "../../../features/scroll/useLenisEngine";
+import RoadMapErrorBoundary from "../RoadMap/ui/chrome/RoadMapErrorBoundary";
 
 import LandingSectionShell from "./LandingSectionShell";
 import {
@@ -16,6 +17,7 @@ import {
   getLandingSectionDefinitions,
 } from "./landingSections.config";
 import useLandingActiveSection from "./hooks/useLandingActiveSection";
+import useLandingSectionMeasurements from "./hooks/useLandingSectionMeasurements";
 import {
   resolveLandingResponsiveSpacing,
   resolveLandingScrollMarginTop,
@@ -73,7 +75,7 @@ const baseContentContainerStyle: CSSProperties = {
   width: "100%",
   minWidth: 0,
   height: "100%",
-  minHeight: 0,
+  minHeight: "100%",
   margin: 0,
   padding: 0,
   boxSizing: "border-box",
@@ -85,6 +87,42 @@ const baseContentContainerStyle: CSSProperties = {
   flex: "1 1 auto",
   userSelect: "none",
 };
+
+const contentMeasurementWrapperStyle: CSSProperties = {
+  width: "100%",
+  minWidth: 0,
+  height: "100%",
+  minHeight: "100%",
+  margin: 0,
+  padding: 0,
+  boxSizing: "border-box",
+  position: "relative",
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "stretch",
+  justifyContent: "flex-start",
+  flex: "1 1 auto",
+  userSelect: "none",
+};
+
+function resolveLandingSectionRuntimeLabel(sectionId: string): string {
+  switch (sectionId) {
+    case "home":
+      return "Landing home mobile";
+    case "portfolio":
+      return "Landing portfolio mobile";
+    case "roadMap":
+      return "Landing RoadMap mobile";
+    case "pricing":
+      return "Landing pricing mobile";
+    case "live":
+      return "Landing live mobile";
+    case "contact":
+      return "Landing contact mobile";
+    default:
+      return `Landing ${sectionId} mobile`;
+  }
+}
 
 const LandingPageMobile: React.FC = () => {
   const containerRef = useRef<HTMLElement | null>(null);
@@ -108,8 +146,15 @@ const LandingPageMobile: React.FC = () => {
     sectionIds: LANDING_SECTION_ORDER,
     sectionSelector: ":scope > section[data-page-section='true']",
     viewportMode: "mobile",
-    activationViewportRatio: 0.48,
+    activationViewportRatio: 0.42,
   });
+
+  const { registerSectionElement, getPlaceholderMinHeight } =
+    useLandingSectionMeasurements({
+      defaultPlaceholderMinHeight: resolveLandingSectionMinHeight("mobile", {
+        preferDynamicViewport: false,
+      }),
+    });
 
   useEffect(() => {
     if (currentSectionId !== activeSectionId) {
@@ -139,6 +184,7 @@ const LandingPageMobile: React.FC = () => {
     >
       {sections.map((section) => {
         const behavior = resolveLandingSectionBehavior(section.behavior);
+        const sectionState = renderPolicy.getSectionState(section.id);
 
         const resolvedSectionMinHeight =
           section.sectionStyle?.minHeight ??
@@ -146,14 +192,11 @@ const LandingPageMobile: React.FC = () => {
             preferDynamicViewport: false,
           });
 
-        const resolvedSectionHeight =
-          section.sectionStyle?.height ?? resolvedSectionMinHeight;
-
         const resolvedSectionStyle: CSSProperties = {
           ...baseSectionStyle,
           ...section.sectionStyle,
           minHeight: resolvedSectionMinHeight,
-          height: resolvedSectionHeight,
+          height: section.sectionStyle?.height,
           scrollMarginTop:
             section.sectionStyle?.scrollMarginTop ??
             resolveLandingScrollMarginTop("mobile"),
@@ -168,7 +211,7 @@ const LandingPageMobile: React.FC = () => {
           ...baseContentContainerStyle,
           ...section.contentStyle,
           height: section.contentStyle?.height ?? "100%",
-          minHeight: section.contentStyle?.minHeight ?? 0,
+          minHeight: section.contentStyle?.minHeight ?? "100%",
           display: section.contentStyle?.display ?? "flex",
           flexDirection: section.contentStyle?.flexDirection ?? "column",
           alignItems: section.contentStyle?.alignItems ?? "stretch",
@@ -177,20 +220,39 @@ const LandingPageMobile: React.FC = () => {
           flex: section.contentStyle?.flex ?? "1 1 auto",
         };
 
+        const placeholderFallback =
+          section.placeholderMinHeight ??
+          behavior.placeholderFallbackMinHeight;
+
         return (
           <LandingSectionShell
             key={section.id}
             id={section.id}
-            state={renderPolicy.getSectionState(section.id)}
+            state={sectionState}
             behavior={behavior}
-            placeholderMinHeight={
-              section.placeholderMinHeight ??
-              behavior.placeholderFallbackMinHeight
-            }
+            placeholderMinHeight={getPlaceholderMinHeight(
+              section.id,
+              placeholderFallback,
+            )}
             sectionStyle={resolvedSectionStyle}
             contentStyle={resolvedContentStyle}
           >
-            {section.content}
+            <div
+              ref={(element) => {
+                registerSectionElement(section.id, element);
+              }}
+              style={contentMeasurementWrapperStyle}
+              data-landing-section-content={section.id}
+            >
+              <RoadMapErrorBoundary
+                sectionLabel={resolveLandingSectionRuntimeLabel(section.id)}
+                resetKey={`mobile:${section.id}:${sectionState}`}
+                minHeight={resolvedSectionMinHeight}
+                fullHeight
+              >
+                {section.content}
+              </RoadMapErrorBoundary>
+            </div>
           </LandingSectionShell>
         );
       })}

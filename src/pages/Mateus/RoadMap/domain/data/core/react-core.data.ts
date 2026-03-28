@@ -1,3 +1,4 @@
+// src/pages/Mateus/RoadMap/domain/data/core/react-core.data.ts
 import type {
   RoadMapCluster,
   RoadMapEdge,
@@ -9,7 +10,8 @@ export const reactCoreRoadMapNodes: readonly RoadMapNode[] = [
     id: "react-core-domain",
     label: "React",
     shortLabel: "React",
-    description: "Base principal para construção de UI orientada a componentes.",
+    description:
+      "Base principal para construção de UI orientada a componentes.",
     kind: "domain",
     category: "react-core",
     demand: "core",
@@ -50,7 +52,9 @@ export const reactCoreRoadMapNodes: readonly RoadMapNode[] = [
   {
     id: "react-core-components-topic",
     label: "JSX & Components",
-    description: "Componentização, composição visual e arquitetura declarativa.",
+    shortLabel: "Components",
+    description:
+      "Componentização, composição visual e arquitetura declarativa.",
     kind: "topic",
     category: "react-core",
     demand: "core",
@@ -65,7 +69,9 @@ export const reactCoreRoadMapNodes: readonly RoadMapNode[] = [
   {
     id: "react-core-props-state-topic",
     label: "Props & State",
-    description: "Fluxo unidirecional, contratos entre componentes e estado local.",
+    shortLabel: "Props & State",
+    description:
+      "Fluxo unidirecional, contratos entre componentes e estado local.",
     kind: "topic",
     category: "react-core",
     demand: "core",
@@ -80,7 +86,9 @@ export const reactCoreRoadMapNodes: readonly RoadMapNode[] = [
   {
     id: "react-core-rendering-topic",
     label: "Rendering Patterns",
-    description: "Renderização declarativa, listas e composição de UI.",
+    shortLabel: "Rendering",
+    description:
+      "Renderização declarativa, listas e composição de UI.",
     kind: "topic",
     category: "react-core",
     demand: "core",
@@ -95,7 +103,9 @@ export const reactCoreRoadMapNodes: readonly RoadMapNode[] = [
   {
     id: "react-core-hooks-topic",
     label: "Hooks",
-    description: "Estado, efeitos e reaproveitamento de lógica em componentes funcionais.",
+    shortLabel: "Hooks",
+    description:
+      "Estado, efeitos e reaproveitamento de lógica em componentes funcionais.",
     kind: "topic",
     category: "react-core",
     demand: "core",
@@ -111,7 +121,8 @@ export const reactCoreRoadMapNodes: readonly RoadMapNode[] = [
     id: "react-core-lifecycle-topic",
     label: "Lifecycle Mental Model",
     shortLabel: "Lifecycle",
-    description: "Montagem, atualização, cleanup e sincronização de efeitos.",
+    description:
+      "Montagem, atualização, cleanup e sincronização de efeitos.",
     kind: "topic",
     category: "react-core",
     demand: "important",
@@ -126,7 +137,9 @@ export const reactCoreRoadMapNodes: readonly RoadMapNode[] = [
   {
     id: "react-core-jsx-concept",
     label: "JSX",
-    description: "Sintaxe declarativa para modelar UI com JavaScript.",
+    shortLabel: "JSX",
+    description:
+      "Sintaxe declarativa para modelar UI com JavaScript.",
     kind: "concept",
     category: "react-core",
     demand: "core",
@@ -142,7 +155,8 @@ export const reactCoreRoadMapNodes: readonly RoadMapNode[] = [
     id: "react-core-composition-concept",
     label: "Composition",
     shortLabel: "Composition",
-    description: "Reutilização de UI via composição, não herança.",
+    description:
+      "Reutilização de UI via composição, não herança.",
     kind: "concept",
     category: "react-core",
     demand: "core",
@@ -157,6 +171,7 @@ export const reactCoreRoadMapNodes: readonly RoadMapNode[] = [
   {
     id: "react-core-props-concept",
     label: "Props",
+    shortLabel: "Props",
     description: "Contrato de entrada entre componentes.",
     kind: "concept",
     category: "react-core",
@@ -172,7 +187,9 @@ export const reactCoreRoadMapNodes: readonly RoadMapNode[] = [
   {
     id: "react-core-state-concept",
     label: "State",
-    description: "Estado local e reatividade na árvore de componentes.",
+    shortLabel: "State",
+    description:
+      "Estado local e reatividade na árvore de componentes.",
     kind: "concept",
     category: "react-core",
     demand: "core",
@@ -187,7 +204,9 @@ export const reactCoreRoadMapNodes: readonly RoadMapNode[] = [
   {
     id: "react-core-lists-keys-concept",
     label: "Lists & Keys",
-    description: "Coleções renderizadas com identidade estável.",
+    shortLabel: "Lists & Keys",
+    description:
+      "Coleções renderizadas com identidade estável.",
     kind: "concept",
     category: "react-core",
     demand: "core",
@@ -202,7 +221,9 @@ export const reactCoreRoadMapNodes: readonly RoadMapNode[] = [
   {
     id: "react-core-conditional-rendering-concept",
     label: "Conditional Rendering",
-    description: "Controle declarativo do fluxo visual da interface.",
+    shortLabel: "Conditional",
+    description:
+      "Controle declarativo do fluxo visual da interface.",
     kind: "concept",
     category: "react-core",
     demand: "core",
@@ -217,7 +238,9 @@ export const reactCoreRoadMapNodes: readonly RoadMapNode[] = [
   {
     id: "react-core-usestate-concept",
     label: "useState",
-    description: "Hook base para estado local de componente.",
+    shortLabel: "useState",
+    description:
+      "Hook base para estado local de componente.",
     kind: "concept",
     category: "react-core",
     demand: "core",
@@ -232,7 +255,9 @@ export const reactCoreRoadMapNodes: readonly RoadMapNode[] = [
   {
     id: "react-core-useeffect-concept",
     label: "useEffect",
-    description: "Sincronização com efeitos externos e cleanup.",
+    shortLabel: "useEffect",
+    description:
+      "Sincronização com efeitos externos e cleanup.",
     kind: "concept",
     category: "react-core",
     demand: "core",
@@ -247,7 +272,9 @@ export const reactCoreRoadMapNodes: readonly RoadMapNode[] = [
   {
     id: "react-core-usememo-concept",
     label: "useMemo",
-    description: "Memoização de valores derivados em cenários úteis.",
+    shortLabel: "useMemo",
+    description:
+      "Memoização de valores derivados em cenários úteis.",
     kind: "concept",
     category: "react-core",
     demand: "important",
@@ -262,7 +289,9 @@ export const reactCoreRoadMapNodes: readonly RoadMapNode[] = [
   {
     id: "react-core-usecallback-concept",
     label: "useCallback",
-    description: "Estabilização de funções quando há benefício real.",
+    shortLabel: "useCallback",
+    description:
+      "Estabilização de funções quando há benefício real.",
     kind: "concept",
     category: "react-core",
     demand: "important",
@@ -439,7 +468,8 @@ export const reactCoreRoadMapClusters: readonly RoadMapCluster[] = [
   {
     id: "cluster-react-core-main",
     label: "React em Produção",
-    description: "Blocos principais do React usados com recorrência.",
+    description:
+      "Blocos principais do React usados com recorrência.",
     category: "react-core",
     nodeIds: [
       "react-core-domain",
@@ -453,7 +483,8 @@ export const reactCoreRoadMapClusters: readonly RoadMapCluster[] = [
   {
     id: "cluster-react-core-rendering",
     label: "Composição e Rendering",
-    description: "Estrutura declarativa, fluxo de dados e renderização.",
+    description:
+      "Estrutura declarativa, fluxo de dados e renderização.",
     category: "react-core",
     nodeIds: [
       "react-core-jsx-concept",
@@ -467,7 +498,8 @@ export const reactCoreRoadMapClusters: readonly RoadMapCluster[] = [
   {
     id: "cluster-react-core-hooks",
     label: "Hooks e Performance",
-    description: "Hooks base e decisões práticas de otimização.",
+    description:
+      "Hooks base e decisões práticas de otimização.",
     category: "react-core",
     nodeIds: [
       "react-core-usestate-concept",

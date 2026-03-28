@@ -8,35 +8,63 @@ export type LandingSectionId =
 
 export type LandingSectionDefinition = Readonly<{
   id: LandingSectionId;
+  label: string;
   path: `/${string}`;
+  anchor?: `#${string}`;
+  order: number;
+  urlSyncEligible: boolean;
 }>;
 
 export const DEFAULT_LANDING_SECTION_ID: LandingSectionId = "home";
 
-export const LANDING_SECTIONS: ReadonlyArray<LandingSectionDefinition> = [
+export const LANDING_SECTIONS: readonly LandingSectionDefinition[] = [
   {
     id: "home",
+    label: "Início",
     path: "/home",
+    anchor: "#home",
+    order: 1,
+    urlSyncEligible: true,
   },
   {
     id: "portfolio",
+    label: "Portfólio",
     path: "/portfolio",
+    anchor: "#portfolio",
+    order: 2,
+    urlSyncEligible: true,
   },
   {
     id: "roadMap",
+    label: "RoadMap",
     path: "/roadmap",
+    anchor: "#roadmap",
+    order: 3,
+    urlSyncEligible: true,
   },
   {
     id: "pricing",
+    label: "Preços",
     path: "/pricing",
+    anchor: "#pricing",
+    order: 4,
+    urlSyncEligible: true,
   },
   {
     id: "live",
+    label: "Ao Vivo",
     path: "/live",
+    anchor: "#live",
+    order: 5,
+    urlSyncEligible: true,
   },
   {
     id: "contact",
+    label: "Contato",
     path: "/contact",
+    anchor: "#contact",
+    order: 6,
+    urlSyncEligible: true,
   },
 ] as const;
 
@@ -51,6 +79,11 @@ const LANDING_PATH_TO_SECTION_ID = new Map<string, LandingSectionId>(
 const LANDING_SECTION_ID_TO_PATH = new Map<LandingSectionId, string>(
   LANDING_SECTIONS.map((section) => [section.id, section.path]),
 );
+
+const LANDING_SECTION_ID_TO_DEFINITION = new Map<
+  LandingSectionId,
+  LandingSectionDefinition
+>(LANDING_SECTIONS.map((section) => [section.id, section]));
 
 function normalizePathname(pathname: string | null | undefined): string {
   if (!pathname) {
@@ -93,6 +126,43 @@ export function normalizeLandingSectionId(
   }
 
   return null;
+}
+
+export function getLandingSectionDefinition(
+  sectionId: LandingSectionId,
+): LandingSectionDefinition {
+  return (
+    LANDING_SECTION_ID_TO_DEFINITION.get(sectionId) ??
+    LANDING_SECTION_ID_TO_DEFINITION.get(DEFAULT_LANDING_SECTION_ID)!
+  );
+}
+
+export function getLandingSectionLabel(sectionId: LandingSectionId): string {
+  return getLandingSectionDefinition(sectionId).label;
+}
+
+export function getLandingOrderedSections(): readonly LandingSectionDefinition[] {
+  return [...LANDING_SECTIONS].sort((left, right) => left.order - right.order);
+}
+
+export function getLandingOrderedSectionIds(): readonly LandingSectionId[] {
+  return getLandingOrderedSections().map((section) => section.id);
+}
+
+export function getLandingSectionsByIds(
+  sectionIds: readonly LandingSectionId[],
+): readonly LandingSectionDefinition[] {
+  const allowedIds = new Set(sectionIds);
+
+  return getLandingOrderedSections().filter((section) =>
+    allowedIds.has(section.id),
+  );
+}
+
+export function getLandingUrlSyncEligibleSectionIds(): readonly LandingSectionId[] {
+  return getLandingOrderedSections()
+    .filter((section) => section.urlSyncEligible)
+    .map((section) => section.id);
 }
 
 export function getPathBySectionId(

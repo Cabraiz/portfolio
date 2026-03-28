@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import { ReactLenis } from "lenis/react";
 
@@ -9,10 +9,10 @@ import TitleWebsite from "../pages/PrincipalPage/TitleWebsite/title_website";
 import FloatingButtons from "./FloatingButtons";
 import { useSectionVisibility } from "../hooks/useSectionVisibility";
 import { getLenisScrollSettings } from "../features/scroll/getLenisScrollSettings";
+import useLandingSectionNavigation from "../features/navigation/useLandingSectionNavigation";
 import {
-  getPathBySectionId,
   getSectionIdByPath,
-  normalizeLandingSectionId,
+  isLandingPath,
   type LandingSectionId,
 } from "../features/navigation/landingSections";
 import type {
@@ -97,9 +97,7 @@ function buildSmoothSettings(viewport: ScrollViewport): LenisScrollSettings {
 
 export default function AppDesktop() {
   const { isNavHidden, isFloatingHidden } = useSectionVisibility();
-
   const location = useLocation();
-  const navigate = useNavigate();
 
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -107,22 +105,42 @@ export default function AppDesktop() {
     buildSmoothSettings(getViewportInfo()),
   );
 
-  const selectedLink = useMemo(() => {
-    return getSectionIdByPath(location.pathname) ?? "";
-  }, [location.pathname]);
+  const {
+    activeSectionId,
+    routeSectionId,
+    controllerReady,
+    navigateToSection,
+  } = useLandingSectionNavigation();
 
-  const handleSelectLink = useCallback(
-    (nextLink: string) => {
-      const normalizedSectionId = normalizeLandingSectionId(nextLink);
+  const resolvedActiveSectionId = useMemo<LandingSectionId | "">(() => {
+    const pathnameSectionId = getSectionIdByPath(location.pathname) ?? "";
 
-      if (!normalizedSectionId) {
-        return;
-      }
+    if (!isLandingPath(location.pathname)) {
+      return pathnameSectionId;
+    }
 
-      navigate(getPathBySectionId(normalizedSectionId));
+    if (controllerReady) {
+      return activeSectionId;
+    }
+
+    return routeSectionId || pathnameSectionId;
+  }, [
+    activeSectionId,
+    controllerReady,
+    location.pathname,
+    routeSectionId,
+  ]);
+
+  const handleNavigateToSection = useCallback(
+    (sectionId: LandingSectionId) => {
+      navigateToSection(sectionId, {
+        replace: isLandingPath(location.pathname),
+        syncUrl: true,
+      });
+
       setMenuOpen(false);
     },
-    [navigate],
+    [location.pathname, navigateToSection],
   );
 
   useEffect(() => {
@@ -154,7 +172,10 @@ export default function AppDesktop() {
     return () => {
       browserWindow.cancelAnimationFrame(frame);
       browserWindow.removeEventListener("resize", updateSmoothOptions);
-      browserWindow.removeEventListener("orientationchange", updateSmoothOptions);
+      browserWindow.removeEventListener(
+        "orientationchange",
+        updateSmoothOptions,
+      );
     };
   }, []);
 
@@ -177,11 +198,11 @@ export default function AppDesktop() {
       {!isNavHidden && (
         <AppNavbar
           isMobileView={false}
-          selectedLink={selectedLink}
-          setSelectedLink={handleSelectLink}
+          activeSectionId={resolvedActiveSectionId}
+          onNavigateToSection={handleNavigateToSection}
           menuOpen={menuOpen}
           setMenuOpen={setMenuOpen}
-          links={links}
+          items={links}
         />
       )}
 
@@ -189,9 +210,9 @@ export default function AppDesktop() {
 
       {!isFloatingHidden && (
         <FloatingButtons
-          links={links}
-          selectedLink={selectedLink}
-          setSelectedLink={handleSelectLink}
+          items={links}
+          activeSectionId={resolvedActiveSectionId}
+          onNavigateToSection={handleNavigateToSection}
         />
       )}
 

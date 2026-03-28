@@ -1,3 +1,4 @@
+// src/pages/Mateus/RoadMap/domain/data/ecosystem/market-signals.data.ts
 import type {
   RoadMapCluster,
   RoadMapEdge,
@@ -22,7 +23,7 @@ export const marketSignalsRoadMapNodes: readonly RoadMapNode[] = [
     details: {
       headline: "Camada de contexto para posicionar melhor a stack.",
       summary:
-        "Não é um bloco didático de estudo. Ele ajuda a mostrar onde cada tecnologia costuma performar melhor em vagas, times, produtos e modernizações.",
+        "Não é um bloco didático de estudo. Ajuda a mostrar onde cada tecnologia costuma performar melhor em vagas, times, produtos e modernizações.",
       projectContexts: [
         "Portfólio profissional",
         "Leitura de vagas",
@@ -69,6 +70,7 @@ export const marketSignalsRoadMapNodes: readonly RoadMapNode[] = [
   {
     id: "market-signals-enterprise-topic",
     label: "Aderência Enterprise",
+    shortLabel: "Enterprise",
     description:
       "Tecnologias e práticas com forte encaixe em ambientes corporativos e times maiores.",
     kind: "topic",
@@ -85,6 +87,7 @@ export const marketSignalsRoadMapNodes: readonly RoadMapNode[] = [
   {
     id: "market-signals-rising-topic",
     label: "Adoção em Crescimento",
+    shortLabel: "Crescimento",
     description:
       "Ferramentas e abordagens que vêm ganhando espaço em projetos novos e modernizações.",
     kind: "topic",
@@ -101,6 +104,7 @@ export const marketSignalsRoadMapNodes: readonly RoadMapNode[] = [
   {
     id: "market-signals-legacy-topic",
     label: "Pressão de Legado",
+    shortLabel: "Legado",
     description:
       "Tecnologias que seguem relevantes por presença forte em bases existentes e manutenção contínua.",
     kind: "topic",
@@ -166,6 +170,23 @@ export const marketSignalsRoadMapNodes: readonly RoadMapNode[] = [
     mobile: { x: 24, y: 650 },
   },
   {
+    id: "market-signals-market-fit-concept",
+    label: "Fit de Mercado",
+    shortLabel: "Market Fit",
+    description:
+      "Combinação entre adoção, produtividade, manutenção e adequação ao tipo de projeto.",
+    kind: "concept",
+    category: "market-signals",
+    demand: "important",
+    difficulty: 2,
+    proficiency: 4,
+    parentId: "market-signals-rising-topic",
+    tags: ["market-fit", "adoption", "productivity"],
+    marketSignals: ["rising", "market-hot"],
+    desktop: { x: 540, y: 390 },
+    mobile: { x: 24, y: 730 },
+  },
+  {
     id: "market-signals-modernization-concept",
     label: "Modernização Progressiva",
     shortLabel: "Modernização",
@@ -180,23 +201,24 @@ export const marketSignalsRoadMapNodes: readonly RoadMapNode[] = [
     tags: ["modernization", "migration", "incremental"],
     marketSignals: ["legacy", "stable", "enterprise"],
     desktop: { x: 540, y: 470 },
-    mobile: { x: 24, y: 730 },
+    mobile: { x: 24, y: 810 },
   },
   {
-    id: "market-signals-market-fit-concept",
-    label: "Fit de Mercado",
+    id: "market-signals-lean-delivery-concept",
+    label: "Velocidade com Baixo Overhead",
+    shortLabel: "Baixo Overhead",
     description:
-      "Combinação entre adoção, produtividade, manutenção e adequação ao tipo de projeto.",
+      "Times enxutos tendem a favorecer stacks com setup rápido, manutenção simples e boa produtividade.",
     kind: "concept",
     category: "market-signals",
-    demand: "important",
+    demand: "optional",
     difficulty: 2,
     proficiency: 4,
-    parentId: "market-signals-rising-topic",
-    tags: ["market-fit", "adoption", "productivity"],
-    marketSignals: ["rising", "market-hot"],
-    desktop: { x: 540, y: 390 },
-    mobile: { x: 24, y: 810 },
+    parentId: "market-signals-freelance-topic",
+    tags: ["lean-delivery", "velocity", "low-overhead"],
+    marketSignals: ["freelance", "rising"],
+    desktop: { x: 540, y: 550 },
+    mobile: { x: 24, y: 890 },
   },
 ];
 
@@ -251,6 +273,13 @@ export const marketSignalsRoadMapEdges: readonly RoadMapEdge[] = [
     strength: 4,
   },
   {
+    id: "edge-market-rising-fit",
+    from: "market-signals-rising-topic",
+    to: "market-signals-market-fit-concept",
+    type: "contains",
+    strength: 4,
+  },
+  {
     id: "edge-market-legacy-modernization",
     from: "market-signals-legacy-topic",
     to: "market-signals-modernization-concept",
@@ -258,9 +287,9 @@ export const marketSignalsRoadMapEdges: readonly RoadMapEdge[] = [
     strength: 4,
   },
   {
-    id: "edge-market-rising-fit",
-    from: "market-signals-rising-topic",
-    to: "market-signals-market-fit-concept",
+    id: "edge-market-freelance-lean",
+    from: "market-signals-freelance-topic",
+    to: "market-signals-lean-delivery-concept",
     type: "contains",
     strength: 4,
   },
@@ -268,7 +297,7 @@ export const marketSignalsRoadMapEdges: readonly RoadMapEdge[] = [
   {
     id: "edge-market-core-typescript-cross",
     from: "market-signals-core-topic",
-    to: "fundamentals-typescript-topic",
+    to: "fundamentals-typescript-technology",
     type: "complements",
     strength: 5,
     isBidirectional: true,
@@ -431,13 +460,14 @@ export const marketSignalsRoadMapClusters: readonly RoadMapCluster[] = [
     id: "cluster-market-concepts",
     label: "Critérios de Aderência",
     description:
-      "Conceitos que explicam frequência, contexto, modernização e fit de stack.",
+      "Conceitos que explicam frequência, contexto, modernização, fit e velocidade de stack.",
     category: "market-signals",
     nodeIds: [
       "market-signals-priority-concept",
       "market-signals-stack-selection-concept",
-      "market-signals-modernization-concept",
       "market-signals-market-fit-concept",
+      "market-signals-modernization-concept",
+      "market-signals-lean-delivery-concept",
     ],
   },
 ];

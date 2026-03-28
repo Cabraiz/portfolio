@@ -1,263 +1,264 @@
-import { memo, useMemo, type CSSProperties } from "react";
+// src/pages/Mateus/RoadMap/ui/canvas/RoadMapEdge.tsx
+import { memo, useMemo } from "react";
 
-import type { RoadMapNode as RoadMapNodeModel } from "../../domain/model/roadmap.types";
+import type {
+  RoadMapEdge as RoadMapEdgeModel,
+  RoadMapNode,
+} from "../../domain/model/roadmap.types";
 
 type RoadMapCanvasPositionKey = "desktop" | "mobile";
 
-type RoadMapNodeProps = Readonly<{
-  node: RoadMapNodeModel;
+type RoadMapEdgeProps = Readonly<{
+  edge: RoadMapEdgeModel;
+  fromNode: RoadMapNode;
+  toNode: RoadMapNode;
   positionKey?: RoadMapCanvasPositionKey;
-  isActive?: boolean;
-  isHovered?: boolean;
   isDimmed?: boolean;
-  onSelect?: (nodeId: string) => void;
-  onHover?: (nodeId: string | null) => void;
 }>;
 
-type NodeDimensions = Readonly<{
+type NodeBox = Readonly<{
+  x: number;
+  y: number;
   width: number;
-  minHeight: number;
+  height: number;
 }>;
 
-function getNodeDimensions(node: RoadMapNodeModel): NodeDimensions {
+type AnchorPoint = Readonly<{
+  x: number;
+  y: number;
+}>;
+
+function getNodeDimensions(node: RoadMapNode): { width: number; height: number } {
   switch (node.kind) {
     case "domain":
-      return { width: 260, minHeight: 84 };
+      return { width: 260, height: 84 };
     case "topic":
-      return { width: 224, minHeight: 60 };
+      return { width: 224, height: 60 };
     case "technology":
-      return { width: 208, minHeight: 56 };
+      return { width: 208, height: 56 };
     case "concept":
-      return { width: 176, minHeight: 42 };
+      return { width: 176, height: 42 };
     default:
-      return { width: 208, minHeight: 56 };
+      return { width: 208, height: 56 };
   }
 }
 
-function getNodePalette(node: RoadMapNodeModel): Readonly<{
-  background: string;
-  border: string;
-  text: string;
-  accent: string;
-  eyebrow: string;
-}> {
-  switch (node.kind) {
-    case "domain":
-      return {
-        background: "#0f172a",
-        border: "rgba(59, 130, 246, 0.32)",
-        text: "#f8fafc",
-        accent: "#60a5fa",
-        eyebrow: "rgba(191, 219, 254, 0.92)",
-      };
-    case "topic":
-      return {
-        background: "#ffffff",
-        border: "rgba(37, 99, 235, 0.16)",
-        text: "#0f172a",
-        accent: "#2563eb",
-        eyebrow: "#1d4ed8",
-      };
-    case "technology":
-      return {
-        background: "#ffffff",
-        border: "rgba(148, 163, 184, 0.2)",
-        text: "#0f172a",
-        accent: "#2563eb",
-        eyebrow: "#2563eb",
-      };
-    case "concept":
-      return {
-        background: "#f8fafc",
-        border: "rgba(148, 163, 184, 0.16)",
-        text: "#1e293b",
-        accent: "#2563eb",
-        eyebrow: "#475569",
-      };
-    default:
-      return {
-        background: "#ffffff",
-        border: "rgba(148, 163, 184, 0.2)",
-        text: "#0f172a",
-        accent: "#2563eb",
-        eyebrow: "#2563eb",
-      };
-  }
-}
-
-function getNodeEyebrow(node: RoadMapNodeModel): string | null {
-  if (node.kind === "domain") {
-    return "Stack";
-  }
-
-  if (node.kind === "topic") {
-    return "Bloco";
-  }
-
-  if (node.kind === "technology" && node.featured) {
-    return "Principal";
-  }
-
-  return null;
-}
-
-function getPosition(
-  node: RoadMapNodeModel,
+function getNodeBox(
+  node: RoadMapNode,
   positionKey: RoadMapCanvasPositionKey,
-): { x: number; y: number } {
-  const position = node[positionKey] ?? node.desktop ?? node.mobile ?? { x: 0, y: 0 };
+): NodeBox {
+  const position =
+    node[positionKey] ?? node.desktop ?? node.mobile ?? { x: 0, y: 0 };
+  const dimensions = getNodeDimensions(node);
 
   return {
     x: position.x,
     y: position.y,
+    width: dimensions.width,
+    height: dimensions.height,
   };
 }
 
-function RoadMapNodeComponent({
-  node,
+function getEdgeStyle(type: RoadMapEdgeModel["type"]): {
+  strokeDasharray?: string;
+  strokeWidth: number;
+  stroke: string;
+} {
+  switch (type) {
+    case "contains":
+      return {
+        strokeDasharray: "4 10",
+        strokeWidth: 1.25,
+        stroke: "rgba(100, 116, 139, 0.26)",
+      };
+    case "prerequisite":
+      return {
+        strokeWidth: 1.8,
+        stroke: "rgba(37, 99, 235, 0.44)",
+      };
+    case "alternative":
+      return {
+        strokeDasharray: "7 8",
+        strokeWidth: 1.4,
+        stroke: "rgba(100, 116, 139, 0.32)",
+      };
+    case "complements":
+      return {
+        strokeWidth: 1.5,
+        stroke: "rgba(14, 116, 144, 0.34)",
+      };
+    case "specializes":
+      return {
+        strokeDasharray: "5 8",
+        strokeWidth: 1.45,
+        stroke: "rgba(99, 102, 241, 0.34)",
+      };
+    default:
+      return {
+        strokeWidth: 1.45,
+        stroke: "rgba(37, 99, 235, 0.34)",
+      };
+  }
+}
+
+function getVerticalAnchors(
+  from: NodeBox,
+  to: NodeBox,
+): {
+  fromPoint: AnchorPoint;
+  toPoint: AnchorPoint;
+} {
+  return {
+    fromPoint: {
+      x: from.x + from.width / 2,
+      y: from.y + from.height,
+    },
+    toPoint: {
+      x: to.x + to.width / 2,
+      y: to.y,
+    },
+  };
+}
+
+function getHorizontalAnchors(
+  from: NodeBox,
+  to: NodeBox,
+): {
+  fromPoint: AnchorPoint;
+  toPoint: AnchorPoint;
+} {
+  const isLeftToRight = from.x <= to.x;
+
+  return {
+    fromPoint: isLeftToRight
+      ? { x: from.x + from.width, y: from.y + from.height / 2 }
+      : { x: from.x, y: from.y + from.height / 2 },
+    toPoint: isLeftToRight
+      ? { x: to.x, y: to.y + to.height / 2 }
+      : { x: to.x + to.width, y: to.y + to.height / 2 },
+  };
+}
+
+function buildPath(from: NodeBox, to: NodeBox): string {
+  const fromCenterY = from.y + from.height / 2;
+  const toCenterY = to.y + to.height / 2;
+  const verticalFlow = toCenterY >= fromCenterY - 12;
+
+  if (verticalFlow) {
+    const { fromPoint, toPoint } = getVerticalAnchors(from, to);
+    const deltaY = Math.max(
+      30,
+      Math.min(88, Math.abs(toPoint.y - fromPoint.y) * 0.28),
+    );
+
+    return [
+      `M ${fromPoint.x} ${fromPoint.y}`,
+      `C ${fromPoint.x} ${fromPoint.y + deltaY},`,
+      `${toPoint.x} ${toPoint.y - deltaY},`,
+      `${toPoint.x} ${toPoint.y}`,
+    ].join(" ");
+  }
+
+  const { fromPoint, toPoint } = getHorizontalAnchors(from, to);
+  const isLeftToRight = fromPoint.x <= toPoint.x;
+  const deltaX = Math.max(
+    36,
+    Math.min(98, Math.abs(toPoint.x - fromPoint.x) * 0.26),
+  );
+
+  return [
+    `M ${fromPoint.x} ${fromPoint.y}`,
+    `C ${fromPoint.x + (isLeftToRight ? deltaX : -deltaX)} ${fromPoint.y},`,
+    `${toPoint.x - (isLeftToRight ? deltaX : -deltaX)} ${toPoint.y},`,
+    `${toPoint.x} ${toPoint.y}`,
+  ].join(" ");
+}
+
+function getMidPoint(from: NodeBox, to: NodeBox) {
+  const fromCenterX = from.x + from.width / 2;
+  const fromCenterY = from.y + from.height / 2;
+  const toCenterX = to.x + to.width / 2;
+  const toCenterY = to.y + to.height / 2;
+  const verticalFlow = toCenterY >= fromCenterY - 12;
+
+  return {
+    x: fromCenterX + (toCenterX - fromCenterX) / 2,
+    y: fromCenterY + (toCenterY - fromCenterY) / 2 + (verticalFlow ? -10 : -12),
+  };
+}
+
+function getLabelWidth(label: string): number {
+  return Math.min(112, Math.max(48, label.length * 6 + 14));
+}
+
+function RoadMapEdgeComponent({
+  edge,
+  fromNode,
+  toNode,
   positionKey = "desktop",
-  isActive = false,
-  isHovered = false,
   isDimmed = false,
-  onSelect,
-  onHover,
-}: RoadMapNodeProps) {
-  const palette = useMemo(() => getNodePalette(node), [node]);
-  const dimensions = useMemo(() => getNodeDimensions(node), [node]);
-  const position = useMemo(() => getPosition(node, positionKey), [node, positionKey]);
-  const eyebrow = useMemo(() => getNodeEyebrow(node), [node]);
-
-  const style = useMemo<CSSProperties>(() => {
-    const borderColor = isActive ? palette.accent : palette.border;
-    const backgroundColor =
-      isActive && node.kind !== "domain" ? "#eff6ff" : palette.background;
-
-    return {
-      position: "absolute",
-      left: `${position.x}px`,
-      top: `${position.y}px`,
-      width: `${dimensions.width}px`,
-      minHeight: `${dimensions.minHeight}px`,
-      padding:
-        node.kind === "domain"
-          ? "14px 16px"
-          : node.kind === "concept"
-            ? "8px 12px"
-            : "10px 14px",
-      borderRadius:
-        node.kind === "domain" ? "18px" : node.kind === "concept" ? "999px" : "14px",
-      border: `1px solid ${borderColor}`,
-      background: backgroundColor,
-      color: palette.text,
-      display: "flex",
-      flexDirection: "column",
-      justifyContent: "center",
-      alignItems: node.kind === "concept" ? "center" : "flex-start",
-      gap: eyebrow ? "4px" : 0,
-      textAlign: node.kind === "concept" ? "center" : "left",
-      cursor: "pointer",
-      userSelect: "none",
-      opacity: isDimmed ? 0.34 : 1,
-      zIndex: isActive ? 6 : isHovered ? 5 : 3,
-      fontFamily:
-        'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-      boxSizing: "border-box",
-      outline: isActive ? "2px solid rgba(37, 99, 235, 0.14)" : "none",
-      outlineOffset: "0",
-    };
-  }, [
-    dimensions,
-    eyebrow,
-    isActive,
-    isDimmed,
-    isHovered,
-    node.kind,
-    palette,
-    position.x,
-    position.y,
-  ]);
-
-  const eyebrowStyle = useMemo<CSSProperties>(
-    () => ({
-      display: "inline-flex",
-      alignItems: "center",
-      minHeight: "16px",
-      padding: "0 6px",
-      borderRadius: "999px",
-      background:
-        node.kind === "domain"
-          ? "rgba(255,255,255,0.1)"
-          : "rgba(37, 99, 235, 0.08)",
-      color: palette.eyebrow,
-      fontSize: "0.62rem",
-      fontWeight: 800,
-      lineHeight: 1,
-      letterSpacing: "0.04em",
-      textTransform: "uppercase",
-      whiteSpace: "nowrap",
-    }),
-    [node.kind, palette.eyebrow],
+}: RoadMapEdgeProps) {
+  const fromBox = useMemo(
+    () => getNodeBox(fromNode, positionKey),
+    [fromNode, positionKey],
+  );
+  const toBox = useMemo(
+    () => getNodeBox(toNode, positionKey),
+    [toNode, positionKey],
   );
 
-  const titleStyle = useMemo<CSSProperties>(
-    () => ({
-      margin: 0,
-      width: "100%",
-      lineHeight: 1.12,
-      fontSize:
-        node.kind === "domain"
-          ? "1rem"
-          : node.kind === "topic"
-            ? "0.9rem"
-            : node.kind === "technology"
-              ? "0.88rem"
-              : "0.8rem",
-      fontWeight: node.kind === "domain" ? 800 : 700,
-      letterSpacing: "-0.02em",
-      overflowWrap: "anywhere",
-    }),
-    [node.kind],
-  );
+  const path = useMemo(() => buildPath(fromBox, toBox), [fromBox, toBox]);
+  const midPoint = useMemo(() => getMidPoint(fromBox, toBox), [fromBox, toBox]);
+  const style = useMemo(() => getEdgeStyle(edge.type), [edge.type]);
 
-  const accentBarStyle = useMemo<CSSProperties>(
-    () => ({
-      position: "absolute",
-      top: "0",
-      left: node.kind === "concept" ? "18%" : "14px",
-      right: node.kind === "concept" ? "18%" : "14px",
-      height: "2px",
-      borderTopLeftRadius: "999px",
-      borderTopRightRadius: "999px",
-      background:
-        node.kind === "domain"
-          ? "rgba(96, 165, 250, 0.92)"
-          : node.kind === "technology" && node.featured
-            ? "rgba(37, 99, 235, 0.82)"
-            : "transparent",
-    }),
-    [node.featured, node.kind],
-  );
+  const label = edge.label?.trim();
+  const shouldRenderLabel =
+    Boolean(label) && !isDimmed && edge.type !== "contains";
+  const labelWidth = label ? getLabelWidth(label) : 0;
 
   return (
-    <button
-      type="button"
-      aria-pressed={isActive}
-      aria-label={node.label}
-      title={node.description ?? node.label}
-      style={style}
-      onClick={() => onSelect?.(node.id)}
-      onMouseEnter={() => onHover?.(node.id)}
-      onMouseLeave={() => onHover?.(null)}
-      onFocus={() => onHover?.(node.id)}
-      onBlur={() => onHover?.(null)}
-    >
-      <span aria-hidden="true" style={accentBarStyle} />
+    <g aria-hidden="true" style={{ pointerEvents: "none" }}>
+      <path
+        d={path}
+        fill="none"
+        stroke={style.stroke}
+        strokeWidth={style.strokeWidth}
+        strokeDasharray={style.strokeDasharray}
+        opacity={isDimmed ? 0.1 : 0.46}
+        strokeLinecap="round"
+      />
 
-      {eyebrow ? <span style={eyebrowStyle}>{eyebrow}</span> : null}
-
-      <span style={titleStyle}>{node.shortLabel ?? node.label}</span>
-    </button>
+      {shouldRenderLabel && label ? (
+        <>
+          <rect
+            x={midPoint.x - labelWidth / 2}
+            y={midPoint.y - 9}
+            width={labelWidth}
+            height={18}
+            rx={9}
+            fill="rgba(255,255,255,0.88)"
+            stroke="rgba(148, 163, 184, 0.14)"
+            opacity={0.92}
+          />
+          <text
+            x={midPoint.x}
+            y={midPoint.y + 3}
+            textAnchor="middle"
+            fontSize="10"
+            fontWeight="700"
+            fill="#475569"
+            opacity={0.78}
+            style={{
+              fontFamily:
+                'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+            }}
+          >
+            {label}
+          </text>
+        </>
+      ) : null}
+    </g>
   );
 }
 
-export default memo(RoadMapNodeComponent);
+export default memo(RoadMapEdgeComponent);

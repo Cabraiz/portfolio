@@ -1,21 +1,24 @@
 import { memo, useMemo, type CSSProperties } from "react";
 
+import type { RoadMapLayoutViewport } from "../../domain/model/roadmap.layout.types";
 import type {
   RoadMapCluster,
   RoadMapEdge,
   RoadMapNode,
 } from "../../domain/model/roadmap.types";
+import {
+  getRoadMapNodeDimensions,
+  getRoadMapNodePosition,
+} from "../../application/services/resolveRoadMapNodeCollisions";
 import RoadMapClusterView from "./RoadMapCluster";
 import RoadMapEdgeView from "./RoadMapEdge";
 import RoadMapNodeView from "./RoadMapNode";
-
-type RoadMapCanvasPositionKey = "desktop" | "mobile";
 
 type RoadMapCanvasProps = Readonly<{
   nodes: readonly RoadMapNode[];
   edges: readonly RoadMapEdge[];
   clusters?: readonly RoadMapCluster[];
-  positionKey?: RoadMapCanvasPositionKey;
+  positionKey?: RoadMapLayoutViewport;
   activeNodeId?: string | null;
   hoveredNodeId?: string | null;
   onNodeSelect?: (nodeId: string) => void;
@@ -26,61 +29,79 @@ type RoadMapCanvasProps = Readonly<{
   emptyDescription?: string;
 }>;
 
-function getNodeDimensions(node: RoadMapNode): { width: number; height: number } {
-  switch (node.kind) {
-    case "domain":
-      return { width: 260, height: 84 };
-    case "topic":
-      return { width: 224, height: 60 };
-    case "technology":
-      return { width: 208, height: 56 };
-    case "concept":
-      return { width: 176, height: 42 };
-    default:
-      return { width: 208, height: 56 };
+type RoadMapCanvasBounds = Readonly<{
+  minX: number;
+  minY: number;
+  maxRight: number;
+  maxBottom: number;
+}>;
+
+function getCanvasNodeBounds(
+  nodes: readonly RoadMapNode[],
+  positionKey: RoadMapLayoutViewport,
+): RoadMapCanvasBounds | null {
+  if (nodes.length === 0) {
+    return null;
   }
+
+  let minX = Number.POSITIVE_INFINITY;
+  let minY = Number.POSITIVE_INFINITY;
+  let maxRight = Number.NEGATIVE_INFINITY;
+  let maxBottom = Number.NEGATIVE_INFINITY;
+
+  for (const node of nodes) {
+    const position = getRoadMapNodePosition(node, positionKey);
+    const dimensions = getRoadMapNodeDimensions(node);
+
+    minX = Math.min(minX, position.x);
+    minY = Math.min(minY, position.y);
+    maxRight = Math.max(maxRight, position.x + dimensions.width);
+    maxBottom = Math.max(maxBottom, position.y + dimensions.height);
+  }
+
+  return {
+    minX,
+    minY,
+    maxRight,
+    maxBottom,
+  };
 }
 
 function getCanvasSize(
   nodes: readonly RoadMapNode[],
-  positionKey: RoadMapCanvasPositionKey,
+  positionKey: RoadMapLayoutViewport,
   minHeight: number,
-) {
-  if (nodes.length === 0) {
+): { width: number; height: number } {
+  const bounds = getCanvasNodeBounds(nodes, positionKey);
+
+  if (!bounds) {
     return {
-      width: positionKey === "mobile" ? 380 : 1120,
+      width: positionKey === "mobile" ? 360 : 1120,
       height: minHeight,
     };
   }
 
-  const paddingRight = positionKey === "mobile" ? 36 : 120;
-  const paddingBottom = 140;
-  const minWidth = positionKey === "mobile" ? 380 : 1120;
+  const paddingLeft = positionKey === "mobile" ? 20 : 28;
+  const paddingRight = positionKey === "mobile" ? 28 : 120;
+  const paddingTop = positionKey === "mobile" ? 24 : 28;
+  const paddingBottom = positionKey === "mobile" ? 80 : 120;
+  const minWidth = positionKey === "mobile" ? 360 : 1120;
 
-  let maxX = 0;
-  let maxY = 0;
-
-  for (const node of nodes) {
-    const position =
-      node[positionKey] ?? node.desktop ?? node.mobile ?? { x: 0, y: 0 };
-    const dimensions = getNodeDimensions(node);
-
-    maxX = Math.max(maxX, position.x + dimensions.width);
-    maxY = Math.max(maxY, position.y + dimensions.height);
-  }
+  const contentWidth = Math.max(0, bounds.maxRight - bounds.minX);
+  const contentHeight = Math.max(0, bounds.maxBottom - bounds.minY);
 
   return {
-    width: Math.max(minWidth, maxX + paddingRight),
-    height: Math.max(minHeight, maxY + paddingBottom),
+    width: Math.max(minWidth, contentWidth + paddingLeft + paddingRight),
+    height: Math.max(minHeight, contentHeight + paddingTop + paddingBottom),
   };
 }
 
-function createConnectedNodeIdSet(
+function createSpotlightNodeIdSet(
   spotlightNodeId: string | null,
   edges: readonly RoadMapEdge[],
-): ReadonlySet<string> | null {
+): ReadonlySet<string> {
   if (!spotlightNodeId) {
-    return null;
+    return new Set<string>();
   }
 
   const relatedNodeIds = new Set<string>([spotlightNodeId]);
@@ -107,7 +128,7 @@ function RoadMapCanvasComponent({
   className,
   minHeight = 920,
   emptyTitle = "Mapa indisponível",
-  emptyDescription = "Nenhuma tecnologia foi encontrada para esta visualização.",
+  emptyDescription = "Nenhum item foi encontrado para esta visualização.",
 }: RoadMapCanvasProps) {
   const nodeMap = useMemo(
     () => new Map(nodes.map((node) => [node.id, node])),
@@ -120,9 +141,10 @@ function RoadMapCanvasComponent({
   );
 
   const spotlightNodeId = hoveredNodeId ?? activeNodeId ?? null;
+  const hasSpotlight = spotlightNodeId !== null;
 
   const spotlightNodeIds = useMemo(
-    () => createConnectedNodeIdSet(spotlightNodeId, edges),
+    () => createSpotlightNodeIdSet(spotlightNodeId, edges),
     [spotlightNodeId, edges],
   );
 
@@ -132,9 +154,11 @@ function RoadMapCanvasComponent({
       width: "100%",
       overflowX: "auto",
       overflowY: "hidden",
-      borderRadius: "20px",
-      border: "1px solid rgba(148, 163, 184, 0.18)",
-      background: "#ffffff",
+      borderRadius: "24px",
+      border: "1px solid rgba(148, 163, 184, 0.14)",
+      background:
+        "linear-gradient(180deg, rgba(255,255,255,0.92) 0%, rgba(248,250,252,0.96) 100%)",
+      boxShadow: "0 18px 48px rgba(15, 23, 42, 0.05)",
       scrollbarWidth: "thin",
     }),
     [],
@@ -149,14 +173,18 @@ function RoadMapCanvasComponent({
       minHeight: `${canvasSize.height}px`,
       padding: 0,
       backgroundColor: "#f8fafc",
-      backgroundImage: `
-        linear-gradient(rgba(148, 163, 184, 0.035) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(148, 163, 184, 0.035) 1px, transparent 1px)
-      `,
-      backgroundSize: "48px 48px",
+      backgroundImage:
+        positionKey === "mobile"
+          ? "none"
+          : `
+              linear-gradient(rgba(15, 23, 42, 0.028) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(15, 23, 42, 0.028) 1px, transparent 1px)
+            `,
+      backgroundSize: positionKey === "mobile" ? undefined : "44px 44px",
       backgroundPosition: "0 0",
+      boxSizing: "border-box",
     }),
-    [canvasSize.height, canvasSize.width],
+    [canvasSize.height, canvasSize.width, positionKey],
   );
 
   const svgStyle = useMemo<CSSProperties>(
@@ -186,6 +214,11 @@ function RoadMapCanvasComponent({
     [minHeight],
   );
 
+  const drawableEdges = useMemo(
+    () => edges.filter((edge) => nodeMap.has(edge.from) && nodeMap.has(edge.to)),
+    [edges, nodeMap],
+  );
+
   if (nodes.length === 0) {
     return (
       <div className={className} style={wrapperStyle}>
@@ -194,7 +227,7 @@ function RoadMapCanvasComponent({
             <h3
               style={{
                 margin: "0 0 8px",
-                fontSize: "1rem",
+                fontSize: "0.98rem",
                 fontWeight: 800,
                 color: "#0f172a",
               }}
@@ -204,7 +237,7 @@ function RoadMapCanvasComponent({
             <p
               style={{
                 margin: 0,
-                fontSize: "0.92rem",
+                fontSize: "0.9rem",
                 lineHeight: 1.55,
                 color: "#475569",
               }}
@@ -222,8 +255,8 @@ function RoadMapCanvasComponent({
       <div style={stageStyle}>
         {clusters.map((cluster) => {
           const isDimmed =
-            Boolean(spotlightNodeIds) &&
-            !cluster.nodeIds.some((nodeId) => spotlightNodeIds?.has(nodeId));
+            hasSpotlight &&
+            !cluster.nodeIds.some((nodeId) => spotlightNodeIds.has(nodeId));
 
           return (
             <RoadMapClusterView
@@ -241,7 +274,7 @@ function RoadMapCanvasComponent({
           viewBox={`0 0 ${canvasSize.width} ${canvasSize.height}`}
           style={svgStyle}
         >
-          {edges.map((edge) => {
+          {drawableEdges.map((edge) => {
             const fromNode = nodeMap.get(edge.from);
             const toNode = nodeMap.get(edge.to);
 
@@ -250,7 +283,7 @@ function RoadMapCanvasComponent({
             }
 
             const isDimmed =
-              Boolean(spotlightNodeId) &&
+              hasSpotlight &&
               edge.from !== spotlightNodeId &&
               edge.to !== spotlightNodeId;
 
@@ -268,8 +301,7 @@ function RoadMapCanvasComponent({
         </svg>
 
         {nodes.map((node) => {
-          const isDimmed =
-            Boolean(spotlightNodeIds) && !spotlightNodeIds?.has(node.id);
+          const isDimmed = hasSpotlight && !spotlightNodeIds.has(node.id);
 
           return (
             <RoadMapNodeView

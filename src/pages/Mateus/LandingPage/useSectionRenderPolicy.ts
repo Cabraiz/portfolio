@@ -1,22 +1,48 @@
 import { useMemo } from "react";
 
+import type { LandingRenderPolicyOptions } from "./landingSections.config";
+import type { LandingSectionViewportMode } from "./landing.types";
+
 export type SectionRenderState = "active" | "near" | "far";
+
+export type SectionRenderPolicySection = Readonly<{
+  id: string;
+  alwaysMountedOnDesktop?: boolean;
+  prefersStableRender?: boolean;
+  urlSyncEligible?: boolean;
+  preferredNearDistance?: number;
+  disableFarOnDesktop?: boolean;
+}>;
 
 export type SectionRenderPolicyItem = Readonly<{
   id: string;
   state: SectionRenderState;
   index: number;
   distanceFromActive: number;
+  effectiveNearDistance: number;
+  alwaysMounted: boolean;
+  prefersStableRender: boolean;
+  farDisabled: boolean;
+  urlSyncEligible: boolean;
 }>;
 
-type SectionDefinition = Readonly<{
-  id: string;
+type ResolvedRenderPolicy = Readonly<{
+  nearDistance: number;
+  stableNearDistance: number;
+  disableFar: boolean;
+  alwaysMountedSectionIds: readonly string[];
+  stableSectionIds: readonly string[];
+  urlSyncEligibleSectionIds: readonly string[];
 }>;
 
 type UseSectionRenderPolicyParams = Readonly<{
-  sections: readonly SectionDefinition[];
+  sections: readonly SectionRenderPolicySection[];
   activeSectionId: string;
+  renderPolicy?: Partial<LandingRenderPolicyOptions>;
   nearDistance?: number;
+  stableNearDistance?: number;
+  disableFar?: boolean;
+  viewportMode?: LandingSectionViewportMode;
 }>;
 
 type SectionRenderPolicyResult = Readonly<{
@@ -27,15 +53,97 @@ type SectionRenderPolicyResult = Readonly<{
   stateMap: ReadonlyMap<string, SectionRenderState>;
 }>;
 
+function normalizeSectionIdList(
+  sectionIds?: readonly string[],
+): readonly string[] {
+  return Array.from(new Set(sectionIds ?? []));
+}
+
+function resolveResolvedRenderPolicy(params: Readonly<{
+  renderPolicy?: Partial<LandingRenderPolicyOptions>;
+  nearDistance?: number;
+  stableNearDistance?: number;
+  disableFar?: boolean;
+}>): ResolvedRenderPolicy {
+  const safeNearDistance = Math.max(
+    0,
+    Math.floor(params.renderPolicy?.nearDistance ?? params.nearDistance ?? 1),
+  );
+
+  const safeStableNearDistance = Math.max(
+    safeNearDistance,
+    Math.floor(
+      params.renderPolicy?.stableNearDistance ??
+        params.stableNearDistance ??
+        3,
+    ),
+  );
+
+  return {
+    nearDistance: safeNearDistance,
+    stableNearDistance: safeStableNearDistance,
+    disableFar: Boolean(
+      params.renderPolicy?.disableFar ?? params.disableFar ?? false,
+    ),
+    alwaysMountedSectionIds: normalizeSectionIdList(
+      params.renderPolicy?.alwaysMountedSectionIds,
+    ),
+    stableSectionIds: normalizeSectionIdList(
+      params.renderPolicy?.stableSectionIds,
+    ),
+    urlSyncEligibleSectionIds: normalizeSectionIdList(
+      params.renderPolicy?.urlSyncEligibleSectionIds,
+    ),
+  };
+}
+
+function resolveEffectiveNearDistance(
+  section: SectionRenderPolicySection,
+  baseNearDistance: number,
+  stableNearDistance: number,
+  isDesktop: boolean,
+  alwaysMounted: boolean,
+  prefersStableRender: boolean,
+  farDisabled: boolean,
+): number {
+  if (!isDesktop) {
+    return baseNearDistance;
+  }
+
+  if (alwaysMounted || farDisabled) {
+    return Number.POSITIVE_INFINITY;
+  }
+
+  let nextNearDistance = baseNearDistance;
+
+  if (prefersStableRender) {
+    nextNearDistance = Math.max(nextNearDistance, stableNearDistance);
+  }
+
+  if (typeof section.preferredNearDistance === "number") {
+    nextNearDistance = Math.max(
+      nextNearDistance,
+      Math.max(0, Math.floor(section.preferredNearDistance)),
+    );
+  }
+
+  return nextNearDistance;
+}
+
 function resolveSectionState(
   distanceFromActive: number,
-  nearDistance: number,
+  effectiveNearDistance: number,
+  farDisabled: boolean,
 ): SectionRenderState {
   if (distanceFromActive === 0) {
     return "active";
   }
 
-  if (distanceFromActive <= nearDistance) {
+  if (farDisabled) {
+    return "near";
+  }
+
+  if (distanceFromActive <= effectiveNearDistance) {
     return "near";
   }
 
@@ -45,10 +153,29 @@ function resolveSectionState(
 export default function useSectionRenderPolicy({
   sections,
   activeSectionId,
-  nearDistance = 1,
+  renderPolicy,
+  nearDistance,
+  stableNearDistance,
+  disableFar,
+  viewportMode = "desktop",
 }: UseSectionRenderPolicyParams): SectionRenderPolicyResult {
   return useMemo(() => {
-    const safeNearDistance = Math.max(0, nearDistance);
+    const resolvedRenderPolicy = resolveResolvedRenderPolicy({
+      renderPolicy,
+      nearDistance,
+      stableNearDistance,
+      disableFar,
+    });
+
+    const isDesktop = viewportMode !== "mobile";
+
+    const alwaysMountedSectionIdSet = new Set(
+      resolvedRenderPolicy.alwaysMountedSectionIds,
+    );
+    const stableSectionIdSet = new Set(resolvedRenderPolicy.stableSectionIds);
+    const urlSyncEligibleSectionIdSet = new Set(
+      resolvedRenderPolicy.urlSyncEligibleSectionIds,
+    );
 
     const activeIndex = sections.findIndex(
       (section) => section.id === activeSectionId,
@@ -59,11 +186,49 @@ export default function useSectionRenderPolicy({
     const items = sections.map((section, index) => {
       const distanceFromActive = Math.abs(index - fallbackActiveIndex);
 
+      const alwaysMounted =
+        isDesktop &&
+        (Boolean(section.alwaysMountedOnDesktop) ||
+          alwaysMountedSectionIdSet.has(section.id));
+
+      const prefersStableRender =
+        isDesktop &&
+        (Boolean(section.prefersStableRender) ||
+          stableSectionIdSet.has(section.id) ||
+          alwaysMounted);
+
+      const farDisabled =
+        isDesktop &&
+        (resolvedRenderPolicy.disableFar ||
+          Boolean(section.disableFarOnDesktop) ||
+          alwaysMounted);
+
+      const effectiveNearDistance = resolveEffectiveNearDistance(
+        section,
+        resolvedRenderPolicy.nearDistance,
+        resolvedRenderPolicy.stableNearDistance,
+        isDesktop,
+        alwaysMounted,
+        prefersStableRender,
+        farDisabled,
+      );
+
       return {
         id: section.id,
-        state: resolveSectionState(distanceFromActive, safeNearDistance),
+        state: resolveSectionState(
+          distanceFromActive,
+          effectiveNearDistance,
+          farDisabled,
+        ),
         index,
         distanceFromActive,
+        effectiveNearDistance,
+        alwaysMounted,
+        prefersStableRender,
+        farDisabled,
+        urlSyncEligible:
+          Boolean(section.urlSyncEligible) ||
+          urlSyncEligibleSectionIdSet.has(section.id),
       } satisfies SectionRenderPolicyItem;
     });
 
@@ -82,5 +247,13 @@ export default function useSectionRenderPolicy({
       items,
       stateMap,
     };
-  }, [activeSectionId, nearDistance, sections]);
+  }, [
+    activeSectionId,
+    disableFar,
+    nearDistance,
+    renderPolicy,
+    sections,
+    stableNearDistance,
+    viewportMode,
+  ]);
 }

@@ -1,3 +1,5 @@
+// src/pages/Mateus/RoadMap/domain/model/roadmap.types.ts
+
 export type RoadMapNodeKind =
   | "domain"
   | "topic"
@@ -14,7 +16,7 @@ export type RoadMapRelationType =
 /**
  * Mantido por compatibilidade com a base atual.
  * No contexto novo, "demand" representa o peso visual/estratégico
- * da tecnologia dentro da sua stack, e não prioridade pedagógica.
+ * da tecnologia dentro da stack, e não prioridade pedagógica.
  */
 export type RoadMapDemandLevel =
   | "core"
@@ -83,7 +85,7 @@ export type RoadMapNode = Readonly<{
   category: RoadMapCategoryId;
 
   /**
-   * Peso visual/estratégico do item na sua stack.
+   * Peso visual/estratégico do item na stack.
    * Ex.: core = base principal; important = atuação recorrente.
    */
   demand: RoadMapDemandLevel;
@@ -95,7 +97,7 @@ export type RoadMapNode = Readonly<{
   difficulty?: 1 | 2 | 3 | 4 | 5;
 
   /**
-   * Novo campo opcional mais coerente com portfólio.
+   * Campo novo opcional mais coerente com portfólio.
    */
   proficiency?: 1 | 2 | 3 | 4 | 5;
 

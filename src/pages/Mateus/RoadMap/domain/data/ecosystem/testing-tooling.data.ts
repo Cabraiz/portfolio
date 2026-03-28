@@ -1,3 +1,4 @@
+// src/pages/Mateus/RoadMap/domain/data/ecosystem/testing-tooling.data.ts
 import type {
   RoadMapCluster,
   RoadMapEdge,
@@ -87,6 +88,7 @@ export const testingToolingRoadMapNodes: readonly RoadMapNode[] = [
   {
     id: "testing-tooling-code-quality-topic",
     label: "Qualidade de Código",
+    shortLabel: "Qualidade",
     description:
       "Padrões automáticos de consistência, legibilidade e prevenção de erro.",
     kind: "topic",
@@ -120,6 +122,7 @@ export const testingToolingRoadMapNodes: readonly RoadMapNode[] = [
   {
     id: "testing-tooling-vitest-technology",
     label: "Vitest",
+    shortLabel: "Vitest",
     description:
       "Runner moderno muito alinhado ao ecossistema Vite e stacks React atuais.",
     kind: "technology",
@@ -155,6 +158,7 @@ export const testingToolingRoadMapNodes: readonly RoadMapNode[] = [
   {
     id: "testing-tooling-jest-technology",
     label: "Jest",
+    shortLabel: "Jest",
     description:
       "Runner consolidado, ainda muito presente em projetos enterprise e bases legadas.",
     kind: "technology",
@@ -188,6 +192,7 @@ export const testingToolingRoadMapNodes: readonly RoadMapNode[] = [
   {
     id: "testing-tooling-playwright-technology",
     label: "Playwright",
+    shortLabel: "Playwright",
     description:
       "Ferramenta moderna de E2E com forte crescimento para jornadas críticas e validação cross-browser.",
     kind: "technology",
@@ -224,6 +229,7 @@ export const testingToolingRoadMapNodes: readonly RoadMapNode[] = [
   {
     id: "testing-tooling-cypress-technology",
     label: "Cypress",
+    shortLabel: "Cypress",
     description:
       "Ferramenta importante no histórico de E2E e ainda presente em muitas bases existentes.",
     kind: "technology",
@@ -240,6 +246,7 @@ export const testingToolingRoadMapNodes: readonly RoadMapNode[] = [
   {
     id: "testing-tooling-eslint-technology",
     label: "ESLint",
+    shortLabel: "ESLint",
     description:
       "Ferramenta base para consistência, prevenção de erro e enforce de padrões.",
     kind: "technology",
@@ -256,6 +263,7 @@ export const testingToolingRoadMapNodes: readonly RoadMapNode[] = [
   {
     id: "testing-tooling-prettier-technology",
     label: "Prettier",
+    shortLabel: "Prettier",
     description:
       "Formatação automática para reduzir ruído visual e divergência no código.",
     kind: "technology",
@@ -272,6 +280,7 @@ export const testingToolingRoadMapNodes: readonly RoadMapNode[] = [
   {
     id: "testing-tooling-storybook-technology",
     label: "Storybook",
+    shortLabel: "Storybook",
     description:
       "Ferramenta de preview, documentação e exploração isolada de componentes.",
     kind: "technology",
@@ -288,6 +297,7 @@ export const testingToolingRoadMapNodes: readonly RoadMapNode[] = [
   {
     id: "testing-tooling-vite-technology",
     label: "Vite",
+    shortLabel: "Vite",
     description:
       "Tooling moderno de desenvolvimento e build com feedback rápido no ciclo local.",
     kind: "technology",

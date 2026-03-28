@@ -1,16 +1,39 @@
-import React from "react";
-import { navbarStyles } from "../NavbarStyles";
+import React, { type CSSProperties } from "react";
+
+import type { LandingSectionId } from "../../../features/navigation/landingSections";
 
 export type DesktopNavItemButtonProps = Readonly<{
-  link: string;
+  link: LandingSectionId;
   label: string;
   isActive: boolean;
   onClick: () => void;
   navRef?: (element: HTMLButtonElement | null) => void;
-  onHoverStart?: (element: HTMLButtonElement) => void;
-  onHoverEnd?: (element: HTMLButtonElement) => void;
   leadingVisual?: React.ReactNode;
 }>;
+
+const baseButtonStyle: CSSProperties = {
+  all: "unset",
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+  position: "relative",
+  cursor: "pointer",
+  whiteSpace: "nowrap",
+  flex: "0 0 auto",
+  minWidth: 0,
+  padding: "6px 0 10px",
+  color: "rgba(255, 255, 255, 0.74)",
+  fontSize: "clamp(1.02rem, 0.68rem + 0.72vw, 1.18rem)",
+  fontWeight: 600,
+  lineHeight: 1,
+  letterSpacing: "-0.01em",
+  transition:
+    "color 180ms ease, transform 180ms ease, opacity 180ms ease",
+};
+
+const activeButtonStyle: CSSProperties = {
+  color: "#ffffff",
+};
 
 const DesktopNavItemButton: React.FC<DesktopNavItemButtonProps> = ({
   link,
@@ -18,18 +41,8 @@ const DesktopNavItemButton: React.FC<DesktopNavItemButtonProps> = ({
   isActive,
   onClick,
   navRef,
-  onHoverStart,
-  onHoverEnd,
   leadingVisual,
 }) => {
-  const handleMouseEnter = (event: React.MouseEvent<HTMLButtonElement>) => {
-    onHoverStart?.(event.currentTarget);
-  };
-
-  const handleMouseLeave = (event: React.MouseEvent<HTMLButtonElement>) => {
-    onHoverEnd?.(event.currentTarget);
-  };
-
   return (
     <button
       type="button"
@@ -37,20 +50,9 @@ const DesktopNavItemButton: React.FC<DesktopNavItemButtonProps> = ({
       data-nav-link={link}
       aria-current={isActive ? "page" : undefined}
       onClick={onClick}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
       style={{
-        all: "unset",
-        ...(navbarStyles.navLink as React.CSSProperties),
-        ...(isActive ? (navbarStyles.navLinkActive as React.CSSProperties) : {}),
-        display: "inline-flex",
-        alignItems: "center",
-        justifyContent: "center",
-        position: "relative",
-        cursor: "pointer",
-        whiteSpace: "nowrap",
-        flex: "0 0 auto",
-        minWidth: 0,
+        ...baseButtonStyle,
+        ...(isActive ? activeButtonStyle : null),
       }}
     >
       <span

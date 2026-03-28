@@ -1,3 +1,4 @@
+// src/pages/Mateus/RoadMap/domain/data/ecosystem/data-layer.data.ts
 import type {
   RoadMapCluster,
   RoadMapEdge,
@@ -22,7 +23,7 @@ export const dataLayerRoadMapNodes: readonly RoadMapNode[] = [
     details: {
       headline: "Bloco central em aplicações orientadas a dados.",
       summary:
-        "Reúne os pontos mais recorrentes no meu trabalho com front-end conectado a backend: requests, cache, mutações, paginação e consistência de dados remotos.",
+        "Reúne os pontos mais recorrentes no trabalho com front-end conectado a backend: requests, cache, mutações, paginação e consistência de dados remotos.",
       projectContexts: [
         "Dashboards",
         "Produtos SaaS",
@@ -51,6 +52,7 @@ export const dataLayerRoadMapNodes: readonly RoadMapNode[] = [
   {
     id: "data-layer-api-consumption-topic",
     label: "Consumo de API",
+    shortLabel: "API Consumption",
     description:
       "Requests, parsing, autenticação, tratamento de erro e padronização de client.",
     kind: "topic",
@@ -67,6 +69,7 @@ export const dataLayerRoadMapNodes: readonly RoadMapNode[] = [
   {
     id: "data-layer-server-state-topic",
     label: "Server State",
+    shortLabel: "Server State",
     description:
       "Dados remotos com cache, revalidação, refetch e sincronização assíncrona.",
     kind: "topic",
@@ -83,6 +86,7 @@ export const dataLayerRoadMapNodes: readonly RoadMapNode[] = [
   {
     id: "data-layer-mutations-topic",
     label: "Mutations",
+    shortLabel: "Mutations",
     description:
       "Criação, edição, deleção e sincronização de alterações com o backend.",
     kind: "topic",
@@ -116,6 +120,7 @@ export const dataLayerRoadMapNodes: readonly RoadMapNode[] = [
   {
     id: "data-layer-fetch-api-technology",
     label: "Fetch API",
+    shortLabel: "Fetch",
     description:
       "Base nativa do browser para requests HTTP, usada de forma direta ou como fundação de abstrações.",
     kind: "technology",
@@ -129,7 +134,7 @@ export const dataLayerRoadMapNodes: readonly RoadMapNode[] = [
     details: {
       headline: "Base importante para entender rede no browser.",
       summary:
-        "Mesmo quando uso outras bibliotecas, entender bem Fetch ajuda a modelar clients, headers, autenticação, erros e comportamento de rede.",
+        "Mesmo quando outras bibliotecas são usadas, entender bem Fetch ajuda a modelar clients, headers, autenticação, erros e comportamento de rede.",
       projectContexts: [
         "Integrações simples",
         "API clients internos",
@@ -152,6 +157,7 @@ export const dataLayerRoadMapNodes: readonly RoadMapNode[] = [
   {
     id: "data-layer-axios-technology",
     label: "Axios",
+    shortLabel: "Axios",
     description:
       "Cliente HTTP consolidado com interceptors, configuração global e presença forte em bases corporativas.",
     kind: "technology",
@@ -227,6 +233,7 @@ export const dataLayerRoadMapNodes: readonly RoadMapNode[] = [
   {
     id: "data-layer-swr-technology",
     label: "SWR",
+    shortLabel: "SWR",
     description:
       "Abordagem enxuta de cache e revalidação muito associada ao ecossistema Vercel.",
     kind: "technology",
@@ -241,8 +248,9 @@ export const dataLayerRoadMapNodes: readonly RoadMapNode[] = [
     mobile: { x: 24, y: 730 },
   },
   {
-    id: "data-layer-invalidation-concept",
+    id: "data-layer-cache-invalidation-concept",
     label: "Invalidação de Cache",
+    shortLabel: "Invalidation",
     description:
       "Atualização controlada de dados remotos após mutações ou troca de contexto.",
     kind: "concept",
@@ -276,6 +284,7 @@ export const dataLayerRoadMapNodes: readonly RoadMapNode[] = [
   {
     id: "data-layer-optimistic-updates-concept",
     label: "Optimistic Updates",
+    shortLabel: "Optimistic",
     description:
       "Atualização visual antecipada antes da confirmação definitiva do backend.",
     kind: "concept",
@@ -368,7 +377,7 @@ export const dataLayerRoadMapEdges: readonly RoadMapEdge[] = [
   {
     id: "edge-data-layer-cache-invalidation",
     from: "data-layer-cache-topic",
-    to: "data-layer-invalidation-concept",
+    to: "data-layer-cache-invalidation-concept",
     type: "contains",
     strength: 5,
   },
@@ -434,7 +443,7 @@ export const dataLayerRoadMapEdges: readonly RoadMapEdge[] = [
   {
     id: "edge-data-layer-query-invalidation",
     from: "data-layer-tanstack-query-technology",
-    to: "data-layer-invalidation-concept",
+    to: "data-layer-cache-invalidation-concept",
     type: "complements",
     strength: 5,
     isBidirectional: true,
@@ -499,7 +508,7 @@ export const dataLayerRoadMapClusters: readonly RoadMapCluster[] = [
       "Conceitos necessários para consistência, escala e boa UX em integrações reais.",
     category: "data-layer",
     nodeIds: [
-      "data-layer-invalidation-concept",
+      "data-layer-cache-invalidation-concept",
       "data-layer-pagination-concept",
       "data-layer-optimistic-updates-concept",
       "data-layer-error-handling-concept",

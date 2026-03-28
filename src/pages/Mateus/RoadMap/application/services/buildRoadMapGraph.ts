@@ -1,4 +1,5 @@
 import {
+  compareNodes,
   sortRoadMapEdges,
   sortRoadMapNodes,
 } from "../../domain/model/roadmap.selectors";
@@ -8,7 +9,6 @@ import type {
   RoadMapEdge,
   RoadMapGraph,
   RoadMapNode,
-  RoadMapPosition,
 } from "../../domain/model/roadmap.types";
 
 export type RoadMapGraphSegment = Readonly<{
@@ -48,60 +48,58 @@ function pushUniqueById<T extends { id: string }>(
   }
 }
 
-function collectNodes(params: BuildRoadMapGraphParams): RoadMapNode[] {
-  const collected: RoadMapNode[] = [];
+function collectGraphEntities<T extends { id: string }>(
+  directItems: readonly T[] | undefined,
+  segments: readonly RoadMapGraphSegment[],
+  entityName: string,
+  select: (segment: RoadMapGraphSegment) => readonly T[] | undefined,
+): T[] {
+  const collected: T[] = [];
 
-  if (params.nodes?.length) {
-    pushUniqueById(collected, params.nodes, "Nó");
+  if (directItems?.length) {
+    pushUniqueById(collected, directItems, entityName);
   }
 
-  for (const segment of params.segments ?? []) {
-    if (segment.nodes?.length) {
-      pushUniqueById(collected, segment.nodes, "Nó");
+  for (const segment of segments) {
+    const items = select(segment);
+
+    if (items?.length) {
+      pushUniqueById(collected, items, entityName);
     }
   }
 
   return collected;
+}
+
+function collectNodes(params: BuildRoadMapGraphParams): RoadMapNode[] {
+  return collectGraphEntities(
+    params.nodes,
+    params.segments ?? [],
+    "Nó",
+    (segment) => segment.nodes,
+  );
 }
 
 function collectEdges(params: BuildRoadMapGraphParams): RoadMapEdge[] {
-  const collected: RoadMapEdge[] = [];
-
-  if (params.edges?.length) {
-    pushUniqueById(collected, params.edges, "Aresta");
-  }
-
-  for (const segment of params.segments ?? []) {
-    if (segment.edges?.length) {
-      pushUniqueById(collected, segment.edges, "Aresta");
-    }
-  }
-
-  return collected;
+  return collectGraphEntities(
+    params.edges,
+    params.segments ?? [],
+    "Aresta",
+    (segment) => segment.edges,
+  );
 }
 
 function collectClusters(params: BuildRoadMapGraphParams): RoadMapCluster[] {
-  const collected: RoadMapCluster[] = [];
-
-  if (params.clusters?.length) {
-    pushUniqueById(collected, params.clusters, "Cluster");
-  }
-
-  for (const segment of params.segments ?? []) {
-    if (segment.clusters?.length) {
-      pushUniqueById(collected, segment.clusters, "Cluster");
-    }
-  }
-
-  return collected;
-}
-
-function resolveNodeSortPosition(node: RoadMapNode): RoadMapPosition | null {
-  return node.desktop ?? node.mobile ?? null;
+  return collectGraphEntities(
+    params.clusters,
+    params.segments ?? [],
+    "Cluster",
+    (segment) => segment.clusters,
+  );
 }
 
 function validateNodeReferences(nodes: readonly RoadMapNode[]): void {
-  const nodeIds = new Set(nodes.map((node) => node.id));
+  const nodeMap = new Map(nodes.map((node) => [node.id, node]));
 
   for (const node of nodes) {
     if (node.parentId === node.id) {
@@ -110,9 +108,21 @@ function validateNodeReferences(nodes: readonly RoadMapNode[]): void {
       );
     }
 
-    if (node.parentId && !nodeIds.has(node.parentId)) {
+    if (!node.parentId) {
+      continue;
+    }
+
+    const parent = nodeMap.get(node.parentId);
+
+    if (!parent) {
       throw new Error(
         `[buildRoadMapGraph] O nó "${node.id}" referencia parentId inexistente: "${node.parentId}".`,
+      );
+    }
+
+    if (parent.category !== node.category) {
+      throw new Error(
+        `[buildRoadMapGraph] O nó "${node.id}" está na categoria "${node.category}", mas seu parentId "${parent.id}" está na categoria "${parent.category}".`,
       );
     }
   }
@@ -149,13 +159,15 @@ function validateClusterReferences(
   nodes: readonly RoadMapNode[],
   clusters: readonly RoadMapCluster[],
 ): void {
-  const nodeIds = new Set(nodes.map((node) => node.id));
+  const nodeMap = new Map(nodes.map((node) => [node.id, node]));
 
   for (const cluster of clusters) {
     const seenNodeIds = new Set<string>();
 
     for (const nodeId of cluster.nodeIds) {
-      if (!nodeIds.has(nodeId)) {
+      const node = nodeMap.get(nodeId);
+
+      if (!node) {
         throw new Error(
           `[buildRoadMapGraph] O cluster "${cluster.id}" referencia nodeId inexistente: "${nodeId}".`,
         );
@@ -167,12 +179,20 @@ function validateClusterReferences(
         );
       }
 
+      if (node.category !== cluster.category) {
+        throw new Error(
+          `[buildRoadMapGraph] O cluster "${cluster.id}" está na categoria "${cluster.category}", mas contém o nó "${node.id}" da categoria "${node.category}".`,
+        );
+      }
+
       seenNodeIds.add(nodeId);
     }
   }
 }
 
-function sortNodesTopDown(nodes: readonly RoadMapNode[]): RoadMapNode[] {
+function sortNodesByGraphReadingOrder(
+  nodes: readonly RoadMapNode[],
+): RoadMapNode[] {
   const fallbackSortedNodes = sortRoadMapNodes(nodes);
   const fallbackOrder = new Map(
     fallbackSortedNodes.map((node, index) => [node.id, index]),
@@ -180,44 +200,44 @@ function sortNodesTopDown(nodes: readonly RoadMapNode[]): RoadMapNode[] {
 
   return [...nodes].sort((left, right) => {
     const categoryDiff =
-      ROADMAP_CATEGORY_ORDER[left.category] - ROADMAP_CATEGORY_ORDER[right.category];
+      ROADMAP_CATEGORY_ORDER[left.category] -
+      ROADMAP_CATEGORY_ORDER[right.category];
 
     if (categoryDiff !== 0) {
       return categoryDiff;
     }
 
-    const leftPosition = resolveNodeSortPosition(left);
-    const rightPosition = resolveNodeSortPosition(right);
-
-    if (leftPosition && rightPosition) {
-      if (leftPosition.y !== rightPosition.y) {
-        return leftPosition.y - rightPosition.y;
-      }
-
-      if (leftPosition.x !== rightPosition.x) {
-        return leftPosition.x - rightPosition.x;
-      }
-    }
-
-    if (leftPosition && !rightPosition) {
-      return -1;
-    }
-
-    if (!leftPosition && rightPosition) {
+    if (left.parentId === right.id) {
       return 1;
     }
 
-    const fallbackDiff =
-      (fallbackOrder.get(left.id) ?? Number.MAX_SAFE_INTEGER) -
-      (fallbackOrder.get(right.id) ?? Number.MAX_SAFE_INTEGER);
-
-    if (fallbackDiff !== 0) {
-      return fallbackDiff;
+    if (right.parentId === left.id) {
+      return -1;
     }
 
-    return left.label.localeCompare(right.label, "pt-BR", {
-      sensitivity: "base",
-    });
+    const parentLabelLeft = left.parentId
+      ? nodes.find((node) => node.id === left.parentId)?.label ?? ""
+      : "";
+    const parentLabelRight = right.parentId
+      ? nodes.find((node) => node.id === right.parentId)?.label ?? ""
+      : "";
+
+    if (parentLabelLeft !== parentLabelRight) {
+      return parentLabelLeft.localeCompare(parentLabelRight, "pt-BR", {
+        sensitivity: "base",
+      });
+    }
+
+    const semanticDiff = compareNodes(left, right);
+
+    if (semanticDiff !== 0) {
+      return semanticDiff;
+    }
+
+    return (
+      (fallbackOrder.get(left.id) ?? Number.MAX_SAFE_INTEGER) -
+      (fallbackOrder.get(right.id) ?? Number.MAX_SAFE_INTEGER)
+    );
   });
 }
 
@@ -251,14 +271,17 @@ function sortClusters(
 
   return normalizedClusters.sort((left, right) => {
     const categoryDiff =
-      ROADMAP_CATEGORY_ORDER[left.category] - ROADMAP_CATEGORY_ORDER[right.category];
+      ROADMAP_CATEGORY_ORDER[left.category] -
+      ROADMAP_CATEGORY_ORDER[right.category];
 
     if (categoryDiff !== 0) {
       return categoryDiff;
     }
 
     const leftFirstNodeOrder = Math.min(
-      ...left.nodeIds.map((nodeId) => nodeOrder.get(nodeId) ?? Number.MAX_SAFE_INTEGER),
+      ...left.nodeIds.map(
+        (nodeId) => nodeOrder.get(nodeId) ?? Number.MAX_SAFE_INTEGER,
+      ),
     );
 
     const rightFirstNodeOrder = Math.min(
@@ -277,52 +300,20 @@ function sortClusters(
   });
 }
 
-export function buildRoadMapGraph({
-  id,
-  title,
-  subtitle,
-  segments = [],
-  nodes = [],
-  edges = [],
-  clusters = [],
-  sort = true,
-  validateReferences = true,
-}: BuildRoadMapGraphParams): RoadMapGraph {
-  const collectedNodes = collectNodes({
+export function buildRoadMapGraph(
+  params: BuildRoadMapGraphParams,
+): RoadMapGraph {
+  const {
     id,
     title,
     subtitle,
-    segments,
-    nodes,
-    edges,
-    clusters,
-    sort,
-    validateReferences,
-  });
+    sort = true,
+    validateReferences = true,
+  } = params;
 
-  const collectedEdges = collectEdges({
-    id,
-    title,
-    subtitle,
-    segments,
-    nodes,
-    edges,
-    clusters,
-    sort,
-    validateReferences,
-  });
-
-  const collectedClusters = collectClusters({
-    id,
-    title,
-    subtitle,
-    segments,
-    nodes,
-    edges,
-    clusters,
-    sort,
-    validateReferences,
-  });
+  const collectedNodes = collectNodes(params);
+  const collectedEdges = collectEdges(params);
+  const collectedClusters = collectClusters(params);
 
   if (validateReferences) {
     validateNodeReferences(collectedNodes);
@@ -330,11 +321,17 @@ export function buildRoadMapGraph({
     validateClusterReferences(collectedNodes, collectedClusters);
   }
 
-  const finalNodes = sort ? sortNodesTopDown(collectedNodes) : collectedNodes;
-  const finalEdges = sort ? sortRoadMapEdges(collectedEdges) : collectedEdges;
+  const finalNodes = sort
+    ? sortNodesByGraphReadingOrder(collectedNodes)
+    : [...collectedNodes];
+
+  const finalEdges = sort
+    ? sortRoadMapEdges(collectedEdges)
+    : [...collectedEdges];
+
   const finalClusters = sort
     ? sortClusters(collectedClusters, finalNodes)
-    : collectedClusters;
+    : [...collectedClusters];
 
   return {
     id,

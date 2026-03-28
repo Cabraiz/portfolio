@@ -1,4 +1,7 @@
+// src/pages/Mateus/RoadMap/domain/model/roadmap.selectors.ts
+
 import {
+  ROADMAP_CATEGORY_ORDER,
   ROADMAP_DEFAULT_FILTERS,
   ROADMAP_DEMAND_ORDER,
   ROADMAP_KIND_ORDER,
@@ -43,7 +46,13 @@ function buildSearchableText(node: RoadMapNode): string {
     ...(node.tags ?? []),
     ...(node.aliases ?? []),
     node.details?.summary,
+    node.details?.headline,
     node.details?.whyItMatters,
+    ...(node.details?.projectContexts ?? []),
+    ...(node.details?.responsibilities ?? []),
+    ...(node.details?.strengths ?? []),
+    ...(node.details?.relatedStacks ?? []),
+    ...(node.details?.evidencePoints ?? []),
     ...(node.details?.whenToUse ?? []),
     ...(node.details?.whenNotToUse ?? []),
     ...(node.details?.useCases ?? []),
@@ -102,15 +111,20 @@ function matchesNodeFilters(
   );
 }
 
-export function createRoadMapNodeMap(
-  graph: RoadMapGraph,
-): RoadMapNodeMap {
+function mergeFilters(
+  filters: Partial<RoadMapFilterState> = {},
+): RoadMapFilterState {
+  return {
+    ...ROADMAP_DEFAULT_FILTERS,
+    ...filters,
+  };
+}
+
+export function createRoadMapNodeMap(graph: RoadMapGraph): RoadMapNodeMap {
   return new Map(graph.nodes.map((node) => [node.id, node]));
 }
 
-export function createRoadMapEdgeMap(
-  graph: RoadMapGraph,
-): RoadMapEdgeMap {
+export function createRoadMapEdgeMap(graph: RoadMapGraph): RoadMapEdgeMap {
   return new Map(graph.edges.map((edge) => [edge.id, edge]));
 }
 
@@ -139,6 +153,7 @@ export function getRoadMapParent(
   nodeId: string,
 ): RoadMapNode | null {
   const node = getRoadMapNodeById(graph, nodeId);
+
   if (!node?.parentId) {
     return null;
   }
@@ -150,18 +165,14 @@ export function getRoadMapOutgoingEdges(
   graph: RoadMapGraph,
   nodeId: string,
 ): RoadMapEdge[] {
-  return graph.edges
-    .filter((edge) => edge.from === nodeId)
-    .sort(compareEdges);
+  return graph.edges.filter((edge) => edge.from === nodeId).sort(compareEdges);
 }
 
 export function getRoadMapIncomingEdges(
   graph: RoadMapGraph,
   nodeId: string,
 ): RoadMapEdge[] {
-  return graph.edges
-    .filter((edge) => edge.to === nodeId)
-    .sort(compareEdges);
+  return graph.edges.filter((edge) => edge.to === nodeId).sort(compareEdges);
 }
 
 export function getRoadMapConnectedEdges(
@@ -205,9 +216,7 @@ export function getRoadMapRelatedNodes(
 }
 
 export function getRoadMapRootNodes(graph: RoadMapGraph): RoadMapNode[] {
-  return graph.nodes
-    .filter((node) => !node.parentId)
-    .sort(compareNodes);
+  return graph.nodes.filter((node) => !node.parentId).sort(compareNodes);
 }
 
 export function getRoadMapNodeLineage(
@@ -236,6 +245,7 @@ export function getRoadMapDescendants(
 
   while (queue.length > 0) {
     const current = queue.shift();
+
     if (!current) {
       continue;
     }
@@ -252,6 +262,7 @@ export function getRoadMapClusterNodes(
   clusterId: string,
 ): RoadMapNode[] {
   const cluster = graph.clusters?.find((item) => item.id === clusterId);
+
   if (!cluster) {
     return [];
   }
@@ -277,10 +288,7 @@ export function getRoadMapVisibleNodes(
   graph: RoadMapGraph,
   filters: Partial<RoadMapFilterState> = {},
 ): RoadMapNode[] {
-  const mergedFilters: RoadMapFilterState = {
-    ...ROADMAP_DEFAULT_FILTERS,
-    ...filters,
-  };
+  const mergedFilters = mergeFilters(filters);
 
   return graph.nodes
     .filter((node) => matchesNodeFilters(node, mergedFilters))
@@ -292,11 +300,7 @@ export function getRoadMapVisibleEdges(
   visibleNodes: readonly RoadMapNode[],
   filters: Partial<RoadMapFilterState> = {},
 ): RoadMapEdge[] {
-  const mergedFilters: RoadMapFilterState = {
-    ...ROADMAP_DEFAULT_FILTERS,
-    ...filters,
-  };
-
+  const mergedFilters = mergeFilters(filters);
   const visibleNodeIds = new Set(visibleNodes.map((node) => node.id));
 
   return graph.edges
@@ -331,7 +335,12 @@ export function getRoadMapVisibleClusters(
         nodeIds: nextNodeIds,
       };
     })
-    .filter((cluster) => cluster.nodeIds.length > 0);
+    .filter((cluster) => cluster.nodeIds.length > 0)
+    .sort((left, right) =>
+      left.label.localeCompare(right.label, "pt-BR", {
+        sensitivity: "base",
+      }),
+    );
 }
 
 export function selectRoadMapFilteredGraph(
@@ -361,6 +370,13 @@ export function sortRoadMapEdges(edges: readonly RoadMapEdge[]): RoadMapEdge[] {
 }
 
 export function compareNodes(left: RoadMapNode, right: RoadMapNode): number {
+  const categoryDelta =
+    ROADMAP_CATEGORY_ORDER[left.category] - ROADMAP_CATEGORY_ORDER[right.category];
+
+  if (categoryDelta !== 0) {
+    return categoryDelta;
+  }
+
   const demandDelta =
     ROADMAP_DEMAND_ORDER[left.demand] - ROADMAP_DEMAND_ORDER[right.demand];
 
@@ -368,14 +384,17 @@ export function compareNodes(left: RoadMapNode, right: RoadMapNode): number {
     return demandDelta;
   }
 
-  const kindDelta =
-    ROADMAP_KIND_ORDER[left.kind] - ROADMAP_KIND_ORDER[right.kind];
+  const kindDelta = ROADMAP_KIND_ORDER[left.kind] - ROADMAP_KIND_ORDER[right.kind];
 
   if (kindDelta !== 0) {
     return kindDelta;
   }
 
-  return left.label.localeCompare(right.label, "en", {
+  if (Boolean(left.featured) !== Boolean(right.featured)) {
+    return left.featured ? -1 : 1;
+  }
+
+  return left.label.localeCompare(right.label, "pt-BR", {
     sensitivity: "base",
   });
 }
@@ -388,7 +407,7 @@ export function compareEdges(left: RoadMapEdge, right: RoadMapEdge): number {
     return relationDelta;
   }
 
-  return left.id.localeCompare(right.id, "en", {
+  return left.id.localeCompare(right.id, "pt-BR", {
     sensitivity: "base",
   });
 }

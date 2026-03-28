@@ -1,13 +1,13 @@
+// src/pages/Mateus/RoadMap/application/hooks/useRoadMapState.ts
 import { useEffect, useMemo } from "react";
 
-import {
-  getRoadMapRootNodes,
-  selectRoadMapFilteredGraph,
-} from "../../domain/model/roadmap.selectors";
+import { getRoadMapRootNodes } from "../../domain/model/roadmap.selectors";
 import type {
   RoadMapFilterState,
   RoadMapGraph,
 } from "../../domain/model/roadmap.types";
+import { computeRoadMapLayout } from "../services/computeRoadMapLayout";
+import { filterRoadMapGraph } from "../services/filterRoadMapGraph";
 import { useRoadMapFilters } from "./useRoadMapFilters";
 import { useRoadMapSelection } from "./useRoadMapSelection";
 import { useRoadMapViewport } from "./useRoadMapViewport";
@@ -18,9 +18,11 @@ type UseRoadMapStateParams = Readonly<{
   initialActiveNodeId?: string | null;
   autoSelectFirstVisibleNode?: boolean;
   mobileBreakpoint?: number;
+  includeAncestors?: boolean;
+  includeRelated?: boolean;
 }>;
 
-type FilteredGraphResult = ReturnType<typeof selectRoadMapFilteredGraph>;
+type FilteredGraphResult = ReturnType<typeof filterRoadMapGraph>;
 type RootNodesResult = ReturnType<typeof getRoadMapRootNodes>;
 
 type UseRoadMapStateResult = Readonly<{
@@ -41,6 +43,8 @@ export function useRoadMapState({
   initialActiveNodeId = null,
   autoSelectFirstVisibleNode = true,
   mobileBreakpoint,
+  includeAncestors = true,
+  includeRelated = false,
 }: UseRoadMapStateParams): UseRoadMapStateResult {
   const viewport = useRoadMapViewport({ mobileBreakpoint });
 
@@ -48,59 +52,77 @@ export function useRoadMapState({
     initialFilters,
   });
 
+  const resolvedGraph = useMemo(
+    () => computeRoadMapLayout(graph),
+    [graph],
+  );
+
   const filteredGraph = useMemo(
-    () => selectRoadMapFilteredGraph(graph, filtersApi.filters),
-    [graph, filtersApi.filters],
+    () =>
+      filterRoadMapGraph(resolvedGraph, filtersApi.filters, {
+        includeAncestors,
+        includeRelated,
+      }),
+    [resolvedGraph, filtersApi.filters, includeAncestors, includeRelated],
   );
 
   const selectionApi = useRoadMapSelection({
-    graph,
+    graph: resolvedGraph,
     initialActiveNodeId,
   });
 
-  const rootNodes = useMemo<RootNodesResult>(() => getRoadMapRootNodes(graph), [
-    graph,
-  ]);
+  const rootNodes = useMemo<RootNodesResult>(
+    () => getRoadMapRootNodes(resolvedGraph),
+    [resolvedGraph],
+  );
 
   const visibleNodeIds = useMemo(
     () => new Set(filteredGraph.visibleNodes.map((node) => node.id)),
     [filteredGraph.visibleNodes],
   );
 
-  useEffect(() => {
-    if (!selectionApi.activeNodeId) {
-      return;
+  const resolvedActiveNodeId = useMemo(() => {
+    const currentActiveNodeId = selectionApi.activeNodeId;
+
+    if (currentActiveNodeId && visibleNodeIds.has(currentActiveNodeId)) {
+      return currentActiveNodeId;
     }
 
-    if (!visibleNodeIds.has(selectionApi.activeNodeId)) {
-      selectionApi.clearSelection();
-    }
-  }, [selectionApi.activeNodeId, selectionApi.clearSelection, visibleNodeIds]);
-
-  useEffect(() => {
     if (!autoSelectFirstVisibleNode) {
-      return;
+      return null;
     }
 
-    if (selectionApi.activeNodeId) {
-      return;
-    }
-
-    const firstVisibleNode = filteredGraph.visibleNodes[0];
-    if (!firstVisibleNode) {
-      return;
-    }
-
-    selectionApi.selectNode(firstVisibleNode.id);
+    return filteredGraph.visibleNodes[0]?.id ?? null;
   }, [
     autoSelectFirstVisibleNode,
     filteredGraph.visibleNodes,
     selectionApi.activeNodeId,
+    visibleNodeIds,
+  ]);
+
+  useEffect(() => {
+    const currentActiveNodeId = selectionApi.activeNodeId;
+
+    if (!resolvedActiveNodeId) {
+      if (currentActiveNodeId) {
+        selectionApi.clearSelection();
+      }
+
+      return;
+    }
+
+    if (currentActiveNodeId !== resolvedActiveNodeId) {
+      selectionApi.selectNode(resolvedActiveNodeId);
+    }
+  }, [
+    resolvedActiveNodeId,
+    selectionApi.activeNodeId,
+    selectionApi.clearSelection,
     selectionApi.selectNode,
   ]);
 
   return {
-    graph,
+    graph: resolvedGraph,
     filteredGraph,
     rootNodes,
     visibleNodes: filteredGraph.visibleNodes,

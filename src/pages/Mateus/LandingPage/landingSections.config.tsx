@@ -1,21 +1,23 @@
 import {
+  Suspense,
   createElement,
+  lazy,
   type ComponentType,
   type CSSProperties,
 } from "react";
 
 import type { LandingSectionId } from "@/features/navigation/landingSections";
 
-import MateusDesktop from "../MateusDesktop";
 import ContactDesktop from "../Contact/ContactDesktop";
 import ContactMobile from "../Contact/ContactMobile";
 import Live from "../Live/Live";
+import MateusDesktop from "../MateusDesktop";
 import MateusMobile from "../MateusMobile/MateusMobile";
 import Portfolio from "../Portfolio/Portfolio";
 import Pricing from "../Pricing/Pricing";
-import RoadMap from "../RoadMap/RoadMap";
-import RoadMapMobile from "../RoadMap/RoadMapMobile";
+import RoadMapErrorBoundary from "../RoadMap/ui/chrome/RoadMapErrorBoundary";
 
+import LandingSectionSkeleton from "./LandingSectionSkeleton";
 import type {
   LandingSectionBehavior,
   LandingSectionDefinition,
@@ -27,7 +29,18 @@ import {
   resolveLandingSectionMinHeight,
 } from "./landingLayout.tokens";
 
+const RoadMap = lazy(() => import("../RoadMap/RoadMap"));
+const RoadMapMobile = lazy(() => import("../RoadMap/RoadMapMobile"));
+
 type LandingRenderableViewportMode = "desktop" | "mobile";
+
+export type LandingSectionRenderHints = Readonly<{
+  alwaysMountedOnDesktop?: boolean;
+  prefersStableRender?: boolean;
+  urlSyncEligible?: boolean;
+  preferredNearDistance?: number;
+  disableFarOnDesktop?: boolean;
+}>;
 
 type LandingSectionViewportConfig = Readonly<{
   Component: ComponentType;
@@ -37,6 +50,7 @@ type LandingSectionViewportConfig = Readonly<{
   behavior?: LandingSectionBehavior;
   sectionStyle?: CSSProperties;
   contentStyle?: CSSProperties;
+  renderHints?: LandingSectionRenderHints;
 }>;
 
 export type LandingSectionConfig = Readonly<{
@@ -44,6 +58,25 @@ export type LandingSectionConfig = Readonly<{
   order: number;
   desktop: LandingSectionViewportConfig;
   mobile: LandingSectionViewportConfig;
+}>;
+
+export type LandingSectionResolvedDefinition = Readonly<
+  LandingSectionDefinition<LandingSectionId> &
+    LandingSectionRenderHints & {
+      order: number;
+      navbarOffsetPx: number;
+      expectedMinHeight: CSSProperties["minHeight"];
+      scrollMarginTop: CSSProperties["scrollMarginTop"];
+    }
+>;
+
+export type LandingRenderPolicyOptions = Readonly<{
+  nearDistance: number;
+  stableNearDistance: number;
+  disableFar: boolean;
+  alwaysMountedSectionIds: readonly LandingSectionId[];
+  stableSectionIds: readonly LandingSectionId[];
+  urlSyncEligibleSectionIds: readonly LandingSectionId[];
 }>;
 
 const DESKTOP_HERO_STABLE_BEHAVIOR: LandingSectionBehavior = {
@@ -61,7 +94,9 @@ const DESKTOP_VIRTUALIZED_BEHAVIOR: LandingSectionBehavior = {
   measurementStrategy: "resize-observer",
   cacheMeasurements: true,
   keepMountedWhenNear: true,
-  placeholderFallbackMinHeight: resolveLandingSectionMinHeight("desktop"),
+  placeholderFallbackMinHeight: resolveLandingSectionMinHeight("desktop", {
+    preferDynamicViewport: true,
+  }),
 };
 
 const MOBILE_STABLE_BEHAVIOR: LandingSectionBehavior = {
@@ -74,6 +109,75 @@ const MOBILE_STABLE_BEHAVIOR: LandingSectionBehavior = {
   }),
 };
 
+const DESKTOP_HERO_RENDER_HINTS: LandingSectionRenderHints = {
+  alwaysMountedOnDesktop: true,
+  prefersStableRender: true,
+  urlSyncEligible: true,
+  preferredNearDistance: 999,
+  disableFarOnDesktop: true,
+};
+
+const DESKTOP_STABLE_CONTENT_RENDER_HINTS: LandingSectionRenderHints = {
+  alwaysMountedOnDesktop: false,
+  prefersStableRender: true,
+  urlSyncEligible: true,
+  preferredNearDistance: 6,
+  disableFarOnDesktop: true,
+};
+
+const MOBILE_DEFAULT_RENDER_HINTS: LandingSectionRenderHints = {
+  alwaysMountedOnDesktop: false,
+  prefersStableRender: false,
+  urlSyncEligible: true,
+  preferredNearDistance: 1,
+  disableFarOnDesktop: false,
+};
+
+function renderSuspenseFallback(
+  variant: "hero" | "portfolio" | "roadmap" | "content",
+  minHeight: CSSProperties["minHeight"] = "100%",
+) {
+  return (
+    <LandingSectionSkeleton
+      variant={variant}
+      fullHeight
+      minHeight={minHeight}
+    />
+  );
+}
+
+function RoadMapDesktopWithBoundary() {
+  return (
+    <RoadMapErrorBoundary
+      sectionLabel="RoadMap desktop"
+      fallbackTitle="A seção RoadMap desktop quebrou"
+      resetKey="roadmap-desktop"
+      fullHeight
+      minHeight="100%"
+    >
+      <Suspense fallback={renderSuspenseFallback("roadmap", "100%")}>
+        <RoadMap />
+      </Suspense>
+    </RoadMapErrorBoundary>
+  );
+}
+
+function RoadMapMobileWithBoundary() {
+  return (
+    <RoadMapErrorBoundary
+      sectionLabel="RoadMap mobile"
+      fallbackTitle="A seção RoadMap mobile quebrou"
+      resetKey="roadmap-mobile"
+      fullHeight
+      minHeight="100%"
+    >
+      <Suspense fallback={renderSuspenseFallback("roadmap", "100%")}>
+        <RoadMapMobile />
+      </Suspense>
+    </RoadMapErrorBoundary>
+  );
+}
+
 function createViewportConfig(
   viewportMode: LandingRenderableViewportMode,
   Component: ComponentType,
@@ -81,6 +185,7 @@ function createViewportConfig(
   options?: Readonly<{
     sectionStyle?: CSSProperties;
     contentStyle?: CSSProperties;
+    renderHints?: LandingSectionRenderHints;
   }>,
 ): LandingSectionViewportConfig {
   const expectedMinHeight = resolveLandingSectionMinHeight(viewportMode, {
@@ -102,8 +207,19 @@ function createViewportConfig(
     },
     contentStyle: {
       minHeight: "100%",
+      height: "100%",
       ...options?.contentStyle,
     },
+    renderHints:
+      viewportMode === "desktop"
+        ? {
+            ...DESKTOP_STABLE_CONTENT_RENDER_HINTS,
+            ...options?.renderHints,
+          }
+        : {
+            ...MOBILE_DEFAULT_RENDER_HINTS,
+            ...options?.renderHints,
+          },
   };
 }
 
@@ -116,17 +232,27 @@ function normalizeConfigViewportMode(
 function toLandingSectionDefinition(
   config: LandingSectionConfig,
   viewportMode: LandingRenderableViewportMode,
-): LandingSectionDefinition<LandingSectionId> {
+): LandingSectionResolvedDefinition {
   const viewportConfig = config[viewportMode];
+  const renderHints = viewportConfig.renderHints ?? {};
 
   return {
     id: config.id,
+    order: config.order,
     viewportMode,
     content: createElement(viewportConfig.Component),
     placeholderMinHeight: viewportConfig.expectedMinHeight,
     sectionStyle: viewportConfig.sectionStyle,
     contentStyle: viewportConfig.contentStyle,
     behavior: viewportConfig.behavior,
+    navbarOffsetPx: viewportConfig.navbarOffsetPx,
+    expectedMinHeight: viewportConfig.expectedMinHeight,
+    scrollMarginTop: viewportConfig.scrollMarginTop,
+    alwaysMountedOnDesktop: renderHints.alwaysMountedOnDesktop,
+    prefersStableRender: renderHints.prefersStableRender,
+    urlSyncEligible: renderHints.urlSyncEligible,
+    preferredNearDistance: renderHints.preferredNearDistance,
+    disableFarOnDesktop: renderHints.disableFarOnDesktop,
   };
 }
 
@@ -144,14 +270,23 @@ export const LANDING_SECTIONS_CONFIG = [
         },
         contentStyle: {
           minHeight: "100%",
+          height: "100%",
           overflow: "visible",
         },
+        renderHints: DESKTOP_HERO_RENDER_HINTS,
       },
     ),
     mobile: createViewportConfig(
       "mobile",
       MateusMobile,
       MOBILE_STABLE_BEHAVIOR,
+      {
+        contentStyle: {
+          minHeight: "100%",
+          height: "100%",
+          overflow: "visible",
+        },
+      },
     ),
   },
   {
@@ -161,6 +296,9 @@ export const LANDING_SECTIONS_CONFIG = [
       "desktop",
       Portfolio,
       DESKTOP_VIRTUALIZED_BEHAVIOR,
+      {
+        renderHints: DESKTOP_STABLE_CONTENT_RENDER_HINTS,
+      },
     ),
     mobile: createViewportConfig(
       "mobile",
@@ -173,13 +311,29 @@ export const LANDING_SECTIONS_CONFIG = [
     order: 2,
     desktop: createViewportConfig(
       "desktop",
-      RoadMap,
+      RoadMapDesktopWithBoundary,
       DESKTOP_VIRTUALIZED_BEHAVIOR,
+      {
+        contentStyle: {
+          minHeight: "100%",
+          height: "100%",
+        },
+        renderHints: {
+          ...DESKTOP_STABLE_CONTENT_RENDER_HINTS,
+          preferredNearDistance: 8,
+        },
+      },
     ),
     mobile: createViewportConfig(
       "mobile",
-      RoadMapMobile,
+      RoadMapMobileWithBoundary,
       MOBILE_STABLE_BEHAVIOR,
+      {
+        contentStyle: {
+          minHeight: "100%",
+          height: "100%",
+        },
+      },
     ),
   },
   {
@@ -189,6 +343,9 @@ export const LANDING_SECTIONS_CONFIG = [
       "desktop",
       Pricing,
       DESKTOP_VIRTUALIZED_BEHAVIOR,
+      {
+        renderHints: DESKTOP_STABLE_CONTENT_RENDER_HINTS,
+      },
     ),
     mobile: createViewportConfig(
       "mobile",
@@ -203,6 +360,9 @@ export const LANDING_SECTIONS_CONFIG = [
       "desktop",
       Live,
       DESKTOP_VIRTUALIZED_BEHAVIOR,
+      {
+        renderHints: DESKTOP_STABLE_CONTENT_RENDER_HINTS,
+      },
     ),
     mobile: createViewportConfig(
       "mobile",
@@ -217,6 +377,9 @@ export const LANDING_SECTIONS_CONFIG = [
       "desktop",
       ContactDesktop,
       DESKTOP_VIRTUALIZED_BEHAVIOR,
+      {
+        renderHints: DESKTOP_STABLE_CONTENT_RENDER_HINTS,
+      },
     ),
     mobile: createViewportConfig(
       "mobile",
@@ -242,7 +405,7 @@ export function getLandingSectionConfig(
 export function getLandingSectionDefinition(
   sectionId: LandingSectionId,
   viewportMode: LandingSectionViewportMode,
-): LandingSectionDefinition<LandingSectionId> | null {
+): LandingSectionResolvedDefinition | null {
   const config = getLandingSectionConfig(sectionId);
 
   if (!config) {
@@ -257,7 +420,7 @@ export function getLandingSectionDefinition(
 
 export function getLandingSectionDefinitions(
   viewportMode: LandingSectionViewportMode,
-): ReadonlyArray<LandingSectionDefinition<LandingSectionId>> {
+): ReadonlyArray<LandingSectionResolvedDefinition> {
   const normalizedViewportMode = normalizeConfigViewportMode(viewportMode);
 
   return LANDING_SECTIONS_CONFIG
@@ -266,4 +429,47 @@ export function getLandingSectionDefinitions(
     .map((section) =>
       toLandingSectionDefinition(section, normalizedViewportMode),
     );
+}
+
+export function getLandingUrlSyncEligibleSectionIds(
+  viewportMode: LandingSectionViewportMode,
+): readonly LandingSectionId[] {
+  return getLandingSectionDefinitions(viewportMode)
+    .filter((section) => section.urlSyncEligible !== false)
+    .map((section) => section.id);
+}
+
+export function getLandingRenderPolicyOptions(
+  viewportMode: LandingSectionViewportMode,
+): LandingRenderPolicyOptions {
+  const sections = getLandingSectionDefinitions(viewportMode);
+
+  const alwaysMountedSectionIds = sections
+    .filter((section) => section.alwaysMountedOnDesktop)
+    .map((section) => section.id);
+
+  const stableSectionIds = sections
+    .filter((section) => section.prefersStableRender)
+    .map((section) => section.id);
+
+  const urlSyncEligibleSectionIds = sections
+    .filter((section) => section.urlSyncEligible !== false)
+    .map((section) => section.id);
+
+  const preferredNearDistance = sections.reduce((maxDistance, section) => {
+    return Math.max(maxDistance, section.preferredNearDistance ?? 1);
+  }, 1);
+
+  const disableFar =
+    viewportMode !== "mobile" &&
+    sections.every((section) => section.disableFarOnDesktop === true);
+
+  return {
+    nearDistance: preferredNearDistance,
+    stableNearDistance: preferredNearDistance,
+    disableFar,
+    alwaysMountedSectionIds,
+    stableSectionIds,
+    urlSyncEligibleSectionIds,
+  };
 }

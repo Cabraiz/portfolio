@@ -1,0 +1,681 @@
+.root {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+  overflow: hidden;
+  isolation: isolate;
+  display: flex;
+  align-items: stretch;
+  justify-content: stretch;
+  border-radius: clamp(24px, 2vw, 32px);
+  background:
+    radial-gradient(circle at 12% 16%, rgba(255, 215, 0, 0.08), transparent 0 28%),
+    radial-gradient(circle at 86% 20%, rgba(255, 215, 0, 0.05), transparent 0 24%),
+    linear-gradient(135deg, rgba(10, 10, 10, 0.94), rgba(19, 19, 19, 0.9));
+  box-sizing: border-box;
+  pointer-events: none;
+  user-select: none;
+}
+
+.fullHeight {
+  min-height: 100%;
+}
+
+.inner {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+  min-height: inherit;
+  padding:
+    clamp(16px, 1.5vw, 24px)
+    clamp(18px, 2vw, 30px)
+    clamp(16px, 1.6vw, 24px)
+    clamp(18px, 2vw, 30px);
+  display: flex;
+  align-items: stretch;
+  justify-content: stretch;
+  box-sizing: border-box;
+}
+
+.backdropGlow,
+.backdropGlowSecondary {
+  position: absolute;
+  inset: auto;
+  border-radius: 999px;
+  filter: blur(42px);
+  opacity: 0.75;
+  pointer-events: none;
+}
+
+.backdropGlow {
+  top: 10%;
+  left: -6%;
+  width: clamp(160px, 18vw, 300px);
+  height: clamp(160px, 18vw, 300px);
+  background: rgba(255, 215, 0, 0.08);
+}
+
+.backdropGlowSecondary {
+  right: -4%;
+  bottom: 8%;
+  width: clamp(140px, 16vw, 260px);
+  height: clamp(140px, 16vw, 260px);
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.shimmerSurface {
+  position: relative;
+  overflow: hidden;
+  border-radius: 999px;
+  background:
+    linear-gradient(
+      100deg,
+      rgba(255, 255, 255, 0.04) 0%,
+      rgba(255, 255, 255, 0.07) 18%,
+      rgba(255, 255, 255, 0.12) 33%,
+      rgba(255, 255, 255, 0.07) 48%,
+      rgba(255, 255, 255, 0.04) 100%
+    );
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-sizing: border-box;
+}
+
+.shimmerSurface::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    105deg,
+    transparent 0%,
+    transparent 35%,
+    rgba(255, 255, 255, 0.18) 50%,
+    transparent 65%,
+    transparent 100%
+  );
+  animation: landing-skeleton-shimmer 2.3s ease-in-out infinite;
+}
+
+.line {
+  display: block;
+  max-width: 100%;
+  min-width: 48px;
+}
+
+.heroLayout,
+.portfolioLayout,
+.roadMapLayout,
+.contentLayout {
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+  min-height: inherit;
+  display: grid;
+  box-sizing: border-box;
+}
+
+.heroLayout {
+  --hero-layout-max-width: clamp(1120px, 88vw, 1360px);
+  --hero-layout-gap: clamp(16px, 1.8vw, 30px);
+  --hero-main-max-width: clamp(520px, 37vw, 640px);
+  --hero-aside-max-width: clamp(360px, 30vw, 490px);
+
+  width: min(100%, var(--hero-layout-max-width));
+  min-width: 0;
+  min-height: inherit;
+  margin: 0 auto;
+  padding-inline: clamp(8px, 1vw, 18px);
+  grid-template-columns: minmax(0, 1.04fr) minmax(340px, 0.9fr);
+  column-gap: var(--hero-layout-gap);
+  align-items: center;
+  justify-content: center;
+}
+
+.heroMainColumn {
+  min-width: 0;
+  width: 100%;
+  max-width: var(--hero-main-max-width);
+  display: grid;
+  gap: clamp(18px, 1.8vw, 24px);
+  align-content: center;
+  justify-items: start;
+  justify-self: start;
+  padding-top: clamp(4px, 0.6vh, 12px);
+}
+
+.heroHeadlineBlock {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+  width: 100%;
+  max-width: var(--hero-main-max-width);
+}
+
+.heroActionsRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  align-items: center;
+}
+
+.heroMetaRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.cta,
+.ctaMuted {
+  height: 48px;
+  border-radius: 16px;
+}
+
+.cta {
+  width: clamp(148px, 17vw, 198px);
+}
+
+.ctaMuted {
+  width: clamp(124px, 14vw, 172px);
+  opacity: 0.72;
+}
+
+.pill {
+  width: 86px;
+  height: 32px;
+  border-radius: 999px;
+  opacity: 0.92;
+}
+
+.heroAsideColumn {
+  min-width: 0;
+  width: 100%;
+  max-width: var(--hero-aside-max-width);
+  height: 100%;
+  display: grid;
+  gap: 12px;
+  align-content: center;
+  justify-items: end;
+  justify-self: end;
+}
+
+.heroOrb {
+  width: 100%;
+  max-width: var(--hero-aside-max-width);
+  aspect-ratio: 1 / 1;
+  border-radius: 28px;
+  justify-self: end;
+}
+
+.heroSignalColumn {
+  width: min(100%, 270px);
+  display: grid;
+  gap: 10px;
+  justify-self: end;
+  margin-top: 2px;
+}
+
+.signalBar {
+  width: 100%;
+  height: 12px;
+  border-radius: 999px;
+}
+
+.portfolioLayout {
+  grid-template-columns: 52px minmax(0, 1fr);
+  gap: clamp(18px, 2vw, 28px);
+  align-items: stretch;
+}
+
+.portfolioRail {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  gap: 20px;
+  padding-top: 8px;
+}
+
+.railLine {
+  width: 6px;
+  min-width: 6px;
+  height: min(100%, 320px);
+  min-height: 220px;
+  border-radius: 999px;
+}
+
+.railDot {
+  width: 18px;
+  height: 18px;
+  min-width: 18px;
+  border-radius: 999px;
+}
+
+.portfolioCards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(16px, 1.6vw, 22px);
+  min-width: 0;
+}
+
+.card {
+  min-width: 0;
+  min-height: 380px;
+  display: grid;
+  grid-template-rows: 1.1fr auto;
+  border-radius: 26px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  box-sizing: border-box;
+}
+
+.cardMedia {
+  width: 100%;
+  min-width: 0;
+  min-height: 190px;
+  border-radius: 20px;
+}
+
+.cardBody {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+  padding-top: 16px;
+  min-width: 0;
+}
+
+.cardTagRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 6px;
+}
+
+.tag {
+  width: 78px;
+  height: 28px;
+  border-radius: 999px;
+}
+
+.roadMapLayout {
+  grid-template-rows: auto 1fr;
+  gap: clamp(16px, 1.8vw, 24px);
+  min-width: 0;
+}
+
+.roadMapTopBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-width: 0;
+}
+
+.roadMapTopFilters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.filterPill {
+  width: 84px;
+  height: 30px;
+  border-radius: 999px;
+}
+
+.roadMapCanvas {
+  position: relative;
+  min-width: 0;
+  min-height: 460px;
+  padding: clamp(18px, 1.8vw, 24px);
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at 18% 22%, rgba(255, 215, 0, 0.05), transparent 0 20%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.roadMapClusterRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 26px;
+}
+
+.cluster {
+  width: clamp(140px, 16vw, 210px);
+  height: 44px;
+  border-radius: 16px;
+}
+
+.roadMapNodeGrid {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.node {
+  width: 100%;
+  min-width: 0;
+  height: 74px;
+  border-radius: 18px;
+}
+
+.connectionLayer {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.connectionA,
+.connectionB,
+.connectionC {
+  position: absolute;
+  display: block;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 215, 0, 0.06),
+    rgba(255, 255, 255, 0.08),
+    rgba(255, 215, 0, 0.03)
+  );
+  filter: blur(0.2px);
+  opacity: 0.7;
+}
+
+.connectionA {
+  top: 34%;
+  left: 16%;
+  width: 34%;
+  height: 2px;
+  transform: rotate(8deg);
+}
+
+.connectionB {
+  top: 54%;
+  left: 42%;
+  width: 24%;
+  height: 2px;
+  transform: rotate(-14deg);
+}
+
+.connectionC {
+  top: 66%;
+  left: 18%;
+  width: 42%;
+  height: 2px;
+  transform: rotate(-4deg);
+}
+
+.contentLayout {
+  grid-template-rows: auto 1fr;
+  gap: 18px;
+  min-width: 0;
+}
+
+.contentHeader {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+}
+
+.contentGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(16px, 1.8vw, 24px);
+  min-width: 0;
+}
+
+.panel {
+  min-width: 0;
+  min-height: 240px;
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  padding: clamp(18px, 1.8vw, 24px);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-sizing: border-box;
+}
+
+@keyframes landing-skeleton-shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@media (max-width: 1600px) {
+  .heroLayout {
+    --hero-layout-max-width: clamp(1060px, 86vw, 1240px);
+    --hero-layout-gap: clamp(16px, 1.5vw, 24px);
+    --hero-main-max-width: clamp(500px, 36vw, 590px);
+    --hero-aside-max-width: clamp(350px, 29vw, 450px);
+
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 0.88fr);
+  }
+
+  .heroSignalColumn {
+    width: min(100%, 252px);
+  }
+}
+
+@media (max-width: 1440px) {
+  .heroLayout {
+    --hero-layout-max-width: min(100%, 1120px);
+    --hero-layout-gap: clamp(14px, 1.4vw, 20px);
+    --hero-main-max-width: clamp(470px, 35vw, 540px);
+    --hero-aside-max-width: clamp(330px, 28vw, 410px);
+
+    grid-template-columns: minmax(0, 1fr) minmax(300px, 390px);
+    padding-inline: 0;
+  }
+
+  .heroSignalColumn {
+    width: min(100%, 236px);
+  }
+}
+
+@media (max-width: 1280px) {
+  .heroLayout {
+    --hero-layout-max-width: min(100%, 1000px);
+    --hero-layout-gap: 16px;
+    --hero-main-max-width: 500px;
+    --hero-aside-max-width: 360px;
+
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
+  }
+
+  .heroSignalColumn {
+    width: min(100%, 220px);
+  }
+}
+
+@media (max-width: 1180px) {
+  .heroLayout {
+    --hero-layout-max-width: min(100%, 940px);
+    --hero-layout-gap: 14px;
+    --hero-main-max-width: 470px;
+    --hero-aside-max-width: 330px;
+
+    grid-template-columns: minmax(0, 1fr) minmax(260px, 330px);
+  }
+
+  .heroSignalColumn {
+    width: min(100%, 200px);
+  }
+}
+
+/* ajuste fino para notebooks 720p / 1366x768 e faixas próximas */
+@media (max-height: 820px) and (min-width: 1181px) and (max-width: 1500px) {
+  .heroLayout {
+    --hero-layout-max-width: min(100%, 980px);
+    --hero-layout-gap: 18px;
+    --hero-main-max-width: 500px;
+    --hero-aside-max-width: 340px;
+
+    grid-template-columns: minmax(0, 500px) minmax(280px, 340px);
+    justify-content: center;
+  }
+
+  .heroMainColumn {
+    max-width: 500px;
+  }
+
+  .heroHeadlineBlock {
+    max-width: 500px;
+  }
+
+  .heroAsideColumn {
+    max-width: 340px;
+  }
+
+  .heroOrb {
+    max-width: 340px;
+  }
+
+  .heroSignalColumn {
+    width: min(100%, 196px);
+  }
+}
+
+/* ajuste ainda mais firme para 1366x768 e similares */
+@media (max-height: 760px) and (min-width: 1181px) and (max-width: 1500px) {
+  .heroLayout {
+    --hero-layout-max-width: min(100%, 940px);
+    --hero-layout-gap: 14px;
+    --hero-main-max-width: 480px;
+    --hero-aside-max-width: 320px;
+
+    grid-template-columns: minmax(0, 480px) minmax(260px, 320px);
+  }
+
+  .heroMainColumn {
+    gap: 16px;
+  }
+
+  .heroHeadlineBlock {
+    max-width: 480px;
+  }
+
+  .heroAsideColumn {
+    max-width: 320px;
+  }
+
+  .heroOrb {
+    max-width: 320px;
+  }
+
+  .heroSignalColumn {
+    width: min(100%, 184px);
+  }
+}
+
+@media (max-width: 1100px) {
+  .heroLayout {
+    width: 100%;
+    max-width: 760px;
+    grid-template-columns: 1fr;
+    row-gap: 20px;
+    column-gap: 0;
+    align-items: start;
+    justify-content: stretch;
+    padding-inline: 0;
+  }
+
+  .heroMainColumn {
+    max-width: none;
+    width: 100%;
+  }
+
+  .heroHeadlineBlock {
+    max-width: none;
+    width: 100%;
+  }
+
+  .heroAsideColumn {
+    max-width: 420px;
+    width: 100%;
+    justify-items: stretch;
+    justify-self: start;
+  }
+
+  .heroOrb {
+    width: min(100%, 420px);
+    justify-self: start;
+  }
+
+  .heroSignalColumn {
+    width: min(100%, 280px);
+    justify-self: start;
+  }
+
+  .portfolioCards,
+  .roadMapNodeGrid,
+  .contentGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .inner {
+    padding: 16px;
+  }
+
+  .portfolioLayout {
+    grid-template-columns: 1fr;
+  }
+
+  .portfolioRail {
+    display: none;
+  }
+
+  .portfolioCards,
+  .roadMapNodeGrid,
+  .contentGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .roadMapTopBar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .roadMapTopFilters {
+    justify-content: flex-start;
+  }
+
+  .card {
+    min-height: 320px;
+  }
+
+  .roadMapCanvas {
+    min-height: 360px;
+  }
+
+  .heroAsideColumn,
+  .heroOrb,
+  .heroSignalColumn {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shimmerSurface::after {
+    animation: none;
+    transform: translateX(0);
+    opacity: 0.2;
+  }
+}

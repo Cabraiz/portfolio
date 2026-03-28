@@ -1,3 +1,9 @@
+// src/pages/Mateus/RoadMap/domain/model/roadmap.registry.ts
+
+import {
+  ROADMAP_KIND_LABELS,
+  ROADMAP_RELATION_LABELS,
+} from "./roadmap.constants";
 import type {
   RoadMapNodeKind,
   RoadMapNodeRegistryEntry,
@@ -10,7 +16,7 @@ export const ROADMAP_NODE_REGISTRY: Readonly<
 > = {
   domain: {
     kind: "domain",
-    label: "Frente",
+    label: ROADMAP_KIND_LABELS.domain,
     description:
       "Agrupa uma frente principal de atuação dentro do mapa da stack.",
     isContainer: true,
@@ -19,7 +25,7 @@ export const ROADMAP_NODE_REGISTRY: Readonly<
   },
   topic: {
     kind: "topic",
-    label: "Bloco",
+    label: ROADMAP_KIND_LABELS.topic,
     description:
       "Organiza tecnologias e práticas relacionadas dentro da mesma frente.",
     isContainer: true,
@@ -28,7 +34,7 @@ export const ROADMAP_NODE_REGISTRY: Readonly<
   },
   technology: {
     kind: "technology",
-    label: "Tecnologia",
+    label: ROADMAP_KIND_LABELS.technology,
     description:
       "Representa uma tecnologia concreta, framework, biblioteca, runtime, serviço ou ferramenta utilizada na prática.",
     isContainer: false,
@@ -37,7 +43,7 @@ export const ROADMAP_NODE_REGISTRY: Readonly<
   },
   concept: {
     kind: "concept",
-    label: "Prática",
+    label: ROADMAP_KIND_LABELS.concept,
     description:
       "Representa padrão, capacidade, abordagem técnica ou conceito aplicado em conjunto com a stack.",
     isContainer: false,
@@ -51,7 +57,7 @@ export const ROADMAP_RELATION_REGISTRY: Readonly<
 > = {
   contains: {
     type: "contains",
-    label: "Agrupa",
+    label: ROADMAP_RELATION_LABELS.contains,
     description:
       "O nó de origem organiza estruturalmente o nó de destino dentro da mesma frente ou bloco.",
     directed: true,
@@ -60,7 +66,7 @@ export const ROADMAP_RELATION_REGISTRY: Readonly<
   },
   prerequisite: {
     type: "prerequisite",
-    label: "Base para",
+    label: ROADMAP_RELATION_LABELS.prerequisite,
     description:
       "O nó de origem costuma servir como base técnica para o uso consistente do nó de destino.",
     directed: true,
@@ -69,7 +75,7 @@ export const ROADMAP_RELATION_REGISTRY: Readonly<
   },
   alternative: {
     type: "alternative",
-    label: "Alterna com",
+    label: ROADMAP_RELATION_LABELS.alternative,
     description:
       "Os nós ocupam papéis parecidos na stack e normalmente representam escolhas alternativas.",
     directed: false,
@@ -78,7 +84,7 @@ export const ROADMAP_RELATION_REGISTRY: Readonly<
   },
   complements: {
     type: "complements",
-    label: "Compõe com",
+    label: ROADMAP_RELATION_LABELS.complements,
     description:
       "Os nós aparecem juntos com frequência e se reforçam dentro do mesmo contexto de entrega.",
     directed: false,
@@ -87,7 +93,7 @@ export const ROADMAP_RELATION_REGISTRY: Readonly<
   },
   specializes: {
     type: "specializes",
-    label: "Especializa",
+    label: ROADMAP_RELATION_LABELS.specializes,
     description:
       "O nó de destino representa um recorte mais específico, especializado ou aprofundado do nó de origem.",
     directed: true,

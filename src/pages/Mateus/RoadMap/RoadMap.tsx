@@ -1,20 +1,17 @@
 import { useId, useMemo, useState } from "react";
 
-import { resolveRoadMapRelations } from "./application/services/resolveRoadMapRelations";
 import { useRoadMapState } from "./application/hooks/useRoadMapState";
+import { resolveRoadMapRelations } from "./application/services/resolveRoadMapRelations";
 import { roadMapGraph } from "./domain/data";
 import RoadMapCanvas from "./ui/canvas/RoadMapCanvas";
 import RoadMapDetailsPanel from "./ui/chrome/RoadMapDetailsPanel";
 import RoadMapFilters from "./ui/chrome/RoadMapFilters";
-import RoadMapHeader from "./ui/chrome/RoadMapHeader";
 import RoadMapLegend from "./ui/chrome/RoadMapLegend";
 import styles from "./RoadMap.module.css";
 
 type RoadMapProps = Readonly<{
   className?: string;
 }>;
-
-type SidePane = "legend" | "details" | null;
 
 function joinClassNames(...values: Array<string | undefined | null | false>) {
   return values.filter(Boolean).join(" ");
@@ -41,13 +38,11 @@ export default function RoadMap({ className }: RoadMapProps) {
     autoSelectFirstVisibleNode: true,
   });
 
-  const [isHeaderExpanded, setIsHeaderExpanded] = useState(false);
   const [isFiltersExpanded, setIsFiltersExpanded] = useState(false);
-  const [activeSidePane, setActiveSidePane] = useState<SidePane>("details");
+  const [isReadingExpanded, setIsReadingExpanded] = useState(false);
 
-  const headerPanelId = useId();
   const filtersPanelId = useId();
-  const sidePanelId = useId();
+  const readingPanelId = useId();
 
   const resolvedRelations = useMemo(() => {
     if (!selectionApi.activeNodeId) {
@@ -62,38 +57,19 @@ export default function RoadMap({ className }: RoadMapProps) {
     return normalized || graph.title;
   }, [graph.title]);
 
-  const hasSelectedNode = Boolean(selectionApi.activeNode);
-
-  const handleSidePaneToggle = (pane: Exclude<SidePane, null>) => {
-    setActiveSidePane((currentPane) => (currentPane === pane ? null : pane));
-  };
+  const canvasMinHeight = isReadingExpanded ? 980 : 920;
 
   return (
     <section className={joinClassNames(styles.root, className)}>
       <div className={styles.stack}>
         <div className={styles.topBar}>
           <div className={styles.topBarContent}>
-            <strong className={styles.topBarTitle}>{compactTitle}</strong>
+            <strong className={styles.topBarTitle} title={graph.title}>
+              {compactTitle}
+            </strong>
           </div>
 
           <div className={styles.topActions}>
-            <button
-              type="button"
-              className={joinClassNames(
-                styles.chromeToggle,
-                isHeaderExpanded && styles.chromeToggleActive,
-              )}
-              onClick={() => setIsHeaderExpanded((current) => !current)}
-              aria-expanded={isHeaderExpanded}
-              aria-controls={headerPanelId}
-            >
-              <span>Resumo</span>
-
-              <span className={styles.toggleChevron} aria-hidden="true">
-                {isHeaderExpanded ? "▴" : "▾"}
-              </span>
-            </button>
-
             <button
               type="button"
               className={joinClassNames(
@@ -116,25 +92,27 @@ export default function RoadMap({ className }: RoadMapProps) {
                 {isFiltersExpanded ? "▴" : "▾"}
               </span>
             </button>
+
+            <button
+              type="button"
+              className={joinClassNames(
+                styles.chromeToggle,
+                isReadingExpanded && styles.chromeToggleActive,
+              )}
+              onClick={() => setIsReadingExpanded((current) => !current)}
+              aria-expanded={isReadingExpanded}
+              aria-controls={readingPanelId}
+            >
+              <span>Leitura</span>
+              <span className={styles.toggleChevron} aria-hidden="true">
+                {isReadingExpanded ? "▴" : "▾"}
+              </span>
+            </button>
           </div>
         </div>
 
-        <div className={styles.topChrome}>
-          {isHeaderExpanded ? (
-            <div id={headerPanelId} className={styles.topPanel}>
-              <div className={styles.chromeCard}>
-                <RoadMapHeader
-                  title={graph.title}
-                  subtitle={graph.subtitle}
-                  visibleNodeCount={visibleNodes.length}
-                  visibleEdgeCount={visibleEdges.length}
-                  activeNodeLabel={selectionApi.activeNode?.label ?? null}
-                />
-              </div>
-            </div>
-          ) : null}
-
-          {isFiltersExpanded ? (
+        {isFiltersExpanded ? (
+          <div className={styles.topChrome}>
             <div id={filtersPanelId} className={styles.topPanel}>
               <div className={styles.chromeCard}>
                 <RoadMapFilters
@@ -152,10 +130,17 @@ export default function RoadMap({ className }: RoadMapProps) {
                 />
               </div>
             </div>
-          ) : null}
-        </div>
+          </div>
+        ) : null}
 
-        <div className={styles.contentGrid}>
+        <div
+          className={joinClassNames(
+            styles.contentGrid,
+            isReadingExpanded
+              ? styles.contentGridSideExpanded
+              : styles.contentGridSideCollapsed,
+          )}
+        >
           <div className={styles.mainColumn}>
             <div className={styles.canvasBlock}>
               <RoadMapCanvas
@@ -167,56 +152,45 @@ export default function RoadMap({ className }: RoadMapProps) {
                 hoveredNodeId={selectionApi.hoveredNodeId}
                 onNodeSelect={selectionApi.selectNode}
                 onNodeHover={selectionApi.hoverNode}
-                minHeight={920}
+                minHeight={canvasMinHeight}
                 emptyTitle="Nenhum item disponível"
                 emptyDescription="Ajuste os filtros para exibir tecnologias, práticas e conexões."
               />
             </div>
           </div>
 
-          <aside className={styles.sideColumn}>
-            <div className={styles.sidePanel}>
-              <div className={styles.sideTabs}>
-                <button
-                  type="button"
-                  className={joinClassNames(
-                    styles.sideTabButton,
-                    activeSidePane === "legend" && styles.sideTabButtonActive,
-                  )}
-                  onClick={() => handleSidePaneToggle("legend")}
-                  aria-expanded={activeSidePane === "legend"}
-                  aria-controls={sidePanelId}
-                >
-                  <span>Leitura</span>
-                </button>
+          <aside
+            className={joinClassNames(
+              styles.sideColumn,
+              isReadingExpanded
+                ? styles.sideColumnExpanded
+                : styles.sideColumnCollapsed,
+            )}
+          >
+            {isReadingExpanded ? (
+              <div id={readingPanelId} className={styles.sidePanelCard}>
+                <div className={styles.sidePanelHeader}>
+                  <div className={styles.sidePanelHeading}>
+                    <span className={styles.sidePanelEyebrow}>Guia</span>
+                    <h2 className={styles.sidePanelTitle}>Leitura</h2>
+                  </div>
 
-                <button
-                  type="button"
-                  className={joinClassNames(
-                    styles.sideTabButton,
-                    activeSidePane === "details" && styles.sideTabButtonActive,
-                  )}
-                  onClick={() => handleSidePaneToggle("details")}
-                  aria-expanded={activeSidePane === "details"}
-                  aria-controls={sidePanelId}
-                >
-                  <span>Detalhes</span>
+                  <button
+                    type="button"
+                    className={styles.sidePanelClose}
+                    onClick={() => setIsReadingExpanded(false)}
+                    aria-label="Fechar leitura"
+                  >
+                    ×
+                  </button>
+                </div>
 
-                  {hasSelectedNode ? (
-                    <span className={styles.sideTabBadge} aria-hidden="true">
-                      1
-                    </span>
-                  ) : null}
-                </button>
-              </div>
-
-              <div id={sidePanelId} className={styles.sidePanelBody}>
-                {activeSidePane === "legend" ? (
-                  <div className={styles.chromeBlock}>
+                <div className={styles.sidePanelBody}>
+                  <div className={styles.sideLegendBlock}>
                     <RoadMapLegend />
                   </div>
-                ) : activeSidePane === "details" ? (
-                  <div className={styles.chromeBlock}>
+
+                  <div className={styles.sideDetailsBlock}>
                     <RoadMapDetailsPanel
                       node={selectionApi.activeNode}
                       parentNode={selectionApi.parentNode}
@@ -226,20 +200,21 @@ export default function RoadMap({ className }: RoadMapProps) {
                       resolvedRelations={resolvedRelations}
                     />
                   </div>
-                ) : (
-                  <div className={styles.sidePanelEmpty}>
-                    <strong className={styles.sidePanelEmptyTitle}>
-                      Painel lateral recolhido
-                    </strong>
-
-                    <p className={styles.sidePanelEmptyText}>
-                      Abra “Leitura” para ver a legenda visual ou “Detalhes” para
-                      focar no item selecionado.
-                    </p>
-                  </div>
-                )}
+                </div>
               </div>
-            </div>
+            ) : (
+              <button
+                type="button"
+                className={styles.sideCollapsedTrigger}
+                onClick={() => setIsReadingExpanded(true)}
+                aria-expanded={false}
+                aria-controls={readingPanelId}
+                aria-label="Abrir guia de leitura"
+                title="Abrir guia de leitura"
+              >
+                <span className={styles.sideCollapsedIcon} aria-hidden="true" />
+              </button>
+            )}
           </aside>
         </div>
       </div>

@@ -1,104 +1,90 @@
-import React from "react";
-import { Button } from "react-bootstrap";
-import { useNavigate } from "react-router-dom";
+import React, { useMemo, type CSSProperties } from "react";
 
 import {
-  getPathBySectionId,
-  normalizeLandingSectionId,
+  getLandingOrderedSectionIds,
+  getLandingSectionsByIds,
   type LandingSectionId,
 } from "../features/navigation/landingSections";
 
-interface FloatingButtonsProps {
-  links: ReadonlyArray<LandingSectionId>;
-  selectedLink: string;
-  setSelectedLink: (link: string) => void;
+export type FloatingButtonsProps = Readonly<{
+  activeSectionId: LandingSectionId | "";
+  onNavigateToSection: (sectionId: LandingSectionId) => void;
+  items?: ReadonlyArray<LandingSectionId>;
+}>;
+
+const railStyle: CSSProperties = {
+  position: "fixed",
+  right: "clamp(14px, 2vw, 28px)",
+  top: "50%",
+  transform: "translateY(-50%)",
+  zIndex: 950,
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  gap: "12px",
+  padding: "12px 8px",
+  borderRadius: "999px",
+  background: "rgba(12, 12, 16, 0.36)",
+  border: "1px solid rgba(255, 255, 255, 0.06)",
+  backdropFilter: "blur(10px)",
+  WebkitBackdropFilter: "blur(10px)",
+  boxShadow: "0 12px 28px rgba(0, 0, 0, 0.24)",
+};
+
+function getButtonStyle(isActive: boolean): CSSProperties {
+  return {
+    width: isActive ? "22px" : "12px",
+    height: isActive ? "22px" : "12px",
+    padding: 0,
+    border: isActive ? "2px solid #f4d35e" : "none",
+    borderRadius: isActive ? "7px" : "2px",
+    transform: isActive ? "none" : "rotate(45deg) scale(0.94)",
+    transformOrigin: "center",
+    background: isActive
+      ? "radial-gradient(circle at 30% 30%, #101115, #1d2027)"
+      : "linear-gradient(135deg, #f4d35e, #d4a017)",
+    boxShadow: isActive
+      ? "0 0 0 1px rgba(255, 211, 94, 0.15), 0 8px 18px rgba(0, 0, 0, 0.28)"
+      : "0 6px 14px rgba(212, 160, 23, 0.24)",
+    cursor: "pointer",
+    transition:
+      "width 180ms ease, height 180ms ease, transform 180ms ease, box-shadow 180ms ease, border-radius 180ms ease",
+  };
 }
 
 const FloatingButtons: React.FC<FloatingButtonsProps> = ({
-  links,
-  selectedLink,
-  setSelectedLink,
+  activeSectionId,
+  onNavigateToSection,
+  items,
 }) => {
-  const navigate = useNavigate();
+  const resolvedItems = useMemo(() => {
+    const ids = items?.length ? items : getLandingOrderedSectionIds();
 
-  /**
-   * Mantido só por compatibilidade com os pais atuais.
-   * A navegação real agora é feita aqui via react-router.
-   */
-  void setSelectedLink;
+    return getLandingSectionsByIds(ids);
+  }, [items]);
 
-  const handleNavigate = (link: LandingSectionId) => {
-    const normalizedSectionId = normalizeLandingSectionId(link);
-
-    if (!normalizedSectionId) {
-      return;
-    }
-
-    navigate(getPathBySectionId(normalizedSectionId));
-  };
-
-  const createButton = (link: LandingSectionId) => {
-    const isSelected = selectedLink === link;
-
-    return (
-      <Button
-        key={link}
-        variant="primary"
-        size="sm"
-        style={{
-          width: isSelected ? "24px" : "12px",
-          height: isSelected ? "24px" : "12px",
-          marginBottom: "2vh",
-          transform: isSelected ? "none" : "rotate(45deg) scaleX(0.8)",
-          transformOrigin: "center",
-          background: isSelected
-            ? "radial-gradient(circle at 30% 30%, #0b0b0b, #1a1a1a)"
-            : "linear-gradient(135deg, #fcd535, #ffb347)",
-          border: isSelected ? "3px solid #fcd535" : "none",
-          borderRadius: isSelected ? "8px" : "2px",
-          boxShadow: isSelected
-            ? "0 0 12px #fcd535, inset 0 0 8px #fcd53588"
-            : "0 0 8px rgba(252, 213, 53, 0.6)",
-          transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
-          cursor: "pointer",
-        }}
-        onMouseEnter={(event) => {
-          event.currentTarget.style.transform = isSelected
-            ? "scale(1.15)"
-            : "rotate(45deg) scale(1.15)";
-          event.currentTarget.style.boxShadow = isSelected
-            ? "0 0 20px #fcd535, inset 0 0 12px #fcd53588"
-            : "0 0 14px rgba(252, 213, 53, 0.8)";
-        }}
-        onMouseLeave={(event) => {
-          event.currentTarget.style.transform = isSelected
-            ? "none"
-            : "rotate(45deg) scaleX(0.8)";
-          event.currentTarget.style.boxShadow = isSelected
-            ? "0 0 12px #fcd535, inset 0 0 8px #fcd53588"
-            : "0 0 8px rgba(252, 213, 53, 0.6)";
-        }}
-        onClick={() => handleNavigate(link)}
-      />
-    );
-  };
+  if (resolvedItems.length === 0) {
+    return null;
+  }
 
   return (
-    <div
-      style={{
-        position: "fixed",
-        bottom: "10px",
-        right: "10px",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "flex-end",
-        marginBottom: "8vh",
-        marginRight: "3vw",
-        zIndex: 9999,
-      }}
-    >
-      {links.map((link) => createButton(link))}
-    </div>
+    <aside aria-label="Navegação lateral por seções" style={railStyle}>
+      {resolvedItems.map((section) => {
+        const isActive = activeSectionId === section.id;
+
+        return (
+          <button
+            key={section.id}
+            type="button"
+            aria-label={section.label}
+            aria-current={isActive ? "page" : undefined}
+            title={section.label}
+            onClick={() => onNavigateToSection(section.id)}
+            style={getButtonStyle(isActive)}
+          />
+        );
+      })}
+    </aside>
   );
 };
 

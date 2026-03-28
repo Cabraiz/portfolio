@@ -1,3 +1,4 @@
+// src/pages/Mateus/RoadMap/application/services/resolveRoadMapRelations.ts
 import {
   createRoadMapNodeMap,
   getRoadMapConnectedEdges,
@@ -56,11 +57,7 @@ function resolveDirection(
     return "bidirectional";
   }
 
-  if (edge.from === activeNodeId) {
-    return "outgoing";
-  }
-
-  return "incoming";
+  return edge.from === activeNodeId ? "outgoing" : "incoming";
 }
 
 function emptyGroupedRelations(): Record<
@@ -131,6 +128,31 @@ function sortResolvedRelations(
   });
 }
 
+function buildResolvedRelation(
+  edge: RoadMapEdge,
+  activeNodeId: string,
+  sourceNode: RoadMapNode,
+  targetNode: RoadMapNode,
+): RoadMapResolvedRelation {
+  const direction = resolveDirection(edge, activeNodeId);
+  const counterpartNode = edge.from === activeNodeId ? targetNode : sourceNode;
+  const registryEntry = getRoadMapRelationRegistryEntry(edge.type);
+
+  return {
+    edge,
+    type: edge.type,
+    label: edge.label?.trim() || ROADMAP_RELATION_LABELS[edge.type],
+    description: registryEntry.description,
+    direction,
+    sourceNode,
+    targetNode,
+    counterpartNode,
+    directed: registryEntry.directed,
+    style: registryEntry.style,
+    semanticWeight: registryEntry.semanticWeight,
+  };
+}
+
 export function resolveRoadMapRelations(
   graph: RoadMapGraph,
   nodeId: string,
@@ -138,60 +160,44 @@ export function resolveRoadMapRelations(
   const nodeMap = createRoadMapNodeMap(graph);
   const connectedEdges = sortRoadMapEdges(getRoadMapConnectedEdges(graph, nodeId));
 
-  const resolvedRelations = sortResolvedRelations(
-    connectedEdges
-      .map((edge) => {
-        const sourceNode = nodeMap.get(edge.from);
-        const targetNode = nodeMap.get(edge.to);
+  const resolvedRelations: RoadMapResolvedRelation[] = [];
 
-        if (!sourceNode || !targetNode) {
-          return null;
-        }
+  for (const edge of connectedEdges) {
+    const sourceNode = nodeMap.get(edge.from);
+    const targetNode = nodeMap.get(edge.to);
 
-        const direction = resolveDirection(edge, nodeId);
-        const counterpartNode = edge.from === nodeId ? targetNode : sourceNode;
-        const registryEntry = getRoadMapRelationRegistryEntry(edge.type);
+    if (!sourceNode || !targetNode) {
+      continue;
+    }
 
-        return {
-          edge,
-          type: edge.type,
-          label: edge.label?.trim() || ROADMAP_RELATION_LABELS[edge.type],
-          description: registryEntry.description,
-          direction,
-          sourceNode,
-          targetNode,
-          counterpartNode,
-          directed: registryEntry.directed,
-          style: registryEntry.style,
-          semanticWeight: registryEntry.semanticWeight,
-        } satisfies RoadMapResolvedRelation;
-      })
-      .filter(
-        (relation): relation is RoadMapResolvedRelation => relation !== null,
-      ),
-  );
+    resolvedRelations.push(
+      buildResolvedRelation(edge, nodeId, sourceNode, targetNode),
+    );
+  }
 
-  const incoming = resolvedRelations.filter(
+  const sortedRelations = sortResolvedRelations(resolvedRelations);
+
+  const incoming = sortedRelations.filter(
     (relation) => relation.direction === "incoming",
   );
 
-  const outgoing = resolvedRelations.filter(
+  const outgoing = sortedRelations.filter(
     (relation) => relation.direction === "outgoing",
   );
 
-  const bidirectional = resolvedRelations.filter(
+  const bidirectional = sortedRelations.filter(
     (relation) => relation.direction === "bidirectional",
   );
 
-  const primary = resolvedRelations.filter(
+  const primary = sortedRelations.filter(
     (relation) => relation.semanticWeight === "primary",
   );
 
-  const secondary = resolvedRelations.filter(
+  const secondary = sortedRelations.filter(
     (relation) => relation.semanticWeight === "secondary",
   );
 
-  const groupedByType = resolvedRelations.reduce<
+  const groupedByType = sortedRelations.reduce<
     Record<RoadMapRelationType, RoadMapResolvedRelation[]>
   >((accumulator, relation) => {
     accumulator[relation.type].push(relation);
@@ -199,7 +205,7 @@ export function resolveRoadMapRelations(
   }, emptyGroupedRelations());
 
   return {
-    all: resolvedRelations,
+    all: sortedRelations,
     incoming,
     outgoing,
     bidirectional,

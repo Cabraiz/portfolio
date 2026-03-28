@@ -1,50 +1,34 @@
 import { memo, useMemo, type CSSProperties } from "react";
 
+import type { RoadMapLayoutViewport } from "../../domain/model/roadmap.layout.types";
 import type {
   RoadMapCluster as RoadMapClusterModel,
   RoadMapNode,
 } from "../../domain/model/roadmap.types";
-
-type RoadMapCanvasPositionKey = "desktop" | "mobile";
+import {
+  getRoadMapNodeDimensions,
+  getRoadMapNodePosition,
+} from "../../application/services/resolveRoadMapNodeCollisions";
 
 type RoadMapClusterProps = Readonly<{
   cluster: RoadMapClusterModel;
   nodes: readonly RoadMapNode[];
-  positionKey?: RoadMapCanvasPositionKey;
+  positionKey?: RoadMapLayoutViewport;
   isDimmed?: boolean;
 }>;
 
-function getNodeDimensions(node: RoadMapNode): { width: number; height: number } {
-  switch (node.kind) {
-    case "domain":
-      return { width: 260, height: 84 };
-    case "topic":
-      return { width: 224, height: 60 };
-    case "technology":
-      return { width: 208, height: 56 };
-    case "concept":
-      return { width: 176, height: 42 };
-    default:
-      return { width: 208, height: 56 };
-  }
-}
-
 function getClusterBounds(
   clusterNodes: readonly RoadMapNode[],
-  positionKey: RoadMapCanvasPositionKey,
+  positionKey: RoadMapLayoutViewport,
 ) {
-  const paddingX = 24;
-  const paddingTop = 42;
-  const paddingBottom = 20;
+  const paddingX = positionKey === "mobile" ? 14 : 20;
+  const paddingTop = positionKey === "mobile" ? 28 : 30;
+  const paddingBottom = positionKey === "mobile" ? 14 : 18;
 
-  const positioned = clusterNodes
+  const positionedNodes = clusterNodes
     .map((node) => {
-      const position = node[positionKey] ?? node.desktop ?? node.mobile;
-      if (!position) {
-        return null;
-      }
-
-      const dimensions = getNodeDimensions(node);
+      const position = getRoadMapNodePosition(node, positionKey);
+      const dimensions = getRoadMapNodeDimensions(node);
 
       return {
         x: position.x,
@@ -60,14 +44,16 @@ function getClusterBounds(
         Boolean(entry),
     );
 
-  if (positioned.length === 0) {
+  if (positionedNodes.length === 0) {
     return null;
   }
 
-  const minX = Math.min(...positioned.map((entry) => entry.x)) - paddingX;
-  const minY = Math.min(...positioned.map((entry) => entry.y)) - paddingTop;
-  const maxRight = Math.max(...positioned.map((entry) => entry.right)) + paddingX;
-  const maxBottom = Math.max(...positioned.map((entry) => entry.bottom)) + paddingBottom;
+  const minX = Math.min(...positionedNodes.map((entry) => entry.x)) - paddingX;
+  const minY = Math.min(...positionedNodes.map((entry) => entry.y)) - paddingTop;
+  const maxRight =
+    Math.max(...positionedNodes.map((entry) => entry.right)) + paddingX;
+  const maxBottom =
+    Math.max(...positionedNodes.map((entry) => entry.bottom)) + paddingBottom;
 
   return {
     x: minX,
@@ -105,33 +91,41 @@ function RoadMapClusterComponent({
     top: `${bounds.y}px`,
     width: `${bounds.width}px`,
     height: `${bounds.height}px`,
-    borderRadius: "20px",
-    border: "1px solid rgba(148, 163, 184, 0.16)",
-    background: "rgba(255, 255, 255, 0.42)",
-    opacity: isDimmed ? 0.28 : 1,
+    borderRadius: "24px",
+    border: "1px solid rgba(148, 163, 184, 0.14)",
+    background:
+      "linear-gradient(180deg, rgba(255,255,255,0.62) 0%, rgba(248,250,252,0.36) 100%)",
+    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.38)",
+    opacity: isDimmed ? 0.2 : 1,
     pointerEvents: "none",
     zIndex: 1,
+    boxSizing: "border-box",
   };
 
   const titleStyle: CSSProperties = {
     position: "absolute",
-    top: "12px",
-    left: "14px",
+    top: "10px",
+    left: "12px",
     display: "inline-flex",
     alignItems: "center",
-    minHeight: "24px",
-    padding: "0 10px",
+    maxWidth: "calc(100% - 24px)",
+    minHeight: "22px",
+    padding: "0 8px",
     borderRadius: "999px",
-    background: "#ffffff",
-    border: "1px solid rgba(148, 163, 184, 0.16)",
-    color: "#334155",
-    fontSize: "0.68rem",
-    fontWeight: 800,
+    background: "rgba(255,255,255,0.84)",
+    border: "1px solid rgba(148, 163, 184, 0.12)",
+    color: "#475569",
+    fontSize: "0.64rem",
+    fontWeight: 700,
     lineHeight: 1,
-    letterSpacing: "0.06em",
+    letterSpacing: "0.04em",
     textTransform: "uppercase",
+    whiteSpace: "nowrap",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
     fontFamily:
       'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+    boxSizing: "border-box",
   };
 
   return (
