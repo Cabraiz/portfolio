@@ -34,7 +34,7 @@ type ViewportState = Readonly<{
 }>;
 
 const NAVBAR_HEIGHT_MOBILE = 72;
-const NAVBAR_HEIGHT_DESKTOP = 82;
+const NAVBAR_HEIGHT_DESKTOP = 70;
 const DESKTOP_COMPACT_BREAKPOINT = 1360;
 
 const navbarRootStyle: CSSProperties = {
@@ -43,12 +43,12 @@ const navbarRootStyle: CSSProperties = {
   left: 0,
   right: 0,
   zIndex: 1000,
-  borderBottom: "1px solid rgba(255, 255, 255, 0.08)",
+  borderBottom: "1px solid rgba(255, 255, 255, 0.10)",
   background:
-    "linear-gradient(180deg, rgba(10, 10, 12, 0.95) 0%, rgba(12, 12, 16, 0.88) 100%)",
+    "linear-gradient(180deg, rgba(18, 18, 22, 0.86) 0%, rgba(12, 12, 16, 0.74) 100%)",
   backdropFilter: "blur(14px)",
   WebkitBackdropFilter: "blur(14px)",
-  boxShadow: "0 12px 32px rgba(0, 0, 0, 0.28)",
+  boxShadow: "0 12px 32px rgba(0, 0, 0, 0.18)",
 };
 
 function getBrowserWindow(): Window | null {

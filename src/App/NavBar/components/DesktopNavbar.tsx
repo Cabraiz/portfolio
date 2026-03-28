@@ -40,8 +40,8 @@ function getNavGap(isCompactDesktop: boolean): string {
 const baseUnderlineStyle: CSSProperties = {
   position: "absolute",
   left: 0,
-  bottom: 0,
-  height: "2px",
+  bottom: "3px",
+  height: "clamp(3.8px, calc(3.4px + 0.06vh), 4.2px)",
   borderRadius: "999px",
   background:
     "linear-gradient(90deg, rgba(255, 215, 0, 0.92) 0%, rgba(255, 235, 153, 0.98) 100%)",
@@ -103,7 +103,7 @@ const DesktopNavbar: React.FC<DesktopNavbarProps> = ({
     gap: getNavGap(isCompactDesktop),
     minWidth: 0,
     maxWidth: "100%",
-    padding: "0 clamp(6px, 1vw, 12px) 8px",
+    padding: "0 clamp(6px, 1vw, 12px) 3px",
     marginTop: "2px",
   };
 
