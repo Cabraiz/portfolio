@@ -27,6 +27,7 @@ import {
   resolveLandingNavbarOffsetPx,
   resolveLandingScrollMarginTop,
   resolveLandingSectionMinHeight,
+  type LandingSectionHeightRole,
 } from "./landingLayout.tokens";
 
 const RoadMap = lazy(() => import("../RoadMap/RoadMap"));
@@ -44,6 +45,7 @@ export type LandingSectionRenderHints = Readonly<{
 
 type LandingSectionViewportConfig = Readonly<{
   Component: ComponentType;
+  sectionRole: LandingSectionHeightRole;
   expectedMinHeight: CSSProperties["minHeight"];
   navbarOffsetPx: number;
   scrollMarginTop: CSSProperties["scrollMarginTop"];
@@ -86,26 +88,40 @@ const DESKTOP_HERO_STABLE_BEHAVIOR: LandingSectionBehavior = {
   keepMountedWhenNear: true,
   placeholderFallbackMinHeight: resolveLandingSectionMinHeight("desktop", {
     preferDynamicViewport: true,
+    sectionRole: "hero",
   }),
 };
 
-const DESKTOP_VIRTUALIZED_BEHAVIOR: LandingSectionBehavior = {
+const DESKTOP_CONTENT_VIRTUALIZED_BEHAVIOR: LandingSectionBehavior = {
   renderStrategy: "placeholder-when-far",
   measurementStrategy: "resize-observer",
   cacheMeasurements: true,
   keepMountedWhenNear: true,
   placeholderFallbackMinHeight: resolveLandingSectionMinHeight("desktop", {
     preferDynamicViewport: true,
+    sectionRole: "content",
   }),
 };
 
-const MOBILE_STABLE_BEHAVIOR: LandingSectionBehavior = {
+const MOBILE_HERO_STABLE_BEHAVIOR: LandingSectionBehavior = {
   renderStrategy: "always-mounted",
   measurementStrategy: "none",
   cacheMeasurements: false,
   keepMountedWhenNear: true,
   placeholderFallbackMinHeight: resolveLandingSectionMinHeight("mobile", {
     preferDynamicViewport: false,
+    sectionRole: "hero",
+  }),
+};
+
+const MOBILE_CONTENT_STABLE_BEHAVIOR: LandingSectionBehavior = {
+  renderStrategy: "always-mounted",
+  measurementStrategy: "none",
+  cacheMeasurements: false,
+  keepMountedWhenNear: true,
+  placeholderFallbackMinHeight: resolveLandingSectionMinHeight("mobile", {
+    preferDynamicViewport: false,
+    sectionRole: "content",
   }),
 };
 
@@ -183,31 +199,51 @@ function createViewportConfig(
   Component: ComponentType,
   behavior: LandingSectionBehavior,
   options?: Readonly<{
+    sectionRole?: LandingSectionHeightRole;
     sectionStyle?: CSSProperties;
     contentStyle?: CSSProperties;
     renderHints?: LandingSectionRenderHints;
   }>,
 ): LandingSectionViewportConfig {
+  const sectionRole = options?.sectionRole ?? "content";
+
   const expectedMinHeight = resolveLandingSectionMinHeight(viewportMode, {
     preferDynamicViewport: viewportMode === "desktop",
+    sectionRole,
   });
 
   const scrollMarginTop = resolveLandingScrollMarginTop(viewportMode);
+  const isHeroSection = sectionRole === "hero";
+
+  const defaultSectionStyle: CSSProperties = {
+    minHeight: expectedMinHeight,
+    height: isHeroSection ? expectedMinHeight : "auto",
+    scrollMarginTop,
+  };
+
+  const defaultContentStyle: CSSProperties = isHeroSection
+    ? {
+        minHeight: "100%",
+        height: "100%",
+      }
+    : {
+        minHeight: "100%",
+        height: "auto",
+      };
 
   return {
     Component,
+    sectionRole,
     expectedMinHeight,
     navbarOffsetPx: resolveLandingNavbarOffsetPx(viewportMode),
     scrollMarginTop,
     behavior,
     sectionStyle: {
-      minHeight: expectedMinHeight,
-      scrollMarginTop,
+      ...defaultSectionStyle,
       ...options?.sectionStyle,
     },
     contentStyle: {
-      minHeight: "100%",
-      height: "100%",
+      ...defaultContentStyle,
       ...options?.contentStyle,
     },
     renderHints:
@@ -265,6 +301,7 @@ export const LANDING_SECTIONS_CONFIG = [
       MateusDesktop,
       DESKTOP_HERO_STABLE_BEHAVIOR,
       {
+        sectionRole: "hero",
         sectionStyle: {
           overflow: "visible",
         },
@@ -279,8 +316,9 @@ export const LANDING_SECTIONS_CONFIG = [
     mobile: createViewportConfig(
       "mobile",
       MateusMobile,
-      MOBILE_STABLE_BEHAVIOR,
+      MOBILE_HERO_STABLE_BEHAVIOR,
       {
+        sectionRole: "hero",
         contentStyle: {
           minHeight: "100%",
           height: "100%",
@@ -295,15 +333,19 @@ export const LANDING_SECTIONS_CONFIG = [
     desktop: createViewportConfig(
       "desktop",
       Portfolio,
-      DESKTOP_VIRTUALIZED_BEHAVIOR,
+      DESKTOP_CONTENT_VIRTUALIZED_BEHAVIOR,
       {
+        sectionRole: "content",
         renderHints: DESKTOP_STABLE_CONTENT_RENDER_HINTS,
       },
     ),
     mobile: createViewportConfig(
       "mobile",
       Portfolio,
-      MOBILE_STABLE_BEHAVIOR,
+      MOBILE_CONTENT_STABLE_BEHAVIOR,
+      {
+        sectionRole: "content",
+      },
     ),
   },
   {
@@ -312,11 +354,12 @@ export const LANDING_SECTIONS_CONFIG = [
     desktop: createViewportConfig(
       "desktop",
       RoadMapDesktopWithBoundary,
-      DESKTOP_VIRTUALIZED_BEHAVIOR,
+      DESKTOP_CONTENT_VIRTUALIZED_BEHAVIOR,
       {
+        sectionRole: "content",
         contentStyle: {
           minHeight: "100%",
-          height: "100%",
+          height: "auto",
         },
         renderHints: {
           ...DESKTOP_STABLE_CONTENT_RENDER_HINTS,
@@ -327,11 +370,12 @@ export const LANDING_SECTIONS_CONFIG = [
     mobile: createViewportConfig(
       "mobile",
       RoadMapMobileWithBoundary,
-      MOBILE_STABLE_BEHAVIOR,
+      MOBILE_CONTENT_STABLE_BEHAVIOR,
       {
+        sectionRole: "content",
         contentStyle: {
           minHeight: "100%",
-          height: "100%",
+          height: "auto",
         },
       },
     ),
@@ -342,15 +386,19 @@ export const LANDING_SECTIONS_CONFIG = [
     desktop: createViewportConfig(
       "desktop",
       Pricing,
-      DESKTOP_VIRTUALIZED_BEHAVIOR,
+      DESKTOP_CONTENT_VIRTUALIZED_BEHAVIOR,
       {
+        sectionRole: "content",
         renderHints: DESKTOP_STABLE_CONTENT_RENDER_HINTS,
       },
     ),
     mobile: createViewportConfig(
       "mobile",
       Pricing,
-      MOBILE_STABLE_BEHAVIOR,
+      MOBILE_CONTENT_STABLE_BEHAVIOR,
+      {
+        sectionRole: "content",
+      },
     ),
   },
   {
@@ -359,15 +407,19 @@ export const LANDING_SECTIONS_CONFIG = [
     desktop: createViewportConfig(
       "desktop",
       Live,
-      DESKTOP_VIRTUALIZED_BEHAVIOR,
+      DESKTOP_CONTENT_VIRTUALIZED_BEHAVIOR,
       {
+        sectionRole: "content",
         renderHints: DESKTOP_STABLE_CONTENT_RENDER_HINTS,
       },
     ),
     mobile: createViewportConfig(
       "mobile",
       Live,
-      MOBILE_STABLE_BEHAVIOR,
+      MOBILE_CONTENT_STABLE_BEHAVIOR,
+      {
+        sectionRole: "content",
+      },
     ),
   },
   {
@@ -376,15 +428,19 @@ export const LANDING_SECTIONS_CONFIG = [
     desktop: createViewportConfig(
       "desktop",
       ContactDesktop,
-      DESKTOP_VIRTUALIZED_BEHAVIOR,
+      DESKTOP_CONTENT_VIRTUALIZED_BEHAVIOR,
       {
+        sectionRole: "content",
         renderHints: DESKTOP_STABLE_CONTENT_RENDER_HINTS,
       },
     ),
     mobile: createViewportConfig(
       "mobile",
       ContactMobile,
-      MOBILE_STABLE_BEHAVIOR,
+      MOBILE_CONTENT_STABLE_BEHAVIOR,
+      {
+        sectionRole: "content",
+      },
     ),
   },
 ] as const satisfies readonly LandingSectionConfig[];

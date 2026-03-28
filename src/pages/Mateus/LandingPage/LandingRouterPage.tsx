@@ -87,6 +87,7 @@ const LandingRouterPage: React.FC = () => {
 
   const resolvedMinHeight = resolveLandingSectionMinHeight(viewportMode, {
     preferDynamicViewport: viewportMode === "desktop",
+    sectionRole: viewportMode === "desktop" ? "content" : "hero",
   });
 
   return (
@@ -95,7 +96,7 @@ const LandingRouterPage: React.FC = () => {
       fallbackTitle={`A página principal (${viewportMode}) quebrou`}
       resetKey={viewportMode}
       minHeight={resolvedMinHeight}
-      fullHeight
+      fullHeight={false}
     >
       <div
         data-landing-router-root="true"

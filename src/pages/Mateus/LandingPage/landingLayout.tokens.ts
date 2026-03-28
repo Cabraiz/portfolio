@@ -3,6 +3,7 @@ import type { CSSProperties } from "react";
 import type { LandingSectionViewportMode } from "./landing.types";
 
 export type LandingRenderableViewportMode = "desktop" | "mobile";
+export type LandingSectionHeightRole = "hero" | "content";
 
 export type LandingResponsiveSpacing = Readonly<{
   sectionPaddingInline: CSSProperties["paddingInline"];
@@ -10,6 +11,15 @@ export type LandingResponsiveSpacing = Readonly<{
   sectionPaddingBlockEnd: CSSProperties["paddingBottom"];
   contentGap: CSSProperties["gap"];
 }>;
+
+export type LandingSectionMinHeightOptions = Readonly<{
+  preferDynamicViewport?: boolean;
+  sectionRole?: LandingSectionHeightRole;
+  subtractNavbarOffset?: boolean;
+}>;
+
+const DESKTOP_NAVBAR_OFFSET_PX = 88;
+const MOBILE_NAVBAR_OFFSET_PX = 88;
 
 export const landingLayoutTokens = {
   breakpoints: {
@@ -36,12 +46,12 @@ export const landingLayoutTokens = {
 
   navbar: {
     offsetPx: {
-      desktop: 88,
-      mobile: 88,
+      desktop: DESKTOP_NAVBAR_OFFSET_PX,
+      mobile: MOBILE_NAVBAR_OFFSET_PX,
     },
     scrollMarginTop: {
-      desktop: "88px",
-      mobile: "88px",
+      desktop: `${DESKTOP_NAVBAR_OFFSET_PX}px`,
+      mobile: `${MOBILE_NAVBAR_OFFSET_PX}px`,
     },
   },
 
@@ -119,7 +129,7 @@ export function resolveLandingViewportHeightUnit(
     : landingLayoutTokens.viewportHeight.stable;
 }
 
-export function resolveLandingSectionMinHeight(
+function resolveLandingBaseSectionMinHeight(
   viewportMode?: LandingSectionViewportMode | LandingRenderableViewportMode,
   options?: Readonly<{
     preferDynamicViewport?: boolean;
@@ -129,8 +139,7 @@ export function resolveLandingSectionMinHeight(
     normalizeLandingRenderableViewportMode(viewportMode);
 
   const shouldPreferDynamicViewport =
-    options?.preferDynamicViewport ??
-    normalizedViewportMode === "desktop";
+    options?.preferDynamicViewport ?? normalizedViewportMode === "desktop";
 
   const sectionMinHeight =
     landingLayoutTokens.sectionMinHeight[normalizedViewportMode];
@@ -140,11 +149,105 @@ export function resolveLandingSectionMinHeight(
     : sectionMinHeight.stable;
 }
 
-export function resolveLandingSectionViewportFallback(
+function shouldSubtractNavbarOffset(
+  viewportMode: LandingRenderableViewportMode,
+  sectionRole: LandingSectionHeightRole,
+  explicitPreference?: boolean,
+): boolean {
+  if (typeof explicitPreference === "boolean") {
+    return explicitPreference;
+  }
+
+  return viewportMode === "desktop" && sectionRole === "content";
+}
+
+function toViewportHeightMinusNavbar(
+  baseMinHeight: CSSProperties["minHeight"],
+  navbarOffsetPx: number,
+): CSSProperties["minHeight"] {
+  return `max(0px, calc(${baseMinHeight} - ${navbarOffsetPx}px))`;
+}
+
+export function resolveLandingSectionMinHeight(
   viewportMode?: LandingSectionViewportMode | LandingRenderableViewportMode,
+  options?: LandingSectionMinHeightOptions,
 ): CSSProperties["minHeight"] {
   const normalizedViewportMode =
     normalizeLandingRenderableViewportMode(viewportMode);
 
-  return landingLayoutTokens.sectionMinHeight[normalizedViewportMode].stable;
+  const sectionRole = options?.sectionRole ?? "hero";
+
+  const baseMinHeight = resolveLandingBaseSectionMinHeight(
+    normalizedViewportMode,
+    {
+      preferDynamicViewport: options?.preferDynamicViewport,
+    },
+  );
+
+  if (
+    !shouldSubtractNavbarOffset(
+      normalizedViewportMode,
+      sectionRole,
+      options?.subtractNavbarOffset,
+    )
+  ) {
+    return baseMinHeight;
+  }
+
+  return toViewportHeightMinusNavbar(
+    baseMinHeight,
+    resolveLandingNavbarOffsetPx(normalizedViewportMode),
+  );
+}
+
+export function resolveLandingHeroSectionMinHeight(
+  viewportMode?: LandingSectionViewportMode | LandingRenderableViewportMode,
+  options?: Omit<LandingSectionMinHeightOptions, "sectionRole">,
+): CSSProperties["minHeight"] {
+  return resolveLandingSectionMinHeight(viewportMode, {
+    ...options,
+    sectionRole: "hero",
+    subtractNavbarOffset: false,
+  });
+}
+
+export function resolveLandingContentSectionMinHeight(
+  viewportMode?: LandingSectionViewportMode | LandingRenderableViewportMode,
+  options?: Omit<LandingSectionMinHeightOptions, "sectionRole">,
+): CSSProperties["minHeight"] {
+  return resolveLandingSectionMinHeight(viewportMode, {
+    ...options,
+    sectionRole: "content",
+  });
+}
+
+export function resolveLandingSectionViewportFallback(
+  viewportMode?: LandingSectionViewportMode | LandingRenderableViewportMode,
+  options?: Pick<
+    LandingSectionMinHeightOptions,
+    "sectionRole" | "subtractNavbarOffset"
+  >,
+): CSSProperties["minHeight"] {
+  const normalizedViewportMode =
+    normalizeLandingRenderableViewportMode(viewportMode);
+
+  const sectionRole = options?.sectionRole ?? "hero";
+
+  const stableMinHeight =
+    landingLayoutTokens.sectionMinHeight[normalizedViewportMode].stable;
+
+  if (
+    !shouldSubtractNavbarOffset(
+      normalizedViewportMode,
+      sectionRole,
+      options?.subtractNavbarOffset,
+    )
+  ) {
+    return stableMinHeight;
+  }
+
+  return toViewportHeightMinusNavbar(
+    stableMinHeight,
+    resolveLandingNavbarOffsetPx(normalizedViewportMode),
+  );
 }

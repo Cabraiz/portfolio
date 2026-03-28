@@ -1,14 +1,14 @@
-import imagem1 from "../../../assets/Mateus/portfolio/imagem1.png";
-import imagem2 from "../../../assets/Mateus/portfolio/imagem2.png";
-import imagem3 from "../../../assets/Mateus/portfolio/imagem3.png";
-import imagem4 from "../../../assets/Mateus/portfolio/imagem4.png";
-import imagem5 from "../../../assets/Mateus/portfolio/imagem5.png";
+import imagem1 from "../../../assets/Mateus/portfolio/imagem1.webp";
+import imagem2 from "../../../assets/Mateus/portfolio/imagem2.webp";
+import imagem3 from "../../../assets/Mateus/portfolio/imagem3.webp";
+import imagem4 from "../../../assets/Mateus/portfolio/imagem4.webp";
+import imagem5 from "../../../assets/Mateus/portfolio/imagem5.webp";
 
-import logo1 from "../../../assets/Mateus/portfolio/logos/logo1.png";
-import logo2 from "../../../assets/Mateus/portfolio/logos/logo2.png";
-import logo3 from "../../../assets/Mateus/portfolio/logos/logo3.png";
-import logo4 from "../../../assets/Mateus/portfolio/logos/logo4.png";
-import logo5 from "../../../assets/Mateus/portfolio/logos/logo5.png";
+import logo1 from "../../../assets/Mateus/portfolio/logos/logo1.webp";
+import logo2 from "../../../assets/Mateus/portfolio/logos/logo2.webp";
+import logo3 from "../../../assets/Mateus/portfolio/logos/logo3.webp";
+import logo4 from "../../../assets/Mateus/portfolio/logos/logo4.webp";
+import logo5 from "../../../assets/Mateus/portfolio/logos/logo5.webp";
 
 import type {
   PortfolioProject,

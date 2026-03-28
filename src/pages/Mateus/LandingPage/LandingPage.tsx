@@ -21,6 +21,7 @@ import {
   resolveLandingResponsiveSpacing,
   resolveLandingScrollMarginTop,
   resolveLandingSectionMinHeight,
+  type LandingSectionHeightRole,
 } from "./landingLayout.tokens";
 import { resolveLandingSectionBehavior } from "./landing.types";
 import useSectionRenderPolicy from "./useSectionRenderPolicy";
@@ -120,6 +121,17 @@ function resolveLandingSectionRuntimeLabel(sectionId: string): string {
   }
 }
 
+function resolveSectionHeightRole(sectionId: string): LandingSectionHeightRole {
+  return sectionId === "home" ? "hero" : "content";
+}
+
+function resolveSectionMinHeightForDesktop(sectionId: string): CSSProperties["minHeight"] {
+  return resolveLandingSectionMinHeight("desktop", {
+    preferDynamicViewport: true,
+    sectionRole: resolveSectionHeightRole(sectionId),
+  });
+}
+
 const LandingPage: React.FC = () => {
   const containerRef = useRef<HTMLElement | null>(null);
 
@@ -168,6 +180,7 @@ const LandingPage: React.FC = () => {
     useLandingSectionMeasurements({
       defaultPlaceholderMinHeight: resolveLandingSectionMinHeight("desktop", {
         preferDynamicViewport: true,
+        sectionRole: "content",
       }),
     });
 
@@ -195,20 +208,25 @@ const LandingPage: React.FC = () => {
       {sections.map((section) => {
         const behavior = resolveLandingSectionBehavior(section.behavior);
         const sectionState = renderPolicy.getSectionState(section.id);
+        const sectionHeightRole = resolveSectionHeightRole(section.id);
 
         const resolvedSectionMinHeight =
+          section.expectedMinHeight ??
           section.sectionStyle?.minHeight ??
-          resolveLandingSectionMinHeight("desktop", {
-            preferDynamicViewport: true,
-          });
+          resolveSectionMinHeightForDesktop(section.id);
+
+        const resolvedSectionHeight =
+          section.sectionStyle?.height ??
+          (sectionHeightRole === "hero" ? resolvedSectionMinHeight : "auto");
 
         const resolvedSectionStyle: CSSProperties = {
           ...baseSectionStyle,
           ...section.sectionStyle,
           minHeight: resolvedSectionMinHeight,
-          height: section.sectionStyle?.height,
+          height: resolvedSectionHeight,
           scrollMarginTop:
             section.sectionStyle?.scrollMarginTop ??
+            section.scrollMarginTop ??
             resolveLandingScrollMarginTop("desktop"),
           display: section.sectionStyle?.display ?? "flex",
           flexDirection: section.sectionStyle?.flexDirection ?? "column",
@@ -220,8 +238,12 @@ const LandingPage: React.FC = () => {
         const resolvedContentStyle: CSSProperties = {
           ...baseContentContainerStyle,
           ...section.contentStyle,
-          height: section.contentStyle?.height ?? "auto",
-          minHeight: section.contentStyle?.minHeight ?? 0,
+          height:
+            section.contentStyle?.height ??
+            (sectionHeightRole === "hero" ? "100%" : "auto"),
+          minHeight:
+            section.contentStyle?.minHeight ??
+            (sectionHeightRole === "hero" ? "100%" : 0),
           display: section.contentStyle?.display ?? "flex",
           flexDirection: section.contentStyle?.flexDirection ?? "column",
           alignItems: section.contentStyle?.alignItems ?? "stretch",
@@ -232,7 +254,8 @@ const LandingPage: React.FC = () => {
 
         const placeholderFallback =
           section.placeholderMinHeight ??
-          behavior.placeholderFallbackMinHeight;
+          behavior.placeholderFallbackMinHeight ??
+          resolvedSectionMinHeight;
 
         return (
           <LandingSectionShell
@@ -258,7 +281,7 @@ const LandingPage: React.FC = () => {
                 sectionLabel={resolveLandingSectionRuntimeLabel(section.id)}
                 resetKey={section.id}
                 minHeight={resolvedSectionMinHeight}
-                fullHeight
+                fullHeight={sectionHeightRole === "hero"}
               >
                 {section.content}
               </RoadMapErrorBoundary>
