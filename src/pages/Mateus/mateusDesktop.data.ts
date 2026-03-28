@@ -1,21 +1,21 @@
 import type { CSSProperties } from "react";
 
-import perfil from "../../assets/Mateus/perfil.webp";
-import IconGmail from "../../assets/Mateus/icon/IconGmail.png";
-import IconInsta from "../../assets/Mateus/icon/IconInsta.png";
-import IconLinkendin from "../../assets/Mateus/icon/IconLinkedIn.png";
-import IconWhatsApp from "../../assets/Mateus/icon/IconWhatsApp.png";
-import IconMeet from "../../assets/Mateus/icon/IconMeet.png";
+import profileImage from "@/assets/Mateus/perfil.webp";
+import gmailIcon from "@/assets/Mateus/icon/IconGmail.png";
+import instagramIcon from "@/assets/Mateus/icon/IconInsta.png";
+import linkedInIcon from "@/assets/Mateus/icon/IconLinkedIn.png";
+import whatsAppIcon from "@/assets/Mateus/icon/IconWhatsApp.png";
+import meetIcon from "@/assets/Mateus/icon/IconMeet.png";
 
-import seloBNB from "../../assets/Mateus/Selos/BNB.svg";
-import seloUNIFOR from "../../assets/Mateus/Selos/UNIFOR.svg";
-import seloSANA from "../../assets/Mateus/Selos/SANA.svg";
-import seloSEDIH from "../../assets/Mateus/Selos/SEDIH.svg";
+import bnbSeal from "@/assets/Mateus/Selos/BNB.svg";
+import uniforSeal from "@/assets/Mateus/Selos/UNIFOR.svg";
+import sanaSeal from "@/assets/Mateus/Selos/SANA.svg";
+import sedihSeal from "@/assets/Mateus/Selos/SEDIH.svg";
 
-import cat1 from "../../assets/Mateus/cutieIcons/Cat1.png";
-import cat2 from "../../assets/Mateus/cutieIcons/Cat2.png";
-import cat3 from "../../assets/Mateus/cutieIcons/Cat3.png";
-import cat4 from "../../assets/Mateus/cutieIcons/Cat4.png";
+import cat1Icon from "@/assets/Mateus/cutieIcons/Cat1.png";
+import cat2Icon from "@/assets/Mateus/cutieIcons/Cat2.png";
+import cat3Icon from "@/assets/Mateus/cutieIcons/Cat3.png";
+import cat4Icon from "@/assets/Mateus/cutieIcons/Cat4.png";
 
 export type SealItem = Readonly<{
   key: string;
@@ -32,41 +32,47 @@ export const WHATSAPP_HREF = "https://wa.me/5585998575707";
 export const MEET_HREF = "https://meet.google.com/SEULINK";
 export const RESUME_HREF = "/files/mateus-cabral-resume.pdf";
 
-export const PROFILE_IMAGE = perfil;
+export const PROFILE_IMAGE = profileImage;
 
 export const SOCIAL_ICONS = {
-  gmail: IconGmail,
-  instagram: IconInsta,
-  linkedin: IconLinkendin,
-  whatsapp: IconWhatsApp,
-  meet: IconMeet,
+  gmail: gmailIcon,
+  instagram: instagramIcon,
+  linkedin: linkedInIcon,
+  whatsapp: whatsAppIcon,
+  meet: meetIcon,
 } as const;
 
 export const seals: readonly SealItem[] = [
   {
     key: "BNB",
-    src: seloBNB,
+    src: bnbSeal,
     alt: "Banco do Nordeste",
-    cat: cat1,
-    style: { scale: "0.9", marginTop: "5px" },
+    cat: cat1Icon,
+    style: {
+      scale: "0.9",
+      marginTop: "5px",
+    },
   },
   {
     key: "UNIFOR",
-    src: seloUNIFOR,
+    src: uniforSeal,
     alt: "UNIFOR",
-    cat: cat2,
+    cat: cat2Icon,
   },
   {
     key: "SANA",
-    src: seloSANA,
+    src: sanaSeal,
     alt: "SANA",
-    cat: cat3,
-    style: { scale: "0.75", marginTop: "5px" },
+    cat: cat3Icon,
+    style: {
+      scale: "0.75",
+      marginTop: "5px",
+    },
   },
   {
     key: "SEDIH",
-    src: seloSEDIH,
+    src: sedihSeal,
     alt: "SEDIH",
-    cat: cat4,
+    cat: cat4Icon,
   },
 ];
