@@ -1,11 +1,11 @@
 import type { CSSProperties } from "react";
 
 import profileImage from "@/assets/Mateus/perfil.webp";
-import gmailIcon from "@/assets/Mateus/icon/IconGmail.png";
-import instagramIcon from "@/assets/Mateus/icon/IconInsta.png";
-import linkedInIcon from "@/assets/Mateus/icon/IconLinkedIn.png";
-import whatsAppIcon from "@/assets/Mateus/icon/IconWhatsApp.png";
-import meetIcon from "@/assets/Mateus/icon/IconMeet.png";
+import gmailIcon from "@/assets/Mateus/Icon/IconGmail.png";
+import instagramIcon from "@/assets/Mateus/Icon/IconInsta.png";
+import linkedInIcon from "@/assets/Mateus/Icon/IconLinkedIn.png";
+import whatsAppIcon from "@/assets/Mateus/Icon/IconWhatsApp.png";
+import meetIcon from "@/assets/Mateus/Icon/IconMeet.png";
 
 import bnbSeal from "@/assets/Mateus/Selos/BNB.svg";
 import uniforSeal from "@/assets/Mateus/Selos/UNIFOR.svg";
