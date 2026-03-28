@@ -41,43 +41,15 @@ type LenisLike =
   | undefined;
 
 export type LandingSectionNavigationNavigateOptions = Readonly<{
-  /**
-   * Quando true, força replace na URL.
-   * Para clique do navbar na própria landing, replace costuma ser o mais limpo.
-   */
   replace?: boolean;
-
-  /**
-   * Mantém a URL sincronizada como efeito secundário.
-   */
   syncUrl?: boolean;
-
-  /**
-   * Força tentativa de scroll local mesmo que a rota atual não pareça landing.
-   */
   forceScroll?: boolean;
-
-  /**
-   * Override fino do offset do scroll.
-   */
   offsetPx?: number;
-
-  /**
-   * Override fino da duração do scroll.
-   */
   duration?: number;
 }>;
 
 export type UseLandingSectionNavigationParams = Readonly<{
-  /**
-   * Quando informado, o hook opera em modo controller:
-   * observa a landing real e alimenta o store compartilhado.
-   *
-   * Quando omitido, o hook opera em modo consumer:
-   * apenas consome o estado centralizado.
-   */
   containerRef?: Readonly<{ current: HTMLElement | null }>;
-
   defaultSectionId?: LandingSectionId;
   sectionIds?: readonly LandingSectionId[];
   sectionSelector?: string;
@@ -88,20 +60,8 @@ export type UseLandingSectionNavigationParams = Readonly<{
   viewportWidth?: number | null;
   tokens?: Partial<LandingActiveSectionCommitTokens>;
   scheduling?: UseLandingActiveSectionSchedulingOptions;
-
-  /**
-   * Por padrão, usa as seções elegíveis da config da landing.
-   */
   urlSyncEligibleSectionIds?: readonly LandingSectionId[];
-
-  /**
-   * A URL continua secundária. Default = true.
-   */
   syncUrl?: boolean;
-
-  /**
-   * Duração padrão do scroll programático.
-   */
   scrollDuration?: number;
 }>;
 
@@ -110,25 +70,20 @@ export type UseLandingSectionNavigationResult = Readonly<{
   observedSectionId: LandingSectionId;
   committedSectionId: LandingSectionId;
   routeSectionId: LandingSectionId;
-
   observations: readonly LandingSectionObservation<LandingSectionId>[];
   controllerReady: boolean;
-
   navigateToSection: (
     sectionId: LandingSectionId,
     options?: LandingSectionNavigationNavigateOptions,
   ) => void;
-
   replaceRouteSection: (
     sectionId: LandingSectionId,
     options?: Readonly<{
       replace?: boolean;
     }>,
   ) => void;
-
   resolveRoutePath: (sectionId: LandingSectionId) => string;
   isUrlSyncEligible: (sectionId: LandingSectionId) => boolean;
-
   refreshActiveSection: (reason?: ActiveSectionChangeReason) => void;
   resolveObservationBySectionId: (
     sectionId: LandingSectionId,
@@ -295,10 +250,6 @@ function resolveRouteSectionIdFromPathname(params: Readonly<{
     return nextSectionId;
   }
 
-  /**
-   * Cai para o mapeamento canonical por path.
-   * Ex.: /roadmap -> roadMap
-   */
   const normalizedPath = normalizePathname(pathname);
 
   for (const section of LANDING_SECTIONS) {
@@ -342,6 +293,31 @@ function scrollToSectionTarget(params: Readonly<{
   }
 }
 
+function writeRoutePathToBrowserHistory(params: Readonly<{
+  nextPath: string;
+  sectionId: LandingSectionId;
+  replace?: boolean;
+}>): void {
+  if (typeof globalThis.window === "undefined") {
+    return;
+  }
+
+  const { nextPath, sectionId, replace = true } = params;
+  const browserWindow = globalThis.window;
+  const normalizedNextPath = normalizePathname(nextPath);
+  const historyState = {
+    ...(browserWindow.history.state ?? {}),
+    landingSectionId: sectionId,
+  };
+
+  if (replace) {
+    browserWindow.history.replaceState(historyState, "", normalizedNextPath);
+    return;
+  }
+
+  browserWindow.history.pushState(historyState, "", normalizedNextPath);
+}
+
 export default function useLandingSectionNavigation(
   params: UseLandingSectionNavigationParams = {},
 ): UseLandingSectionNavigationResult {
@@ -379,7 +355,9 @@ export default function useLandingSectionNavigation(
   const resolvedUrlSyncEligibleSectionIds = useMemo(() => {
     return normalizeSectionIds(
       urlSyncEligibleSectionIds ??
-        getLandingUrlSyncEligibleSectionIds(viewportMode === "mobile" ? "mobile" : "desktop"),
+        getLandingUrlSyncEligibleSectionIds(
+          viewportMode === "mobile" ? "mobile" : "desktop",
+        ),
     );
   }, [urlSyncEligibleSectionIds, viewportMode]);
 
@@ -494,36 +472,6 @@ export default function useLandingSectionNavigation(
     activeSectionState.setActiveSectionId,
   ]);
 
-  useEffect(() => {
-    if (!controllerEnabled || !syncUrl) {
-      return;
-    }
-
-    const nextSectionId = activeSectionState.committedSectionId;
-
-    if (!isUrlSyncEligible(nextSectionId)) {
-      return;
-    }
-
-    const nextPath = resolveRoutePath(nextSectionId);
-
-    if (
-      normalizePathname(location.pathname) === normalizePathname(nextPath)
-    ) {
-      return;
-    }
-
-    navigate(nextPath, { replace: true });
-  }, [
-    controllerEnabled,
-    syncUrl,
-    activeSectionState.committedSectionId,
-    isUrlSyncEligible,
-    resolveRoutePath,
-    location.pathname,
-    navigate,
-  ]);
-
   const replaceRouteSection = useCallback(
     (
       sectionId: LandingSectionId,
@@ -536,10 +484,20 @@ export default function useLandingSectionNavigation(
         : resolvedDefaultSectionId;
 
       const nextPath = resolveRoutePath(normalizedSectionId);
+      const currentPathIsLanding = isLandingPath(location.pathname);
 
       patchStoreState({
         routeSectionId: normalizedSectionId,
       });
+
+      if (currentPathIsLanding) {
+        writeRoutePathToBrowserHistory({
+          nextPath,
+          sectionId: normalizedSectionId,
+          replace: options?.replace ?? true,
+        });
+        return;
+      }
 
       if (
         normalizePathname(location.pathname) === normalizePathname(nextPath)
@@ -663,11 +621,10 @@ export default function useLandingSectionNavigation(
           duration: options?.duration ?? scrollDuration,
         });
 
-        if (
-          shouldSyncUrl &&
-          normalizePathname(location.pathname) !== normalizePathname(nextPath)
-        ) {
-          navigate(nextPath, {
+        if (shouldSyncUrl) {
+          writeRoutePathToBrowserHistory({
+            nextPath,
+            sectionId: nextSectionId,
             replace: options?.replace ?? true,
           });
         }

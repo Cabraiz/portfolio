@@ -11,7 +11,7 @@ import { useSectionVisibility } from "../hooks/useSectionVisibility";
 import { getLenisScrollSettings } from "../features/scroll/getLenisScrollSettings";
 import useLandingSectionNavigation from "../features/navigation/useLandingSectionNavigation";
 import {
-  getSectionIdByPath,
+  DEFAULT_LANDING_SECTION_ID,
   isLandingPath,
   type LandingSectionId,
 } from "../features/navigation/landingSections";
@@ -23,7 +23,7 @@ import type {
 
 import "react-toastify/dist/ReactToastify.css";
 
-const links: LandingSectionId[] = [
+const links: readonly LandingSectionId[] = [
   "home",
   "portfolio",
   "roadMap",
@@ -33,7 +33,7 @@ const links: LandingSectionId[] = [
 ];
 
 function getBrowserWindow(): Window | null {
-  if (globalThis.window === undefined) {
+  if (typeof globalThis.window === "undefined") {
     return null;
   }
 
@@ -41,7 +41,7 @@ function getBrowserWindow(): Window | null {
 }
 
 function getBrowserNavigator(): Navigator | null {
-  if (globalThis.navigator === undefined) {
+  if (typeof globalThis.navigator === "undefined") {
     return null;
   }
 
@@ -71,11 +71,13 @@ function getHardwareInfo(): ScrollHardwareInfo {
     return {};
   }
 
-  const nav = browserNavigator as Navigator & { deviceMemory?: number };
+  const navigatorWithDeviceMemory = browserNavigator as Navigator & {
+    deviceMemory?: number;
+  };
 
   return {
-    deviceMemoryGb: nav.deviceMemory ?? null,
-    hardwareConcurrency: nav.hardwareConcurrency ?? null,
+    deviceMemoryGb: navigatorWithDeviceMemory.deviceMemory ?? null,
+    hardwareConcurrency: browserNavigator.hardwareConcurrency ?? null,
   };
 }
 
@@ -112,35 +114,35 @@ export default function AppDesktop() {
     navigateToSection,
   } = useLandingSectionNavigation();
 
-  const resolvedActiveSectionId = useMemo<LandingSectionId | "">(() => {
-    const pathnameSectionId = getSectionIdByPath(location.pathname) ?? "";
+  const isCurrentRouteLanding = isLandingPath(location.pathname);
 
-    if (!isLandingPath(location.pathname)) {
-      return pathnameSectionId;
+  const resolvedActiveSectionId = useMemo<LandingSectionId | "">(() => {
+    if (!isCurrentRouteLanding) {
+      return "";
     }
 
     if (controllerReady) {
       return activeSectionId;
     }
 
-    return routeSectionId || pathnameSectionId;
+    return routeSectionId || DEFAULT_LANDING_SECTION_ID;
   }, [
     activeSectionId,
     controllerReady,
-    location.pathname,
+    isCurrentRouteLanding,
     routeSectionId,
   ]);
 
   const handleNavigateToSection = useCallback(
     (sectionId: LandingSectionId) => {
       navigateToSection(sectionId, {
-        replace: isLandingPath(location.pathname),
+        replace: isCurrentRouteLanding,
         syncUrl: true,
       });
 
       setMenuOpen(false);
     },
-    [location.pathname, navigateToSection],
+    [isCurrentRouteLanding, navigateToSection],
   );
 
   useEffect(() => {
@@ -152,7 +154,7 @@ export default function AppDesktop() {
 
     let frame = 0;
 
-    const updateSmoothOptions = () => {
+    const updateSmoothOptions = (): void => {
       browserWindow.cancelAnimationFrame(frame);
 
       frame = browserWindow.requestAnimationFrame(() => {

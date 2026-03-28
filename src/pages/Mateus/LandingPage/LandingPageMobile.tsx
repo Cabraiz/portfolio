@@ -4,9 +4,14 @@ import React, {
   useMemo,
   useRef,
 } from "react";
+import { useLocation } from "react-router-dom";
 
-import usePathSectionSync from "../../../features/navigation/usePathSectionSync";
-import { DEFAULT_LANDING_SECTION_ID } from "../../../features/navigation/landingSections";
+import {
+  DEFAULT_LANDING_SECTION_ID,
+  getSectionIdByPath,
+  isLandingPath,
+  type LandingSectionId,
+} from "../../../features/navigation/landingSections";
 import useDocumentVisibilitySync from "../../../features/scroll/useDocumentVisibilitySync";
 import useLenisEngine from "../../../features/scroll/useLenisEngine";
 import RoadMapErrorBoundary from "../RoadMap/ui/chrome/RoadMapErrorBoundary";
@@ -17,6 +22,7 @@ import {
   getLandingSectionDefinitions,
 } from "./landingSections.config";
 import useLandingActiveSection from "./hooks/useLandingActiveSection";
+import useLandingHistorySync from "./hooks/useLandingHistorySync";
 import useLandingSectionMeasurements from "./hooks/useLandingSectionMeasurements";
 import {
   resolveLandingResponsiveSpacing,
@@ -124,29 +130,43 @@ function resolveLandingSectionRuntimeLabel(sectionId: string): string {
   }
 }
 
+function resolveInitialMobileSectionId(pathname: string): LandingSectionId {
+  if (!isLandingPath(pathname)) {
+    return DEFAULT_LANDING_SECTION_ID;
+  }
+
+  return getSectionIdByPath(pathname) ?? DEFAULT_LANDING_SECTION_ID;
+}
+
 const LandingPageMobile: React.FC = () => {
   const containerRef = useRef<HTMLElement | null>(null);
+  const location = useLocation();
 
   const sections = useMemo(() => {
     return getLandingSectionDefinitions("mobile");
   }, []);
 
-  const { currentSectionId, syncSectionFromScroll } = usePathSectionSync({
-    containerRef,
-    defaultSectionId: DEFAULT_LANDING_SECTION_ID,
-    historyMode: "replace",
-  });
+  const initialSectionId = useMemo<LandingSectionId>(() => {
+    return resolveInitialMobileSectionId(location.pathname);
+  }, [location.pathname]);
 
   useLenisEngine();
   useDocumentVisibilitySync();
 
   const { activeSectionId, refreshActiveSection } = useLandingActiveSection({
     containerRef,
-    defaultSectionId: currentSectionId,
+    defaultSectionId: initialSectionId,
     sectionIds: LANDING_SECTION_ORDER,
     sectionSelector: ":scope > section[data-page-section='true']",
     viewportMode: "mobile",
     activationViewportRatio: 0.42,
+  });
+
+  const { routeSectionId } = useLandingHistorySync({
+    committedSectionId: activeSectionId,
+    defaultSectionId: initialSectionId,
+    viewportMode: "mobile",
+    historyMode: "replace",
   });
 
   const { registerSectionElement, getPlaceholderMinHeight } =
@@ -157,14 +177,6 @@ const LandingPageMobile: React.FC = () => {
     });
 
   useEffect(() => {
-    if (currentSectionId !== activeSectionId) {
-      syncSectionFromScroll(activeSectionId, {
-        historyMode: "replace",
-      });
-    }
-  }, [activeSectionId, currentSectionId, syncSectionFromScroll]);
-
-  useEffect(() => {
     refreshActiveSection("refresh");
   }, [refreshActiveSection, sections]);
 
@@ -172,6 +184,7 @@ const LandingPageMobile: React.FC = () => {
     sections,
     activeSectionId,
     nearDistance: 1,
+    viewportMode: "mobile",
   });
 
   return (
@@ -180,6 +193,7 @@ const LandingPageMobile: React.FC = () => {
       style={containerStyle}
       aria-label="Landing page mobile"
       data-active-section={activeSectionId}
+      data-route-section={routeSectionId}
       data-landing-viewport="mobile"
     >
       {sections.map((section) => {

@@ -1,20 +1,9 @@
-import React, {
-  Suspense,
-  lazy,
-  useEffect,
-  useState,
-  type CSSProperties,
-} from "react";
+import React, { useEffect, useState, type CSSProperties } from "react";
 
 import RoadMapErrorBoundary from "../RoadMap/ui/chrome/RoadMapErrorBoundary";
-
-import LandingSectionSkeleton, {
-  type LandingSectionSkeletonVariant,
-} from "./LandingSectionSkeleton";
+import LandingPage from "./LandingPage";
+import LandingPageMobile from "./LandingPageMobile";
 import { resolveLandingSectionMinHeight } from "./landingLayout.tokens";
-
-const LandingPage = lazy(() => import("./LandingPage"));
-const LandingPageMobile = lazy(() => import("./LandingPageMobile"));
 
 const MOBILE_BREAKPOINT_PX = 992;
 
@@ -28,21 +17,37 @@ const routerRootStyle: CSSProperties = {
   boxSizing: "border-box",
 };
 
+function getBrowserWindow(): Window | null {
+  if (globalThis.window === undefined) {
+    return null;
+  }
+
+  return globalThis.window;
+}
+
+function resolveIsMobileFromWindow(browserWindow: Window): boolean {
+  return browserWindow.innerWidth < MOBILE_BREAKPOINT_PX;
+}
+
 function useIsMobileLanding(): boolean {
   const [isMobile, setIsMobile] = useState<boolean>(() => {
-    if (typeof window === "undefined") {
+    const browserWindow = getBrowserWindow();
+
+    if (browserWindow === null) {
       return false;
     }
 
-    return window.innerWidth < MOBILE_BREAKPOINT_PX;
+    return resolveIsMobileFromWindow(browserWindow);
   });
 
   useEffect(() => {
-    if (typeof window === "undefined") {
+    const browserWindow = getBrowserWindow();
+
+    if (browserWindow === null) {
       return;
     }
 
-    const mediaQuery = window.matchMedia(
+    const mediaQuery = browserWindow.matchMedia(
       `(max-width: ${MOBILE_BREAKPOINT_PX - 1}px)`,
     );
 
@@ -60,47 +65,20 @@ function useIsMobileLanding(): boolean {
       };
     }
 
-    mediaQuery.addListener(applyMatch);
+    const handleResize = (): void => {
+      setIsMobile(resolveIsMobileFromWindow(browserWindow));
+    };
+
+    browserWindow.addEventListener("resize", handleResize, {
+      passive: true,
+    });
 
     return () => {
-      mediaQuery.removeListener(applyMatch);
+      browserWindow.removeEventListener("resize", handleResize);
     };
   }, []);
 
   return isMobile;
-}
-
-type LandingRouterLoadingFallbackProps = Readonly<{
-  viewportMode: "desktop" | "mobile";
-  minHeight: CSSProperties["minHeight"];
-}>;
-
-function resolveRouterSkeletonVariant(
-  viewportMode: "desktop" | "mobile",
-): LandingSectionSkeletonVariant {
-  return viewportMode === "mobile" ? "content" : "hero";
-}
-
-function LandingRouterLoadingFallback({
-  viewportMode,
-  minHeight,
-}: LandingRouterLoadingFallbackProps) {
-  return (
-    <div
-      style={{
-        ...routerRootStyle,
-        minHeight,
-      }}
-      aria-hidden="true"
-      data-landing-router-fallback={viewportMode}
-    >
-      <LandingSectionSkeleton
-        variant={resolveRouterSkeletonVariant(viewportMode)}
-        minHeight={minHeight}
-        fullHeight
-      />
-    </div>
-  );
 }
 
 const LandingRouterPage: React.FC = () => {
@@ -119,25 +97,16 @@ const LandingRouterPage: React.FC = () => {
       minHeight={resolvedMinHeight}
       fullHeight
     >
-      <Suspense
-        fallback={
-          <LandingRouterLoadingFallback
-            viewportMode={viewportMode}
-            minHeight={resolvedMinHeight}
-          />
-        }
+      <div
+        data-landing-router-root="true"
+        data-landing-viewport={viewportMode}
+        style={{
+          ...routerRootStyle,
+          minHeight: resolvedMinHeight,
+        }}
       >
-        <div
-          data-landing-router-root="true"
-          data-landing-viewport={viewportMode}
-          style={{
-            ...routerRootStyle,
-            minHeight: resolvedMinHeight,
-          }}
-        >
-          {isMobile ? <LandingPageMobile /> : <LandingPage />}
-        </div>
-      </Suspense>
+        {isMobile ? <LandingPageMobile /> : <LandingPage />}
+      </div>
     </RoadMapErrorBoundary>
   );
 };
