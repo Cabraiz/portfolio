@@ -28,67 +28,6 @@ jobs:
       - name: 📦 Install dependencies
         run: npm install
 
-      - name: 🧱 Normalize folder names to lowercase (recursively)
-        run: |
-          find ./src -type d | tac | while read dir; do
-            parent=$(dirname "$dir")
-            base=$(basename "$dir")
-            lower=$(echo "$base" | tr '[:upper:]' '[:lower:]')
-            if [ "$base" != "$lower" ]; then
-              target="$parent/$lower"
-              echo "📁 Renomeando pasta '$dir' → '$target'"
-              git mv "$dir" "$target" 2>/dev/null || mv "$dir" "$target"
-            fi
-          done
-
-      - name: 🔧 Normalize filenames to lowercase (images, fonts, code, and CSS)
-        run: |
-          for ext in svg png webp jpg jpeg gif ico otf ttf woff woff2 ts tsx css pdf; do
-            find ./src -type f -iname "*.${ext}" | while read filepath; do
-              dirname=$(dirname "$filepath")
-              filename=$(basename "$filepath")
-              lowercase="$dirname/$(echo "$filename" | tr '[:upper:]' '[:lower:]')"
-              if [ "$filepath" != "$lowercase" ]; then
-                echo "📝 Renomeando '$filepath' para '$lowercase'"
-                git mv "$filepath" "$lowercase" 2>/dev/null || mv "$filepath" "$lowercase"
-              fi
-            done
-          done
-
-      - name: 🛠️ Fix imports to match lowercase file paths (including .css)
-        run: |
-          for ext in svg png webp jpg jpeg gif ico otf ttf woff woff2 ts tsx css pdf; do
-            find ./src -type f \( -name "*.ts" -o -name "*.tsx" \) | while read file; do
-              grep -iE "['\"].*\.${ext}['\"]" "$file" | while read line; do
-                old=$(echo "$line" | sed -nE "s/.*['\"](.*\.${ext})['\"].*/\1/p")
-                if [ -n "$old" ]; then
-                  corrected=$(echo "$old" | sed -E 's@([^/]+)@\L\1@g')
-                  if [ "$old" != "$corrected" ]; then
-                    echo "📝 Corrigindo import em $file: $old → $corrected"
-                    sed -i "s|$old|$corrected|g" "$file"
-                  fi
-                fi
-              done
-            done
-          done
-
-      - name: 🛠️ Fix imports to match lowercase folder paths (ignora node_modules e libs)
-        run: |
-          find ./src -type f \( -name "*.ts" -o -name "*.tsx" \) | while read file; do
-            grep -oE "from\s+['\"][^'\"]+['\"]" "$file" | sed -E "s/from\s+['\"](.*)['\"]/\\1/" | while read path; do
-              # Se for gsap ou outros pacotes, ignora
-              if [[ "$path" =~ ^gsap ]]; then
-                continue
-              fi
-
-              corrected=$(echo "$path" | sed -E 's@/([^/]+)@/\L\1@g')
-              if [ "$path" != "$corrected" ]; then
-                echo "📂 Corrigindo import em $file: $path → $corrected"
-                sed -i "s|['\"]$path['\"]|\"$corrected\"|g" "$file"
-              fi
-            done
-          done
-
       - name: 🩹 Patch react-toastify deep import and root entry for Vite (Node 20+)
         run: |
           FILE=node_modules/react-toastify/dist/ReactToastify.css
@@ -126,7 +65,6 @@ jobs:
             echo "❌ GSAP não encontrado. Abortando build."
             exit 1
           fi
-
 
       - name: 🛠️ Build app
         run: npx vite build && cp 404.html dist/
