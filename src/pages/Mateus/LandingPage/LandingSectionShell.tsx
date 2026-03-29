@@ -30,8 +30,8 @@ const baseSectionStyle: CSSProperties = {
   position: "relative",
   width: "100%",
   minWidth: 0,
-  minHeight: "100vh",
-  height: "100vh",
+  minHeight: 0,
+  height: "auto",
   margin: 0,
   padding: 0,
   boxSizing: "border-box",
@@ -48,7 +48,7 @@ function getBaseContentStyle(disableTransitions: boolean): CSSProperties {
   return {
     width: "100%",
     minWidth: 0,
-    height: "100%",
+    height: "auto",
     minHeight: 0,
     margin: 0,
     padding: 0,
@@ -203,7 +203,7 @@ function LandingSectionShellComponent({
     DEFAULT_PLACEHOLDER_MIN_HEIGHT;
 
   const resolvedSectionHeight =
-    sectionStyle?.height ?? resolvedSectionMinHeight;
+    sectionStyle?.height ?? "auto";
 
   const resolvedSectionStyle: CSSProperties = {
     ...baseSectionStyle,

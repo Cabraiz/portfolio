@@ -1,0 +1,54 @@
+.portfolioRoot {
+  --portfolio-section-min-height: calc(100dvh - 84px);
+  --portfolio-section-padding-top: 26px;
+  --portfolio-section-padding-bottom: 40px;
+  --portfolio-section-padding-inline: clamp(20px, 3vw, 40px);
+
+  --portfolio-layout-width: 1480px;
+  --portfolio-layout-gap: 22px;
+  --portfolio-rail-column-width: 300px;
+
+  --portfolio-stage-height: 500px;
+  --portfolio-timeline-max-height: 500px;
+
+  --portfolio-surface-border: 1px solid rgba(255, 255, 255, 0.08);
+  --portfolio-surface-bg: rgba(255, 255, 255, 0.028);
+  --portfolio-surface-shadow: 0 10px 24px rgba(0, 0, 0, 0.16);
+
+  --portfolio-hit-zone-fade: rgba(8, 8, 10, 0.1);
+  --portfolio-hit-zone-fade-strong: rgba(8, 8, 10, 0.18);
+  --portfolio-hit-zone-ring: rgba(255, 255, 255, 0.16);
+  --portfolio-hit-zone-text: rgba(255, 255, 255, 0.96);
+  --portfolio-hit-zone-text-muted: rgba(253, 245, 230, 0.74);
+}
+
+@media (max-width: 1280px) {
+  .portfolioRoot {
+    --portfolio-layout-width: 1320px;
+    --portfolio-layout-gap: 18px;
+    --portfolio-rail-column-width: 280px;
+    --portfolio-stage-height: 460px;
+    --portfolio-timeline-max-height: 460px;
+  }
+}
+
+@media (max-width: 1080px) {
+  .portfolioRoot {
+    --portfolio-section-padding-top: 22px;
+    --portfolio-section-padding-bottom: 32px;
+    --portfolio-stage-height: 440px;
+    --portfolio-timeline-max-height: 440px;
+  }
+}
+
+@media (max-width: 768px) {
+  .portfolioRoot {
+    --portfolio-section-min-height: auto;
+    --portfolio-section-padding-top: 20px;
+    --portfolio-section-padding-bottom: 24px;
+    --portfolio-section-padding-inline: 16px;
+    --portfolio-layout-gap: 14px;
+    --portfolio-stage-height: 360px;
+    --portfolio-timeline-max-height: 360px;
+  }
+}

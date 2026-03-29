@@ -30,20 +30,12 @@ type UsePortfolioActiveItemResult = Readonly<{
   getProjectById: (projectId: PortfolioProjectId) => PortfolioProject | undefined;
 }>;
 
-function clampIndex(index: number, total: number): number {
+function wrapIndex(index: number, total: number): number {
   if (total <= 0) {
     return 0;
   }
 
-  if (index < 0) {
-    return 0;
-  }
-
-  if (index >= total) {
-    return total - 1;
-  }
-
-  return index;
+  return ((index % total) + total) % total;
 }
 
 function resolveInitialIndex(
@@ -58,7 +50,9 @@ function resolveInitialIndex(
     return 0;
   }
 
-  const foundIndex = projects.findIndex((project) => project.id === defaultProjectId);
+  const foundIndex = projects.findIndex(
+    (project) => project.id === defaultProjectId,
+  );
 
   return foundIndex >= 0 ? foundIndex : 0;
 }
@@ -80,7 +74,7 @@ export default function usePortfolioActiveItem({
       const nextResolvedIndex =
         defaultProjectId != null
           ? resolveInitialIndex(projects, defaultProjectId)
-          : clampIndex(currentIndex, projects.length);
+          : wrapIndex(currentIndex, projects.length);
 
       return nextResolvedIndex;
     });
@@ -91,11 +85,17 @@ export default function usePortfolioActiveItem({
     [projects],
   );
 
-  const safeActiveIndex = clampIndex(activeIndex, projects.length);
+  const safeActiveIndex = wrapIndex(activeIndex, projects.length);
   const activeProject = projects[safeActiveIndex];
-  const previousProject = safeActiveIndex > 0 ? projects[safeActiveIndex - 1] : null;
-  const nextProject =
-    safeActiveIndex < projects.length - 1 ? projects[safeActiveIndex + 1] : null;
+  const hasCircularNavigation = projects.length > 1;
+
+  const previousProject = hasCircularNavigation
+    ? projects[wrapIndex(safeActiveIndex - 1, projects.length)]
+    : null;
+
+  const nextProject = hasCircularNavigation
+    ? projects[wrapIndex(safeActiveIndex + 1, projects.length)]
+    : null;
 
   const state = useMemo<PortfolioActiveProjectState>(() => {
     if (!activeProject) {
@@ -114,7 +114,7 @@ export default function usePortfolioActiveItem({
 
   const setActiveIndex = useCallback(
     (index: number) => {
-      setActiveIndexState(clampIndex(index, projects.length));
+      setActiveIndexState(wrapIndex(index, projects.length));
     },
     [projects.length],
   );
@@ -153,17 +153,29 @@ export default function usePortfolioActiveItem({
         }
       }
 
-      setActiveIndexState(clampIndex(selection.index, projects.length));
+      setActiveIndexState(wrapIndex(selection.index, projects.length));
     },
     [getProjectIndexById, projects.length],
   );
 
   const goToPrevious = useCallback(() => {
-    setActiveIndexState((currentIndex) => clampIndex(currentIndex - 1, projects.length));
+    if (projects.length <= 1) {
+      return;
+    }
+
+    setActiveIndexState((currentIndex) =>
+      wrapIndex(currentIndex - 1, projects.length),
+    );
   }, [projects.length]);
 
   const goToNext = useCallback(() => {
-    setActiveIndexState((currentIndex) => clampIndex(currentIndex + 1, projects.length));
+    if (projects.length <= 1) {
+      return;
+    }
+
+    setActiveIndexState((currentIndex) =>
+      wrapIndex(currentIndex + 1, projects.length),
+    );
   }, [projects.length]);
 
   const isProjectActive = useCallback(
@@ -182,8 +194,8 @@ export default function usePortfolioActiveItem({
     activeProject: state.activeProject,
     previousProject: state.previousProject,
     nextProject: state.nextProject,
-    hasPrevious: state.previousProject != null,
-    hasNext: state.nextProject != null,
+    hasPrevious: hasCircularNavigation,
+    hasNext: hasCircularNavigation,
     activeProjectId: state.activeProject.id,
     setActiveIndex,
     setActiveProjectById,

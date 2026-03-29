@@ -1,0 +1,20 @@
+.portfolioViewport,
+.portfolioViewportInner,
+.portfolioViewportStage,
+.portfolioViewportStageSlot,
+.portfolioViewportStageFrame,
+.portfolioViewportActiveCard {
+  width: 100%;
+  min-width: 0;
+}
+
+.portfolioViewport,
+.portfolioViewportStage {
+  display: grid;
+}
+
+.portfolioViewportInner,
+.portfolioViewportStageFrame {
+  min-width: 0;
+  min-height: 0;
+}

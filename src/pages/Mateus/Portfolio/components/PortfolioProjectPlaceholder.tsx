@@ -1,7 +1,7 @@
 import { memo } from "react";
 
 import type { PortfolioProject } from "../types";
-import styles from "../Portfolio.module.css";
+import styles from "../ui/card/PortfolioProjectPlaceholder.module.css";
 
 type PortfolioProjectPlaceholderDirection = "previous" | "next";
 
@@ -17,10 +17,16 @@ function joinClasses(
   return classes.filter(Boolean).join(" ");
 }
 
-function getDirectionLabel(
-  direction: PortfolioProjectPlaceholderDirection
+function getDirectionAriaLabel(
+  direction: PortfolioProjectPlaceholderDirection,
 ): string {
   return direction === "previous" ? "Projeto anterior" : "Próximo projeto";
+}
+
+function getDirectionBadgeLabel(
+  direction: PortfolioProjectPlaceholderDirection,
+): string {
+  return direction === "previous" ? "Anterior" : "Próximo";
 }
 
 function PortfolioProjectPlaceholderComponent({
@@ -35,12 +41,12 @@ function PortfolioProjectPlaceholderComponent({
         direction === "previous" &&
           styles.portfolioProjectPlaceholderPrevious,
         direction === "next" && styles.portfolioProjectPlaceholderNext,
-        className
+        className,
       )}
       data-portfolio-project-placeholder="true"
       data-project-id={project.id}
       data-direction={direction}
-      aria-label={`${getDirectionLabel(direction)}: ${project.name}`}
+      aria-label={`${getDirectionAriaLabel(direction)}: ${project.name}`}
     >
       <div className={styles.portfolioProjectPlaceholderMedia}>
         <img
@@ -55,7 +61,7 @@ function PortfolioProjectPlaceholderComponent({
 
       <div className={styles.portfolioProjectPlaceholderOverlay}>
         <span className={styles.portfolioProjectPlaceholderDirection}>
-          {getDirectionLabel(direction)}
+          {getDirectionBadgeLabel(direction)}
         </span>
 
         <div className={styles.portfolioProjectPlaceholderContent}>
@@ -86,7 +92,7 @@ function PortfolioProjectPlaceholderComponent({
 }
 
 const PortfolioProjectPlaceholder = memo(
-  PortfolioProjectPlaceholderComponent
+  PortfolioProjectPlaceholderComponent,
 );
 
 PortfolioProjectPlaceholder.displayName = "PortfolioProjectPlaceholder";

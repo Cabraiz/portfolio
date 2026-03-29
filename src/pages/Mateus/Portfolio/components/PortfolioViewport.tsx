@@ -1,10 +1,10 @@
 import { memo } from "react";
 
-import PortfolioProjectCard from "./PortfolioProjectCard";
-import PortfolioProjectPlaceholder from "./PortfolioProjectPlaceholder";
+import PortfolioStage from "./PortfolioStage";
 
 import type { PortfolioProject } from "../types";
-import styles from "../Portfolio.module.css";
+import rootStyles from "../core/PortfolioRoot.module.css";
+import stageStyles from "../ui/stage/PortfolioViewport.module.css";
 
 type PortfolioViewportProps = Readonly<{
   activeProject: PortfolioProject;
@@ -23,121 +23,53 @@ function joinClasses(
   return classes.filter(Boolean).join(" ");
 }
 
+/**
+ * Wrapper leve de compatibilidade.
+ * O viewport antigo tinha:
+ * - stage ativa
+ * - sidebar de anterior/próximo
+ * - placeholders ricos
+ *
+ * Agora ele fica só com:
+ * - stage ativa
+ * - navegação simples
+ *
+ * previousProject / nextProject permanecem nas props apenas para evitar
+ * quebra imediata em call sites antigos, mas não são mais usados.
+ */
 function PortfolioViewportComponent({
   activeProject,
-  previousProject = null,
-  nextProject = null,
+  previousProject,
+  nextProject,
   hasPrevious = false,
   hasNext = false,
   onPrevious,
   onNext,
   className,
 }: PortfolioViewportProps) {
+  void previousProject;
+  void nextProject;
+  void hasPrevious;
+  void hasNext;
+
   return (
     <section
-      className={joinClasses(styles.portfolioViewport, className)}
+      className={joinClasses(
+        rootStyles.portfolioStageColumn,
+        stageStyles.portfolioViewport,
+        className,
+      )}
       data-portfolio-viewport="true"
-      aria-label="Projeto em destaque"
+      data-project-id={activeProject.id}
+      aria-label="Projeto em destaque do portfólio"
     >
-      <div className={styles.portfolioViewportInner}>
-        <div className={styles.portfolioViewportStage}>
-          <div className={styles.portfolioViewportStageFrame}>
-            <PortfolioProjectCard
-              key={activeProject.id}
-              project={activeProject}
-              className={styles.portfolioViewportActiveCard}
-            />
-          </div>
-
-          <div className={styles.portfolioViewportControls}>
-            <button
-              type="button"
-              className={joinClasses(
-                styles.portfolioViewportControlButton,
-                !hasPrevious && styles.portfolioViewportControlButtonDisabled,
-              )}
-              onClick={onPrevious}
-              disabled={!hasPrevious}
-              aria-label="Projeto anterior"
-            >
-              <span aria-hidden="true">←</span>
-            </button>
-
-            <div
-              className={styles.portfolioViewportActiveMeta}
-              aria-live="polite"
-            >
-              <span className={styles.portfolioViewportActiveYear}>
-                {activeProject.year}
-              </span>
-              <strong className={styles.portfolioViewportActiveName}>
-                {activeProject.name}
-              </strong>
-            </div>
-
-            <button
-              type="button"
-              className={joinClasses(
-                styles.portfolioViewportControlButton,
-                !hasNext && styles.portfolioViewportControlButtonDisabled,
-              )}
-              onClick={onNext}
-              disabled={!hasNext}
-              aria-label="Próximo projeto"
-            >
-              <span aria-hidden="true">→</span>
-            </button>
-          </div>
-        </div>
-
-        <aside
-          className={styles.portfolioViewportSidebar}
-          aria-label="Projetos próximos"
-        >
-          <div className={styles.portfolioViewportSidebarGroup}>
-            <span className={styles.portfolioViewportSidebarLabel}>
-              Anterior
-            </span>
-
-            {previousProject ? (
-              <PortfolioProjectPlaceholder
-                project={previousProject}
-                direction="previous"
-                className={styles.portfolioViewportPlaceholderCard}
-              />
-            ) : (
-              <div
-                className={joinClasses(
-                  styles.portfolioViewportPlaceholderCard,
-                  styles.portfolioViewportPlaceholderEmpty,
-                )}
-                aria-hidden="true"
-              />
-            )}
-          </div>
-
-          <div className={styles.portfolioViewportSidebarGroup}>
-            <span className={styles.portfolioViewportSidebarLabel}>
-              Próximo
-            </span>
-
-            {nextProject ? (
-              <PortfolioProjectPlaceholder
-                project={nextProject}
-                direction="next"
-                className={styles.portfolioViewportPlaceholderCard}
-              />
-            ) : (
-              <div
-                className={joinClasses(
-                  styles.portfolioViewportPlaceholderCard,
-                  styles.portfolioViewportPlaceholderEmpty,
-                )}
-                aria-hidden="true"
-              />
-            )}
-          </div>
-        </aside>
+      <div className={stageStyles.portfolioViewportInner}>
+        <PortfolioStage
+          project={activeProject}
+          className={stageStyles.portfolioViewportStageSlot}
+          onPrevious={onPrevious}
+          onNext={onNext}
+        />
       </div>
     </section>
   );

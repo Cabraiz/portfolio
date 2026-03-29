@@ -19,62 +19,86 @@ import type {
 } from "./types";
 
 export const portfolioSectionCopy: PortfolioSectionCopy = {
-  eyebrow: "Projetos selecionados",
+  eyebrow: "",
   title: "Portfólio",
-  description:
-    "Alguns trabalhos com foco em produto, interface e execução visual. A seção foi simplificada para priorizar fluidez, legibilidade e uma rolagem mais estável no desktop.",
+  description: "",
 };
+
+const defaultProjectMedia = {
+  aspectRatio: "16 / 9",
+  fit: "cover",
+} as const;
 
 export const portfolioProjects: ReadonlyArray<PortfolioProject> = [
   {
     id: "erp-varejo",
-    name: "ERP VAREJO",
+    name: "SISTEMA ERP VAREJO",
     year: "2021",
     imageSrc: imagem1,
     imageAlt: "Preview do projeto ERP VAREJO",
     logoSrc: logo1,
     logoAlt: "Logo do projeto ERP VAREJO",
     projectLabel: "Projeto",
+    media: {
+      ...defaultProjectMedia,
+      position: "center top",
+    },
   },
   {
     id: "app-bank",
-    name: "APP BANK",
+    name: "APP BANCO",
     year: "2022",
     imageSrc: imagem2,
-    imageAlt: "Preview do projeto APP BANK",
+    imageAlt: "Preview do projeto APP BANCO",
     logoSrc: logo2,
-    logoAlt: "Logo do projeto APP BANK",
+    logoAlt: "Logo do projeto APP BANCO",
     projectLabel: "Projeto",
+    media: {
+      ...defaultProjectMedia,
+      position: "50% 18%",
+    },
   },
   {
     id: "app-barber",
-    name: "APP BARBER",
+    name: "APP BARBEARIA",
     year: "2023",
     imageSrc: imagem3,
-    imageAlt: "Preview do projeto APP BARBER",
+    imageAlt: "Preview do projeto APP BARBEARIA",
     logoSrc: logo3,
-    logoAlt: "Logo do projeto APP BARBER",
+    logoAlt: "Logo do projeto APP BARBEARIA",
     projectLabel: "Projeto",
+    media: {
+      ...defaultProjectMedia,
+      position: "50% 20%",
+    },
   },
   {
     id: "site-adv",
-    name: "SITE ADV",
+    name: "WEB SITE ADVOCACIA",
     year: "2020",
     imageSrc: imagem4,
-    imageAlt: "Preview do projeto SITE ADV",
+    imageAlt: "Preview do projeto WEB SITE ADVOCACIA",
     logoSrc: logo4,
-    logoAlt: "Logo do projeto SITE ADV",
+    logoAlt: "Logo do projeto WEB SITE ADVOCACIA",
     projectLabel: "Projeto",
+    media: {
+      ...defaultProjectMedia,
+      position: "center top",
+    },
   },
   {
     id: "site-cabeleireira",
-    name: "SITE CABELEIREIRA",
+    name: "WEB SITE STUDIO",
     year: "2021",
     imageSrc: imagem5,
-    imageAlt: "Preview do projeto SITE CABELEIREIRA",
+    imageAlt: "Preview do projeto WEB SITE STUDIO",
     logoSrc: logo5,
-    logoAlt: "Logo do projeto SITE CABELEIREIRA",
+    logoAlt: "Logo do projeto WEB SITE STUDIO",
     projectLabel: "Projeto",
+    media: {
+      ...defaultProjectMedia,
+      position: "58% center",
+    },
   },
 ] as const;
 
@@ -102,6 +126,8 @@ export function getPortfolioProjectById(
   return portfolioProjectLookup.get(projectId);
 }
 
-export function getPortfolioProjectIndex(projectId: PortfolioProjectId): number {
+export function getPortfolioProjectIndex(
+  projectId: PortfolioProjectId,
+): number {
   return portfolioProjects.findIndex((project) => project.id === projectId);
 }

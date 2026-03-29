@@ -83,27 +83,26 @@ function useIsMobileLanding(): boolean {
 
 const LandingRouterPage: React.FC = () => {
   const isMobile = useIsMobileLanding();
-  const viewportMode = isMobile ? "mobile" : "desktop";
 
-  const resolvedMinHeight = resolveLandingSectionMinHeight(viewportMode, {
-    preferDynamicViewport: viewportMode === "desktop",
-    sectionRole: viewportMode === "desktop" ? "content" : "hero",
+  const mobileRootMinHeight = resolveLandingSectionMinHeight("mobile", {
+    preferDynamicViewport: false,
+    sectionRole: "hero",
   });
 
   return (
     <RoadMapErrorBoundary
-      sectionLabel={`Landing ${viewportMode}`}
-      fallbackTitle={`A página principal (${viewportMode}) quebrou`}
-      resetKey={viewportMode}
-      minHeight={resolvedMinHeight}
-      fullHeight={false}
+      sectionLabel={`Landing ${isMobile ? "mobile" : "desktop"}`}
+      fallbackTitle={`A página principal (${isMobile ? "mobile" : "desktop"}) quebrou`}
+      resetKey={isMobile ? "mobile" : "desktop"}
+      minHeight={isMobile ? mobileRootMinHeight : undefined}
+      fullHeight={isMobile}
     >
       <div
         data-landing-router-root="true"
-        data-landing-viewport={viewportMode}
+        data-landing-viewport={isMobile ? "mobile" : "desktop"}
         style={{
           ...routerRootStyle,
-          minHeight: resolvedMinHeight,
+          ...(isMobile ? { minHeight: mobileRootMinHeight } : null),
         }}
       >
         {isMobile ? <LandingPageMobile /> : <LandingPage />}

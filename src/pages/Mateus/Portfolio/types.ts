@@ -5,6 +5,37 @@ export type PortfolioProjectId =
   | "site-adv"
   | "site-cabeleireira";
 
+export type PortfolioMediaFit = "cover" | "contain";
+
+export type PortfolioMediaAnchorX =
+  | "left"
+  | "center"
+  | "right"
+  | `${number}%`
+  | `${number}px`;
+
+export type PortfolioMediaAnchorY =
+  | "top"
+  | "center"
+  | "bottom"
+  | `${number}%`
+  | `${number}px`;
+
+export type PortfolioMediaAspectRatio =
+  | "16 / 9"
+  | "4 / 3"
+  | "3 / 2"
+  | "1 / 1"
+  | string;
+
+export type PortfolioProjectMedia = Readonly<{
+  aspectRatio?: PortfolioMediaAspectRatio;
+  fit?: PortfolioMediaFit;
+  position?: string;
+  focalPointX?: PortfolioMediaAnchorX;
+  focalPointY?: PortfolioMediaAnchorY;
+}>;
+
 export type PortfolioProject = Readonly<{
   id: PortfolioProjectId;
   name: string;
@@ -14,6 +45,7 @@ export type PortfolioProject = Readonly<{
   logoSrc: string;
   logoAlt: string;
   projectLabel: string;
+  media?: PortfolioProjectMedia;
 }>;
 
 export type PortfolioSectionCopy = Readonly<{
