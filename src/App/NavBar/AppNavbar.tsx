@@ -10,14 +10,23 @@ import { useTranslation } from "react-i18next";
 
 import logo from "../../assets/icones/logo.svg";
 import LiveAnimation from "../../pages/PrincipalPage/Animation/live_animation";
-import {
-  DEFAULT_LANDING_SECTION_ID,
-  type LandingSectionId,
-} from "../../features/navigation/landingSections";
+import type { LandingSectionId } from "../../features/navigation/landingSections";
 import DesktopNavbar from "./components/DesktopNavbar";
 import MobileNavbar from "./components/MobileNavbar";
 import useNavbarBodyScrollLock from "./hooks/useNavbarBodyScrollLock";
 import useNavbarUnderline from "./hooks/useNavbarUnderline";
+import {
+  NAVBAR_DEFAULT_HOME_SECTION,
+  NAVBAR_DEFAULT_VIEWPORT_HEIGHT,
+  NAVBAR_DEFAULT_VIEWPORT_WIDTH,
+  NAVBAR_DESKTOP_COMPACT_BREAKPOINT,
+  NAVBAR_HEIGHT_CSS_VAR,
+  getNavbarGap,
+  getNavbarHeight,
+  getNavbarLiveAnimationLeft,
+  getNavbarMaxWidth,
+  getNavbarPadding,
+} from "./navbar.constants";
 
 export type AppNavbarProps = Readonly<{
   isMobileView: boolean;
@@ -32,10 +41,6 @@ type ViewportState = Readonly<{
   width: number;
   height: number;
 }>;
-
-const NAVBAR_HEIGHT_MOBILE = 72;
-const NAVBAR_HEIGHT_DESKTOP = 70;
-const DESKTOP_COMPACT_BREAKPOINT = 1360;
 
 const navbarRootStyle: CSSProperties = {
   position: "fixed",
@@ -64,8 +69,8 @@ function getViewportState(): ViewportState {
 
   if (!browserWindow) {
     return {
-      width: 1440,
-      height: 900,
+      width: NAVBAR_DEFAULT_VIEWPORT_WIDTH,
+      height: NAVBAR_DEFAULT_VIEWPORT_HEIGHT,
     };
   }
 
@@ -73,28 +78,6 @@ function getViewportState(): ViewportState {
     width: browserWindow.innerWidth,
     height: browserWindow.innerHeight,
   };
-}
-
-function getNavbarHeight(isMobileView: boolean): number {
-  return isMobileView ? NAVBAR_HEIGHT_MOBILE : NAVBAR_HEIGHT_DESKTOP;
-}
-
-function getNavbarPadding(isMobileView: boolean): string {
-  return isMobileView
-    ? "0 clamp(14px, 4vw, 18px)"
-    : "0 clamp(20px, 3.2vw, 40px)";
-}
-
-function getNavbarGap(isMobileView: boolean): string {
-  return isMobileView ? "12px" : "20px";
-}
-
-function getNavbarMaxWidth(): string {
-  return "min(1480px, 100%)";
-}
-
-function getLiveAnimationLeft(isCompactDesktop: boolean): string {
-  return isCompactDesktop ? "-26px" : "-30px";
 }
 
 export default function AppNavbar({
@@ -113,7 +96,7 @@ export default function AppNavbar({
 
   const navbarHeight = getNavbarHeight(isMobileView);
   const isCompactDesktop =
-    !isMobileView && viewport.width <= DESKTOP_COMPACT_BREAKPOINT;
+    !isMobileView && viewport.width <= NAVBAR_DESKTOP_COMPACT_BREAKPOINT;
 
   useNavbarBodyScrollLock({
     isMobileView,
@@ -160,8 +143,22 @@ export default function AppNavbar({
     };
   }, []);
 
+  useEffect(() => {
+    const root = globalThis.document?.documentElement;
+
+    if (!root) {
+      return;
+    }
+
+    root.style.setProperty(NAVBAR_HEIGHT_CSS_VAR, `${navbarHeight}px`);
+
+    return () => {
+      root.style.removeProperty(NAVBAR_HEIGHT_CSS_VAR);
+    };
+  }, [navbarHeight]);
+
   const handleBrandClick = useCallback(() => {
-    onNavigateToSection(DEFAULT_LANDING_SECTION_ID);
+    onNavigateToSection(NAVBAR_DEFAULT_HOME_SECTION);
     setMenuOpen(false);
   }, [onNavigateToSection, setMenuOpen]);
 
@@ -227,7 +224,7 @@ export default function AppNavbar({
                 <span
                   style={{
                     position: "absolute",
-                    left: getLiveAnimationLeft(isCompactDesktop),
+                    left: getNavbarLiveAnimationLeft(isCompactDesktop),
                     top: "50%",
                     transform: "translateY(calc(-50% - 16px)) scale(0.42)",
                     pointerEvents: "none",

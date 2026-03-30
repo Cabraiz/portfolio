@@ -1,15 +1,19 @@
 .portfolioRoot {
-  --portfolio-section-min-height: calc(100dvh - 84px);
-  --portfolio-section-padding-top: 26px;
-  --portfolio-section-padding-bottom: 40px;
+  --portfolio-section-min-height: calc(100dvh - var(--app-navbar-height, 70px));
+  --portfolio-section-padding-top: 22px;
+  --portfolio-section-padding-bottom: 22px;
   --portfolio-section-padding-inline: clamp(20px, 3vw, 40px);
 
   --portfolio-layout-width: 1480px;
-  --portfolio-layout-gap: 22px;
-  --portfolio-rail-column-width: 300px;
+  --portfolio-layout-gap: 16px;
+  --portfolio-rail-column-width: 284px;
 
-  --portfolio-stage-height: 500px;
-  --portfolio-timeline-max-height: 500px;
+  --portfolio-stage-height: clamp(
+    320px,
+    calc(100dvh - var(--app-navbar-height, 70px) - 170px),
+    500px
+  );
+  --portfolio-timeline-max-height: var(--portfolio-stage-height);
 
   --portfolio-surface-border: 1px solid rgba(255, 255, 255, 0.08);
   --portfolio-surface-bg: rgba(255, 255, 255, 0.028);
@@ -25,30 +29,58 @@
 @media (max-width: 1280px) {
   .portfolioRoot {
     --portfolio-layout-width: 1320px;
-    --portfolio-layout-gap: 18px;
-    --portfolio-rail-column-width: 280px;
-    --portfolio-stage-height: 460px;
-    --portfolio-timeline-max-height: 460px;
+    --portfolio-layout-gap: 14px;
+    --portfolio-rail-column-width: 264px;
+
+    --portfolio-stage-height: clamp(
+      300px,
+      calc(100dvh - var(--app-navbar-height, 70px) - 160px),
+      460px
+    );
+    --portfolio-timeline-max-height: var(--portfolio-stage-height);
   }
 }
 
 @media (max-width: 1080px) {
   .portfolioRoot {
-    --portfolio-section-padding-top: 22px;
-    --portfolio-section-padding-bottom: 32px;
-    --portfolio-stage-height: 440px;
-    --portfolio-timeline-max-height: 440px;
+    --portfolio-section-padding-top: 18px;
+    --portfolio-section-padding-bottom: 18px;
+    --portfolio-layout-gap: 12px;
+
+    --portfolio-stage-height: clamp(
+      300px,
+      calc(100dvh - var(--app-navbar-height, 70px) - 150px),
+      440px
+    );
+    --portfolio-timeline-max-height: var(--portfolio-stage-height);
   }
 }
 
 @media (max-width: 768px) {
   .portfolioRoot {
     --portfolio-section-min-height: auto;
-    --portfolio-section-padding-top: 20px;
-    --portfolio-section-padding-bottom: 24px;
+    --portfolio-section-padding-top: 18px;
+    --portfolio-section-padding-bottom: 20px;
     --portfolio-section-padding-inline: 16px;
     --portfolio-layout-gap: 14px;
+
     --portfolio-stage-height: 360px;
     --portfolio-timeline-max-height: 360px;
+  }
+}
+
+@media (max-height: 820px) and (min-width: 769px) {
+  .portfolioRoot {
+    --portfolio-section-padding-top: 10px;
+    --portfolio-section-padding-bottom: 10px;
+    --portfolio-layout-gap: 10px;
+    --portfolio-rail-column-width: 228px;
+
+    --portfolio-stage-height: clamp(
+      280px,
+      calc(100dvh - var(--app-navbar-height, 70px) - 130px),
+      380px
+    );
+    --portfolio-timeline-max-height: var(--portfolio-stage-height);
   }
 }

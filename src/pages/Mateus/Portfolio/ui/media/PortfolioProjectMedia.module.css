@@ -1,0 +1,94 @@
+.portfolioProjectMedia {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  display: block;
+  overflow: hidden;
+  aspect-ratio: var(
+    --portfolio-project-media-aspect-ratio,
+    var(--portfolio-stage-aspect-ratio, 16 / 9)
+  );
+  background:
+    radial-gradient(
+      circle at 18% 16%,
+      rgba(255, 255, 255, 0.06),
+      transparent 28%
+    ),
+    linear-gradient(180deg, rgba(20, 20, 25, 0.96), rgba(10, 10, 12, 0.98));
+}
+
+.portfolioProjectMediaViewport {
+  position: absolute;
+  inset: 0;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.portfolioProjectMediaImage {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: var(--portfolio-project-image-fit, cover);
+  object-position: var(--portfolio-project-image-position, center center);
+  user-select: none;
+  -webkit-user-drag: none;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+.portfolioProjectMediaFallback {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: clamp(18px, 2.2vw, 28px);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(0, 0, 0, 0.1)),
+    linear-gradient(135deg, rgba(28, 28, 32, 0.98), rgba(12, 12, 15, 1));
+}
+
+.portfolioProjectMediaFallbackInner {
+  display: grid;
+  gap: 8px;
+  justify-items: center;
+  text-align: center;
+}
+
+.portfolioProjectMediaFallbackEyebrow {
+  color: rgba(253, 245, 230, 0.62);
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.portfolioProjectMediaFallbackTitle {
+  color: rgba(255, 255, 255, 0.96);
+  font-size: clamp(1rem, 1.25vw, 1.35rem);
+  line-height: 1.08;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  max-width: 18ch;
+}
+
+.portfolioProjectMediaFallbackYear {
+  color: rgba(253, 245, 230, 0.52);
+  font-size: 0.88rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+@media (max-width: 768px) {
+  .portfolioProjectMedia {
+    height: auto;
+  }
+
+  .portfolioProjectMediaFallbackTitle {
+    max-width: 16ch;
+  }
+}

@@ -1,15 +1,15 @@
 .root,
 .portfolioRoot {
   --portfolio-layout-width: 1560px;
-  --portfolio-section-min-height: calc(100dvh - 84px);
-  --portfolio-section-padding-top: 30px;
+  --portfolio-section-min-height: calc(100dvh - var(--app-navbar-height, 70px));
+  --portfolio-section-padding-top: 22px;
   --portfolio-section-padding-inline: clamp(20px, 3vw, 36px);
-  --portfolio-section-padding-bottom: 48px;
-  --portfolio-layout-gap: 18px;
-  --portfolio-rail-column-width: 292px;
+  --portfolio-section-padding-bottom: 22px;
+  --portfolio-layout-gap: 16px;
+  --portfolio-rail-column-width: 284px;
   --portfolio-stage-aspect-ratio: 16 / 9;
-  --portfolio-timeline-max-height: 500px;
-  --portfolio-control-size: 46px;
+  --portfolio-timeline-max-height: 100%;
+  --portfolio-control-size: 44px;
 
   position: relative;
   width: 100%;
@@ -23,12 +23,17 @@
 
 .portfolioSection {
   width: 100%;
-  min-height: var(--portfolio-section-min-height);
+  height: var(--portfolio-section-min-height);
+  min-height: 0;
   padding:
     var(--portfolio-section-padding-top)
     var(--portfolio-section-padding-inline)
     var(--portfolio-section-padding-bottom);
   box-sizing: border-box;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  align-content: stretch;
+  overflow: hidden;
   background:
     radial-gradient(
       circle at 14% 0%,
@@ -47,42 +52,48 @@
 
 .portfolioContent {
   width: min(100%, var(--portfolio-layout-width));
-  margin: 10px auto 0;
+  height: 100%;
+  min-height: 0;
+  margin: 0 auto;
   display: grid;
   grid-template-columns:
     minmax(0, 1fr)
     minmax(260px, var(--portfolio-rail-column-width));
   gap: var(--portfolio-layout-gap);
-  align-items: start;
+  align-items: stretch;
 }
 
 .portfolioStageColumn {
   min-width: 0;
+  min-height: 0;
   width: 100%;
   display: grid;
   justify-items: stretch;
-  align-content: start;
+  align-content: stretch;
   gap: 0;
 }
 
 .portfolioStageColumn > * {
   width: 100%;
   min-width: 0;
+  min-height: 0;
 }
 
 .portfolioRailColumn {
   min-width: 0;
+  min-height: 0;
   width: 100%;
   max-height: var(--portfolio-timeline-max-height);
-  align-self: start;
+  align-self: stretch;
+  overflow: hidden;
 }
 
 @media (max-width: 1280px) {
   .portfolioRoot {
     --portfolio-layout-width: 1380px;
     --portfolio-section-padding-inline: clamp(18px, 2.6vw, 28px);
-    --portfolio-layout-gap: 16px;
-    --portfolio-rail-column-width: 272px;
+    --portfolio-layout-gap: 14px;
+    --portfolio-rail-column-width: 264px;
   }
 }
 
@@ -98,14 +109,18 @@
 
 @media (max-width: 768px) {
   .portfolioSection {
+    height: auto;
+    min-height: auto;
+    overflow: visible;
     padding:
-      calc(var(--portfolio-section-padding-top) - 4px)
+      calc(var(--portfolio-section-padding-top) - 2px)
       16px
-      calc(var(--portfolio-section-padding-bottom) - 8px);
+      calc(var(--portfolio-section-padding-bottom) - 4px);
   }
 
   .portfolioContent {
-    margin-top: 8px;
+    height: auto;
+    min-height: 0;
   }
 
   .portfolioStageColumn {

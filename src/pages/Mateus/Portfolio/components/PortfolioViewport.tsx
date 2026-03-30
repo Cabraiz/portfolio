@@ -14,6 +14,8 @@ type PortfolioViewportProps = Readonly<{
   hasNext?: boolean;
   onPrevious?: () => void;
   onNext?: () => void;
+  onHoverStart?: () => void;
+  onHoverEnd?: () => void;
   className?: string;
 }>;
 
@@ -45,12 +47,15 @@ function PortfolioViewportComponent({
   hasNext = false,
   onPrevious,
   onNext,
+  onHoverStart,
+  onHoverEnd,
   className,
 }: PortfolioViewportProps) {
   void previousProject;
   void nextProject;
-  void hasPrevious;
-  void hasNext;
+
+  const handlePrevious = hasPrevious ? onPrevious : undefined;
+  const handleNext = hasNext ? onNext : undefined;
 
   return (
     <section
@@ -67,8 +72,10 @@ function PortfolioViewportComponent({
         <PortfolioStage
           project={activeProject}
           className={stageStyles.portfolioViewportStageSlot}
-          onPrevious={onPrevious}
-          onNext={onNext}
+          onPrevious={handlePrevious}
+          onNext={handleNext}
+          onHoverStart={onHoverStart}
+          onHoverEnd={onHoverEnd}
         />
       </div>
     </section>

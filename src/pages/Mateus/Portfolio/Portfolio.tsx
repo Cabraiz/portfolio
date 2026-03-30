@@ -37,37 +37,39 @@ type PortfolioResponsivePreset = Readonly<{
 const PORTFOLIO_COMPACT_HEIGHT_MAX = 820;
 const PORTFOLIO_TALL_HEIGHT_MIN = 980;
 const PORTFOLIO_AUTOPLAY_INTERVAL_MS = 4200;
+const PORTFOLIO_SECTION_MIN_HEIGHT =
+  "calc(100dvh - var(--app-navbar-height, 70px))";
 
 const PORTFOLIO_RESPONSIVE_PRESETS: Record<
   PortfolioHeightMode,
   PortfolioResponsivePreset
 > = {
   compact: {
-    sectionMinHeight: "calc(100dvh - 72px)",
-    sectionPaddingTop: "22px",
-    sectionPaddingBottom: "34px",
-    layoutGap: "14px",
-    railColumnWidth: "252px",
-    timelineMaxHeight: "360px",
-    controlSize: "42px",
+    sectionMinHeight: PORTFOLIO_SECTION_MIN_HEIGHT,
+    sectionPaddingTop: "10px",
+    sectionPaddingBottom: "10px",
+    layoutGap: "10px",
+    railColumnWidth: "228px",
+    timelineMaxHeight: "100%",
+    controlSize: "38px",
   },
   default: {
-    sectionMinHeight: "calc(100dvh - 84px)",
-    sectionPaddingTop: "30px",
-    sectionPaddingBottom: "48px",
-    layoutGap: "18px",
-    railColumnWidth: "292px",
-    timelineMaxHeight: "500px",
-    controlSize: "46px",
+    sectionMinHeight: PORTFOLIO_SECTION_MIN_HEIGHT,
+    sectionPaddingTop: "22px",
+    sectionPaddingBottom: "22px",
+    layoutGap: "16px",
+    railColumnWidth: "284px",
+    timelineMaxHeight: "100%",
+    controlSize: "44px",
   },
   tall: {
-    sectionMinHeight: "calc(100dvh - 92px)",
-    sectionPaddingTop: "34px",
-    sectionPaddingBottom: "56px",
-    layoutGap: "20px",
-    railColumnWidth: "312px",
-    timelineMaxHeight: "560px",
-    controlSize: "48px",
+    sectionMinHeight: PORTFOLIO_SECTION_MIN_HEIGHT,
+    sectionPaddingTop: "30px",
+    sectionPaddingBottom: "30px",
+    layoutGap: "18px",
+    railColumnWidth: "304px",
+    timelineMaxHeight: "100%",
+    controlSize: "46px",
   },
 };
 

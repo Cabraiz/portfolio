@@ -1,9 +1,8 @@
-import {
-  memo,
-  type CSSProperties,
-} from "react";
+import { memo } from "react";
 
 import type { PortfolioProject } from "../types";
+import PortfolioProjectMedia from "../ui/media/PortfolioProjectMedia";
+import PortfolioStageSurface from "../ui/stage/PortfolioStageSurface";
 import styles from "../ui/card/PortfolioProjectCard.module.css";
 
 type PortfolioProjectCardProps = Readonly<{
@@ -21,50 +20,6 @@ function joinClasses(
   return classes.filter(Boolean).join(" ");
 }
 
-function resolveProjectMediaPosition(project: PortfolioProject): string | undefined {
-  const media = project.media;
-
-  if (!media) {
-    return undefined;
-  }
-
-  if (typeof media.position === "string" && media.position.trim().length > 0) {
-    return media.position;
-  }
-
-  const hasFocalPointX = typeof media.focalPointX !== "undefined";
-  const hasFocalPointY = typeof media.focalPointY !== "undefined";
-
-  if (!hasFocalPointX && !hasFocalPointY) {
-    return undefined;
-  }
-
-  return `${media.focalPointX ?? "center"} ${media.focalPointY ?? "center"}`;
-}
-
-function buildProjectMediaStyle(project: PortfolioProject): CSSProperties {
-  const media = project.media;
-  const resolvedPosition = resolveProjectMediaPosition(project);
-
-  return {
-    ...(media?.aspectRatio
-      ? {
-          "--portfolio-stage-aspect-ratio": media.aspectRatio,
-        }
-      : {}),
-    ...(media?.fit
-      ? {
-          "--portfolio-project-image-fit": media.fit,
-        }
-      : {}),
-    ...(resolvedPosition
-      ? {
-          "--portfolio-project-image-position": resolvedPosition,
-        }
-      : {}),
-  } as CSSProperties;
-}
-
 function PortfolioProjectCardComponent({
   project,
   className,
@@ -73,109 +28,42 @@ function PortfolioProjectCardComponent({
   onHoverStart,
   onHoverEnd,
 }: PortfolioProjectCardProps) {
-  const mediaStyle = buildProjectMediaStyle(project);
-
-  const handlePreviousClick = () => {
-    onPrevious?.();
-  };
-
-  const handleNextClick = () => {
-    onNext?.();
-  };
-
-  const handleFocus = () => {
-    onHoverStart?.();
-  };
-
-  const handleBlur = () => {
-    onHoverEnd?.();
-  };
-
-  const handleMouseEnter = () => {
-    onHoverStart?.();
-  };
-
-  const handleMouseLeave = () => {
-    onHoverEnd?.();
-  };
+  const hasLogo =
+    typeof project.logoSrc === "string" && project.logoSrc.trim().length > 0;
 
   return (
-    <article
+    <PortfolioStageSurface
+      project={project}
       className={joinClasses(styles.portfolioProjectCard, className)}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      data-portfolio-project-card="true"
-      data-project-id={project.id}
-      style={mediaStyle}
+      onPrevious={onPrevious}
+      onNext={onNext}
+      onHoverStart={onHoverStart}
+      onHoverEnd={onHoverEnd}
     >
-      <div className={styles.portfolioProjectCardMedia}>
-        <img
-          src={project.imageSrc}
-          alt={project.imageAlt}
-          className={styles.portfolioProjectCardImage}
-          loading="eager"
-          decoding="async"
-          draggable={false}
-        />
-      </div>
-
-      <button
-        type="button"
-        className={joinClasses(
-          styles.portfolioProjectCardHitZone,
-          styles.portfolioProjectCardHitZonePrevious,
-        )}
-        onClick={handlePreviousClick}
-        onFocus={handleFocus}
-        onBlur={handleBlur}
-        aria-label={`Ver projeto anterior antes de ${project.name}`}
-      >
-        <span
-          className={styles.portfolioProjectCardHitZoneCue}
-          aria-hidden="true"
-        >
-          <span className={styles.portfolioProjectCardHitZoneIcon}>←</span>
-          <span className={styles.portfolioProjectCardHitZoneLabel}>
-            Anterior
-          </span>
-        </span>
-      </button>
-
-      <button
-        type="button"
-        className={joinClasses(
-          styles.portfolioProjectCardHitZone,
-          styles.portfolioProjectCardHitZoneNext,
-        )}
-        onClick={handleNextClick}
-        onFocus={handleFocus}
-        onBlur={handleBlur}
-        aria-label={`Ver próximo projeto depois de ${project.name}`}
-      >
-        <span
-          className={styles.portfolioProjectCardHitZoneCue}
-          aria-hidden="true"
-        >
-          <span className={styles.portfolioProjectCardHitZoneLabel}>
-            Próximo
-          </span>
-          <span className={styles.portfolioProjectCardHitZoneIcon}>→</span>
-        </span>
-      </button>
+      <PortfolioProjectMedia
+        project={project}
+        className={styles.portfolioProjectCardMedia}
+        imageClassName={styles.portfolioProjectCardImage}
+        loading="eager"
+        decoding="async"
+        draggable={false}
+      />
 
       <div className={styles.portfolioProjectCardOverlay}>
         <div className={styles.portfolioProjectCardBottomRow}>
           <div className={styles.portfolioProjectCardIdentity}>
-            <div className={styles.portfolioProjectCardLogoBox}>
-              <img
-                src={project.logoSrc}
-                alt={project.logoAlt}
-                className={styles.portfolioProjectCardLogo}
-                loading="lazy"
-                decoding="async"
-                draggable={false}
-              />
-            </div>
+            {hasLogo ? (
+              <div className={styles.portfolioProjectCardLogoBox}>
+                <img
+                  src={project.logoSrc}
+                  alt={project.logoAlt ?? `Logo do projeto ${project.name}`}
+                  className={styles.portfolioProjectCardLogo}
+                  loading="lazy"
+                  decoding="async"
+                  draggable={false}
+                />
+              </div>
+            ) : null}
 
             <div className={styles.portfolioProjectCardTextGroup}>
               <h3 className={styles.portfolioProjectCardTitle}>
@@ -189,7 +77,7 @@ function PortfolioProjectCardComponent({
           </div>
         </div>
       </div>
-    </article>
+    </PortfolioStageSurface>
   );
 }
 
