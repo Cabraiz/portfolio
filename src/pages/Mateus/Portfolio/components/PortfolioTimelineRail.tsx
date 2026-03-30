@@ -420,14 +420,6 @@ function PortfolioTimelineRailComponent({
         data-project-index={projectIndex}
         data-project-active={isActive ? "true" : "false"}
       >
-        <span
-          className={joinClasses(
-            styles.portfolioTimelineMarker,
-            isActive && styles.portfolioTimelineMarkerActive,
-          )}
-          aria-hidden="true"
-        />
-
         <span className={styles.portfolioTimelineContent}>
           <span className={styles.portfolioTimelineMetaRow}>
             <span className={styles.portfolioTimelineYear}>{project.year}</span>

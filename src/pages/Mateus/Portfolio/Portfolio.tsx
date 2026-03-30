@@ -13,12 +13,10 @@ import {
   defaultPortfolioProjectId,
   portfolioProjectListItems,
   portfolioProjects,
-  portfolioSectionCopy,
 } from "./portfolio.data";
 
 import usePortfolioActiveItem from "./hooks/usePortfolioActiveItem";
 
-import PortfolioHeader from "./components/PortfolioHeader";
 import PortfolioStage from "./components/PortfolioStage";
 import PortfolioTimelineRail from "./components/PortfolioTimelineRail";
 
@@ -46,8 +44,8 @@ const PORTFOLIO_RESPONSIVE_PRESETS: Record<
 > = {
   compact: {
     sectionMinHeight: PORTFOLIO_SECTION_MIN_HEIGHT,
-    sectionPaddingTop: "10px",
-    sectionPaddingBottom: "10px",
+    sectionPaddingTop: "clamp(24px, 6dvh, 56px)",
+    sectionPaddingBottom: "clamp(24px, 6dvh, 56px)",
     layoutGap: "10px",
     railColumnWidth: "228px",
     timelineMaxHeight: "100%",
@@ -55,8 +53,8 @@ const PORTFOLIO_RESPONSIVE_PRESETS: Record<
   },
   default: {
     sectionMinHeight: PORTFOLIO_SECTION_MIN_HEIGHT,
-    sectionPaddingTop: "22px",
-    sectionPaddingBottom: "22px",
+    sectionPaddingTop: "clamp(32px, 8dvh, 88px)",
+    sectionPaddingBottom: "clamp(32px, 8dvh, 88px)",
     layoutGap: "16px",
     railColumnWidth: "284px",
     timelineMaxHeight: "100%",
@@ -64,8 +62,8 @@ const PORTFOLIO_RESPONSIVE_PRESETS: Record<
   },
   tall: {
     sectionMinHeight: PORTFOLIO_SECTION_MIN_HEIGHT,
-    sectionPaddingTop: "30px",
-    sectionPaddingBottom: "30px",
+    sectionPaddingTop: "clamp(40px, 9dvh, 112px)",
+    sectionPaddingBottom: "clamp(40px, 9dvh, 112px)",
     layoutGap: "18px",
     railColumnWidth: "304px",
     timelineMaxHeight: "100%",
@@ -235,8 +233,6 @@ export default function Portfolio() {
       style={responsiveStyle}
     >
       <div className={rootStyles.portfolioSection}>
-        <PortfolioHeader copy={portfolioSectionCopy} />
-
         <div className={rootStyles.portfolioContent}>
           <div className={rootStyles.portfolioStageColumn}>
             <PortfolioStage

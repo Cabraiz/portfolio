@@ -2,9 +2,9 @@
 .portfolioRoot {
   --portfolio-layout-width: 1560px;
   --portfolio-section-min-height: calc(100dvh - var(--app-navbar-height, 70px));
-  --portfolio-section-padding-top: 22px;
+  --portfolio-section-padding-top: clamp(32px, 8dvh, 88px);
   --portfolio-section-padding-inline: clamp(20px, 3vw, 36px);
-  --portfolio-section-padding-bottom: 22px;
+  --portfolio-section-padding-bottom: clamp(32px, 8dvh, 88px);
   --portfolio-layout-gap: 16px;
   --portfolio-rail-column-width: 284px;
   --portfolio-stage-aspect-ratio: 16 / 9;
@@ -31,7 +31,7 @@
     var(--portfolio-section-padding-bottom);
   box-sizing: border-box;
   display: grid;
-  grid-template-rows: auto 1fr;
+  grid-template-rows: minmax(0, 1fr);
   align-content: stretch;
   overflow: hidden;
   background:
@@ -108,14 +108,19 @@
 }
 
 @media (max-width: 768px) {
+  .portfolioRoot {
+    --portfolio-section-padding-top: clamp(20px, 5dvh, 40px);
+    --portfolio-section-padding-bottom: clamp(20px, 5dvh, 40px);
+  }
+
   .portfolioSection {
     height: auto;
     min-height: auto;
     overflow: visible;
     padding:
-      calc(var(--portfolio-section-padding-top) - 2px)
+      var(--portfolio-section-padding-top)
       16px
-      calc(var(--portfolio-section-padding-bottom) - 4px);
+      var(--portfolio-section-padding-bottom);
   }
 
   .portfolioContent {
