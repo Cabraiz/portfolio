@@ -14,6 +14,7 @@ import {
   coreRoadMapEdges,
   coreRoadMapNodes,
   coreRoadMapSegments,
+  type RoadMapDataSegment,
 } from "./core";
 import {
   ecosystemRoadMapClusters,
@@ -32,10 +33,10 @@ function sortRoadMapClusters(
   );
 }
 
-export const roadMapDataSegments = [
+export const roadMapDataSegments: readonly RoadMapDataSegment[] = [
   ...coreRoadMapSegments,
   ...ecosystemRoadMapSegments,
-] as const;
+];
 
 export const roadMapDataNodes: readonly RoadMapNode[] = sortRoadMapNodes([
   ...coreRoadMapNodes,
@@ -53,7 +54,7 @@ export const roadMapDataClusters: readonly RoadMapCluster[] =
     ...ecosystemRoadMapClusters,
   ]);
 
-export const roadMapGraph: RoadMapGraph = {
+const roadMapGraphNormalized = {
   id: "frontend-market-roadmap",
   title: "Roadmap de Tecnologias Front-end",
   subtitle:
@@ -61,7 +62,9 @@ export const roadMapGraph: RoadMapGraph = {
   nodes: roadMapDataNodes,
   edges: roadMapDataEdges,
   clusters: roadMapDataClusters,
-};
+} satisfies RoadMapGraph;
+
+export const roadMapGraph = roadMapGraphNormalized;
 
 export {
   coreRoadMapClusters,

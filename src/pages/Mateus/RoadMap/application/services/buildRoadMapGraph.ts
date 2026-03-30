@@ -18,8 +18,9 @@ export type RoadMapGraphSegment = Readonly<{
 }>;
 
 export type BuildRoadMapGraphParams = Readonly<{
-  id: string;
-  title: string;
+  baseGraph?: RoadMapGraph;
+  id?: string;
+  title?: string;
   subtitle?: string;
   segments?: readonly RoadMapGraphSegment[];
   nodes?: readonly RoadMapNode[];
@@ -49,12 +50,17 @@ function pushUniqueById<T extends { id: string }>(
 }
 
 function collectGraphEntities<T extends { id: string }>(
+  baseItems: readonly T[] | undefined,
   directItems: readonly T[] | undefined,
   segments: readonly RoadMapGraphSegment[],
   entityName: string,
   select: (segment: RoadMapGraphSegment) => readonly T[] | undefined,
 ): T[] {
   const collected: T[] = [];
+
+  if (baseItems?.length) {
+    pushUniqueById(collected, baseItems, entityName);
+  }
 
   if (directItems?.length) {
     pushUniqueById(collected, directItems, entityName);
@@ -73,6 +79,7 @@ function collectGraphEntities<T extends { id: string }>(
 
 function collectNodes(params: BuildRoadMapGraphParams): RoadMapNode[] {
   return collectGraphEntities(
+    params.baseGraph?.nodes,
     params.nodes,
     params.segments ?? [],
     "Nó",
@@ -82,6 +89,7 @@ function collectNodes(params: BuildRoadMapGraphParams): RoadMapNode[] {
 
 function collectEdges(params: BuildRoadMapGraphParams): RoadMapEdge[] {
   return collectGraphEntities(
+    params.baseGraph?.edges,
     params.edges,
     params.segments ?? [],
     "Aresta",
@@ -91,6 +99,7 @@ function collectEdges(params: BuildRoadMapGraphParams): RoadMapEdge[] {
 
 function collectClusters(params: BuildRoadMapGraphParams): RoadMapCluster[] {
   return collectGraphEntities(
+    params.baseGraph?.clusters,
     params.clusters,
     params.segments ?? [],
     "Cluster",
@@ -300,13 +309,40 @@ function sortClusters(
   });
 }
 
+function resolveGraphId(params: BuildRoadMapGraphParams): string {
+  const resolvedId = params.id ?? params.baseGraph?.id;
+
+  if (!resolvedId) {
+    throw new Error(
+      '[buildRoadMapGraph] "id" é obrigatório quando nenhum baseGraph com id é fornecido.',
+    );
+  }
+
+  return resolvedId;
+}
+
+function resolveGraphTitle(params: BuildRoadMapGraphParams): string {
+  const resolvedTitle = params.title ?? params.baseGraph?.title;
+
+  if (!resolvedTitle) {
+    throw new Error(
+      '[buildRoadMapGraph] "title" é obrigatório quando nenhum baseGraph com title é fornecido.',
+    );
+  }
+
+  return resolvedTitle;
+}
+
+function resolveGraphSubtitle(
+  params: BuildRoadMapGraphParams,
+): string | undefined {
+  return params.subtitle ?? params.baseGraph?.subtitle;
+}
+
 export function buildRoadMapGraph(
   params: BuildRoadMapGraphParams,
 ): RoadMapGraph {
   const {
-    id,
-    title,
-    subtitle,
     sort = true,
     validateReferences = true,
   } = params;
@@ -334,9 +370,9 @@ export function buildRoadMapGraph(
     : [...collectedClusters];
 
   return {
-    id,
-    title,
-    subtitle,
+    id: resolveGraphId(params),
+    title: resolveGraphTitle(params),
+    subtitle: resolveGraphSubtitle(params),
     nodes: finalNodes,
     edges: finalEdges,
     clusters: finalClusters,

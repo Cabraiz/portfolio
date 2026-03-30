@@ -1,0 +1,156 @@
+{
+  "version": 1,
+  "graph": {
+    "id": "roadmap-fundamentals",
+    "title": "Fundamental Topics",
+    "subtitle": "React foundation topics modeled from JSON."
+  },
+  "defaults": {
+    "category": "fundamentals",
+    "demand": "important"
+  },
+  "nodes": [
+    {
+      "id": "fundamental-topics",
+      "label": "Fundamental Topics",
+      "type": "main",
+      "summary": "Central hub for the core React concepts.",
+      "featured": true,
+      "tags": ["react", "fundamentals", "base"]
+    },
+    {
+      "id": "create-react-app",
+      "label": "Create React App",
+      "type": "topic",
+      "summary": "Historical starting point for React app bootstrapping.",
+      "tags": ["setup", "tooling"]
+    },
+    {
+      "id": "jsx",
+      "label": "JSX",
+      "type": "topic",
+      "summary": "Syntax layer used to describe React UI.",
+      "tags": ["syntax", "ui"]
+    },
+    {
+      "id": "components",
+      "label": "Components",
+      "type": "topic",
+      "summary": "Reusable composition units in React.",
+      "tags": ["architecture", "ui"]
+    },
+    {
+      "id": "props-vs-state",
+      "label": "Props vs State",
+      "type": "topic",
+      "summary": "Distinguishes immutable external input from internal mutable state.",
+      "tags": ["state", "data-flow"]
+    },
+    {
+      "id": "conditional-rendering",
+      "label": "Conditional Rendering",
+      "type": "topic",
+      "summary": "Controls which UI branch is rendered based on conditions.",
+      "tags": ["rendering", "ui-logic"]
+    },
+    {
+      "id": "functional-components",
+      "label": "Functional Components",
+      "type": "subtopic",
+      "summary": "Modern component authoring pattern centered on functions and hooks.",
+      "tags": ["components", "functions"]
+    },
+    {
+      "id": "class-components",
+      "label": "Class Components",
+      "type": "subtopic",
+      "summary": "Legacy component authoring pattern based on ES classes.",
+      "tags": ["components", "legacy"]
+    },
+    {
+      "id": "component-life-cycle",
+      "label": "Component Life Cycle",
+      "type": "topic",
+      "summary": "Lifecycle concepts for mount, update and unmount phases.",
+      "tags": ["lifecycle", "rendering"]
+    },
+    {
+      "id": "lists-and-keys",
+      "label": "Lists and Keys",
+      "type": "topic",
+      "summary": "Patterns for rendering collections and preserving identity.",
+      "tags": ["rendering", "collections"]
+    },
+    {
+      "id": "composition-vs-inheritance",
+      "label": "Composition vs Inheritance",
+      "type": "topic",
+      "summary": "React favors composition over inheritance for reuse.",
+      "tags": ["architecture", "patterns"]
+    },
+    {
+      "id": "basic-hooks",
+      "label": "Basic Hooks",
+      "type": "topic",
+      "summary": "Foundational hooks such as state and effect primitives.",
+      "tags": ["hooks", "state"]
+    }
+  ],
+  "edges": [
+    {
+      "from": "fundamental-topics",
+      "to": "create-react-app",
+      "relation": "has_topic"
+    },
+    {
+      "from": "fundamental-topics",
+      "to": "jsx",
+      "relation": "has_topic"
+    },
+    {
+      "from": "fundamental-topics",
+      "to": "components",
+      "relation": "has_topic"
+    },
+    {
+      "from": "fundamental-topics",
+      "to": "props-vs-state",
+      "relation": "has_topic"
+    },
+    {
+      "from": "fundamental-topics",
+      "to": "conditional-rendering",
+      "relation": "has_topic"
+    },
+    {
+      "from": "fundamental-topics",
+      "to": "component-life-cycle",
+      "relation": "has_topic"
+    },
+    {
+      "from": "fundamental-topics",
+      "to": "lists-and-keys",
+      "relation": "has_topic"
+    },
+    {
+      "from": "fundamental-topics",
+      "to": "composition-vs-inheritance",
+      "relation": "has_topic"
+    },
+    {
+      "from": "fundamental-topics",
+      "to": "basic-hooks",
+      "relation": "has_topic"
+    },
+    {
+      "from": "components",
+      "to": "functional-components",
+      "relation": "has_subtopic"
+    },
+    {
+      "from": "components",
+      "to": "class-components",
+      "relation": "has_subtopic"
+    }
+  ]
+}
