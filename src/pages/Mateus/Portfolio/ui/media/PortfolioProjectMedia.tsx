@@ -22,6 +22,16 @@ type PortfolioProjectMediaProps = Readonly<{
   onError?: (event: SyntheticEvent<HTMLImageElement>) => void;
 }>;
 
+const compactObjectPositionByProjectId: Partial<
+  Record<PortfolioProject["id"], string>
+> = {
+  "erp-varejo": "center 6%",
+  "app-bank": "50% 10%",
+  "app-barber": "50% 8%",
+  "site-adv": "50% 6%",
+  "site-cabeleireira": "58% 10%",
+};
+
 function joinClasses(
   ...classes: Array<string | undefined | null | false>
 ): string {
@@ -32,13 +42,52 @@ function resolveObjectPosition(project: PortfolioProject): string {
   const media = project.media;
 
   if (media?.position && media.position.trim().length > 0) {
-    return media.position;
+    return media.position.trim();
   }
 
   const fallbackX = media?.focalPointX ?? "center";
-  const fallbackY = media?.focalPointY ?? "center";
+  const fallbackY = media?.focalPointY ?? "top";
 
   return `${fallbackX} ${fallbackY}`;
+}
+
+function shiftObjectPositionTowardTop(
+  position: string,
+  deltaPercent: number,
+): string {
+  const tokens = position.trim().split(/\s+/).filter(Boolean);
+
+  const rawX = tokens[0] ?? "center";
+  const rawY = tokens[1] ?? "top";
+
+  if (/^-?\d+(\.\d+)?%$/.test(rawY)) {
+    const nextPercent = Math.max(
+      0,
+      Number.parseFloat(rawY.replace("%", "")) - deltaPercent,
+    );
+
+    return `${rawX} ${nextPercent}%`;
+  }
+
+  if (rawY === "center") {
+    return `${rawX} 18%`;
+  }
+
+  if (rawY === "bottom") {
+    return `${rawX} 30%`;
+  }
+
+  return `${rawX} 8%`;
+}
+
+function resolveCompactObjectPosition(project: PortfolioProject): string {
+  const explicitCompactPosition = compactObjectPositionByProjectId[project.id];
+
+  if (explicitCompactPosition) {
+    return explicitCompactPosition;
+  }
+
+  return shiftObjectPositionTowardTop(resolveObjectPosition(project), 10);
 }
 
 function resolveObjectFit(project: PortfolioProject): string {
@@ -63,14 +112,21 @@ function PortfolioProjectMediaComponent({
 }: PortfolioProjectMediaProps) {
   const [hasError, setHasError] = useState(false);
 
+  const objectFit = resolveObjectFit(project);
+  const objectPosition = resolveObjectPosition(project);
+  const compactObjectPosition = resolveCompactObjectPosition(project);
+  const aspectRatio = resolveAspectRatio(project);
+
   const style = useMemo(
     () =>
       ({
-        "--portfolio-project-media-aspect-ratio": resolveAspectRatio(project),
-        "--portfolio-project-image-fit": resolveObjectFit(project),
-        "--portfolio-project-image-position": resolveObjectPosition(project),
+        "--portfolio-project-media-aspect-ratio": aspectRatio,
+        "--portfolio-project-image-fit": objectFit,
+        "--portfolio-project-image-position": objectPosition,
+        "--portfolio-project-image-position-compact": compactObjectPosition,
+        "--portfolio-project-media-radius": "inherit",
       }) as CSSProperties,
-    [project],
+    [aspectRatio, compactObjectPosition, objectFit, objectPosition],
   );
 
   const hasRenderableImage =
@@ -93,7 +149,9 @@ function PortfolioProjectMediaComponent({
       style={style}
       data-portfolio-project-media="true"
       data-project-id={project.id}
-      data-media-fit={resolveObjectFit(project)}
+      data-media-fit={objectFit}
+      data-media-position={objectPosition}
+      data-media-position-compact={compactObjectPosition}
     >
       <div className={styles.portfolioProjectMediaViewport}>
         {hasRenderableImage ? (

@@ -27,6 +27,7 @@ export const portfolioSectionCopy: PortfolioSectionCopy = {
 const defaultProjectMedia = {
   aspectRatio: "16 / 9",
   fit: "cover",
+  position: "center 10%",
 } as const;
 
 export const portfolioProjects: ReadonlyArray<PortfolioProject> = [
@@ -41,7 +42,7 @@ export const portfolioProjects: ReadonlyArray<PortfolioProject> = [
     projectLabel: "Projeto",
     media: {
       ...defaultProjectMedia,
-      position: "center top",
+      position: "center 8%",
     },
   },
   {
@@ -55,7 +56,7 @@ export const portfolioProjects: ReadonlyArray<PortfolioProject> = [
     projectLabel: "Projeto",
     media: {
       ...defaultProjectMedia,
-      position: "50% 18%",
+      position: "50% 14%",
     },
   },
   {
@@ -69,7 +70,7 @@ export const portfolioProjects: ReadonlyArray<PortfolioProject> = [
     projectLabel: "Projeto",
     media: {
       ...defaultProjectMedia,
-      position: "50% 20%",
+      position: "50% 12%",
     },
   },
   {
@@ -83,7 +84,7 @@ export const portfolioProjects: ReadonlyArray<PortfolioProject> = [
     projectLabel: "Projeto",
     media: {
       ...defaultProjectMedia,
-      position: "center top",
+      position: "50% 8%",
     },
   },
   {
@@ -97,7 +98,7 @@ export const portfolioProjects: ReadonlyArray<PortfolioProject> = [
     projectLabel: "Projeto",
     media: {
       ...defaultProjectMedia,
-      position: "58% center",
+      position: "58% 14%",
     },
   },
 ] as const;

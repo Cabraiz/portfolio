@@ -21,36 +21,46 @@
 .portfolioViewport,
 .portfolioViewportInner,
 .portfolioViewportStage,
+.portfolioViewportStageSlot,
 .portfolioViewportStageFrame {
   display: grid;
 }
 
 .portfolioViewport {
   align-self: stretch;
+  overflow: visible;
 }
 
 .portfolioViewportInner {
   grid-template-columns: minmax(0, 1fr);
   grid-template-rows: minmax(0, 1fr);
+  overflow: visible;
 }
 
 .portfolioViewportStage {
   align-items: stretch;
+  overflow: visible;
 }
 
 .portfolioViewportStageSlot {
   display: block;
+  min-height: 0;
+  overflow: visible;
 }
 
 .portfolioViewportStageFrame {
   grid-template-columns: minmax(0, 1fr);
   grid-template-rows: minmax(0, 1fr);
   align-items: stretch;
+  min-height: 0;
+  overflow: visible;
 }
 
 .portfolioViewportActiveCard {
   max-width: none;
   max-height: 100%;
+  min-height: 0;
+  overflow: visible;
 }
 
 @media (max-width: 768px) {
