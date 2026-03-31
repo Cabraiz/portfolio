@@ -1,13 +1,9 @@
 import { Col } from "react-bootstrap";
 
+import MeetQrPopoverButton from "./MeetQrPopoverButton";
 import SocialButton from "./SocialButton";
 import { useMateusHeroLayout } from "../../hooks/useMateusHeroLayout";
-import {
-  MEET_HREF,
-  PROFILE_IMAGE,
-  SOCIAL_ICONS,
-  WHATSAPP_HREF,
-} from "../../mateusDesktop.data";
+import { PROFILE_IMAGE, SOCIAL_ICONS } from "../../mateusDesktop.data";
 
 type HeroProfileColumnProps = Readonly<{
   isCompactDesktop: boolean;
@@ -17,7 +13,6 @@ type HeroProfileColumnProps = Readonly<{
 }>;
 
 export default function HeroProfileColumn({
-  isPT,
   isImageLoaded,
   onImageLoad,
 }: HeroProfileColumnProps) {
@@ -27,22 +22,6 @@ export default function HeroProfileColumn({
     profileImageWrapperStyle,
     socialRowStyle,
   } = useMateusHeroLayout();
-
-  const supportSocialButton = isPT ? (
-    <SocialButton
-      href={MEET_HREF}
-      icon={SOCIAL_ICONS.meet}
-      alt="Meet"
-      imageClassName="imagesize--support"
-    />
-  ) : (
-    <SocialButton
-      href={WHATSAPP_HREF}
-      icon={SOCIAL_ICONS.whatsapp}
-      alt="WhatsApp"
-      imageClassName="imagesize--support"
-    />
-  );
 
   return (
     <Col
@@ -95,7 +74,7 @@ export default function HeroProfileColumn({
             icon={SOCIAL_ICONS.instagram}
             alt="Instagram"
           />
-          {supportSocialButton}
+          <MeetQrPopoverButton />
         </div>
       </div>
     </Col>

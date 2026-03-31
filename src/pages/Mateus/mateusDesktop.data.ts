@@ -6,6 +6,7 @@ import instagramIcon from "@/assets/Mateus/Icon/IconInsta.png";
 import linkedInIcon from "@/assets/Mateus/Icon/IconLinkedIn.png";
 import whatsAppIcon from "@/assets/Mateus/Icon/IconWhatsApp.png";
 import meetIcon from "@/assets/Mateus/Icon/IconMeet.png";
+import whatsappQrSvg from "@/assets/Mateus/QRCode/whatsapp-contact-qr.svg";
 
 import bnbSeal from "@/assets/Mateus/Selos/BNB.svg";
 import uniforSeal from "@/assets/Mateus/Selos/UNIFOR.svg";
@@ -28,9 +29,19 @@ export type SealItem = Readonly<{
 export const COMPACT_DESKTOP_MEDIA_QUERY =
   "(max-height: 1080px) and (min-width: 961px)";
 
-export const WHATSAPP_HREF = "https://wa.me/5585998575707";
+export const WHATSAPP_HREF =
+  "https://wa.me/5585998575707?text=Ol%C3%A1%20Mateus%2C%20vi%20seu%20portf%C3%B3lio%20e%20gostaria%20de%20conversar.";
 export const MEET_HREF = "https://meet.google.com/SEULINK";
 export const RESUME_HREF = "/files/mateus-cabral-resume.pdf";
+
+export const WHATSAPP_QR_SRC = whatsappQrSvg;
+export const WHATSAPP_QR_ALT =
+  "QR Code para abrir conversa com Mateus no WhatsApp";
+
+export const MEET_QR_POPOVER_TITLE = "Escaneie e fale comigo no WhatsApp";
+export const MEET_QR_POPOVER_SUBTITLE =
+  "Aponte a câmera para o QR Code ou abra a conversa diretamente pelo botão abaixo.";
+export const MEET_QR_POPOVER_CTA_LABEL = "Abrir conversa";
 
 export const PROFILE_IMAGE = profileImage;
 

@@ -42,6 +42,7 @@
 		"node-fetch": "^3.3.2",
 		"nth-check": "3.0.0",
 		"protobufjs": "8.0.0",
+		"qrcode": "^1.5.4",
 		"qrcode.react": "4.2.0",
 		"react": "19.2.4",
 		"react-addons-update": "15.6.3",
