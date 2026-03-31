@@ -8,9 +8,6 @@ import {
   fundamentalsRoadMapGraph,
   fundamentalsRoadMapSegment,
 } from "./fundamentals.data";
-import { reactCoreRoadMapSegment } from "./react-core.data";
-import { renderingRoutingRoadMapSegment } from "./rendering-routing.data";
-import { stateManagementRoadMapSegment } from "./state-management.data";
 
 export type RoadMapDataSegment = Readonly<{
   nodes: readonly RoadMapNode[];
@@ -20,9 +17,6 @@ export type RoadMapDataSegment = Readonly<{
 
 export const coreRoadMapSegments: readonly RoadMapDataSegment[] = [
   fundamentalsRoadMapSegment,
-  reactCoreRoadMapSegment,
-  stateManagementRoadMapSegment,
-  renderingRoutingRoadMapSegment,
 ] as const;
 
 export const coreRoadMapNodes: readonly RoadMapNode[] =
@@ -34,7 +28,7 @@ export const coreRoadMapEdges: readonly RoadMapEdge[] =
 export const coreRoadMapClusters: readonly RoadMapCluster[] =
   coreRoadMapSegments.flatMap((segment) => segment.clusters);
 
-export { fundamentalsRoadMapGraph, fundamentalsRoadMapSegment } from "./fundamentals.data";
-export { reactCoreRoadMapSegment } from "./react-core.data";
-export { renderingRoutingRoadMapSegment } from "./rendering-routing.data";
-export { stateManagementRoadMapSegment } from "./state-management.data";
+export {
+  fundamentalsRoadMapGraph,
+  fundamentalsRoadMapSegment,
+} from "./fundamentals.data";

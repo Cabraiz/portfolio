@@ -14,14 +14,10 @@ import {
   coreRoadMapEdges,
   coreRoadMapNodes,
   coreRoadMapSegments,
+  fundamentalsRoadMapGraph,
+  fundamentalsRoadMapSegment,
   type RoadMapDataSegment,
 } from "./core";
-import {
-  ecosystemRoadMapClusters,
-  ecosystemRoadMapEdges,
-  ecosystemRoadMapNodes,
-  ecosystemRoadMapSegments,
-} from "./ecosystem";
 
 function sortRoadMapClusters(
   clusters: readonly RoadMapCluster[],
@@ -34,31 +30,24 @@ function sortRoadMapClusters(
 }
 
 export const roadMapDataSegments: readonly RoadMapDataSegment[] = [
-  ...coreRoadMapSegments,
-  ...ecosystemRoadMapSegments,
+  fundamentalsRoadMapSegment,
 ];
 
-export const roadMapDataNodes: readonly RoadMapNode[] = sortRoadMapNodes([
-  ...coreRoadMapNodes,
-  ...ecosystemRoadMapNodes,
-]);
+export const roadMapDataNodes: readonly RoadMapNode[] = sortRoadMapNodes(
+  coreRoadMapNodes,
+);
 
-export const roadMapDataEdges: readonly RoadMapEdge[] = sortRoadMapEdges([
-  ...coreRoadMapEdges,
-  ...ecosystemRoadMapEdges,
-]);
+export const roadMapDataEdges: readonly RoadMapEdge[] = sortRoadMapEdges(
+  coreRoadMapEdges,
+);
 
 export const roadMapDataClusters: readonly RoadMapCluster[] =
-  sortRoadMapClusters([
-    ...coreRoadMapClusters,
-    ...ecosystemRoadMapClusters,
-  ]);
+  sortRoadMapClusters(coreRoadMapClusters);
 
 const roadMapGraphNormalized = {
-  id: "frontend-market-roadmap",
-  title: "Roadmap de Tecnologias Front-end",
-  subtitle:
-    "Mapa visual orientado por mercado, relacionando fundamentos, React, estado, dados, estilização, testes e sinais de adoção.",
+  id: fundamentalsRoadMapGraph.id,
+  title: fundamentalsRoadMapGraph.title,
+  subtitle: fundamentalsRoadMapGraph.subtitle,
   nodes: roadMapDataNodes,
   edges: roadMapDataEdges,
   clusters: roadMapDataClusters,
@@ -71,11 +60,6 @@ export {
   coreRoadMapEdges,
   coreRoadMapNodes,
   coreRoadMapSegments,
+  fundamentalsRoadMapGraph,
+  fundamentalsRoadMapSegment,
 } from "./core";
-
-export {
-  ecosystemRoadMapClusters,
-  ecosystemRoadMapEdges,
-  ecosystemRoadMapNodes,
-  ecosystemRoadMapSegments,
-} from "./ecosystem";

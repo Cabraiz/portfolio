@@ -96,26 +96,6 @@ function getCanvasSize(
   };
 }
 
-function createSpotlightNodeIdSet(
-  spotlightNodeId: string | null,
-  edges: readonly RoadMapEdge[],
-): ReadonlySet<string> {
-  if (!spotlightNodeId) {
-    return new Set<string>();
-  }
-
-  const relatedNodeIds = new Set<string>([spotlightNodeId]);
-
-  for (const edge of edges) {
-    if (edge.from === spotlightNodeId || edge.to === spotlightNodeId) {
-      relatedNodeIds.add(edge.from);
-      relatedNodeIds.add(edge.to);
-    }
-  }
-
-  return relatedNodeIds;
-}
-
 function RoadMapCanvasComponent({
   nodes,
   edges,
@@ -140,25 +120,60 @@ function RoadMapCanvasComponent({
     [nodes, positionKey, minHeight],
   );
 
-  const spotlightNodeId = hoveredNodeId ?? activeNodeId ?? null;
-  const hasSpotlight = spotlightNodeId !== null;
-
-  const spotlightNodeIds = useMemo(
-    () => createSpotlightNodeIdSet(spotlightNodeId, edges),
-    [spotlightNodeId, edges],
-  );
-
   const wrapperStyle = useMemo<CSSProperties>(
     () => ({
       position: "relative",
       width: "100%",
-      overflowX: "auto",
-      overflowY: "hidden",
+      overflow: "hidden",
       borderRadius: "24px",
       border: "1px solid rgba(148, 163, 184, 0.14)",
       background:
         "linear-gradient(180deg, rgba(255,255,255,0.92) 0%, rgba(248,250,252,0.96) 100%)",
       boxShadow: "0 18px 48px rgba(15, 23, 42, 0.05)",
+    }),
+    [],
+  );
+
+  const summaryStyle = useMemo<CSSProperties>(
+    () => ({
+      display: "flex",
+      flexWrap: "wrap",
+      gap: "10px",
+      alignItems: "center",
+      padding: "16px 18px 0 18px",
+    }),
+    [],
+  );
+
+  const badgeStyle = useMemo<CSSProperties>(
+    () => ({
+      display: "inline-flex",
+      alignItems: "center",
+      justifyContent: "center",
+      minHeight: "30px",
+      padding: "0 12px",
+      borderRadius: "999px",
+      border: "1px solid rgba(148, 163, 184, 0.18)",
+      background: "rgba(255,255,255,0.8)",
+      color: "#334155",
+      fontSize: "0.75rem",
+      fontWeight: 700,
+      lineHeight: 1,
+      whiteSpace: "nowrap",
+      boxShadow: "0 8px 18px rgba(15, 23, 42, 0.04)",
+      fontFamily:
+        'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+    }),
+    [],
+  );
+
+  const scrollerStyle = useMemo<CSSProperties>(
+    () => ({
+      position: "relative",
+      width: "100%",
+      overflowX: "auto",
+      overflowY: "hidden",
+      padding: "16px 0 0 0",
       scrollbarWidth: "thin",
     }),
     [],
@@ -171,18 +186,11 @@ function RoadMapCanvasComponent({
       minWidth: `${canvasSize.width}px`,
       height: `${canvasSize.height}px`,
       minHeight: `${canvasSize.height}px`,
-      padding: 0,
       backgroundColor: "#f8fafc",
       backgroundImage:
-        positionKey === "mobile"
-          ? "none"
-          : `
-              linear-gradient(rgba(15, 23, 42, 0.028) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(15, 23, 42, 0.028) 1px, transparent 1px)
-            `,
-      backgroundSize: positionKey === "mobile" ? undefined : "44px 44px",
+        "linear-gradient(rgba(148, 163, 184, 0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(148, 163, 184, 0.08) 1px, transparent 1px)",
+      backgroundSize: positionKey === "mobile" ? "24px 24px" : "32px 32px",
       backgroundPosition: "0 0",
-      boxSizing: "border-box",
     }),
     [canvasSize.height, canvasSize.width, positionKey],
   );
@@ -191,11 +199,17 @@ function RoadMapCanvasComponent({
     () => ({
       position: "absolute",
       inset: 0,
-      width: "100%",
-      height: "100%",
+      width: `${canvasSize.width}px`,
+      height: `${canvasSize.height}px`,
       overflow: "visible",
-      zIndex: 2,
       pointerEvents: "none",
+    }),
+    [canvasSize.height, canvasSize.width],
+  );
+
+  const emptyStateShellStyle = useMemo<CSSProperties>(
+    () => ({
+      padding: "24px",
     }),
     [],
   );
@@ -204,47 +218,54 @@ function RoadMapCanvasComponent({
     () => ({
       display: "grid",
       placeItems: "center",
-      minHeight: `${minHeight}px`,
-      padding: "32px 24px",
+      minHeight: `${Math.max(320, minHeight)}px`,
+      padding: "32px",
       textAlign: "center",
-      color: "#334155",
-      fontFamily:
-        'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
     }),
     [minHeight],
   );
 
-  const drawableEdges = useMemo(
-    () => edges.filter((edge) => nodeMap.has(edge.from) && nodeMap.has(edge.to)),
-    [edges, nodeMap],
+  const emptyCardStyle = useMemo<CSSProperties>(
+    () => ({
+      maxWidth: "520px",
+      padding: "28px 24px",
+      borderRadius: "22px",
+      border: "1px solid rgba(148, 163, 184, 0.14)",
+      background: "rgba(255,255,255,0.84)",
+      boxShadow: "0 18px 36px rgba(15, 23, 42, 0.04)",
+    }),
+    [],
   );
 
   if (nodes.length === 0) {
     return (
       <div className={className} style={wrapperStyle}>
-        <div style={emptyStateStyle}>
-          <div>
-            <h3
-              style={{
-                margin: "0 0 8px",
-                fontSize: "0.98rem",
-                fontWeight: 800,
-                color: "#0f172a",
-              }}
-            >
-              {emptyTitle}
-            </h3>
-            <p
-              style={{
-                margin: 0,
-                fontSize: "0.9rem",
-                lineHeight: 1.55,
-                color: "#475569",
-              }}
-            >
-              {emptyDescription}
-            </p>
-          </div>
+        <div style={emptyStateShellStyle}>
+          <section style={emptyStateStyle}>
+            <div style={emptyCardStyle}>
+              <h3
+                style={{
+                  margin: "0 0 8px 0",
+                  color: "#0f172a",
+                  fontSize: "1.1rem",
+                  lineHeight: 1.2,
+                }}
+              >
+                {emptyTitle}
+              </h3>
+
+              <p
+                style={{
+                  margin: 0,
+                  color: "#475569",
+                  fontSize: "0.92rem",
+                  lineHeight: 1.6,
+                }}
+              >
+                {emptyDescription}
+              </p>
+            </div>
+          </section>
         </div>
       </div>
     );
@@ -252,70 +273,66 @@ function RoadMapCanvasComponent({
 
   return (
     <div className={className} style={wrapperStyle}>
-      <div style={stageStyle}>
-        {clusters.map((cluster) => {
-          const isDimmed =
-            hasSpotlight &&
-            !cluster.nodeIds.some((nodeId) => spotlightNodeIds.has(nodeId));
+      <div style={summaryStyle}>
+        <span style={badgeStyle}>{nodes.length} nós visíveis</span>
+        <span style={badgeStyle}>{edges.length} relações visíveis</span>
+        <span style={badgeStyle}>{clusters.length} agrupamentos</span>
+      </div>
 
-          return (
-            <RoadMapClusterView
-              key={cluster.id}
-              cluster={cluster}
-              nodes={nodes}
-              positionKey={positionKey}
-              isDimmed={isDimmed}
-            />
-          );
-        })}
-
-        <svg
-          aria-hidden="true"
-          viewBox={`0 0 ${canvasSize.width} ${canvasSize.height}`}
-          style={svgStyle}
-        >
-          {drawableEdges.map((edge) => {
-            const fromNode = nodeMap.get(edge.from);
-            const toNode = nodeMap.get(edge.to);
-
-            if (!fromNode || !toNode) {
-              return null;
-            }
-
-            const isDimmed =
-              hasSpotlight &&
-              edge.from !== spotlightNodeId &&
-              edge.to !== spotlightNodeId;
-
-            return (
-              <RoadMapEdgeView
-                key={edge.id}
-                edge={edge}
-                fromNode={fromNode}
-                toNode={toNode}
+      <div style={scrollerStyle}>
+        <div style={stageStyle}>
+          <svg
+            width={canvasSize.width}
+            height={canvasSize.height}
+            viewBox={`0 0 ${canvasSize.width} ${canvasSize.height}`}
+            aria-hidden="true"
+            focusable="false"
+            style={svgStyle}
+          >
+            {clusters.map((cluster) => (
+              <RoadMapClusterView
+                key={cluster.id}
+                cluster={cluster}
+                nodes={nodes}
                 positionKey={positionKey}
-                isDimmed={isDimmed}
+                isDimmed={false}
               />
-            );
-          })}
-        </svg>
+            ))}
 
-        {nodes.map((node) => {
-          const isDimmed = hasSpotlight && !spotlightNodeIds.has(node.id);
+            {edges.map((edge) => {
+              const fromNode = nodeMap.get(edge.from);
+              const toNode = nodeMap.get(edge.to);
 
-          return (
+              if (!fromNode || !toNode) {
+                return null;
+              }
+
+              return (
+                <RoadMapEdgeView
+                  key={`${edge.from}:${edge.to}:${edge.type}:${edge.label ?? ""}`}
+                  edge={edge}
+                  fromNode={fromNode}
+                  toNode={toNode}
+                  positionKey={positionKey}
+                  isDimmed={false}
+                />
+              );
+            })}
+          </svg>
+
+          {nodes.map((node) => (
             <RoadMapNodeView
               key={node.id}
               node={node}
               positionKey={positionKey}
               isActive={activeNodeId === node.id}
               isHovered={hoveredNodeId === node.id}
-              isDimmed={isDimmed}
+              isDimmed={false}
               onSelect={onNodeSelect}
               onHover={onNodeHover}
             />
-          );
-        })}
+          ))}
+        </div>
       </div>
     </div>
   );

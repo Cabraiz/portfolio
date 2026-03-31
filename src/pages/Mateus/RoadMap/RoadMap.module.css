@@ -11,6 +11,19 @@
   --roadmap-shadow-soft: 0 14px 32px rgba(15, 23, 42, 0.05);
   --roadmap-sticky-top: 12px;
 
+  --roadmap-edge-color-base: rgba(100, 116, 139, 0.92);
+  --roadmap-edge-requires: rgba(100, 116, 139, 0.92);
+  --roadmap-edge-builds-on: rgba(100, 116, 139, 0.92);
+  --roadmap-edge-related: rgba(100, 116, 139, 0.92);
+
+  --roadmap-edge-opacity: 0.9;
+  --roadmap-edge-opacity-featured: 0.95;
+  --roadmap-edge-opacity-active: 1;
+  --roadmap-edge-stroke-width: 2.4px;
+  --roadmap-edge-stroke-width-featured: 2.7px;
+  --roadmap-edge-stroke-width-active: 3px;
+  --roadmap-edge-dasharray: 4 8;
+
   position: relative;
   width: 100%;
   min-width: 0;
@@ -385,6 +398,45 @@
   min-width: 0;
 }
 
+.roadMapGraphEdge {
+  fill: none;
+  stroke: var(--roadmap-edge-color-base);
+  opacity: var(--roadmap-edge-opacity);
+  stroke-width: var(--roadmap-edge-stroke-width);
+  stroke-dasharray: var(--roadmap-edge-dasharray);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+  transition:
+    opacity 180ms ease,
+    stroke-width 180ms ease,
+    filter 180ms ease,
+    stroke 180ms ease;
+}
+
+.roadMapGraphEdgeRequires {
+  stroke: var(--roadmap-edge-requires);
+}
+
+.roadMapGraphEdgeBuildsOn {
+  stroke: var(--roadmap-edge-builds-on);
+}
+
+.roadMapGraphEdgeRelated {
+  stroke: var(--roadmap-edge-related);
+}
+
+.roadMapGraphEdgeFeatured {
+  opacity: var(--roadmap-edge-opacity-featured);
+  stroke-width: var(--roadmap-edge-stroke-width-featured);
+}
+
+.roadMapGraphEdgeActive {
+  opacity: var(--roadmap-edge-opacity-active);
+  stroke-width: var(--roadmap-edge-stroke-width-active);
+  filter: drop-shadow(0 0 6px rgba(59, 130, 246, 0.18));
+}
+
 @media (max-width: 1360px) {
   .contentGridSideCollapsed,
   .contentGridSideExpanded {
@@ -469,5 +521,20 @@
   .sidePanelCard {
     padding: 12px;
     border-radius: 20px;
+  }
+
+  .roadMapGraphEdge {
+    stroke-width: 2.2px;
+    opacity: 0.88;
+  }
+
+  .roadMapGraphEdgeFeatured {
+    opacity: 0.94;
+    stroke-width: 2.5px;
+  }
+
+  .roadMapGraphEdgeActive {
+    opacity: 1;
+    stroke-width: 2.8px;
   }
 }
