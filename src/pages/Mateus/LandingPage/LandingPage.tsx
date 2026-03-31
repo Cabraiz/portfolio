@@ -1,7 +1,9 @@
 import React, {
   type CSSProperties,
+  useEffect,
   useMemo,
   useRef,
+  useState,
 } from "react";
 
 import {
@@ -18,9 +20,11 @@ import useLandingHistorySync from "./hooks/useLandingHistorySync";
 import useLandingSectionMeasurements from "./hooks/useLandingSectionMeasurements";
 import { getLandingSectionDefinitions } from "./landingSections.config";
 import {
+  resolveLandingNavbarFallbackOffsetPx,
   resolveLandingResponsiveSpacing,
   resolveLandingScrollMarginTop,
   resolveLandingSectionMinHeight,
+  subscribeToLandingNavbarOffset,
   type LandingSectionHeightRole,
 } from "./landingLayout.tokens";
 import { resolveLandingSectionBehavior } from "./landing.types";
@@ -139,6 +143,10 @@ function resolveDesktopSectionMinHeight(
 const LandingPage: React.FC = () => {
   const containerRef = useRef<HTMLElement | null>(null);
 
+  const [navbarOffsetPx, setNavbarOffsetPx] = useState<number>(() =>
+    resolveLandingNavbarFallbackOffsetPx("desktop"),
+  );
+
   const sections = useMemo(() => {
     return getLandingSectionDefinitions("desktop");
   }, []);
@@ -152,16 +160,21 @@ const LandingPage: React.FC = () => {
   useLenisEngine();
   useDocumentVisibilitySync();
 
+  useEffect(() => {
+    return subscribeToLandingNavbarOffset("desktop", setNavbarOffsetPx);
+  }, []);
+
   const {
     observedSectionId,
     committedSectionId,
+    refreshActiveSection,
   } = useLandingSectionNavigation({
     containerRef,
     defaultSectionId: desktopScrollPolicy.defaultSectionId,
     sectionIds: desktopScrollPolicy.sectionIds,
     sectionSelector: desktopScrollPolicy.sectionSelector,
     viewportMode: desktopScrollPolicy.viewportMode,
-    navbarOffsetPx: desktopScrollPolicy.observed.navbarOffsetPx,
+    navbarOffsetPx,
     activationViewportRatio:
       desktopScrollPolicy.observed.activationViewportRatio,
     tokens: desktopScrollPolicy.tokens,
@@ -177,6 +190,10 @@ const LandingPage: React.FC = () => {
     urlSyncEligibleSectionIds: desktopScrollPolicy.url.eligibleSectionIds,
     historyMode: desktopScrollPolicy.url.historyMode,
   });
+
+  useEffect(() => {
+    refreshActiveSection("refresh");
+  }, [navbarOffsetPx, refreshActiveSection]);
 
   const renderAnchorSectionId = observedSectionId || committedSectionId;
 

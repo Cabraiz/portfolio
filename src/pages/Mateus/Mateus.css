@@ -52,7 +52,12 @@ img {
   transition: 0.5s;
 }
 
-.imagesize:hover {
+.imagesize--support {
+  height: calc(5vh * 1.1);
+}
+
+.imagesize:hover,
+.imagesize--support:hover {
   filter: none;
 }
 

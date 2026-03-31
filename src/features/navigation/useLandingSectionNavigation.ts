@@ -263,6 +263,20 @@ function resolveRouteSectionIdFromPathname(params: Readonly<{
   return fallbackSectionId;
 }
 
+function resolveExactWindowScrollTop(
+  target: HTMLElement,
+  offsetPx: number,
+): number | null {
+  if (typeof globalThis.window === "undefined") {
+    return null;
+  }
+
+  const browserWindow = globalThis.window;
+  const targetTop = browserWindow.scrollY + target.getBoundingClientRect().top;
+
+  return Math.max(0, Math.round(targetTop - offsetPx));
+}
+
 function scrollToSectionTarget(params: Readonly<{
   target: HTMLElement;
   lenis: LenisLike;
@@ -271,11 +285,20 @@ function scrollToSectionTarget(params: Readonly<{
 }>): void {
   const { target, lenis, offsetPx, duration } = params;
 
-  if (lenis) {
-    lenis.scrollTo(target, {
-      offset: -offsetPx,
+  const targetScrollTop = resolveExactWindowScrollTop(target, offsetPx);
+
+  if (targetScrollTop !== null && lenis) {
+    lenis.scrollTo(targetScrollTop, {
       duration,
       easing: createEaseOutCubic,
+    });
+    return;
+  }
+
+  if (targetScrollTop !== null && typeof globalThis.window !== "undefined") {
+    globalThis.window.scrollTo({
+      top: targetScrollTop,
+      behavior: "smooth",
     });
     return;
   }
@@ -284,13 +307,6 @@ function scrollToSectionTarget(params: Readonly<{
     behavior: "smooth",
     block: "start",
   });
-
-  if (typeof globalThis.window !== "undefined") {
-    globalThis.window.scrollBy({
-      top: -offsetPx,
-      behavior: "smooth",
-    });
-  }
 }
 
 function writeRoutePathToBrowserHistory(params: Readonly<{
@@ -368,9 +384,15 @@ export default function useLandingSectionNavigation(
     );
   }, [defaultSectionId, resolvedSectionIds]);
 
-  const resolvedNavbarOffsetPx = useMemo(() => {
-    return navbarOffsetPx ?? resolveLandingNavbarOffsetPx(viewportMode);
+  const getResolvedNavbarOffsetPx = useCallback((): number => {
+    if (typeof navbarOffsetPx === "number" && Number.isFinite(navbarOffsetPx)) {
+      return navbarOffsetPx;
+    }
+
+    return resolveLandingNavbarOffsetPx(viewportMode);
   }, [navbarOffsetPx, viewportMode]);
+
+  const resolvedNavbarOffsetPx = getResolvedNavbarOffsetPx();
 
   const routeSectionIdFromLocation = useMemo(() => {
     return resolveRouteSectionIdFromPathname({
@@ -617,7 +639,7 @@ export default function useLandingSectionNavigation(
         scrollToSectionTarget({
           target: targetElement,
           lenis,
-          offsetPx: options?.offsetPx ?? resolvedNavbarOffsetPx,
+          offsetPx: options?.offsetPx ?? getResolvedNavbarOffsetPx(),
           duration: options?.duration ?? scrollDuration,
         });
 
@@ -633,6 +655,10 @@ export default function useLandingSectionNavigation(
           globalThis.window.requestAnimationFrame(() => {
             getStoreSnapshot().refreshActiveSection?.("refresh");
           });
+
+          globalThis.window.setTimeout(() => {
+            getStoreSnapshot().refreshActiveSection?.("refresh");
+          }, 180);
         }
 
         return;
@@ -643,6 +669,7 @@ export default function useLandingSectionNavigation(
       });
     },
     [
+      getResolvedNavbarOffsetPx,
       getSectionElement,
       isUrlSyncEligible,
       lenis,
@@ -650,7 +677,6 @@ export default function useLandingSectionNavigation(
       navigate,
       resolveRoutePath,
       resolvedDefaultSectionId,
-      resolvedNavbarOffsetPx,
       scrollDuration,
       setActiveSectionId,
       syncUrl,

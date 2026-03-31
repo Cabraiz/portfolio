@@ -3,6 +3,7 @@ import React, {
   useEffect,
   useMemo,
   useRef,
+  useState,
 } from "react";
 import { useLocation } from "react-router-dom";
 
@@ -25,9 +26,11 @@ import useLandingActiveSection from "./hooks/useLandingActiveSection";
 import useLandingHistorySync from "./hooks/useLandingHistorySync";
 import useLandingSectionMeasurements from "./hooks/useLandingSectionMeasurements";
 import {
+  resolveLandingNavbarFallbackOffsetPx,
   resolveLandingResponsiveSpacing,
   resolveLandingScrollMarginTop,
   resolveLandingSectionMinHeight,
+  subscribeToLandingNavbarOffset,
 } from "./landingLayout.tokens";
 import { resolveLandingSectionBehavior } from "./landing.types";
 import useSectionRenderPolicy from "./useSectionRenderPolicy";
@@ -142,6 +145,10 @@ const LandingPageMobile: React.FC = () => {
   const containerRef = useRef<HTMLElement | null>(null);
   const location = useLocation();
 
+  const [navbarOffsetPx, setNavbarOffsetPx] = useState<number>(() =>
+    resolveLandingNavbarFallbackOffsetPx("mobile"),
+  );
+
   const sections = useMemo(() => {
     return getLandingSectionDefinitions("mobile");
   }, []);
@@ -153,12 +160,17 @@ const LandingPageMobile: React.FC = () => {
   useLenisEngine();
   useDocumentVisibilitySync();
 
+  useEffect(() => {
+    return subscribeToLandingNavbarOffset("mobile", setNavbarOffsetPx);
+  }, []);
+
   const { activeSectionId, refreshActiveSection } = useLandingActiveSection({
     containerRef,
     defaultSectionId: initialSectionId,
     sectionIds: LANDING_SECTION_ORDER,
     sectionSelector: ":scope > section[data-page-section='true']",
     viewportMode: "mobile",
+    navbarOffsetPx,
     activationViewportRatio: 0.42,
   });
 
@@ -178,7 +190,7 @@ const LandingPageMobile: React.FC = () => {
 
   useEffect(() => {
     refreshActiveSection("refresh");
-  }, [refreshActiveSection, sections]);
+  }, [navbarOffsetPx, refreshActiveSection, sections]);
 
   const renderPolicy = useSectionRenderPolicy({
     sections,
@@ -201,6 +213,7 @@ const LandingPageMobile: React.FC = () => {
         const sectionState = renderPolicy.getSectionState(section.id);
 
         const resolvedSectionMinHeight =
+          section.expectedMinHeight ??
           section.sectionStyle?.minHeight ??
           resolveLandingSectionMinHeight("mobile", {
             preferDynamicViewport: false,
@@ -210,9 +223,11 @@ const LandingPageMobile: React.FC = () => {
           ...baseSectionStyle,
           ...section.sectionStyle,
           minHeight: resolvedSectionMinHeight,
-          height: section.sectionStyle?.height,
+          height:
+            section.sectionStyle?.height ?? resolvedSectionMinHeight,
           scrollMarginTop:
             section.sectionStyle?.scrollMarginTop ??
+            section.scrollMarginTop ??
             resolveLandingScrollMarginTop("mobile"),
           display: section.sectionStyle?.display ?? "flex",
           flexDirection: section.sectionStyle?.flexDirection ?? "column",
@@ -224,8 +239,8 @@ const LandingPageMobile: React.FC = () => {
         const resolvedContentStyle: CSSProperties = {
           ...baseContentContainerStyle,
           ...section.contentStyle,
-          height: section.contentStyle?.height ?? "100%",
           minHeight: section.contentStyle?.minHeight ?? "100%",
+          height: section.contentStyle?.height ?? "100%",
           display: section.contentStyle?.display ?? "flex",
           flexDirection: section.contentStyle?.flexDirection ?? "column",
           alignItems: section.contentStyle?.alignItems ?? "stretch",
@@ -236,7 +251,8 @@ const LandingPageMobile: React.FC = () => {
 
         const placeholderFallback =
           section.placeholderMinHeight ??
-          behavior.placeholderFallbackMinHeight;
+          behavior.placeholderFallbackMinHeight ??
+          resolvedSectionMinHeight;
 
         return (
           <LandingSectionShell

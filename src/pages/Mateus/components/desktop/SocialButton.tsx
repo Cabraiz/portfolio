@@ -6,13 +6,21 @@ export type SocialButtonProps = Readonly<{
   icon: string;
   alt: string;
   isScrollToTop?: boolean;
+  imageClassName?: string;
 }>;
+
+function joinClasses(
+  ...classes: Array<string | undefined | null | false>
+): string {
+  return classes.filter(Boolean).join(" ");
+}
 
 export default function SocialButton({
   href,
   icon,
   alt,
   isScrollToTop,
+  imageClassName,
 }: SocialButtonProps) {
   const normalizedTooltipClass = normalizeTooltipClassName(alt);
 
@@ -24,9 +32,19 @@ export default function SocialButton({
       className="social-wrapper"
       aria-label={alt}
     >
-      <div className={`social-link ${isScrollToTop ? "scrollToTopButton" : ""}`}>
-        <Image className="imagesize" src={icon} alt={alt} />
+      <div
+        className={joinClasses(
+          "social-link",
+          isScrollToTop && "scrollToTopButton"
+        )}
+      >
+        <Image
+          className={joinClasses("imagesize", imageClassName)}
+          src={icon}
+          alt={alt}
+        />
       </div>
+
       <div className={`tooltip-custom tooltip-${normalizedTooltipClass}`}>
         {alt}
       </div>

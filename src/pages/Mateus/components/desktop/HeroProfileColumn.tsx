@@ -29,12 +29,18 @@ export default function HeroProfileColumn({
   } = useMateusHeroLayout();
 
   const supportSocialButton = isPT ? (
-    <SocialButton href={MEET_HREF} icon={SOCIAL_ICONS.meet} alt="Meet" />
+    <SocialButton
+      href={MEET_HREF}
+      icon={SOCIAL_ICONS.meet}
+      alt="Meet"
+      imageClassName="imagesize--support"
+    />
   ) : (
     <SocialButton
       href={WHATSAPP_HREF}
       icon={SOCIAL_ICONS.whatsapp}
       alt="WhatsApp"
+      imageClassName="imagesize--support"
     />
   );
 
@@ -80,7 +86,7 @@ export default function HeroProfileColumn({
             alt="LinkedIn"
           />
           <SocialButton
-            href="mailto:mateusccabr@gmail.com?subject=Freelance..."
+            href="mailto:mateusccabr@gmail.com?subject=Freelance."
             icon={SOCIAL_ICONS.gmail}
             alt="Gmail"
           />

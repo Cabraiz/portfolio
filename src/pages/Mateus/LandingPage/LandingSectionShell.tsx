@@ -42,6 +42,8 @@ const baseSectionStyle: CSSProperties = {
   overflowX: "clip",
   overflowY: "visible",
   isolation: "isolate",
+  scrollMarginTop: 0,
+  scrollSnapAlign: "start",
 };
 
 function getBaseContentStyle(disableTransitions: boolean): CSSProperties {
@@ -210,6 +212,8 @@ function LandingSectionShellComponent({
     ...sectionStyle,
     minHeight: resolvedSectionMinHeight,
     height: resolvedSectionHeight,
+    scrollMarginTop: sectionStyle?.scrollMarginTop ?? 0,
+    scrollSnapAlign: sectionStyle?.scrollSnapAlign ?? "start",
     display: sectionStyle?.display ?? "flex",
     flexDirection: sectionStyle?.flexDirection ?? "column",
     alignItems: sectionStyle?.alignItems ?? "stretch",
