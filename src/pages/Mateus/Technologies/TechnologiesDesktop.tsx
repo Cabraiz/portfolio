@@ -11,62 +11,77 @@ const TechnologiesDesktop: React.FC<TechnologiesPresentationProps> = ({
   activeFilterId,
   activeItem,
   clusters,
-  totalCount,
-  clusterCount,
-  summaryLabel,
-  resultText,
-  experienceRangeLabel,
   onChangeFilter,
   onResetFilter,
   onSelectItem,
 }) => {
+  const handleSearchButtonClick = (): void => {
+    const searchTarget = document.querySelector(
+      "[data-technologies-search-target='true']",
+    );
+
+    if (searchTarget instanceof HTMLElement) {
+      searchTarget.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+
+      window.requestAnimationFrame(() => {
+        searchTarget.focus?.();
+      });
+
+      return;
+    }
+
+    const filtersTarget = document.querySelector(
+      "[data-technologies-filters='true']",
+    );
+
+    if (filtersTarget instanceof HTMLElement) {
+      filtersTarget.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }
+  };
+
   return (
     <section className={styles.viewport} aria-labelledby="technologies-title">
-      <header className={styles.hero}>
-        <div className={styles.heroCopy}>
+      <header className={styles.heroCompact}>
+        <div className={styles.heroCompactCopy}>
           <p className={styles.eyebrow}>Engineering Capabilities</p>
 
-          <h2 className={styles.title} id="technologies-title">
-            Stack hexagonal, leitura executiva e profundidade técnica real.
+          <h2 className={styles.titleCompact} id="technologies-title">
+            Tecnologias e stacks com busca direta.
           </h2>
-
-          <p className={styles.description}>
-            Esta seção transforma a antiga lista de skills em uma capability
-            matrix: clusters por domínio, filtro de leitura, cards hexagonais e
-            um spotlight técnico para comunicar senioridade, repertório e
-            contexto de entrega com mais força visual.
-          </p>
         </div>
 
-        <div className={styles.metricsRow}>
-          <article className={styles.metricCard}>
-            <span className={styles.metricLabel}>Tecnologias</span>
-            <strong className={styles.metricValue}>{totalCount}</strong>
-          </article>
-
-          <article className={styles.metricCard}>
-            <span className={styles.metricLabel}>Clusters</span>
-            <strong className={styles.metricValue}>{clusterCount}</strong>
-          </article>
-
-          <article className={styles.metricCard}>
-            <span className={styles.metricLabel}>Janela de experiência</span>
-            <strong className={styles.metricValue}>{experienceRangeLabel}</strong>
-          </article>
+        <div className={styles.heroCompactActions}>
+          <button
+            type="button"
+            className={styles.searchTriggerButton}
+            onClick={handleSearchButtonClick}
+            aria-label="Buscar tecnologia"
+          >
+            Buscar tecnologia
+          </button>
         </div>
       </header>
 
-      <div className={styles.filtersBlock}>
+      <div
+        className={styles.filtersBlockCompact}
+        data-technologies-filters="true"
+      >
         <TechnologiesFilterBar
           items={filters}
           activeFilterId={activeFilterId}
           onChange={onChangeFilter}
           onReset={onResetFilter}
-          summaryLabel={summaryLabel}
-          resultText={resultText}
-          title="Filtrar capacidades por domínio"
-          description="Use os filtros para destacar blocos específicos da stack e mudar o foco do grid sem perder o contexto visual da seção."
-          helperText="O spotlight acompanha a seleção atual e transforma o card ativo em uma leitura editorial mais profunda."
+          summaryLabel=""
+          resultText=""
+          title=""
+          description=""
+          helperText=""
         />
       </div>
 

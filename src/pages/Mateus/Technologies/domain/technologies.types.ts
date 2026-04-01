@@ -47,6 +47,12 @@ export type TechnologyMediaAsset = Readonly<{
   height?: number;
 }>;
 
+export type TechnologyVisuals = Readonly<{
+  logoSrc?: string | null;
+  heroAsset?: TechnologyMediaAsset | null;
+  gallery?: readonly TechnologyMediaAsset[];
+}>;
+
 export type TechnologyCategory = Readonly<{
   id: TechnologyCategoryId;
   label: string;
@@ -71,12 +77,10 @@ export type TechnologyItem = Readonly<{
   hidden?: boolean;
   deprecated?: boolean;
   priority?: number;
-  logoSrc?: string;
   accentCategoryId?: TechnologyCategoryId;
   shapeVariant?: TechnologyShapeVariant;
-  heroAsset?: TechnologyMediaAsset | null;
-  gallery?: readonly TechnologyMediaAsset[];
-}>;
+}> &
+  TechnologyVisuals;
 
 export type TechnologiesFiltersState = Readonly<{
   query: string;

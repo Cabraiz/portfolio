@@ -3,13 +3,10 @@
 import type {
   TechnologyItem,
   TechnologyMediaAsset,
+  TechnologyVisuals,
 } from "../domain/technologies.types";
 
-type BuildTechnologyVisualsResult = Readonly<{
-  logoSrc: string;
-  heroAsset: TechnologyMediaAsset;
-  gallery: readonly TechnologyMediaAsset[];
-}>;
+type BuildTechnologyVisualsResult = Readonly<Required<TechnologyVisuals>>;
 
 type CreateTechnologyParams = Readonly<
   Omit<TechnologyItem, "logoSrc" | "heroAsset" | "gallery"> & {
@@ -17,48 +14,75 @@ type CreateTechnologyParams = Readonly<
   }
 >;
 
+export const TECHNOLOGY_ICONS_BASE_PATH = "/images/technologies/icons";
+export const TECHNOLOGY_VISUALS_BASE_PATH = "/images/technologies";
+
+export function buildTechnologyLogoSrc(slug: string): string {
+  return `${TECHNOLOGY_ICONS_BASE_PATH}/${slug}.webp`;
+}
+
+export function buildTechnologyVisualBasePath(slug: string): string {
+  return `${TECHNOLOGY_VISUALS_BASE_PATH}/${slug}`;
+}
+
+function buildTechnologyHeroAsset(
+  slug: string,
+  name: string,
+): TechnologyMediaAsset {
+  const basePath = buildTechnologyVisualBasePath(slug);
+
+  return {
+    id: `${slug}-hero`,
+    kind: "illustration",
+    src: `${basePath}/hero.webp`,
+    alt: `${name} hero visual`,
+    width: 1600,
+    height: 900,
+  };
+}
+
+function buildTechnologyGallery(
+  slug: string,
+  name: string,
+): readonly TechnologyMediaAsset[] {
+  const basePath = buildTechnologyVisualBasePath(slug);
+
+  return [
+    {
+      id: `${slug}-gallery-01`,
+      kind: "screenshot",
+      src: `${basePath}/gallery-01.webp`,
+      alt: `${name} gallery image 01`,
+      width: 1600,
+      height: 900,
+    },
+    {
+      id: `${slug}-gallery-02`,
+      kind: "screenshot",
+      src: `${basePath}/gallery-02.webp`,
+      alt: `${name} gallery image 02`,
+      width: 1600,
+      height: 900,
+    },
+    {
+      id: `${slug}-gallery-03`,
+      kind: "screenshot",
+      src: `${basePath}/gallery-03.webp`,
+      alt: `${name} gallery image 03`,
+      width: 1600,
+      height: 900,
+    },
+  ];
+}
+
 function buildTechnologyVisuals(
   slug: string,
   name: string,
 ): BuildTechnologyVisualsResult {
-  const basePath = `/images/technologies/${slug}`;
-
   return {
-    logoSrc: `${basePath}/logo.svg`,
-    heroAsset: {
-      id: `${slug}-hero`,
-      kind: "illustration",
-      src: `${basePath}/hero.webp`,
-      alt: `${name} hero visual`,
-      width: 1600,
-      height: 900,
-    },
-    gallery: [
-      {
-        id: `${slug}-gallery-01`,
-        kind: "screenshot",
-        src: `${basePath}/gallery-01.webp`,
-        alt: `${name} gallery image 01`,
-        width: 1600,
-        height: 900,
-      },
-      {
-        id: `${slug}-gallery-02`,
-        kind: "screenshot",
-        src: `${basePath}/gallery-02.webp`,
-        alt: `${name} gallery image 02`,
-        width: 1600,
-        height: 900,
-      },
-      {
-        id: `${slug}-gallery-03`,
-        kind: "screenshot",
-        src: `${basePath}/gallery-03.webp`,
-        alt: `${name} gallery image 03`,
-        width: 1600,
-        height: 900,
-      },
-    ],
+    logoSrc: buildTechnologyLogoSrc(slug),
+    heroAsset: buildTechnologyHeroAsset(slug, name),
+    gallery: buildTechnologyGallery(slug, name),
   };
 }
 

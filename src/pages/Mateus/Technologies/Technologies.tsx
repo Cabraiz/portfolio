@@ -243,12 +243,17 @@ function resolveDeliveryLabel(years?: number | null): string {
   return "Aplicação dirigida";
 }
 
+function buildTechnologyIconSrc(iconFileName: string): string {
+  return `/images/technologies/icons/${iconFileName}.webp`;
+}
+
 type CreateTechnologyInput = Readonly<{
   id: string;
   name: string;
   clusterId: TechnologyClusterId;
   years?: number | null;
   description: string;
+  iconSrc?: string;
   badges?: readonly string[];
   related?: readonly string[];
   highlights?: readonly string[];
@@ -262,6 +267,7 @@ function createTechnology({
   clusterId,
   years = null,
   description,
+  iconSrc,
   badges = [],
   related = [],
   highlights = [],
@@ -281,6 +287,7 @@ function createTechnology({
     clusterId,
     categoryLabel: clusterMeta.title,
     levelLabel,
+    iconSrc,
     tone: clusterMeta.tone,
     accentRgb: clusterMeta.accentRgb,
     badges,
@@ -366,6 +373,7 @@ const TECHNOLOGY_CATALOG: readonly TechnologyCatalogItem[] = [
     name: "AWS",
     clusterId: "cloud",
     years: 4,
+    iconSrc: buildTechnologyIconSrc("aws"),
     description:
       "Atuação com EC2, S3, RDS, IAM e fluxos de mensageria para provisionamento, serviços distribuídos e sustentação de ambientes em nuvem.",
     badges: ["EC2", "S3", "RDS", "IAM", "SQS/SNS"],
