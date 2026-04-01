@@ -7,6 +7,7 @@
   display: block;
   overflow: hidden;
   border-radius: inherit;
+  background: transparent;
   isolation: isolate;
 }
 
@@ -18,6 +19,7 @@
   min-height: 0;
   overflow: hidden;
   border-radius: inherit;
+  background: transparent;
 }
 
 .portfolioProjectCardImage {
@@ -40,9 +42,9 @@
     linear-gradient(
       180deg,
       rgba(7, 7, 9, 0) 0%,
-      rgba(7, 7, 9, 0.015) 44%,
-      rgba(7, 7, 9, 0.06) 72%,
-      rgba(7, 7, 9, 0.16) 100%
+      rgba(7, 7, 9, 0.012) 48%,
+      rgba(7, 7, 9, 0.05) 76%,
+      rgba(7, 7, 9, 0.12) 100%
     );
   pointer-events: none;
   box-sizing: border-box;
@@ -63,12 +65,12 @@
   width: min(100%, 440px);
   padding: 12px 14px;
   border-radius: 18px;
-  background: rgba(8, 8, 10, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(8, 8, 10, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.07);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   box-sizing: border-box;
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.06);
 }
 
 .portfolioProjectCardLogoBox {

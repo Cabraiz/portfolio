@@ -30,6 +30,7 @@
   min-height: 0;
   overflow: hidden;
   border-radius: inherit;
+  background: transparent;
   transform: translateZ(0);
   backface-visibility: hidden;
 }
@@ -46,7 +47,7 @@
   object-position: var(--portfolio-project-image-position, center top);
   user-select: none;
   -webkit-user-drag: none;
-  transform: translateZ(0) scale(1.002);
+  transform: translateZ(0) scale(1.001);
   transform-origin: center top;
   backface-visibility: hidden;
 }
