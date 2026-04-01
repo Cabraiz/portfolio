@@ -60,8 +60,8 @@
   border-radius: inherit;
   padding: clamp(18px, 2.2vw, 28px);
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(0, 0, 0, 0.1)),
-    linear-gradient(135deg, rgba(28, 28, 32, 0.98), rgba(12, 12, 15, 1));
+    linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(0, 0, 0, 0.06)),
+    linear-gradient(135deg, rgba(28, 28, 32, 0.96), rgba(12, 12, 15, 1));
 }
 
 .portfolioProjectMediaFallbackInner {
