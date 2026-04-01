@@ -27,7 +27,7 @@ const links: readonly LandingSectionId[] = [
   "home",
   "portfolio",
   "roadMap",
-  "pricing",
+  "technologies",
   "live",
   "contact",
 ];

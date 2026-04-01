@@ -18,7 +18,6 @@ import { getLenisScrollSettings } from "../features/scroll/getLenisScrollSetting
 import {
   getPathBySectionId,
   getSectionIdByPath,
-  normalizeLandingSectionId,
   type LandingSectionId,
 } from "../features/navigation/landingSections";
 import type {
@@ -29,10 +28,10 @@ import type {
 
 const APP_LENIS_SCROLL_CLASS = "desktop-lenis-scroll";
 
-const links: LandingSectionId[] = [
+const links: readonly LandingSectionId[] = [
   "portfolio",
   "roadMap",
-  "pricing",
+  "technologies",
   "live",
   "contact",
 ];
@@ -138,19 +137,13 @@ function AppMobile() {
 
   const isNavHidden = hiddenNavbarRoutes.includes(location.pathname);
 
-  const selectedLink = useMemo(() => {
+  const activeSectionId = useMemo<LandingSectionId | "">(() => {
     return getSectionIdByPath(location.pathname) ?? "";
   }, [location.pathname]);
 
-  const handleSelectLink = useCallback(
-    (nextLink: string) => {
-      const normalizedSectionId = normalizeLandingSectionId(nextLink);
-
-      if (!normalizedSectionId) {
-        return;
-      }
-
-      navigate(getPathBySectionId(normalizedSectionId));
+  const handleNavigateToSection = useCallback(
+    (sectionId: LandingSectionId) => {
+      navigate(getPathBySectionId(sectionId));
       setMenuOpen(false);
     },
     [navigate],
@@ -243,11 +236,11 @@ function AppMobile() {
         {!isNavHidden && (
           <AppNavbar
             isMobileView={true}
-            selectedLink={selectedLink}
-            setSelectedLink={handleSelectLink}
+            activeSectionId={activeSectionId}
+            onNavigateToSection={handleNavigateToSection}
             menuOpen={menuOpen}
             setMenuOpen={setMenuOpen}
-            links={links}
+            items={links}
           />
         )}
 

@@ -2,7 +2,7 @@ export type LandingSectionId =
   | "home"
   | "portfolio"
   | "roadMap"
-  | "pricing"
+  | "technologies"
   | "live"
   | "contact";
 
@@ -43,10 +43,10 @@ export const LANDING_SECTIONS: readonly LandingSectionDefinition[] = [
     urlSyncEligible: true,
   },
   {
-    id: "pricing",
-    label: "Preços",
-    path: "/pricing",
-    anchor: "#pricing",
+    id: "technologies",
+    label: "Tecnologias",
+    path: "/technologies",
+    anchor: "#technologies",
     order: 4,
     urlSyncEligible: true,
   },

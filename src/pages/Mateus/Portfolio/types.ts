@@ -28,6 +28,8 @@ export type PortfolioMediaAspectRatio =
   | "1 / 1"
   | string;
 
+export type PortfolioTechnologyName = string;
+
 export type PortfolioProjectMedia = Readonly<{
   aspectRatio?: PortfolioMediaAspectRatio;
   fit?: PortfolioMediaFit;
@@ -45,6 +47,7 @@ export type PortfolioProject = Readonly<{
   logoSrc: string;
   logoAlt: string;
   projectLabel: string;
+  technologies: readonly PortfolioTechnologyName[];
   media?: PortfolioProjectMedia;
 }>;
 
@@ -78,7 +81,18 @@ export type PortfolioProjectListItem = Readonly<{
   year: string;
 }>;
 
+export type PortfolioTechnologyStat = Readonly<{
+  name: PortfolioTechnologyName;
+  projectCount: number;
+  projectIds: readonly PortfolioProjectId[];
+}>;
+
 export type PortfolioProjectLookup = ReadonlyMap<
   PortfolioProjectId,
   PortfolioProject
+>;
+
+export type PortfolioTechnologyLookup = ReadonlyMap<
+  PortfolioTechnologyName,
+  PortfolioTechnologyStat
 >;

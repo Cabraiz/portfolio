@@ -122,8 +122,8 @@ function resolveLandingSectionRuntimeLabel(sectionId: string): string {
       return "Landing portfolio mobile";
     case "roadMap":
       return "Landing RoadMap mobile";
-    case "pricing":
-      return "Landing pricing mobile";
+    case "technologies":
+      return "Landing technologies mobile";
     case "live":
       return "Landing live mobile";
     case "contact":
@@ -223,8 +223,7 @@ const LandingPageMobile: React.FC = () => {
           ...baseSectionStyle,
           ...section.sectionStyle,
           minHeight: resolvedSectionMinHeight,
-          height:
-            section.sectionStyle?.height ?? resolvedSectionMinHeight,
+          height: section.sectionStyle?.height ?? resolvedSectionMinHeight,
           scrollMarginTop:
             section.sectionStyle?.scrollMarginTop ??
             section.scrollMarginTop ??

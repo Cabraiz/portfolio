@@ -14,8 +14,8 @@ import Live from "../Live/Live";
 import MateusDesktop from "../MateusDesktop";
 import MateusMobile from "../MateusMobile/MateusMobile";
 import Portfolio from "../Portfolio/Portfolio";
-import Pricing from "../Pricing/Pricing";
 import RoadMapErrorBoundary from "../RoadMap/ui/chrome/RoadMapErrorBoundary";
+import Technologies from "../Technologies/Technologies";
 
 import LandingSectionSkeleton from "./LandingSectionSkeleton";
 import type {
@@ -381,11 +381,11 @@ export const LANDING_SECTIONS_CONFIG = [
     ),
   },
   {
-    id: "pricing",
+    id: "technologies",
     order: 3,
     desktop: createViewportConfig(
       "desktop",
-      Pricing,
+      Technologies,
       DESKTOP_CONTENT_VIRTUALIZED_BEHAVIOR,
       {
         sectionRole: "content",
@@ -394,7 +394,7 @@ export const LANDING_SECTIONS_CONFIG = [
     ),
     mobile: createViewportConfig(
       "mobile",
-      Pricing,
+      Technologies,
       MOBILE_CONTENT_STABLE_BEHAVIOR,
       {
         sectionRole: "content",
