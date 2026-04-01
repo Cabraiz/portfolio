@@ -1,0 +1,348 @@
+.root {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  display: grid;
+  gap: clamp(18px, 2vw, 28px);
+  padding: clamp(22px, 2.4vw, 30px);
+  border-radius: 30px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.015)),
+    radial-gradient(circle at top right, rgba(212, 175, 55, 0.09), transparent 44%),
+    rgba(8, 8, 11, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.075);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 22px 48px rgba(0, 0, 0, 0.24);
+  overflow: clip;
+  isolation: isolate;
+}
+
+.root::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 1px;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.08),
+    rgba(255, 255, 255, 0.02)
+  );
+  opacity: 0.55;
+}
+
+.header {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 16px;
+}
+
+.headerTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+.titleBlock {
+  min-width: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.eyebrow {
+  margin: 0;
+  color: rgba(255, 232, 186, 0.82);
+  font-size: 0.74rem;
+  line-height: 1;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.title {
+  margin: 0;
+  color: #fff8ea;
+  font-size: clamp(1.34rem, 1.95vw, 1.88rem);
+  line-height: 1.02;
+  font-weight: 700;
+  letter-spacing: -0.05em;
+}
+
+.description {
+  margin: 0;
+  max-width: 72ch;
+  color: rgba(255, 245, 230, 0.7);
+  font-size: clamp(0.95rem, 1.05vw, 1rem);
+  line-height: 1.78;
+}
+
+.headerMeta {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px 12px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.countChip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 32px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.025)),
+    rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.085);
+  color: rgba(255, 245, 230, 0.82);
+  font-size: 0.76rem;
+  line-height: 1;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.legendWrap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px 18px;
+  flex-wrap: wrap;
+}
+
+.legendCaption {
+  margin: 0;
+  color: rgba(255, 245, 230, 0.52);
+  font-size: 0.76rem;
+  line-height: 1.5;
+  font-weight: 500;
+}
+
+.content {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  min-width: 0;
+}
+
+.grid {
+  width: 100%;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: clamp(14px, 1.6vw, 20px);
+  align-items: stretch;
+}
+
+.gridCompact {
+  gap: clamp(12px, 1.2vw, 16px);
+}
+
+.cardItem {
+  min-width: 0;
+  grid-column: span 4;
+}
+
+.cardItemDense {
+  grid-column: span 3;
+}
+
+.cardItemFeatured {
+  grid-column: span 6;
+}
+
+.cardItemOffset {
+  margin-top: clamp(18px, 2vw, 30px);
+}
+
+.cardItemOffsetSoft {
+  margin-top: clamp(8px, 1vw, 14px);
+}
+
+.emptyState {
+  min-height: 260px;
+  display: grid;
+  place-items: center;
+  padding: clamp(22px, 2.8vw, 34px);
+  border-radius: 24px;
+  border: 1px dashed rgba(255, 255, 255, 0.12);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01)),
+    rgba(6, 6, 9, 0.82);
+}
+
+.emptyStateInner {
+  display: grid;
+  gap: 12px;
+  justify-items: center;
+  text-align: center;
+}
+
+.emptyStateTitle {
+  margin: 0;
+  color: rgba(255, 248, 234, 0.92);
+  font-size: 1.02rem;
+  line-height: 1.3;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.emptyStateDescription {
+  margin: 0;
+  max-width: 56ch;
+  color: rgba(255, 245, 230, 0.64);
+  font-size: 0.94rem;
+  line-height: 1.72;
+}
+
+.legend {
+  display: flex;
+  align-items: center;
+  gap: 10px 12px;
+  flex-wrap: wrap;
+}
+
+.legendItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 30px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.02)),
+    rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(255, 245, 230, 0.8);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  white-space: nowrap;
+}
+
+.legendItemStrong {
+  border-color: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 248, 234, 0.94);
+}
+
+.legendSwatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  flex-shrink: 0;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.12),
+    0 0 16px rgba(255, 255, 255, 0.08);
+}
+
+.legendLabel {
+  font-size: 0.74rem;
+  line-height: 1;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.legendValue {
+  font-size: 0.72rem;
+  line-height: 1;
+  font-weight: 600;
+  color: rgba(255, 245, 230, 0.58);
+}
+
+@media (max-width: 1380px) {
+  .cardItem {
+    grid-column: span 6;
+  }
+
+  .cardItemDense {
+    grid-column: span 4;
+  }
+
+  .cardItemFeatured {
+    grid-column: span 6;
+  }
+}
+
+@media (max-width: 1080px) {
+  .root {
+    padding: clamp(18px, 2.2vw, 24px);
+    border-radius: 26px;
+  }
+
+  .grid {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+
+  .cardItem,
+  .cardItemFeatured {
+    grid-column: span 3;
+  }
+
+  .cardItemDense {
+    grid-column: span 2;
+  }
+
+  .cardItemOffset,
+  .cardItemOffsetSoft {
+    margin-top: 0;
+  }
+}
+
+@media (max-width: 720px) {
+  .headerTop {
+    align-items: stretch;
+  }
+
+  .headerMeta {
+    justify-content: flex-start;
+  }
+
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .cardItem,
+  .cardItemDense,
+  .cardItemFeatured {
+    grid-column: span 1;
+  }
+
+  .legendWrap {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 560px) {
+  .root {
+    padding: 18px 16px;
+    border-radius: 22px;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cardItem,
+  .cardItemDense,
+  .cardItemFeatured {
+    grid-column: span 1;
+  }
+
+  .title {
+    font-size: 1.24rem;
+  }
+
+  .description {
+    font-size: 0.92rem;
+  }
+
+  .emptyState {
+    min-height: 220px;
+  }
+}

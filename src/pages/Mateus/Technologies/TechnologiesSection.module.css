@@ -1,0 +1,228 @@
+.section {
+  width: 100%;
+  min-width: 0;
+  color: #fdf5e6;
+  background:
+    radial-gradient(circle at top, rgba(255, 255, 255, 0.06), transparent 28%),
+    linear-gradient(180deg, rgba(10, 10, 12, 0.98), rgba(6, 6, 9, 1));
+}
+
+.viewport {
+  width: min(1540px, calc(100% - clamp(24px, 4vw, 56px)));
+  margin: 0 auto;
+  padding:
+    clamp(28px, 4vw, 52px)
+    0
+    clamp(36px, 4.5vw, 64px);
+  display: grid;
+  gap: clamp(22px, 2.6vw, 32px);
+}
+
+.hero {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  display: grid;
+  gap: clamp(18px, 2vw, 24px);
+  padding: clamp(24px, 2.8vw, 34px);
+  border-radius: 34px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.042), rgba(255, 255, 255, 0.015)),
+    radial-gradient(circle at top right, rgba(212, 175, 55, 0.1), transparent 42%),
+    rgba(8, 8, 11, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.075);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 24px 54px rgba(0, 0, 0, 0.24);
+  overflow: clip;
+  isolation: isolate;
+}
+
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 10% 14%, rgba(255, 255, 255, 0.06), transparent 20%),
+    radial-gradient(circle at 88% 16%, rgba(212, 175, 55, 0.08), transparent 24%);
+  pointer-events: none;
+}
+
+.heroCopy {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 14px;
+}
+
+.eyebrow {
+  margin: 0;
+  color: rgba(255, 232, 186, 0.84);
+  font-size: 0.74rem;
+  line-height: 1;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.title {
+  margin: 0;
+  max-width: 16ch;
+  color: #fff8ea;
+  font-size: clamp(1.72rem, 3vw, 3.1rem);
+  line-height: 0.98;
+  font-weight: 700;
+  letter-spacing: -0.06em;
+}
+
+.description {
+  margin: 0;
+  max-width: 74ch;
+  color: rgba(255, 245, 230, 0.72);
+  font-size: clamp(0.96rem, 1.08vw, 1.04rem);
+  line-height: 1.82;
+}
+
+.metricsRow {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.metricCard {
+  min-width: 0;
+  display: grid;
+  gap: 8px;
+  padding: 16px 16px 14px;
+  border-radius: 20px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.018)),
+    rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.075);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    0 16px 24px rgba(0, 0, 0, 0.12);
+}
+
+.metricLabel {
+  color: rgba(255, 245, 230, 0.54);
+  font-size: 0.74rem;
+  line-height: 1;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.metricValue {
+  color: rgba(255, 248, 234, 0.98);
+  font-size: clamp(1rem, 1.3vw, 1.14rem);
+  line-height: 1.18;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.filtersBlock {
+  width: 100%;
+  min-width: 0;
+}
+
+.desktopLayout {
+  width: 100%;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(360px, 0.85fr);
+  gap: clamp(18px, 2vw, 24px);
+  align-items: start;
+}
+
+.clustersColumn {
+  min-width: 0;
+}
+
+.clustersStack {
+  width: 100%;
+  min-width: 0;
+  display: grid;
+  gap: clamp(18px, 2vw, 24px);
+}
+
+.stickyAside {
+  min-width: 0;
+  position: sticky;
+  top: clamp(18px, 2vw, 26px);
+}
+
+.mobileStack {
+  width: 100%;
+  min-width: 0;
+  display: grid;
+  gap: clamp(18px, 2vw, 22px);
+}
+
+@media (max-width: 1180px) {
+  .desktopLayout {
+    grid-template-columns: 1fr;
+  }
+
+  .stickyAside {
+    position: relative;
+    top: auto;
+  }
+}
+
+@media (max-width: 920px) {
+  .viewport {
+    width: min(100%, calc(100% - 24px));
+    padding-top: 22px;
+    padding-bottom: 32px;
+  }
+
+  .hero {
+    padding: 18px 16px;
+    border-radius: 24px;
+  }
+
+  .title {
+    max-width: 100%;
+    font-size: 1.46rem;
+  }
+
+  .description {
+    font-size: 0.92rem;
+    line-height: 1.76;
+  }
+
+  .metricsRow {
+    grid-template-columns: 1fr;
+  }
+
+  .metricCard {
+    border-radius: 18px;
+  }
+}
+
+@media (max-width: 560px) {
+  .viewport {
+    width: calc(100% - 20px);
+  }
+
+  .eyebrow {
+    font-size: 0.7rem;
+  }
+
+  .title {
+    font-size: 1.28rem;
+  }
+
+  .description {
+    font-size: 0.88rem;
+  }
+
+  .metricValue {
+    font-size: 0.98rem;
+  }
+}

@@ -44,8 +44,8 @@ export const NAVBAR_DEFAULT_DESKTOP_GAP = "20px";
 
 export const NAVBAR_DEFAULT_CONTAINER_MAX_WIDTH = "min(1480px, 100%)";
 
-export const NAVBAR_LIVE_ANIMATION_LEFT_DEFAULT = "-30px";
-export const NAVBAR_LIVE_ANIMATION_LEFT_COMPACT = "-26px";
+export const NAVBAR_LIVE_ANIMATION_LEFT_DEFAULT = "-31px";
+export const NAVBAR_LIVE_ANIMATION_LEFT_COMPACT = "-29px";
 
 export function getNavbarHeight(isMobileView: boolean): number {
   return isMobileView ? NAVBAR_HEIGHT_MOBILE : NAVBAR_HEIGHT_DESKTOP;

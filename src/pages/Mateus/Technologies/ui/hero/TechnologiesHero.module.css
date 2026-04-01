@@ -1,0 +1,309 @@
+/* src/pages/Mateus/Technologies/ui/hero/TechnologiesHero.module.css */
+
+.technologiesHero {
+  --technologies-hero-radius: clamp(24px, 2.3vw, 34px);
+  --technologies-hero-panel-radius: clamp(20px, 1.8vw, 26px);
+  --technologies-hero-padding: clamp(22px, 2.5vw, 34px);
+  --technologies-hero-gap: clamp(18px, 2vw, 26px);
+  --technologies-hero-accent: #8b5cf6;
+  --technologies-hero-accent-glow: rgba(139, 92, 246, 0.24);
+  --technologies-hero-border-soft: rgba(255, 255, 255, 0.08);
+  --technologies-hero-border-strong: rgba(255, 255, 255, 0.14);
+  --technologies-hero-text-strong: rgba(255, 255, 255, 0.96);
+  --technologies-hero-text-base: rgba(255, 255, 255, 0.78);
+  --technologies-hero-text-soft: rgba(255, 255, 255, 0.58);
+  --technologies-hero-surface-bg:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.016)),
+    linear-gradient(180deg, rgba(12, 12, 16, 0.96), rgba(8, 8, 11, 0.985));
+  --technologies-hero-panel-bg:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.012)),
+    linear-gradient(180deg, rgba(16, 16, 21, 0.96), rgba(10, 10, 14, 0.985));
+  --technologies-hero-shadow: 0 20px 48px rgba(0, 0, 0, 0.22);
+
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  display: grid;
+  gap: 16px;
+}
+
+.technologiesHeroCompact {
+  --technologies-hero-padding: 20px;
+  --technologies-hero-gap: 16px;
+}
+
+.technologiesHeroInner {
+  position: relative;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--technologies-hero-gap);
+  align-items: stretch;
+  padding: var(--technologies-hero-padding);
+  border-radius: var(--technologies-hero-radius);
+  border: 1px solid var(--technologies-hero-border-soft);
+  background: var(--technologies-hero-surface-bg);
+  box-shadow: var(--technologies-hero-shadow);
+  backdrop-filter: blur(14px);
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.technologiesHeroInner::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(
+      circle at 16% 18%,
+      color-mix(in srgb, var(--technologies-hero-accent) 12%, transparent),
+      transparent 28%
+    ),
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--technologies-hero-accent) 9%, transparent),
+      transparent 42%
+    );
+  pointer-events: none;
+}
+
+.technologiesHeroCopy {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+  display: grid;
+  gap: 12px;
+  align-content: start;
+}
+
+.technologiesHeroEyebrow {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  max-width: 100%;
+  min-height: 34px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid
+    color-mix(in srgb, var(--technologies-hero-accent) 30%, transparent);
+  background: color-mix(
+    in srgb,
+    var(--technologies-hero-accent) 10%,
+    transparent
+  );
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.technologiesHeroTitle {
+  margin: 0;
+  max-width: 980px;
+  color: var(--technologies-hero-text-strong);
+  font-size: clamp(2rem, 4.4vw, 4.2rem);
+  line-height: 1.02;
+  letter-spacing: -0.045em;
+  font-weight: 800;
+  text-wrap: balance;
+}
+
+.technologiesHeroDescription {
+  margin: 0;
+  max-width: 70ch;
+  color: var(--technologies-hero-text-base);
+  font-size: clamp(1rem, 1.15vw, 1.1rem);
+  line-height: 1.74;
+}
+
+.technologiesHeroCaption {
+  margin: 2px 0 0;
+  max-width: 74ch;
+  color: var(--technologies-hero-text-soft);
+  font-size: 0.94rem;
+  line-height: 1.68;
+}
+
+.technologiesHeroActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.technologiesHeroVisual {
+  position: relative;
+  min-width: clamp(120px, 13vw, 196px);
+  display: grid;
+  place-items: center;
+  align-self: center;
+  justify-self: end;
+}
+
+.technologiesHeroVisualHex {
+  width: clamp(96px, 8vw, 132px);
+  aspect-ratio: 1 / 1;
+  clip-path: polygon(
+    25% 6.7%,
+    75% 6.7%,
+    100% 50%,
+    75% 93.3%,
+    25% 93.3%,
+    0% 50%
+  );
+  border: 1px solid
+    color-mix(in srgb, var(--technologies-hero-accent) 30%, transparent);
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(
+        in srgb,
+        var(--technologies-hero-accent) 24%,
+        rgba(255, 255, 255, 0.04)
+      ),
+      rgba(255, 255, 255, 0.02)
+    );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 24px 52px color-mix(
+      in srgb,
+      var(--technologies-hero-accent) 18%,
+      transparent
+    );
+}
+
+.technologiesHeroVisualRing {
+  position: absolute;
+  width: clamp(124px, 10vw, 164px);
+  aspect-ratio: 1 / 1;
+  border-radius: 999px;
+  border: 1px dashed
+    color-mix(in srgb, var(--technologies-hero-accent) 24%, transparent);
+  opacity: 0.68;
+}
+
+.technologiesHeroVisualCore {
+  position: absolute;
+  width: clamp(18px, 1.4vw, 24px);
+  aspect-ratio: 1 / 1;
+  border-radius: 999px;
+  background: var(--technologies-hero-accent);
+  box-shadow:
+    0 0 0 8px color-mix(in srgb, var(--technologies-hero-accent) 14%, transparent),
+    0 0 32px color-mix(in srgb, var(--technologies-hero-accent) 34%, transparent);
+}
+
+.technologiesHeroStatsWrapper {
+  min-width: 0;
+}
+
+.technologiesHeroStats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.technologiesHeroStatsCompact {
+  gap: 12px;
+}
+
+.technologiesHeroStatCard {
+  position: relative;
+  min-width: 0;
+  display: grid;
+  gap: 6px;
+  padding: 16px 16px 15px;
+  border-radius: var(--technologies-hero-panel-radius);
+  border: 1px solid var(--technologies-hero-border-soft);
+  background: var(--technologies-hero-panel-bg);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.18);
+  overflow: hidden;
+}
+
+.technologiesHeroStatCard::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: linear-gradient(
+    180deg,
+    var(--technologies-hero-accent),
+    color-mix(in srgb, var(--technologies-hero-accent) 24%, transparent)
+  );
+  opacity: 0.9;
+}
+
+.technologiesHeroStatLabel {
+  color: var(--technologies-hero-text-soft);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.technologiesHeroStatValue {
+  color: var(--technologies-hero-text-strong);
+  font-size: clamp(1.35rem, 2vw, 1.8rem);
+  line-height: 1;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.technologiesHeroStatHelper {
+  color: var(--technologies-hero-text-base);
+  font-size: 0.88rem;
+  line-height: 1.55;
+}
+
+@media (max-width: 1180px) {
+  .technologiesHeroStats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 920px) {
+  .technologiesHeroInner {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .technologiesHeroVisual {
+    display: none;
+  }
+}
+
+@media (max-width: 680px) {
+  .technologiesHero {
+    gap: 14px;
+  }
+
+  .technologiesHeroInner {
+    padding: 18px;
+  }
+
+  .technologiesHeroTitle {
+    font-size: clamp(1.68rem, 8vw, 2.48rem);
+    line-height: 1.04;
+  }
+
+  .technologiesHeroDescription,
+  .technologiesHeroCaption,
+  .technologiesHeroStatHelper {
+    line-height: 1.58;
+  }
+
+  .technologiesHeroStats {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .technologiesHeroStatCard {
+    padding: 14px;
+  }
+
+  .technologiesHeroEyebrow {
+    min-height: 31px;
+    padding: 0 12px;
+    font-size: 0.72rem;
+    letter-spacing: 0.11em;
+  }
+}

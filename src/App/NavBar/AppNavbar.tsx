@@ -226,7 +226,7 @@ export default function AppNavbar({
                     position: "absolute",
                     left: getNavbarLiveAnimationLeft(isCompactDesktop),
                     top: "50%",
-                    transform: "translateY(calc(-50% - 16px)) scale(0.42)",
+                    transform: "translateY(calc(-50% - 13px)) scale(0.42)",
                     pointerEvents: "none",
                   }}
                 >

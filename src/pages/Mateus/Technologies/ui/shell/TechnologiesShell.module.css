@@ -1,0 +1,498 @@
+/* src/pages/Mateus/Technologies/ui/shell/TechnologiesShell.module.css */
+
+.root {
+  --technologies-shell-max-width: 1440px;
+  --technologies-shell-section-min-height: calc(
+    100dvh - var(--app-navbar-height, 70px)
+  );
+  --technologies-shell-padding-top: clamp(30px, 4dvh, 52px);
+  --technologies-shell-padding-inline: clamp(18px, 3vw, 34px);
+  --technologies-shell-padding-bottom: clamp(22px, 3.5dvh, 38px);
+  --technologies-shell-gap: clamp(18px, 2vw, 26px);
+  --technologies-shell-header-gap: clamp(18px, 2vw, 24px);
+  --technologies-shell-surface-radius: clamp(24px, 2.2vw, 34px);
+  --technologies-shell-panel-radius: clamp(22px, 2vw, 30px);
+  --technologies-shell-soft-border: rgba(255, 255, 255, 0.08);
+  --technologies-shell-strong-border: rgba(255, 255, 255, 0.14);
+  --technologies-shell-text-strong: rgba(255, 255, 255, 0.96);
+  --technologies-shell-text-base: rgba(255, 255, 255, 0.76);
+  --technologies-shell-text-soft: rgba(255, 255, 255, 0.58);
+  --technologies-shell-surface-bg:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.018)),
+    linear-gradient(180deg, rgba(10, 10, 14, 0.96), rgba(7, 7, 10, 0.985));
+  --technologies-shell-panel-bg:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.012)),
+    linear-gradient(180deg, rgba(15, 15, 19, 0.96), rgba(10, 10, 13, 0.985));
+  --technologies-shell-accent: #8b5cf6;
+  --technologies-shell-accent-glow: rgba(139, 92, 246, 0.26);
+  --technologies-shell-shadow-rest: 0 18px 44px rgba(0, 0, 0, 0.22);
+  --technologies-shell-shadow-panel: 0 22px 54px rgba(0, 0, 0, 0.26);
+
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+}
+
+.rootCompact {
+  --technologies-shell-padding-top: clamp(20px, 2.8dvh, 34px);
+  --technologies-shell-padding-bottom: clamp(18px, 2.6dvh, 28px);
+  --technologies-shell-gap: 16px;
+}
+
+.section {
+  position: relative;
+  width: 100%;
+  min-height: var(--technologies-shell-section-min-height);
+  padding:
+    var(--technologies-shell-padding-top)
+    var(--technologies-shell-padding-inline)
+    var(--technologies-shell-padding-bottom);
+  overflow: hidden;
+  isolation: isolate;
+  background:
+    radial-gradient(
+      circle at 14% 12%,
+      color-mix(in srgb, var(--technologies-shell-accent) 20%, transparent),
+      transparent 26%
+    ),
+    radial-gradient(
+      circle at 84% 10%,
+      rgba(255, 179, 71, 0.08),
+      transparent 20%
+    ),
+    radial-gradient(
+      circle at 50% 86%,
+      rgba(56, 189, 248, 0.07),
+      transparent 24%
+    ),
+    linear-gradient(180deg, rgba(8, 8, 10, 0.96), rgba(11, 11, 14, 0.985));
+}
+
+.background {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.backgroundGlowPrimary,
+.backgroundGlowSecondary {
+  position: absolute;
+  border-radius: 999px;
+  filter: blur(56px);
+  opacity: 0.9;
+}
+
+.backgroundGlowPrimary {
+  top: -12%;
+  right: -8%;
+  width: clamp(220px, 28vw, 420px);
+  height: clamp(220px, 28vw, 420px);
+  background: var(--technologies-shell-accent-glow);
+}
+
+.backgroundGlowSecondary {
+  bottom: -16%;
+  left: -8%;
+  width: clamp(220px, 24vw, 360px);
+  height: clamp(220px, 24vw, 360px);
+  background: rgba(59, 130, 246, 0.14);
+}
+
+.backgroundGrid {
+  position: absolute;
+  inset: 0;
+  opacity: 0.18;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.032) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.032) 1px, transparent 1px);
+  background-size: 34px 34px;
+  mask-image: radial-gradient(circle at center, black 34%, transparent 86%);
+}
+
+.content {
+  position: relative;
+  z-index: 1;
+  width: min(100%, var(--technologies-shell-max-width));
+  min-width: 0;
+  margin: 0 auto;
+  display: grid;
+  gap: var(--technologies-shell-gap);
+}
+
+.header {
+  display: grid;
+  gap: var(--technologies-shell-header-gap);
+}
+
+.headerShell {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: clamp(16px, 2vw, 24px);
+  align-items: stretch;
+  padding: clamp(22px, 2.4vw, 34px);
+  border-radius: var(--technologies-shell-surface-radius);
+  border: 1px solid var(--technologies-shell-soft-border);
+  background: var(--technologies-shell-surface-bg);
+  box-shadow: var(--technologies-shell-shadow-rest);
+  backdrop-filter: blur(14px);
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.headerShell::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--technologies-shell-accent) 9%, transparent),
+      transparent 42%
+    );
+  pointer-events: none;
+}
+
+.headerCopy {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  min-height: 32px;
+  margin: 0;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--technologies-shell-accent) 32%, transparent);
+  background: color-mix(in srgb, var(--technologies-shell-accent) 9%, transparent);
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.title {
+  margin: 0;
+  max-width: 980px;
+  color: var(--technologies-shell-text-strong);
+  font-size: clamp(2rem, 4.6vw, 4.3rem);
+  line-height: 1.02;
+  letter-spacing: -0.04em;
+  font-weight: 800;
+  text-wrap: balance;
+}
+
+.description {
+  margin: 0;
+  max-width: 960px;
+  color: var(--technologies-shell-text-base);
+  font-size: clamp(1rem, 1.2vw, 1.12rem);
+  line-height: 1.78;
+}
+
+.caption {
+  margin: 2px 0 0;
+  max-width: 900px;
+  color: var(--technologies-shell-text-soft);
+  font-size: 0.94rem;
+  line-height: 1.72;
+}
+
+.headerAccent {
+  position: relative;
+  min-width: clamp(120px, 12vw, 180px);
+  display: grid;
+  place-items: center;
+  align-self: center;
+  justify-self: end;
+}
+
+.headerAccentHex {
+  width: clamp(92px, 8vw, 128px);
+  aspect-ratio: 1 / 1;
+  clip-path: polygon(
+    25% 6.7%,
+    75% 6.7%,
+    100% 50%,
+    75% 93.3%,
+    25% 93.3%,
+    0% 50%
+  );
+  border: 1px solid color-mix(in srgb, var(--technologies-shell-accent) 28%, transparent);
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--technologies-shell-accent) 24%, rgba(255, 255, 255, 0.04)),
+      rgba(255, 255, 255, 0.02)
+    );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 22px 52px color-mix(in srgb, var(--technologies-shell-accent) 18%, transparent);
+}
+
+.headerAccentRing {
+  position: absolute;
+  width: clamp(120px, 10vw, 160px);
+  aspect-ratio: 1 / 1;
+  border-radius: 999px;
+  border: 1px dashed color-mix(in srgb, var(--technologies-shell-accent) 22%, transparent);
+  opacity: 0.68;
+}
+
+.metricsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.metricCard {
+  position: relative;
+  min-width: 0;
+  display: grid;
+  gap: 6px;
+  padding: 16px 16px 15px;
+  border-radius: 22px;
+  border: 1px solid var(--technologies-shell-soft-border);
+  background: var(--technologies-shell-panel-bg);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.18);
+  overflow: hidden;
+}
+
+.metricCard::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: linear-gradient(
+    180deg,
+    var(--technologies-shell-accent),
+    color-mix(in srgb, var(--technologies-shell-accent) 22%, transparent)
+  );
+  opacity: 0.88;
+}
+
+.metricLabel {
+  color: var(--technologies-shell-text-soft);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.metricValue {
+  color: var(--technologies-shell-text-strong);
+  font-size: clamp(1.35rem, 2vw, 1.8rem);
+  line-height: 1;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.metricHelper {
+  color: var(--technologies-shell-text-base);
+  font-size: 0.88rem;
+  line-height: 1.55;
+}
+
+.body {
+  display: grid;
+  grid-template-columns: minmax(0, 1.24fr) minmax(320px, 0.76fr);
+  gap: var(--technologies-shell-gap);
+  align-items: start;
+}
+
+.mainColumn,
+.asideColumn {
+  min-width: 0;
+  display: grid;
+  gap: 14px;
+}
+
+.filtersRow {
+  min-width: 0;
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border-radius: var(--technologies-shell-panel-radius);
+  border: 1px solid var(--technologies-shell-soft-border);
+  background: var(--technologies-shell-panel-bg);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.16);
+}
+
+.canvasPanel,
+.spotlightPanel,
+.supportingContent {
+  min-width: 0;
+  border-radius: var(--technologies-shell-surface-radius);
+  border: 1px solid var(--technologies-shell-soft-border);
+  background: var(--technologies-shell-surface-bg);
+  box-shadow: var(--technologies-shell-shadow-panel);
+  backdrop-filter: blur(14px);
+  overflow: hidden;
+}
+
+.canvasInner {
+  min-width: 0;
+  min-height: clamp(420px, 62dvh, 860px);
+  padding: clamp(16px, 1.8vw, 22px);
+}
+
+.gridArea {
+  min-width: 0;
+  min-height: 100%;
+  display: grid;
+  align-content: start;
+}
+
+.spotlightPanel {
+  min-height: clamp(420px, 62dvh, 860px);
+  padding: clamp(16px, 1.8vw, 22px);
+  position: sticky;
+  top: calc(var(--app-navbar-height, 70px) + 16px);
+}
+
+.supportingContent {
+  padding: clamp(16px, 1.8vw, 22px);
+}
+
+.emptyState {
+  position: relative;
+  min-height: 100%;
+  display: grid;
+  place-items: center;
+  padding: clamp(24px, 4vw, 48px);
+  text-align: center;
+  overflow: hidden;
+}
+
+.emptyStateHex {
+  position: absolute;
+  width: clamp(200px, 28vw, 320px);
+  aspect-ratio: 1 / 1;
+  clip-path: polygon(
+    25% 6.7%,
+    75% 6.7%,
+    100% 50%,
+    75% 93.3%,
+    25% 93.3%,
+    0% 50%
+  );
+  border: 1px solid color-mix(in srgb, var(--technologies-shell-accent) 18%, transparent);
+  background:
+    radial-gradient(
+      circle at center,
+      color-mix(in srgb, var(--technologies-shell-accent) 12%, transparent),
+      transparent 62%
+    );
+  opacity: 0.76;
+  filter: blur(0.2px);
+}
+
+.emptyStateContent {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 10px;
+  max-width: 560px;
+}
+
+.emptyStateEyebrow {
+  color: var(--technologies-shell-text-soft);
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.emptyStateTitle {
+  margin: 0;
+  color: var(--technologies-shell-text-strong);
+  font-size: clamp(1.28rem, 2vw, 1.72rem);
+  line-height: 1.1;
+  font-weight: 800;
+}
+
+.emptyStateDescription {
+  margin: 0;
+  color: var(--technologies-shell-text-base);
+  font-size: 0.98rem;
+  line-height: 1.7;
+}
+
+@media (max-width: 1180px) {
+  .metricsGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .spotlightPanel {
+    position: relative;
+    top: auto;
+    min-height: auto;
+  }
+}
+
+@media (max-width: 900px) {
+  .headerShell {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .headerAccent {
+    display: none;
+  }
+
+  .canvasInner {
+    min-height: 360px;
+  }
+}
+
+@media (max-width: 680px) {
+  .section {
+    min-height: auto;
+    padding:
+      clamp(20px, 5dvh, 34px)
+      14px
+      clamp(18px, 4dvh, 26px);
+  }
+
+  .content {
+    gap: 14px;
+  }
+
+  .metricsGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .headerShell {
+    padding: 18px;
+  }
+
+  .filtersRow,
+  .canvasInner,
+  .spotlightPanel,
+  .supportingContent {
+    padding: 14px;
+  }
+
+  .title {
+    font-size: clamp(1.64rem, 8vw, 2.46rem);
+    line-height: 1.04;
+  }
+
+  .description,
+  .caption,
+  .emptyStateDescription {
+    line-height: 1.62;
+  }
+}
