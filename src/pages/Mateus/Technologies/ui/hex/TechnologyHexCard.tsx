@@ -41,18 +41,6 @@ type TechnologyHexCardProps = Readonly<{
   onSelect?: (item: TechnologyCatalogItem) => void;
 }>;
 
-function formatExperience(years?: number | null): string {
-  if (typeof years !== "number" || Number.isNaN(years) || years <= 0) {
-    return "Experiência sólida";
-  }
-
-  if (years === 1) {
-    return "1 ano";
-  }
-
-  return `${years} anos`;
-}
-
 function getInitials(name: string): string {
   const tokens = name
     .split(/[\s/|()-]+/)
@@ -144,17 +132,9 @@ function TechnologyHexCardComponent({
                 label={item.categoryLabel}
                 tone={item.tone ?? "neutral"}
               />
-              <TechnologyHexBadge
-                label={formatExperience(item.years)}
-                emphasis="strong"
-              />
             </div>
 
-            <div className={styles.headerSide}>
-              {item.levelLabel ? (
-                <TechnologyHexBadge label={item.levelLabel} />
-              ) : null}
-            </div>
+            <div className={styles.headerSide} />
           </header>
 
           <div className={styles.visual} aria-hidden="true">

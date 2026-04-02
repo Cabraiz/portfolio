@@ -208,38 +208,6 @@ function useIsMobileTechnologies(): boolean {
   return isMobile;
 }
 
-function formatYears(years?: number | null): string {
-  if (typeof years !== "number" || Number.isNaN(years) || years <= 0) {
-    return "Experiência consistente";
-  }
-
-  if (years === 1) {
-    return "1 ano";
-  }
-
-  return `${years} anos`;
-}
-
-function resolveLevelLabel(years?: number | null): string {
-  if (typeof years !== "number" || Number.isNaN(years) || years <= 0) {
-    return "Base sólida";
-  }
-
-  if (years >= 9) {
-    return "Sênior";
-  }
-
-  if (years >= 6) {
-    return "Avançado";
-  }
-
-  if (years >= 3) {
-    return "Forte";
-  }
-
-  return "Em evolução";
-}
-
 function resolveConfidenceLabel(years?: number | null): string {
   if (typeof years !== "number" || Number.isNaN(years) || years <= 0) {
     return "Recorrente";
@@ -347,15 +315,14 @@ function buildHighlights(
   item: TechnologyItem,
   clusterMeta: ClusterMeta,
 ): readonly string[] {
-  const levelLabel = resolveLevelLabel(item.years);
   const deliveryLabel = resolveDeliveryLabel(item.years);
+  const confidenceLabel = resolveConfidenceLabel(item.years);
 
   return [
-    formatYears(item.years),
-    levelLabel,
     clusterMeta.shortFilterLabel,
     deliveryLabel,
-  ].slice(0, 4);
+    confidenceLabel,
+  ].slice(0, 3);
 }
 
 function buildRelatedIcons(
@@ -429,7 +396,7 @@ function buildEvidenceGallery(
       {
         id: `${item.id}-evidence-ecosystem`,
         title: `${item.name} no ecossistema relacionado`,
-        description: `Bloco visual pensado para logo, screenshot, diagrama ou interface que reforce senioridade e repertório sobre ${item.name}.`,
+        description: `Bloco visual pensado para logo, screenshot, diagrama ou interface que reforce repertório e profundidade sobre ${item.name}.`,
         meta: "Ecosystem View",
       },
     ];
@@ -457,7 +424,6 @@ function mapTechnologyItemToCatalogItem(
 ): TechnologyCatalogItem {
   const clusterId = mapCategoryToClusterId(item.categoryId);
   const clusterMeta = CLUSTER_META[clusterId];
-  const levelLabel = resolveLevelLabel(item.years);
   const confidenceLabel = resolveConfidenceLabel(item.years);
   const deliveryLabel = resolveDeliveryLabel(item.years);
   const displayName = item.label ?? item.name;
@@ -476,7 +442,7 @@ function mapTechnologyItemToCatalogItem(
     featured: item.featured,
     priority: item.priority,
     categoryLabel: clusterMeta.title,
-    levelLabel,
+    levelLabel: undefined,
     logoSrc,
     iconSrc: logoSrc,
     tone: clusterMeta.tone,
@@ -487,25 +453,21 @@ function mapTechnologyItemToCatalogItem(
     subtitle:
       item.summary ??
       `${displayName} aparece aqui como uma capacidade aplicada dentro do eixo ${clusterMeta.title.toLowerCase()}, com foco em profundidade técnica, consistência de uso e contexto real de entrega.`,
-    levelDescription: `${formatYears(item.years)} de atuação somados a cenários de entrega, manutenção, evolução e integração com o restante da stack.`,
+    levelDescription:
+      "Capacidade aplicada em contexto real de entrega, manutenção, evolução e integração com o restante da stack.",
     heroImageSrc: item.heroAsset?.src,
     heroCaptionTitle: `${displayName} dentro de ${clusterMeta.title}`,
     heroCaptionText:
       item.heroAsset?.alt ??
-      "Leitura editorial da tecnologia com experiência, profundidade, ecossistema relacionado e organização visual por domínio.",
+      "Leitura editorial da tecnologia com profundidade, ecossistema relacionado e organização visual por domínio.",
     highlights: buildHighlights(item, clusterMeta),
     relatedStack: buildRelatedStack(item, clusterMeta),
     evidenceGallery: buildEvidenceGallery(item),
     metrics: [
       {
-        id: `${item.id}-metric-experience`,
-        label: "Experiência",
-        value: formatYears(item.years),
-      },
-      {
-        id: `${item.id}-metric-level`,
-        label: "Nível",
-        value: levelLabel,
+        id: `${item.id}-metric-domain`,
+        label: "Domínio",
+        value: clusterMeta.title,
       },
       {
         id: `${item.id}-metric-delivery`,
@@ -513,9 +475,9 @@ function mapTechnologyItemToCatalogItem(
         value: deliveryLabel,
       },
       {
-        id: `${item.id}-metric-cluster`,
-        label: "Cluster",
-        value: clusterMeta.shortFilterLabel,
+        id: `${item.id}-metric-confidence`,
+        label: "Recorrência",
+        value: confidenceLabel,
       },
     ],
     deliveryLabel,
@@ -573,12 +535,6 @@ function buildLegendItems(
   items: readonly TechnologyCatalogItem[],
 ): readonly TechnologyClusterLegendItem[] {
   const clusterMeta = CLUSTER_META[clusterId];
-  const withKnownYears = items.filter(
-    (item) => typeof item.years === "number" && Number.isFinite(item.years),
-  );
-  const maxYears = withKnownYears.length
-    ? Math.max(...withKnownYears.map((item) => item.years as number))
-    : null;
 
   return [
     {
@@ -589,16 +545,16 @@ function buildLegendItems(
       emphasis: "strong",
     },
     {
-      id: `${clusterId}-legend-depth`,
-      label: "Maior senioridade",
-      value: maxYears ? `${maxYears} anos` : "Base sólida",
+      id: `${clusterId}-legend-delivery`,
+      label: "Entrega",
+      value: "Aplicação real",
       color:
         "linear-gradient(180deg, rgba(255,248,230,0.92), rgba(255,248,230,0.42))",
     },
     {
       id: `${clusterId}-legend-focus`,
       label: "Leitura",
-      value: "UX + profundidade",
+      value: "Produto + arquitetura",
       color:
         "linear-gradient(180deg, rgba(255,255,255,0.76), rgba(255,255,255,0.36))",
     },
@@ -608,25 +564,11 @@ function buildLegendItems(
 function getExperienceRangeLabel(
   items: readonly TechnologyCatalogItem[],
 ): string {
-  const knownYears = items
-    .map((item) => item.years)
-    .filter(
-      (years): years is number =>
-        typeof years === "number" && Number.isFinite(years) && years > 0,
-    );
-
-  if (!knownYears.length) {
+  if (!items.length) {
     return "Base consolidada";
   }
 
-  const min = Math.min(...knownYears);
-  const max = Math.max(...knownYears);
-
-  if (min === max) {
-    return `${max} anos`;
-  }
-
-  return `${min}–${max} anos`;
+  return "Cobertura multidisciplinar";
 }
 
 function buildClusters(
