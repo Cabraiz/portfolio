@@ -7,8 +7,16 @@
   padding: clamp(18px, 2vw, 24px);
   border-radius: 26px;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.038), rgba(255, 255, 255, 0.014)),
-    radial-gradient(circle at top right, rgba(212, 175, 55, 0.08), transparent 42%),
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.038),
+      rgba(255, 255, 255, 0.014)
+    ),
+    radial-gradient(
+      circle at top right,
+      rgba(212, 175, 55, 0.08),
+      transparent 42%
+    ),
     rgba(8, 8, 11, 0.92);
   border: 1px solid rgba(255, 255, 255, 0.075);
   box-shadow:
@@ -16,6 +24,16 @@
     0 18px 38px rgba(0, 0, 0, 0.22);
   overflow: clip;
   isolation: isolate;
+}
+
+.rootHeaderRail {
+  gap: 12px;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  overflow: visible;
 }
 
 .header {
@@ -31,6 +49,15 @@
   min-width: 0;
   display: grid;
   gap: 8px;
+}
+
+.utilityRow {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 .eyebrow {
@@ -76,7 +103,11 @@
   padding: 7px 12px;
   border-radius: 999px;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.02)),
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.055),
+      rgba(255, 255, 255, 0.02)
+    ),
     rgba(255, 255, 255, 0.02);
   border: 1px solid rgba(255, 255, 255, 0.085);
   color: rgba(255, 245, 230, 0.82);
@@ -88,6 +119,21 @@
   white-space: nowrap;
 }
 
+.summaryChipHeaderRail {
+  min-height: 32px;
+  padding: 6px 11px;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.045),
+      rgba(255, 255, 255, 0.018)
+    ),
+    rgba(255, 255, 255, 0.016);
+  border-color: rgba(255, 255, 255, 0.075);
+  color: rgba(255, 245, 230, 0.76);
+  font-size: 0.7rem;
+}
+
 .resetButton {
   min-height: 36px;
   display: inline-flex;
@@ -97,7 +143,11 @@
   padding: 8px 14px;
   border-radius: 999px;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.02)),
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.055),
+      rgba(255, 255, 255, 0.02)
+    ),
     rgba(255, 255, 255, 0.024);
   border: 1px solid rgba(255, 255, 255, 0.09);
   color: rgba(255, 245, 230, 0.84);
@@ -112,6 +162,21 @@
     background 180ms ease;
   cursor: pointer;
   white-space: nowrap;
+}
+
+.resetButtonHeaderRail {
+  min-height: 32px;
+  padding: 7px 12px;
+  font-size: 0.7rem;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.045),
+      rgba(255, 255, 255, 0.018)
+    ),
+    rgba(255, 255, 255, 0.016);
+  border-color: rgba(255, 255, 255, 0.075);
+  color: rgba(255, 245, 230, 0.78);
 }
 
 .resetButton:hover {
@@ -154,6 +219,16 @@
   background: transparent;
 }
 
+.filtersScrollerHeaderRail {
+  overflow: visible;
+  padding-bottom: 0;
+  scrollbar-width: none;
+}
+
+.filtersScrollerHeaderRail::-webkit-scrollbar {
+  display: none;
+}
+
 .filterList {
   width: max-content;
   min-width: 100%;
@@ -161,6 +236,14 @@
   align-items: center;
   gap: 10px 12px;
   flex-wrap: nowrap;
+}
+
+.filterListHeaderRail {
+  width: 100%;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(170px, 100%), 1fr));
+  gap: 10px;
 }
 
 .filterButton {
@@ -174,7 +257,11 @@
   padding: 10px 14px;
   border-radius: 18px;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.018)),
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.05),
+      rgba(255, 255, 255, 0.018)
+    ),
     rgba(255, 255, 255, 0.022);
   border: 1px solid rgba(255, 255, 255, 0.08);
   color: rgba(255, 245, 230, 0.82);
@@ -190,6 +277,19 @@
   cursor: pointer;
   white-space: nowrap;
   isolation: isolate;
+}
+
+.filterButtonHeaderRail {
+  width: 100%;
+  min-width: 0;
+  min-height: 52px;
+  padding: 12px 14px;
+  border-radius: 18px;
+  justify-content: flex-start;
+  white-space: normal;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.035),
+    0 12px 22px rgba(0, 0, 0, 0.12);
 }
 
 .filterButton::before {
@@ -226,9 +326,17 @@
 
 .filterButtonActive {
   color: #fff9ec;
-  border-color: color-mix(in srgb, var(--filter-accent) 58%, rgba(255, 255, 255, 0.16));
+  border-color: color-mix(
+    in srgb,
+    var(--filter-accent) 58%,
+    rgba(255, 255, 255, 0.16)
+  );
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.085), rgba(255, 255, 255, 0.028)),
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.085),
+      rgba(255, 255, 255, 0.028)
+    ),
     rgba(255, 255, 255, 0.03);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.06),
@@ -261,6 +369,12 @@
     0 0 20px color-mix(in srgb, var(--filter-accent) 34%, transparent);
 }
 
+.filterDotHeaderRail {
+  width: 10px;
+  height: 10px;
+  margin-top: 1px;
+}
+
 .filterLabelGroup {
   position: relative;
   z-index: 1;
@@ -268,6 +382,13 @@
   display: flex;
   align-items: baseline;
   gap: 8px;
+}
+
+.filterLabelGroupHeaderRail {
+  width: 100%;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
 }
 
 .filterLabel {
@@ -285,6 +406,11 @@
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+}
+
+.filterCountHeaderRail {
+  margin-left: auto;
+  white-space: nowrap;
 }
 
 .filterButtonActive .filterCount {
@@ -314,6 +440,12 @@
   font-weight: 600;
 }
 
+@media (max-width: 900px) {
+  .filterListHeaderRail {
+    grid-template-columns: repeat(auto-fit, minmax(min(150px, 100%), 1fr));
+  }
+}
+
 @media (max-width: 720px) {
   .root {
     padding: 16px;
@@ -328,14 +460,26 @@
     justify-content: flex-start;
   }
 
+  .utilityRow {
+    justify-content: flex-start;
+  }
+
   .filterButton {
     min-height: 44px;
     padding: 9px 12px;
     border-radius: 16px;
   }
 
+  .filterButtonHeaderRail {
+    min-height: 48px;
+  }
+
   .filterLabel {
     font-size: 0.8rem;
+  }
+
+  .filterListHeaderRail {
+    grid-template-columns: 1fr 1fr;
   }
 }
 
@@ -351,5 +495,13 @@
   .footer {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .filterListHeaderRail {
+    grid-template-columns: 1fr;
+  }
+
+  .filterLabelGroupHeaderRail {
+    align-items: baseline;
   }
 }

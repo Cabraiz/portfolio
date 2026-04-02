@@ -15,36 +15,6 @@ const TechnologiesDesktop: React.FC<TechnologiesPresentationProps> = ({
   onResetFilter,
   onSelectItem,
 }) => {
-  const handleSearchButtonClick = (): void => {
-    const searchTarget = document.querySelector(
-      "[data-technologies-search-target='true']",
-    );
-
-    if (searchTarget instanceof HTMLElement) {
-      searchTarget.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-      });
-
-      window.requestAnimationFrame(() => {
-        searchTarget.focus?.();
-      });
-
-      return;
-    }
-
-    const filtersTarget = document.querySelector(
-      "[data-technologies-filters='true']",
-    );
-
-    if (filtersTarget instanceof HTMLElement) {
-      filtersTarget.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
-    }
-  };
-
   return (
     <section className={styles.viewport} aria-labelledby="technologies-title">
       <header className={styles.heroCompact}>
@@ -56,34 +26,25 @@ const TechnologiesDesktop: React.FC<TechnologiesPresentationProps> = ({
           </h2>
         </div>
 
-        <div className={styles.heroCompactActions}>
-          <button
-            type="button"
-            className={styles.searchTriggerButton}
-            onClick={handleSearchButtonClick}
-            aria-label="Buscar tecnologia"
-          >
-            Buscar tecnologia
-          </button>
+        <div
+          className={styles.heroCompactFilters}
+          data-technologies-filters="true"
+        >
+          <div className={styles.filtersHeroPanel}>
+            <TechnologiesFilterBar
+              items={filters}
+              activeFilterId={activeFilterId}
+              onChange={onChangeFilter}
+              onReset={onResetFilter}
+              summaryLabel=""
+              resultText=""
+              title=""
+              description=""
+              helperText=""
+            />
+          </div>
         </div>
       </header>
-
-      <div
-        className={styles.filtersBlockCompact}
-        data-technologies-filters="true"
-      >
-        <TechnologiesFilterBar
-          items={filters}
-          activeFilterId={activeFilterId}
-          onChange={onChangeFilter}
-          onReset={onResetFilter}
-          summaryLabel=""
-          resultText=""
-          title=""
-          description=""
-          helperText=""
-        />
-      </div>
 
       <div className={styles.desktopLayout}>
         <div className={styles.clustersColumn}>
@@ -106,7 +67,9 @@ const TechnologiesDesktop: React.FC<TechnologiesPresentationProps> = ({
         </div>
 
         <aside className={styles.stickyAside}>
-          <TechnologySpotlightPanel item={activeItem} />
+          <div className={styles.stickyAsideInner}>
+            <TechnologySpotlightPanel item={activeItem} />
+          </div>
         </aside>
       </div>
     </section>
