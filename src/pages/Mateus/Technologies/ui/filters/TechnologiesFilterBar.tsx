@@ -12,6 +12,8 @@ function isBlank(value?: string): boolean {
   return !value || value.trim().length === 0;
 }
 
+const COUNT_FORMATTER = new Intl.NumberFormat("pt-BR");
+
 export type TechnologiesFilterItem = Readonly<{
   id: string;
   label: string;
@@ -21,7 +23,10 @@ export type TechnologiesFilterItem = Readonly<{
   disabled?: boolean;
 }>;
 
-export type TechnologiesFilterBarVariant = "default" | "headerRail";
+export type TechnologiesFilterBarVariant =
+  | "default"
+  | "headerRail"
+  | "clusterNav";
 
 type TechnologiesFilterBarProps = Readonly<{
   items: readonly TechnologiesFilterItem[];
@@ -47,39 +52,76 @@ type TechnologiesFilterBarProps = Readonly<{
 
 type ResolvedFilterItem = TechnologiesFilterItem;
 
-function formatCount(count?: number): string | null {
+function normalizeCount(count?: number): number | null {
   if (typeof count !== "number" || Number.isNaN(count) || count < 0) {
     return null;
   }
 
-  if (count === 1) {
+  return count;
+}
+
+function formatVisualCount(
+  count?: number,
+  isCompactRail?: boolean,
+): string | null {
+  const normalizedCount = normalizeCount(count);
+
+  if (normalizedCount === null) {
+    return null;
+  }
+
+  if (isCompactRail) {
+    return COUNT_FORMATTER.format(normalizedCount);
+  }
+
+  if (normalizedCount === 1) {
     return "1 item";
   }
 
-  return `${count} itens`;
+  return `${COUNT_FORMATTER.format(normalizedCount)} itens`;
 }
 
-function TechnologiesFilterBarComponent({
-  items,
-  activeFilterId,
-  onChange,
-  className,
-  variant,
-  eyebrow,
-  title,
-  description,
-  summaryLabel,
-  helperText,
-  resultText,
-  ariaLabel,
-  allFilterId = "all",
-  allFilterLabel = "Todos",
-  allFilterCount,
-  includeAllFilter = true,
-  showResetButton = true,
-  resetLabel = "Limpar filtro",
-  onReset,
-}: TechnologiesFilterBarProps) {
+function formatAriaCount(count?: number): string | null {
+  const normalizedCount = normalizeCount(count);
+
+  if (normalizedCount === null) {
+    return null;
+  }
+
+  if (normalizedCount === 1) {
+    return "1 item";
+  }
+
+  return `${COUNT_FORMATTER.format(normalizedCount)} itens`;
+}
+
+function TechnologiesFilterBarComponent(props: TechnologiesFilterBarProps) {
+  const {
+    items,
+    activeFilterId,
+    onChange,
+    className,
+    variant,
+    eyebrow,
+    title,
+    description,
+    summaryLabel,
+    helperText,
+    resultText,
+    ariaLabel,
+    allFilterId = "all",
+    allFilterLabel = "Todos",
+    allFilterCount,
+    includeAllFilter = true,
+    showResetButton,
+    resetLabel,
+    onReset,
+  } = props;
+
+  void showResetButton;
+  void resetLabel;
+  void onReset;
+
   const resolvedItems = useMemo<ResolvedFilterItem[]>(() => {
     const nextItems = [...items];
 
@@ -98,7 +140,7 @@ function TechnologiesFilterBarComponent({
         id: allFilterId,
         label: allFilterLabel,
         count: allFilterCount,
-        color: "rgba(212, 175, 55, 0.95)",
+        color: "rgba(186, 152, 82, 0.82)",
       },
       ...nextItems,
     ];
@@ -110,59 +152,47 @@ function TechnologiesFilterBarComponent({
     isBlank(helperText) &&
     isBlank(resultText) &&
     isBlank(summaryLabel)
-      ? "headerRail"
+      ? "clusterNav"
       : "default";
 
   const resolvedVariant = variant ?? inferredVariant;
-  const isHeaderRail = resolvedVariant === "headerRail";
+  const isCompactRail =
+    resolvedVariant === "headerRail" || resolvedVariant === "clusterNav";
 
-  const resolvedEyebrow =
-    eyebrow ?? (isHeaderRail ? "" : "Capability Filters");
+  const resolvedEyebrow = eyebrow ?? (isCompactRail ? "" : "Capability Filters");
   const resolvedTitle =
-    title ?? (isHeaderRail ? "" : "Filtrar tecnologias por domínio");
+    title ?? (isCompactRail ? "" : "Filtrar tecnologias por domínio");
   const resolvedDescription =
     description ??
-    (isHeaderRail
+    (isCompactRail
       ? ""
       : "Organize a leitura por especialidade e destaque rapidamente os blocos mais relevantes da stack.");
   const resolvedHelperText =
     helperText ??
-    (isHeaderRail
+    (isCompactRail
       ? ""
       : "Selecione um domínio para focar a leitura do grid e do spotlight técnico.");
   const resolvedResultText = resultText ?? "";
   const resolvedAriaLabel = ariaLabel ?? "Filtros de tecnologias";
 
-  const showReset = showResetButton && activeFilterId !== allFilterId;
-
   const showHeader =
-    !isHeaderRail &&
+    !isCompactRail &&
     (!isBlank(resolvedEyebrow) ||
       !isBlank(resolvedTitle) ||
       !isBlank(resolvedDescription) ||
-      Boolean(summaryLabel) ||
-      showReset);
+      Boolean(summaryLabel));
 
-  const showUtilityRow = isHeaderRail && (Boolean(summaryLabel) || showReset);
+  const showUtilityRow = isCompactRail && Boolean(summaryLabel);
 
   const showFooter =
-    !isHeaderRail &&
+    !isCompactRail &&
     (!isBlank(resolvedHelperText) || !isBlank(resolvedResultText));
-
-  const handleReset = (): void => {
-    if (onReset) {
-      onReset();
-      return;
-    }
-
-    onChange(allFilterId);
-  };
 
   return (
     <section
       className={joinClasses(
         styles.root,
-        isHeaderRail && styles.rootHeaderRail,
+        isCompactRail && styles.rootCompactRail,
         className,
       )}
       aria-label={resolvedAriaLabel}
@@ -189,17 +219,6 @@ function TechnologiesFilterBarComponent({
             {summaryLabel ? (
               <span className={styles.summaryChip}>{summaryLabel}</span>
             ) : null}
-
-            {showReset ? (
-              <button
-                type="button"
-                className={styles.resetButton}
-                onClick={handleReset}
-                aria-label={resetLabel}
-              >
-                {resetLabel}
-              </button>
-            ) : null}
           </div>
         </div>
       ) : null}
@@ -210,25 +229,11 @@ function TechnologiesFilterBarComponent({
             <span
               className={joinClasses(
                 styles.summaryChip,
-                styles.summaryChipHeaderRail,
+                styles.summaryChipCompactRail,
               )}
             >
               {summaryLabel}
             </span>
-          ) : null}
-
-          {showReset ? (
-            <button
-              type="button"
-              className={joinClasses(
-                styles.resetButton,
-                styles.resetButtonHeaderRail,
-              )}
-              onClick={handleReset}
-              aria-label={resetLabel}
-            >
-              {resetLabel}
-            </button>
           ) : null}
         </div>
       ) : null}
@@ -236,20 +241,21 @@ function TechnologiesFilterBarComponent({
       <div
         className={joinClasses(
           styles.filtersScroller,
-          isHeaderRail && styles.filtersScrollerHeaderRail,
+          isCompactRail && styles.filtersScrollerCompactRail,
         )}
       >
         <div
           className={joinClasses(
             styles.filterList,
-            isHeaderRail && styles.filterListHeaderRail,
+            isCompactRail && styles.filterListCompactRail,
           )}
           role="tablist"
           aria-label={resolvedAriaLabel}
         >
           {resolvedItems.map((item) => {
             const isActive = item.id === activeFilterId;
-            const countLabel = formatCount(item.count);
+            const visualCount = formatVisualCount(item.count, isCompactRail);
+            const ariaCount = formatAriaCount(item.count);
 
             return (
               <button
@@ -258,21 +264,21 @@ function TechnologiesFilterBarComponent({
                 role="tab"
                 aria-selected={isActive}
                 aria-label={
-                  countLabel
-                    ? `${item.label}, ${countLabel}`
-                    : `Filtrar por ${item.label}`
+                  ariaCount
+                    ? `${item.label}, ${ariaCount}${isActive ? ", filtro ativo" : ""}`
+                    : `${isActive ? "Filtro ativo" : "Filtrar por"} ${item.label}`
                 }
                 disabled={item.disabled}
                 className={joinClasses(
                   styles.filterButton,
-                  isHeaderRail && styles.filterButtonHeaderRail,
+                  isCompactRail && styles.filterButtonCompactRail,
                   isActive && styles.filterButtonActive,
                   item.disabled && styles.filterButtonDisabled,
                 )}
                 style={
                   {
                     "--filter-accent":
-                      item.color ?? "rgba(255, 255, 255, 0.14)",
+                      item.color ?? "rgba(255, 255, 255, 0.18)",
                   } as React.CSSProperties
                 }
                 onClick={() => onChange(item.id)}
@@ -281,8 +287,8 @@ function TechnologiesFilterBarComponent({
               >
                 <span
                   className={joinClasses(
-                    styles.filterDot,
-                    isHeaderRail && styles.filterDotHeaderRail,
+                    styles.filterMarker,
+                    isCompactRail && styles.filterMarkerCompactRail,
                   )}
                   aria-hidden="true"
                 />
@@ -290,21 +296,21 @@ function TechnologiesFilterBarComponent({
                 <span
                   className={joinClasses(
                     styles.filterLabelGroup,
-                    isHeaderRail && styles.filterLabelGroupHeaderRail,
+                    isCompactRail && styles.filterLabelGroupCompactRail,
                   )}
                 >
                   <span className={styles.filterLabel}>
                     {item.shortLabel ?? item.label}
                   </span>
 
-                  {countLabel ? (
+                  {visualCount ? (
                     <span
                       className={joinClasses(
                         styles.filterCount,
-                        isHeaderRail && styles.filterCountHeaderRail,
+                        isCompactRail && styles.filterCountCompactRail,
                       )}
                     >
-                      {countLabel}
+                      {visualCount}
                     </span>
                   ) : null}
                 </span>
