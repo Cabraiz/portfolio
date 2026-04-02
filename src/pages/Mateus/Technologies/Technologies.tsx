@@ -35,7 +35,6 @@ export type TechnologyClusterViewModel = Readonly<{
   title: string;
   description: string;
   eyebrow: string;
-  countLabel: string;
   legendItems: readonly TechnologyClusterLegendItem[];
   items: readonly TechnologyCatalogItem[];
 }>;
@@ -318,11 +317,10 @@ function buildHighlights(
   const deliveryLabel = resolveDeliveryLabel(item.years);
   const confidenceLabel = resolveConfidenceLabel(item.years);
 
-  return [
-    clusterMeta.shortFilterLabel,
-    deliveryLabel,
-    confidenceLabel,
-  ].slice(0, 3);
+  return [clusterMeta.shortFilterLabel, deliveryLabel, confidenceLabel].slice(
+    0,
+    3,
+  );
 }
 
 function buildRelatedIcons(
@@ -595,10 +593,6 @@ function buildClusters(
         title: clusterMeta.title,
         eyebrow: clusterMeta.eyebrow,
         description: clusterMeta.description,
-        countLabel:
-          clusterItems.length === 1
-            ? "1 tecnologia"
-            : `${clusterItems.length} tecnologias`,
         legendItems: buildLegendItems(clusterId, clusterItems),
         items: clusterItems,
       });

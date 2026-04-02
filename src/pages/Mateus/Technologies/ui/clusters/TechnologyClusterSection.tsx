@@ -23,7 +23,6 @@ type TechnologyClusterSectionProps = Readonly<{
   activeItemId?: string | null;
   className?: string;
   dense?: boolean;
-  countLabel?: string;
   emptyTitle?: string;
   emptyDescription?: string;
   onSelectItem?: (item: TechnologyCatalogItem) => void;
@@ -56,21 +55,6 @@ function buildDecoratedItems(
   });
 }
 
-function resolveCountLabel(
-  count: number,
-  explicitCountLabel?: string,
-): string {
-  if (explicitCountLabel) {
-    return explicitCountLabel;
-  }
-
-  if (count === 1) {
-    return "1 tecnologia";
-  }
-
-  return `${count} tecnologias`;
-}
-
 function TechnologyClusterSectionComponent({
   id,
   title,
@@ -81,13 +65,11 @@ function TechnologyClusterSectionComponent({
   activeItemId = null,
   className,
   dense = false,
-  countLabel,
   emptyTitle = "Nenhuma tecnologia disponível neste cluster.",
   emptyDescription = "Adicione itens ao dataset para que o cluster comece a renderizar os cards hexagonais e a navegação visual.",
   onSelectItem,
 }: TechnologyClusterSectionProps) {
   const decoratedItems = useMemo(() => buildDecoratedItems(items), [items]);
-  const resolvedCountLabel = resolveCountLabel(items.length, countLabel);
 
   return (
     <section
@@ -110,10 +92,6 @@ function TechnologyClusterSectionComponent({
             {description ? (
               <p className={styles.description}>{description}</p>
             ) : null}
-          </div>
-
-          <div className={styles.headerMeta}>
-            <span className={styles.countChip}>{resolvedCountLabel}</span>
           </div>
         </div>
 

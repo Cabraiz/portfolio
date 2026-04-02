@@ -159,7 +159,8 @@ function TechnologiesFilterBarComponent(props: TechnologiesFilterBarProps) {
   const isCompactRail =
     resolvedVariant === "headerRail" || resolvedVariant === "clusterNav";
 
-  const resolvedEyebrow = eyebrow ?? (isCompactRail ? "" : "Capability Filters");
+  const resolvedEyebrow =
+    eyebrow ?? (isCompactRail ? "" : "Capability Filters");
   const resolvedTitle =
     title ?? (isCompactRail ? "" : "Filtrar tecnologias por domínio");
   const resolvedDescription =
@@ -265,7 +266,9 @@ function TechnologiesFilterBarComponent(props: TechnologiesFilterBarProps) {
                 aria-selected={isActive}
                 aria-label={
                   ariaCount
-                    ? `${item.label}, ${ariaCount}${isActive ? ", filtro ativo" : ""}`
+                    ? `${item.label}, ${ariaCount}${
+                        isActive ? ", filtro ativo" : ""
+                      }`
                     : `${isActive ? "Filtro ativo" : "Filtrar por"} ${item.label}`
                 }
                 disabled={item.disabled}

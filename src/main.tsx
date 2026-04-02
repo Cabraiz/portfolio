@@ -4,6 +4,11 @@ import { BrowserRouter } from "react-router-dom";
 import { Provider } from "react-redux";
 import { ChakraProvider } from "@chakra-ui/react";
 
+import "@fontsource/inter/400.css";
+import "@fontsource/inter/500.css";
+import "@fontsource/inter/600.css";
+import "@fontsource/inter/700.css";
+
 import App from "./App/App";
 import FloatingChat from "./pages/Mateus/FloatingChat";
 import RoadMapErrorBoundary from "./pages/Mateus/RoadMap/ui/chrome/RoadMapErrorBoundary";
@@ -18,23 +23,17 @@ import "./i18n/i18n";
 
 const GLOBAL_RUNTIME_FALLBACK_ID = "global-runtime-fallback";
 
-function setFontFamily(): void {
-  if (typeof window === "undefined") {
+const BASE_FONT_FAMILY =
+  "'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+
+function applyBaseFontFamily(): void {
+  if (typeof globalThis.document === "undefined") {
     return;
   }
 
-  if (window.innerWidth < 768) {
-    document.documentElement.style.setProperty(
-      "--font-family-base",
-      "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif",
-    );
-
-    return;
-  }
-
-  document.documentElement.style.setProperty(
+  globalThis.document.documentElement.style.setProperty(
     "--font-family-base",
-    "'Playfair Display', serif",
+    BASE_FONT_FAMILY,
   );
 }
 
@@ -80,16 +79,17 @@ function renderGlobalRuntimeFallback(
   message: string,
   details?: string,
 ): void {
-  if (typeof document === "undefined") {
+  if (typeof globalThis.document === "undefined") {
     return;
   }
 
-  let container = document.getElementById(GLOBAL_RUNTIME_FALLBACK_ID);
+  let container =
+    globalThis.document.getElementById(GLOBAL_RUNTIME_FALLBACK_ID);
 
   if (!container) {
-    container = document.createElement("div");
+    container = globalThis.document.createElement("div");
     container.id = GLOBAL_RUNTIME_FALLBACK_ID;
-    document.body.appendChild(container);
+    globalThis.document.body.appendChild(container);
   }
 
   container.setAttribute("role", "alert");
@@ -120,7 +120,7 @@ function renderGlobalRuntimeFallback(
           background: linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(254,242,242,0.98) 100%);
           box-shadow: 0 18px 42px rgba(15, 23, 42, 0.14);
           box-sizing: border-box;
-          font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+          font-family: ${BASE_FONT_FAMILY};
           pointer-events: auto;
         "
       >
@@ -135,7 +135,7 @@ function renderGlobalRuntimeFallback(
             background: rgba(239, 68, 68, 0.08);
             color: #b91c1c;
             font-size: 0.68rem;
-            font-weight: 800;
+            font-weight: 700;
             line-height: 1;
             letter-spacing: 0.08em;
             text-transform: uppercase;
@@ -149,7 +149,7 @@ function renderGlobalRuntimeFallback(
             margin: 0;
             color: #7f1d1d;
             font-size: 1rem;
-            font-weight: 900;
+            font-weight: 700;
             line-height: 1.15;
             letter-spacing: -0.02em;
           "
@@ -162,7 +162,7 @@ function renderGlobalRuntimeFallback(
             margin: 0;
             color: #450a0a;
             font-size: 0.9rem;
-            font-weight: 600;
+            font-weight: 500;
             line-height: 1.6;
             overflow-wrap: anywhere;
           "
@@ -188,7 +188,7 @@ function renderGlobalRuntimeFallback(
                     padding: 12px 14px;
                     color: #334155;
                     font-size: 0.8rem;
-                    font-weight: 800;
+                    font-weight: 600;
                     line-height: 1.2;
                     letter-spacing: 0.02em;
                   "
@@ -205,6 +205,7 @@ function renderGlobalRuntimeFallback(
                     line-height: 1.55;
                     white-space: pre-wrap;
                     overflow-wrap: anywhere;
+                    font-family: ${BASE_FONT_FAMILY};
                   "
                 >${escapeHtml(details)}</pre>
               </details>
@@ -217,11 +218,11 @@ function renderGlobalRuntimeFallback(
 }
 
 function installGlobalRuntimeHandlers(): void {
-  if (typeof window === "undefined") {
+  if (typeof globalThis.window === "undefined") {
     return;
   }
 
-  window.addEventListener("error", (event) => {
+  globalThis.window.addEventListener("error", (event) => {
     const message = resolveUnknownErrorMessage(event.error ?? event.message);
     const details =
       resolveUnknownErrorDetails(event.error ?? event.message) +
@@ -237,7 +238,7 @@ function installGlobalRuntimeHandlers(): void {
     );
   });
 
-  window.addEventListener("unhandledrejection", (event) => {
+  globalThis.window.addEventListener("unhandledrejection", (event) => {
     const message = resolveUnknownErrorMessage(event.reason);
     const details = resolveUnknownErrorDetails(event.reason);
 
@@ -250,13 +251,12 @@ function installGlobalRuntimeHandlers(): void {
   });
 }
 
-if (typeof window !== "undefined") {
-  window.addEventListener("resize", setFontFamily);
-  setFontFamily();
+if (typeof globalThis.window !== "undefined") {
+  applyBaseFontFamily();
 
-  const redirectedPath = window.location.search.slice(1);
+  const redirectedPath = globalThis.window.location.search.slice(1);
   if (redirectedPath && redirectedPath.startsWith("/")) {
-    window.history.replaceState({}, "", redirectedPath);
+    globalThis.window.history.replaceState({}, "", redirectedPath);
   }
 
   installGlobalRuntimeHandlers();
@@ -285,15 +285,9 @@ const MainApp: React.FC = () => {
   );
 };
 
-const rootElement = document.getElementById("root");
+const rootElement = globalThis.document.getElementById("root");
 
-if (!rootElement) {
-  console.error("Elemento root não encontrado");
-  renderGlobalRuntimeFallback(
-    "Não foi possível iniciar a aplicação",
-    "O elemento root não foi encontrado no documento.",
-  );
-} else {
+if (rootElement) {
   try {
     ReactDOM.createRoot(rootElement).render(<MainApp />);
   } catch (error) {
@@ -305,4 +299,10 @@ if (!rootElement) {
       resolveUnknownErrorDetails(error),
     );
   }
+} else {
+  console.error("Elemento root não encontrado");
+  renderGlobalRuntimeFallback(
+    "Não foi possível iniciar a aplicação",
+    "O elemento root não foi encontrado no documento.",
+  );
 }
