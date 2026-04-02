@@ -1,5 +1,3 @@
-// src/pages/Mateus/Technologies/data/technologies.data.ts
-
 import type {
   TechnologyItem,
   TechnologyMediaAsset,

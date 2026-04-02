@@ -171,17 +171,36 @@
   position: relative;
   display: grid;
   place-items: center;
-  min-height: 128px;
+  min-height: 138px;
+}
+
+.visualHalo {
+  position: absolute;
+  inset: 50%;
+  width: clamp(132px, 10.8vw, 162px);
+  height: clamp(132px, 10.8vw, 162px);
+  transform: translate(-50%, -50%);
+  border-radius: 40px;
+  background: radial-gradient(
+    circle,
+    rgba(var(--technology-accent-rgb), 0.2) 0%,
+    rgba(var(--technology-accent-rgb), 0.08) 42%,
+    rgba(var(--technology-accent-rgb), 0) 74%
+  );
+  filter: blur(18px);
+  opacity: 0.95;
+  pointer-events: none;
 }
 
 .visualCore {
   position: relative;
   z-index: 1;
-  width: clamp(118px, 9.4vw, 142px);
-  height: clamp(118px, 9.4vw, 142px);
+  width: clamp(124px, 9.8vw, 150px);
+  height: clamp(124px, 9.8vw, 150px);
   display: grid;
   place-items: center;
-  border-radius: 36px;
+  padding: clamp(16px, 1.4vw, 20px);
+  border-radius: 38px;
   background:
     linear-gradient(
       180deg,
@@ -195,12 +214,14 @@
     0 20px 38px rgba(0, 0, 0, 0.26);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
+  box-sizing: border-box;
 }
 
 .visualMedia {
-  width: 82%;
-  height: 82%;
+  width: 100%;
+  height: 100%;
   object-fit: contain;
+  object-position: center;
   display: block;
   filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.24));
 }
@@ -352,18 +373,20 @@
   }
 
   .visual {
-    min-height: 118px;
+    min-height: 126px;
+  }
+
+  .visualHalo {
+    width: clamp(122px, 9.4vw, 144px);
+    height: clamp(122px, 9.4vw, 144px);
+    border-radius: 34px;
   }
 
   .visualCore {
-    width: clamp(108px, 8.8vw, 126px);
-    height: clamp(108px, 8.8vw, 126px);
-    border-radius: 32px;
-  }
-
-  .visualMedia {
-    width: 80%;
-    height: 80%;
+    width: clamp(112px, 8.8vw, 132px);
+    height: clamp(112px, 8.8vw, 132px);
+    padding: 16px;
+    border-radius: 34px;
   }
 
   .description {
@@ -378,18 +401,20 @@
   }
 
   .visual {
-    min-height: 110px;
+    min-height: 116px;
   }
 
-  .visualCore {
-    width: 104px;
-    height: 104px;
+  .visualHalo {
+    width: 112px;
+    height: 112px;
     border-radius: 30px;
   }
 
-  .visualMedia {
-    width: 78%;
-    height: 78%;
+  .visualCore {
+    width: 108px;
+    height: 108px;
+    padding: 14px;
+    border-radius: 30px;
   }
 
   .footer {
@@ -408,18 +433,20 @@
   }
 
   .visual {
-    min-height: 102px;
+    min-height: 104px;
   }
 
-  .visualCore {
-    width: 94px;
-    height: 94px;
+  .visualHalo {
+    width: 100px;
+    height: 100px;
     border-radius: 28px;
   }
 
-  .visualMedia {
-    width: 76%;
-    height: 76%;
+  .visualCore {
+    width: 96px;
+    height: 96px;
+    padding: 12px;
+    border-radius: 28px;
   }
 
   .title {

@@ -1,5 +1,3 @@
-// src/pages/Mateus/Technologies/domain/technologies.types.ts
-
 export type TechnologyCategoryId =
   | "cloud"
   | "frontend"

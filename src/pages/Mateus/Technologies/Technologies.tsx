@@ -1,11 +1,19 @@
 import React, { useEffect, useMemo, useState } from "react";
 
-import type { TechnologyClusterLegendItem } from "./ui/clusters/TechnologyClusterLegend";
-import type { TechnologiesFilterItem } from "./ui/filters/TechnologiesFilterBar";
-import type { TechnologySpotlightItem } from "./ui/spotlight/TechnologySpotlightPanel";
+import { TECHNOLOGY_ITEM_MAP, TECHNOLOGY_ITEMS } from "./data/technologies.data";
+import type {
+  TechnologyCategoryId,
+  TechnologyItem,
+} from "./domain/technologies.types";
 import TechnologiesDesktop from "./TechnologiesDesktop";
 import TechnologiesMobile from "./TechnologiesMobile";
 import styles from "./TechnologiesSection.module.css";
+import type { TechnologyClusterLegendItem } from "./ui/clusters/TechnologyClusterLegend";
+import type { TechnologiesFilterItem } from "./ui/filters/TechnologiesFilterBar";
+import type { TechnologySpotlightItem } from "./ui/spotlight/TechnologySpotlightPanel";
+import type { TechnologyRelatedStackItem } from "./ui/spotlight/TechnologyRelatedStack";
+import type { TechnologyEvidenceGalleryItem } from "./ui/spotlight/TechnologyEvidenceGallery";
+import type { TechnologyRelatedIcon } from "./ui/hex/TechnologyHexCard";
 
 export type TechnologyClusterId =
   | "cloud"
@@ -17,6 +25,9 @@ export type TechnologyClusterId =
 export type TechnologyCatalogItem = TechnologySpotlightItem &
   Readonly<{
     clusterId: TechnologyClusterId;
+    sourceCategoryId: TechnologyCategoryId;
+    featured?: boolean;
+    priority?: number;
   }>;
 
 export type TechnologyClusterViewModel = Readonly<{
@@ -119,6 +130,28 @@ const CLUSTER_META: Record<TechnologyClusterId, ClusterMeta> = {
     legendColor:
       "linear-gradient(180deg, rgba(255,214,84,0.96), rgba(255,214,84,0.56))",
   },
+};
+
+const TOKEN_LABEL_OVERRIDES: Readonly<Record<string, string>> = {
+  api: "API",
+  apis: "APIs",
+  ui: "UI",
+  ux: "UX",
+  qa: "QA",
+  sql: "SQL",
+  nosql: "NoSQL",
+  ssr: "SSR",
+  spa: "SPA",
+  jvm: "JVM",
+  ec2: "EC2",
+  s3: "S3",
+  rds: "RDS",
+  iam: "IAM",
+  sqs: "SQS",
+  sns: "SNS",
+  aws: "AWS",
+  gcp: "GCP",
+  otel: "OTel",
 };
 
 function getBrowserWindow(): Window | null {
@@ -243,121 +276,244 @@ function resolveDeliveryLabel(years?: number | null): string {
   return "Aplicação dirigida";
 }
 
-function buildTechnologyIconSrc(iconFileName: string): string {
-  return `/images/technologies/icons/${iconFileName}.webp`;
+function mapCategoryToClusterId(
+  categoryId: TechnologyCategoryId,
+): TechnologyClusterId {
+  switch (categoryId) {
+    case "cloud":
+      return "cloud";
+    case "frontend":
+      return "frontend";
+    case "backend-jvm":
+    case "backend-js":
+    case "python":
+      return "backend";
+    case "data":
+      return "data";
+    case "qa":
+    case "observability":
+      return "quality";
+    default:
+      return "backend";
+  }
 }
 
-type CreateTechnologyInput = Readonly<{
-  id: string;
-  name: string;
-  clusterId: TechnologyClusterId;
-  years?: number | null;
-  description: string;
-  iconSrc?: string;
-  badges?: readonly string[];
-  related?: readonly string[];
-  highlights?: readonly string[];
-  subtitle?: string;
-  heroCaptionText?: string;
-}>;
+function formatTokenLabel(value: string): string {
+  const normalized = value.trim();
 
-function createTechnology({
-  id,
-  name,
-  clusterId,
-  years = null,
-  description,
-  iconSrc,
-  badges = [],
-  related = [],
-  highlights = [],
-  subtitle,
-  heroCaptionText,
-}: CreateTechnologyInput): TechnologyCatalogItem {
-  const clusterMeta = CLUSTER_META[clusterId];
-  const levelLabel = resolveLevelLabel(years);
-  const confidenceLabel = resolveConfidenceLabel(years);
-  const deliveryLabel = resolveDeliveryLabel(years);
+  if (!normalized) {
+    return value;
+  }
 
-  return {
-    id,
-    name,
-    years,
-    description,
-    clusterId,
-    categoryLabel: clusterMeta.title,
+  const lowered = normalized.toLowerCase();
+  const override = TOKEN_LABEL_OVERRIDES[lowered];
+
+  if (override) {
+    return override;
+  }
+
+  return normalized
+    .split(/[\s/_-]+/)
+    .filter(Boolean)
+    .map((token) => {
+      const tokenLower = token.toLowerCase();
+      const tokenOverride = TOKEN_LABEL_OVERRIDES[tokenLower];
+
+      if (tokenOverride) {
+        return tokenOverride;
+      }
+
+      if (token.length <= 3) {
+        return token.toUpperCase();
+      }
+
+      return `${token.charAt(0).toUpperCase()}${token.slice(1).toLowerCase()}`;
+    })
+    .join(" ");
+}
+
+function buildBadges(item: TechnologyItem): readonly string[] {
+  const tags = item.tags?.map(formatTokenLabel) ?? [];
+
+  if (tags.length > 0) {
+    return tags.slice(0, 3);
+  }
+
+  const aliases = item.aliases?.map(formatTokenLabel) ?? [];
+  return aliases.slice(0, 3);
+}
+
+function buildHighlights(
+  item: TechnologyItem,
+  clusterMeta: ClusterMeta,
+): readonly string[] {
+  const levelLabel = resolveLevelLabel(item.years);
+  const deliveryLabel = resolveDeliveryLabel(item.years);
+
+  return [
+    formatYears(item.years),
     levelLabel,
-    iconSrc,
-    tone: clusterMeta.tone,
-    accentRgb: clusterMeta.accentRgb,
-    badges,
-    relatedIcons: related.slice(0, 4).map((itemName) => ({
-      id: `${id}-${itemName.toLowerCase().replace(/[^a-z0-9]+/gi, "-")}`,
-      name: itemName,
-    })),
-    eyebrow: clusterMeta.eyebrow,
-    subtitle:
-      subtitle ??
-      `${name} aparece aqui como uma capacidade aplicada dentro do eixo ${clusterMeta.title.toLowerCase()}, com foco em profundidade técnica, consistência de uso e contexto real de entrega.`,
-    levelDescription: `${formatYears(years)} de atuação somados a cenários de entrega, manutenção, evolução e integração com o restante da stack.`,
-    heroCaptionTitle: `${name} dentro de ${clusterMeta.title}`,
-    heroCaptionText:
-      heroCaptionText ??
-      "Leitura editorial da tecnologia com experiência, profundidade, ecossistema relacionado e organização visual por domínio.",
-    highlights:
-      highlights.length > 0
-        ? highlights
-        : [
-            formatYears(years),
-            levelLabel,
-            clusterMeta.shortFilterLabel,
-            deliveryLabel,
-          ],
-    relatedStack: related.map((itemName) => ({
-      id: `${id}-stack-${itemName.toLowerCase().replace(/[^a-z0-9]+/gi, "-")}`,
-      name: itemName,
-      tone: clusterMeta.tone,
-      label: clusterMeta.shortFilterLabel,
-      description: `${itemName} aparece como parte do ecossistema que normalmente acompanha ${name} em cenários de arquitetura, integração e entrega.`,
-    })),
-    evidenceGallery: [
+    clusterMeta.shortFilterLabel,
+    deliveryLabel,
+  ].slice(0, 4);
+}
+
+function buildRelatedIcons(
+  item: TechnologyItem,
+): readonly TechnologyRelatedIcon[] {
+  return (item.relatedIds ?? []).slice(0, 4).reduce<TechnologyRelatedIcon[]>(
+    (accumulator, relatedId) => {
+      const relatedItem = TECHNOLOGY_ITEM_MAP[relatedId];
+
+      if (!relatedItem) {
+        return accumulator;
+      }
+
+      accumulator.push({
+        id: `${item.id}-${relatedItem.id}`,
+        name: relatedItem.shortName ?? relatedItem.name,
+        src: relatedItem.logoSrc ?? undefined,
+      });
+
+      return accumulator;
+    },
+    [],
+  );
+}
+
+function buildRelatedStack(
+  item: TechnologyItem,
+  clusterMeta: ClusterMeta,
+): readonly TechnologyRelatedStackItem[] {
+  return (item.relatedIds ?? [])
+    .slice(0, 4)
+    .reduce<TechnologyRelatedStackItem[]>((accumulator, relatedId) => {
+      const relatedItem = TECHNOLOGY_ITEM_MAP[relatedId];
+
+      if (!relatedItem) {
+        return accumulator;
+      }
+
+      accumulator.push({
+        id: `${item.id}-stack-${relatedItem.id}`,
+        name: relatedItem.shortName ?? relatedItem.name,
+        iconSrc: relatedItem.logoSrc ?? undefined,
+        tone: clusterMeta.tone,
+        label: clusterMeta.shortFilterLabel,
+        description: `${relatedItem.name} aparece como parte do ecossistema que normalmente acompanha ${item.name} em cenários de arquitetura, integração e entrega.`,
+      });
+
+      return accumulator;
+    }, []);
+}
+
+function buildEvidenceGallery(
+  item: TechnologyItem,
+): readonly TechnologyEvidenceGalleryItem[] {
+  const galleryItems = item.gallery ?? [];
+
+  if (!galleryItems.length) {
+    return [
       {
-        id: `${id}-evidence-architecture`,
-        title: `${name} em arquitetura aplicada`,
-        description: `Exemplo editorial para posicionar ${name} dentro do fluxo técnico, mostrando onde ele entra na solução e como se conecta ao restante da stack.`,
+        id: `${item.id}-evidence-architecture`,
+        title: `${item.name} em arquitetura aplicada`,
+        description: `Exemplo editorial para posicionar ${item.name} dentro do fluxo técnico, mostrando onde ele entra na solução e como se conecta ao restante da stack.`,
         meta: "Architecture View",
       },
       {
-        id: `${id}-evidence-delivery`,
-        title: `${name} em fluxo de entrega`,
+        id: `${item.id}-evidence-delivery`,
+        title: `${item.name} em fluxo de entrega`,
         description: `Cartão visual para comunicar a presença da tecnologia em pipelines, produção, produto e evolução contínua.`,
         meta: "Delivery View",
       },
       {
-        id: `${id}-evidence-ecosystem`,
-        title: `${name} no ecossistema relacionado`,
-        description: `Bloco visual pensado para logo, screenshot, diagrama ou interface que reforce senioridade e repertório sobre ${name}.`,
+        id: `${item.id}-evidence-ecosystem`,
+        title: `${item.name} no ecossistema relacionado`,
+        description: `Bloco visual pensado para logo, screenshot, diagrama ou interface que reforce senioridade e repertório sobre ${item.name}.`,
         meta: "Ecosystem View",
       },
-    ],
+    ];
+  }
+
+  return galleryItems.slice(0, 3).map((asset, index) => ({
+    id: asset.id,
+    title: `${item.name} — evidência ${String(index + 1).padStart(2, "0")}`,
+    description:
+      index === 0
+        ? `Leitura visual da tecnologia ${item.name} aplicada em contexto real de arquitetura e entrega.`
+        : `Registro visual complementar para reforçar repertório, ecossistema e profundidade sobre ${item.name}.`,
+    imageSrc: asset.src,
+    meta:
+      index === 0
+        ? "Architecture View"
+        : index === 1
+          ? "Delivery View"
+          : "Ecosystem View",
+  }));
+}
+
+function mapTechnologyItemToCatalogItem(
+  item: TechnologyItem,
+): TechnologyCatalogItem {
+  const clusterId = mapCategoryToClusterId(item.categoryId);
+  const clusterMeta = CLUSTER_META[clusterId];
+  const levelLabel = resolveLevelLabel(item.years);
+  const confidenceLabel = resolveConfidenceLabel(item.years);
+  const deliveryLabel = resolveDeliveryLabel(item.years);
+  const displayName = item.label ?? item.name;
+  const logoSrc = item.logoSrc ?? undefined;
+
+  return {
+    id: item.id,
+    name: displayName,
+    years: item.years,
+    description:
+      item.description ??
+      item.summary ??
+      `${displayName} aparece aqui como capacidade aplicada dentro do eixo ${clusterMeta.title.toLowerCase()}.`,
+    clusterId,
+    sourceCategoryId: item.categoryId,
+    featured: item.featured,
+    priority: item.priority,
+    categoryLabel: clusterMeta.title,
+    levelLabel,
+    logoSrc,
+    iconSrc: logoSrc,
+    tone: clusterMeta.tone,
+    accentRgb: clusterMeta.accentRgb,
+    badges: buildBadges(item),
+    relatedIcons: buildRelatedIcons(item),
+    eyebrow: clusterMeta.eyebrow,
+    subtitle:
+      item.summary ??
+      `${displayName} aparece aqui como uma capacidade aplicada dentro do eixo ${clusterMeta.title.toLowerCase()}, com foco em profundidade técnica, consistência de uso e contexto real de entrega.`,
+    levelDescription: `${formatYears(item.years)} de atuação somados a cenários de entrega, manutenção, evolução e integração com o restante da stack.`,
+    heroImageSrc: item.heroAsset?.src,
+    heroCaptionTitle: `${displayName} dentro de ${clusterMeta.title}`,
+    heroCaptionText:
+      item.heroAsset?.alt ??
+      "Leitura editorial da tecnologia com experiência, profundidade, ecossistema relacionado e organização visual por domínio.",
+    highlights: buildHighlights(item, clusterMeta),
+    relatedStack: buildRelatedStack(item, clusterMeta),
+    evidenceGallery: buildEvidenceGallery(item),
     metrics: [
       {
-        id: `${id}-metric-experience`,
+        id: `${item.id}-metric-experience`,
         label: "Experiência",
-        value: formatYears(years),
+        value: formatYears(item.years),
       },
       {
-        id: `${id}-metric-level`,
+        id: `${item.id}-metric-level`,
         label: "Nível",
         value: levelLabel,
       },
       {
-        id: `${id}-metric-delivery`,
+        id: `${item.id}-metric-delivery`,
         label: "Entrega",
         value: deliveryLabel,
       },
       {
-        id: `${id}-metric-cluster`,
+        id: `${item.id}-metric-cluster`,
         label: "Cluster",
         value: clusterMeta.shortFilterLabel,
       },
@@ -367,299 +523,50 @@ function createTechnology({
   };
 }
 
-const TECHNOLOGY_CATALOG: readonly TechnologyCatalogItem[] = [
-  createTechnology({
-    id: "aws",
-    name: "AWS",
-    clusterId: "cloud",
-    years: 4,
-    iconSrc: buildTechnologyIconSrc("aws"),
-    description:
-      "Atuação com EC2, S3, RDS, IAM e fluxos de mensageria para provisionamento, serviços distribuídos e sustentação de ambientes em nuvem.",
-    badges: ["EC2", "S3", "RDS", "IAM", "SQS/SNS"],
-    related: ["Docker", "Kubernetes", "Node.js", "PostgreSQL"],
-    highlights: ["Cloud runtime", "Infra de produto", "Serviços gerenciados"],
-  }),
-  createTechnology({
-    id: "gcp",
-    name: "GCP",
-    clusterId: "cloud",
-    years: 3,
-    description:
-      "Experiência com Compute Engine, Cloud SQL, Cloud Storage e Pub/Sub para workloads em produção, backend e integração com serviços gerenciados.",
-    badges: ["Compute Engine", "Cloud SQL", "Cloud Storage", "Pub/Sub"],
-    related: ["Kubernetes", "Python", "FastAPI", "PostgreSQL"],
-    highlights: ["Cloud services", "Serviços gerenciados", "Integração backend"],
-  }),
-  createTechnology({
-    id: "docker",
-    name: "Docker",
-    clusterId: "cloud",
-    years: 9,
-    description:
-      "Containerização madura para padronizar ambiente, pipeline, build e isolamento de serviços em cenários de desenvolvimento e produção.",
-    badges: ["Containers", "Build", "Runtime"],
-    related: ["Kubernetes", "AWS", "GCP", "Node.js"],
-    highlights: ["Stack core", "Ambientes reproduzíveis", "Entrega contínua"],
-  }),
-  createTechnology({
-    id: "kubernetes",
-    name: "Kubernetes",
-    clusterId: "cloud",
-    years: 9,
-    description:
-      "Orquestração de workloads e serviços distribuídos com foco em escalabilidade, resiliência e operação de ambientes complexos.",
-    badges: ["Orquestração", "Escalabilidade", "Runtime"],
-    related: ["Docker", "AWS", "GCP", "Prometheus"],
-    highlights: ["Plataforma", "Escala", "Operação distribuída"],
-  }),
-  createTechnology({
-    id: "react-next-typescript",
-    name: "React / Next.js / TypeScript",
-    clusterId: "frontend",
-    years: 10,
-    description:
-      "Construção de produtos de interface com forte base em React, ecossistema Next.js e modelagem tipada em TypeScript.",
-    badges: ["React", "Next.js", "TypeScript"],
-    related: ["GraphQL", "Node.js", "Playwright", "OTel"],
-    highlights: ["UI de produto", "SSR/SPA", "Arquitetura frontend"],
-  }),
-  createTechnology({
-    id: "vue-nuxt-typescript",
-    name: "Vue.js / Nuxt.js / TypeScript",
-    clusterId: "frontend",
-    years: null,
-    description:
-      "Repertório com Vue e Nuxt para aplicações web tipadas e orientadas a produto, mantendo coerência arquitetural no frontend.",
-    badges: ["Vue.js", "Nuxt.js", "TypeScript"],
-    related: ["Node.js", "GraphQL", "MongoDB"],
-    highlights: ["Alternativa madura", "Frontend tipado", "Arquitetura web"],
-  }),
-  createTechnology({
-    id: "flutter",
-    name: "Flutter",
-    clusterId: "frontend",
-    years: 6,
-    description:
-      "Entrega de interfaces mobile com foco em consistência visual, velocidade de iteração e reutilização de padrões de produto.",
-    badges: ["Mobile", "Cross-platform", "UI"],
-    related: ["Firebase", "Node.js", "GraphQL", "REST APIs"],
-    highlights: ["Mobile product", "UI consistente", "Cross-platform"],
-  }),
-  createTechnology({
-    id: "graphql-apollo",
-    name: "GraphQL / Apollo Server",
-    clusterId: "backend",
-    years: 3,
-    description:
-      "Modelagem de contratos orientados a consumo eficiente de dados, com GraphQL e camadas de resolução integradas ao backend.",
-    badges: ["GraphQL", "Apollo Server", "Schema"],
-    related: ["Node.js", "React", "PostgreSQL", "Redis"],
-    highlights: ["Contratos tipados", "Schema-first", "Consumo eficiente"],
-  }),
-  createTechnology({
-    id: "java-spring",
-    name: "Java / Spring Boot",
-    clusterId: "backend",
-    years: 10,
-    description:
-      "Base robusta para APIs, serviços de domínio e aplicações backend com foco em arquitetura empresarial e manutenção evolutiva.",
-    badges: ["Java", "Spring Boot", "APIs"],
-    related: ["PostgreSQL", "Kafka", "Redis", "Prometheus"],
-    highlights: ["Stack core", "Backend enterprise", "APIs e domínio"],
-  }),
-  createTechnology({
-    id: "kotlin",
-    name: "Kotlin",
-    clusterId: "backend",
-    years: 6,
-    description:
-      "Uso de Kotlin como linguagem moderna para backend, aproveitando concisão, segurança e interoperabilidade no ecossistema JVM.",
-    badges: ["JVM", "Backend", "Interoperabilidade"],
-    related: ["Java", "Spring Boot", "PostgreSQL"],
-    highlights: ["JVM moderna", "Código conciso", "Backend pragmático"],
-  }),
-  createTechnology({
-    id: "node-express",
-    name: "Node.js / Express",
-    clusterId: "backend",
-    years: 8,
-    description:
-      "Construção de APIs e serviços rápidos de iterar, com forte aplicabilidade em integrações, produto digital e serviços web.",
-    badges: ["Node.js", "Express", "APIs"],
-    related: ["NestJS", "GraphQL", "MongoDB", "Redis"],
-    highlights: ["Entrega rápida", "Serviços web", "Integração de produto"],
-  }),
-  createTechnology({
-    id: "nestjs",
-    name: "NestJS",
-    clusterId: "backend",
-    years: 5,
-    description:
-      "Arquitetura backend mais estruturada no ecossistema Node, com organização modular, contratos claros e boa escalabilidade de código.",
-    badges: ["NestJS", "Modules", "Architecture"],
-    related: ["Node.js", "GraphQL", "Kafka", "Redis"],
-    highlights: ["Estrutura", "Modularidade", "Backend escalável"],
-  }),
-  createTechnology({
-    id: "python",
-    name: "Python",
-    clusterId: "backend",
-    years: 8,
-    description:
-      "Linguagem versátil aplicada a serviços, automações, integrações e workloads que exigem agilidade com boa produtividade.",
-    badges: ["Automation", "APIs", "Scripts"],
-    related: ["FastAPI", "GCP", "RabbitMQ", "PostgreSQL"],
-    highlights: ["Versatilidade", "Produtividade", "Automação e APIs"],
-  }),
-  createTechnology({
-    id: "fastapi",
-    name: "FastAPI",
-    clusterId: "backend",
-    years: 5,
-    description:
-      "Framework para APIs modernas em Python, com tipagem, performance e ergonomia adequada a serviços orientados a produto.",
-    badges: ["FastAPI", "Python", "Typed APIs"],
-    related: ["Python", "PostgreSQL", "Redis", "GCP"],
-    highlights: ["APIs modernas", "Tipagem", "Velocidade de entrega"],
-  }),
-  createTechnology({
-    id: "postgresql",
-    name: "PostgreSQL",
-    clusterId: "data",
-    years: 10,
-    description:
-      "Banco relacional sólido para domínio transacional, modelagem consistente, consultas complexas e operação em produção.",
-    badges: ["SQL", "Relational", "Transactions"],
-    related: ["Java", "Node.js", "Python", "Redis"],
-    highlights: ["Persistência core", "SQL forte", "Base transacional"],
-  }),
-  createTechnology({
-    id: "mongodb",
-    name: "MongoDB",
-    clusterId: "data",
-    years: 6,
-    description:
-      "Persistência orientada a documentos para cenários com flexibilidade de estrutura e modelos de dados mais adaptativos.",
-    badges: ["Document DB", "Flexible Schema", "NoSQL"],
-    related: ["Node.js", "NestJS", "GraphQL"],
-    highlights: ["Document store", "Flexibilidade", "NoSQL pragmático"],
-  }),
-  createTechnology({
-    id: "redis",
-    name: "Redis",
-    clusterId: "data",
-    years: 5,
-    description:
-      "Camada de cache e estruturas rápidas para desacoplamento, aceleração de leitura e apoio a fluxos de alta recorrência.",
-    badges: ["Cache", "In-memory", "Performance"],
-    related: ["PostgreSQL", "Node.js", "Java", "RabbitMQ"],
-    highlights: ["Performance", "Cache", "Baixa latência"],
-  }),
-  createTechnology({
-    id: "rabbitmq",
-    name: "RabbitMQ",
-    clusterId: "data",
-    years: 5,
-    description:
-      "Mensageria aplicada a desacoplamento, filas de processamento, distribuição de tarefas e integração entre serviços.",
-    badges: ["Queues", "Messaging", "Async flows"],
-    related: ["Python", "Node.js", "Redis", "PostgreSQL"],
-    highlights: ["Assíncrono", "Desacoplamento", "Processamento distribuído"],
-  }),
-  createTechnology({
-    id: "kafka",
-    name: "Kafka",
-    clusterId: "data",
-    years: 5,
-    description:
-      "Streaming e mensageria orientados a throughput, integração de eventos e fluxos com maior volume e resiliência.",
-    badges: ["Streaming", "Events", "Throughput"],
-    related: ["Java", "Spring Boot", "Prometheus", "OTel"],
-    highlights: ["Event-driven", "Streaming", "Alta escala"],
-  }),
-  createTechnology({
-    id: "selenium",
-    name: "Selenium",
-    clusterId: "quality",
-    years: 10,
-    description:
-      "Automação consolidada para fluxos de teste, validação funcional e suporte a cenários críticos de qualidade.",
-    badges: ["Browser automation", "Functional tests", "Regression"],
-    related: ["Cypress", "Playwright", "Grafana"],
-    highlights: ["QA core", "Automação", "Cobertura funcional"],
-  }),
-  createTechnology({
-    id: "cypress",
-    name: "Cypress",
-    clusterId: "quality",
-    years: 5,
-    description:
-      "Testes end-to-end e validação de fluxos de interface com ergonomia alta para times que exigem feedback rápido.",
-    badges: ["E2E", "Frontend QA", "Fast feedback"],
-    related: ["React", "Playwright", "Grafana"],
-    highlights: ["E2E", "Feedback rápido", "Frontend quality"],
-  }),
-  createTechnology({
-    id: "playwright",
-    name: "Playwright",
-    clusterId: "quality",
-    years: 2,
-    description:
-      "Automação moderna para testes de interface e fluxos cross-browser com boa estabilidade e abrangência.",
-    badges: ["Cross-browser", "E2E", "Automation"],
-    related: ["React", "Cypress", "OTel"],
-    highlights: ["Cross-browser", "UI testing", "Automação moderna"],
-  }),
-  createTechnology({
-    id: "grafana",
-    name: "Grafana",
-    clusterId: "quality",
-    years: 5,
-    description:
-      "Construção de dashboards e leitura operacional para acompanhar comportamento de serviços, métricas e saúde do sistema.",
-    badges: ["Dashboards", "Metrics", "Monitoring"],
-    related: ["Prometheus", "OTel", "Kubernetes"],
-    highlights: [
-      "Visualização operacional",
-      "Leitura executiva",
-      "Observabilidade",
-    ],
-  }),
-  createTechnology({
-    id: "prometheus",
-    name: "Prometheus",
-    clusterId: "quality",
-    years: 4,
-    description:
-      "Coleta e organização de métricas para monitoramento, alertas e suporte a decisões operacionais baseadas em dados.",
-    badges: ["Metrics", "Scraping", "Alerting"],
-    related: ["Grafana", "Kubernetes", "OTel"],
-    highlights: ["Métricas", "Monitoramento", "Sustentação operacional"],
-  }),
-  createTechnology({
-    id: "otel",
-    name: "OpenTelemetry",
-    clusterId: "quality",
-    years: 3,
-    description:
-      "Instrumentação de traces, métricas e sinais operacionais para melhorar leitura de comportamento distribuído.",
-    badges: ["Tracing", "Telemetry", "Observability"],
-    related: ["Grafana", "Prometheus", "Kafka"],
-    highlights: ["Tracing", "Instrumentação", "Sinais distribuídos"],
-  }),
-].sort((left, right) => {
-  const leftYears =
-    typeof left.years === "number" && Number.isFinite(left.years)
-      ? left.years
+function compareCatalogItems(
+  left: TechnologyCatalogItem,
+  right: TechnologyCatalogItem,
+): number {
+  const featuredDiff =
+    Number(Boolean(right.featured)) - Number(Boolean(left.featured));
+
+  if (featuredDiff !== 0) {
+    return featuredDiff;
+  }
+
+  const rightPriority =
+    typeof right.priority === "number" && Number.isFinite(right.priority)
+      ? right.priority
       : -1;
+  const leftPriority =
+    typeof left.priority === "number" && Number.isFinite(left.priority)
+      ? left.priority
+      : -1;
+
+  if (rightPriority !== leftPriority) {
+    return rightPriority - leftPriority;
+  }
+
   const rightYears =
     typeof right.years === "number" && Number.isFinite(right.years)
       ? right.years
       : -1;
+  const leftYears =
+    typeof left.years === "number" && Number.isFinite(left.years)
+      ? left.years
+      : -1;
 
-  return rightYears - leftYears || left.name.localeCompare(right.name);
-});
+  if (rightYears !== leftYears) {
+    return rightYears - leftYears;
+  }
+
+  return left.name.localeCompare(right.name);
+}
+
+const TECHNOLOGY_CATALOG: readonly TechnologyCatalogItem[] = [...TECHNOLOGY_ITEMS]
+  .map(mapTechnologyItemToCatalogItem)
+  .filter((item) => !TECHNOLOGY_ITEM_MAP[item.id]?.hidden)
+  .sort(compareCatalogItems);
 
 function buildLegendItems(
   clusterId: TechnologyClusterId,
@@ -737,7 +644,11 @@ function buildClusters(
       const clusterMeta = CLUSTER_META[clusterId];
       const clusterItems = items.filter((item) => item.clusterId === clusterId);
 
-      const cluster: TechnologyClusterViewModel = {
+      if (!clusterItems.length) {
+        return clusters;
+      }
+
+      clusters.push({
         id: clusterId,
         title: clusterMeta.title,
         eyebrow: clusterMeta.eyebrow,
@@ -748,9 +659,8 @@ function buildClusters(
             : `${clusterItems.length} tecnologias`,
         legendItems: buildLegendItems(clusterId, clusterItems),
         items: clusterItems,
-      };
+      });
 
-      clusters.push(cluster);
       return clusters;
     },
     [],

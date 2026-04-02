@@ -1,4 +1,4 @@
-import React, { memo } from "react";
+import React, { memo, useEffect, useMemo, useState } from "react";
 import type { TechnologyCatalogItem } from "../../Technologies";
 
 import TechnologyHexBadge, {
@@ -25,6 +25,7 @@ export type TechnologyHexCardItem = Readonly<{
   years?: number | null;
   categoryLabel: string;
   levelLabel?: string;
+  logoSrc?: string;
   iconSrc?: string;
   tone?: TechnologyBadgeTone;
   accentRgb?: string;
@@ -69,6 +70,18 @@ function getInitials(name: string): string {
   return `${tokens[0][0] ?? ""}${tokens[1][0] ?? ""}`.toUpperCase();
 }
 
+function resolveItemVisualSrc(item: TechnologyCatalogItem): string | undefined {
+  if ("logoSrc" in item && typeof item.logoSrc === "string" && item.logoSrc) {
+    return item.logoSrc;
+  }
+
+  if ("iconSrc" in item && typeof item.iconSrc === "string" && item.iconSrc) {
+    return item.iconSrc;
+  }
+
+  return undefined;
+}
+
 function TechnologyHexCardComponent({
   item,
   isActive = false,
@@ -83,12 +96,25 @@ function TechnologyHexCardComponent({
   const relatedIcons = item.relatedIcons?.slice(0, 4) ?? [];
   const metaBadges = item.badges?.slice(0, 3) ?? [];
 
+  const visualSrc = useMemo(() => resolveItemVisualSrc(item), [item]);
+  const [hasVisualError, setHasVisualError] = useState(false);
+
+  useEffect(() => {
+    setHasVisualError(false);
+  }, [visualSrc, item.id]);
+
+  const shouldShowImage = Boolean(visualSrc) && !hasVisualError;
+
   const handleClick = (): void => {
     if (disabled) {
       return;
     }
 
     onSelect?.(item);
+  };
+
+  const handleVisualError = (): void => {
+    setHasVisualError(true);
   };
 
   return (
@@ -132,14 +158,16 @@ function TechnologyHexCardComponent({
           </header>
 
           <div className={styles.visual} aria-hidden="true">
+            <div className={styles.visualHalo} />
             <div className={styles.visualCore}>
-              {item.iconSrc ? (
+              {shouldShowImage ? (
                 <img
-                  src={item.iconSrc}
+                  src={visualSrc}
                   alt=""
                   className={styles.visualMedia}
                   loading="lazy"
                   decoding="async"
+                  onError={handleVisualError}
                 />
               ) : (
                 <span className={styles.visualFallback}>
