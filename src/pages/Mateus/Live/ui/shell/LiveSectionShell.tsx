@@ -24,10 +24,12 @@ type LiveSectionShellProps = Readonly<{
   compact?: boolean;
 
   eyebrow?: string;
+  statusLabel?: string;
   title?: string;
   description?: string;
   caption?: string;
 
+  heroSlot?: ReactNode;
   metrics?: readonly LiveShellMetricItem[];
   metricsSlot?: ReactNode;
   filtersSlot?: ReactNode;
@@ -72,6 +74,10 @@ function hasRenderableNode(node: ReactNode): boolean {
   return true;
 }
 
+function hasTextContent(value?: string): boolean {
+  return typeof value === "string" && value.trim().length > 0;
+}
+
 function resolveMetricToneClassName(tone?: LiveShellMetricTone): string | null {
   switch (tone) {
     case "info":
@@ -87,7 +93,7 @@ function resolveMetricToneClassName(tone?: LiveShellMetricTone): string | null {
 }
 
 function renderMetricCards(
-  metrics: readonly LiveShellMetricItem[],
+  metrics: readonly LiveShellMetricItem[]
 ): ReactNode {
   if (!metrics.length) {
     return null;
@@ -98,7 +104,7 @@ function renderMetricCards(
       key={metric.id}
       className={joinClassNames(
         styles.metricCard,
-        resolveMetricToneClassName(metric.tone),
+        resolveMetricToneClassName(metric.tone)
       )}
       data-live-metric="true"
       data-live-metric-id={metric.id}
@@ -126,10 +132,12 @@ export default function LiveSectionShell({
   sectionClassName,
   contentClassName,
   compact = false,
-  eyebrow = "Ao vivo",
-  title = "Operação viva, entregas em movimento.",
-  description = "Um painel editorial que traduz projetos, entregas e frentes ativas em sinais visuais mais vivos, com leitura rápida e interação refinada.",
-  caption = "A proposta aqui não é só listar números, mas fazer a seção parecer um centro de monitoramento de trabalho real.",
+  eyebrow,
+  statusLabel,
+  title = "Tudo em curso, ao vivo.",
+  description = "",
+  caption = "",
+  heroSlot,
   metrics = [],
   metricsSlot,
   filtersSlot,
@@ -160,18 +168,31 @@ export default function LiveSectionShell({
     ? supportingSlot
     : children;
 
+  const hasHero = hasRenderableNode(heroSlot);
   const hasMetrics = hasRenderableNode(resolvedMetrics);
   const hasFilters = hasRenderableNode(filtersSlot);
   const hasScene = hasRenderableNode(sceneSlot);
   const hasSpotlight = hasRenderableNode(spotlightSlot);
   const hasSupportingContent = hasRenderableNode(resolvedSupportingContent);
 
+  const hasEyebrow = hasTextContent(eyebrow);
+  const hasStatusLabel = hasTextContent(statusLabel);
+  const shouldRenderEyebrowRow = hasEyebrow || hasStatusLabel;
+
+  const resolvedTitle = hasTextContent(title)
+    ? title.trim()
+    : "Tudo em curso, ao vivo.";
+  const resolvedDescription = hasTextContent(description)
+    ? description.trim()
+    : null;
+  const resolvedCaption = hasTextContent(caption) ? caption.trim() : null;
+
   return (
     <div
       className={joinClassNames(
         styles.root,
         compact && styles.rootCompact,
-        className,
+        className
       )}
       style={rootStyle}
     >
@@ -179,7 +200,6 @@ export default function LiveSectionShell({
         id={id}
         className={joinClassNames(styles.section, sectionClassName)}
         aria-labelledby={`${id}-title`}
-        aria-label={ariaLabel}
       >
         <div className={styles.background} aria-hidden="true">
           <div className={styles.backgroundGlowPrimary} />
@@ -189,40 +209,47 @@ export default function LiveSectionShell({
         </div>
 
         <div className={joinClassNames(styles.content, contentClassName)}>
-          <header className={styles.header}>
-            <div className={styles.headerShell} data-live-board="true">
-              <div className={styles.headerCopy}>
-                <div className={styles.eyebrowRow}>
-                  <span className={styles.eyebrow}>{eyebrow}</span>
-                  <span className={styles.statusDot} aria-hidden="true" />
-                  <span className={styles.statusLabel}>Sinal ativo</span>
+          <header className={styles.header} aria-label={ariaLabel}>
+            <div className={styles.heroShell} data-live-board="true">
+              <div className={styles.heroCopy}>
+                {shouldRenderEyebrowRow ? (
+                  <div className={styles.eyebrowRow}>
+                    {hasEyebrow ? (
+                      <span className={styles.eyebrow}>{eyebrow}</span>
+                    ) : null}
+
+                    {hasEyebrow && hasStatusLabel ? (
+                      <span className={styles.statusDot} aria-hidden="true" />
+                    ) : null}
+
+                    {hasStatusLabel ? (
+                      <span className={styles.statusLabel}>{statusLabel}</span>
+                    ) : null}
+                  </div>
+                ) : null}
+
+                <div className={styles.titleBlock}>
+                  <h2 id={`${id}-title`} className={styles.title}>
+                    {resolvedTitle}
+                  </h2>
+
+                  {resolvedDescription ? (
+                    <p className={styles.description}>{resolvedDescription}</p>
+                  ) : null}
+
+                  {resolvedCaption ? (
+                    <p className={styles.caption}>{resolvedCaption}</p>
+                  ) : null}
                 </div>
-
-                <h2 id={`${id}-title`} className={styles.title}>
-                  {title}
-                </h2>
-
-                <p className={styles.description}>{description}</p>
-
-                {caption ? <p className={styles.caption}>{caption}</p> : null}
               </div>
 
-              <div className={styles.headerPanel} aria-hidden="true">
-                <div className={styles.headerPanelFrame}>
-                  <div className={styles.headerPanelLine} />
-                  <div className={styles.headerPanelLine} />
-                  <div className={styles.headerPanelLine} />
-                </div>
-
-                <div className={styles.headerPanelSignal}>
-                  <span className={styles.headerPanelSignalLabel}>Live</span>
-                  <strong className={styles.headerPanelSignalValue}>ON</strong>
-                </div>
-              </div>
+              {hasHero ? (
+                <div className={styles.heroMedia}>{heroSlot}</div>
+              ) : null}
             </div>
 
             {hasMetrics ? (
-              <div className={styles.metricsGrid}>{resolvedMetrics}</div>
+              <div className={styles.metricsRow}>{resolvedMetrics}</div>
             ) : null}
           </header>
 

@@ -1,0 +1,153 @@
+/* src/pages/Mateus/Live/ui/chrome/billboard/styles/LiveHeroBillboardMarquee.module.css */
+
+.marqueeViewport {
+  width: 100%;
+  min-width: 0;
+  min-height: clamp(62px, 6vw, 82px);
+  overflow: hidden;
+  display: grid;
+  align-items: center;
+  mask-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(0, 0, 0, 1) 8%,
+    rgba(0, 0, 0, 1) 92%,
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(0, 0, 0, 1) 8%,
+    rgba(0, 0, 0, 1) 92%,
+    transparent 100%
+  );
+}
+
+.marqueeTrack {
+  display: flex;
+  align-items: center;
+  width: max-content;
+  min-width: max-content;
+  min-height: clamp(62px, 6vw, 82px);
+  will-change: transform;
+  animation: liveHeroMarquee var(--live-hero-marquee-duration, 11.5s) linear infinite;
+}
+
+.marqueeWord {
+  --dot-on: rgba(238, 184, 95, 0.98);
+  --dot-glow: rgba(238, 184, 95, 0.24);
+  --dot-off: rgba(255, 224, 168, 0.08);
+
+  position: relative;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  min-height: clamp(62px, 6vw, 82px);
+  padding-inline-end: clamp(48px, 4.4vw, 78px);
+  font-size: clamp(2.2rem, 2.75vw, 3.05rem);
+  line-height: 1;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  background-image:
+    radial-gradient(circle, var(--dot-on) 0 1.5px, transparent 1.95px);
+  background-size: 6px 6px;
+  background-position: center;
+  -webkit-background-clip: text;
+  background-clip: text;
+  filter:
+    drop-shadow(0 0 1px var(--dot-glow))
+    drop-shadow(0 0 4px rgba(238, 184, 95, 0.1));
+}
+
+.marqueeWord::before {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  background-image:
+    radial-gradient(circle, var(--dot-off) 0 1.2px, transparent 1.65px);
+  background-size: 6px 6px;
+  background-position: center;
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+.marqueeWord::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.22;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  background-image:
+    radial-gradient(circle, rgba(255, 214, 142, 0.9) 0 0.78px, transparent 1.3px);
+  background-size: 6px 6px;
+  background-position: center;
+  -webkit-background-clip: text;
+  background-clip: text;
+  filter: blur(0.22px);
+}
+
+@keyframes liveHeroMarquee {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+
+  to {
+    transform: translate3d(-25%, 0, 0);
+  }
+}
+
+@media (max-width: 900px) {
+  .marqueeViewport,
+  .marqueeTrack {
+    min-height: clamp(54px, 7vw, 70px);
+  }
+
+  .marqueeWord {
+    min-height: clamp(54px, 7vw, 70px);
+    padding-inline-end: clamp(40px, 4.5vw, 64px);
+    font-size: clamp(1.78rem, 3vw, 2.3rem);
+    letter-spacing: 0.1em;
+    background-size: 5px 5px;
+  }
+
+  .marqueeWord::before,
+  .marqueeWord::after {
+    background-size: 5px 5px;
+  }
+}
+
+@media (max-width: 640px) {
+  .marqueeViewport,
+  .marqueeTrack {
+    min-height: 46px;
+  }
+
+  .marqueeWord {
+    min-height: 46px;
+    padding-inline-end: 28px;
+    font-size: 1.4rem;
+    letter-spacing: 0.08em;
+    background-size: 4px 4px;
+  }
+
+  .marqueeWord::before,
+  .marqueeWord::after {
+    background-size: 4px 4px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marqueeTrack {
+    animation: none;
+    transform: translate3d(0, 0, 0);
+  }
+}

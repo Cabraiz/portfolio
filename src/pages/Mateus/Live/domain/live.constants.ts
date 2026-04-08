@@ -1,6 +1,7 @@
 // src/pages/Mateus/Live/domain/live.constants.ts
 
 import type {
+  LiveHeroCounterId,
   LiveInteractionMode,
   LiveMetricEmphasis,
   LiveMetricId,
@@ -48,13 +49,21 @@ export const LIVE_SCENE_DENSITY_WEIGHTS: Readonly<
   dense: 1.2,
 };
 
+export const LIVE_SCENE_DENSITY_LABELS: Readonly<
+  Record<LiveSceneDensity, string>
+> = {
+  calm: "Suave",
+  balanced: "Equilibrado",
+  dense: "Denso",
+};
+
 export const LIVE_INTERACTION_LABELS: Readonly<
   Record<LiveInteractionMode, string>
 > = {
   hover: "Hover",
-  drag: "Drag",
-  magnetic: "Magnetic",
-  spotlight: "Spotlight",
+  drag: "Arraste",
+  magnetic: "Campo magnético",
+  spotlight: "Foco",
 };
 
 export const LIVE_PROJECT_STATUS_LABELS: Readonly<
@@ -112,13 +121,18 @@ export const LIVE_METRIC_ORDER: readonly LiveMetricId[] = [
   "years-building",
 ] as const;
 
-export const LIVE_HERO_METRIC_IDS: readonly LiveMetricId[] = [
-  "projects-total",
-  "projects-active",
+export const LIVE_HERO_COUNTER_IDS: readonly LiveHeroCounterId[] = [
   "projects-delivered",
+  "projects-active",
+] as const;
+
+export const LIVE_HERO_METRIC_IDS: readonly LiveMetricId[] = [
+  "projects-delivered",
+  "projects-active",
 ] as const;
 
 export const LIVE_SECONDARY_METRIC_IDS: readonly LiveMetricId[] = [
+  "projects-total",
   "projects-monitoring",
   "deliveries-shipped",
   "automations",
@@ -133,6 +147,12 @@ export const LIVE_METRIC_DEFAULT_ACCENTS: Readonly<
   success: "var(--live-accent-success, rgba(52, 211, 153, 0.96))",
   warning: "var(--live-accent-warning, rgba(251, 191, 36, 0.96))",
 };
+
+export const LIVE_HERO_TITLE =
+  "Projetos feitos. Projetos em andamento.";
+
+export const LIVE_HERO_DESCRIPTION =
+  "Leitura curta do que já foi entregue e do que segue ativo agora.";
 
 export const LIVE_EMPTY_PROJECTS_TITLE =
   "Nenhum projeto disponível para o radar ao vivo.";

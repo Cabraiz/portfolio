@@ -9,6 +9,10 @@ export type LiveMetricId =
   | "automations"
   | "years-building";
 
+export type LiveHeroCounterId =
+  | "projects-delivered"
+  | "projects-active";
+
 export type LiveMetricDisplayMode = "integer" | "decimal" | "compact";
 
 export type LiveMetricTone = "neutral" | "info" | "success" | "warning";
@@ -129,6 +133,15 @@ export type LiveSectionSceneConfig = Readonly<{
   parallaxStrength: number;
   pointerInfluenceRadius: number;
   pulseIntervalMs: number;
+}>;
+
+export type LiveHeroCounterSnapshot = Readonly<{
+  id: LiveHeroCounterId;
+  label: string;
+  shortLabel: string;
+  value: number;
+  formattedValue: string;
+  tone: LiveMetricTone;
 }>;
 
 export type LiveMetricCollection = readonly LiveMetricDefinition[];

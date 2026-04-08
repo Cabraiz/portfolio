@@ -19,6 +19,8 @@ type UseLiveCounterTickerParams = Readonly<{
   delayMs?: number;
   autoplay?: boolean;
   precision?: number;
+  minimumIntegerDigits?: number;
+  useGrouping?: boolean;
   prefix?: string;
   suffix?: string;
   locale?: string;
@@ -45,6 +47,14 @@ function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);
 }
 
+function normalizePrecision(value: number): number {
+  return clamp(Math.round(value), 0, 20);
+}
+
+function normalizeMinimumIntegerDigits(value: number): number {
+  return clamp(Math.round(value), 1, 21);
+}
+
 function easeOutCubic(progress: number): number {
   return 1 - Math.pow(1 - progress, 3);
 }
@@ -53,12 +63,16 @@ function formatNumber(
   value: number,
   locale: string,
   precision: number,
+  minimumIntegerDigits: number,
+  useGrouping: boolean,
   prefix?: string,
   suffix?: string,
 ): string {
   const formatted = new Intl.NumberFormat(locale, {
     minimumFractionDigits: precision,
     maximumFractionDigits: precision,
+    minimumIntegerDigits,
+    useGrouping,
   }).format(value);
 
   return `${prefix ?? ""}${formatted}${suffix ?? ""}`;
@@ -71,6 +85,8 @@ export function useLiveCounterTicker({
   delayMs = 0,
   autoplay = true,
   precision = 0,
+  minimumIntegerDigits = 1,
+  useGrouping = true,
   prefix,
   suffix,
   locale = "pt-BR",
@@ -83,6 +99,16 @@ export function useLiveCounterTicker({
     respectSystemPreference: respectReducedMotion,
   });
 
+  const normalizedPrecision = useMemo(
+    () => normalizePrecision(precision),
+    [precision],
+  );
+
+  const normalizedMinimumIntegerDigits = useMemo(
+    () => normalizeMinimumIntegerDigits(minimumIntegerDigits),
+    [minimumIntegerDigits],
+  );
+
   const [value, setValue] = useState<number>(startValue);
   const [progress, setProgress] = useState<number>(0);
   const [isRunning, setIsRunning] = useState<boolean>(false);
@@ -93,18 +119,15 @@ export function useLiveCounterTicker({
   const startedAtMsRef = useRef<number | null>(null);
   const frameDelayCompletedRef = useRef(delayMs <= 0);
 
-  const completeImmediately = useCallback(
-    (nextValue: number) => {
-      currentValueRef.current = nextValue;
-      targetValueRef.current = nextValue;
-      setValue(nextValue);
-      setProgress(1);
-      setIsRunning(false);
-      startedAtMsRef.current = null;
-      frameDelayCompletedRef.current = true;
-    },
-    [],
-  );
+  const completeImmediately = useCallback((nextValue: number) => {
+    currentValueRef.current = nextValue;
+    targetValueRef.current = nextValue;
+    setValue(nextValue);
+    setProgress(1);
+    setIsRunning(false);
+    startedAtMsRef.current = null;
+    frameDelayCompletedRef.current = true;
+  }, []);
 
   const reset = useCallback(() => {
     fromValueRef.current = startValue;
@@ -262,8 +285,25 @@ export function useLiveCounterTicker({
       return formatter(value);
     }
 
-    return formatNumber(value, locale, precision, prefix, suffix);
-  }, [formatter, locale, precision, prefix, suffix, value]);
+    return formatNumber(
+      value,
+      locale,
+      normalizedPrecision,
+      normalizedMinimumIntegerDigits,
+      useGrouping,
+      prefix,
+      suffix,
+    );
+  }, [
+    formatter,
+    locale,
+    normalizedMinimumIntegerDigits,
+    normalizedPrecision,
+    prefix,
+    suffix,
+    useGrouping,
+    value,
+  ]);
 
   return {
     value,

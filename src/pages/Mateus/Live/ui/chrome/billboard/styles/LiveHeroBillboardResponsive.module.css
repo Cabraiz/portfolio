@@ -1,0 +1,134 @@
+/* src/pages/Mateus/Live/ui/chrome/billboard/styles/LiveHeroBillboardResponsive.module.css */
+
+@media (max-width: 900px) {
+  :global([data-live-hero-root]) {
+    max-width: 100%;
+  }
+
+  :global([data-live-hero-screen]) {
+    min-height: auto;
+  }
+
+  :global([data-live-hero-board]) {
+    gap: 16px;
+  }
+
+  :global([data-live-hero-header]) {
+    width: min(100%, clamp(280px, 60vw, 500px));
+    min-height: clamp(54px, 7vw, 70px);
+  }
+
+  :global([data-live-hero-marquee-viewport]),
+  :global([data-live-hero-marquee-track]) {
+    min-height: clamp(54px, 7vw, 70px);
+  }
+
+  :global([data-live-hero-marquee-word]) {
+    min-height: clamp(54px, 7vw, 70px);
+    padding-inline-end: clamp(40px, 4.5vw, 64px);
+    font-size: clamp(1.78rem, 3vw, 2.3rem);
+    letter-spacing: 0.1em;
+    background-size: 5px 5px;
+  }
+
+  :global([data-live-hero-marquee-word])::before,
+  :global([data-live-hero-marquee-word])::after {
+    background-size: 5px 5px;
+  }
+
+  :global([data-live-hero-counter]) {
+    grid-auto-columns: minmax(clamp(50px, 8vw, 66px), auto);
+  }
+
+  :global([data-live-hero-digit-slot]) {
+    min-width: clamp(50px, 8vw, 66px);
+    min-height: clamp(90px, 12vw, 118px);
+  }
+
+  :global([data-live-hero-digit-glyph]) {
+    font-size: clamp(3.28rem, 10vw, 5.05rem);
+    background-size: 6px 6px;
+  }
+
+  :global([data-live-hero-digit-glyph])::before,
+  :global([data-live-hero-digit-glyph])::after {
+    background-size: 6px 6px;
+  }
+}
+
+@media (max-width: 640px) {
+  :global([data-live-hero-root]),
+  :global([data-live-hero-root][data-live-hero-compact="true"]) {
+    max-width: 100%;
+  }
+
+  :global([data-live-hero-board]) {
+    justify-items: start;
+    padding-inline-start: 0;
+    gap: 12px;
+  }
+
+  :global([data-live-hero-header]),
+  :global([data-live-hero-counter]) {
+    justify-self: start;
+  }
+
+  :global([data-live-hero-header]) {
+    width: 100%;
+    min-height: 46px;
+  }
+
+  :global([data-live-hero-marquee-viewport]),
+  :global([data-live-hero-marquee-track]) {
+    min-height: 46px;
+  }
+
+  :global([data-live-hero-marquee-word]) {
+    min-height: 46px;
+    padding-inline-end: 28px;
+    font-size: 1.4rem;
+    letter-spacing: 0.08em;
+    background-size: 4px 4px;
+  }
+
+  :global([data-live-hero-marquee-word])::before,
+  :global([data-live-hero-marquee-word])::after {
+    background-size: 4px 4px;
+  }
+
+  :global([data-live-hero-counter]) {
+    grid-auto-columns: minmax(44px, auto);
+  }
+
+  :global([data-live-hero-digit-slot]) {
+    min-width: 44px;
+    min-height: 80px;
+  }
+
+  :global([data-live-hero-digit-glyph]) {
+    font-size: clamp(2.82rem, 13.6vw, 4.1rem);
+    background-size: 5px 5px;
+  }
+
+  :global([data-live-hero-digit-glyph])::before,
+  :global([data-live-hero-digit-glyph])::after {
+    background-size: 5px 5px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :global([data-live-hero-screen]) {
+    transition: none;
+  }
+
+  :global([data-live-hero-root]:hover) :global([data-live-hero-screen]) {
+    transform: none;
+  }
+
+  :global([data-live-hero-marquee-track]),
+  :global([data-live-hero-root][data-running="true"]) :global([data-live-hero-digit-glyph]),
+  :global([data-live-hero-root][data-running="true"]) :global([data-live-hero-digit-glyph])::after {
+    animation: none;
+    transform: translate3d(0, 0, 0);
+  }
+}

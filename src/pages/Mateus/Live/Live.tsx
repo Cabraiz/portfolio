@@ -24,17 +24,15 @@ import type {
 } from "./domain/live.types";
 import { useLiveGsapScene } from "./hooks/useLiveGsapScene";
 import LiveStatsBoard from "./ui/board/LiveStatsBoard";
+import LiveHeroBillboard from "./ui/chrome/billboard/LiveHeroBillboard";
 import LiveInteractionHint from "./ui/chrome/LiveInteractionHint";
 import LiveLegend from "./ui/chrome/LiveLegend";
 import LiveMiniTimeline from "./ui/chrome/LiveMiniTimeline";
-import LiveSectionHeader from "./ui/chrome/LiveSectionHeader";
 import LiveAmbientGrid from "./ui/scene/LiveAmbientGrid";
 import LiveCursorField from "./ui/scene/LiveCursorField";
 import LiveProjectNodes from "./ui/scene/LiveProjectNodes";
 import LiveSignalPulse from "./ui/scene/LiveSignalPulse";
-import LiveSectionShell, {
-	type LiveShellMetricItem,
-} from "./ui/shell/LiveSectionShell";
+import LiveSectionShell from "./ui/shell/LiveSectionShell";
 import styles from "./Live.module.css";
 
 type PointerSnapshot = Readonly<{
@@ -55,6 +53,12 @@ const DEFAULT_POINTER: PointerSnapshot = {
 	centeredX: 0,
 	centeredY: 0,
 	distance: 0,
+};
+
+const DENSITY_LABELS: Record<LiveSceneDensity, string> = {
+	calm: "Suave",
+	balanced: "Equilibrado",
+	dense: "Denso",
 };
 
 function joinClassNames(
@@ -189,17 +193,6 @@ export default function Live() {
 		selectedStatus,
 	]);
 
-	const shellMetrics = useMemo<readonly LiveShellMetricItem[]>(() => {
-		return metricsState.heroMetrics.map((metric) => ({
-			id: metric.id,
-			label: metric.shortLabel,
-			value: metric.formattedValue,
-			helperText: metric.description,
-			badge: metric.badge,
-			tone: metric.tone,
-		}));
-	}, [metricsState.heroMetrics]);
-
 	const pulseSize = Math.round(102 * LIVE_SCENE_DENSITY_WEIGHTS[density]);
 	const pulseX = `${30 + pointer.normalizedX * 40}%`;
 	const pulseY = `${24 + pointer.normalizedY * 36}%`;
@@ -212,8 +205,12 @@ export default function Live() {
 
 	const sceneHudStyle = useMemo<CSSProperties>(() => {
 		return {
-			["--live-scene-pointer-x" as const]: `${Math.round(pointer.normalizedX * 100)}%`,
-			["--live-scene-pointer-y" as const]: `${Math.round(pointer.normalizedY * 100)}%`,
+			["--live-scene-pointer-x" as const]: `${Math.round(
+				pointer.normalizedX * 100
+			)}%`,
+			["--live-scene-pointer-y" as const]: `${Math.round(
+				pointer.normalizedY * 100
+			)}%`,
 		} as CSSProperties;
 	}, [pointer.normalizedX, pointer.normalizedY]);
 
@@ -234,11 +231,16 @@ export default function Live() {
 				id={LIVE_SECTION_ID}
 				className={styles.shell}
 				ariaLabel="Seção ao vivo do portfólio"
-				eyebrow="Ao vivo"
-				title="Projetos, entregas e operação em leitura editorial."
-				description="Um placar interativo inspirado em painéis urbanos de contagem contínua, mas traduzido para um radar profissional de software, produto e execução."
-				caption="O foco aqui é transformar histórico e trabalho ativo em um painel que pareça vivo, observável e agradável de explorar."
-				metrics={shellMetrics}
+				title="Tudo em curso, ao vivo."
+				description=""
+				caption=""
+				heroSlot={
+					<LiveHeroBillboard
+						metrics={metricsState.snapshots}
+						summary={metricsState.summary}
+						isRunning={metricsState.isRunning}
+					/>
+				}
 				hasResults={hasResults}
 				filtersSlot={
 					<div className={styles.filtersBar}>
@@ -291,7 +293,7 @@ export default function Live() {
 											setDensity(option);
 										}}
 									>
-										{option}
+										{DENSITY_LABELS[option]}
 									</button>
 								)
 							)}
@@ -437,7 +439,7 @@ export default function Live() {
 										className={styles.sceneControlButton}
 										onClick={spotlight.selectPreviousProject}
 									>
-										Prev
+										Anterior
 									</button>
 
 									<button
@@ -445,12 +447,12 @@ export default function Live() {
 										className={styles.sceneControlButton}
 										onClick={spotlight.selectNextProject}
 									>
-										Next
+										Próximo
 									</button>
 
 									<span className={styles.sceneMetaPill}>
 										{toNodeCountLabel(spotlight.visibleProjects.length)} ·{" "}
-										{density}
+										{DENSITY_LABELS[density]}
 									</span>
 								</div>
 							</LiveAmbientGrid>
@@ -459,38 +461,26 @@ export default function Live() {
 				}
 				spotlightSlot={
 					<div className={styles.sidebarStack}>
-						<div data-live-hint="true">
-							<LiveSectionHeader
-								elapsedMs={metricsState.elapsedMs}
-								isRunning={metricsState.isRunning}
-								summary={metricsState.summary}
-								density={density}
-								interactionMode={LIVE_DEFAULT_SCENE_CONFIG.interactionMode}
-								spotlightTitle={spotlight.spotlightTitle}
-								footerSlot={
-									<div className={styles.headerFooter}>
-										<span className={styles.headerBadge}>
-											{metricsState.isRunning
-												? "Painel vivo"
-												: "Painel pausado"}
-										</span>
-										<span className={styles.headerBadge}>
-											Cena {isSceneReady ? "pronta" : "preparando"}
-										</span>
-										{selectedStatus ? (
-											<button
-												type="button"
-												className={styles.headerBadgeButton}
-												onClick={() => {
-													setSelectedStatus(null);
-												}}
-											>
-												Limpar recorte
-											</button>
-										) : null}
-									</div>
-								}
-							/>
+						<div className={styles.headerFooter}>
+							<span className={styles.headerBadge}>
+								{metricsState.isRunning ? "Painel vivo" : "Painel pausado"}
+							</span>
+
+							<span className={styles.headerBadge}>
+								Cena {isSceneReady ? "pronta" : "preparando"}
+							</span>
+
+							{selectedStatus ? (
+								<button
+									type="button"
+									className={styles.headerBadgeButton}
+									onClick={() => {
+										setSelectedStatus(null);
+									}}
+								>
+									Limpar recorte
+								</button>
+							) : null}
 						</div>
 
 						<LiveLegend

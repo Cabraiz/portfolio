@@ -3,34 +3,33 @@
 .root {
   --live-shell-max-width: 1440px;
   --live-shell-section-min-height: calc(100dvh - var(--app-navbar-height, 70px));
-  --live-shell-padding-top: clamp(28px, 4dvh, 52px);
+  --live-shell-padding-top: clamp(24px, 3.6dvh, 42px);
   --live-shell-padding-inline: clamp(18px, 3vw, 34px);
-  --live-shell-padding-bottom: clamp(22px, 3.5dvh, 38px);
-  --live-shell-gap: clamp(18px, 2vw, 26px);
-  --live-shell-header-gap: clamp(18px, 2vw, 24px);
-  --live-shell-surface-radius: clamp(24px, 2.2vw, 34px);
-  --live-shell-panel-radius: clamp(22px, 2vw, 30px);
+  --live-shell-padding-bottom: clamp(20px, 3.2dvh, 34px);
+  --live-shell-gap: clamp(16px, 1.8vw, 22px);
+  --live-shell-surface-radius: clamp(24px, 2.1vw, 34px);
+  --live-shell-panel-radius: clamp(20px, 1.8vw, 28px);
 
   --live-shell-soft-border: rgba(255, 255, 255, 0.08);
   --live-shell-strong-border: rgba(255, 255, 255, 0.14);
 
   --live-shell-text-strong: rgba(255, 255, 255, 0.96);
-  --live-shell-text-base: rgba(255, 255, 255, 0.76);
-  --live-shell-text-soft: rgba(255, 255, 255, 0.58);
+  --live-shell-text-base: rgba(255, 255, 255, 0.72);
+  --live-shell-text-soft: rgba(255, 255, 255, 0.54);
 
   --live-shell-surface-bg:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.018)),
-    linear-gradient(180deg, rgba(10, 10, 14, 0.965), rgba(7, 7, 10, 0.988));
-  --live-shell-panel-bg:
     linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.012)),
-    linear-gradient(180deg, rgba(15, 15, 19, 0.965), rgba(10, 10, 13, 0.988));
+    linear-gradient(180deg, rgba(9, 11, 16, 0.965), rgba(7, 8, 12, 0.988));
+  --live-shell-panel-bg:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.008)),
+    linear-gradient(180deg, rgba(12, 14, 20, 0.965), rgba(9, 10, 14, 0.988));
 
   --live-shell-accent: #38bdf8;
-  --live-shell-accent-glow: rgba(56, 189, 248, 0.2);
+  --live-shell-accent-glow: rgba(56, 189, 248, 0.16);
   --live-shell-signal: #34d399;
 
   --live-shell-shadow-rest: 0 18px 44px rgba(0, 0, 0, 0.22);
-  --live-shell-shadow-panel: 0 22px 54px rgba(0, 0, 0, 0.26);
+  --live-shell-shadow-panel: 0 22px 54px rgba(0, 0, 0, 0.24);
 
   position: relative;
   width: 100%;
@@ -39,9 +38,9 @@
 }
 
 .rootCompact {
-  --live-shell-padding-top: clamp(20px, 2.8dvh, 34px);
-  --live-shell-padding-bottom: clamp(18px, 2.6dvh, 28px);
-  --live-shell-gap: 16px;
+  --live-shell-padding-top: clamp(18px, 2.8dvh, 30px);
+  --live-shell-padding-bottom: clamp(16px, 2.6dvh, 24px);
+  --live-shell-gap: 14px;
 }
 
 .section {
@@ -55,22 +54,10 @@
   overflow: hidden;
   isolation: isolate;
   background:
-    radial-gradient(
-      circle at 16% 12%,
-      color-mix(in srgb, var(--live-shell-accent) 20%, transparent),
-      transparent 24%
-    ),
-    radial-gradient(
-      circle at 85% 10%,
-      rgba(52, 211, 153, 0.09),
-      transparent 18%
-    ),
-    radial-gradient(
-      circle at 54% 88%,
-      rgba(59, 130, 246, 0.08),
-      transparent 24%
-    ),
-    linear-gradient(180deg, rgba(8, 8, 10, 0.968), rgba(11, 11, 14, 0.988));
+    radial-gradient(circle at 12% 10%, rgba(56, 189, 248, 0.12), transparent 22%),
+    radial-gradient(circle at 84% 12%, rgba(52, 211, 153, 0.08), transparent 18%),
+    radial-gradient(circle at 56% 88%, rgba(59, 130, 246, 0.06), transparent 24%),
+    linear-gradient(180deg, rgba(8, 9, 12, 0.968), rgba(10, 11, 14, 0.99));
 }
 
 .background {
@@ -85,7 +72,7 @@
   position: absolute;
   border-radius: 999px;
   filter: blur(58px);
-  opacity: 0.9;
+  opacity: 0.78;
 }
 
 .backgroundGlowPrimary {
@@ -101,24 +88,24 @@
   left: -8%;
   width: clamp(220px, 24vw, 360px);
   height: clamp(220px, 24vw, 360px);
-  background: rgba(52, 211, 153, 0.12);
+  background: rgba(52, 211, 153, 0.1);
 }
 
 .backgroundGrid {
   position: absolute;
   inset: 0;
-  opacity: 0.16;
+  opacity: 0.1;
   background-image:
     linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
   background-size: 34px 34px;
-  mask-image: radial-gradient(circle at center, black 36%, transparent 86%);
+  mask-image: radial-gradient(circle at center, black 32%, transparent 84%);
 }
 
 .backgroundScanlines {
   position: absolute;
   inset: 0;
-  opacity: 0.08;
+  opacity: 0.045;
   background:
     repeating-linear-gradient(
       180deg,
@@ -142,16 +129,16 @@
 
 .header {
   display: grid;
-  gap: var(--live-shell-header-gap);
+  gap: 12px;
 }
 
-.headerShell {
+.heroShell {
   position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: clamp(18px, 2vw, 26px);
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 420px);
+  gap: clamp(18px, 2vw, 28px);
   align-items: stretch;
-  padding: clamp(22px, 2.4vw, 34px);
+  padding: clamp(22px, 2.2vw, 32px);
   border-radius: var(--live-shell-surface-radius);
   border: 1px solid var(--live-shell-soft-border);
   background: var(--live-shell-surface-bg);
@@ -161,25 +148,26 @@
   isolation: isolate;
 }
 
-.headerShell::before {
+.heroShell::before {
   content: "";
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(
-      135deg,
-      color-mix(in srgb, var(--live-shell-accent) 11%, transparent),
-      transparent 42%
-    );
+    radial-gradient(circle at 16% 14%, rgba(56, 189, 248, 0.08), transparent 26%),
+    linear-gradient(135deg, rgba(56, 189, 248, 0.05), transparent 38%);
   pointer-events: none;
 }
 
-.headerCopy {
+.heroCopy {
   position: relative;
   z-index: 1;
-  display: grid;
-  gap: 12px;
   min-width: 0;
+  min-height: 100%;
+  display: grid;
+  align-content: center;
+  justify-items: start;
+  gap: 10px;
+  padding-block: clamp(4px, 0.7vw, 10px);
 }
 
 .eyebrowRow {
@@ -187,6 +175,8 @@
   align-items: center;
   gap: 10px;
   flex-wrap: wrap;
+  min-height: 32px;
+  margin: 0;
 }
 
 .eyebrow {
@@ -197,146 +187,92 @@
   margin: 0;
   padding: 0 14px;
   border-radius: 999px;
-  border: 1px solid color-mix(in srgb, var(--live-shell-accent) 34%, transparent);
-  background: color-mix(in srgb, var(--live-shell-accent) 10%, transparent);
-  color: rgba(255, 255, 255, 0.8);
-  font-size: 0.74rem;
+  border: 1px solid rgba(56, 189, 248, 0.26);
+  background: rgba(56, 189, 248, 0.08);
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.16em;
   text-transform: uppercase;
 }
 
 .statusDot {
+  flex: 0 0 auto;
   width: 10px;
   height: 10px;
   border-radius: 999px;
   background: var(--live-shell-signal);
   box-shadow:
-    0 0 0 4px color-mix(in srgb, var(--live-shell-signal) 18%, transparent),
-    0 0 16px color-mix(in srgb, var(--live-shell-signal) 36%, transparent);
+    0 0 0 4px rgba(52, 211, 153, 0.14),
+    0 0 16px rgba(52, 211, 153, 0.26);
 }
 
 .statusLabel {
   color: var(--live-shell-text-soft);
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
+.titleBlock {
+  display: grid;
+  align-content: center;
+  gap: 14px;
+}
+
 .title {
   margin: 0;
-  max-width: 980px;
+  max-width: 12ch;
   color: var(--live-shell-text-strong);
-  font-size: clamp(2rem, 4.6vw, 4.2rem);
-  line-height: 1.02;
-  letter-spacing: -0.045em;
-  font-weight: 800;
+  font-family:
+    Inter,
+    Poppins,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+  font-size: clamp(2.2rem, 5vw, 4.6rem);
+  line-height: 0.95;
+  letter-spacing: -0.068em;
+  font-weight: 760;
   text-wrap: balance;
 }
 
 .description {
   margin: 0;
-  max-width: 960px;
+  max-width: 34ch;
   color: var(--live-shell-text-base);
-  font-size: clamp(1rem, 1.18vw, 1.1rem);
-  line-height: 1.78;
+  font-size: clamp(0.98rem, 1.08vw, 1.04rem);
+  line-height: 1.58;
 }
 
 .caption {
-  margin: 2px 0 0;
-  max-width: 900px;
+  margin: 0;
+  max-width: 42ch;
   color: var(--live-shell-text-soft);
-  font-size: 0.94rem;
-  line-height: 1.72;
+  font-size: 0.88rem;
+  line-height: 1.6;
 }
 
-.headerPanel {
+.heroMedia {
   position: relative;
-  min-width: clamp(170px, 15vw, 240px);
-  display: grid;
-  gap: 12px;
-  align-self: stretch;
+  z-index: 1;
+  min-width: 0;
+  width: 100%;
+  align-self: center;
   justify-self: end;
-}
-
-.headerPanelFrame {
-  position: relative;
-  min-height: 112px;
-  border-radius: 22px;
-  border: 1px solid color-mix(in srgb, var(--live-shell-accent) 24%, var(--live-shell-soft-border));
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.018)),
-    rgba(7, 10, 14, 0.78);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.06),
-    0 16px 34px rgba(0, 0, 0, 0.18);
-  overflow: hidden;
-}
-
-.headerPanelFrame::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(
-      180deg,
-      color-mix(in srgb, var(--live-shell-accent) 11%, transparent),
-      transparent 42%
-    );
-  pointer-events: none;
-}
-
-.headerPanelLine {
-  position: absolute;
-  left: 14px;
-  right: 14px;
-  height: 1px;
-  background: rgba(255, 255, 255, 0.08);
-}
-
-.headerPanelLine:nth-child(1) {
-  top: 28px;
-}
-
-.headerPanelLine:nth-child(2) {
-  top: 56px;
-}
-
-.headerPanelLine:nth-child(3) {
-  top: 84px;
-}
-
-.headerPanelSignal {
   display: grid;
-  gap: 4px;
-  padding: 12px 14px;
-  border-radius: 18px;
-  border: 1px solid var(--live-shell-soft-border);
-  background: var(--live-shell-panel-bg);
-  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.16);
+  align-items: center;
+  justify-items: end;
 }
 
-.headerPanelSignalLabel {
-  color: var(--live-shell-text-soft);
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-}
-
-.headerPanelSignalValue {
-  color: var(--live-shell-text-strong);
-  font-size: 1.05rem;
-  line-height: 1;
-  font-weight: 800;
-  letter-spacing: -0.03em;
-}
-
-.metricsGrid {
+.metricsRow {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 14px;
+  gap: 12px;
 }
 
 .metricCard {
@@ -346,11 +282,11 @@
   min-width: 0;
   display: grid;
   gap: 8px;
-  padding: 16px 16px 15px;
-  border-radius: 22px;
+  padding: 15px 15px 14px;
+  border-radius: 20px;
   border: 1px solid var(--live-shell-soft-border);
   background: var(--live-shell-panel-bg);
-  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.18);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.16);
   overflow: hidden;
 }
 
@@ -363,7 +299,7 @@
     linear-gradient(
       180deg,
       var(--live-metric-accent),
-      color-mix(in srgb, var(--live-metric-accent) 22%, transparent)
+      rgba(255, 255, 255, 0)
     );
   opacity: 0.9;
 }
@@ -389,7 +325,7 @@
 
 .metricLabel {
   color: var(--live-shell-text-soft);
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -401,10 +337,10 @@
   min-height: 22px;
   padding: 0 9px;
   border-radius: 999px;
-  border: 1px solid color-mix(in srgb, var(--live-metric-accent) 28%, transparent);
-  background: color-mix(in srgb, var(--live-metric-accent) 9%, transparent);
-  color: rgba(255, 255, 255, 0.72);
-  font-size: 0.68rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.66rem;
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -412,21 +348,21 @@
 
 .metricValue {
   color: var(--live-shell-text-strong);
-  font-size: clamp(1.36rem, 2vw, 1.86rem);
+  font-size: clamp(1.24rem, 1.8vw, 1.66rem);
   line-height: 1;
-  font-weight: 800;
+  font-weight: 780;
   letter-spacing: -0.04em;
 }
 
 .metricHelper {
   color: var(--live-shell-text-base);
-  font-size: 0.88rem;
-  line-height: 1.55;
+  font-size: 0.82rem;
+  line-height: 1.5;
 }
 
 .body {
   display: grid;
-  grid-template-columns: minmax(0, 1.22fr) minmax(320px, 0.78fr);
+  grid-template-columns: minmax(0, 1.2fr) minmax(300px, 0.8fr);
   gap: var(--live-shell-gap);
   align-items: start;
 }
@@ -500,15 +436,10 @@
   width: clamp(190px, 26vw, 300px);
   aspect-ratio: 1 / 1;
   border-radius: 999px;
-  border: 1px solid color-mix(in srgb, var(--live-shell-accent) 20%, transparent);
+  border: 1px solid rgba(56, 189, 248, 0.18);
   background:
-    radial-gradient(
-      circle at center,
-      color-mix(in srgb, var(--live-shell-accent) 14%, transparent),
-      transparent 62%
-    );
+    radial-gradient(circle at center, rgba(56, 189, 248, 0.12), transparent 62%);
   opacity: 0.8;
-  filter: blur(0.2px);
 }
 
 .emptyStateContent {
@@ -543,7 +474,7 @@
 }
 
 @media (max-width: 1180px) {
-  .metricsGrid {
+  .metricsRow {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
@@ -558,18 +489,27 @@
   }
 }
 
-@media (max-width: 900px) {
-  .headerShell {
+@media (max-width: 980px) {
+  .heroShell {
     grid-template-columns: minmax(0, 1fr);
+    align-items: start;
   }
 
-  .headerPanel {
-    min-width: 0;
+  .heroCopy {
+    min-height: auto;
+    align-content: start;
+    padding-block: 0;
+    gap: 10px;
+  }
+
+  .heroMedia {
     justify-self: stretch;
+    justify-items: start;
+    align-self: start;
   }
 
-  .canvasInner {
-    min-height: 360px;
+  .title {
+    max-width: 11ch;
   }
 }
 
@@ -586,12 +526,21 @@
     gap: 14px;
   }
 
-  .metricsGrid {
+  .metricsRow {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .headerShell {
+  .heroShell {
     padding: 18px;
+  }
+
+  .heroCopy {
+    gap: 8px;
+  }
+
+  .eyebrowRow {
+    gap: 8px;
+    min-height: 28px;
   }
 
   .filtersRow,
@@ -602,14 +551,14 @@
   }
 
   .title {
-    font-size: clamp(1.64rem, 8vw, 2.54rem);
-    line-height: 1.04;
+    font-size: clamp(1.82rem, 8vw, 3rem);
+    line-height: 0.98;
   }
 
   .description,
   .caption,
   .emptyStateDescription {
-    line-height: 1.62;
+    line-height: 1.58;
   }
 
   .metricCardTopRow {

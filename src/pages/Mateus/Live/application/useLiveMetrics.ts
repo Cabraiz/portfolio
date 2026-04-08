@@ -2,7 +2,12 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-import { LIVE_HERO_METRIC_IDS, LIVE_SECONDARY_METRIC_IDS } from "../domain/live.constants";
+import {
+  LIVE_DEFAULT_COUNTER_TICK_MS,
+  LIVE_HERO_COUNTER_IDS,
+  LIVE_HERO_METRIC_IDS,
+  LIVE_SECONDARY_METRIC_IDS,
+} from "../domain/live.constants";
 import {
   buildLiveMetricSnapshot,
   groupLiveProjectsByStatus,
@@ -10,6 +15,8 @@ import {
   summarizeLiveProjects,
 } from "../domain/live.helpers";
 import type {
+  LiveHeroCounterId,
+  LiveHeroCounterSnapshot,
   LiveMetricDefinition,
   LiveMetricId,
   LiveMetricSnapshot,
@@ -36,6 +43,7 @@ type UseLiveMetricsResult = Readonly<{
   snapshots: readonly LiveMetricSnapshot[];
   heroMetrics: readonly LiveMetricSnapshot[];
   secondaryMetrics: readonly LiveMetricSnapshot[];
+  heroCounterSnapshots: readonly LiveHeroCounterSnapshot[];
   elapsedMs: number;
   isRunning: boolean;
   hasAnimatedMetrics: boolean;
@@ -46,21 +54,62 @@ type UseLiveMetricsResult = Readonly<{
   restart: () => void;
   setElapsedMs: (nextElapsedMs: number) => void;
   getSnapshotById: (metricId: LiveMetricId) => LiveMetricSnapshot | null;
+  getHeroCounterById: (
+    counterId: LiveHeroCounterId,
+  ) => LiveHeroCounterSnapshot | null;
 }>;
+
+function isDefined<T>(value: T | null | undefined): value is T {
+  return value !== null && value !== undefined;
+}
+
+function buildFallbackHeroCounter(
+  counterId: LiveHeroCounterId,
+  summary: LiveProjectAggregate,
+): LiveHeroCounterSnapshot {
+  switch (counterId) {
+    case "projects-active":
+      return {
+        id: counterId,
+        label: "Projetos em andamento",
+        shortLabel: "Andamento",
+        value: summary.activeProjects,
+        formattedValue: String(summary.activeProjects),
+        tone: "info",
+      };
+
+    case "projects-delivered":
+    default:
+      return {
+        id: counterId,
+        label: "Projetos feitos",
+        shortLabel: "Feitos",
+        value: summary.deliveredProjects,
+        formattedValue: String(summary.deliveredProjects),
+        tone: "success",
+      };
+  }
+}
 
 export function useLiveMetrics({
   metrics = LIVE_METRICS,
   projects = LIVE_PROJECTS,
   autoStart = true,
-  simulationIntervalMs = 1200,
+  simulationIntervalMs = LIVE_DEFAULT_COUNTER_TICK_MS,
   initialElapsedMs = 0,
   respectSimulation = true,
 }: UseLiveMetricsParams = {}): UseLiveMetricsResult {
-  const [elapsedMs, setElapsedMsState] = useState<number>(initialElapsedMs);
+  const [elapsedMs, setElapsedMsState] = useState<number>(
+    Math.max(0, Math.floor(initialElapsedMs)),
+  );
   const [isRunning, setIsRunning] = useState<boolean>(autoStart);
 
   useEffect(() => {
-    if (!isRunning || simulationIntervalMs <= 0 || typeof window === "undefined") {
+    if (
+      !isRunning ||
+      simulationIntervalMs <= 0 ||
+      typeof window === "undefined"
+    ) {
       return undefined;
     }
 
@@ -103,17 +152,42 @@ export function useLiveMetrics({
     });
   }, [elapsedMs, isRunning, metrics, projects, respectSimulation]);
 
-  const heroMetrics = useMemo<readonly LiveMetricSnapshot[]>(() => {
-    return snapshots.filter((metric) =>
-      LIVE_HERO_METRIC_IDS.includes(metric.id as LiveMetricId),
+  const snapshotsById = useMemo(() => {
+    return new Map<LiveMetricId, LiveMetricSnapshot>(
+      snapshots.map((metric) => [metric.id, metric]),
     );
   }, [snapshots]);
 
-  const secondaryMetrics = useMemo<readonly LiveMetricSnapshot[]>(() => {
-    return snapshots.filter((metric) =>
-      LIVE_SECONDARY_METRIC_IDS.includes(metric.id as LiveMetricId),
+  const heroMetrics = useMemo<readonly LiveMetricSnapshot[]>(() => {
+    return LIVE_HERO_METRIC_IDS.map((metricId) => snapshotsById.get(metricId)).filter(
+      isDefined,
     );
-  }, [snapshots]);
+  }, [snapshotsById]);
+
+  const secondaryMetrics = useMemo<readonly LiveMetricSnapshot[]>(() => {
+    return LIVE_SECONDARY_METRIC_IDS.map((metricId) =>
+      snapshotsById.get(metricId),
+    ).filter(isDefined);
+  }, [snapshotsById]);
+
+  const heroCounterSnapshots = useMemo<readonly LiveHeroCounterSnapshot[]>(() => {
+    return LIVE_HERO_COUNTER_IDS.map((counterId) => {
+      const snapshot = snapshotsById.get(counterId);
+
+      if (!snapshot) {
+        return buildFallbackHeroCounter(counterId, summary);
+      }
+
+      return {
+        id: counterId,
+        label: snapshot.label,
+        shortLabel: snapshot.shortLabel,
+        value: snapshot.value,
+        formattedValue: snapshot.formattedValue,
+        tone: snapshot.tone,
+      };
+    });
+  }, [snapshotsById, summary]);
 
   const start = useCallback(() => {
     setIsRunning(true);
@@ -142,9 +216,18 @@ export function useLiveMetrics({
 
   const getSnapshotById = useCallback(
     (metricId: LiveMetricId): LiveMetricSnapshot | null => {
-      return snapshots.find((metric) => metric.id === metricId) ?? null;
+      return snapshotsById.get(metricId) ?? null;
     },
-    [snapshots],
+    [snapshotsById],
+  );
+
+  const getHeroCounterById = useCallback(
+    (counterId: LiveHeroCounterId): LiveHeroCounterSnapshot | null => {
+      return (
+        heroCounterSnapshots.find((counter) => counter.id === counterId) ?? null
+      );
+    },
+    [heroCounterSnapshots],
   );
 
   return {
@@ -155,6 +238,7 @@ export function useLiveMetrics({
     snapshots,
     heroMetrics,
     secondaryMetrics,
+    heroCounterSnapshots,
     elapsedMs,
     isRunning,
     hasAnimatedMetrics,
@@ -165,5 +249,6 @@ export function useLiveMetrics({
     restart,
     setElapsedMs,
     getSnapshotById,
+    getHeroCounterById,
   };
 }

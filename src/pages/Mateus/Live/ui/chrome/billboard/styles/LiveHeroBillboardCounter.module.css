@@ -1,0 +1,185 @@
+/* src/pages/Mateus/Live/ui/chrome/billboard/styles/LiveHeroBillboardCounter.module.css */
+
+.counter {
+  position: relative;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(clamp(58px, 6vw, 78px), auto);
+  align-items: stretch;
+  justify-self: end;
+  width: max-content;
+  max-width: 100%;
+  border-top: 2px solid rgba(126, 126, 126, 0.82);
+  border-bottom: 2px solid rgba(126, 126, 126, 0.82);
+  background:
+    linear-gradient(
+      180deg,
+      rgba(34, 34, 34, 0.96) 0%,
+      rgba(10, 10, 10, 0.98) 18%,
+      rgba(0, 0, 0, 1) 50%,
+      rgba(12, 12, 12, 0.98) 82%,
+      rgba(30, 30, 30, 0.96) 100%
+    );
+  box-shadow:
+    inset 0 1px 0 rgba(220, 220, 220, 0.08),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.03),
+    0 0 0 1px rgba(70, 70, 70, 0.45);
+}
+
+.counter::before,
+.counter::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  pointer-events: none;
+  z-index: 2;
+  background: linear-gradient(
+    180deg,
+    rgba(210, 210, 210, 0.18) 0%,
+    rgba(138, 138, 138, 0.92) 12%,
+    rgba(82, 82, 82, 0.96) 48%,
+    rgba(132, 132, 132, 0.9) 86%,
+    rgba(220, 220, 220, 0.16) 100%
+  );
+}
+
+.counter::before {
+  left: 0;
+}
+
+.counter::after {
+  right: 0;
+}
+
+.digitSlot {
+  --digit-flicker-delay: 0s;
+
+  position: relative;
+  display: grid;
+  place-items: stretch;
+  min-width: clamp(58px, 6vw, 78px);
+  min-height: clamp(104px, 10.8vw, 140px);
+  padding: 0;
+  overflow: hidden;
+  isolation: isolate;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(14, 14, 14, 1) 0%,
+      rgba(0, 0, 0, 1) 22%,
+      rgba(0, 0, 0, 1) 78%,
+      rgba(18, 18, 18, 1) 100%
+    );
+  background-image: none;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.025),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.02);
+}
+
+.digitSlot + .digitSlot {
+  border-left: 2px solid rgba(118, 118, 118, 0.82);
+}
+
+.digitSlot::after {
+  content: "";
+  position: absolute;
+  inset: 7% auto 7% 0;
+  width: 2px;
+  background: linear-gradient(
+    180deg,
+    rgba(220, 220, 220, 0.08) 0%,
+    rgba(150, 150, 150, 0.85) 18%,
+    rgba(86, 86, 86, 0.96) 50%,
+    rgba(148, 148, 148, 0.82) 82%,
+    rgba(220, 220, 220, 0.08) 100%
+  );
+  opacity: 1;
+}
+
+.digitSlot:first-child::after {
+  display: none;
+}
+
+.digitGlyph {
+  --digit-dot-on: rgba(238, 184, 95, 0.98);
+  --digit-dot-off: rgba(238, 184, 95, 0.08);
+  --digit-dot-glow: rgba(238, 184, 95, 0.24);
+
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-size: clamp(4.3rem, 8.9vw, calc(var(--live-hero-value-size) * 1.06));
+  line-height: 0.9;
+  letter-spacing: -0.065em;
+  font-weight: 760;
+  font-variant-numeric: tabular-nums lining-nums;
+  text-wrap: nowrap;
+  text-align: center;
+  text-rendering: geometricPrecision;
+  transform: none;
+
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  background-image:
+    radial-gradient(circle, var(--digit-dot-on) 0 1.35px, transparent 1.82px);
+  background-size: 7px 7px;
+  background-position: center;
+  -webkit-background-clip: text;
+  background-clip: text;
+  filter:
+    drop-shadow(0 0 1px var(--digit-dot-glow))
+    drop-shadow(0 0 4px rgba(238, 184, 95, 0.14));
+  will-change: opacity, filter;
+}
+
+.digitGlyph::before,
+.digitGlyph::after {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font: inherit;
+  line-height: inherit;
+  letter-spacing: inherit;
+  text-align: inherit;
+}
+
+.digitGlyph::before {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  background-image:
+    radial-gradient(circle, var(--digit-dot-off) 0 1.16px, transparent 1.66px);
+  background-size: 7px 7px;
+  background-position: center;
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+.digitGlyph::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.2;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  background-image:
+    radial-gradient(circle, rgba(255, 214, 142, 0.92) 0 0.72px, transparent 1.28px);
+  background-size: 7px 7px;
+  background-position: center;
+  -webkit-background-clip: text;
+  background-clip: text;
+  filter: blur(0.28px);
+  will-change: opacity, filter;
+}

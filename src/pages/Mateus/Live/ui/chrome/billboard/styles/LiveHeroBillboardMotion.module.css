@@ -1,0 +1,108 @@
+/* src/pages/Mateus/Live/ui/chrome/billboard/styles/LiveHeroBillboardMotion.module.css */
+
+:global([data-live-hero-marquee-track]) {
+  will-change: transform;
+  animation: liveHeroMarquee var(--live-hero-marquee-duration, 11.5s) linear infinite;
+}
+
+:global([data-live-hero-root][data-running="true"]) :global([data-live-hero-digit-glyph]) {
+  animation: liveHeroDigitFlicker 2.2s linear infinite;
+  animation-delay: var(--digit-flicker-delay, 0s);
+}
+
+:global([data-live-hero-root][data-running="true"]) :global([data-live-hero-digit-glyph])::after {
+  animation: liveHeroDigitSpark 2.2s linear infinite;
+  animation-delay: var(--digit-flicker-delay, 0s);
+}
+
+@keyframes liveHeroMarquee {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+
+  to {
+    transform: translate3d(-25%, 0, 0);
+  }
+}
+
+@keyframes liveHeroDigitFlicker {
+  0%,
+  100% {
+    opacity: 1;
+    filter:
+      drop-shadow(0 0 1px rgba(238, 184, 95, 0.24))
+      drop-shadow(0 0 4px rgba(238, 184, 95, 0.14));
+  }
+
+  8% {
+    opacity: 0.93;
+  }
+
+  9% {
+    opacity: 1;
+  }
+
+  24% {
+    opacity: 0.9;
+  }
+
+  26% {
+    opacity: 1;
+  }
+
+  58% {
+    opacity: 0.95;
+  }
+
+  60% {
+    opacity: 1;
+  }
+
+  78% {
+    opacity: 0.92;
+  }
+
+  80% {
+    opacity: 1;
+  }
+}
+
+@keyframes liveHeroDigitSpark {
+  0%,
+  100% {
+    opacity: 0.18;
+    filter: blur(0.28px);
+  }
+
+  10% {
+    opacity: 0.28;
+  }
+
+  11% {
+    opacity: 0.14;
+  }
+
+  25% {
+    opacity: 0.32;
+  }
+
+  27% {
+    opacity: 0.16;
+  }
+
+  59% {
+    opacity: 0.26;
+  }
+
+  61% {
+    opacity: 0.12;
+  }
+
+  79% {
+    opacity: 0.3;
+  }
+
+  81% {
+    opacity: 0.16;
+  }
+}

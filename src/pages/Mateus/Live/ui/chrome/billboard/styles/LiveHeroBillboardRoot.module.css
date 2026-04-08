@@ -1,0 +1,37 @@
+/* src/pages/Mateus/Live/ui/chrome/billboard/styles/LiveHeroBillboardRoot.module.css */
+
+.root {
+  position: relative;
+  width: 100%;
+  max-width: var(--live-hero-billboard-max-width, 100%);
+  min-width: 0;
+}
+
+.compact {
+  max-width: var(--live-hero-billboard-compact-max-width, 100%);
+}
+
+.hiddenLabel {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  border: 0;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+  .root {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 640px) {
+  .root,
+  .compact {
+    max-width: 100%;
+  }
+}
