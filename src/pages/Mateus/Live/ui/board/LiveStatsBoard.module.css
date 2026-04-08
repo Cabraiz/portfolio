@@ -1,0 +1,599 @@
+/* src/pages/Mateus/Live/ui/board/LiveStatsBoard.module.css */
+
+.root {
+  --live-board-surface:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01)),
+    linear-gradient(180deg, rgba(8, 10, 14, 0.94), rgba(5, 7, 10, 0.98));
+  --live-board-panel:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.028), rgba(255, 255, 255, 0.012)),
+    rgba(9, 13, 18, 0.88);
+  --live-board-border-soft: rgba(255, 255, 255, 0.08);
+  --live-board-border-strong: rgba(255, 255, 255, 0.14);
+  --live-board-text-strong: rgba(255, 255, 255, 0.96);
+  --live-board-text-base: rgba(255, 255, 255, 0.76);
+  --live-board-text-soft: rgba(255, 255, 255, 0.56);
+  --live-board-shadow: 0 28px 80px rgba(0, 0, 0, 0.28);
+  --live-board-radius-xl: clamp(24px, 2.4vw, 34px);
+  --live-board-radius-lg: clamp(18px, 1.8vw, 24px);
+  --live-board-radius-md: 16px;
+  --live-board-gap: clamp(14px, 1.8vw, 22px);
+
+  position: relative;
+  display: grid;
+  gap: var(--live-board-gap);
+  width: 100%;
+  padding: clamp(18px, 2vw, 28px);
+  border: 1px solid var(--live-board-border-soft);
+  border-radius: var(--live-board-radius-xl);
+  background: var(--live-board-surface);
+  box-shadow: var(--live-board-shadow);
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.root::before {
+  content: "";
+  position: absolute;
+  inset: -18% auto auto -10%;
+  width: 38%;
+  aspect-ratio: 1 / 1;
+  border-radius: 999px;
+  background: radial-gradient(
+    circle,
+    rgba(96, 165, 250, 0.16) 0%,
+    rgba(96, 165, 250, 0.08) 32%,
+    transparent 72%
+  );
+  filter: blur(16px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.root::after {
+  content: "";
+  position: absolute;
+  inset: auto -12% -26% auto;
+  width: 44%;
+  aspect-ratio: 1 / 1;
+  border-radius: 999px;
+  background: radial-gradient(
+    circle,
+    rgba(52, 211, 153, 0.12) 0%,
+    rgba(52, 211, 153, 0.04) 35%,
+    transparent 72%
+  );
+  filter: blur(20px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.toolbar,
+.heroGrid,
+.midRow,
+.secondaryGrid {
+  position: relative;
+  z-index: 1;
+}
+
+.toolbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(280px, 0.95fr);
+  gap: var(--live-board-gap);
+  align-items: start;
+}
+
+.toolbarMain {
+  display: grid;
+  gap: 14px;
+}
+
+.liveBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  width: fit-content;
+  padding: 8px 12px;
+  border: 1px solid var(--live-board-border-soft);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(10px);
+}
+
+.liveDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(248, 113, 113, 0.96);
+  box-shadow: 0 0 0 0 rgba(248, 113, 113, 0.42);
+}
+
+.liveDot[data-running="true"] {
+  animation: liveDotPulse 1.8s ease-out infinite;
+}
+
+.liveDot[data-running="false"] {
+  background: rgba(148, 163, 184, 0.9);
+  box-shadow: none;
+}
+
+.liveBadgeLabel {
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--live-board-text-strong);
+}
+
+.headlineBlock {
+  display: grid;
+  gap: 10px;
+}
+
+.title {
+  margin: 0;
+  font-size: clamp(1.36rem, 2vw, 2.18rem);
+  line-height: 1.02;
+  letter-spacing: -0.04em;
+  color: var(--live-board-text-strong);
+}
+
+.subtitle {
+  margin: 0;
+  max-width: 68ch;
+  font-size: 0.98rem;
+  line-height: 1.65;
+  color: var(--live-board-text-base);
+}
+
+.toolbarAside {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  align-content: start;
+}
+
+.commandInfo,
+.focusPanel,
+.signalStrip,
+.metricCard {
+  border: 1px solid var(--live-board-border-soft);
+  background: var(--live-board-panel);
+  backdrop-filter: blur(14px);
+}
+
+.commandInfo {
+  display: grid;
+  gap: 6px;
+  min-height: 84px;
+  padding: 14px 16px;
+  border-radius: var(--live-board-radius-lg);
+}
+
+.commandLabel {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--live-board-text-soft);
+}
+
+.commandValue {
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--live-board-text-strong);
+}
+
+.commandActions {
+  display: flex;
+  grid-column: 1 / -1;
+  gap: 10px;
+}
+
+.commandButton {
+  appearance: none;
+  border: 1px solid rgba(96, 165, 250, 0.24);
+  border-radius: 999px;
+  padding: 11px 16px;
+  background:
+    linear-gradient(180deg, rgba(96, 165, 250, 0.16), rgba(96, 165, 250, 0.08)),
+    rgba(255, 255, 255, 0.02);
+  color: var(--live-board-text-strong);
+  font: inherit;
+  font-size: 0.86rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    background-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.commandButton:hover,
+.commandButton:focus-visible {
+  transform: translateY(-1px);
+  border-color: rgba(96, 165, 250, 0.4);
+  box-shadow: 0 10px 22px rgba(59, 130, 246, 0.18);
+  outline: none;
+}
+
+.commandButtonGhost {
+  border-color: var(--live-board-border-soft);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02)),
+    rgba(255, 255, 255, 0.01);
+}
+
+.heroGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--live-board-gap);
+}
+
+.midRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.9fr);
+  gap: var(--live-board-gap);
+}
+
+.signalStrip {
+  display: grid;
+  gap: 14px;
+  padding: 16px 18px;
+  border-radius: var(--live-board-radius-lg);
+}
+
+.signalStripHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.signalStripLabel {
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--live-board-text-soft);
+}
+
+.signalStripValue {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--live-board-text-base);
+}
+
+.pillRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.statusPill {
+  display: inline-grid;
+  gap: 4px;
+  min-width: 132px;
+  padding: 10px 12px;
+  border: 1px solid var(--live-board-border-soft);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.statusPill[data-status="active"] {
+  border-color: rgba(52, 211, 153, 0.18);
+}
+
+.statusPill[data-status="monitoring"] {
+  border-color: rgba(96, 165, 250, 0.18);
+}
+
+.statusPill[data-status="incubating"] {
+  border-color: rgba(251, 191, 36, 0.18);
+}
+
+.statusPill[data-status="delivered"] {
+  border-color: rgba(167, 139, 250, 0.18);
+}
+
+.statusPillLabel {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--live-board-text-soft);
+}
+
+.statusPillValue {
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--live-board-text-strong);
+}
+
+.focusPanel {
+  display: grid;
+  gap: 8px;
+  align-content: start;
+  padding: 16px 18px;
+  border-radius: var(--live-board-radius-lg);
+}
+
+.focusLabel {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--live-board-text-soft);
+}
+
+.focusValue {
+  font-size: clamp(1.02rem, 1.4vw, 1.2rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--live-board-text-strong);
+}
+
+.focusDescription {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: var(--live-board-text-base);
+}
+
+.secondaryGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.metricCard {
+  --live-board-accent: rgba(148, 163, 184, 0.88);
+
+  appearance: none;
+  display: grid;
+  gap: 14px;
+  width: 100%;
+  text-align: left;
+  color: inherit;
+  cursor: pointer;
+  padding: 18px;
+  border-radius: var(--live-board-radius-lg);
+  position: relative;
+  overflow: hidden;
+  transition:
+    transform 220ms ease,
+    border-color 220ms ease,
+    box-shadow 220ms ease,
+    background-color 220ms ease;
+}
+
+.metricCard::before {
+  content: "";
+  position: absolute;
+  inset: -28% auto auto -12%;
+  width: 180px;
+  height: 180px;
+  border-radius: 999px;
+  background: radial-gradient(circle, var(--live-board-accent) 0%, transparent 72%);
+  opacity: 0.12;
+  filter: blur(18px);
+  pointer-events: none;
+}
+
+.metricCard::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035);
+  pointer-events: none;
+}
+
+.metricCard:hover,
+.metricCard:focus-visible {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--live-board-accent) 32%, rgba(255, 255, 255, 0.1));
+  box-shadow:
+    0 20px 36px rgba(0, 0, 0, 0.2),
+    0 0 0 1px color-mix(in srgb, var(--live-board-accent) 24%, transparent);
+  outline: none;
+}
+
+.metricCard[data-selected="true"] {
+  border-color: color-mix(in srgb, var(--live-board-accent) 48%, rgba(255, 255, 255, 0.14));
+  box-shadow:
+    0 22px 40px rgba(0, 0, 0, 0.24),
+    0 0 0 1px color-mix(in srgb, var(--live-board-accent) 28%, transparent);
+}
+
+.metricCardHero {
+  min-height: 246px;
+  padding: 20px;
+}
+
+.metricCardCompact {
+  min-height: 188px;
+  padding: 16px;
+}
+
+.metricCardTopRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.metricEyebrow {
+  max-width: 60%;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--live-board-text-soft);
+}
+
+.metricTrend {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  padding: 7px 10px;
+  border: 1px solid var(--live-board-border-soft);
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--live-board-text-base);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.metricTrendGlyph {
+  font-size: 0.86rem;
+  color: var(--live-board-accent);
+}
+
+.metricValue {
+  font-size: clamp(1.92rem, 3vw, 3.24rem);
+  line-height: 0.95;
+  letter-spacing: -0.06em;
+  color: var(--live-board-text-strong);
+}
+
+.metricCardCompact .metricValue {
+  font-size: clamp(1.48rem, 2vw, 2.18rem);
+}
+
+.metricDescription {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.68;
+  color: var(--live-board-text-base);
+}
+
+.metricCardCompact .metricDescription {
+  font-size: 0.88rem;
+  line-height: 1.58;
+}
+
+.metricFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: auto;
+}
+
+.metricBadge,
+.metricBadgeMuted,
+.metricHint,
+.metricHintMuted {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 7px 10px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.metricBadge {
+  border: 1px solid color-mix(in srgb, var(--live-board-accent) 32%, transparent);
+  color: var(--live-board-text-strong);
+  background: color-mix(in srgb, var(--live-board-accent) 10%, transparent);
+}
+
+.metricBadgeMuted {
+  border: 1px solid var(--live-board-border-soft);
+  color: var(--live-board-text-base);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.metricHint {
+  color: var(--live-board-accent);
+}
+
+.metricHintMuted {
+  color: var(--live-board-text-soft);
+}
+
+@keyframes liveDotPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(248, 113, 113, 0.44);
+  }
+
+  70% {
+    box-shadow: 0 0 0 12px rgba(248, 113, 113, 0);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(248, 113, 113, 0);
+  }
+}
+
+@media (max-width: 1180px) {
+  .toolbar,
+  .midRow {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .heroGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .secondaryGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 780px) {
+  .root {
+    padding: 16px;
+  }
+
+  .toolbarAside {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .commandActions {
+    flex-wrap: wrap;
+  }
+
+  .heroGrid,
+  .secondaryGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .signalStripHeader,
+  .metricCardTopRow,
+  .metricFooter {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .metricEyebrow {
+    max-width: none;
+  }
+
+  .metricCardHero {
+    min-height: 220px;
+  }
+
+  .metricCardCompact {
+    min-height: 172px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .liveDot,
+  .metricCard,
+  .commandButton {
+    animation: none !important;
+    transition: none !important;
+  }
+}

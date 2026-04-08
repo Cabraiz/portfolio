@@ -1,0 +1,622 @@
+/* src/pages/Mateus/Live/ui/shell/LiveSectionShell.module.css */
+
+.root {
+  --live-shell-max-width: 1440px;
+  --live-shell-section-min-height: calc(100dvh - var(--app-navbar-height, 70px));
+  --live-shell-padding-top: clamp(28px, 4dvh, 52px);
+  --live-shell-padding-inline: clamp(18px, 3vw, 34px);
+  --live-shell-padding-bottom: clamp(22px, 3.5dvh, 38px);
+  --live-shell-gap: clamp(18px, 2vw, 26px);
+  --live-shell-header-gap: clamp(18px, 2vw, 24px);
+  --live-shell-surface-radius: clamp(24px, 2.2vw, 34px);
+  --live-shell-panel-radius: clamp(22px, 2vw, 30px);
+
+  --live-shell-soft-border: rgba(255, 255, 255, 0.08);
+  --live-shell-strong-border: rgba(255, 255, 255, 0.14);
+
+  --live-shell-text-strong: rgba(255, 255, 255, 0.96);
+  --live-shell-text-base: rgba(255, 255, 255, 0.76);
+  --live-shell-text-soft: rgba(255, 255, 255, 0.58);
+
+  --live-shell-surface-bg:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.018)),
+    linear-gradient(180deg, rgba(10, 10, 14, 0.965), rgba(7, 7, 10, 0.988));
+  --live-shell-panel-bg:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.012)),
+    linear-gradient(180deg, rgba(15, 15, 19, 0.965), rgba(10, 10, 13, 0.988));
+
+  --live-shell-accent: #38bdf8;
+  --live-shell-accent-glow: rgba(56, 189, 248, 0.2);
+  --live-shell-signal: #34d399;
+
+  --live-shell-shadow-rest: 0 18px 44px rgba(0, 0, 0, 0.22);
+  --live-shell-shadow-panel: 0 22px 54px rgba(0, 0, 0, 0.26);
+
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+}
+
+.rootCompact {
+  --live-shell-padding-top: clamp(20px, 2.8dvh, 34px);
+  --live-shell-padding-bottom: clamp(18px, 2.6dvh, 28px);
+  --live-shell-gap: 16px;
+}
+
+.section {
+  position: relative;
+  width: 100%;
+  min-height: var(--live-shell-section-min-height);
+  padding:
+    var(--live-shell-padding-top)
+    var(--live-shell-padding-inline)
+    var(--live-shell-padding-bottom);
+  overflow: hidden;
+  isolation: isolate;
+  background:
+    radial-gradient(
+      circle at 16% 12%,
+      color-mix(in srgb, var(--live-shell-accent) 20%, transparent),
+      transparent 24%
+    ),
+    radial-gradient(
+      circle at 85% 10%,
+      rgba(52, 211, 153, 0.09),
+      transparent 18%
+    ),
+    radial-gradient(
+      circle at 54% 88%,
+      rgba(59, 130, 246, 0.08),
+      transparent 24%
+    ),
+    linear-gradient(180deg, rgba(8, 8, 10, 0.968), rgba(11, 11, 14, 0.988));
+}
+
+.background {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.backgroundGlowPrimary,
+.backgroundGlowSecondary {
+  position: absolute;
+  border-radius: 999px;
+  filter: blur(58px);
+  opacity: 0.9;
+}
+
+.backgroundGlowPrimary {
+  top: -10%;
+  right: -8%;
+  width: clamp(220px, 28vw, 420px);
+  height: clamp(220px, 28vw, 420px);
+  background: var(--live-shell-accent-glow);
+}
+
+.backgroundGlowSecondary {
+  bottom: -16%;
+  left: -8%;
+  width: clamp(220px, 24vw, 360px);
+  height: clamp(220px, 24vw, 360px);
+  background: rgba(52, 211, 153, 0.12);
+}
+
+.backgroundGrid {
+  position: absolute;
+  inset: 0;
+  opacity: 0.16;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 34px 34px;
+  mask-image: radial-gradient(circle at center, black 36%, transparent 86%);
+}
+
+.backgroundScanlines {
+  position: absolute;
+  inset: 0;
+  opacity: 0.08;
+  background:
+    repeating-linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.05) 0px,
+      rgba(255, 255, 255, 0.05) 1px,
+      transparent 1px,
+      transparent 4px
+    );
+  mask-image: linear-gradient(180deg, transparent, black 20%, black 80%, transparent);
+}
+
+.content {
+  position: relative;
+  z-index: 1;
+  width: min(100%, var(--live-shell-max-width));
+  min-width: 0;
+  margin: 0 auto;
+  display: grid;
+  gap: var(--live-shell-gap);
+}
+
+.header {
+  display: grid;
+  gap: var(--live-shell-header-gap);
+}
+
+.headerShell {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: clamp(18px, 2vw, 26px);
+  align-items: stretch;
+  padding: clamp(22px, 2.4vw, 34px);
+  border-radius: var(--live-shell-surface-radius);
+  border: 1px solid var(--live-shell-soft-border);
+  background: var(--live-shell-surface-bg);
+  box-shadow: var(--live-shell-shadow-rest);
+  backdrop-filter: blur(14px);
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.headerShell::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--live-shell-accent) 11%, transparent),
+      transparent 42%
+    );
+  pointer-events: none;
+}
+
+.headerCopy {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+
+.eyebrowRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  min-height: 32px;
+  margin: 0;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--live-shell-accent) 34%, transparent);
+  background: color-mix(in srgb, var(--live-shell-accent) 10%, transparent);
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.statusDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--live-shell-signal);
+  box-shadow:
+    0 0 0 4px color-mix(in srgb, var(--live-shell-signal) 18%, transparent),
+    0 0 16px color-mix(in srgb, var(--live-shell-signal) 36%, transparent);
+}
+
+.statusLabel {
+  color: var(--live-shell-text-soft);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.title {
+  margin: 0;
+  max-width: 980px;
+  color: var(--live-shell-text-strong);
+  font-size: clamp(2rem, 4.6vw, 4.2rem);
+  line-height: 1.02;
+  letter-spacing: -0.045em;
+  font-weight: 800;
+  text-wrap: balance;
+}
+
+.description {
+  margin: 0;
+  max-width: 960px;
+  color: var(--live-shell-text-base);
+  font-size: clamp(1rem, 1.18vw, 1.1rem);
+  line-height: 1.78;
+}
+
+.caption {
+  margin: 2px 0 0;
+  max-width: 900px;
+  color: var(--live-shell-text-soft);
+  font-size: 0.94rem;
+  line-height: 1.72;
+}
+
+.headerPanel {
+  position: relative;
+  min-width: clamp(170px, 15vw, 240px);
+  display: grid;
+  gap: 12px;
+  align-self: stretch;
+  justify-self: end;
+}
+
+.headerPanelFrame {
+  position: relative;
+  min-height: 112px;
+  border-radius: 22px;
+  border: 1px solid color-mix(in srgb, var(--live-shell-accent) 24%, var(--live-shell-soft-border));
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.018)),
+    rgba(7, 10, 14, 0.78);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 16px 34px rgba(0, 0, 0, 0.18);
+  overflow: hidden;
+}
+
+.headerPanelFrame::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--live-shell-accent) 11%, transparent),
+      transparent 42%
+    );
+  pointer-events: none;
+}
+
+.headerPanelLine {
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.headerPanelLine:nth-child(1) {
+  top: 28px;
+}
+
+.headerPanelLine:nth-child(2) {
+  top: 56px;
+}
+
+.headerPanelLine:nth-child(3) {
+  top: 84px;
+}
+
+.headerPanelSignal {
+  display: grid;
+  gap: 4px;
+  padding: 12px 14px;
+  border-radius: 18px;
+  border: 1px solid var(--live-shell-soft-border);
+  background: var(--live-shell-panel-bg);
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.16);
+}
+
+.headerPanelSignalLabel {
+  color: var(--live-shell-text-soft);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.headerPanelSignalValue {
+  color: var(--live-shell-text-strong);
+  font-size: 1.05rem;
+  line-height: 1;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.metricsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.metricCard {
+  --live-metric-accent: var(--live-shell-accent);
+
+  position: relative;
+  min-width: 0;
+  display: grid;
+  gap: 8px;
+  padding: 16px 16px 15px;
+  border-radius: 22px;
+  border: 1px solid var(--live-shell-soft-border);
+  background: var(--live-shell-panel-bg);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.18);
+  overflow: hidden;
+}
+
+.metricCard::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background:
+    linear-gradient(
+      180deg,
+      var(--live-metric-accent),
+      color-mix(in srgb, var(--live-metric-accent) 22%, transparent)
+    );
+  opacity: 0.9;
+}
+
+.metricCardInfo {
+  --live-metric-accent: #38bdf8;
+}
+
+.metricCardSuccess {
+  --live-metric-accent: #34d399;
+}
+
+.metricCardWarning {
+  --live-metric-accent: #fbbf24;
+}
+
+.metricCardTopRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.metricLabel {
+  color: var(--live-shell-text-soft);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.metricBadge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  padding: 0 9px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--live-metric-accent) 28%, transparent);
+  background: color-mix(in srgb, var(--live-metric-accent) 9%, transparent);
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.metricValue {
+  color: var(--live-shell-text-strong);
+  font-size: clamp(1.36rem, 2vw, 1.86rem);
+  line-height: 1;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+}
+
+.metricHelper {
+  color: var(--live-shell-text-base);
+  font-size: 0.88rem;
+  line-height: 1.55;
+}
+
+.body {
+  display: grid;
+  grid-template-columns: minmax(0, 1.22fr) minmax(320px, 0.78fr);
+  gap: var(--live-shell-gap);
+  align-items: start;
+}
+
+.mainColumn,
+.asideColumn {
+  min-width: 0;
+  display: grid;
+  gap: 14px;
+}
+
+.filtersRow {
+  min-width: 0;
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border-radius: var(--live-shell-panel-radius);
+  border: 1px solid var(--live-shell-soft-border);
+  background: var(--live-shell-panel-bg);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.16);
+}
+
+.canvasPanel,
+.spotlightPanel,
+.supportingContent {
+  min-width: 0;
+  border-radius: var(--live-shell-surface-radius);
+  border: 1px solid var(--live-shell-soft-border);
+  background: var(--live-shell-surface-bg);
+  box-shadow: var(--live-shell-shadow-panel);
+  backdrop-filter: blur(14px);
+  overflow: hidden;
+}
+
+.canvasInner {
+  min-width: 0;
+  min-height: clamp(440px, 64dvh, 880px);
+  padding: clamp(16px, 1.8vw, 22px);
+}
+
+.sceneArea {
+  min-width: 0;
+  min-height: 100%;
+  display: grid;
+  align-content: stretch;
+}
+
+.spotlightPanel {
+  min-height: clamp(440px, 64dvh, 880px);
+  padding: clamp(16px, 1.8vw, 22px);
+  position: sticky;
+  top: calc(var(--app-navbar-height, 70px) + 16px);
+}
+
+.supportingContent {
+  padding: clamp(16px, 1.8vw, 22px);
+}
+
+.emptyState {
+  position: relative;
+  min-height: 100%;
+  display: grid;
+  place-items: center;
+  padding: clamp(24px, 4vw, 48px);
+  text-align: center;
+  overflow: hidden;
+}
+
+.emptyStateOrb {
+  position: absolute;
+  width: clamp(190px, 26vw, 300px);
+  aspect-ratio: 1 / 1;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--live-shell-accent) 20%, transparent);
+  background:
+    radial-gradient(
+      circle at center,
+      color-mix(in srgb, var(--live-shell-accent) 14%, transparent),
+      transparent 62%
+    );
+  opacity: 0.8;
+  filter: blur(0.2px);
+}
+
+.emptyStateContent {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 10px;
+  max-width: 560px;
+}
+
+.emptyStateEyebrow {
+  color: var(--live-shell-text-soft);
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.emptyStateTitle {
+  margin: 0;
+  color: var(--live-shell-text-strong);
+  font-size: clamp(1.28rem, 2vw, 1.72rem);
+  line-height: 1.1;
+  font-weight: 800;
+}
+
+.emptyStateDescription {
+  margin: 0;
+  color: var(--live-shell-text-base);
+  font-size: 0.98rem;
+  line-height: 1.7;
+}
+
+@media (max-width: 1180px) {
+  .metricsGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .spotlightPanel {
+    position: relative;
+    top: auto;
+    min-height: auto;
+  }
+}
+
+@media (max-width: 900px) {
+  .headerShell {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .headerPanel {
+    min-width: 0;
+    justify-self: stretch;
+  }
+
+  .canvasInner {
+    min-height: 360px;
+  }
+}
+
+@media (max-width: 680px) {
+  .section {
+    min-height: auto;
+    padding:
+      clamp(20px, 5dvh, 34px)
+      14px
+      clamp(18px, 4dvh, 26px);
+  }
+
+  .content {
+    gap: 14px;
+  }
+
+  .metricsGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .headerShell {
+    padding: 18px;
+  }
+
+  .filtersRow,
+  .canvasInner,
+  .spotlightPanel,
+  .supportingContent {
+    padding: 14px;
+  }
+
+  .title {
+    font-size: clamp(1.64rem, 8vw, 2.54rem);
+    line-height: 1.04;
+  }
+
+  .description,
+  .caption,
+  .emptyStateDescription {
+    line-height: 1.62;
+  }
+
+  .metricCardTopRow {
+    align-items: flex-start;
+  }
+
+  .metricBadge {
+    font-size: 0.64rem;
+  }
+}
