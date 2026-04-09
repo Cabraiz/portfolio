@@ -1,6 +1,6 @@
 // src/pages/Mateus/Live/ui/chrome/billboard/LiveHeroBillboardScreen.tsx
 
-import type { ReactNode } from "react";
+import { Children, type ReactNode } from "react";
 
 import type {
   BillboardCssVariables,
@@ -40,6 +40,12 @@ export default function LiveHeroBillboardScreen({
   classNames,
   children,
 }: LiveHeroBillboardScreenProps) {
+  const childArray = Children.toArray(children);
+
+  const hasDedicatedHeader = childArray.length > 1;
+  const headerChild = hasDedicatedHeader ? childArray[0] : null;
+  const counterChildren = hasDedicatedHeader ? childArray.slice(1) : childArray;
+
   return (
     <aside
       className={joinClassNames(
@@ -56,7 +62,23 @@ export default function LiveHeroBillboardScreen({
       <div
         className={classNames.screen}
         data-live-hero-screen="true"
+        data-live-hero-screen-shell="true"
       >
+        <span
+          aria-hidden="true"
+          data-live-hero-glass-layer="true"
+        />
+
+        <span
+          aria-hidden="true"
+          data-live-hero-glass-reflection="true"
+        />
+
+        <span
+          aria-hidden="true"
+          data-live-hero-glass-noise="true"
+        />
+
         <article
           className={classNames.board}
           data-live-hero-board="true"
@@ -64,7 +86,31 @@ export default function LiveHeroBillboardScreen({
           aria-label={lane.ariaLabel}
         >
           <span className={classNames.hiddenLabel}>{lane.label}</span>
-          {children}
+
+          {headerChild ? (
+            <div
+              data-live-hero-marquee-rail="true"
+              data-live-hero-board-slot="marquee"
+            >
+              {headerChild}
+            </div>
+          ) : null}
+
+          {headerChild && counterChildren.length > 0 ? (
+            <div
+              aria-hidden="true"
+              data-live-hero-board-separator="true"
+            />
+          ) : null}
+
+          {counterChildren.length > 0 ? (
+            <div
+              data-live-hero-counter-dock="true"
+              data-live-hero-board-slot="counter"
+            >
+              {counterChildren}
+            </div>
+          ) : null}
         </article>
       </div>
     </aside>

@@ -1,81 +1,182 @@
 /* src/pages/Mateus/Live/ui/chrome/billboard/styles/LiveHeroBillboardMarquee.module.css */
 
 .marqueeViewport {
+  --marquee-rail-height: clamp(44px, 4vw, 56px);
+  --marquee-edge-fade: clamp(14px, 1.45vw, 20px);
+  --marquee-dot-on: rgba(240, 187, 98, 0.98);
+  --marquee-dot-core: rgba(255, 219, 149, 0.72);
+  --marquee-dot-reflection: rgba(255, 232, 185, 0.62);
+
+  position: relative;
+  display: flex;
+  align-items: center;
   width: 100%;
   min-width: 0;
-  min-height: clamp(62px, 6vw, 82px);
+  min-height: var(--marquee-rail-height);
   overflow: hidden;
-  display: grid;
-  align-items: center;
-  mask-image: linear-gradient(
+  padding-inline: clamp(12px, 1.1vw, 16px);
+  isolation: isolate;
+
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.04) 0%,
+      rgba(255, 255, 255, 0.015) 14%,
+      rgba(10, 14, 22, 0) 34%,
+      rgba(0, 0, 0, 0.18) 100%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(11, 16, 24, 0.95) 0%,
+      rgba(7, 11, 18, 0.985) 58%,
+      rgba(4, 7, 12, 1) 100%
+    );
+
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    inset 0 10px 18px rgba(255, 255, 255, 0.02),
+    inset 0 -18px 24px rgba(0, 0, 0, 0.36);
+}
+
+.marqueeViewport::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.13) 0%,
+      rgba(255, 255, 255, 0.03) 12%,
+      rgba(255, 255, 255, 0) 28%
+    ),
+    radial-gradient(
+      78% 155% at 0% 50%,
+      rgba(255, 255, 255, 0.05) 0%,
+      rgba(255, 255, 255, 0) 42%
+    ),
+    radial-gradient(
+      42% 150% at 100% 50%,
+      rgba(122, 147, 189, 0.06) 0%,
+      rgba(122, 147, 189, 0) 48%
+    );
+
+  opacity: 0.48;
+}
+
+.marqueeViewport::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+
+  background: linear-gradient(
     90deg,
-    transparent 0%,
-    rgba(0, 0, 0, 1) 8%,
-    rgba(0, 0, 0, 1) 92%,
-    transparent 100%
-  );
-  -webkit-mask-image: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(0, 0, 0, 1) 8%,
-    rgba(0, 0, 0, 1) 92%,
-    transparent 100%
+    rgba(5, 8, 13, 0.94) 0%,
+    rgba(5, 8, 13, 0) var(--marquee-edge-fade),
+    rgba(5, 8, 13, 0) calc(100% - var(--marquee-edge-fade)),
+    rgba(5, 8, 13, 0.94) 100%
   );
 }
 
 .marqueeTrack {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
   width: max-content;
   min-width: max-content;
-  min-height: clamp(62px, 6vw, 82px);
+  white-space: nowrap;
   will-change: transform;
-  animation: liveHeroMarquee var(--live-hero-marquee-duration, 11.5s) linear infinite;
+  animation: liveHeroBillboardMarqueeScroll 13.2s linear infinite;
+}
+
+.marqueeTrack > [data-live-hero-marquee-sequence="true"] {
+  display: flex;
+  align-items: center;
+  gap: clamp(26px, 2vw, 38px);
+  flex: 0 0 auto;
+  min-width: max-content;
+  padding-inline-end: clamp(26px, 2vw, 38px);
 }
 
 .marqueeWord {
-  --dot-on: rgba(238, 184, 95, 0.98);
-  --dot-glow: rgba(238, 184, 95, 0.24);
-  --dot-off: rgba(255, 224, 168, 0.08);
-
   position: relative;
   flex: 0 0 auto;
   display: inline-flex;
   align-items: center;
-  min-height: clamp(62px, 6vw, 82px);
-  padding-inline-end: clamp(48px, 4.4vw, 78px);
-  font-size: clamp(2.2rem, 2.75vw, 3.05rem);
-  line-height: 1;
-  font-weight: 800;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  justify-content: center;
+  min-height: var(--marquee-rail-height);
+  padding: 0;
+  margin: 0;
   white-space: nowrap;
+  text-transform: uppercase;
+
+  font-size: clamp(2rem, 2.75vw, 3.05rem);
+  line-height: 0.82;
+  font-weight: 800;
+  letter-spacing: clamp(0.085em, 0.16vw, 0.12em);
+
   color: transparent;
   -webkit-text-fill-color: transparent;
-  background-image:
-    radial-gradient(circle, var(--dot-on) 0 1.5px, transparent 1.95px);
-  background-size: 6px 6px;
-  background-position: center;
+
+  background-image: radial-gradient(
+    circle,
+    var(--marquee-dot-on) 0 1.26px,
+    transparent 1.82px
+  );
+  background-size: 5px 5px;
+  background-position: center center;
   -webkit-background-clip: text;
   background-clip: text;
+
   filter:
-    drop-shadow(0 0 1px var(--dot-glow))
-    drop-shadow(0 0 4px rgba(238, 184, 95, 0.1));
+    drop-shadow(0 0 1px rgba(255, 230, 185, 0.18))
+    drop-shadow(0 0 6px rgba(234, 160, 56, 0.12));
 }
 
 .marqueeWord::before {
   content: attr(data-text);
   position: absolute;
   inset: 0;
-  z-index: -1;
+  pointer-events: none;
+
   color: transparent;
   -webkit-text-fill-color: transparent;
-  background-image:
-    radial-gradient(circle, var(--dot-off) 0 1.2px, transparent 1.65px);
-  background-size: 6px 6px;
-  background-position: center;
+  background-image: radial-gradient(
+    circle,
+    var(--marquee-dot-reflection) 0 1px,
+    transparent 1.48px
+  );
+  background-size: 5px 5px;
+  background-position: center center;
   -webkit-background-clip: text;
   background-clip: text;
+
+  transform: translateY(-44%) scaleY(-0.32);
+  transform-origin: top center;
+  opacity: 0.15;
+  filter: blur(0.6px);
+
+  -webkit-mask-image: linear-gradient(
+    to top,
+    rgba(255, 255, 255, 0.92) 0%,
+    rgba(255, 255, 255, 0.5) 34%,
+    rgba(255, 255, 255, 0.1) 68%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  mask-image: linear-gradient(
+    to top,
+    rgba(255, 255, 255, 0.92) 0%,
+    rgba(255, 255, 255, 0.5) 34%,
+    rgba(255, 255, 255, 0.1) 68%,
+    rgba(255, 255, 255, 0) 100%
+  );
 }
 
 .marqueeWord::after {
@@ -83,65 +184,98 @@
   position: absolute;
   inset: 0;
   pointer-events: none;
-  opacity: 0.22;
+
   color: transparent;
   -webkit-text-fill-color: transparent;
-  background-image:
-    radial-gradient(circle, rgba(255, 214, 142, 0.9) 0 0.78px, transparent 1.3px);
-  background-size: 6px 6px;
-  background-position: center;
+  opacity: 0.28;
+
+  background-image: radial-gradient(
+    circle,
+    var(--marquee-dot-core) 0 0.8px,
+    transparent 1.2px
+  );
+  background-size: 5px 5px;
+  background-position: center center;
   -webkit-background-clip: text;
   background-clip: text;
-  filter: blur(0.22px);
+
+  mix-blend-mode: screen;
 }
 
-@keyframes liveHeroMarquee {
+@keyframes liveHeroBillboardMarqueeScroll {
   from {
     transform: translate3d(0, 0, 0);
   }
 
   to {
-    transform: translate3d(-25%, 0, 0);
+    transform: translate3d(-50%, 0, 0);
   }
 }
 
 @media (max-width: 900px) {
-  .marqueeViewport,
+  .marqueeViewport {
+    --marquee-rail-height: clamp(38px, 4.8vw, 48px);
+    --marquee-edge-fade: 12px;
+    padding-inline: 12px;
+  }
+
   .marqueeTrack {
-    min-height: clamp(54px, 7vw, 70px);
+    animation-duration: 11s;
+  }
+
+  .marqueeTrack > [data-live-hero-marquee-sequence="true"] {
+    gap: clamp(20px, 2.8vw, 28px);
+    padding-inline-end: clamp(20px, 2.8vw, 28px);
   }
 
   .marqueeWord {
-    min-height: clamp(54px, 7vw, 70px);
-    padding-inline-end: clamp(40px, 4.5vw, 64px);
-    font-size: clamp(1.78rem, 3vw, 2.3rem);
-    letter-spacing: 0.1em;
-    background-size: 5px 5px;
+    font-size: clamp(1.72rem, 3.8vw, 2.5rem);
+    letter-spacing: 0.095em;
+    background-size: 4px 4px;
   }
 
   .marqueeWord::before,
   .marqueeWord::after {
-    background-size: 5px 5px;
+    background-size: 4px 4px;
+  }
+
+  .marqueeWord::before {
+    transform: translateY(-42%) scaleY(-0.3);
+    opacity: 0.14;
   }
 }
 
 @media (max-width: 640px) {
-  .marqueeViewport,
+  .marqueeViewport {
+    --marquee-rail-height: 32px;
+    --marquee-edge-fade: 8px;
+    padding-inline: 8px;
+  }
+
   .marqueeTrack {
-    min-height: 46px;
+    animation-duration: 9.4s;
+  }
+
+  .marqueeTrack > [data-live-hero-marquee-sequence="true"] {
+    gap: 16px;
+    padding-inline-end: 16px;
   }
 
   .marqueeWord {
-    min-height: 46px;
-    padding-inline-end: 28px;
-    font-size: 1.4rem;
-    letter-spacing: 0.08em;
+    font-size: clamp(1.28rem, 5.5vw, 1.82rem);
+    line-height: 0.84;
+    letter-spacing: 0.085em;
     background-size: 4px 4px;
   }
 
   .marqueeWord::before,
   .marqueeWord::after {
     background-size: 4px 4px;
+  }
+
+  .marqueeWord::before {
+    transform: translateY(-40%) scaleY(-0.28);
+    opacity: 0.13;
   }
 }
 

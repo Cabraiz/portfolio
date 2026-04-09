@@ -9,10 +9,24 @@ export default function LiveHeroBillboardMarquee({
   copyCount = 4,
   classNames,
 }: LiveHeroBillboardMarqueeProps) {
-  const marqueeCopies = useMemo(
-    () => Array.from({ length: Math.max(1, copyCount) }),
+  const eyebrow = lane.eyebrow.trim();
+
+  const sequenceCopies = useMemo(
+    () => Array.from({ length: Math.max(2, copyCount) }),
     [copyCount],
   );
+
+  const renderSequence = (sequenceId: string) =>
+    sequenceCopies.map((_, copyIndex) => (
+      <span
+        key={`${lane.id}-marquee-${sequenceId}-${copyIndex}`}
+        className={classNames.marqueeWord}
+        data-live-hero-marquee-word="true"
+        data-text={eyebrow}
+      >
+        {eyebrow}
+      </span>
+    ));
 
   return (
     <header
@@ -28,16 +42,16 @@ export default function LiveHeroBillboardMarquee({
           className={classNames.marqueeTrack}
           data-live-hero-marquee-track="true"
         >
-          {marqueeCopies.map((_, copyIndex) => (
-            <span
-              className={classNames.marqueeWord}
-              data-live-hero-marquee-word="true"
-              data-text={lane.eyebrow}
-              key={`${lane.id}-marquee-${copyIndex}`}
-            >
-              {lane.eyebrow}
-            </span>
-          ))}
+          <div data-live-hero-marquee-sequence="true">
+            {renderSequence("a")}
+          </div>
+
+          <div
+            data-live-hero-marquee-sequence="true"
+            aria-hidden="true"
+          >
+            {renderSequence("b")}
+          </div>
         </div>
       </div>
     </header>

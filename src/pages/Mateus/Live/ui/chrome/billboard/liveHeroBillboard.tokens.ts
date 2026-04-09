@@ -1,12 +1,34 @@
 // src/pages/Mateus/Live/ui/chrome/billboard/liveHeroBillboard.tokens.ts
 
 export type LiveHeroBillboardSkinTokens = Readonly<{
+  shell: Readonly<{
+    border: string;
+    innerBorder: string;
+    cornerShadow: string;
+    outerShadow: string;
+    background: string;
+  }>;
+  glass: Readonly<{
+    tint: string;
+    topReflectionOpacity: number;
+    sideReflectionOpacity: number;
+    vignetteOpacity: number;
+    noiseOpacity: number;
+    blur: string;
+  }>;
   marquee: Readonly<{
     duration: string;
     compactDuration: string;
+    speed: string;
+    railHeight: string;
+    railInset: string;
     dotSize: string;
     dotSizeTablet: string;
     dotSizeMobile: string;
+    textColor: string;
+    textGlow: string;
+    letterSpacing: string;
+    separatorOpacity: number;
     glowOpacity: number;
     trailOpacity: number;
   }>;
@@ -24,6 +46,12 @@ export type LiveHeroBillboardSkinTokens = Readonly<{
     dividerGlow: string;
     flickerDuration: string;
     flickerStepDelay: number;
+    ambientGlow: string;
+  }>;
+  counterDock: Readonly<{
+    topDivider: string;
+    dockShadow: string;
+    ambientGlow: string;
   }>;
   screen: Readonly<{
     borderColor: string;
@@ -33,18 +61,46 @@ export type LiveHeroBillboardSkinTokens = Readonly<{
     highlightOpacity: number;
     shadow: string;
     runningOutlineColor: string;
+    background: string;
   }>;
 }>;
 
 export const LIVE_HERO_BILLBOARD_SKIN_TOKENS = {
+  shell: {
+    border: "rgba(156, 171, 194, 0.22)",
+    innerBorder: "rgba(255, 255, 255, 0.05)",
+    cornerShadow:
+      "inset 22px 0 32px rgba(0, 0, 0, 0.28), inset -22px 0 32px rgba(0, 0, 0, 0.28)",
+    outerShadow:
+      "0 20px 52px rgba(0, 0, 0, 0.42), 0 6px 18px rgba(0, 0, 0, 0.2)",
+    background:
+      "linear-gradient(180deg, rgba(12, 18, 28, 0.98) 0%, rgba(7, 11, 18, 0.99) 52%, rgba(3, 6, 11, 1) 100%)",
+  },
+
+  glass: {
+    tint: "rgba(7, 11, 18, 0.82)",
+    topReflectionOpacity: 0.46,
+    sideReflectionOpacity: 0.22,
+    vignetteOpacity: 0.58,
+    noiseOpacity: 0.16,
+    blur: "18px",
+  },
+
   marquee: {
-    duration: "11.5s",
-    compactDuration: "9.5s",
-    dotSize: "6px 6px",
-    dotSizeTablet: "5px 5px",
+    duration: "13.8s",
+    compactDuration: "11.2s",
+    speed: "linear",
+    railHeight: "clamp(46px, 4.15vw, 58px)",
+    railInset: "clamp(12px, 1.1vw, 16px)",
+    dotSize: "5px 5px",
+    dotSizeTablet: "4px 4px",
     dotSizeMobile: "4px 4px",
-    glowOpacity: 0.24,
-    trailOpacity: 0.22,
+    textColor: "rgba(240, 187, 98, 0.98)",
+    textGlow: "rgba(234, 160, 56, 0.14)",
+    letterSpacing: "clamp(0.08em, 0.16vw, 0.12em)",
+    separatorOpacity: 0.16,
+    glowOpacity: 0.12,
+    trailOpacity: 0.08,
   },
 
   counter: {
@@ -57,22 +113,33 @@ export const LIVE_HERO_BILLBOARD_SKIN_TOKENS = {
     glyphDotSize: "7px 7px",
     glyphDotSizeTablet: "6px 6px",
     glyphDotSizeMobile: "5px 5px",
-    dividerColor: "rgba(173, 146, 100, 0.24)",
+    dividerColor: "rgba(196, 203, 214, 0.22)",
     dividerGlow:
-      "linear-gradient(180deg, rgba(214, 190, 145, 0) 0%, rgba(214, 190, 145, 0.22) 18%, rgba(214, 190, 145, 0.22) 82%, rgba(214, 190, 145, 0) 100%)",
-    flickerDuration: "2.2s",
+      "linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(196, 203, 214, 0.12) 20%, rgba(196, 203, 214, 0.12) 80%, rgba(255, 255, 255, 0) 100%)",
+    flickerDuration: "2.15s",
     flickerStepDelay: 0.16,
+    ambientGlow: "rgba(241, 176, 70, 0.08)",
+  },
+
+  counterDock: {
+    topDivider: "rgba(182, 194, 212, 0.18)",
+    dockShadow:
+      "inset 0 1px 0 rgba(255, 255, 255, 0.04), inset 0 18px 28px rgba(255, 255, 255, 0.015), inset 0 -24px 30px rgba(0, 0, 0, 0.18)",
+    ambientGlow:
+      "radial-gradient(120% 90% at 50% 0%, rgba(255, 185, 84, 0.08) 0%, rgba(255, 185, 84, 0) 44%)",
   },
 
   screen: {
-    borderColor: "rgba(153, 126, 84, 0.24)",
-    borderHoverColor: "rgba(174, 145, 96, 0.3)",
-    innerBorderColor: "rgba(109, 84, 49, 0.16)",
+    borderColor: "rgba(156, 171, 194, 0.22)",
+    borderHoverColor: "rgba(196, 210, 230, 0.28)",
+    innerBorderColor: "rgba(255, 255, 255, 0.05)",
     railColor:
-      "linear-gradient(180deg, rgba(191, 162, 111, 0.96) 0%, rgba(118, 90, 52, 0.16) 100%)",
-    highlightOpacity: 0.024,
+      "linear-gradient(180deg, rgba(255, 255, 255, 0.045) 0%, rgba(255, 255, 255, 0.015) 18%, rgba(8, 13, 22, 0) 38%, rgba(0, 0, 0, 0.14) 100%)",
+    highlightOpacity: 0.46,
     shadow:
-      "inset 0 1px 0 rgba(255, 245, 225, 0.035), inset 0 0 0 1px rgba(109, 84, 49, 0.16), 0 18px 36px rgba(0, 0, 0, 0.22)",
-    runningOutlineColor: "rgba(153, 126, 84, 0.06)",
+      "inset 0 1px 0 rgba(255, 255, 255, 0.08), inset 0 0 0 1px rgba(255, 255, 255, 0.028), inset 0 -46px 60px rgba(0, 0, 0, 0.42), 0 20px 52px rgba(0, 0, 0, 0.42)",
+    runningOutlineColor: "rgba(255, 255, 255, 0.04)",
+    background:
+      "linear-gradient(180deg, rgba(12, 18, 28, 0.98) 0%, rgba(7, 11, 18, 0.99) 52%, rgba(3, 6, 11, 1) 100%)",
   },
 } as const satisfies LiveHeroBillboardSkinTokens;
