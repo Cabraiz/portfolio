@@ -112,7 +112,6 @@ export const TECHNOLOGY_ITEMS: readonly TechnologyItem[] = [
     summary:
       "Base cloud voltada para infraestrutura, serviços gerenciados e aplicações escaláveis.",
     aliases: ["amazon web services", "ec2", "s3", "rds", "iam", "sqs", "sns"],
-    tags: ["cloud", "infra", "services", "platform"],
     relatedIds: ["gcp", "docker", "kubernetes", "postgresql", "rabbitmq"],
     featured: true,
     priority: 95,
@@ -139,7 +138,6 @@ export const TECHNOLOGY_ITEMS: readonly TechnologyItem[] = [
       "pubsub",
       "pub/sub",
     ],
-    tags: ["cloud", "storage", "database", "events"],
     relatedIds: ["aws", "docker", "kubernetes", "postgresql", "kafka"],
     featured: true,
     priority: 86,
@@ -157,7 +155,6 @@ export const TECHNOLOGY_ITEMS: readonly TechnologyItem[] = [
     summary:
       "Peça central da stack de build, execução e padronização de ambientes.",
     aliases: ["containers", "docker engine", "dockerfile"],
-    tags: ["containers", "runtime", "delivery"],
     relatedIds: ["kubernetes", "aws", "gcp", "nodejs", "python", "java"],
     featured: true,
     priority: 99,
@@ -175,7 +172,6 @@ export const TECHNOLOGY_ITEMS: readonly TechnologyItem[] = [
     summary:
       "Base operacional para ambientes distribuídos com foco em resiliência e automação.",
     aliases: ["k8s", "orchestration", "cluster"],
-    tags: ["containers", "cluster", "orchestration"],
     relatedIds: ["docker", "aws", "gcp", "prometheus", "grafana"],
     featured: true,
     priority: 98,
@@ -195,7 +191,6 @@ export const TECHNOLOGY_ITEMS: readonly TechnologyItem[] = [
     summary:
       "Stack principal de frontend para produto, renderização moderna e experiência de usuário.",
     aliases: ["next.js", "nextjs", "typescript", "frontend"],
-    tags: ["ui", "spa", "ssr", "web"],
     relatedIds: ["vue", "flutter", "graphql", "nodejs"],
     featured: true,
     priority: 100,
@@ -214,7 +209,6 @@ export const TECHNOLOGY_ITEMS: readonly TechnologyItem[] = [
     summary:
       "Tecnologia mapeada para a matriz visual, com tempo total não informado na versão inicial do dataset.",
     aliases: ["nuxt", "nuxt.js", "nuxtjs", "typescript"],
-    tags: ["ui", "spa", "frontend"],
     relatedIds: ["react", "flutter", "nodejs"],
     featured: false,
     priority: 68,
@@ -232,7 +226,6 @@ export const TECHNOLOGY_ITEMS: readonly TechnologyItem[] = [
     summary:
       "Stack mobile com capacidade de entrega visual e rapidez de prototipação.",
     aliases: ["dart", "mobile", "cross platform"],
-    tags: ["mobile", "app", "ui"],
     relatedIds: ["react", "vue"],
     featured: true,
     priority: 84,
@@ -252,7 +245,6 @@ export const TECHNOLOGY_ITEMS: readonly TechnologyItem[] = [
     summary:
       "Pilar backend de longa duração, com forte aderência a domínios de negócio e integração.",
     aliases: ["spring", "spring boot", "jvm", "backend"],
-    tags: ["api", "enterprise", "services"],
     relatedIds: ["kotlin", "postgresql", "rabbitmq", "kafka"],
     featured: true,
     priority: 100,
@@ -270,7 +262,6 @@ export const TECHNOLOGY_ITEMS: readonly TechnologyItem[] = [
     summary:
       "Stack complementar à base Java, com boa sinergia em ambientes de backend corporativo.",
     aliases: ["jvm", "backend kotlin"],
-    tags: ["jvm", "services", "backend"],
     relatedIds: ["java", "postgresql", "kafka"],
     featured: true,
     priority: 82,
@@ -290,7 +281,6 @@ export const TECHNOLOGY_ITEMS: readonly TechnologyItem[] = [
     summary:
       "Stack madura para backends orientados a produto e serviços de entrega rápida.",
     aliases: ["node", "express", "javascript backend", "typescript backend"],
-    tags: ["api", "services", "backend"],
     relatedIds: ["nestjs", "graphql", "react", "redis"],
     featured: true,
     priority: 96,
@@ -308,7 +298,6 @@ export const TECHNOLOGY_ITEMS: readonly TechnologyItem[] = [
     summary:
       "Framework alinhado a organização enterprise dentro do ecossistema Node.",
     aliases: ["nest", "node framework", "typescript backend"],
-    tags: ["api", "framework", "backend"],
     relatedIds: ["nodejs", "graphql", "redis", "postgresql"],
     featured: true,
     priority: 85,
@@ -327,7 +316,6 @@ export const TECHNOLOGY_ITEMS: readonly TechnologyItem[] = [
     summary:
       "Camada de integração adequada a clients ricos e contratos mais expressivos.",
     aliases: ["apollo", "apollo server", "schema", "resolver"],
-    tags: ["api", "schema", "contracts"],
     relatedIds: ["nodejs", "nestjs", "react"],
     featured: false,
     priority: 72,
@@ -346,7 +334,6 @@ export const TECHNOLOGY_ITEMS: readonly TechnologyItem[] = [
     summary:
       "Stack madura para automação, integrações e serviços rápidos.",
     aliases: ["python backend", "automation", "scripts"],
-    tags: ["automation", "api", "backend"],
     relatedIds: ["fastapi", "postgresql", "redis", "rabbitmq"],
     featured: true,
     priority: 94,
@@ -364,7 +351,6 @@ export const TECHNOLOGY_ITEMS: readonly TechnologyItem[] = [
     summary:
       "Framework principal para serviços HTTP modernos dentro da camada Python.",
     aliases: ["python api", "async api", "pydantic"],
-    tags: ["api", "framework", "backend"],
     relatedIds: ["python", "postgresql", "redis", "rabbitmq"],
     featured: true,
     priority: 83,
@@ -384,7 +370,6 @@ export const TECHNOLOGY_ITEMS: readonly TechnologyItem[] = [
     summary:
       "Base de dados relacional madura e recorrente em múltiplas stacks do portfólio.",
     aliases: ["postgres", "sql", "database", "relational db"],
-    tags: ["database", "sql", "storage"],
     relatedIds: ["mongodb", "redis", "java", "python", "nestjs"],
     featured: true,
     priority: 100,
@@ -402,7 +387,6 @@ export const TECHNOLOGY_ITEMS: readonly TechnologyItem[] = [
     summary:
       "Banco NoSQL usado como complemento em arquiteturas que exigem mais elasticidade estrutural.",
     aliases: ["mongo", "nosql", "document database"],
-    tags: ["database", "nosql", "documents"],
     relatedIds: ["postgresql", "redis", "nodejs"],
     featured: true,
     priority: 81,
@@ -420,7 +404,6 @@ export const TECHNOLOGY_ITEMS: readonly TechnologyItem[] = [
     summary:
       "Peça de aceleração e suporte a integrações distribuídas.",
     aliases: ["cache", "in-memory", "key value"],
-    tags: ["cache", "performance", "storage"],
     relatedIds: ["postgresql", "mongodb", "nodejs", "python"],
     featured: true,
     priority: 79,
@@ -438,7 +421,6 @@ export const TECHNOLOGY_ITEMS: readonly TechnologyItem[] = [
     summary:
       "Ferramenta central para comunicação assíncrona e orquestração entre serviços.",
     aliases: ["queues", "message broker", "broker"],
-    tags: ["messaging", "async", "integration"],
     relatedIds: ["kafka", "python", "fastapi", "java"],
     featured: true,
     priority: 84,
@@ -456,7 +438,6 @@ export const TECHNOLOGY_ITEMS: readonly TechnologyItem[] = [
     summary:
       "Stack orientada a eventos e pipelines distribuídos.",
     aliases: ["streaming", "events", "event bus"],
-    tags: ["stream", "events", "integration"],
     relatedIds: ["rabbitmq", "java", "kotlin", "gcp"],
     featured: true,
     priority: 83,
@@ -475,7 +456,6 @@ export const TECHNOLOGY_ITEMS: readonly TechnologyItem[] = [
     summary:
       "Base histórica de QA com forte cobertura de automação end-to-end.",
     aliases: ["browser automation", "ui automation", "e2e"],
-    tags: ["qa", "automation", "tests"],
     relatedIds: ["cypress", "playwright", "react"],
     featured: true,
     priority: 98,
@@ -493,7 +473,6 @@ export const TECHNOLOGY_ITEMS: readonly TechnologyItem[] = [
     summary:
       "Ferramenta voltada para confiabilidade de fluxos frontend e integração funcional.",
     aliases: ["e2e", "frontend testing", "ui tests"],
-    tags: ["qa", "tests", "frontend"],
     relatedIds: ["selenium", "playwright", "react"],
     featured: true,
     priority: 84,
@@ -511,7 +490,6 @@ export const TECHNOLOGY_ITEMS: readonly TechnologyItem[] = [
     summary:
       "Ferramenta mais nova no ecossistema de testes, útil para fluxos modernos de frontend.",
     aliases: ["browser testing", "e2e", "cross-browser"],
-    tags: ["qa", "automation", "tests"],
     relatedIds: ["selenium", "cypress", "react"],
     featured: false,
     priority: 60,
@@ -530,7 +508,6 @@ export const TECHNOLOGY_ITEMS: readonly TechnologyItem[] = [
     summary:
       "Camada visual de observabilidade para acompanhamento contínuo do sistema.",
     aliases: ["dashboards", "monitoring ui", "metrics visualization"],
-    tags: ["monitoring", "observability", "dashboards"],
     relatedIds: ["prometheus", "otel", "kubernetes"],
     featured: true,
     priority: 84,
@@ -548,7 +525,6 @@ export const TECHNOLOGY_ITEMS: readonly TechnologyItem[] = [
     summary:
       "Fundação métrica para ecossistemas orientados a monitoração.",
     aliases: ["metrics", "scraping", "monitoring"],
-    tags: ["metrics", "telemetry", "observability"],
     relatedIds: ["grafana", "otel", "kubernetes"],
     featured: true,
     priority: 78,
@@ -567,7 +543,6 @@ export const TECHNOLOGY_ITEMS: readonly TechnologyItem[] = [
     summary:
       "Camada de observabilidade distribuída para rastreamento e análise de comportamento.",
     aliases: ["opentelemetry", "tracing", "distributed tracing", "otel"],
-    tags: ["telemetry", "trace", "observability"],
     relatedIds: ["grafana", "prometheus", "kubernetes"],
     featured: false,
     priority: 70,

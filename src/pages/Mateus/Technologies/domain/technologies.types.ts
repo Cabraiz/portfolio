@@ -69,7 +69,6 @@ export type TechnologyItem = Readonly<{
   description?: string;
   summary?: string;
   aliases?: readonly string[];
-  tags?: readonly string[];
   relatedIds?: readonly string[];
   featured?: boolean;
   hidden?: boolean;

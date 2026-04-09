@@ -12,7 +12,10 @@ import {
   TECHNOLOGY_HEX_GRID_DESKTOP_TOKENS,
   TECHNOLOGY_HEX_GRID_MOBILE_TOKENS,
 } from "../../domain/technologies.tokens";
-import type { TechnologyCategoryId, TechnologyItem } from "../../domain/technologies.types";
+import type {
+  TechnologyCategoryId,
+  TechnologyItem,
+} from "../../domain/technologies.types";
 
 type TechnologiesHexGridProps = Readonly<{
   items: readonly TechnologyItem[];
@@ -63,14 +66,6 @@ function getTechnologyInitials(item: TechnologyItem): string {
   return `${words[0][0] ?? ""}${words[1][0] ?? ""}`.toUpperCase();
 }
 
-function getTechnologySummary(item: TechnologyItem): string {
-  return (
-    item.summary?.trim() ||
-    item.description?.trim() ||
-    "Stack posicionada na matriz visual de capabilities."
-  );
-}
-
 function getToneLabel(item: TechnologyItem): string {
   const tone = getTechnologyProficiencyTone(item.years);
 
@@ -93,7 +88,11 @@ function getAccentCategoryId(item: TechnologyItem): TechnologyCategoryId {
   return item.accentCategoryId ?? item.categoryId;
 }
 
-function getCardOffset(index: number, columns: number, staggerOffsetY: number): number {
+function getCardOffset(
+  index: number,
+  columns: number,
+  staggerOffsetY: number,
+): number {
   if (columns <= 1 || staggerOffsetY <= 0) {
     return 0;
   }
@@ -133,8 +132,12 @@ function TechnologiesHexGridComponent({
     ? Math.max(132, gridTokens.itemHeight - 20)
     : gridTokens.itemHeight;
 
-  const resolvedGapX = compact ? Math.max(12, gridTokens.gapX - 4) : gridTokens.gapX;
-  const resolvedGapY = compact ? Math.max(12, gridTokens.gapY - 4) : gridTokens.gapY;
+  const resolvedGapX = compact
+    ? Math.max(12, gridTokens.gapX - 4)
+    : gridTokens.gapX;
+  const resolvedGapY = compact
+    ? Math.max(12, gridTokens.gapY - 4)
+    : gridTokens.gapY;
   const resolvedStaggerOffset = compact
     ? Math.max(0, gridTokens.staggerOffsetY - 20)
     : gridTokens.staggerOffsetY;
@@ -262,7 +265,10 @@ function TechnologiesHexGridComponent({
           const accent = TECHNOLOGY_CATEGORY_ACCENTS[accentCategoryId];
           const isActive = activeTechnologyId === item.id;
           const isHovered = hoveredTechnologyId === item.id;
-          const yearsLabel = formatTechnologyYears(item.years, "Tempo não informado");
+          const yearsLabel = formatTechnologyYears(
+            item.years,
+            "Tempo não informado",
+          );
           const toneLabel = getToneLabel(item);
           const cardOffset = getCardOffset(
             index,
@@ -270,7 +276,6 @@ function TechnologiesHexGridComponent({
             resolvedStaggerOffset,
           );
           const monogram = getTechnologyInitials(item);
-          const summary = getTechnologySummary(item);
           const safeYearsValue = getSafeYearsValue(item);
           const showLogo = Boolean(item.logoSrc);
 
@@ -286,8 +291,8 @@ function TechnologiesHexGridComponent({
             minWidth: 0,
             minHeight: resolvedHeight,
             padding: mobile ? "16px 16px 18px" : "18px 18px 20px",
-            display: "grid",
-            gridTemplateRows: "auto auto 1fr auto",
+            display: "flex",
+            flexDirection: "column",
             gap: 12,
             textAlign: "left",
             color: accent.text,
@@ -304,7 +309,11 @@ function TechnologiesHexGridComponent({
             cursor: "pointer",
             transition:
               "transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease, opacity 180ms ease",
-            transform: isActive ? "translateY(-4px)" : isHovered ? "translateY(-2px)" : "translateY(0)",
+            transform: isActive
+              ? "translateY(-4px)"
+              : isHovered
+                ? "translateY(-2px)"
+                : "translateY(0)",
             clipPath: HEX_CLIP_PATH,
             overflow: "hidden",
             isolation: "isolate",
@@ -427,19 +436,6 @@ function TechnologiesHexGridComponent({
             textOverflow: "ellipsis",
           };
 
-          const summaryStyle: CSSProperties = {
-            position: "relative",
-            zIndex: 1,
-            margin: 0,
-            color: "rgba(255,255,255,0.74)",
-            fontSize: "0.88rem",
-            lineHeight: 1.58,
-            display: "-webkit-box",
-            WebkitLineClamp: mobile ? 3 : 4,
-            WebkitBoxOrient: "vertical",
-            overflow: "hidden",
-          };
-
           const footerStyle: CSSProperties = {
             position: "relative",
             zIndex: 1,
@@ -448,6 +444,7 @@ function TechnologiesHexGridComponent({
             justifyContent: "space-between",
             gap: 10,
             minWidth: 0,
+            marginTop: "auto",
           };
 
           const tonePillStyle: CSSProperties = {
@@ -544,8 +541,6 @@ function TechnologiesHexGridComponent({
                     <p style={subtitleStyle}>{item.label || item.name}</p>
                   </div>
                 </div>
-
-                <p style={summaryStyle}>{summary}</p>
 
                 <div style={footerStyle}>
                   <span style={tonePillStyle}>{toneLabel}</span>

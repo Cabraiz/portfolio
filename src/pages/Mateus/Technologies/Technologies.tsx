@@ -131,28 +131,6 @@ const CLUSTER_META: Record<TechnologyClusterId, ClusterMeta> = {
   },
 };
 
-const TOKEN_LABEL_OVERRIDES: Readonly<Record<string, string>> = {
-  api: "API",
-  apis: "APIs",
-  ui: "UI",
-  ux: "UX",
-  qa: "QA",
-  sql: "SQL",
-  nosql: "NoSQL",
-  ssr: "SSR",
-  spa: "SPA",
-  jvm: "JVM",
-  ec2: "EC2",
-  s3: "S3",
-  rds: "RDS",
-  iam: "IAM",
-  sqs: "SQS",
-  sns: "SNS",
-  aws: "AWS",
-  gcp: "GCP",
-  otel: "OTel",
-};
-
 function getBrowserWindow(): Window | null {
   return typeof window === "undefined" ? null : window;
 }
@@ -263,51 +241,6 @@ function mapCategoryToClusterId(
     default:
       return "backend";
   }
-}
-
-function formatTokenLabel(value: string): string {
-  const normalized = value.trim();
-
-  if (!normalized) {
-    return value;
-  }
-
-  const lowered = normalized.toLowerCase();
-  const override = TOKEN_LABEL_OVERRIDES[lowered];
-
-  if (override) {
-    return override;
-  }
-
-  return normalized
-    .split(/[\s/_-]+/)
-    .filter(Boolean)
-    .map((token) => {
-      const tokenLower = token.toLowerCase();
-      const tokenOverride = TOKEN_LABEL_OVERRIDES[tokenLower];
-
-      if (tokenOverride) {
-        return tokenOverride;
-      }
-
-      if (token.length <= 3) {
-        return token.toUpperCase();
-      }
-
-      return `${token.charAt(0).toUpperCase()}${token.slice(1).toLowerCase()}`;
-    })
-    .join(" ");
-}
-
-function buildBadges(item: TechnologyItem): readonly string[] {
-  const tags = item.tags?.map(formatTokenLabel) ?? [];
-
-  if (tags.length > 0) {
-    return tags.slice(0, 3);
-  }
-
-  const aliases = item.aliases?.map(formatTokenLabel) ?? [];
-  return aliases.slice(0, 3);
 }
 
 function buildHighlights(
@@ -445,7 +378,6 @@ function mapTechnologyItemToCatalogItem(
     iconSrc: logoSrc,
     tone: clusterMeta.tone,
     accentRgb: clusterMeta.accentRgb,
-    badges: buildBadges(item),
     relatedIcons: buildRelatedIcons(item),
     eyebrow: clusterMeta.eyebrow,
     subtitle:

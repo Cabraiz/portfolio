@@ -2,9 +2,6 @@ import { memo, useMemo } from "react";
 
 import type { TechnologyCatalogItem } from "../../Technologies";
 import TechnologyHexCard from "../hex/TechnologyHexCard";
-import TechnologyClusterLegend, {
-  type TechnologyClusterLegendItem,
-} from "./TechnologyClusterLegend";
 import styles from "./TechnologyClusterSection.module.css";
 
 function joinClasses(
@@ -19,7 +16,6 @@ type TechnologyClusterSectionProps = Readonly<{
   description?: string;
   eyebrow?: string;
   items: readonly TechnologyCatalogItem[];
-  legendItems?: readonly TechnologyClusterLegendItem[];
   activeItemId?: string | null;
   className?: string;
   dense?: boolean;
@@ -58,10 +54,8 @@ function buildDecoratedItems(
 function TechnologyClusterSectionComponent({
   id,
   title,
-  description,
   eyebrow = "Capability Cluster",
   items,
-  legendItems = [],
   activeItemId = null,
   className,
   dense = false,
@@ -81,29 +75,17 @@ function TechnologyClusterSectionComponent({
       data-cluster-density={dense ? "dense" : "default"}
     >
       <header className={styles.header}>
-        <div className={styles.headerTop}>
-          <div className={styles.titleBlock}>
-            <p className={styles.eyebrow}>{eyebrow}</p>
+        <div className={styles.headerSurface}>
+          <div className={styles.headerTop}>
+            <div className={styles.titleBlock}>
+              <p className={styles.eyebrow}>{eyebrow}</p>
 
-            <h2 className={styles.title} id={`${id}-title`}>
-              {title}
-            </h2>
-
-            {description ? (
-              <p className={styles.description}>{description}</p>
-            ) : null}
+              <h2 className={styles.title} id={`${id}-title`}>
+                {title}
+              </h2>
+            </div>
           </div>
         </div>
-
-        {legendItems.length > 0 ? (
-          <div className={styles.legendWrap}>
-            <TechnologyClusterLegend items={legendItems} />
-
-            <p className={styles.legendCaption}>
-              Leitura rápida do cluster para senioridade, foco e profundidade.
-            </p>
-          </div>
-        ) : null}
       </header>
 
       <div className={styles.content}>

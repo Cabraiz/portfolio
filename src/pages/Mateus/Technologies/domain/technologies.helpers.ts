@@ -53,7 +53,6 @@ export function getTechnologySearchText(item: TechnologyItem): string {
       item.description ?? "",
       item.summary ?? "",
       ...(item.aliases ?? []),
-      ...(item.tags ?? []),
     ].join(" "),
   );
 }

@@ -29,7 +29,6 @@ export type TechnologyHexCardItem = Readonly<{
   iconSrc?: string;
   tone?: TechnologyBadgeTone;
   accentRgb?: string;
-  badges?: readonly string[];
   relatedIcons?: readonly TechnologyRelatedIcon[];
 }>;
 
@@ -70,6 +69,45 @@ function resolveItemVisualSrc(item: TechnologyCatalogItem): string | undefined {
   return undefined;
 }
 
+function getHeaderLabel(item: TechnologyCatalogItem): string {
+  const rawName =
+    "name" in item && typeof item.name === "string" ? item.name.trim() : "";
+
+  if (rawName) {
+    return rawName;
+  }
+
+  if (
+    "categoryLabel" in item &&
+    typeof item.categoryLabel === "string" &&
+    item.categoryLabel.trim()
+  ) {
+    return item.categoryLabel.trim();
+  }
+
+  return "Technology";
+}
+
+function getFooterSignature(item: TechnologyCatalogItem): string {
+  if ("categoryLabel" in item && typeof item.categoryLabel === "string") {
+    const categoryLabel = item.categoryLabel.trim();
+
+    if (categoryLabel) {
+      return categoryLabel;
+    }
+  }
+
+  if ("levelLabel" in item && typeof item.levelLabel === "string") {
+    const levelLabel = item.levelLabel.trim();
+
+    if (levelLabel) {
+      return levelLabel;
+    }
+  }
+
+  return "Core Stack";
+}
+
 function TechnologyHexCardComponent({
   item,
   isActive = false,
@@ -81,10 +119,10 @@ function TechnologyHexCardComponent({
     "--technology-accent-rgb": item.accentRgb ?? "212, 175, 55",
   } as React.CSSProperties;
 
-  const relatedIcons = item.relatedIcons?.slice(0, 4) ?? [];
-  const metaBadges = item.badges?.slice(0, 3) ?? [];
-
   const visualSrc = useMemo(() => resolveItemVisualSrc(item), [item]);
+  const headerLabel = useMemo(() => getHeaderLabel(item), [item]);
+  const footerSignature = useMemo(() => getFooterSignature(item), [item]);
+
   const [hasVisualError, setHasVisualError] = useState(false);
 
   useEffect(() => {
@@ -129,7 +167,7 @@ function TechnologyHexCardComponent({
           <header className={styles.header}>
             <div className={styles.headerBadges}>
               <TechnologyHexBadge
-                label={item.categoryLabel}
+                label={headerLabel}
                 tone={item.tone ?? "neutral"}
               />
             </div>
@@ -157,57 +195,27 @@ function TechnologyHexCardComponent({
             </div>
           </div>
 
-          <div className={styles.content}>
-            <div className={styles.titleWrap}>
-              <h3 className={styles.title}>{item.name}</h3>
-              <p className={styles.description}>{item.description}</p>
+          <div className={styles.content} />
+
+          <footer
+            className={styles.footer}
+            aria-hidden="true"
+            data-active={isActive ? "true" : "false"}
+          >
+            <div className={styles.footerBase}>
+              <span className={styles.footerPill}>{footerSignature}</span>
+
+              <div className={styles.footerRail}>
+                <span className={styles.footerRailLine} />
+                <span className={styles.footerSignal}>
+                  <span className={styles.footerSignalBar} />
+                  <span className={styles.footerSignalBar} />
+                  <span className={styles.footerSignalBar} />
+                </span>
+              </div>
             </div>
 
-            {metaBadges.length > 0 ? (
-              <div className={styles.metaList}>
-                {metaBadges.map((badge) => (
-                  <span key={badge} className={styles.metaItem}>
-                    {badge}
-                  </span>
-                ))}
-              </div>
-            ) : null}
-          </div>
-
-          <footer className={styles.footer}>
-            {relatedIcons.length > 0 ? (
-              <div className={styles.relatedList} aria-hidden="true">
-                {relatedIcons.map((icon) => (
-                  <span
-                    key={icon.id}
-                    className={styles.relatedItem}
-                    title={icon.name}
-                  >
-                    {icon.src ? (
-                      <img
-                        src={icon.src}
-                        alt=""
-                        className={styles.relatedIcon}
-                        loading="lazy"
-                        decoding="async"
-                      />
-                    ) : (
-                      <span className={styles.relatedFallback}>
-                        {getInitials(icon.name).slice(0, 1)}
-                      </span>
-                    )}
-                  </span>
-                ))}
-              </div>
-            ) : (
-              <span className={styles.relatedSummary}>
-                Ecossistema visual disponível no spotlight.
-              </span>
-            )}
-
-            <span className={styles.cta}>
-              {isActive ? "Selecionado" : "Explorar"}
-            </span>
+            <span className={styles.footerGlow} />
           </footer>
         </div>
       </button>
