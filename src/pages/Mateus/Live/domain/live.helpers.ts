@@ -8,7 +8,10 @@ import {
   LIVE_LOCALE,
   LIVE_MAX_FEATURED_PROJECTS,
   LIVE_METRIC_DEFAULT_ACCENTS,
+  LIVE_ONGOING_PROJECT_STATUSES,
   LIVE_PROJECT_COMPLEXITY_LABELS,
+  LIVE_PROJECT_LIFECYCLE_FILTER_LABELS,
+  LIVE_PROJECT_SIZE_FILTER_LABELS,
   LIVE_PROJECT_STATUS_LABELS,
   LIVE_PROJECT_STATUS_ORDER,
 } from "./live.constants";
@@ -17,7 +20,11 @@ import type {
   LiveMetricSnapshot,
   LiveMetricTone,
   LiveProjectAggregate,
+  LiveProjectComplexity,
+  LiveProjectFilterCounts,
+  LiveProjectLifecycleFilter,
   LiveProjectRecord,
+  LiveProjectSizeFilter,
   LiveProjectStatus,
   LiveStatusBucket,
 } from "./live.types";
@@ -45,21 +52,91 @@ export function isLiveProjectVisible(project: LiveProjectRecord): boolean {
 }
 
 export function isLiveProjectOngoing(project: LiveProjectRecord): boolean {
-  return (
-    project.status === "active" ||
-    project.status === "monitoring" ||
-    project.status === "incubating"
-  );
+  return LIVE_ONGOING_PROJECT_STATUSES.includes(project.status);
+}
+
+export function mapLiveProjectStatusToLifecycleFilter(
+  status: LiveProjectStatus,
+): LiveProjectLifecycleFilter {
+  if (status === "delivered") {
+    return "delivered";
+  }
+
+  return "ongoing";
 }
 
 export function getLiveProjectStatusLabel(status: LiveProjectStatus): string {
   return LIVE_PROJECT_STATUS_LABELS[status];
 }
 
+export function getLiveProjectLifecycleFilterLabel(
+  filter: LiveProjectLifecycleFilter,
+): string {
+  return LIVE_PROJECT_LIFECYCLE_FILTER_LABELS[filter];
+}
+
 export function getLiveProjectComplexityLabel(
-  complexity: LiveProjectRecord["complexity"],
+  complexity: LiveProjectComplexity,
 ): string {
   return LIVE_PROJECT_COMPLEXITY_LABELS[complexity];
+}
+
+export function getLiveProjectSizeFilterLabel(
+  filter: LiveProjectSizeFilter,
+): string {
+  return LIVE_PROJECT_SIZE_FILTER_LABELS[filter];
+}
+
+export function matchesLiveProjectLifecycleFilter(
+  project: LiveProjectRecord,
+  filter: LiveProjectLifecycleFilter,
+): boolean {
+  if (!isLiveProjectVisible(project)) {
+    return false;
+  }
+
+  if (filter === "all") {
+    return true;
+  }
+
+  if (filter === "ongoing") {
+    return isLiveProjectOngoing(project);
+  }
+
+  return project.status === "delivered";
+}
+
+export function matchesLiveProjectSizeFilter(
+  project: LiveProjectRecord,
+  filter: LiveProjectSizeFilter,
+): boolean {
+  if (!isLiveProjectVisible(project)) {
+    return false;
+  }
+
+  if (filter === "all") {
+    return true;
+  }
+
+  return project.complexity === filter;
+}
+
+export function buildLiveProjectFilterCounts(
+  projects: readonly LiveProjectRecord[],
+): LiveProjectFilterCounts {
+  const visibleProjects = projects.filter(isLiveProjectVisible);
+
+  return {
+    all: visibleProjects.length,
+    ongoing: visibleProjects.filter(isLiveProjectOngoing).length,
+    delivered: visibleProjects.filter(
+      (project) => project.status === "delivered",
+    ).length,
+    low: visibleProjects.filter((project) => project.complexity === "low").length,
+    medium: visibleProjects.filter((project) => project.complexity === "medium")
+      .length,
+    high: visibleProjects.filter((project) => project.complexity === "high").length,
+  };
 }
 
 export function getLiveProjectHealthTone(healthScore: number): LiveMetricTone {

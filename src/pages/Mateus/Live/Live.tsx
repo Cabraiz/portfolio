@@ -1,33 +1,45 @@
 // src/pages/Mateus/Live/Live.tsx
 
 import {
-	useEffect,
-	useMemo,
-	useRef,
-	useState,
-	type CSSProperties,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
 } from "react";
 
 import { useLiveMetrics } from "./application/useLiveMetrics";
 import { useLiveProjectSpotlight } from "./application/useLiveProjectSpotlight";
 import {
-	LIVE_DEFAULT_SCENE_CONFIG,
-	LIVE_INTERACTION_LABELS,
-	LIVE_PROJECT_STATUS_LABELS,
-	LIVE_SCENE_DENSITY_WEIGHTS,
-	LIVE_SECTION_ID,
+  LIVE_DEFAULT_SCENE_CONFIG,
+  LIVE_INTERACTION_LABELS,
+  LIVE_PROJECT_LIFECYCLE_FILTER_LABELS,
+  LIVE_PROJECT_SIZE_FILTER_LABELS,
+  LIVE_PROJECT_STATUS_LABELS,
+  LIVE_SECTION_ID,
 } from "./domain/live.constants";
+import {
+  buildLiveProjectFilterCounts,
+  isLiveProjectVisible,
+  mapLiveProjectStatusToLifecycleFilter,
+  matchesLiveProjectLifecycleFilter,
+  matchesLiveProjectSizeFilter,
+} from "./domain/live.helpers";
 import type {
-	LiveMetricId,
-	LiveProjectStatus,
-	LiveSceneDensity,
+  LiveMetricId,
+  LiveProjectLifecycleFilter,
+  LiveProjectSizeFilter,
+  LiveProjectStatus,
 } from "./domain/live.types";
 import { useLiveGsapScene } from "./hooks/useLiveGsapScene";
 import LiveStatsBoard from "./ui/board/LiveStatsBoard";
 import LiveHeroBillboard from "./ui/chrome/billboard/LiveHeroBillboard";
 import LiveInteractionHint from "./ui/chrome/LiveInteractionHint";
-import LiveLegend from "./ui/chrome/LiveLegend";
 import LiveMiniTimeline from "./ui/chrome/LiveMiniTimeline";
+import LiveProjectFilters from "./ui/chrome/LiveProjectFilters";
+import LiveWorldGlobe, {
+  type LiveWorldGlobePoint,
+} from "./ui/chrome/LiveWorldGlobe";
 import LiveAmbientGrid from "./ui/scene/LiveAmbientGrid";
 import LiveCursorField from "./ui/scene/LiveCursorField";
 import LiveProjectNodes from "./ui/scene/LiveProjectNodes";
@@ -36,501 +48,667 @@ import LiveSectionShell from "./ui/shell/LiveSectionShell";
 import styles from "./Live.module.css";
 
 type PointerSnapshot = Readonly<{
-	clientX: number;
-	clientY: number;
-	normalizedX: number;
-	normalizedY: number;
-	centeredX: number;
-	centeredY: number;
-	distance: number;
+  clientX: number;
+  clientY: number;
+  normalizedX: number;
+  normalizedY: number;
+  centeredX: number;
+  centeredY: number;
+  distance: number;
 }>;
 
 const DEFAULT_POINTER: PointerSnapshot = {
-	clientX: 0,
-	clientY: 0,
-	normalizedX: 0.5,
-	normalizedY: 0.5,
-	centeredX: 0,
-	centeredY: 0,
-	distance: 0,
+  clientX: 0,
+  clientY: 0,
+  normalizedX: 0.5,
+  normalizedY: 0.5,
+  centeredX: 0,
+  centeredY: 0,
+  distance: 0,
 };
 
-const DENSITY_LABELS: Record<LiveSceneDensity, string> = {
-	calm: "Suave",
-	balanced: "Equilibrado",
-	dense: "Denso",
-};
+const LIVE_GLOBE_ORIGIN = {
+  id: "fortaleza-br",
+  label: "Fortaleza",
+  country: "Brasil",
+  region: "Ceará · base operacional",
+  lat: -3.7319,
+  lng: -38.5267,
+  size: 0.058,
+  color: [0.243, 0.929, 0.925],
+} as const satisfies LiveWorldGlobePoint;
 
-function joinClassNames(
-	...classNames: Array<string | false | null | undefined>
-): string {
-	return classNames.filter(Boolean).join(" ");
-}
+const LIVE_GLOBE_TARGETS = {
+  active: {
+    id: "brazil",
+    label: "Brasil",
+    country: "Brasil",
+    region: "América do Sul",
+    lat: -14.235,
+    lng: -51.9253,
+    size: 0.09,
+    color: [0.557, 0.906, 0.992],
+  },
+  monitoring: {
+    id: "united-states",
+    label: "Estados Unidos",
+    country: "Estados Unidos",
+    region: "América do Norte",
+    lat: 37.0902,
+    lng: -95.7129,
+    size: 0.062,
+    color: [0.349, 0.592, 0.992],
+  },
+  delivered: {
+    id: "portugal",
+    label: "Portugal",
+    country: "Portugal",
+    region: "Europa",
+    lat: 39.3999,
+    lng: -8.2245,
+    size: 0.056,
+    color: [0.753, 0.639, 0.992],
+  },
+  incubating: {
+    id: "japan",
+    label: "Japão",
+    country: "Japão",
+    region: "Ásia",
+    lat: 36.2048,
+    lng: 138.2529,
+    size: 0.058,
+    color: [0.992, 0.58, 0.8],
+  },
+} as const satisfies Record<LiveProjectStatus, LiveWorldGlobePoint>;
+
+const LIVE_GLOBE_MARKERS = [
+  LIVE_GLOBE_ORIGIN,
+  LIVE_GLOBE_TARGETS.active,
+  LIVE_GLOBE_TARGETS.monitoring,
+  LIVE_GLOBE_TARGETS.delivered,
+  LIVE_GLOBE_TARGETS.incubating,
+] as const satisfies readonly LiveWorldGlobePoint[];
 
 function mapMetricToStatus(
-	metricId: LiveMetricId | null
+  metricId: LiveMetricId | null
 ): LiveProjectStatus | null {
-	switch (metricId) {
-		case "projects-active":
-		case "automations":
-			return "active";
+  switch (metricId) {
+    case "projects-active":
+    case "automations":
+      return "active";
 
-		case "projects-monitoring":
-			return "monitoring";
+    case "projects-monitoring":
+      return "monitoring";
 
-		case "projects-delivered":
-		case "deliveries-shipped":
-			return "delivered";
+    case "projects-delivered":
+    case "deliveries-shipped":
+      return "delivered";
 
-		default:
-			return null;
-	}
+    default:
+      return null;
+  }
 }
 
-function getSceneTitle(selectedStatus: LiveProjectStatus | null): string {
-	if (!selectedStatus) {
-		return "Radar de projetos";
-	}
+function getSceneTitle(options: Readonly<{
+  selectedStatus: LiveProjectStatus | null;
+  lifecycleFilter: LiveProjectLifecycleFilter;
+  sizeFilter: LiveProjectSizeFilter;
+}>): string {
+  const { selectedStatus, lifecycleFilter, sizeFilter } = options;
 
-	return `Radar • ${LIVE_PROJECT_STATUS_LABELS[selectedStatus]}`;
+  if (selectedStatus) {
+    return `Radar • ${LIVE_PROJECT_STATUS_LABELS[selectedStatus]}`;
+  }
+
+  const activeLabels: string[] = [];
+
+  if (lifecycleFilter !== "all") {
+    activeLabels.push(LIVE_PROJECT_LIFECYCLE_FILTER_LABELS[lifecycleFilter]);
+  }
+
+  if (sizeFilter !== "all") {
+    activeLabels.push(LIVE_PROJECT_SIZE_FILTER_LABELS[sizeFilter]);
+  }
+
+  if (activeLabels.length === 0) {
+    return "Radar de projetos";
+  }
+
+  return `Radar • ${activeLabels.join(" · ")}`;
 }
 
-function getSceneHint(
-	selectedStatus: LiveProjectStatus | null,
-	selectedMetricLabel: string | null
-): string {
-	if (selectedStatus && selectedMetricLabel) {
-		return `Recorte ativo: ${LIVE_PROJECT_STATUS_LABELS[selectedStatus]}. O spotlight acompanha ${selectedMetricLabel.toLowerCase()}.`;
-	}
+function getSceneHint(options: Readonly<{
+  selectedStatus: LiveProjectStatus | null;
+  lifecycleFilter: LiveProjectLifecycleFilter;
+  sizeFilter: LiveProjectSizeFilter;
+  selectedMetricLabel: string | null;
+}>): string {
+  const {
+    selectedStatus,
+    lifecycleFilter,
+    sizeFilter,
+    selectedMetricLabel,
+  } = options;
 
-	if (selectedStatus) {
-		return `Recorte ativo: ${LIVE_PROJECT_STATUS_LABELS[selectedStatus]}. Passe o mouse pelos nós para abrir o spotlight.`;
-	}
+  const activeSlices: string[] = [];
 
-	if (selectedMetricLabel) {
-		return `Métrica em foco: ${selectedMetricLabel}. Passe o mouse pelos nós e compare placar com radar.`;
-	}
+  if (selectedStatus) {
+    activeSlices.push(LIVE_PROJECT_STATUS_LABELS[selectedStatus]);
+  } else if (lifecycleFilter !== "all") {
+    activeSlices.push(LIVE_PROJECT_LIFECYCLE_FILTER_LABELS[lifecycleFilter]);
+  }
 
-	return "Passe o mouse pelos nós para abrir o spotlight e deixar o radar vivo.";
+  if (sizeFilter !== "all") {
+    activeSlices.push(LIVE_PROJECT_SIZE_FILTER_LABELS[sizeFilter]);
+  }
+
+  if (activeSlices.length > 0 && selectedMetricLabel) {
+    return `Recorte ativo: ${activeSlices.join(" · ")}. O spotlight acompanha ${selectedMetricLabel.toLowerCase()}.`;
+  }
+
+  if (activeSlices.length > 0) {
+    return `Recorte ativo: ${activeSlices.join(" · ")}. Passe o mouse pelos nós para abrir o spotlight.`;
+  }
+
+  if (selectedMetricLabel) {
+    return `Métrica em foco: ${selectedMetricLabel}. Passe o mouse pelos nós e compare placar com radar.`;
+  }
+
+  return "Passe o mouse pelos nós para abrir o spotlight e deixar o radar vivo.";
+}
+
+function getSceneMetaLabel(options: Readonly<{
+  selectedStatus: LiveProjectStatus | null;
+  lifecycleFilter: LiveProjectLifecycleFilter;
+  sizeFilter: LiveProjectSizeFilter;
+}>): string {
+  const { selectedStatus, lifecycleFilter, sizeFilter } = options;
+
+  if (selectedStatus) {
+    return LIVE_PROJECT_STATUS_LABELS[selectedStatus];
+  }
+
+  if (sizeFilter !== "all") {
+    return LIVE_PROJECT_SIZE_FILTER_LABELS[sizeFilter];
+  }
+
+  if (lifecycleFilter !== "all") {
+    return LIVE_PROJECT_LIFECYCLE_FILTER_LABELS[lifecycleFilter];
+  }
+
+  return LIVE_INTERACTION_LABELS[LIVE_DEFAULT_SCENE_CONFIG.interactionMode];
 }
 
 function toNodeCountLabel(count: number): string {
-	return `${count} ${count === 1 ? "nó" : "nós"}`;
+  return `${count} ${count === 1 ? "nó" : "nós"}`;
+}
+
+function resolveGlobeTarget(options: Readonly<{
+  selectedStatus: LiveProjectStatus | null;
+  fallbackMetricId: LiveMetricId | null;
+  spotlightStatus: LiveProjectStatus | null;
+}>): LiveWorldGlobePoint {
+  const { selectedStatus, fallbackMetricId, spotlightStatus } = options;
+
+  if (spotlightStatus) {
+    return LIVE_GLOBE_TARGETS[spotlightStatus];
+  }
+
+  if (selectedStatus) {
+    return LIVE_GLOBE_TARGETS[selectedStatus];
+  }
+
+  const metricStatus = mapMetricToStatus(fallbackMetricId);
+
+  if (metricStatus) {
+    return LIVE_GLOBE_TARGETS[metricStatus];
+  }
+
+  return LIVE_GLOBE_TARGETS.active;
 }
 
 export default function Live() {
-	const rootRef = useRef<HTMLDivElement | null>(null);
+  const rootRef = useRef<HTMLDivElement | null>(null);
 
-	const metricsState = useLiveMetrics();
+  const metricsState = useLiveMetrics();
+  const density = LIVE_DEFAULT_SCENE_CONFIG.density;
 
-	const [selectedMetricId, setSelectedMetricId] = useState<LiveMetricId | null>(
-		null
-	);
-	const [selectedStatus, setSelectedStatus] =
-		useState<LiveProjectStatus | null>(null);
-	const [density, setDensity] = useState<LiveSceneDensity>(
-		LIVE_DEFAULT_SCENE_CONFIG.density
-	);
-	const [pointer, setPointer] = useState<PointerSnapshot>(DEFAULT_POINTER);
+  const [selectedMetricId, setSelectedMetricId] = useState<LiveMetricId | null>(
+    null
+  );
+  const [selectedStatus, setSelectedStatus] =
+    useState<LiveProjectStatus | null>(null);
+  const [lifecycleFilter, setLifecycleFilter] =
+    useState<LiveProjectLifecycleFilter>("all");
+  const [sizeFilter, setSizeFilter] = useState<LiveProjectSizeFilter>("all");
+  const [pointer, setPointer] = useState<PointerSnapshot>(DEFAULT_POINTER);
 
-	useEffect(() => {
-		if (selectedMetricId !== null) {
-			return;
-		}
+  useEffect(() => {
+    if (selectedMetricId !== null) {
+      return;
+    }
 
-		const firstHeroMetric = metricsState.heroMetrics[0];
+    const firstHeroMetric = metricsState.heroMetrics[0];
 
-		if (firstHeroMetric) {
-			setSelectedMetricId(firstHeroMetric.id);
-		}
-	}, [metricsState.heroMetrics, selectedMetricId]);
+    if (firstHeroMetric) {
+      setSelectedMetricId(firstHeroMetric.id);
+    }
+  }, [metricsState.heroMetrics, selectedMetricId]);
 
-	const filteredProjects = useMemo(() => {
-		if (!selectedStatus) {
-			return metricsState.projects;
-		}
+  const selectedLifecycleFilter = useMemo<LiveProjectLifecycleFilter>(() => {
+    if (selectedStatus) {
+      return mapLiveProjectStatusToLifecycleFilter(selectedStatus);
+    }
 
-		return metricsState.projects.filter(
-			(project) => project.status === selectedStatus
-		);
-	}, [metricsState.projects, selectedStatus]);
+    return lifecycleFilter;
+  }, [lifecycleFilter, selectedStatus]);
 
-	const spotlight = useLiveProjectSpotlight({
-		projects: filteredProjects,
-		autoSelectFirstProject: true,
-		featuredLimit: LIVE_DEFAULT_SCENE_CONFIG.maxVisibleNodes,
-	});
+  const projectFilterCounts = useMemo(() => {
+    return buildLiveProjectFilterCounts(metricsState.projects);
+  }, [metricsState.projects]);
 
-	const selectedMetric = useMemo(() => {
-		if (!selectedMetricId) {
-			return metricsState.heroMetrics[0] ?? metricsState.snapshots[0] ?? null;
-		}
+  const filteredProjects = useMemo(() => {
+    return metricsState.projects.filter((project) => {
+      if (!isLiveProjectVisible(project)) {
+        return false;
+      }
 
-		return metricsState.getSnapshotById(selectedMetricId);
-	}, [
-		metricsState,
-		metricsState.heroMetrics,
-		metricsState.snapshots,
-		selectedMetricId,
-	]);
+      if (!matchesLiveProjectSizeFilter(project, sizeFilter)) {
+        return false;
+      }
 
-	const {
-		isReady: isSceneReady,
-		refresh: refreshScene,
-		replay: replayScene,
-	} = useLiveGsapScene({
-		rootRef,
-		hintSelector: '[data-live-hint="true"]',
-	});
+      if (selectedStatus !== null) {
+        return project.status === selectedStatus;
+      }
 
-	useEffect(() => {
-		refreshScene();
-	}, [
-		density,
-		filteredProjects.length,
-		refreshScene,
-		selectedMetricId,
-		selectedStatus,
-	]);
+      return matchesLiveProjectLifecycleFilter(project, lifecycleFilter);
+    });
+  }, [lifecycleFilter, metricsState.projects, selectedStatus, sizeFilter]);
 
-	const pulseSize = Math.round(102 * LIVE_SCENE_DENSITY_WEIGHTS[density]);
-	const pulseX = `${30 + pointer.normalizedX * 40}%`;
-	const pulseY = `${24 + pointer.normalizedY * 36}%`;
+  const spotlight = useLiveProjectSpotlight({
+    projects: filteredProjects,
+    autoSelectFirstProject: true,
+    featuredLimit: LIVE_DEFAULT_SCENE_CONFIG.maxVisibleNodes,
+  });
 
-	const sceneTitle = getSceneTitle(selectedStatus);
-	const sceneHint = getSceneHint(selectedStatus, selectedMetric?.label ?? null);
+  const selectedMetric = useMemo(() => {
+    if (!selectedMetricId) {
+      return metricsState.heroMetrics[0] ?? metricsState.snapshots[0] ?? null;
+    }
 
-	const spotlightProject = spotlight.spotlightProject;
-	const spotlightTags = spotlightProject?.tags.slice(0, 3) ?? [];
+    return metricsState.getSnapshotById(selectedMetricId);
+  }, [metricsState, selectedMetricId]);
 
-	const sceneHudStyle = useMemo<CSSProperties>(() => {
-		return {
-			["--live-scene-pointer-x" as const]: `${Math.round(
-				pointer.normalizedX * 100
-			)}%`,
-			["--live-scene-pointer-y" as const]: `${Math.round(
-				pointer.normalizedY * 100
-			)}%`,
-		} as CSSProperties;
-	}, [pointer.normalizedX, pointer.normalizedY]);
+  const {
+    isReady: isSceneReady,
+    refresh: refreshScene,
+    replay: replayScene,
+  } = useLiveGsapScene({
+    rootRef,
+    hintSelector: '[data-live-hint="true"]',
+  });
 
-	const handleMetricSelect = (metricId: LiveMetricId) => {
-		setSelectedMetricId(metricId);
-		setSelectedStatus(mapMetricToStatus(metricId));
-	};
+  useEffect(() => {
+    refreshScene();
+  }, [
+    filteredProjects.length,
+    lifecycleFilter,
+    refreshScene,
+    selectedMetricId,
+    selectedStatus,
+    sizeFilter,
+  ]);
 
-	const handleStatusSelect = (status: LiveProjectStatus | null) => {
-		setSelectedStatus(status);
-	};
+  const pulseSize = Math.round(102);
+  const pulseX = `${30 + pointer.normalizedX * 40}%`;
+  const pulseY = `${24 + pointer.normalizedY * 36}%`;
 
-	const hasResults = metricsState.projects.length > 0;
+  const sceneTitle = getSceneTitle({
+    selectedStatus,
+    lifecycleFilter: selectedLifecycleFilter,
+    sizeFilter,
+  });
 
-	return (
-		<div ref={rootRef} className={styles.root}>
-			<LiveSectionShell
-				id={LIVE_SECTION_ID}
-				className={styles.shell}
-				ariaLabel="Seção ao vivo do portfólio"
-				title="Tudo em curso, ao vivo."
-				description=""
-				caption=""
-				heroSlot={
-					<LiveHeroBillboard
-						metrics={metricsState.snapshots}
-						summary={metricsState.summary}
-						isRunning={metricsState.isRunning}
-					/>
-				}
-				hasResults={hasResults}
-				filtersSlot={
-					<div className={styles.filtersBar}>
-						<div className={styles.filterGroup}>
-							<button
-								type="button"
-								className={joinClassNames(
-									styles.filterPill,
-									!selectedStatus && styles.filterPillActive
-								)}
-								onClick={() => {
-									setSelectedStatus(null);
-								}}
-							>
-								Todos
-							</button>
+  const sceneHint = getSceneHint({
+    selectedStatus,
+    lifecycleFilter: selectedLifecycleFilter,
+    sizeFilter,
+    selectedMetricLabel: selectedMetric?.label ?? null,
+  });
 
-							{(
-								Object.keys(LIVE_PROJECT_STATUS_LABELS) as LiveProjectStatus[]
-							).map((status) => (
-								<button
-									key={status}
-									type="button"
-									className={joinClassNames(
-										styles.filterPill,
-										selectedStatus === status && styles.filterPillActive
-									)}
-									onClick={() => {
-										handleStatusSelect(
-											selectedStatus === status ? null : status
-										);
-									}}
-								>
-									{LIVE_PROJECT_STATUS_LABELS[status]}
-								</button>
-							))}
-						</div>
+  const sceneMetaLabel = getSceneMetaLabel({
+    selectedStatus,
+    lifecycleFilter: selectedLifecycleFilter,
+    sizeFilter,
+  });
 
-						<div className={styles.filterGroup}>
-							{(["calm", "balanced", "dense"] as LiveSceneDensity[]).map(
-								(option) => (
-									<button
-										key={option}
-										type="button"
-										className={joinClassNames(
-											styles.filterPill,
-											density === option && styles.filterPillActive
-										)}
-										onClick={() => {
-											setDensity(option);
-										}}
-									>
-										{DENSITY_LABELS[option]}
-									</button>
-								)
-							)}
-						</div>
+  const spotlightProject = spotlight.spotlightProject;
+  const spotlightTags = spotlightProject?.tags.slice(0, 3) ?? [];
 
-						<div className={styles.filterGroup}>
-							<button
-								type="button"
-								className={styles.filterGhostButton}
-								onClick={replayScene}
-							>
-								Reanimar cena
-							</button>
+  const sceneHudStyle = useMemo<CSSProperties>(() => {
+    return {
+      ["--live-scene-pointer-x" as const]: `${Math.round(
+        pointer.normalizedX * 100
+      )}%`,
+      ["--live-scene-pointer-y" as const]: `${Math.round(
+        pointer.normalizedY * 100
+      )}%`,
+    } as CSSProperties;
+  }, [pointer.normalizedX, pointer.normalizedY]);
 
-							<span className={styles.filterMeta}>
-								{toNodeCountLabel(spotlight.visibleProjects.length)} ·{" "}
-								{
-									LIVE_INTERACTION_LABELS[
-										LIVE_DEFAULT_SCENE_CONFIG.interactionMode
-									]
-								}
-							</span>
-						</div>
-					</div>
-				}
-				sceneSlot={
-					<div className={styles.sceneViewport}>
-						<LiveCursorField
-							className={styles.sceneField}
-							label={sceneTitle}
-							hint={sceneHint}
-							minHeight="clamp(420px, 48vw, 680px)"
-							onPointerStateChange={setPointer}
-							onPointerLeaveField={() => {
-								setPointer(DEFAULT_POINTER);
-							}}
-						>
-							<LiveAmbientGrid
-								density={density}
-								pointer={pointer}
-								minHeight="clamp(420px, 48vw, 680px)"
-								borderRadius="30px"
-							>
-								{[0.28, 0.42, 0.56].map((ringFactor, index) => {
-									const size = `${Math.round(100 * ringFactor)}%`;
+  const globeTarget = useMemo(() => {
+    return resolveGlobeTarget({
+      selectedStatus,
+      fallbackMetricId: selectedMetricId,
+      spotlightStatus: spotlightProject?.status ?? null,
+    });
+  }, [selectedMetricId, selectedStatus, spotlightProject?.status]);
 
-									return (
-										<div
-											key={`scene-ring-${ringFactor}`}
-											className={styles.sceneRing}
-											data-live-parallax={String(0.2 + index * 0.16)}
-											style={{
-												width: size,
-												height: size,
-												transform: `translate(-50%, -50%) rotate(${index * 12}deg)`,
-												opacity: 0.16 + index * 0.06,
-											}}
-										/>
-									);
-								})}
+  const globeTitle = spotlightProject
+    ? spotlightProject.name
+    : selectedStatus
+      ? `Foco • ${LIVE_PROJECT_STATUS_LABELS[selectedStatus]}`
+      : "Presença global";
 
-								<LiveSignalPulse
-									x={pulseX}
-									y={pulseY}
-									size={pulseSize}
-									variant="radar"
-									label="scan"
-									dataParallax={0.8}
-								/>
+  const globeSubtitle = spotlightProject
+    ? `${LIVE_PROJECT_STATUS_LABELS[spotlightProject.status]} · ${spotlightProject.clientLabel}`
+    : selectedMetric
+      ? `Leitura guiada por ${selectedMetric.label.toLowerCase()}.`
+      : "Globo vivo para apontar o país em foco no radar.";
 
-								<LiveSignalPulse
-									x="50%"
-									y="50%"
-									size={76}
-									variant="soft"
-									label="core"
-									dataParallax={0.25}
-								/>
+  const handleMetricSelect = (metricId: LiveMetricId) => {
+    const nextStatus = mapMetricToStatus(metricId);
 
-								{spotlightProject ? (
-									<LiveSignalPulse
-										x={`${46 + pointer.normalizedX * 10}%`}
-										y={`${46 + pointer.normalizedY * 10}%`}
-										size={64}
-										variant="focus"
-										label="focus"
-										dataParallax={0.96}
-									/>
-								) : null}
+    setSelectedMetricId(metricId);
+    setSelectedStatus(nextStatus);
+    setLifecycleFilter(
+      nextStatus ? mapLiveProjectStatusToLifecycleFilter(nextStatus) : "all"
+    );
+  };
 
-								<div
-									className={styles.sceneHud}
-									style={sceneHudStyle}
-									data-live-parallax="0.18"
-								>
-									<span className={styles.sceneHudEyebrow}>spotlight</span>
+  const handleLifecycleFilterChange = (
+    filter: LiveProjectLifecycleFilter
+  ) => {
+    setSelectedStatus(null);
+    setLifecycleFilter(filter);
+  };
 
-									<strong className={styles.sceneHudTitle}>
-										{spotlight.spotlightTitle}
-									</strong>
+  const handleSizeFilterChange = (filter: LiveProjectSizeFilter) => {
+    setSizeFilter(filter);
+  };
 
-									<span className={styles.sceneHudMeta}>
-										{spotlightProject
-											? `${spotlightProject.clientLabel} · ${Math.round(
-													spotlightProject.healthScore
-												)}% saúde`
-											: "Passe o mouse pelos nós para abrir o spotlight."}
-									</span>
+  const clearFilters = () => {
+    setSelectedStatus(null);
+    setLifecycleFilter("all");
+    setSizeFilter("all");
+  };
 
-									<p className={styles.sceneHudDescription}>
-										{spotlightProject?.summary ?? spotlight.projectNarrative}
-									</p>
+  const hasResults = metricsState.projects.length > 0;
+  const hasActiveFilters =
+    selectedStatus !== null ||
+    lifecycleFilter !== "all" ||
+    sizeFilter !== "all";
 
-									{spotlightTags.length > 0 ? (
-										<div className={styles.sceneTagRow}>
-											{spotlightTags.map((tag) => (
-												<span key={tag} className={styles.sceneTag}>
-													{tag}
-												</span>
-											))}
-										</div>
-									) : null}
-								</div>
+  return (
+    <div ref={rootRef} className={styles.root}>
+      <LiveSectionShell
+        id={LIVE_SECTION_ID}
+        className={styles.shell}
+        ariaLabel="Seção ao vivo do portfólio"
+        title="Tudo em curso, ao vivo."
+        description=""
+        caption=""
+        heroSlot={
+          <LiveHeroBillboard
+            metrics={metricsState.snapshots}
+            summary={metricsState.summary}
+            isRunning={metricsState.isRunning}
+          />
+        }
+        hasResults={hasResults}
+        filtersSlot={
+          <div className={styles.filtersBar}>
+            <LiveProjectFilters
+              lifecycleFilter={selectedLifecycleFilter}
+              sizeFilter={sizeFilter}
+              onLifecycleFilterChange={handleLifecycleFilterChange}
+              onSizeFilterChange={handleSizeFilterChange}
+              counts={projectFilterCounts}
+              showLifecycleAll
+              showSizeAll={false}
+            />
 
-								<LiveProjectNodes
-									projects={spotlight.visibleProjects}
-									density={density}
-									maxVisibleNodes={LIVE_DEFAULT_SCENE_CONFIG.maxVisibleNodes}
-									selectedProjectId={spotlight.activeProjectId}
-									hoveredProjectId={spotlight.hoveredProjectId}
-									spotlightProjectId={spotlight.spotlightProjectId}
-									onProjectSelect={spotlight.selectProject}
-									onProjectHover={spotlight.hoverProject}
-									onProjectLeave={spotlight.clearHover}
-									showClient
-									showStack
-									showHealth
-								/>
+            <div className={styles.filterGroup}>
+              <button
+                type="button"
+                className={styles.filterGhostButton}
+                onClick={replayScene}
+              >
+                Reanimar cena
+              </button>
 
-								<div className={styles.sceneControls} data-live-parallax="0.32">
-									<button
-										type="button"
-										className={styles.sceneControlButton}
-										onClick={spotlight.selectPreviousProject}
-									>
-										Anterior
-									</button>
+              <span className={styles.filterMeta}>
+                {toNodeCountLabel(spotlight.visibleProjects.length)} ·{" "}
+                {
+                  LIVE_INTERACTION_LABELS[
+                    LIVE_DEFAULT_SCENE_CONFIG.interactionMode
+                  ]
+                }
+              </span>
+            </div>
+          </div>
+        }
+        sceneSlot={
+          <div className={styles.sceneViewport}>
+            <LiveCursorField
+              className={styles.sceneField}
+              label={sceneTitle}
+              hint={sceneHint}
+              minHeight="clamp(420px, 48vw, 680px)"
+              onPointerStateChange={setPointer}
+              onPointerLeaveField={() => {
+                setPointer(DEFAULT_POINTER);
+              }}
+            >
+              <LiveAmbientGrid
+                density={density}
+                pointer={pointer}
+                minHeight="clamp(420px, 48vw, 680px)"
+                borderRadius="30px"
+              >
+                {[0.28, 0.42, 0.56].map((ringFactor, index) => {
+                  const size = `${Math.round(100 * ringFactor)}%`;
 
-									<button
-										type="button"
-										className={styles.sceneControlButton}
-										onClick={spotlight.selectNextProject}
-									>
-										Próximo
-									</button>
+                  return (
+                    <div
+                      key={`scene-ring-${ringFactor}`}
+                      className={styles.sceneRing}
+                      data-live-parallax={String(0.2 + index * 0.16)}
+                      style={{
+                        width: size,
+                        height: size,
+                        transform: `translate(-50%, -50%) rotate(${index * 12}deg)`,
+                        opacity: 0.16 + index * 0.06,
+                      }}
+                    />
+                  );
+                })}
 
-									<span className={styles.sceneMetaPill}>
-										{toNodeCountLabel(spotlight.visibleProjects.length)} ·{" "}
-										{DENSITY_LABELS[density]}
-									</span>
-								</div>
-							</LiveAmbientGrid>
-						</LiveCursorField>
-					</div>
-				}
-				spotlightSlot={
-					<div className={styles.sidebarStack}>
-						<div className={styles.headerFooter}>
-							<span className={styles.headerBadge}>
-								{metricsState.isRunning ? "Painel vivo" : "Painel pausado"}
-							</span>
+                <LiveSignalPulse
+                  x={pulseX}
+                  y={pulseY}
+                  size={pulseSize}
+                  variant="radar"
+                  label="scan"
+                  dataParallax={0.8}
+                />
 
-							<span className={styles.headerBadge}>
-								Cena {isSceneReady ? "pronta" : "preparando"}
-							</span>
+                <LiveSignalPulse
+                  x="50%"
+                  y="50%"
+                  size={76}
+                  variant="soft"
+                  label="core"
+                  dataParallax={0.25}
+                />
 
-							{selectedStatus ? (
-								<button
-									type="button"
-									className={styles.headerBadgeButton}
-									onClick={() => {
-										setSelectedStatus(null);
-									}}
-								>
-									Limpar recorte
-								</button>
-							) : null}
-						</div>
+                {spotlightProject ? (
+                  <LiveSignalPulse
+                    x={`${46 + pointer.normalizedX * 10}%`}
+                    y={`${46 + pointer.normalizedY * 10}%`}
+                    size={64}
+                    variant="focus"
+                    label="focus"
+                    dataParallax={0.96}
+                  />
+                ) : null}
 
-						<LiveLegend
-							statusBuckets={metricsState.statusBuckets}
-							selectedStatus={selectedStatus}
-							onStatusSelect={handleStatusSelect}
-							showToneLegend
-							showStatusLegend
-							showHintLegend={false}
-						/>
-					</div>
-				}
-				supportingSlot={
-					<div className={styles.supportingGrid}>
-						<LiveStatsBoard
-							className={styles.board}
-							metrics={metricsState.snapshots}
-							heroMetrics={metricsState.heroMetrics}
-							secondaryMetrics={metricsState.secondaryMetrics}
-							statusBuckets={metricsState.statusBuckets}
-							elapsedMs={metricsState.elapsedMs}
-							isRunning={metricsState.isRunning}
-							hasAnimatedMetrics={metricsState.hasAnimatedMetrics}
-							selectedMetricId={selectedMetricId}
-							onMetricSelect={handleMetricSelect}
-							onToggleRunning={metricsState.toggle}
-							onRestart={metricsState.restart}
-						/>
+                <div
+                  className={styles.sceneHud}
+                  style={sceneHudStyle}
+                  data-live-parallax="0.18"
+                >
+                  <span className={styles.sceneHudEyebrow}>spotlight</span>
 
-						<div className={styles.chromeGrid}>
-							<div className={styles.chromePanel}>
-								<LiveMiniTimeline
-									projects={filteredProjects}
-									selectedProjectId={spotlight.activeProjectId}
-									onProjectSelect={spotlight.selectProject}
-								/>
-							</div>
+                  <strong className={styles.sceneHudTitle}>
+                    {spotlight.spotlightTitle}
+                  </strong>
 
-							<div className={styles.chromePanel} data-live-hint="true">
-								<LiveInteractionHint
-									interactionMode={LIVE_DEFAULT_SCENE_CONFIG.interactionMode}
-									isRunning={metricsState.isRunning}
-									selectedProjectName={spotlightProject?.name ?? null}
-									activeMetricLabel={selectedMetric?.label ?? null}
-								/>
-							</div>
-						</div>
-					</div>
-				}
-			/>
-		</div>
-	);
+                  <span className={styles.sceneHudMeta}>
+                    {spotlightProject
+                      ? `${spotlightProject.clientLabel} · ${Math.round(
+                          spotlightProject.healthScore
+                        )}% saúde`
+                      : "Passe o mouse pelos nós para abrir o spotlight."}
+                  </span>
+
+                  <p className={styles.sceneHudDescription}>
+                    {spotlightProject?.summary ?? spotlight.projectNarrative}
+                  </p>
+
+                  {spotlightTags.length > 0 ? (
+                    <div className={styles.sceneTagRow}>
+                      {spotlightTags.map((tag) => (
+                        <span key={tag} className={styles.sceneTag}>
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  ) : null}
+                </div>
+
+                <LiveProjectNodes
+                  projects={spotlight.visibleProjects}
+                  density={density}
+                  maxVisibleNodes={LIVE_DEFAULT_SCENE_CONFIG.maxVisibleNodes}
+                  selectedProjectId={spotlight.activeProjectId}
+                  hoveredProjectId={spotlight.hoveredProjectId}
+                  spotlightProjectId={spotlight.spotlightProjectId}
+                  onProjectSelect={spotlight.selectProject}
+                  onProjectHover={spotlight.hoverProject}
+                  onProjectLeave={spotlight.clearHover}
+                  showClient
+                  showStack
+                  showHealth
+                />
+
+                <div className={styles.sceneControls} data-live-parallax="0.32">
+                  <button
+                    type="button"
+                    className={styles.sceneControlButton}
+                    onClick={spotlight.selectPreviousProject}
+                  >
+                    Anterior
+                  </button>
+
+                  <button
+                    type="button"
+                    className={styles.sceneControlButton}
+                    onClick={spotlight.selectNextProject}
+                  >
+                    Próximo
+                  </button>
+
+                  <span className={styles.sceneMetaPill}>
+                    {toNodeCountLabel(spotlight.visibleProjects.length)} ·{" "}
+                    {sceneMetaLabel}
+                  </span>
+                </div>
+              </LiveAmbientGrid>
+            </LiveCursorField>
+          </div>
+        }
+        spotlightSlot={
+          <div className={styles.sidebarStack}>
+            <div className={styles.headerFooter}>
+              <span className={styles.headerBadge}>
+                {metricsState.isRunning ? "Painel vivo" : "Painel pausado"}
+              </span>
+
+              <span className={styles.headerBadge}>
+                Cena {isSceneReady ? "pronta" : "preparando"}
+              </span>
+
+              {hasActiveFilters ? (
+                <button
+                  type="button"
+                  className={styles.headerBadgeButton}
+                  onClick={clearFilters}
+                >
+                  Limpar recorte
+                </button>
+              ) : null}
+            </div>
+
+            <LiveWorldGlobe
+              title={globeTitle}
+              subtitle={globeSubtitle}
+              eyebrow="world focus"
+              target={globeTarget}
+              origin={LIVE_GLOBE_ORIGIN}
+              markers={LIVE_GLOBE_MARKERS}
+              showArcToTarget={globeTarget.id !== LIVE_GLOBE_ORIGIN.id}
+            />
+          </div>
+        }
+        supportingSlot={
+          <div className={styles.supportingGrid}>
+            <LiveStatsBoard
+              className={styles.board}
+              metrics={metricsState.snapshots}
+              heroMetrics={metricsState.heroMetrics}
+              secondaryMetrics={metricsState.secondaryMetrics}
+              statusBuckets={metricsState.statusBuckets}
+              elapsedMs={metricsState.elapsedMs}
+              isRunning={metricsState.isRunning}
+              hasAnimatedMetrics={metricsState.hasAnimatedMetrics}
+              selectedMetricId={selectedMetricId}
+              onMetricSelect={handleMetricSelect}
+              onToggleRunning={metricsState.toggle}
+              onRestart={metricsState.restart}
+            />
+
+            <div className={styles.chromeGrid}>
+              <div className={styles.chromePanel}>
+                <LiveMiniTimeline
+                  projects={filteredProjects}
+                  selectedProjectId={spotlight.activeProjectId}
+                  onProjectSelect={spotlight.selectProject}
+                />
+              </div>
+
+              <div className={styles.chromePanel} data-live-hint="true">
+                <LiveInteractionHint
+                  interactionMode={LIVE_DEFAULT_SCENE_CONFIG.interactionMode}
+                  isRunning={metricsState.isRunning}
+                  selectedProjectName={spotlightProject?.name ?? null}
+                  activeMetricLabel={selectedMetric?.label ?? null}
+                />
+              </div>
+            </div>
+          </div>
+        }
+      />
+    </div>
+  );
 }

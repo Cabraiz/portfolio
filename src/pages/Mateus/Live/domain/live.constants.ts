@@ -8,6 +8,8 @@ import type {
   LiveMetricSimulationConfig,
   LiveMetricTone,
   LiveProjectComplexity,
+  LiveProjectLifecycleFilter,
+  LiveProjectSizeFilter,
   LiveProjectStatus,
   LiveSceneDensity,
   LiveSectionSceneConfig,
@@ -84,12 +86,35 @@ export const LIVE_PROJECT_STATUS_ORDER: Readonly<
   delivered: 40,
 };
 
+export const LIVE_ONGOING_PROJECT_STATUSES: readonly LiveProjectStatus[] = [
+  "active",
+  "monitoring",
+  "incubating",
+] as const;
+
+export const LIVE_PROJECT_LIFECYCLE_FILTER_LABELS: Readonly<
+  Record<LiveProjectLifecycleFilter, string>
+> = {
+  all: "Todos",
+  ongoing: "Em andamento",
+  delivered: "Concluído",
+};
+
 export const LIVE_PROJECT_COMPLEXITY_LABELS: Readonly<
   Record<LiveProjectComplexity, string>
 > = {
-  low: "Baixa",
-  medium: "Média",
-  high: "Alta",
+  low: "Pequeno",
+  medium: "Médio",
+  high: "Grande",
+};
+
+export const LIVE_PROJECT_SIZE_FILTER_LABELS: Readonly<
+  Record<LiveProjectSizeFilter, string>
+> = {
+  all: "Todos os portes",
+  low: "Projetos pequenos",
+  medium: "Projetos médios",
+  high: "Projetos grandes",
 };
 
 export const LIVE_METRIC_TONE_LABELS: Readonly<Record<LiveMetricTone, string>> =

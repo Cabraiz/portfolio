@@ -29,6 +29,23 @@ export type LiveProjectStatus =
 
 export type LiveProjectComplexity = "low" | "medium" | "high";
 
+export type LiveProjectLifecycleFilter =
+  | "all"
+  | "ongoing"
+  | "delivered";
+
+export type LiveProjectSizeFilter =
+  | "all"
+  | LiveProjectComplexity;
+
+export type LiveProjectFilterCountKey =
+  | LiveProjectLifecycleFilter
+  | LiveProjectSizeFilter;
+
+export type LiveProjectFilterCounts = Readonly<
+  Partial<Record<LiveProjectFilterCountKey, number>>
+>;
+
 export type LiveInteractionMode =
   | "hover"
   | "drag"
