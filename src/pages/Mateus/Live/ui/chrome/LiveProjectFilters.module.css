@@ -1,11 +1,21 @@
 /* src/pages/Mateus/Live/ui/chrome/LiveProjectFilters.module.css */
 
 .root {
+  --live-project-filters-gap: 10px;
+  --live-project-filters-padding-x: 16px;
+  --live-project-filters-padding-y: 14px;
+  --live-project-filters-pill-height: 40px;
+  --live-project-filters-pill-padding-x: 16px;
+  --live-project-filters-pill-font-size: 0.72rem;
+
   position: relative;
-  display: grid;
-  gap: 12px;
+  display: flex;
+  align-items: center;
+  gap: var(--live-project-filters-gap);
   width: 100%;
-  padding: 14px 16px;
+  min-width: 0;
+  padding: var(--live-project-filters-padding-y)
+    var(--live-project-filters-padding-x);
   border-radius: 28px;
   border: 1px solid rgba(255, 255, 255, 0.08);
   background:
@@ -21,20 +31,27 @@
     0 20px 48px rgba(0, 0, 0, 0.22);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
+  overflow-x: auto;
+  overflow-y: hidden;
+  flex-wrap: nowrap;
+  scrollbar-width: none;
+}
+
+.root::-webkit-scrollbar {
+  display: none;
 }
 
 .rootCompact {
-  gap: 10px;
-  padding: 12px;
   border-radius: 22px;
 }
 
 .group {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
-  gap: 10px;
-  min-width: 0;
+  gap: var(--live-project-filters-gap);
+  min-width: max-content;
+  flex: 0 0 auto;
 }
 
 .pill {
@@ -42,18 +59,23 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  flex: 0 0 auto;
   gap: 10px;
-  min-height: 40px;
   min-width: 0;
-  padding: 0 16px;
+  min-height: var(--live-project-filters-pill-height);
+  padding: 0 var(--live-project-filters-pill-padding-x);
   border-radius: 999px;
   border: 1px solid rgba(255, 255, 255, 0.11);
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.02)),
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.035),
+      rgba(255, 255, 255, 0.02)
+    ),
     rgba(8, 12, 18, 0.54);
   color: rgba(255, 255, 255, 0.72);
   font: inherit;
-  font-size: 0.72rem;
+  font-size: var(--live-project-filters-pill-font-size);
   font-weight: 700;
   letter-spacing: 0.08em;
   line-height: 1;
@@ -75,7 +97,11 @@
   color: rgba(255, 255, 255, 0.92);
   border-color: rgba(255, 255, 255, 0.18);
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.028)),
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.055),
+      rgba(255, 255, 255, 0.028)
+    ),
     rgba(12, 18, 28, 0.62);
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
 }
@@ -84,7 +110,11 @@
   color: rgba(255, 255, 255, 0.96);
   border-color: rgba(96, 165, 250, 0.34);
   background:
-    linear-gradient(180deg, rgba(96, 165, 250, 0.16), rgba(96, 165, 250, 0.07)),
+    linear-gradient(
+      180deg,
+      rgba(96, 165, 250, 0.16),
+      rgba(96, 165, 250, 0.07)
+    ),
     rgba(10, 18, 30, 0.72);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.05),
@@ -99,6 +129,7 @@
 
 .pillLabel {
   min-width: 0;
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
@@ -107,6 +138,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  flex: 0 0 auto;
   min-width: 24px;
   min-height: 24px;
   padding: 0 8px;
@@ -128,33 +160,25 @@
 
 @media (max-width: 900px) {
   .root {
-    padding: 12px;
     border-radius: 24px;
   }
 
-  .group {
-    gap: 8px;
-  }
-
   .pill {
-    min-height: 38px;
-    padding-inline: 14px;
+    gap: 8px;
   }
 }
 
 @media (max-width: 640px) {
   .root,
   .rootCompact {
-    gap: 8px;
-    padding: 10px;
-    border-radius: 20px;
-  }
+    --live-project-filters-gap: 8px;
+    --live-project-filters-padding-x: 10px;
+    --live-project-filters-padding-y: 10px;
+    --live-project-filters-pill-height: 34px;
+    --live-project-filters-pill-padding-x: 12px;
+    --live-project-filters-pill-font-size: 0.66rem;
 
-  .pill {
-    min-height: 34px;
-    padding-inline: 12px;
-    font-size: 0.66rem;
-    letter-spacing: 0.07em;
+    border-radius: 20px;
   }
 
   .count {

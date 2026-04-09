@@ -20,8 +20,7 @@
   "floatingChat": {
     "phrases": [
       "Chat",
-      "Fale comigo",
-      "Posso ajudar?"
+      "Mensagens"
     ],
     "firstMessage": "Como seria seu projeto ideal?",
     "secondMessage": "Olá! Pronto para tirar sua ideia do papel?",
