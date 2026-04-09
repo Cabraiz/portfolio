@@ -195,7 +195,7 @@ export default function AppDesktop() {
         touchMultiplier: smoothOptions.touchMultiplier,
       }}
     >
-      <TitleWebsite title1="Bem Vindo! 🤝" title2="Cabraiz" />
+      <TitleWebsite title1="Bem Vindo! 🫡" title2="Cabraiz" />
 
       {!isNavHidden && (
         <AppNavbar
