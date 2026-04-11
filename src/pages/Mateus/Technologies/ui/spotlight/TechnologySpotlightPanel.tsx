@@ -1,18 +1,10 @@
-import { memo, CSSProperties } from "react";
+import { memo, type CSSProperties } from "react";
 
-import TechnologyHexBadge, {
-  type TechnologyBadgeTone,
-} from "../hex/TechnologyHexBadge";
+import type { TechnologyHexCardItem } from "../hex/TechnologyHexCard";
 import type {
-  TechnologyHexCardItem,
-  TechnologyRelatedIcon,
-} from "../hex/TechnologyHexCard";
-import TechnologyEvidenceGallery, {
-  type TechnologyEvidenceGalleryItem,
-} from "./TechnologyEvidenceGallery";
-import TechnologyRelatedStack, {
-  type TechnologyRelatedStackItem,
-} from "./TechnologyRelatedStack";
+  TechnologyTrunfoEntry,
+  TechnologyTrunfoStat,
+} from "../../domain/technologies.types";
 import styles from "./TechnologySpotlightPanel.module.css";
 
 function joinClasses(
@@ -21,26 +13,18 @@ function joinClasses(
   return classes.filter(Boolean).join(" ");
 }
 
-type TechnologySpotlightMetric = Readonly<{
-  id: string;
-  label: string;
-  value: string;
-}>;
-
 export type TechnologySpotlightItem = TechnologyHexCardItem &
   Readonly<{
+    shortName?: string;
     eyebrow?: string;
     subtitle?: string;
     levelDescription?: string;
     heroImageSrc?: string;
     heroCaptionTitle?: string;
     heroCaptionText?: string;
-    highlights?: readonly string[];
-    relatedStack?: readonly TechnologyRelatedStackItem[];
-    evidenceGallery?: readonly TechnologyEvidenceGalleryItem[];
-    metrics?: readonly TechnologySpotlightMetric[];
     deliveryLabel?: string;
     confidenceLabel?: string;
+    trunfoData?: TechnologyTrunfoEntry | null;
   }>;
 
 type TechnologySpotlightPanelProps = Readonly<{
@@ -68,31 +52,21 @@ function getInitials(name: string): string {
   return `${tokens[0][0] ?? ""}${tokens[1][0] ?? ""}`.toUpperCase();
 }
 
-function mapRelatedIconsToStackItems(
-  icons: readonly TechnologyRelatedIcon[] | undefined,
-  tone?: TechnologyBadgeTone
-): TechnologyRelatedStackItem[] {
-  return (icons ?? []).map((item) => ({
-    id: item.id,
-    name: item.name,
-    iconSrc: item.src,
-    tone,
-  }));
-}
+function buildFallbackTrunfo(
+  item: TechnologySpotlightItem,
+): TechnologyTrunfoEntry | null {
+  const stats: TechnologyTrunfoStat[] = [];
 
-function buildFallbackMetrics(
-  item: TechnologySpotlightItem
-): TechnologySpotlightMetric[] {
-  const metrics: TechnologySpotlightMetric[] = [
-    {
+  if (item.categoryLabel) {
+    stats.push({
       id: "category",
       label: "Domínio",
       value: item.categoryLabel,
-    },
-  ];
+    });
+  }
 
   if (item.deliveryLabel) {
-    metrics.push({
+    stats.push({
       id: "delivery",
       label: "Entrega",
       value: item.deliveryLabel,
@@ -100,22 +74,32 @@ function buildFallbackMetrics(
   }
 
   if (item.confidenceLabel) {
-    metrics.push({
+    stats.push({
       id: "confidence",
       label: "Recorrência",
       value: item.confidenceLabel,
     });
   }
 
-  return metrics.slice(0, 3);
+  if (stats.length === 0) {
+    return null;
+  }
+
+  return {
+    technologyId: item.id,
+    name: item.name,
+    imageSrc: item.heroImageSrc ?? null,
+    imageAlt: `${item.name} technical card visual`,
+    stats,
+  };
 }
 
 function TechnologySpotlightPanelComponent({
   item,
   className,
   emptyEyebrow = "Technology Spotlight",
-  emptyTitle = "Selecione uma tecnologia para abrir o painel técnico.",
-  emptyText = "Aqui entram profundidade, ecossistema relacionado, imagens e provas visuais da stack. Esse painel deve ser o protagonista analítico da seção.",
+  emptyTitle = "Selecione uma tecnologia para abrir o card técnico.",
+  emptyText = "A coluna direita foi preparada para funcionar como um card de trunfo: imagem superior e atributos dinâmicos vindos do JSON da tecnologia.",
 }: TechnologySpotlightPanelProps) {
   if (!item) {
     return (
@@ -129,13 +113,18 @@ function TechnologySpotlightPanelComponent({
     );
   }
 
-  const relatedStackItems = item.relatedStack?.length
-    ? item.relatedStack
-    : mapRelatedIconsToStackItems(item.relatedIcons, item.tone);
+  const trunfoData: TechnologyTrunfoEntry | null =
+    item.trunfoData ?? buildFallbackTrunfo(item);
 
-  const metrics = item.metrics?.length
-    ? item.metrics
-    : buildFallbackMetrics(item);
+  const heroImageSrc =
+    trunfoData?.imageSrc ?? item.heroImageSrc ?? item.iconSrc ?? null;
+
+  const heroImageAlt = trunfoData?.imageAlt ?? `${item.name} spotlight visual`;
+
+  const stats: readonly TechnologyTrunfoStat[] = trunfoData?.stats ?? [];
+
+  const topLeftCode = item.shortName ?? "3B";
+  const topRightName = trunfoData?.name ?? item.name;
 
   const cssVars = {
     "--technology-spotlight-accent-rgb": item.accentRgb ?? "212, 175, 55",
@@ -148,77 +137,25 @@ function TechnologySpotlightPanelComponent({
       aria-labelledby={`technology-spotlight-title-${item.id}`}
       data-technology-spotlight="true"
       data-technology-id={item.id}
+      data-technology-trunfo={stats.length > 0 ? "true" : "false"}
     >
-      <header className={styles.header}>
-        <div className={styles.headerTop}>
-          <div className={styles.headerIdentity}>
-            <div className={styles.identityRow}>
-              <div className={styles.iconFrame} aria-hidden="true">
-                {item.iconSrc ? (
-                  <img
-                    src={item.iconSrc}
-                    alt=""
-                    className={styles.iconMedia}
-                    loading="lazy"
-                    decoding="async"
-                  />
-                ) : (
-                  <span className={styles.iconFallback}>
-                    {getInitials(item.name)}
-                  </span>
-                )}
-              </div>
-
-              <div className={styles.identityContent}>
-                <p className={styles.eyebrow}>
-                  {item.eyebrow ?? "Technology Spotlight"}
-                </p>
-
-                <h2
-                  className={styles.title}
-                  id={`technology-spotlight-title-${item.id}`}
-                >
-                  {item.name}
-                </h2>
-
-                <p className={styles.subtitle}>
-                  {item.subtitle ?? item.levelDescription ?? item.description}
-                </p>
-
-                <div className={styles.badges}>
-                  <TechnologyHexBadge
-                    label={item.categoryLabel}
-                    tone={item.tone ?? "neutral"}
-                  />
-                  {item.confidenceLabel ? (
-                    <TechnologyHexBadge label={item.confidenceLabel} />
-                  ) : null}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className={styles.headerAside}>
-            <div className={styles.metricChips}>
-              {item.deliveryLabel ? (
-                <span className={styles.metricChip}>{item.deliveryLabel}</span>
-              ) : null}
-
-              {item.confidenceLabel ? (
-                <span className={styles.metricChip}>
-                  {item.confidenceLabel}
-                </span>
-              ) : null}
-            </div>
-          </div>
+      <div className={styles.trunfoCard}>
+        <div className={styles.topBar}>
+          <span className={styles.topBarCode}>{topLeftCode}</span>
+          <h2
+            className={styles.topBarName}
+            id={`technology-spotlight-title-${item.id}`}
+          >
+            {topRightName}
+          </h2>
         </div>
 
-        <div className={styles.visual}>
+        <div className={styles.heroArea}>
           <div className={styles.heroMediaFrame}>
-            {item.heroImageSrc ? (
+            {heroImageSrc ? (
               <img
-                src={item.heroImageSrc}
-                alt=""
+                src={heroImageSrc}
+                alt={heroImageAlt}
                 className={styles.heroMedia}
                 loading="lazy"
                 decoding="async"
@@ -235,7 +172,7 @@ function TechnologySpotlightPanelComponent({
 
             <div className={styles.heroMediaOverlay} aria-hidden="true" />
 
-            {item.heroCaptionTitle || item.heroCaptionText ? (
+            {(item.heroCaptionTitle || item.heroCaptionText) && !stats.length ? (
               <div className={styles.heroCaption}>
                 {item.heroCaptionTitle ? (
                   <h3 className={styles.heroCaptionTitle}>
@@ -252,51 +189,30 @@ function TechnologySpotlightPanelComponent({
             ) : null}
           </div>
         </div>
-      </header>
 
-      <div className={styles.content}>
-        <div className={styles.grid}>
-          <div className={styles.main}>
-            <section className={styles.card}>
-              <h3 className={styles.cardTitle}>Leitura executiva</h3>
-              <p className={styles.cardText}>{item.description}</p>
+        <div className={styles.boardArea}>
+          {item.description ? (
+            <div className={styles.boardSummary}>
+              <p className={styles.boardSummaryText}>{item.description}</p>
+            </div>
+          ) : null}
 
-              {item.highlights?.length ? (
-                <div className={styles.highlights}>
-                  {item.highlights.map((highlight) => (
-                    <span key={highlight} className={styles.highlightPill}>
-                      {highlight}
-                    </span>
-                  ))}
+          {stats.length ? (
+            <div className={styles.statsList}>
+              {stats.map((stat) => (
+                <div key={stat.id} className={styles.statRow}>
+                  <span className={styles.statLabel}>{stat.label}</span>
+                  <span className={styles.statValue}>{String(stat.value)}</span>
                 </div>
-              ) : null}
-            </section>
-
-            <section className={styles.card}>
-              <TechnologyEvidenceGallery items={item.evidenceGallery ?? []} />
-            </section>
-          </div>
-
-          <div className={styles.side}>
-            <section className={styles.card}>
-              <h3 className={styles.cardTitle}>Métricas rápidas</h3>
-
-              <div className={styles.metricsGrid}>
-                {metrics.map((metric) => (
-                  <div key={metric.id} className={styles.metricCard}>
-                    <span className={styles.metricLabel}>{metric.label}</span>
-                    <span className={styles.metricValue}>{metric.value}</span>
-                  </div>
-                ))}
-              </div>
-            </section>
-
-            {relatedStackItems.length ? (
-              <section className={styles.card}>
-                <TechnologyRelatedStack items={relatedStackItems} />
-              </section>
-            ) : null}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className={styles.statsEmpty}>
+              <span className={styles.statsEmptyText}>
+                Nenhum atributo cadastrado para esta tecnologia.
+              </span>
+            </div>
+          )}
         </div>
       </div>
     </aside>

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 
 import TechnologyClusterSection from "./ui/clusters/TechnologyClusterSection";
 import TechnologiesFilterBar from "./ui/filters/TechnologiesFilterBar";
@@ -15,6 +15,18 @@ const TechnologiesDesktop: React.FC<TechnologiesPresentationProps> = ({
   onResetFilter,
   onSelectItem,
 }) => {
+  const activeClusterId = useMemo(() => {
+    if (!activeItem) {
+      return null;
+    }
+
+    const ownerCluster = clusters.find((cluster) =>
+      cluster.items.some((item) => item.id === activeItem.id),
+    );
+
+    return ownerCluster?.id ?? null;
+  }, [activeItem, clusters]);
+
   return (
     <section className={styles.viewport} aria-labelledby="technologies-title">
       <header className={styles.heroCompact}>
@@ -49,7 +61,7 @@ const TechnologiesDesktop: React.FC<TechnologiesPresentationProps> = ({
       <div className={styles.desktopLayout}>
         <div className={styles.clustersColumn}>
           <div className={styles.clustersStack}>
-            {clusters.map((cluster) => (
+            {clusters.map((cluster, clusterIndex) => (
               <TechnologyClusterSection
                 key={cluster.id}
                 id={`technologies-cluster-${cluster.id}`}
@@ -57,9 +69,9 @@ const TechnologiesDesktop: React.FC<TechnologiesPresentationProps> = ({
                 eyebrow={cluster.eyebrow}
                 description={cluster.description}
                 items={cluster.items}
-                legendItems={cluster.legendItems}
                 activeItemId={activeItem?.id ?? null}
-                countLabel={cluster.countLabel}
+                isActiveCluster={activeClusterId === cluster.id}
+                clusterIndex={clusterIndex}
                 onSelectItem={onSelectItem}
               />
             ))}

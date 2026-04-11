@@ -88,26 +88,6 @@ function getHeaderLabel(item: TechnologyCatalogItem): string {
   return "Technology";
 }
 
-function getFooterSignature(item: TechnologyCatalogItem): string {
-  if ("categoryLabel" in item && typeof item.categoryLabel === "string") {
-    const categoryLabel = item.categoryLabel.trim();
-
-    if (categoryLabel) {
-      return categoryLabel;
-    }
-  }
-
-  if ("levelLabel" in item && typeof item.levelLabel === "string") {
-    const levelLabel = item.levelLabel.trim();
-
-    if (levelLabel) {
-      return levelLabel;
-    }
-  }
-
-  return "Core Stack";
-}
-
 function TechnologyHexCardComponent({
   item,
   isActive = false,
@@ -121,7 +101,6 @@ function TechnologyHexCardComponent({
 
   const visualSrc = useMemo(() => resolveItemVisualSrc(item), [item]);
   const headerLabel = useMemo(() => getHeaderLabel(item), [item]);
-  const footerSignature = useMemo(() => getFooterSignature(item), [item]);
 
   const [hasVisualError, setHasVisualError] = useState(false);
 
@@ -148,7 +127,7 @@ function TechnologyHexCardComponent({
       className={joinClasses(
         styles.card,
         isActive && styles.cardActive,
-        className,
+        className
       )}
       style={cssVars}
       data-technology-card="true"
@@ -163,60 +142,43 @@ function TechnologyHexCardComponent({
         aria-pressed={isActive}
         aria-label={`Abrir detalhes da tecnologia ${item.name}`}
       >
-        <div className={styles.inner}>
-          <header className={styles.header}>
-            <div className={styles.headerBadges}>
-              <TechnologyHexBadge
-                label={headerLabel}
-                tone={item.tone ?? "neutral"}
-              />
-            </div>
+        <div className={styles.shell}>
+          <div className={styles.hexStage}>
+            <div className={styles.inner}>
+              <header className={styles.header}>
+                <div className={styles.headerBadges}>
+                  <TechnologyHexBadge
+                    label={headerLabel}
+                    tone={item.tone ?? "neutral"}
+                  />
+                </div>
 
-            <div className={styles.headerSide} />
-          </header>
+                <div className={styles.headerSide} />
+              </header>
 
-          <div className={styles.visual} aria-hidden="true">
-            <div className={styles.visualHalo} />
-            <div className={styles.visualCore}>
-              {shouldShowImage ? (
-                <img
-                  src={visualSrc}
-                  alt=""
-                  className={styles.visualMedia}
-                  loading="lazy"
-                  decoding="async"
-                  onError={handleVisualError}
-                />
-              ) : (
-                <span className={styles.visualFallback}>
-                  {getInitials(item.name)}
-                </span>
-              )}
-            </div>
-          </div>
-
-          <div className={styles.content} />
-
-          <footer
-            className={styles.footer}
-            aria-hidden="true"
-            data-active={isActive ? "true" : "false"}
-          >
-            <div className={styles.footerBase}>
-              <span className={styles.footerPill}>{footerSignature}</span>
-
-              <div className={styles.footerRail}>
-                <span className={styles.footerRailLine} />
-                <span className={styles.footerSignal}>
-                  <span className={styles.footerSignalBar} />
-                  <span className={styles.footerSignalBar} />
-                  <span className={styles.footerSignalBar} />
-                </span>
+              <div className={styles.visual} aria-hidden="true">
+                <div className={styles.visualHalo} />
+                <div className={styles.visualCore}>
+                  <div className={styles.visualMediaWrap}>
+                    {shouldShowImage ? (
+                      <img
+                        src={visualSrc}
+                        alt=""
+                        className={styles.visualMedia}
+                        loading="lazy"
+                        decoding="async"
+                        onError={handleVisualError}
+                      />
+                    ) : (
+                      <span className={styles.visualFallback}>
+                        {getInitials(item.name)}
+                      </span>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
-
-            <span className={styles.footerGlow} />
-          </footer>
+          </div>
         </div>
       </button>
     </article>

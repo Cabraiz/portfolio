@@ -51,6 +51,26 @@ export type TechnologyVisuals = Readonly<{
   gallery?: readonly TechnologyMediaAsset[];
 }>;
 
+export type TechnologyTrunfoCategoryKey =
+  | "cloud-infrastructure"
+  | "frontend-mobile"
+  | "backend-apis"
+  | "datastorage-messaging";
+
+export type TechnologyTrunfoStat = Readonly<{
+  id: string;
+  label: string;
+  value: string | number;
+}>;
+
+export type TechnologyTrunfoEntry = Readonly<{
+  technologyId: string;
+  name?: string;
+  imageSrc?: string | null;
+  imageAlt?: string;
+  stats: readonly TechnologyTrunfoStat[];
+}>;
+
 export type TechnologyCategory = Readonly<{
   id: TechnologyCategoryId;
   label: string;
@@ -76,6 +96,7 @@ export type TechnologyItem = Readonly<{
   priority?: number;
   accentCategoryId?: TechnologyCategoryId;
   shapeVariant?: TechnologyShapeVariant;
+  trunfoData?: TechnologyTrunfoEntry | null;
 }> &
   TechnologyVisuals;
 

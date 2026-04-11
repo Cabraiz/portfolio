@@ -1,19 +1,25 @@
 import type {
   TechnologyItem,
   TechnologyMediaAsset,
-  TechnologyVisuals,
+  TechnologyTrunfoEntry,
 } from "../domain/technologies.types";
+import { resolveTechnologyTrunfoByTechnologyId } from "./technologies.trunfo.registry";
 
-type BuildTechnologyVisualsResult = Readonly<Required<TechnologyVisuals>>;
+type BuildTechnologyVisualsResult = Readonly<{
+  logoSrc: string;
+  heroAsset: TechnologyMediaAsset;
+  gallery: readonly TechnologyMediaAsset[];
+}>;
 
 type CreateTechnologyParams = Readonly<
-  Omit<TechnologyItem, "logoSrc" | "heroAsset" | "gallery"> & {
+  Omit<TechnologyItem, "logoSrc" | "heroAsset" | "gallery" | "trunfoData"> & {
     slug: string;
   }
 >;
 
 export const TECHNOLOGY_ICONS_BASE_PATH = "/images/technologies/icons";
 export const TECHNOLOGY_VISUALS_BASE_PATH = "/images/technologies";
+export const TECHNOLOGY_BANNERS_BASE_PATH = "/images/technologies/banner";
 
 export function buildTechnologyLogoSrc(slug: string): string {
   return `${TECHNOLOGY_ICONS_BASE_PATH}/${slug}.webp`;
@@ -23,17 +29,26 @@ export function buildTechnologyVisualBasePath(slug: string): string {
   return `${TECHNOLOGY_VISUALS_BASE_PATH}/${slug}`;
 }
 
+export function buildTechnologyBannerBasePath(slug: string): string {
+  return `${TECHNOLOGY_BANNERS_BASE_PATH}/${slug}`;
+}
+
+export function buildTechnologyBannerSrc(
+  slug: string,
+  extension: "webp" | "png" = "webp",
+): string {
+  return `${buildTechnologyBannerBasePath(slug)}.${extension}`;
+}
+
 function buildTechnologyHeroAsset(
   slug: string,
   name: string,
 ): TechnologyMediaAsset {
-  const basePath = buildTechnologyVisualBasePath(slug);
-
   return {
     id: `${slug}-hero`,
     kind: "illustration",
-    src: `${basePath}/hero.webp`,
-    alt: `${name} hero visual`,
+    src: buildTechnologyBannerSrc(slug, "webp"),
+    alt: `${name} technical card visual`,
     width: 1600,
     height: 900,
   };
@@ -84,17 +99,43 @@ function buildTechnologyVisuals(
   };
 }
 
+function normalizeTechnologyTrunfoData(
+  technologyId: string,
+  fallbackName: string,
+  heroAsset: TechnologyMediaAsset,
+): TechnologyTrunfoEntry | null {
+  const registryEntry = resolveTechnologyTrunfoByTechnologyId(technologyId);
+
+  if (!registryEntry) {
+    return null;
+  }
+
+  return {
+    technologyId: registryEntry.technologyId,
+    name: registryEntry.name ?? fallbackName,
+    imageSrc: registryEntry.imageSrc ?? heroAsset.src,
+    imageAlt: registryEntry.imageAlt ?? `${fallbackName} technical card visual`,
+    stats: registryEntry.stats,
+  };
+}
+
 function createTechnology({
   slug,
   ...technology
 }: CreateTechnologyParams): TechnologyItem {
   const visuals = buildTechnologyVisuals(slug, technology.name);
+  const trunfoData = normalizeTechnologyTrunfoData(
+    technology.id,
+    technology.name,
+    visuals.heroAsset,
+  );
 
   return {
     ...technology,
     logoSrc: visuals.logoSrc,
     heroAsset: visuals.heroAsset,
     gallery: visuals.gallery,
+    trunfoData,
   };
 }
 
