@@ -1,0 +1,265 @@
+@import "../../model/portfolio.tokens.css";
+@import url("https://fonts.googleapis.com/css2?family=Bowlby+One+SC&display=swap");
+
+.counter {
+  --counter-size: clamp(5.75rem, 8vw, 8rem);
+  --counter-motion-duration: 680ms;
+  --counter-motion-easing: cubic-bezier(0.22, 1, 0.36, 1);
+
+  --counter-mark-width: 0.16rem;
+  --counter-mark-height: 0.72rem;
+  --counter-mark-radius-offset: calc(50% - 1.05rem);
+  --counter-rotation: var(--portfolio-project-counter-rotation, 0deg);
+
+  --counter-surface-top: rgba(16, 18, 24, 0.96);
+  --counter-surface-bottom: rgba(8, 10, 16, 0.99);
+  --counter-border-outer: rgba(230, 35, 35, 0.98);
+  --counter-shadow: rgba(0, 0, 0, 0.34);
+
+  --counter-accent: rgba(242, 201, 76, 0.96);
+  --counter-text-strong: rgba(245, 245, 245, 0.98);
+  --counter-mark-idle: rgba(255, 255, 255, 0.1);
+  --counter-mark-active: rgba(242, 201, 76, 0.96);
+
+  position: relative;
+  display: grid;
+  justify-items: center;
+  width: min-content;
+  user-select: none;
+}
+
+.discShell {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: var(--counter-size);
+  aspect-ratio: 1 / 1;
+}
+
+/* fundo do círculo */
+.discFrame {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: 999px;
+  background: linear-gradient(
+    180deg,
+    var(--counter-surface-top) 0%,
+    var(--counter-surface-bottom) 100%
+  );
+  box-shadow:
+    0 1.15rem 2.4rem -1rem var(--counter-shadow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03),
+    inset 0 -1.2rem 2rem rgba(0, 0, 0, 0.24);
+}
+
+/* anel vermelho por cima */
+.discFrame::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  border-radius: 999px;
+  border: 0.34rem solid var(--counter-border-outer);
+  box-shadow: 0 0 0.95rem rgba(230, 35, 35, 0.2);
+  pointer-events: none;
+}
+
+.discFrame::after {
+  display: none;
+}
+
+/* marcas */
+.marksLayer {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: 999px;
+  transform: rotate(calc(var(--counter-rotation) * -1));
+  transition: transform var(--counter-motion-duration) var(--counter-motion-easing);
+}
+
+.mark {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: var(--counter-mark-width);
+  height: var(--counter-mark-height);
+  border: 0;
+  padding: 0;
+  border-radius: 999px;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.04) 0%,
+    var(--counter-mark-idle) 100%
+  );
+  transform:
+    translate(-50%, -50%)
+    rotate(var(--portfolio-project-counter-mark-angle))
+    translateY(calc(var(--counter-mark-radius-offset) * -1));
+  transform-origin: center center;
+  opacity: 0.88;
+  transition:
+    transform 220ms ease,
+    background 220ms ease,
+    box-shadow 220ms ease,
+    opacity 220ms ease;
+  pointer-events: none;
+}
+
+.markActive {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 248, 214, 0.92) 0%,
+    var(--counter-mark-active) 100%
+  );
+  box-shadow:
+    0 0 0.75rem rgba(242, 201, 76, 0.28),
+    0 0 1.15rem rgba(242, 201, 76, 0.14);
+  opacity: 1;
+  transform:
+    translate(-50%, -50%)
+    rotate(var(--portfolio-project-counter-mark-angle))
+    translateY(calc(var(--counter-mark-radius-offset) * -1))
+    scale(1.1);
+}
+
+.markInteractive {
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.markInteractive:hover,
+.markInteractive:focus-visible {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 248, 214, 0.88) 0%,
+    var(--counter-accent) 100%
+  );
+  box-shadow:
+    0 0 0.65rem rgba(242, 201, 76, 0.22),
+    0 0 1rem rgba(242, 201, 76, 0.12);
+  opacity: 1;
+}
+
+.markInteractive:focus-visible {
+  outline: 2px solid rgba(242, 201, 76, 0.32);
+  outline-offset: 0.15rem;
+}
+
+/* retângulo */
+.core {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 2;
+  width: 53.2%;
+  height: 81.4%;
+  transform: translate(-50%, -50%);
+  display: grid;
+  place-items: center;
+  padding-block: 5%;
+  padding-inline: 8%;
+  box-sizing: border-box;
+  border-radius: 0.14rem;
+  background: linear-gradient(
+    180deg,
+    rgba(40, 28, 28, 0.96) 0%,
+    rgba(12, 11, 13, 0.995) 100%
+  );
+  border-top: 2px solid rgba(255, 255, 255, 0.24);
+  border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.03),
+    inset 0 -0.55rem 0.9rem rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+}
+
+.core::before,
+.core::after {
+  content: "";
+  position: absolute;
+  top: 0.08rem;
+  bottom: 0.08rem;
+  width: 2px;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 245, 220, 0.34) 0%,
+    rgba(255, 245, 220, 0.22) 45%,
+    rgba(0, 0, 0, 0.28) 100%
+  );
+  pointer-events: none;
+}
+
+.core::before {
+  left: 0.16rem;
+}
+
+.core::after {
+  right: 0.16rem;
+}
+
+/* número */
+.valueWrap {
+  position: relative;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  inline-size: 100%;
+  block-size: 100%;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.value {
+  font-family: "Bowlby One SC", sans-serif;
+  font-size: clamp(2.35rem, 3.5vw, 3.6rem);
+  font-weight: 400;
+  line-height: 0.8;
+  letter-spacing: -0.05em;
+  text-indent: 0;
+  color: var(--counter-text-strong);
+  text-shadow: 0 0 0.25rem rgba(255, 255, 255, 0.02);
+  transform: translateX(-12%) scaleX(0.8);
+  transform-origin: center;
+  white-space: nowrap;
+  max-inline-size: 100%;
+}
+
+.paused .value {
+  opacity: 0.84;
+}
+
+@media (max-height: 820px) {
+  .counter {
+    --counter-size: clamp(5.25rem, 7.2vw, 7rem);
+    --counter-mark-radius-offset: calc(50% - 0.96rem);
+  }
+
+  .mark {
+    height: 0.64rem;
+  }
+
+  .core {
+    width: 49.35%;
+    height: 75%;
+  }
+
+  .value {
+    font-size: clamp(2.8rem, 3.95vw, 3.95rem);
+  }
+}
+
+@media (max-width: 1024px) {
+  .counter {
+    --counter-size: clamp(5.1rem, 22vw, 6.8rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marksLayer,
+  .mark {
+    transition: none;
+  }
+}

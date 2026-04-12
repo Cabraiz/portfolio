@@ -11,14 +11,13 @@ import rootStyles from "./core/PortfolioRoot.module.css";
 
 import {
   defaultPortfolioProjectId,
-  portfolioProjectListItems,
   portfolioProjects,
 } from "./portfolio.data";
 
 import usePortfolioActiveItem from "./hooks/usePortfolioActiveItem";
 
 import PortfolioStage from "./components/PortfolioStage";
-import PortfolioTimelineRail from "./components/PortfolioTimelineRail";
+import PortfolioTimelineRail from "./ui/rail/PortfolioTimelineRail";
 
 type PortfolioHeightMode = "compact" | "default" | "tall";
 
@@ -28,6 +27,8 @@ type PortfolioResponsivePreset = Readonly<{
   sectionPaddingBottom: string;
   layoutGap: string;
   railColumnWidth: string;
+  railCounterSize: string;
+  railGap: string;
   timelineMaxHeight: string;
   controlSize: string;
 }>;
@@ -44,28 +45,34 @@ const PORTFOLIO_RESPONSIVE_PRESETS: Record<
 > = {
   compact: {
     sectionMinHeight: PORTFOLIO_SECTION_MIN_HEIGHT,
-    sectionPaddingTop: "clamp(24px, 6dvh, 56px)",
-    sectionPaddingBottom: "clamp(24px, 6dvh, 56px)",
-    layoutGap: "10px",
-    railColumnWidth: "228px",
+    sectionPaddingTop: "clamp(22px, 5.5dvh, 52px)",
+    sectionPaddingBottom: "clamp(22px, 5.5dvh, 52px)",
+    layoutGap: "12px",
+    railColumnWidth: "246px",
+    railCounterSize: "clamp(5.15rem, 6.4vw, 6.75rem)",
+    railGap: "12px",
     timelineMaxHeight: "100%",
     controlSize: "38px",
   },
   default: {
     sectionMinHeight: PORTFOLIO_SECTION_MIN_HEIGHT,
-    sectionPaddingTop: "clamp(32px, 8dvh, 88px)",
-    sectionPaddingBottom: "clamp(32px, 8dvh, 88px)",
+    sectionPaddingTop: "clamp(30px, 7.5dvh, 84px)",
+    sectionPaddingBottom: "clamp(30px, 7.5dvh, 84px)",
     layoutGap: "16px",
     railColumnWidth: "284px",
+    railCounterSize: "clamp(5.75rem, 8vw, 8rem)",
+    railGap: "14px",
     timelineMaxHeight: "100%",
     controlSize: "44px",
   },
   tall: {
     sectionMinHeight: PORTFOLIO_SECTION_MIN_HEIGHT,
-    sectionPaddingTop: "clamp(40px, 9dvh, 112px)",
-    sectionPaddingBottom: "clamp(40px, 9dvh, 112px)",
+    sectionPaddingTop: "clamp(38px, 8.5dvh, 108px)",
+    sectionPaddingBottom: "clamp(38px, 8.5dvh, 108px)",
     layoutGap: "18px",
     railColumnWidth: "304px",
+    railCounterSize: "clamp(6rem, 8.4vw, 8.4rem)",
+    railGap: "16px",
     timelineMaxHeight: "100%",
     controlSize: "46px",
   },
@@ -102,11 +109,9 @@ export default function Portfolio() {
   const {
     activeIndex,
     activeProject,
-    activeProjectId,
     hasPrevious,
     hasNext,
     setActiveIndex,
-    setActiveProjectById,
     goToPrevious,
     goToNext,
   } = usePortfolioActiveItem({
@@ -204,6 +209,29 @@ export default function Portfolio() {
     setIsAutoplayPaused(false);
   }, []);
 
+  const handleSelectProjectIndex = useCallback(
+    (index: number) => {
+      setActiveIndex(index);
+      setIsAutoplayPaused(true);
+    },
+    [setActiveIndex],
+  );
+
+  const railItems = useMemo(
+    () =>
+      portfolioProjects.map((project) => ({
+        id: project.id,
+        year: project.year,
+        title: project.name,
+        subtitle: project.subtitle,
+        statusLabel: project.statusLabel,
+        railLogoSrc: project.logoSrc,
+        railLogoAlt: project.logoAlt,
+        isActive: project.id === activeProject.id,
+      })),
+    [activeProject.id],
+  );
+
   const responsivePreset = PORTFOLIO_RESPONSIVE_PRESETS[heightMode];
 
   const responsiveStyle = useMemo(
@@ -215,6 +243,8 @@ export default function Portfolio() {
           responsivePreset.sectionPaddingBottom,
         "--portfolio-layout-gap": responsivePreset.layoutGap,
         "--portfolio-rail-column-width": responsivePreset.railColumnWidth,
+        "--portfolio-rail-counter-size": responsivePreset.railCounterSize,
+        "--portfolio-rail-gap": responsivePreset.railGap,
         "--portfolio-stage-aspect-ratio": "16 / 9",
         "--portfolio-timeline-max-height":
           responsivePreset.timelineMaxHeight,
@@ -249,15 +279,12 @@ export default function Portfolio() {
             aria-label="Navegação de projetos"
           >
             <PortfolioTimelineRail
-              projects={portfolioProjectListItems}
+              items={railItems}
               activeIndex={activeIndex}
-              activeProjectId={activeProjectId}
-              onSelectProject={setActiveProjectById}
-              onSelectProjectIndex={setActiveIndex}
-              onMovePrevious={goToPrevious}
-              onMoveNext={goToNext}
-              onHoverStart={handleAutoplayPause}
-              onHoverEnd={handleAutoplayResume}
+              paused={isAutoplayPaused}
+              counterLabel="PROJECT INDEX"
+              counterCaption="PORTFOLIO"
+              onSelectIndex={handleSelectProjectIndex}
             />
           </aside>
         </div>

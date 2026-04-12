@@ -30,6 +30,14 @@ export type PortfolioMediaAspectRatio =
 
 export type PortfolioTechnologyName = string;
 
+export type PortfolioProjectAccent =
+  | "amber"
+  | "gold"
+  | "orange"
+  | "platinum"
+  | "neutral"
+  | string;
+
 export type PortfolioProjectMedia = Readonly<{
   aspectRatio?: PortfolioMediaAspectRatio;
   fit?: PortfolioMediaFit;
@@ -47,6 +55,11 @@ export type PortfolioProject = Readonly<{
   logoSrc: string;
   logoAlt: string;
   projectLabel: string;
+  subtitle?: string;
+  statusLabel?: string;
+  counterLabel?: string;
+  accent?: PortfolioProjectAccent;
+  tags?: readonly string[];
   technologies: readonly PortfolioTechnologyName[];
   media?: PortfolioProjectMedia;
 }>;
@@ -79,6 +92,12 @@ export type PortfolioProjectListItem = Readonly<{
   id: PortfolioProjectId;
   name: string;
   year: string;
+  subtitle?: string;
+  statusLabel?: string;
+  accent?: PortfolioProjectAccent;
+  counterLabel?: string;
+  railLogoSrc?: string;
+  railLogoAlt?: string;
 }>;
 
 export type PortfolioTechnologyStat = Readonly<{
