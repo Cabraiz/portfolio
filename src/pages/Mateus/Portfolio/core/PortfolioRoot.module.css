@@ -1,9 +1,9 @@
 .root,
 .portfolioRoot {
-  --portfolio-layout-width: 1560px;
+  --portfolio-layout-width: 100%;
   --portfolio-section-min-height: calc(100dvh - var(--app-navbar-height, 70px));
   --portfolio-section-padding-top: clamp(32px, 8dvh, 88px);
-  --portfolio-section-padding-inline: clamp(20px, 3vw, 36px);
+  --portfolio-section-padding-inline: var(--app-content-gutter-inline, 15%);
   --portfolio-section-padding-bottom: clamp(32px, 8dvh, 88px);
   --portfolio-layout-gap: 16px;
   --portfolio-rail-column-width: 284px;
@@ -51,10 +51,10 @@
 }
 
 .portfolioContent {
-  width: min(100%, var(--portfolio-layout-width));
+  width: 100%;
   height: 100%;
   min-height: 0;
-  margin: 0 auto;
+  margin: 0;
   display: grid;
   grid-template-columns:
     minmax(0, 1fr)
@@ -88,10 +88,10 @@
   overflow: hidden;
 }
 
+/* desktop ainda pode ajustar gap e rail, mas NÃO lateral */
 @media (max-width: 1280px) {
+  .root,
   .portfolioRoot {
-    --portfolio-layout-width: 1380px;
-    --portfolio-section-padding-inline: clamp(18px, 2.6vw, 28px);
     --portfolio-layout-gap: 14px;
     --portfolio-rail-column-width: 264px;
   }
@@ -108,6 +108,7 @@
 }
 
 @media (max-width: 768px) {
+  .root,
   .portfolioRoot {
     --portfolio-section-padding-top: clamp(20px, 5dvh, 40px);
     --portfolio-section-padding-bottom: clamp(20px, 5dvh, 40px);
@@ -134,10 +135,6 @@
 }
 
 @media (max-width: 560px) {
-  .portfolioRoot {
-    --portfolio-section-padding-inline: 14px;
-  }
-
   .portfolioSection {
     padding-inline: 14px;
   }

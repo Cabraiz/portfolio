@@ -8,7 +8,10 @@
 }
 
 .viewport {
-  width: min(1540px, calc(100% - clamp(24px, 4vw, 56px)));
+  width: min(
+    1540px,
+    calc(100% - (var(--app-content-gutter-inline, 10%) * 2))
+  );
   margin: 0 auto;
   padding:
     clamp(28px, 4vw, 52px)
@@ -277,7 +280,7 @@
 }
 
 .stickyAside {
-  --technologies-sticky-top: clamp(18px, 2vw, 26px);
+  --technologies-sticky-top: clamp(80px, 2vw, 90px);
   --technologies-sticky-bottom-gap: clamp(18px, 2vw, 26px);
 
   min-width: 0;

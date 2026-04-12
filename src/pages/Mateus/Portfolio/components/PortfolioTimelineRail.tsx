@@ -460,14 +460,6 @@ function PortfolioTimelineRailComponent({
       onFocusCapture={onHoverStart}
       onBlurCapture={handleBlurCapture}
     >
-      <div className={styles.portfolioTimelineRailHeader}>
-        <span className={styles.portfolioTimelineRailTitle}>Projetos</span>
-
-        <span className={styles.portfolioTimelineRailCount}>
-          {String(totalProjects).padStart(2, "0")}
-        </span>
-      </div>
-
       <div className={styles.portfolioTimelineRailBody}>
         <div className={styles.portfolioTimelineViewport}>
           {pickerAxis === "horizontal" ? (

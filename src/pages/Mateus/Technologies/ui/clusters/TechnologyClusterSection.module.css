@@ -44,11 +44,14 @@
     0 22px 48px rgba(0, 0, 0, 0.24);
   overflow: visible;
   isolation: isolate;
-  transform: translate3d(0, var(--cluster-shift-y), 0);
+  will-change: opacity, filter, transform;
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
   transition:
     border-color 220ms ease,
     box-shadow 260ms ease,
-    transform 320ms ease;
+    filter 260ms ease,
+    opacity 220ms ease;
 }
 
 .root::before {
@@ -101,6 +104,7 @@
   overflow: hidden;
   z-index: 0;
   pointer-events: none;
+  will-change: transform, opacity;
 }
 
 .energyField {
@@ -108,6 +112,7 @@
   inset: 0;
   z-index: 0;
   pointer-events: none;
+  will-change: transform, opacity;
 }
 
 .energyAura,
@@ -117,6 +122,8 @@
   position: absolute;
   inset: 0;
   pointer-events: none;
+  will-change: transform, opacity, filter;
+  backface-visibility: hidden;
 }
 
 .energyAura {
@@ -206,6 +213,7 @@
   pointer-events: none;
   opacity: calc(0.16 + var(--cluster-network-opacity) * 0.84);
   transform: rotate(var(--cluster-orbit-rotate));
+  will-change: transform, opacity;
   transition: opacity 260ms ease, transform 300ms ease;
 }
 
@@ -264,6 +272,7 @@
   filter: blur(10px);
   opacity: calc(0.08 + var(--cluster-network-opacity) * 0.24);
   transform: translateX(calc(var(--cluster-network-travel) * 172%));
+  will-change: transform, opacity;
 }
 
 .scanPulseAlt {
@@ -279,6 +288,7 @@
   top: var(--technology-cluster-sticky-top);
   z-index: 30;
   pointer-events: none;
+  will-change: transform, opacity, filter;
 }
 
 .headerSurface {
@@ -308,6 +318,8 @@
   -webkit-backdrop-filter: blur(18px) saturate(135%);
   pointer-events: auto;
   overflow: hidden;
+  will-change: transform, opacity, filter;
+  backface-visibility: hidden;
 }
 
 .headerSurface::before {
@@ -354,7 +366,7 @@
 .eyebrow {
   margin: 0;
   color: rgba(214, 232, 255, 0.82);
-  font-size: 0.74rem;
+  font-size: 0.888rem;
   line-height: 1;
   font-weight: 800;
   letter-spacing: 0.18em;
@@ -364,13 +376,14 @@
 .title {
   margin: 0;
   color: #f4f8ff;
-  font-size: clamp(1.34rem, 1.95vw, 1.88rem);
+  font-size: clamp(1.608rem, 2.34vw, 2.256rem);
   line-height: 1.02;
   font-weight: 700;
   letter-spacing: -0.05em;
 }
 
 .description {
+  display: none;
   margin: 0;
   max-width: 60ch;
   color: rgba(225, 235, 255, 0.68);
@@ -409,9 +422,9 @@
   justify-content: center;
   align-items: flex-start;
   align-self: start;
-  will-change: transform, opacity;
+  will-change: transform, opacity, filter;
+  backface-visibility: hidden;
   transition:
-    transform 260ms ease,
     filter 260ms ease,
     opacity 220ms ease;
 }
@@ -420,6 +433,12 @@
   width: 100%;
   max-width: min(100%, 280px);
   height: auto;
+  will-change: transform, filter;
+  transform: translateZ(0);
+  transition:
+    transform 260ms ease,
+    filter 260ms ease,
+    opacity 220ms ease;
 }
 
 .cardItemDense {
@@ -431,11 +450,11 @@
 }
 
 .cardItemOffset {
-  transform: translateY(var(--technology-cluster-offset-strong));
+  margin-top: var(--technology-cluster-offset-strong);
 }
 
 .cardItemOffsetSoft {
-  transform: translateY(var(--technology-cluster-offset-soft));
+  margin-top: var(--technology-cluster-offset-soft);
 }
 
 .cardItem::after {
@@ -459,18 +478,8 @@
   z-index: 2;
 }
 
-.cardItem:not(.cardItemOffset):not(.cardItemOffsetSoft):hover {
+.cardItem:hover > * {
   transform: translateY(-6px) scale(1.01);
-}
-
-.cardItem.cardItemOffsetSoft:hover {
-  transform: translateY(calc(var(--technology-cluster-offset-soft) - 6px))
-    scale(1.01);
-}
-
-.cardItem.cardItemOffset:hover {
-  transform: translateY(calc(var(--technology-cluster-offset-strong) - 6px))
-    scale(1.01);
 }
 
 .cardItem:hover::after {
@@ -584,12 +593,10 @@
 
   .cardItemOffset,
   .cardItemOffsetSoft {
-    transform: none;
+    margin-top: 0;
   }
 
-  .cardItem:hover,
-  .cardItem.cardItemOffset:hover,
-  .cardItem.cardItemOffsetSoft:hover {
+  .cardItem:hover > * {
     transform: translateY(-4px) scale(1.008);
   }
 }
@@ -629,6 +636,14 @@
     opacity: 0.72;
   }
 
+  .title {
+    font-size: clamp(1.42rem, 5vw, 1.92rem);
+  }
+
+  .eyebrow {
+    font-size: 0.8rem;
+  }
+
   .description {
     font-size: 0.9rem;
   }
@@ -663,7 +678,7 @@
   }
 
   .title {
-    font-size: 1.24rem;
+    font-size: 1.4rem;
   }
 
   .emptyState {
@@ -674,15 +689,26 @@
 @media (prefers-reduced-motion: reduce) {
   .root,
   .cardItem,
+  .cardItem > *,
   .networkLayer,
   .energyAura,
   .energyBeam,
   .energyGrid,
   .energyGlow,
   .scanPulse,
-  .scanPulseAlt {
+  .scanPulseAlt,
+  .headerSticky,
+  .headerSurface,
+  .visualViewport,
+  .energyField {
     transition: none !important;
     animation: none !important;
     transform: none !important;
+    will-change: auto !important;
+  }
+
+  .cardItemOffset,
+  .cardItemOffsetSoft {
+    margin-top: 0 !important;
   }
 }

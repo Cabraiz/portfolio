@@ -20,6 +20,7 @@ import type {
   ScrollHardwareInfo,
   ScrollViewport,
 } from "../features/scroll/lenisScrollProfiles";
+import "./AppDesktop.css";
 
 import "react-toastify/dist/ReactToastify.css";
 

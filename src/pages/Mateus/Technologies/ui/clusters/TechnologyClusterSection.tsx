@@ -1,12 +1,8 @@
-import React, { memo, useId, useLayoutEffect, useMemo, useRef } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import React, { memo, useId, useMemo, useRef } from "react";
 
 import type { TechnologyCatalogItem } from "../../Technologies";
 import TechnologyHexCard from "../hex/TechnologyHexCard";
 import styles from "./TechnologyClusterSection.module.css";
-
-gsap.registerPlugin(ScrollTrigger);
 
 function joinClasses(
   ...classes: Array<string | undefined | null | false>
@@ -16,6 +12,7 @@ function joinClasses(
 
 type TechnologyClusterSectionProps = Readonly<{
   id: string;
+  clusterId?: string;
   title: string;
   description?: string;
   eyebrow?: string;
@@ -59,6 +56,7 @@ function buildDecoratedItems(
 
 function TechnologyClusterSectionComponent({
   id,
+  clusterId,
   title,
   description,
   eyebrow = "Capability Cluster",
@@ -79,94 +77,6 @@ function TechnologyClusterSectionComponent({
     () => buildDecoratedItems(items, dense),
     [items, dense]
   );
-
-  useLayoutEffect(() => {
-    const root = rootRef.current;
-
-    if (!root) {
-      return undefined;
-    }
-
-    const cardItems = Array.from(
-      root.querySelectorAll<HTMLElement>("[data-cluster-card-item='true']")
-    );
-
-    const ctx = gsap.context(() => {
-      gsap.set(root, {
-        "--cluster-energy": 0.2,
-        "--cluster-energy-alpha": 0.16,
-        "--cluster-shift-y": "18px",
-        "--cluster-network-opacity": 0.2,
-        "--cluster-network-travel": 0,
-        "--cluster-orbit-rotate": "-7deg",
-        "--cluster-surface-glow": 0.1,
-      });
-
-      gsap.set(cardItems, {
-        y: 18,
-        opacity: 0.78,
-        scale: 0.985,
-      });
-
-      const timeline = gsap.timeline({
-        defaults: {
-          ease: "none",
-        },
-        scrollTrigger: {
-          trigger: root,
-          start: "top 92%",
-          end: "bottom 12%",
-          scrub: 1.15,
-        },
-      });
-
-      timeline
-        .to(
-          root,
-          {
-            "--cluster-energy": 1,
-            "--cluster-energy-alpha": 0.88,
-            "--cluster-shift-y": "0px",
-            "--cluster-network-opacity": 0.92,
-            "--cluster-network-travel": 1,
-            "--cluster-orbit-rotate": "0deg",
-            "--cluster-surface-glow": 1,
-          },
-          0
-        )
-        .to(
-          cardItems,
-          {
-            y: 0,
-            opacity: 1,
-            scale: 1,
-            stagger: dense ? 0.024 : 0.04,
-            ease: "power2.out",
-          },
-          0.06
-        );
-
-      if (isActiveCluster) {
-        gsap.fromTo(
-          root,
-          { "--cluster-hero-surge": 0.16 },
-          {
-            "--cluster-hero-surge": 1,
-            duration: 1.9,
-            repeat: -1,
-            yoyo: true,
-            ease: "sine.inOut",
-          }
-        );
-      } else {
-        gsap.set(root, { "--cluster-hero-surge": 0.18 });
-      }
-    }, root);
-
-    return () => {
-      ctx.revert();
-    };
-  }, [dense, isActiveCluster, items.length, clusterIndex]);
 
   const handlePointerMove = (event: React.PointerEvent<HTMLElement>) => {
     const root = rootRef.current;
@@ -201,21 +111,44 @@ function TechnologyClusterSectionComponent({
       className={joinClasses(styles.root, className)}
       aria-labelledby={`${id}-title`}
       data-technology-cluster="true"
-      data-cluster-id={id}
+      data-cluster-id={clusterId ?? id}
       data-cluster-density={dense ? "dense" : "default"}
       data-cluster-active={isActiveCluster ? "true" : "false"}
+      data-cluster-index={clusterIndex}
       onPointerMove={handlePointerMove}
       onPointerLeave={handlePointerLeave}
     >
-      <div className={styles.visualViewport} aria-hidden="true">
-        <div className={styles.energyField}>
-          <div className={styles.energyAura} />
-          <div className={styles.energyBeam} />
-          <div className={styles.energyGrid} />
-          <div className={styles.energyGlow} />
+      <div
+        className={styles.visualViewport}
+        aria-hidden="true"
+        data-technology-cluster-ornament="true"
+      >
+        <div
+          className={styles.energyField}
+          data-technology-cluster-ornament="true"
+        >
+          <div
+            className={styles.energyAura}
+            data-technology-cluster-ornament="true"
+          />
+          <div
+            className={styles.energyBeam}
+            data-technology-cluster-ornament="true"
+          />
+          <div
+            className={styles.energyGrid}
+            data-technology-cluster-ornament="true"
+          />
+          <div
+            className={styles.energyGlow}
+            data-technology-cluster-ornament="true"
+          />
         </div>
 
-        <div className={styles.networkLayer}>
+        <div
+          className={styles.networkLayer}
+          data-technology-cluster-ornament="true"
+        >
           <svg
             className={styles.networkSvg}
             viewBox="0 0 1000 540"
@@ -275,24 +208,34 @@ function TechnologyClusterSectionComponent({
             <circle className={styles.networkNode} cx="564" cy="344" r="4.5" />
           </svg>
 
-          <span className={styles.scanPulse} />
-          <span className={styles.scanPulseAlt} />
+          <span
+            className={styles.scanPulse}
+            data-technology-cluster-ornament="true"
+          />
+          <span
+            className={styles.scanPulseAlt}
+            data-technology-cluster-ornament="true"
+          />
         </div>
       </div>
 
-      <header className={styles.headerSticky}>
+      <header
+        className={styles.headerSticky}
+        data-technology-cluster-header="true"
+      >
         <div className={styles.headerSurface}>
           <div className={styles.headerTop}>
             <div className={styles.titleBlock}>
-              <p className={styles.eyebrow}>{eyebrow}</p>
+              <p
+                className={styles.eyebrow}
+                data-technology-cluster-badge="true"
+              >
+                {eyebrow}
+              </p>
 
               <h2 className={styles.title} id={`${id}-title`}>
                 {title}
               </h2>
-
-              {description ? (
-                <p className={styles.description}>{description}</p>
-              ) : null}
             </div>
           </div>
         </div>
@@ -313,6 +256,7 @@ function TechnologyClusterSectionComponent({
                   key={item.id}
                   role="listitem"
                   data-cluster-card-item="true"
+                  data-technology-cluster-card="true"
                   data-card-active={isActive ? "true" : "false"}
                   data-card-index={index}
                   data-card-offset={offsetKind}

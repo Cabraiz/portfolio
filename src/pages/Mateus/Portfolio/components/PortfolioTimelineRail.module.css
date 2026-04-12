@@ -9,33 +9,7 @@
   width: 100%;
   min-width: 0;
   display: grid;
-  gap: 14px;
-}
-
-.portfolioTimelineRailHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  min-width: 0;
-}
-
-.portfolioTimelineRailTitle {
-  min-width: 0;
-  color: rgba(253, 245, 230, 0.82);
-  font-size: 0.88rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.portfolioTimelineRailCount {
-  flex: 0 0 auto;
-  color: rgba(253, 245, 230, 0.46);
-  font-size: 0.76rem;
-  font-weight: 800;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  gap: 0;
 }
 
 .portfolioTimelineRailBody {
@@ -343,8 +317,6 @@
     --portfolio-timeline-inner-padding: 10px;
     --portfolio-timeline-tracker-width: 50px;
     --portfolio-timeline-tracker-gap: 12px;
-
-    gap: 12px;
   }
 
   .portfolioTimelineViewport {
@@ -366,7 +338,7 @@
 
 @media (max-width: 960px) {
   .portfolioTimelineRail {
-    gap: 12px;
+    gap: 0;
   }
 
   .portfolioTimelineRailBody {
@@ -476,18 +448,6 @@
 }
 
 @media (max-width: 560px) {
-  .portfolioTimelineRailHeader {
-    gap: 8px;
-  }
-
-  .portfolioTimelineRailTitle {
-    font-size: 0.82rem;
-  }
-
-  .portfolioTimelineRailCount {
-    font-size: 0.72rem;
-  }
-
   .portfolioTimelineListMobile {
     grid-auto-columns: minmax(158px, 176px);
   }

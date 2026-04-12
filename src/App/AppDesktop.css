@@ -8,25 +8,42 @@
 
 @font-face {
   font-family: "BlommingElegant";
-  src: local("BlommingElegant"), url("/fonts/BloomingElegant/Blooming/Elegant/Sans.otf");
+  src: local("BlommingElegant"),
+    url("/fonts/BloomingElegant/Blooming/Elegant/Sans.otf");
 }
 
 @font-face {
   font-family: "Modernist";
-  src: local("Modernist"), url("/fonts/Modernist/Modernist.otf") format("truetype");
+  src: local("Modernist"),
+    url("/fonts/Modernist/Modernist.otf") format("truetype");
   font-weight: 700;
 }
 
 @font-face {
   font-family: "Orbitron";
-  src: local("Orbitron"), url("/fonts/Orbitron/Orbitron-Bold.ttf") format("truetype");
+  src: local("Orbitron"),
+    url("/fonts/Orbitron/Orbitron-Bold.ttf") format("truetype");
   font-weight: 700;
 }
 
 @font-face {
-  font-family: 'Sirichana';
-  src: url('/fonts/Sirichana/SirichanaBold.ttf') format('opentype');
+  font-family: "Sirichana";
+  src: url("/fonts/Sirichana/SirichanaBold.ttf") format("opentype");
   font-weight: 600;
+}
+
+/* ===========================
+   🧭 Coordenador Global Desktop
+   fonte da verdade do gutter lateral
+=========================== */
+:root {
+  --app-content-gutter-inline: 7%;
+}
+
+@media (max-height: 720px) and (min-width: 1081px) {
+  :root {
+    --app-content-gutter-inline: 7%;
+  }
 }
 
 /* ===========================
@@ -102,10 +119,11 @@ button.curriculo:hover {
   font-weight: 500;
 }
 
+/* Agora a home obedece o gutter global do pai */
 .home-row {
   justify-content: center;
-  padding-left: 10vw;
-  padding-right: 10vw;
+  padding-left: 0;
+  padding-right: 0;
 }
 
 .border-gradient-green {
@@ -119,5 +137,5 @@ button.curriculo:hover {
       #ffffff33 92%,
       #ffffff00 100%
     )
-    100% 0 100% 0/0.3vh 0 0.3vh 0 stretch;
+    100% 0 100% 0 / 0.3vh 0 0.3vh 0 stretch;
 }

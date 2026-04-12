@@ -437,6 +437,13 @@
   filter: drop-shadow(0 0 6px rgba(59, 130, 246, 0.18));
 }
 
+@media (max-height: 720px) and (min-width: 1081px) {
+  .root {
+    --roadmap-page-max-width: min(1275px, 85vw);
+    --roadmap-page-padding-x: clamp(26px, 3.9vw, 48px);
+  }
+}
+
 @media (max-width: 1360px) {
   .contentGridSideCollapsed,
   .contentGridSideExpanded {
