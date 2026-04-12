@@ -188,6 +188,16 @@ function TechnologySpotlightPanelComponent({
               </div>
             ) : null}
           </div>
+
+          <img
+            src="/images/technologies/super.webp"
+            alt=""
+            aria-hidden="true"
+            className={styles.heroCornerBadge}
+            loading="lazy"
+            decoding="async"
+            draggable={false}
+          />
         </div>
 
         <div className={styles.boardArea}>

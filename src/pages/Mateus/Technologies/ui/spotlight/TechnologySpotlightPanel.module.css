@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Slackey&display=swap");
+
 .panel {
   --technology-spotlight-accent-rgb: 212, 175, 55;
 
@@ -83,10 +85,11 @@
 
 .topBarCode {
   color: rgba(255, 232, 186, 0.92);
-  font-size: clamp(1.26rem, 1.85vw, 1.54rem);
+  font-family: "Slackey", system-ui, sans-serif;
+  font-size: clamp(1.18rem, 1.7vw, 1.42rem);
   line-height: 1;
-  font-weight: 900;
-  letter-spacing: 0.16em;
+  font-weight: 400;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
   justify-self: start;
 }
@@ -95,10 +98,11 @@
   margin: 0;
   min-width: 0;
   color: #fff8ea;
-  font-size: clamp(1.5rem, 2.1vw, 1.86rem);
-  line-height: 1.04;
-  font-weight: 800;
-  letter-spacing: -0.04em;
+  font-family: "Slackey", system-ui, sans-serif;
+  font-size: clamp(1.12rem, 1.52vw, 1.42rem);
+  line-height: 1.08;
+  font-weight: 400;
+  letter-spacing: 0;
   text-align: right;
   justify-self: end;
   word-break: break-word;
@@ -107,10 +111,29 @@
 .heroArea {
   position: relative;
   min-width: 0;
+  overflow: visible;
+  z-index: 2;
+}
+
+.heroArea::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0 0;
+  height: clamp(26px, 3.6vw, 40px);
+  z-index: 1;
+  background:
+    linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.012),
+      rgba(255, 255, 255, 0) 64%
+    ),
+    rgba(8, 8, 10, 0.98);
+  pointer-events: none;
 }
 
 .heroMediaFrame {
   position: relative;
+  z-index: 2;
   width: 100%;
   aspect-ratio: 16 / 9;
   min-height: clamp(220px, 21vw, 320px);
@@ -124,6 +147,12 @@
     ),
     rgba(8, 9, 13, 0.96);
   border-bottom: 1px solid rgba(255, 255, 255, 0.085);
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    100% 100%,
+    0 92%
+  );
 }
 
 .heroMedia {
@@ -133,12 +162,13 @@
   height: 100%;
   display: block;
   object-fit: cover;
-  border-radius: 0;
+  object-position: center 30%;
 }
 
 .heroMediaOverlay {
   position: absolute;
   inset: 0;
+  z-index: 1;
   border-radius: 0;
   background:
     linear-gradient(
@@ -149,6 +179,28 @@
       rgba(8, 9, 12, 0.44) 100%
     );
   pointer-events: none;
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    100% 100%,
+    0 92%
+  );
+}
+
+.heroCornerBadge {
+  position: absolute;
+  left: clamp(10px, 1.3vw, 18px);
+  bottom: -10px;
+  z-index: 3;
+  width: clamp(90px, 11vw, 146px);
+  max-width: 34%;
+  height: auto;
+  display: block;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+  filter: drop-shadow(0 14px 24px rgba(0, 0, 0, 0.34));
 }
 
 .heroMediaFallback {
@@ -185,6 +237,7 @@
 
 .heroCaption {
   position: absolute;
+  z-index: 2;
   left: clamp(16px, 2vw, 22px);
   right: clamp(16px, 2vw, 22px);
   bottom: clamp(16px, 2vw, 22px);
@@ -211,17 +264,11 @@
 
 .boardArea {
   position: relative;
+  z-index: 1;
   display: grid;
   gap: 0;
   padding: 0;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.018), rgba(255, 255, 255, 0)),
-    linear-gradient(
-      135deg,
-      rgba(var(--technology-spotlight-accent-rgb), 0.06),
-      transparent 42%
-    ),
-    rgba(8, 8, 10, 0.98);
+  background: rgba(8, 8, 10, 0.98);
 }
 
 .boardSummary {
@@ -250,7 +297,8 @@
       90deg,
       rgba(255, 255, 255, 0.012),
       rgba(255, 255, 255, 0) 64%
-    );
+    ),
+    rgba(8, 8, 10, 0.98);
 }
 
 .statRow:last-child {
@@ -271,10 +319,11 @@
 .statValue {
   flex-shrink: 0;
   color: rgb(var(--technology-spotlight-accent-rgb));
-  font-size: clamp(1.02rem, 1.4vw, 1.34rem);
-  line-height: 1;
-  font-weight: 900;
-  letter-spacing: -0.04em;
+  font-family: "Slackey", system-ui, sans-serif;
+  font-size: clamp(0.94rem, 1.18vw, 1.12rem);
+  line-height: 1.04;
+  font-weight: 400;
+  letter-spacing: 0;
   text-align: right;
 }
 
@@ -363,6 +412,14 @@
     padding: 14px 16px 12px;
   }
 
+  .topBarCode {
+    font-size: clamp(1.02rem, 4vw, 1.16rem);
+  }
+
+  .topBarName {
+    font-size: clamp(0.98rem, 4.2vw, 1.2rem);
+  }
+
   .statRow {
     padding: 13px 16px;
   }
@@ -374,6 +431,13 @@
   .heroMediaFrame {
     min-height: 220px;
     border-radius: 0;
+  }
+
+  .heroCornerBadge {
+    left: 10px;
+    bottom: 12px;
+    width: clamp(76px, 18vw, 112px);
+    max-width: 36%;
   }
 
   .trunfoCard {
@@ -395,13 +459,21 @@
 
   .topBarCode {
     justify-self: start;
-    font-size: clamp(1.08rem, 5vw, 1.28rem);
+    font-size: clamp(0.96rem, 4.8vw, 1.08rem);
   }
 
   .topBarName {
     text-align: left;
     justify-self: start;
-    font-size: clamp(1.32rem, 6vw, 1.72rem);
+    font-size: clamp(0.92rem, 5.2vw, 1.12rem);
+    line-height: 1.1;
+  }
+
+  .heroCornerBadge {
+    left: 8px;
+    bottom: 10px;
+    width: clamp(68px, 22vw, 96px);
+    max-width: 38%;
   }
 
   .statRow {
