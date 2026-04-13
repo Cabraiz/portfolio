@@ -24,11 +24,11 @@
   position: relative;
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
-  gap: var(--portfolio-rail-gap, 14px);
+  gap: var(--portfolio-rail-gap, 10px);
   width: 100%;
   height: 100%;
   min-height: 0;
-  padding: clamp(0.85rem, 1vw, 1rem);
+  padding: 0.78rem;
   border-radius: clamp(1.2rem, 1.6vw, 1.7rem);
   background: linear-gradient(
     180deg,
@@ -63,14 +63,11 @@
   display: grid;
   justify-items: center;
   align-content: start;
-  padding:
-    clamp(0.15rem, 0.3vw, 0.25rem)
-    clamp(0.15rem, 0.3vw, 0.25rem)
-    clamp(0.25rem, 0.5vw, 0.45rem);
+  padding: 0.08rem 0.08rem 0.18rem;
 }
 
 .counterSlot :global(.counter) {
-  --counter-size: var(--portfolio-rail-counter-size, clamp(5.75rem, 8vw, 8rem));
+  --counter-size: var(--portfolio-rail-counter-size, clamp(5rem, 6.8vw, 6.4rem));
 }
 
 .list {
@@ -78,18 +75,20 @@
   z-index: 1;
   display: grid;
   grid-auto-rows: minmax(0, auto);
-  gap: 0.72rem;
+  gap: 0.54rem;
   align-content: start;
   min-height: 0;
-  padding-right: 0.2rem;
+  padding-right: 0.3rem;
   overflow-y: auto;
+  overflow-x: hidden;
   overscroll-behavior: contain;
+  scrollbar-gutter: stable;
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.16) transparent;
 }
 
 .list::-webkit-scrollbar {
-  width: 0.4rem;
+  width: 0.42rem;
 }
 
 .list::-webkit-scrollbar-track {
@@ -103,14 +102,11 @@
 
 .card {
   position: relative;
-  display: grid;
-  gap: 0.72rem;
+  display: block;
   width: 100%;
   min-width: 0;
-  padding:
-    clamp(0.9rem, 1vw, 1rem)
-    clamp(0.95rem, 1.05vw, 1.05rem)
-    clamp(0.9rem, 1vw, 1rem);
+  min-height: 72px;
+  padding: 0.74rem 0.82rem 0.74rem 0.94rem;
   border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: clamp(1rem, 1.1vw, 1.15rem);
   background: linear-gradient(
@@ -148,9 +144,9 @@
 .card::after {
   content: "";
   position: absolute;
-  top: 0.9rem;
-  bottom: 0.9rem;
-  left: 0.65rem;
+  top: 0.78rem;
+  bottom: 0.78rem;
+  left: 0.6rem;
   width: 0.14rem;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.08);
@@ -204,34 +200,84 @@
   opacity: 1;
 }
 
-.cardTopline {
+.cardGrid {
   position: relative;
   z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 34px;
+  column-gap: 0.52rem;
+  align-items: center;
+  min-width: 0;
+}
+
+.cardContent {
+  min-width: 0;
+  display: grid;
+  gap: 0.28rem;
+}
+
+.cardTopline {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
+  justify-content: flex-start;
+  gap: 0.4rem;
   min-width: 0;
-  padding-left: 0.55rem;
+  padding-left: 0.48rem;
 }
 
 .year {
-  font-size: clamp(0.64rem, 0.72vw, 0.76rem);
+  font-size: 0.68rem;
   font-weight: 700;
   line-height: 1;
-  letter-spacing: 0.2em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--portfolio-rail-text-muted);
   white-space: nowrap;
 }
 
+.cardBody {
+  display: grid;
+  gap: 0.18rem;
+  min-width: 0;
+  padding-left: 0.48rem;
+}
+
+.title {
+  display: block;
+  min-width: 0;
+  font-size: clamp(0.78rem, 0.84vw, 0.88rem);
+  font-weight: 800;
+  line-height: 1.02;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  color: var(--portfolio-rail-text-strong);
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  text-wrap: pretty;
+}
+
+.subtitle {
+  display: block;
+  min-width: 0;
+  font-size: clamp(0.58rem, 0.64vw, 0.64rem);
+  font-weight: 700;
+  line-height: 1.08;
+  letter-spacing: 0.035em;
+  text-transform: uppercase;
+  color: var(--portfolio-rail-text-soft);
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
 .logoSlot {
   display: grid;
   place-items: center;
-  inline-size: clamp(2rem, 2.4vw, 2.6rem);
-  block-size: clamp(2rem, 2.4vw, 2.6rem);
-  flex: 0 0 auto;
-  border-radius: 0.65rem;
+  inline-size: 34px;
+  block-size: 34px;
+  min-inline-size: 34px;
+  align-self: center;
+  justify-self: end;
+  border-radius: 0.62rem;
   background: rgba(255, 255, 255, 0.035);
   border: 1px solid rgba(255, 255, 255, 0.06);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
@@ -242,51 +288,17 @@
   display: block;
   inline-size: auto;
   block-size: auto;
-  max-inline-size: 72%;
-  max-block-size: 72%;
+  max-inline-size: 68%;
+  max-block-size: 68%;
   object-fit: contain;
   filter: brightness(1.02) contrast(1.04);
 }
 
 .logoFallback {
-  font-size: 1rem;
+  font-size: 0.92rem;
   line-height: 1;
   color: var(--portfolio-rail-accent);
   opacity: 0.8;
-}
-
-.cardBody {
-  position: relative;
-  z-index: 1;
-  display: grid;
-  gap: 0.32rem;
-  min-width: 0;
-  padding-left: 0.55rem;
-}
-
-.title {
-  display: block;
-  min-width: 0;
-  font-size: clamp(0.92rem, 1vw, 1.02rem);
-  font-weight: 800;
-  line-height: 1.08;
-  letter-spacing: 0.035em;
-  text-transform: uppercase;
-  color: var(--portfolio-rail-text-strong);
-  word-break: break-word;
-  text-wrap: balance;
-}
-
-.subtitle {
-  display: block;
-  min-width: 0;
-  font-size: clamp(0.68rem, 0.78vw, 0.76rem);
-  font-weight: 600;
-  line-height: 1.22;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--portfolio-rail-text-soft);
-  word-break: break-word;
 }
 
 .emptyState {
@@ -308,54 +320,73 @@
 
 @media (max-height: 820px) {
   .rail {
-    padding: 0.8rem;
+    padding: 0.72rem;
   }
 
   .list {
-    gap: 0.62rem;
+    gap: 0.5rem;
   }
 
   .card {
-    gap: 0.62rem;
-    padding:
-      0.8rem
-      0.88rem
-      0.82rem;
+    min-height: 68px;
+    padding: 0.7rem 0.78rem 0.7rem 0.9rem;
   }
 
   .card::after {
-    top: 0.82rem;
-    bottom: 0.82rem;
+    top: 0.74rem;
+    bottom: 0.74rem;
+  }
+
+  .cardGrid {
+    grid-template-columns: minmax(0, 1fr) 32px;
+    column-gap: 0.48rem;
   }
 
   .title {
-    font-size: clamp(0.86rem, 0.92vw, 0.96rem);
+    font-size: clamp(0.74rem, 0.8vw, 0.84rem);
   }
 
   .subtitle {
-    font-size: clamp(0.64rem, 0.7vw, 0.72rem);
+    font-size: clamp(0.54rem, 0.58vw, 0.6rem);
   }
 
   .logoSlot {
-    inline-size: 1.9rem;
-    block-size: 1.9rem;
+    inline-size: 32px;
+    block-size: 32px;
+    min-inline-size: 32px;
   }
 }
 
 @media (max-width: 1280px) {
   .rail {
-    padding: 0.82rem;
+    padding: 0.74rem;
+  }
+
+  .list {
+    gap: 0.52rem;
   }
 
   .card {
-    padding:
-      0.84rem
-      0.88rem
-      0.86rem;
+    min-height: 70px;
+    padding: 0.72rem 0.8rem 0.72rem 0.92rem;
+  }
+
+  .cardGrid {
+    grid-template-columns: minmax(0, 1fr) 33px;
   }
 
   .title {
-    font-size: clamp(0.86rem, 0.92vw, 0.96rem);
+    font-size: clamp(0.76rem, 0.82vw, 0.86rem);
+  }
+
+  .subtitle {
+    font-size: clamp(0.56rem, 0.6vw, 0.62rem);
+  }
+
+  .logoSlot {
+    inline-size: 33px;
+    block-size: 33px;
+    min-inline-size: 33px;
   }
 }
 

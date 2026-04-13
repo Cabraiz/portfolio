@@ -75,10 +75,25 @@ const PortfolioTimelineRail: React.FC<PortfolioTimelineRailProps> = ({
                 aria-pressed={isActive}
                 aria-label={`Selecionar projeto ${item.title}`}
               >
-                <div className={styles.cardTopline}>
-                  <span className={styles.year}>{item.year}</span>
+                <div className={styles.cardGrid}>
+                  <div className={styles.cardContent}>
+                    <div className={styles.cardTopline}>
+                      <span className={styles.year}>{item.year}</span>
+                    </div>
 
-                  <span className={styles.logoSlot}>
+                    <div className={styles.cardBody}>
+                      <strong className={styles.title}>{item.title}</strong>
+
+                      {item.subtitle ? (
+                        <span className={styles.subtitle}>{item.subtitle}</span>
+                      ) : null}
+                    </div>
+                  </div>
+
+                  <span
+                    className={styles.logoSlot}
+                    aria-hidden={!item.railLogoSrc}
+                  >
                     {item.railLogoSrc ? (
                       <img
                         src={item.railLogoSrc}
@@ -88,22 +103,11 @@ const PortfolioTimelineRail: React.FC<PortfolioTimelineRailProps> = ({
                         decoding="async"
                       />
                     ) : (
-                      <span
-                        className={styles.logoFallback}
-                        aria-hidden="true"
-                      >
+                      <span className={styles.logoFallback} aria-hidden="true">
                         •
                       </span>
                     )}
                   </span>
-                </div>
-
-                <div className={styles.cardBody}>
-                  <strong className={styles.title}>{item.title}</strong>
-
-                  {item.subtitle ? (
-                    <span className={styles.subtitle}>{item.subtitle}</span>
-                  ) : null}
                 </div>
               </button>
             );
