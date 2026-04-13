@@ -51,9 +51,17 @@ function PortfolioProjectCardComponent({
 
       <div className={styles.portfolioProjectCardOverlay}>
         <div className={styles.portfolioProjectCardBottomRow}>
-          <div className={styles.portfolioProjectCardIdentity}>
+          <div
+            className={styles.portfolioProjectCardIdentity}
+            data-portfolio-glass-panel="true"
+            data-lenis-parallax="soft"
+            data-gsap="portfolio-glass-panel"
+          >
             {hasLogo ? (
-              <div className={styles.portfolioProjectCardLogoBox}>
+              <div
+                className={styles.portfolioProjectCardLogoBox}
+                data-gsap="portfolio-glass-logo"
+              >
                 <img
                   src={project.logoSrc}
                   alt={project.logoAlt ?? `Logo do projeto ${project.name}`}
@@ -65,7 +73,10 @@ function PortfolioProjectCardComponent({
               </div>
             ) : null}
 
-            <div className={styles.portfolioProjectCardTextGroup}>
+            <div
+              className={styles.portfolioProjectCardTextGroup}
+              data-gsap="portfolio-glass-copy"
+            >
               <h3 className={styles.portfolioProjectCardTitle}>
                 {project.name}
               </h3>
