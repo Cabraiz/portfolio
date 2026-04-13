@@ -1,0 +1,204 @@
+{
+  "tecnologias": [
+    {
+      "id": "java",
+      "nome": "Java",
+      "aliases": ["Java"],
+      "projetos": 5.0,
+      "arquiteturas": 5.0,
+      "iaAplicada": 2.0
+    },
+    {
+      "id": "kotlin",
+      "nome": "Kotlin",
+      "aliases": ["Kotlin"],
+      "projetos": 3.5,
+      "arquiteturas": 3.5,
+      "iaAplicada": 1.5
+    },
+    {
+      "id": "nodejs",
+      "nome": "Node.js",
+      "aliases": ["Node.js", "Node", "NodeJS"],
+      "projetos": 5.0,
+      "arquiteturas": 5.0,
+      "iaAplicada": 3.5
+    },
+    {
+      "id": "nestjs",
+      "nome": "NestJS",
+      "aliases": ["NestJS", "Nest"],
+      "projetos": 3.5,
+      "arquiteturas": 3.5,
+      "iaAplicada": 2.5
+    },
+    {
+      "id": "graphql",
+      "nome": "GraphQL",
+      "aliases": ["GraphQL"],
+      "projetos": 3.0,
+      "arquiteturas": 4.0,
+      "iaAplicada": 1.0
+    },
+    {
+      "id": "python",
+      "nome": "Python",
+      "aliases": ["Python"],
+      "projetos": 4.0,
+      "arquiteturas": 4.0,
+      "iaAplicada": 4.5
+    },
+    {
+      "id": "fastapi",
+      "nome": "FastAPI",
+      "aliases": ["FastAPI"],
+      "projetos": 3.5,
+      "arquiteturas": 3.5,
+      "iaAplicada": 4.0
+    },
+    {
+      "id": "react",
+      "nome": "React",
+      "aliases": ["React", "React.js", "ReactJS"],
+      "projetos": 5.0,
+      "arquiteturas": 4.5,
+      "iaAplicada": 2.0
+    },
+    {
+      "id": "vuejs",
+      "nome": "Vue.js",
+      "aliases": ["Vue.js", "Vue", "VueJS"],
+      "projetos": 3.0,
+      "arquiteturas": 3.0,
+      "iaAplicada": 1.0
+    },
+    {
+      "id": "flutter",
+      "nome": "Flutter",
+      "aliases": ["Flutter"],
+      "projetos": 3.0,
+      "arquiteturas": 2.5,
+      "iaAplicada": 1.0
+    },
+    {
+      "id": "aws",
+      "nome": "AWS",
+      "aliases": ["AWS", "Amazon Web Services", "Amazon AWS"],
+      "projetos": 5.0,
+      "arquiteturas": 5.0,
+      "iaAplicada": 3.5
+    },
+    {
+      "id": "gcp",
+      "nome": "GCP",
+      "aliases": ["GCP", "Google Cloud", "Google Cloud Platform"],
+      "projetos": 4.0,
+      "arquiteturas": 4.0,
+      "iaAplicada": 2.5
+    },
+    {
+      "id": "docker",
+      "nome": "Docker",
+      "aliases": ["Docker"],
+      "projetos": 5.0,
+      "arquiteturas": 5.0,
+      "iaAplicada": 2.5
+    },
+    {
+      "id": "kubernetes",
+      "nome": "Kubernetes",
+      "aliases": ["Kubernetes", "K8s"],
+      "projetos": 4.5,
+      "arquiteturas": 5.0,
+      "iaAplicada": 2.5
+    },
+    {
+      "id": "postgresql",
+      "nome": "PostgreSQL",
+      "aliases": ["PostgreSQL", "Postgres"],
+      "projetos": 5.0,
+      "arquiteturas": 4.5,
+      "iaAplicada": 2.0
+    },
+    {
+      "id": "mongodb",
+      "nome": "MongoDB",
+      "aliases": ["MongoDB", "Mongo"],
+      "projetos": 4.0,
+      "arquiteturas": 4.0,
+      "iaAplicada": 2.0
+    },
+    {
+      "id": "redis",
+      "nome": "Redis",
+      "aliases": ["Redis"],
+      "projetos": 3.5,
+      "arquiteturas": 4.0,
+      "iaAplicada": 1.5
+    },
+    {
+      "id": "rabbitmq",
+      "nome": "RabbitMQ",
+      "aliases": ["RabbitMQ", "Rabbit"],
+      "projetos": 4.0,
+      "arquiteturas": 5.0,
+      "iaAplicada": 1.5
+    },
+    {
+      "id": "kafka",
+      "nome": "Kafka",
+      "aliases": ["Kafka", "Apache Kafka"],
+      "projetos": 4.0,
+      "arquiteturas": 5.0,
+      "iaAplicada": 1.5
+    },
+    {
+      "id": "selenium",
+      "nome": "Selenium",
+      "aliases": ["Selenium"],
+      "projetos": 4.0,
+      "arquiteturas": 2.5,
+      "iaAplicada": 1.0
+    },
+    {
+      "id": "cypress",
+      "nome": "Cypress",
+      "aliases": ["Cypress"],
+      "projetos": 3.0,
+      "arquiteturas": 2.0,
+      "iaAplicada": 1.0
+    },
+    {
+      "id": "playwright",
+      "nome": "Playwright",
+      "aliases": ["Playwright"],
+      "projetos": 2.0,
+      "arquiteturas": 2.0,
+      "iaAplicada": 1.0
+    },
+    {
+      "id": "grafana",
+      "nome": "Grafana",
+      "aliases": ["Grafana"],
+      "projetos": 3.5,
+      "arquiteturas": 3.5,
+      "iaAplicada": 1.5
+    },
+    {
+      "id": "prometheus",
+      "nome": "Prometheus",
+      "aliases": ["Prometheus"],
+      "projetos": 3.0,
+      "arquiteturas": 3.5,
+      "iaAplicada": 1.5
+    },
+    {
+      "id": "opentelemetry",
+      "nome": "OpenTelemetry",
+      "aliases": ["OpenTelemetry", "OTel"],
+      "projetos": 2.5,
+      "arquiteturas": 3.0,
+      "iaAplicada": 1.5
+    }
+  ]
+}

@@ -1,9 +1,7 @@
 import type {
   TechnologyItem,
   TechnologyMediaAsset,
-  TechnologyTrunfoEntry,
 } from "../domain/technologies.types";
-import { resolveTechnologyTrunfoByTechnologyId } from "./technologies.trunfo.registry";
 
 type BuildTechnologyVisualsResult = Readonly<{
   logoSrc: string;
@@ -12,7 +10,10 @@ type BuildTechnologyVisualsResult = Readonly<{
 }>;
 
 type CreateTechnologyParams = Readonly<
-  Omit<TechnologyItem, "logoSrc" | "heroAsset" | "gallery" | "trunfoData"> & {
+  Omit<
+    TechnologyItem,
+    "logoSrc" | "heroAsset" | "gallery" | "trunfoData"
+  > & {
     slug: string;
   }
 >;
@@ -99,43 +100,18 @@ function buildTechnologyVisuals(
   };
 }
 
-function normalizeTechnologyTrunfoData(
-  technologyId: string,
-  fallbackName: string,
-  heroAsset: TechnologyMediaAsset,
-): TechnologyTrunfoEntry | null {
-  const registryEntry = resolveTechnologyTrunfoByTechnologyId(technologyId);
-
-  if (!registryEntry) {
-    return null;
-  }
-
-  return {
-    technologyId: registryEntry.technologyId,
-    name: registryEntry.name ?? fallbackName,
-    imageSrc: registryEntry.imageSrc ?? heroAsset.src,
-    imageAlt: registryEntry.imageAlt ?? `${fallbackName} technical card visual`,
-    stats: registryEntry.stats,
-  };
-}
-
 function createTechnology({
   slug,
   ...technology
 }: CreateTechnologyParams): TechnologyItem {
   const visuals = buildTechnologyVisuals(slug, technology.name);
-  const trunfoData = normalizeTechnologyTrunfoData(
-    technology.id,
-    technology.name,
-    visuals.heroAsset,
-  );
 
   return {
     ...technology,
     logoSrc: visuals.logoSrc,
     heroAsset: visuals.heroAsset,
     gallery: visuals.gallery,
-    trunfoData,
+    trunfoData: null,
   };
 }
 
@@ -148,10 +124,6 @@ export const TECHNOLOGY_ITEMS: readonly TechnologyItem[] = [
     shortName: "AWS",
     years: 4,
     categoryId: "cloud",
-    description:
-      "Experiência com EC2, S3, RDS, IAM e filas/eventos usando SQS e SNS.",
-    summary:
-      "Base cloud voltada para infraestrutura, serviços gerenciados e aplicações escaláveis.",
     aliases: ["amazon web services", "ec2", "s3", "rds", "iam", "sqs", "sns"],
     relatedIds: ["gcp", "docker", "kubernetes", "postgresql", "rabbitmq"],
     featured: true,
@@ -166,10 +138,6 @@ export const TECHNOLOGY_ITEMS: readonly TechnologyItem[] = [
     shortName: "GCP",
     years: 3,
     categoryId: "cloud",
-    description:
-      "Experiência com Compute Engine, Cloud SQL, Cloud Storage e Pub/Sub.",
-    summary:
-      "Uso orientado a compute, banco gerenciado, storage e mensageria na plataforma Google.",
     aliases: [
       "google cloud",
       "google cloud platform",
@@ -191,10 +159,6 @@ export const TECHNOLOGY_ITEMS: readonly TechnologyItem[] = [
     shortName: "Docker",
     years: 9,
     categoryId: "cloud",
-    description:
-      "Containerização, isolamento de runtime e empacotamento consistente para ambientes de desenvolvimento e entrega.",
-    summary:
-      "Peça central da stack de build, execução e padronização de ambientes.",
     aliases: ["containers", "docker engine", "dockerfile"],
     relatedIds: ["kubernetes", "aws", "gcp", "nodejs", "python", "java"],
     featured: true,
@@ -208,10 +172,6 @@ export const TECHNOLOGY_ITEMS: readonly TechnologyItem[] = [
     shortName: "K8s",
     years: 9,
     categoryId: "cloud",
-    description:
-      "Orquestração, escalabilidade e operação de workloads containerizados.",
-    summary:
-      "Base operacional para ambientes distribuídos com foco em resiliência e automação.",
     aliases: ["k8s", "orchestration", "cluster"],
     relatedIds: ["docker", "aws", "gcp", "prometheus", "grafana"],
     featured: true,
@@ -227,10 +187,6 @@ export const TECHNOLOGY_ITEMS: readonly TechnologyItem[] = [
     shortName: "React",
     years: 10,
     categoryId: "frontend",
-    description:
-      "Construção de interfaces modernas com React, Next.js e TypeScript.",
-    summary:
-      "Stack principal de frontend para produto, renderização moderna e experiência de usuário.",
     aliases: ["next.js", "nextjs", "typescript", "frontend"],
     relatedIds: ["vue", "flutter", "graphql", "nodejs"],
     featured: true,
@@ -245,10 +201,6 @@ export const TECHNOLOGY_ITEMS: readonly TechnologyItem[] = [
     shortName: "Vue",
     years: null,
     categoryId: "frontend",
-    description:
-      "Stack complementar de interface com Vue.js, Nuxt.js e TypeScript.",
-    summary:
-      "Tecnologia mapeada para a matriz visual, com tempo total não informado na versão inicial do dataset.",
     aliases: ["nuxt", "nuxt.js", "nuxtjs", "typescript"],
     relatedIds: ["react", "flutter", "nodejs"],
     featured: false,
@@ -262,10 +214,6 @@ export const TECHNOLOGY_ITEMS: readonly TechnologyItem[] = [
     shortName: "Flutter",
     years: 6,
     categoryId: "frontend",
-    description:
-      "Desenvolvimento cross-platform com foco em experiência consistente entre plataformas.",
-    summary:
-      "Stack mobile com capacidade de entrega visual e rapidez de prototipação.",
     aliases: ["dart", "mobile", "cross platform"],
     relatedIds: ["react", "vue"],
     featured: true,
@@ -281,10 +229,6 @@ export const TECHNOLOGY_ITEMS: readonly TechnologyItem[] = [
     shortName: "Java",
     years: 10,
     categoryId: "backend-jvm",
-    description:
-      "Serviços corporativos, APIs e fluxos críticos com Java e Spring Boot.",
-    summary:
-      "Pilar backend de longa duração, com forte aderência a domínios de negócio e integração.",
     aliases: ["spring", "spring boot", "jvm", "backend"],
     relatedIds: ["kotlin", "postgresql", "rabbitmq", "kafka"],
     featured: true,
@@ -298,10 +242,6 @@ export const TECHNOLOGY_ITEMS: readonly TechnologyItem[] = [
     shortName: "Kotlin",
     years: 6,
     categoryId: "backend-jvm",
-    description:
-      "Desenvolvimento em plataforma JVM com foco em robustez, produtividade e qualidade de código.",
-    summary:
-      "Stack complementar à base Java, com boa sinergia em ambientes de backend corporativo.",
     aliases: ["jvm", "backend kotlin"],
     relatedIds: ["java", "postgresql", "kafka"],
     featured: true,
@@ -317,10 +257,6 @@ export const TECHNOLOGY_ITEMS: readonly TechnologyItem[] = [
     shortName: "Node",
     years: 8,
     categoryId: "backend-js",
-    description:
-      "APIs e serviços com Node.js e Express, com foco em produtividade e integração.",
-    summary:
-      "Stack madura para backends orientados a produto e serviços de entrega rápida.",
     aliases: ["node", "express", "javascript backend", "typescript backend"],
     relatedIds: ["nestjs", "graphql", "react", "redis"],
     featured: true,
@@ -334,10 +270,6 @@ export const TECHNOLOGY_ITEMS: readonly TechnologyItem[] = [
     shortName: "NestJS",
     years: 5,
     categoryId: "backend-js",
-    description:
-      "Estruturação de backends escaláveis com NestJS, arquitetura modular e tipagem forte.",
-    summary:
-      "Framework alinhado a organização enterprise dentro do ecossistema Node.",
     aliases: ["nest", "node framework", "typescript backend"],
     relatedIds: ["nodejs", "graphql", "redis", "postgresql"],
     featured: true,
@@ -352,10 +284,6 @@ export const TECHNOLOGY_ITEMS: readonly TechnologyItem[] = [
     shortName: "GraphQL",
     years: 3,
     categoryId: "backend-js",
-    description:
-      "Modelagem de APIs orientadas a schema com GraphQL e Apollo Server.",
-    summary:
-      "Camada de integração adequada a clients ricos e contratos mais expressivos.",
     aliases: ["apollo", "apollo server", "schema", "resolver"],
     relatedIds: ["nodejs", "nestjs", "react"],
     featured: false,
@@ -370,10 +298,6 @@ export const TECHNOLOGY_ITEMS: readonly TechnologyItem[] = [
     shortName: "Python",
     years: 8,
     categoryId: "python",
-    description:
-      "Backend, automação e serviços com foco em produtividade e clareza de implementação.",
-    summary:
-      "Stack madura para automação, integrações e serviços rápidos.",
     aliases: ["python backend", "automation", "scripts"],
     relatedIds: ["fastapi", "postgresql", "redis", "rabbitmq"],
     featured: true,
@@ -387,10 +311,6 @@ export const TECHNOLOGY_ITEMS: readonly TechnologyItem[] = [
     shortName: "FastAPI",
     years: 5,
     categoryId: "python",
-    description:
-      "APIs modernas com tipagem, performance e ergonomia para backend Python.",
-    summary:
-      "Framework principal para serviços HTTP modernos dentro da camada Python.",
     aliases: ["python api", "async api", "pydantic"],
     relatedIds: ["python", "postgresql", "redis", "rabbitmq"],
     featured: true,
@@ -406,10 +326,6 @@ export const TECHNOLOGY_ITEMS: readonly TechnologyItem[] = [
     shortName: "PostgreSQL",
     years: 10,
     categoryId: "data",
-    description:
-      "Modelagem relacional, consultas SQL, consistência transacional e suporte a sistemas críticos.",
-    summary:
-      "Base de dados relacional madura e recorrente em múltiplas stacks do portfólio.",
     aliases: ["postgres", "sql", "database", "relational db"],
     relatedIds: ["mongodb", "redis", "java", "python", "nestjs"],
     featured: true,
@@ -423,10 +339,6 @@ export const TECHNOLOGY_ITEMS: readonly TechnologyItem[] = [
     shortName: "MongoDB",
     years: 6,
     categoryId: "data",
-    description:
-      "Persistência documental e modelagem flexível para cenários orientados a documentos.",
-    summary:
-      "Banco NoSQL usado como complemento em arquiteturas que exigem mais elasticidade estrutural.",
     aliases: ["mongo", "nosql", "document database"],
     relatedIds: ["postgresql", "redis", "nodejs"],
     featured: true,
@@ -440,10 +352,6 @@ export const TECHNOLOGY_ITEMS: readonly TechnologyItem[] = [
     shortName: "Redis",
     years: 5,
     categoryId: "data",
-    description:
-      "Cache, estruturas em memória e suporte a workloads com necessidade de resposta rápida.",
-    summary:
-      "Peça de aceleração e suporte a integrações distribuídas.",
     aliases: ["cache", "in-memory", "key value"],
     relatedIds: ["postgresql", "mongodb", "nodejs", "python"],
     featured: true,
@@ -457,10 +365,6 @@ export const TECHNOLOGY_ITEMS: readonly TechnologyItem[] = [
     shortName: "RabbitMQ",
     years: 5,
     categoryId: "data",
-    description:
-      "Mensageria, desacoplamento de fluxos e integração assíncrona baseada em filas.",
-    summary:
-      "Ferramenta central para comunicação assíncrona e orquestração entre serviços.",
     aliases: ["queues", "message broker", "broker"],
     relatedIds: ["kafka", "python", "fastapi", "java"],
     featured: true,
@@ -474,10 +378,6 @@ export const TECHNOLOGY_ITEMS: readonly TechnologyItem[] = [
     shortName: "Kafka",
     years: 5,
     categoryId: "data",
-    description:
-      "Streaming, eventos e integração de sistemas com alto volume de troca de mensagens.",
-    summary:
-      "Stack orientada a eventos e pipelines distribuídos.",
     aliases: ["streaming", "events", "event bus"],
     relatedIds: ["rabbitmq", "java", "kotlin", "gcp"],
     featured: true,
@@ -492,10 +392,6 @@ export const TECHNOLOGY_ITEMS: readonly TechnologyItem[] = [
     shortName: "Selenium",
     years: 10,
     categoryId: "qa",
-    description:
-      "Automação funcional, regressão e validação de fluxos críticos de interface.",
-    summary:
-      "Base histórica de QA com forte cobertura de automação end-to-end.",
     aliases: ["browser automation", "ui automation", "e2e"],
     relatedIds: ["cypress", "playwright", "react"],
     featured: true,
@@ -509,10 +405,6 @@ export const TECHNOLOGY_ITEMS: readonly TechnologyItem[] = [
     shortName: "Cypress",
     years: 5,
     categoryId: "qa",
-    description:
-      "Automação moderna de testes end-to-end e validação de comportamento em aplicações web.",
-    summary:
-      "Ferramenta voltada para confiabilidade de fluxos frontend e integração funcional.",
     aliases: ["e2e", "frontend testing", "ui tests"],
     relatedIds: ["selenium", "playwright", "react"],
     featured: true,
@@ -526,10 +418,6 @@ export const TECHNOLOGY_ITEMS: readonly TechnologyItem[] = [
     shortName: "Playwright",
     years: 2,
     categoryId: "qa",
-    description:
-      "Automação cross-browser recente com foco em confiabilidade e velocidade de feedback.",
-    summary:
-      "Ferramenta mais nova no ecossistema de testes, útil para fluxos modernos de frontend.",
     aliases: ["browser testing", "e2e", "cross-browser"],
     relatedIds: ["selenium", "cypress", "react"],
     featured: false,
@@ -544,10 +432,6 @@ export const TECHNOLOGY_ITEMS: readonly TechnologyItem[] = [
     shortName: "Grafana",
     years: 5,
     categoryId: "observability",
-    description:
-      "Dashboards, monitoramento visual e leitura operacional de métricas.",
-    summary:
-      "Camada visual de observabilidade para acompanhamento contínuo do sistema.",
     aliases: ["dashboards", "monitoring ui", "metrics visualization"],
     relatedIds: ["prometheus", "otel", "kubernetes"],
     featured: true,
@@ -561,10 +445,6 @@ export const TECHNOLOGY_ITEMS: readonly TechnologyItem[] = [
     shortName: "Prometheus",
     years: 4,
     categoryId: "observability",
-    description:
-      "Coleta de métricas, scraping e suporte à análise operacional de sistemas.",
-    summary:
-      "Fundação métrica para ecossistemas orientados a monitoração.",
     aliases: ["metrics", "scraping", "monitoring"],
     relatedIds: ["grafana", "otel", "kubernetes"],
     featured: true,
@@ -579,11 +459,13 @@ export const TECHNOLOGY_ITEMS: readonly TechnologyItem[] = [
     shortName: "OTel",
     years: 3,
     categoryId: "observability",
-    description:
-      "Instrumentação, traces e padronização de telemetria entre serviços.",
-    summary:
-      "Camada de observabilidade distribuída para rastreamento e análise de comportamento.",
-    aliases: ["opentelemetry", "tracing", "distributed tracing", "otel"],
+    aliases: [
+      "opentelemetry",
+      "open telemetry",
+      "tracing",
+      "distributed tracing",
+      "otel",
+    ],
     relatedIds: ["grafana", "prometheus", "kubernetes"],
     featured: false,
     priority: 70,

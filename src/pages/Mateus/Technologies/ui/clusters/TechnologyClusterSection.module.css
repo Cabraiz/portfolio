@@ -4,17 +4,6 @@
   --technology-cluster-offset-strong: clamp(24px, 2.4vw, 40px);
   --technology-cluster-offset-soft: clamp(10px, 1.2vw, 18px);
 
-  --cluster-pointer-x: 50%;
-  --cluster-pointer-y: 28%;
-  --cluster-energy: 0.2;
-  --cluster-energy-alpha: 0.16;
-  --cluster-shift-y: 18px;
-  --cluster-network-opacity: 0.2;
-  --cluster-network-travel: 0;
-  --cluster-orbit-rotate: -7deg;
-  --cluster-surface-glow: 0.1;
-  --cluster-hero-surge: 0.18;
-
   position: relative;
   width: 100%;
   min-width: 0;
@@ -25,33 +14,26 @@
   background:
     linear-gradient(
       180deg,
-      rgba(255, 255, 255, 0.04),
-      rgba(255, 255, 255, 0.015)
-    ),
-    radial-gradient(
-      circle at top right,
-      rgba(82, 130, 255, 0.11),
-      transparent 46%
+      rgba(255, 255, 255, 0.035),
+      rgba(255, 255, 255, 0.012)
     ),
     linear-gradient(
       180deg,
-      rgba(10, 14, 22, 0.96),
-      rgba(6, 8, 14, 0.97)
+      rgba(10, 14, 22, 0.97),
+      rgba(6, 8, 14, 0.985)
     );
-  border: 1px solid rgba(255, 255, 255, 0.075);
+  border: 1px solid rgba(255, 255, 255, 0.07);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.05),
-    0 22px 48px rgba(0, 0, 0, 0.24);
+    inset 0 1px 0 rgba(255, 255, 255, 0.045),
+    0 18px 42px rgba(0, 0, 0, 0.26);
   overflow: visible;
   isolation: isolate;
-  will-change: opacity, filter, transform;
-  transform-style: preserve-3d;
-  backface-visibility: hidden;
+  will-change: opacity, transform;
   transition:
     border-color 220ms ease,
     box-shadow 260ms ease,
-    filter 260ms ease,
-    opacity 220ms ease;
+    opacity 220ms ease,
+    transform 260ms ease;
 }
 
 .root::before {
@@ -61,10 +43,10 @@
   width: 1px;
   background: linear-gradient(
     180deg,
-    rgba(255, 255, 255, 0.08),
-    rgba(255, 255, 255, 0.02)
+    rgba(255, 255, 255, 0.07),
+    rgba(255, 255, 255, 0.015)
   );
-  opacity: 0.55;
+  opacity: 0.5;
   z-index: 0;
 }
 
@@ -76,219 +58,49 @@
   background:
     linear-gradient(
       135deg,
-      rgba(255, 255, 255, 0.05),
-      transparent 22%
+      rgba(255, 255, 255, 0.04),
+      transparent 20%
     ),
     linear-gradient(
       180deg,
-      rgba(255, 255, 255, 0.012),
-      transparent 70%
+      rgba(255, 255, 255, 0.01),
+      transparent 72%
     );
-  opacity: calc(0.26 + var(--cluster-surface-glow) * 0.18);
+  opacity: 0.2;
   pointer-events: none;
   z-index: 0;
 }
 
 .root[data-cluster-active="true"] {
-  border-color: rgba(146, 187, 255, 0.2);
+  border-color: rgba(138, 182, 255, 0.16);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.055),
-    0 24px 56px rgba(0, 0, 0, 0.28),
-    0 0 0 1px rgba(126, 170, 255, 0.08);
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 22px 50px rgba(0, 0, 0, 0.3),
+    0 0 0 1px rgba(126, 170, 255, 0.055);
 }
 
-.visualViewport {
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  overflow: hidden;
-  z-index: 0;
-  pointer-events: none;
-  will-change: transform, opacity;
-}
-
-.energyField {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  will-change: transform, opacity;
-}
-
+.visualViewport,
+.energyField,
 .energyAura,
 .energyBeam,
 .energyGrid,
-.energyGlow {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  will-change: transform, opacity, filter;
-  backface-visibility: hidden;
-}
-
-.energyAura {
-  background:
-    radial-gradient(
-      46% 34% at var(--cluster-pointer-x) var(--cluster-pointer-y),
-      rgba(110, 168, 255, calc(0.22 * var(--cluster-energy-alpha))),
-      rgba(76, 124, 255, calc(0.14 * var(--cluster-energy-alpha))) 36%,
-      rgba(34, 56, 112, calc(0.08 * var(--cluster-energy-alpha))) 56%,
-      transparent 76%
-    ),
-    radial-gradient(
-      36% 26% at 50% 14%,
-      rgba(129, 178, 255, calc(0.18 * var(--cluster-energy-alpha))),
-      transparent 72%
-    );
-  filter: blur(8px) saturate(118%);
-  opacity: calc(0.34 + var(--cluster-energy) * 0.54);
-  transform: translateZ(0);
-}
-
-.energyBeam {
-  inset: -6% 10% 24%;
-  clip-path: polygon(18% 0%, 82% 0%, 100% 100%, 0% 100%);
-  background:
-    linear-gradient(
-      180deg,
-      rgba(86, 138, 255, calc(0.22 * var(--cluster-energy-alpha))),
-      rgba(52, 88, 174, calc(0.11 * var(--cluster-energy-alpha))) 48%,
-      transparent 100%
-    );
-  opacity: calc(0.22 + var(--cluster-energy) * 0.5);
-  filter: blur(14px);
-  transform:
-    translateY(calc(-8px * var(--cluster-energy)))
-    scaleY(calc(0.95 + var(--cluster-energy) * 0.08));
-  transform-origin: top center;
-}
-
-.energyGrid {
-  inset: 14% 8% 12%;
-  background-image:
-    linear-gradient(
-      90deg,
-      rgba(138, 176, 255, 0.055) 1px,
-      transparent 1px
-    ),
-    linear-gradient(
-      180deg,
-      rgba(138, 176, 255, 0.045) 1px,
-      transparent 1px
-    );
-  background-size: 54px 54px;
-  mask-image: linear-gradient(
-    180deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.7) 16%,
-    rgba(255, 255, 255, 0.9) 50%,
-    transparent 100%
-  );
-  opacity: calc(0.08 + var(--cluster-network-opacity) * 0.16);
-  transform:
-    perspective(800px)
-    rotateX(68deg)
-    translateY(calc(20px - var(--cluster-network-travel) * 12px));
-  transform-origin: center top;
-  filter: blur(0.2px);
-}
-
-.energyGlow {
-  inset: auto 8% -8% 8%;
-  height: 34%;
-  background:
-    radial-gradient(
-      50% 100% at 50% 0%,
-      rgba(104, 152, 255, calc(0.22 * var(--cluster-energy-alpha))),
-      transparent 74%
-    );
-  opacity: calc(0.18 + var(--cluster-energy) * 0.42);
-  filter: blur(22px);
-}
-
-.networkLayer {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  opacity: calc(0.16 + var(--cluster-network-opacity) * 0.84);
-  transform: rotate(var(--cluster-orbit-rotate));
-  will-change: transform, opacity;
-  transition: opacity 260ms ease, transform 300ms ease;
-}
-
-.networkSvg {
-  position: absolute;
-  inset: 10% 3% 10%;
-  width: 94%;
-  height: 80%;
-  overflow: visible;
-  filter:
-    drop-shadow(0 0 10px rgba(97, 153, 255, 0.14))
-    drop-shadow(0 0 22px rgba(97, 153, 255, 0.08));
-}
-
+.energyGlow,
+.networkLayer,
+.networkSvg,
 .networkPath,
-.networkPathSoft {
-  fill: none;
-  stroke-linecap: round;
-  vector-effect: non-scaling-stroke;
-}
-
-.networkPath {
-  stroke-width: 1.85;
-  opacity: calc(0.3 + var(--cluster-network-opacity) * 0.48);
-  stroke-dasharray: 10 22;
-  stroke-dashoffset: calc(180px - var(--cluster-network-travel) * 180px);
-}
-
-.networkPathSoft {
-  stroke-width: 1.1;
-  opacity: calc(0.16 + var(--cluster-network-opacity) * 0.28);
-  stroke-dasharray: 7 18;
-  stroke-dashoffset: calc(120px - var(--cluster-network-travel) * 120px);
-}
-
-.networkNode {
-  fill: rgba(171, 208, 255, 0.92);
-  opacity: calc(0.3 + var(--cluster-network-opacity) * 0.56);
-  filter: drop-shadow(0 0 12px rgba(119, 173, 255, 0.35));
-}
-
+.networkPathSoft,
+.networkNode,
 .scanPulse,
 .scanPulseAlt {
-  position: absolute;
-  inset: 12% auto 16% -22%;
-  width: 42%;
-  border-radius: 999px;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(168, 205, 255, 0.02) 12%,
-    rgba(168, 205, 255, 0.18) 50%,
-    rgba(168, 205, 255, 0.02) 88%,
-    transparent 100%
-  );
-  filter: blur(10px);
-  opacity: calc(0.08 + var(--cluster-network-opacity) * 0.24);
-  transform: translateX(calc(var(--cluster-network-travel) * 172%));
-  will-change: transform, opacity;
-}
-
-.scanPulseAlt {
-  inset: 26% auto 28% -30%;
-  width: 28%;
-  opacity: calc(0.06 + var(--cluster-network-opacity) * 0.16);
-  filter: blur(14px);
-  transform: translateX(calc(var(--cluster-network-travel) * 198%));
+  display: none !important;
 }
 
 .headerSticky {
   position: sticky;
   top: var(--technology-cluster-sticky-top);
-  z-index: 30;
+  z-index: 20;
   pointer-events: none;
-  will-change: transform, opacity, filter;
+  will-change: transform, opacity;
 }
 
 .headerSurface {
@@ -300,25 +112,19 @@
   background:
     linear-gradient(
       180deg,
-      rgba(255, 255, 255, 0.08),
-      rgba(255, 255, 255, 0.025)
+      rgba(255, 255, 255, 0.055),
+      rgba(255, 255, 255, 0.018)
     ),
-    radial-gradient(
-      circle at top right,
-      rgba(104, 153, 255, calc(0.12 + var(--cluster-hero-surge) * 0.06)),
-      transparent 42%
-    ),
-    rgba(9, 10, 14, 0.72);
-  border: 1px solid rgba(255, 255, 255, 0.095);
+    rgba(10, 12, 18, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.085);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.08),
-    0 18px 34px rgba(0, 0, 0, 0.26),
-    0 0 0 1px rgba(103, 149, 255, calc(0.02 + var(--cluster-hero-surge) * 0.05));
-  backdrop-filter: blur(18px) saturate(135%);
-  -webkit-backdrop-filter: blur(18px) saturate(135%);
+    inset 0 1px 0 rgba(255, 255, 255, 0.065),
+    0 12px 28px rgba(0, 0, 0, 0.22);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   pointer-events: auto;
   overflow: hidden;
-  will-change: transform, opacity, filter;
+  will-change: transform, opacity;
   backface-visibility: hidden;
 }
 
@@ -328,23 +134,14 @@
   inset: 1px;
   border-radius: calc(var(--technology-cluster-header-radius) - 1px);
   background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.07), transparent 34%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent 72%);
-  opacity: 0.9;
+    linear-gradient(135deg, rgba(255, 255, 255, 0.045), transparent 34%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.012), transparent 72%);
+  opacity: 0.68;
   pointer-events: none;
 }
 
 .headerSurface::after {
-  content: "";
-  position: absolute;
-  left: clamp(18px, 2vw, 28px);
-  right: clamp(18px, 2vw, 28px);
-  bottom: -10px;
-  height: 22px;
-  background: linear-gradient(180deg, rgba(8, 8, 11, 0.28), transparent);
-  filter: blur(10px);
-  opacity: 0.85;
-  pointer-events: none;
+  content: none;
 }
 
 .headerTop {
@@ -365,7 +162,7 @@
 
 .eyebrow {
   margin: 0;
-  color: rgba(214, 232, 255, 0.82);
+  color: rgba(214, 232, 255, 0.8);
   font-size: 0.888rem;
   line-height: 1;
   font-weight: 800;
@@ -422,22 +219,21 @@
   justify-content: center;
   align-items: flex-start;
   align-self: start;
-  will-change: transform, opacity, filter;
+  will-change: transform, opacity;
   backface-visibility: hidden;
   transition:
-    filter 260ms ease,
-    opacity 220ms ease;
+    opacity 220ms ease,
+    transform 260ms ease;
 }
 
 .cardItem > * {
   width: 100%;
   max-width: min(100%, 280px);
   height: auto;
-  will-change: transform, filter;
+  will-change: transform;
   transform: translateZ(0);
   transition:
     transform 260ms ease,
-    filter 260ms ease,
     opacity 220ms ease;
 }
 
@@ -461,17 +257,17 @@
   content: "";
   position: absolute;
   inset: auto 14% -4% 14%;
-  height: 24%;
+  height: 18%;
   border-radius: 999px;
   background: radial-gradient(
     50% 100% at 50% 0%,
-    rgba(118, 169, 255, 0.18),
+    rgba(118, 169, 255, 0.08),
     transparent 75%
   );
   opacity: 0;
-  filter: blur(14px);
+  filter: none;
   pointer-events: none;
-  transition: opacity 260ms ease;
+  transition: opacity 220ms ease;
 }
 
 .cardItem:hover {
@@ -479,20 +275,20 @@
 }
 
 .cardItem:hover > * {
-  transform: translateY(-6px) scale(1.01);
+  transform: translateY(-4px) scale(1.008);
 }
 
 .cardItem:hover::after {
-  opacity: 0.72;
+  opacity: 0.32;
 }
 
 .cardItemActive {
   z-index: 3;
-  filter: drop-shadow(0 0 18px rgba(113, 164, 255, 0.18));
+  filter: none;
 }
 
 .cardItemActive::after {
-  opacity: calc(0.48 + var(--cluster-hero-surge) * 0.24);
+  opacity: 0.22;
 }
 
 .emptyState {
@@ -557,7 +353,6 @@
 @media (max-width: 1080px) {
   .root {
     --technology-cluster-sticky-top: clamp(68px, 7.2vh, 96px);
-
     padding: clamp(18px, 2.2vw, 24px);
     border-radius: 26px;
   }
@@ -597,7 +392,7 @@
   }
 
   .cardItem:hover > * {
-    transform: translateY(-4px) scale(1.008);
+    transform: translateY(-3px) scale(1.006);
   }
 }
 
@@ -611,7 +406,7 @@
   }
 
   .headerSurface {
-    padding: 16px 16px;
+    padding: 16px;
     border-radius: 22px;
   }
 
@@ -630,12 +425,6 @@
     max-width: min(100%, 244px);
   }
 
-  .networkSvg,
-  .scanPulse,
-  .scanPulseAlt {
-    opacity: 0.72;
-  }
-
   .title {
     font-size: clamp(1.42rem, 5vw, 1.92rem);
   }
@@ -652,13 +441,12 @@
 @media (max-width: 560px) {
   .root {
     --technology-cluster-sticky-top: 60px;
-
     padding: 18px 16px;
     border-radius: 22px;
   }
 
   .headerSurface {
-    padding: 14px 14px;
+    padding: 14px;
     border-radius: 20px;
   }
 
@@ -690,17 +478,8 @@
   .root,
   .cardItem,
   .cardItem > *,
-  .networkLayer,
-  .energyAura,
-  .energyBeam,
-  .energyGrid,
-  .energyGlow,
-  .scanPulse,
-  .scanPulseAlt,
   .headerSticky,
-  .headerSurface,
-  .visualViewport,
-  .energyField {
+  .headerSurface {
     transition: none !important;
     animation: none !important;
     transform: none !important;

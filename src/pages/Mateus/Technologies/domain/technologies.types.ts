@@ -51,16 +51,26 @@ export type TechnologyVisuals = Readonly<{
   gallery?: readonly TechnologyMediaAsset[];
 }>;
 
-export type TechnologyTrunfoCategoryKey =
-  | "cloud-infrastructure"
-  | "frontend-mobile"
-  | "backend-apis"
-  | "datastorage-messaging";
+export type TechnologyStarsValue = number;
+
+export type TechnologyStarsStatId =
+  | "projetos"
+  | "arquiteturas"
+  | "iaAplicada";
+
+export type TechnologyStarsStat = Readonly<{
+  id: TechnologyStarsStatId;
+  label: string;
+  value: TechnologyStarsValue;
+  max: number;
+}>;
+
+export type TechnologyTrunfoStatValue = string | number;
 
 export type TechnologyTrunfoStat = Readonly<{
   id: string;
   label: string;
-  value: string | number;
+  value: TechnologyTrunfoStatValue;
 }>;
 
 export type TechnologyTrunfoEntry = Readonly<{

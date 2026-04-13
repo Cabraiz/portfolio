@@ -19,7 +19,6 @@ type RevealTargets = Readonly<{
   legend: HTMLElement | null;
   cards: HTMLElement[];
   badges: HTMLElement[];
-  ornaments: HTMLElement[];
 }>;
 
 function prefersReducedMotion(): boolean {
@@ -56,9 +55,6 @@ function getRevealTargets(cluster: HTMLElement): RevealTargets {
     badges: Array.from(
       cluster.querySelectorAll<HTMLElement>("[data-technology-cluster-badge]"),
     ),
-    ornaments: Array.from(
-      cluster.querySelectorAll<HTMLElement>("[data-technology-cluster-ornament]"),
-    ),
   };
 }
 
@@ -93,6 +89,14 @@ function clearClusterInlineStyles(
   clusters.forEach((cluster) => {
     const targets = getRevealTargets(cluster);
 
+    gsap.killTweensOf([
+      targets.root,
+      targets.header,
+      targets.legend,
+      ...targets.cards,
+      ...targets.badges,
+    ]);
+
     gsap.set(
       [
         targets.root,
@@ -100,7 +104,6 @@ function clearClusterInlineStyles(
         targets.legend,
         ...targets.cards,
         ...targets.badges,
-        ...targets.ornaments,
       ].filter(Boolean),
       {
         clearProps:
@@ -118,14 +121,12 @@ function setInitialRevealState(
 ): void {
   gsap.set(targets.root, {
     autoAlpha: 1,
-    transformPerspective: 1200,
-    transformStyle: "preserve-3d",
   });
 
   if (targets.header) {
     gsap.set(targets.header, {
       autoAlpha: 0,
-      y: 28,
+      y: 18,
       willChange: "transform, opacity",
       force3D: true,
     });
@@ -134,7 +135,7 @@ function setInitialRevealState(
   if (targets.legend) {
     gsap.set(targets.legend, {
       autoAlpha: 0,
-      y: 18,
+      y: 12,
       willChange: "transform, opacity",
       force3D: true,
     });
@@ -143,8 +144,8 @@ function setInitialRevealState(
   if (targets.badges.length > 0) {
     gsap.set(targets.badges, {
       autoAlpha: 0,
-      y: 14,
-      scale: 0.96,
+      y: 10,
+      scale: 0.985,
       willChange: "transform, opacity",
       force3D: true,
     });
@@ -153,19 +154,8 @@ function setInitialRevealState(
   if (targets.cards.length > 0) {
     gsap.set(targets.cards, {
       autoAlpha: 0,
-      y: 34,
-      scale: 0.94,
-      rotateX: 5,
-      transformOrigin: "50% 70%",
-      willChange: "transform, opacity",
-      force3D: true,
-    });
-  }
-
-  if (targets.ornaments.length > 0) {
-    gsap.set(targets.ornaments, {
-      y: 0,
-      autoAlpha: 0.55,
+      y: 20,
+      scale: 0.985,
       willChange: "transform, opacity",
       force3D: true,
     });
@@ -180,14 +170,14 @@ function createIntroTimeline(
 
   const introTimeline = gsap.timeline({
     defaults: {
-      duration: 0.78,
-      ease: "power3.out",
+      duration: 0.58,
+      ease: "power2.out",
       overwrite: "auto",
     },
     scrollTrigger: {
       trigger: targets.root,
-      start: "top 82%",
-      end: "bottom 26%",
+      start: "top 86%",
+      end: "bottom 20%",
       toggleActions: "play none none reverse",
       fastScrollEnd: true,
       invalidateOnRefresh: true,
@@ -212,7 +202,7 @@ function createIntroTimeline(
         autoAlpha: 1,
         y: 0,
       },
-      0.06,
+      0.04,
     );
   }
 
@@ -223,9 +213,9 @@ function createIntroTimeline(
         autoAlpha: 1,
         y: 0,
         scale: 1,
-        stagger: 0.035,
+        stagger: 0.025,
       },
-      0.1,
+      0.08,
     );
   }
 
@@ -236,11 +226,10 @@ function createIntroTimeline(
         autoAlpha: 1,
         y: 0,
         scale: 1,
-        rotateX: 0,
-        stagger: 0.065,
-        duration: 0.84,
+        stagger: 0.045,
+        duration: 0.62,
       },
-      0.14,
+      0.12,
     );
   }
 
@@ -249,63 +238,14 @@ function createIntroTimeline(
   });
 }
 
-function createParallaxTimeline(
-  gsap: typeof import("gsap").default,
-  targets: RevealTargets,
-  clusterIndex: number,
-): void {
-  if (targets.ornaments.length === 0 && targets.cards.length === 0) {
-    return;
-  }
-
-  const parallaxTimeline = gsap.timeline({
-    defaults: {
-      ease: "none",
-      overwrite: "auto",
-    },
-    scrollTrigger: {
-      trigger: targets.root,
-      start: "top bottom",
-      end: "bottom top",
-      scrub: 0.8,
-      invalidateOnRefresh: true,
-    },
-  });
-
-  if (targets.ornaments.length > 0) {
-    parallaxTimeline.to(
-      targets.ornaments,
-      {
-        y: () => gsap.utils.random(-18, 18),
-        autoAlpha: 0.8,
-        stagger: 0.04,
-      },
-      0,
-    );
-  }
-
-  if (targets.cards.length > 0) {
-    parallaxTimeline.to(
-      targets.cards,
-      {
-        y: () => -10 - clusterIndex * 1.5,
-        stagger: 0.035,
-      },
-      0,
-    );
-  }
-}
-
 function setupClusterMotion(
   gsap: typeof import("gsap").default,
   cluster: HTMLElement,
-  clusterIndex: number,
 ): void {
   const targets = getRevealTargets(cluster);
 
   setInitialRevealState(gsap, targets);
   createIntroTimeline(gsap, targets);
-  createParallaxTimeline(gsap, targets, clusterIndex);
 }
 
 function syncClusterActiveState(
@@ -320,19 +260,32 @@ function syncClusterActiveState(
   markClusterActive(cluster, isActive);
 
   if (motionDisabled) {
+    gsap.killTweensOf(cluster);
     gsap.set(cluster, {
       clearProps: "opacity,transform,filter,willChange",
     });
 
+    const cards = cluster.querySelectorAll<HTMLElement>(
+      "[data-technology-cluster-card]",
+    );
+
+    if (cards.length > 0) {
+      gsap.killTweensOf(cards);
+      gsap.set(cards, {
+        clearProps: "opacity,transform,filter,willChange",
+      });
+    }
+
     return;
   }
 
+  gsap.killTweensOf(cluster);
+
   gsap.to(cluster, {
-    duration: 0.42,
+    duration: 0.32,
     ease: "power2.out",
-    scale: isActive ? 1 : 0.985,
-    autoAlpha: isActive ? 1 : 0.82,
-    filter: isActive ? "saturate(1)" : "saturate(0.82)",
+    scale: isActive ? 1 : 0.992,
+    autoAlpha: isActive ? 1 : 0.9,
     overwrite: "auto",
   });
 
@@ -344,12 +297,14 @@ function syncClusterActiveState(
     return;
   }
 
+  gsap.killTweensOf(cards);
+
   gsap.to(cards, {
-    duration: 0.42,
+    duration: 0.32,
     ease: "power2.out",
-    y: isActive ? -4 : 0,
-    scale: isActive ? 1.012 : 1,
-    stagger: 0.018,
+    y: isActive ? -3 : 0,
+    scale: isActive ? 1.008 : 1,
+    stagger: 0.015,
     overwrite: "auto",
   });
 }
@@ -386,8 +341,8 @@ export function useTechnologiesDesktopMotion({
     }
 
     const ctx = gsap.context(() => {
-      clusters.forEach((cluster, index) => {
-        setupClusterMotion(gsap, cluster, index);
+      clusters.forEach((cluster) => {
+        setupClusterMotion(gsap, cluster);
       });
 
       ScrollTrigger.sort();

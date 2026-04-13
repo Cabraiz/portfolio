@@ -1,5 +1,6 @@
 import { memo, type CSSProperties } from "react";
 
+import { getTechnologyStarsStatsByCandidates } from "../../data/technologies.stats";
 import type { TechnologyHexCardItem } from "../hex/TechnologyHexCard";
 import type {
   TechnologyTrunfoEntry,
@@ -15,6 +16,7 @@ function joinClasses(
 
 export type TechnologySpotlightItem = TechnologyHexCardItem &
   Readonly<{
+    label?: string;
     shortName?: string;
     eyebrow?: string;
     subtitle?: string;
@@ -22,9 +24,8 @@ export type TechnologySpotlightItem = TechnologyHexCardItem &
     heroImageSrc?: string;
     heroCaptionTitle?: string;
     heroCaptionText?: string;
-    deliveryLabel?: string;
-    confidenceLabel?: string;
     trunfoData?: TechnologyTrunfoEntry | null;
+    aliases?: readonly string[];
   }>;
 
 type TechnologySpotlightPanelProps = Readonly<{
@@ -34,6 +35,17 @@ type TechnologySpotlightPanelProps = Readonly<{
   emptyTitle?: string;
   emptyText?: string;
 }>;
+
+type SpotlightRenderableStat = Readonly<{
+  id: string;
+  label: string;
+  rawValue: string | number;
+  numericValue: number | null;
+  max: number;
+  formattedValue: string;
+}>;
+
+const DEFAULT_MAX_STARS = 5;
 
 function getInitials(name: string): string {
   const tokens = name
@@ -55,33 +67,15 @@ function getInitials(name: string): string {
 function buildFallbackTrunfo(
   item: TechnologySpotlightItem,
 ): TechnologyTrunfoEntry | null {
-  const stats: TechnologyTrunfoStat[] = [];
+  const jsonStats = getTechnologyStarsStatsByCandidates([
+    item.id,
+    item.name,
+    item.label,
+    item.shortName,
+    ...(item.aliases ?? []),
+  ]);
 
-  if (item.categoryLabel) {
-    stats.push({
-      id: "category",
-      label: "Domínio",
-      value: item.categoryLabel,
-    });
-  }
-
-  if (item.deliveryLabel) {
-    stats.push({
-      id: "delivery",
-      label: "Entrega",
-      value: item.deliveryLabel,
-    });
-  }
-
-  if (item.confidenceLabel) {
-    stats.push({
-      id: "confidence",
-      label: "Recorrência",
-      value: item.confidenceLabel,
-    });
-  }
-
-  if (stats.length === 0) {
+  if (jsonStats.length === 0) {
     return null;
   }
 
@@ -90,8 +84,110 @@ function buildFallbackTrunfo(
     name: item.name,
     imageSrc: item.heroImageSrc ?? null,
     imageAlt: `${item.name} technical card visual`,
-    stats,
+    stats: jsonStats.map((stat) => ({
+      id: stat.id,
+      label: stat.label,
+      value: stat.value,
+    })),
   };
+}
+
+function parseNumericStatValue(value: unknown): number | null {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return Math.min(Math.max(Number(value.toFixed(1)), 0), DEFAULT_MAX_STARS);
+  }
+
+  if (typeof value === "string") {
+    const parsed = Number(value.replace(",", ".").trim());
+
+    if (Number.isFinite(parsed)) {
+      return Math.min(
+        Math.max(Number(parsed.toFixed(1)), 0),
+        DEFAULT_MAX_STARS,
+      );
+    }
+  }
+
+  return null;
+}
+
+function formatStatValue(
+  value: string | number,
+  numericValue: number | null,
+): string {
+  if (numericValue !== null) {
+    return `${numericValue.toFixed(1)}/${DEFAULT_MAX_STARS}`;
+  }
+
+  return String(value);
+}
+
+function normalizeRenderableStats(
+  stats: readonly TechnologyTrunfoStat[],
+): readonly SpotlightRenderableStat[] {
+  return stats.map((stat) => {
+    const numericValue = parseNumericStatValue(stat.value);
+
+    return {
+      id: String(stat.id),
+      label: stat.label,
+      rawValue: stat.value,
+      numericValue,
+      max: DEFAULT_MAX_STARS,
+      formattedValue: formatStatValue(stat.value, numericValue),
+    };
+  });
+}
+
+function getStarFillPercent(starIndex: number, value: number): number {
+  const starStart = starIndex;
+  const starEnd = starIndex + 1;
+
+  if (value >= starEnd) {
+    return 100;
+  }
+
+  if (value <= starStart) {
+    return 0;
+  }
+
+  return Math.round((value - starStart) * 100);
+}
+
+function renderStars(stat: SpotlightRenderableStat) {
+  const ratingValue = stat.numericValue;
+
+  if (ratingValue === null) {
+    return null;
+  }
+
+  return (
+    <div
+      className={styles.statRating}
+      aria-label={`${stat.label}: ${stat.formattedValue}`}
+      title={`${stat.label}: ${stat.formattedValue}`}
+    >
+      {Array.from({ length: stat.max }, (_, index) => {
+        const fillPercent = getStarFillPercent(index, ratingValue);
+
+        return (
+          <span
+            key={`${stat.id}-star-${index}`}
+            className={styles.star}
+            aria-hidden="true"
+          >
+            <span className={styles.starBase}>★</span>
+            <span
+              className={styles.starFill}
+              style={{ width: `${fillPercent}%` }}
+            >
+              ★
+            </span>
+          </span>
+        );
+      })}
+    </div>
+  );
 }
 
 function TechnologySpotlightPanelComponent({
@@ -99,7 +195,7 @@ function TechnologySpotlightPanelComponent({
   className,
   emptyEyebrow = "Technology Spotlight",
   emptyTitle = "Selecione uma tecnologia para abrir o card técnico.",
-  emptyText = "A coluna direita foi preparada para funcionar como um card de trunfo: imagem superior e atributos dinâmicos vindos do JSON da tecnologia.",
+  emptyText = "A coluna direita foi preparada para funcionar como um card técnico com imagem superior e atributos dinâmicos vindos do JSON da tecnologia.",
 }: TechnologySpotlightPanelProps) {
   if (!item) {
     return (
@@ -121,7 +217,7 @@ function TechnologySpotlightPanelComponent({
 
   const heroImageAlt = trunfoData?.imageAlt ?? `${item.name} spotlight visual`;
 
-  const stats: readonly TechnologyTrunfoStat[] = trunfoData?.stats ?? [];
+  const stats = normalizeRenderableStats(trunfoData?.stats ?? []);
 
   const topLeftCode = item.shortName ?? "3B";
   const topRightName = trunfoData?.name ?? item.name;
@@ -154,11 +250,13 @@ function TechnologySpotlightPanelComponent({
           <div className={styles.heroMediaFrame}>
             {heroImageSrc ? (
               <img
+                key={heroImageSrc}
                 src={heroImageSrc}
                 alt={heroImageAlt}
                 className={styles.heroMedia}
                 loading="lazy"
                 decoding="async"
+                draggable={false}
               />
             ) : (
               <div className={styles.heroMediaFallback} aria-hidden="true">
@@ -201,18 +299,12 @@ function TechnologySpotlightPanelComponent({
         </div>
 
         <div className={styles.boardArea}>
-          {item.description ? (
-            <div className={styles.boardSummary}>
-              <p className={styles.boardSummaryText}>{item.description}</p>
-            </div>
-          ) : null}
-
           {stats.length ? (
             <div className={styles.statsList}>
               {stats.map((stat) => (
                 <div key={stat.id} className={styles.statRow}>
                   <span className={styles.statLabel}>{stat.label}</span>
-                  <span className={styles.statValue}>{String(stat.value)}</span>
+                  {renderStars(stat)}
                 </div>
               ))}
             </div>

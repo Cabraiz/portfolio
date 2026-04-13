@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Slackey&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700;800&family=Slackey&display=swap");
 
 .panel {
   --technology-spotlight-accent-rgb: 212, 175, 55;
@@ -138,7 +138,7 @@
   aspect-ratio: 16 / 9;
   min-height: clamp(220px, 21vw, 320px);
   overflow: hidden;
-  border-radius: 0;
+  border-radius: 0 !important;
   background:
     radial-gradient(
       circle at top,
@@ -153,6 +153,15 @@
     100% 100%,
     0 92%
   );
+  -webkit-clip-path: polygon(
+    0 0,
+    100% 0,
+    100% 100%,
+    0 92%
+  );
+  isolation: isolate;
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
 .heroMedia {
@@ -163,13 +172,28 @@
   display: block;
   object-fit: cover;
   object-position: center 30%;
+  border-radius: 0 !important;
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    100% 100%,
+    0 92%
+  );
+  -webkit-clip-path: polygon(
+    0 0,
+    100% 0,
+    100% 100%,
+    0 92%
+  );
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
 .heroMediaOverlay {
   position: absolute;
   inset: 0;
   z-index: 1;
-  border-radius: 0;
+  border-radius: 0 !important;
   background:
     linear-gradient(
       180deg,
@@ -180,6 +204,12 @@
     );
   pointer-events: none;
   clip-path: polygon(
+    0 0,
+    100% 0,
+    100% 100%,
+    0 92%
+  );
+  -webkit-clip-path: polygon(
     0 0,
     100% 0,
     100% 100%,
@@ -209,6 +239,19 @@
   display: grid;
   place-items: center;
   padding: 24px;
+  border-radius: 0 !important;
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    100% 100%,
+    0 92%
+  );
+  -webkit-clip-path: polygon(
+    0 0,
+    100% 0,
+    100% 100%,
+    0 92%
+  );
 }
 
 .heroMediaFallbackInner {
@@ -288,9 +331,9 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  gap: 16px;
+  gap: 18px;
   min-width: 0;
-  padding: 14px 20px;
+  padding: 16px 20px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.075);
   background:
     linear-gradient(
@@ -307,24 +350,61 @@
 
 .statLabel {
   min-width: 0;
-  color: rgba(255, 245, 230, 0.76);
-  font-size: 0.82rem;
-  line-height: 1.25;
-  font-weight: 800;
-  letter-spacing: 0.08em;
+  color: rgba(255, 245, 230, 0.8);
+  font-family: "Lexend", system-ui, sans-serif;
+  font-size: 0.86rem;
+  line-height: 1.2;
+  font-weight: 700;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   word-break: break-word;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.statRating {
+  justify-self: end;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  min-height: 18px;
+  flex-wrap: nowrap;
+}
+
+.star {
+  position: relative;
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  line-height: 1;
+  flex: 0 0 auto;
+}
+
+.starBase,
+.starFill {
+  position: absolute;
+  inset: 0;
+  display: block;
+  font-size: 1rem;
+  line-height: 1;
+  font-family: "Lexend", system-ui, sans-serif;
+  user-select: none;
+}
+
+.starBase {
+  color: rgba(255, 255, 255, 0.16);
+}
+
+.starFill {
+  color: rgb(var(--technology-spotlight-accent-rgb));
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 .statValue {
-  flex-shrink: 0;
-  color: rgb(var(--technology-spotlight-accent-rgb));
-  font-family: "Slackey", system-ui, sans-serif;
-  font-size: clamp(0.94rem, 1.18vw, 1.12rem);
-  line-height: 1.04;
-  font-weight: 400;
-  letter-spacing: 0;
-  text-align: right;
+  display: none;
 }
 
 .statsEmpty {
@@ -421,7 +501,22 @@
   }
 
   .statRow {
-    padding: 13px 16px;
+    gap: 14px;
+    padding: 14px 16px;
+  }
+
+  .statLabel {
+    font-size: 0.8rem;
+  }
+
+  .star {
+    width: 0.95rem;
+    height: 0.95rem;
+  }
+
+  .starBase,
+  .starFill {
+    font-size: 0.95rem;
   }
 
   .statsEmpty {
@@ -430,7 +525,15 @@
 
   .heroMediaFrame {
     min-height: 220px;
-    border-radius: 0;
+    border-radius: 0 !important;
+  }
+
+  .heroMedia {
+    border-radius: 0 !important;
+  }
+
+  .heroMediaOverlay {
+    border-radius: 0 !important;
   }
 
   .heroCornerBadge {
@@ -477,11 +580,26 @@
   }
 
   .statRow {
-    grid-template-columns: 1fr;
-    gap: 8px;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 12px;
   }
 
-  .statValue {
-    text-align: left;
+  .statLabel {
+    font-size: 0.76rem;
+    line-height: 1.18;
+  }
+
+  .statRating {
+    gap: 3px;
+  }
+
+  .star {
+    width: 0.88rem;
+    height: 0.88rem;
+  }
+
+  .starBase,
+  .starFill {
+    font-size: 0.88rem;
   }
 }
