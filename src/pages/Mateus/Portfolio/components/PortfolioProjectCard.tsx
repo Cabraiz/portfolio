@@ -73,23 +73,14 @@ function PortfolioProjectCardComponent({
             )}
           >
             <span className={styles.portfolioProjectCardNavEyebrow}>
-              Navigate
+              Previous project
             </span>
 
             <span className={styles.portfolioProjectCardNavMain}>
               <span className={styles.portfolioProjectCardNavIcon}>←</span>
-              <span className={styles.portfolioProjectCardNavRule} />
-              <span className={styles.portfolioProjectCardNavText}>
-                Previous project
-              </span>
             </span>
           </span>
         </button>
-
-        <div
-          className={styles.portfolioProjectCardNavNeutralZone}
-          aria-hidden="true"
-        />
 
         <button
           type="button"
@@ -110,14 +101,10 @@ function PortfolioProjectCardComponent({
             )}
           >
             <span className={styles.portfolioProjectCardNavEyebrow}>
-              Navigate
+              Next project
             </span>
 
             <span className={styles.portfolioProjectCardNavMain}>
-              <span className={styles.portfolioProjectCardNavText}>
-                Next project
-              </span>
-              <span className={styles.portfolioProjectCardNavRule} />
               <span className={styles.portfolioProjectCardNavIcon}>→</span>
             </span>
           </span>
