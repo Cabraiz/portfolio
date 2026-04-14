@@ -3,7 +3,7 @@ import { memo } from "react";
 import type { PortfolioProject } from "../types";
 import PortfolioProjectMedia from "../ui/media/PortfolioProjectMedia";
 import PortfolioStageSurface from "../ui/stage/PortfolioStageSurface";
-import styles from "../ui/card/PortfolioProjectCard.module.css";
+import styles from "./PortfolioProjectCard.module.css";
 
 type PortfolioProjectCardProps = Readonly<{
   project: PortfolioProject;
@@ -31,12 +31,13 @@ function PortfolioProjectCardComponent({
   const hasLogo =
     typeof project.logoSrc === "string" && project.logoSrc.trim().length > 0;
 
+  const hasPrevious = typeof onPrevious === "function";
+  const hasNext = typeof onNext === "function";
+
   return (
     <PortfolioStageSurface
       project={project}
       className={joinClasses(styles.portfolioProjectCard, className)}
-      onPrevious={onPrevious}
-      onNext={onNext}
       onHoverStart={onHoverStart}
       onHoverEnd={onHoverEnd}
     >
@@ -48,6 +49,80 @@ function PortfolioProjectCardComponent({
         decoding="async"
         draggable={false}
       />
+
+      <div
+        className={styles.portfolioProjectCardNavigationLayer}
+        aria-hidden="true"
+      >
+        <button
+          type="button"
+          className={joinClasses(
+            styles.portfolioProjectCardNavZone,
+            styles.portfolioProjectCardNavZonePrevious,
+          )}
+          onClick={onPrevious}
+          disabled={!hasPrevious}
+          tabIndex={-1}
+          aria-label="Projeto anterior"
+          data-nav-direction="previous"
+        >
+          <span
+            className={joinClasses(
+              styles.portfolioProjectCardNavPill,
+              styles.portfolioProjectCardNavPillPrevious,
+            )}
+          >
+            <span className={styles.portfolioProjectCardNavEyebrow}>
+              Navigate
+            </span>
+
+            <span className={styles.portfolioProjectCardNavMain}>
+              <span className={styles.portfolioProjectCardNavIcon}>←</span>
+              <span className={styles.portfolioProjectCardNavRule} />
+              <span className={styles.portfolioProjectCardNavText}>
+                Previous project
+              </span>
+            </span>
+          </span>
+        </button>
+
+        <div
+          className={styles.portfolioProjectCardNavNeutralZone}
+          aria-hidden="true"
+        />
+
+        <button
+          type="button"
+          className={joinClasses(
+            styles.portfolioProjectCardNavZone,
+            styles.portfolioProjectCardNavZoneNext,
+          )}
+          onClick={onNext}
+          disabled={!hasNext}
+          tabIndex={-1}
+          aria-label="Próximo projeto"
+          data-nav-direction="next"
+        >
+          <span
+            className={joinClasses(
+              styles.portfolioProjectCardNavPill,
+              styles.portfolioProjectCardNavPillNext,
+            )}
+          >
+            <span className={styles.portfolioProjectCardNavEyebrow}>
+              Navigate
+            </span>
+
+            <span className={styles.portfolioProjectCardNavMain}>
+              <span className={styles.portfolioProjectCardNavText}>
+                Next project
+              </span>
+              <span className={styles.portfolioProjectCardNavRule} />
+              <span className={styles.portfolioProjectCardNavIcon}>→</span>
+            </span>
+          </span>
+        </button>
+      </div>
 
       <div className={styles.portfolioProjectCardOverlay}>
         <div className={styles.portfolioProjectCardBottomRow}>

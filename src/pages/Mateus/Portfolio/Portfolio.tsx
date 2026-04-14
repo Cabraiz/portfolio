@@ -1,20 +1,19 @@
 import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-  type CSSProperties,
+	useCallback,
+	useEffect,
+	useMemo,
+	useRef,
+	useState,
+	type CSSProperties,
 } from "react";
 
 import "./model/portfolio.tokens.css";
 import rootStyles from "./core/PortfolioRoot.module.css";
 
-import {
-  defaultPortfolioProjectId,
-  portfolioProjects,
-} from "./portfolio.data";
+import { defaultPortfolioProjectId, portfolioProjects } from "./portfolio.data";
 
 import usePortfolioActiveItem from "./hooks/usePortfolioActiveItem";
+import useLandingSectionNavigation from "../../../features/navigation/useLandingSectionNavigation";
 
 import PortfolioStage from "./components/PortfolioStage";
 import PortfolioTimelineRail from "./ui/rail/PortfolioTimelineRail";
@@ -22,273 +21,300 @@ import PortfolioTimelineRail from "./ui/rail/PortfolioTimelineRail";
 type PortfolioHeightMode = "compact" | "default" | "tall";
 
 type PortfolioResponsivePreset = Readonly<{
-  sectionMinHeight: string;
-  sectionPaddingTop: string;
-  sectionPaddingBottom: string;
-  layoutGap: string;
-  railColumnWidth: string;
-  railCounterSize: string;
-  railGap: string;
-  timelineMaxHeight: string;
-  controlSize: string;
+	sectionMinHeight: string;
+	sectionPaddingTop: string;
+	sectionPaddingBottom: string;
+	layoutGap: string;
+	railColumnWidth: string;
+	railCounterSize: string;
+	railGap: string;
+	timelineMaxHeight: string;
+	controlSize: string;
 }>;
 
 const PORTFOLIO_COMPACT_HEIGHT_MAX = 820;
 const PORTFOLIO_TALL_HEIGHT_MIN = 980;
 const PORTFOLIO_AUTOPLAY_INTERVAL_MS = 4200;
 const PORTFOLIO_SECTION_MIN_HEIGHT =
-  "calc(100dvh - var(--app-navbar-height, 70px))";
+	"calc(100dvh - var(--app-navbar-height, 70px))";
 
 const PORTFOLIO_RESPONSIVE_PRESETS: Record<
-  PortfolioHeightMode,
-  PortfolioResponsivePreset
+	PortfolioHeightMode,
+	PortfolioResponsivePreset
 > = {
-  compact: {
-    sectionMinHeight: PORTFOLIO_SECTION_MIN_HEIGHT,
-    sectionPaddingTop: "clamp(22px, 5.5dvh, 52px)",
-    sectionPaddingBottom: "clamp(22px, 5.5dvh, 52px)",
-    layoutGap: "12px",
-    railColumnWidth: "246px",
-    railCounterSize: "clamp(5.15rem, 6.4vw, 6.75rem)",
-    railGap: "12px",
-    timelineMaxHeight: "100%",
-    controlSize: "38px",
-  },
-  default: {
-    sectionMinHeight: PORTFOLIO_SECTION_MIN_HEIGHT,
-    sectionPaddingTop: "clamp(30px, 7.5dvh, 84px)",
-    sectionPaddingBottom: "clamp(30px, 7.5dvh, 84px)",
-    layoutGap: "16px",
-    railColumnWidth: "284px",
-    railCounterSize: "clamp(5.75rem, 8vw, 8rem)",
-    railGap: "14px",
-    timelineMaxHeight: "100%",
-    controlSize: "44px",
-  },
-  tall: {
-    sectionMinHeight: PORTFOLIO_SECTION_MIN_HEIGHT,
-    sectionPaddingTop: "clamp(38px, 8.5dvh, 108px)",
-    sectionPaddingBottom: "clamp(38px, 8.5dvh, 108px)",
-    layoutGap: "18px",
-    railColumnWidth: "304px",
-    railCounterSize: "clamp(6rem, 8.4vw, 8.4rem)",
-    railGap: "16px",
-    timelineMaxHeight: "100%",
-    controlSize: "46px",
-  },
+	compact: {
+		sectionMinHeight: PORTFOLIO_SECTION_MIN_HEIGHT,
+		sectionPaddingTop: "clamp(22px, 5.5dvh, 52px)",
+		sectionPaddingBottom: "clamp(22px, 5.5dvh, 52px)",
+		layoutGap: "12px",
+		railColumnWidth: "246px",
+		railCounterSize: "clamp(5.15rem, 6.4vw, 6.75rem)",
+		railGap: "12px",
+		timelineMaxHeight: "100%",
+		controlSize: "38px",
+	},
+	default: {
+		sectionMinHeight: PORTFOLIO_SECTION_MIN_HEIGHT,
+		sectionPaddingTop: "clamp(30px, 7.5dvh, 84px)",
+		sectionPaddingBottom: "clamp(30px, 7.5dvh, 84px)",
+		layoutGap: "16px",
+		railColumnWidth: "284px",
+		railCounterSize: "clamp(5.75rem, 8vw, 8rem)",
+		railGap: "14px",
+		timelineMaxHeight: "100%",
+		controlSize: "44px",
+	},
+	tall: {
+		sectionMinHeight: PORTFOLIO_SECTION_MIN_HEIGHT,
+		sectionPaddingTop: "clamp(38px, 8.5dvh, 108px)",
+		sectionPaddingBottom: "clamp(38px, 8.5dvh, 108px)",
+		layoutGap: "18px",
+		railColumnWidth: "304px",
+		railCounterSize: "clamp(6rem, 8.4vw, 8.4rem)",
+		railGap: "16px",
+		timelineMaxHeight: "100%",
+		controlSize: "46px",
+	},
 };
 
 function resolvePortfolioHeightMode(
-  viewportHeight: number,
+	viewportHeight: number
 ): PortfolioHeightMode {
-  if (viewportHeight <= PORTFOLIO_COMPACT_HEIGHT_MAX) {
-    return "compact";
-  }
+	if (viewportHeight <= PORTFOLIO_COMPACT_HEIGHT_MAX) {
+		return "compact";
+	}
 
-  if (viewportHeight >= PORTFOLIO_TALL_HEIGHT_MIN) {
-    return "tall";
-  }
+	if (viewportHeight >= PORTFOLIO_TALL_HEIGHT_MIN) {
+		return "tall";
+	}
 
-  return "default";
+	return "default";
 }
 
 function getInitialPortfolioHeightMode(): PortfolioHeightMode {
-  if (typeof globalThis.window === "undefined") {
-    return "default";
-  }
+	if (!globalThis.window) {
+		return "default";
+	}
 
-  return resolvePortfolioHeightMode(globalThis.innerHeight);
+	return resolvePortfolioHeightMode(globalThis.innerHeight);
 }
 
 export default function Portfolio() {
-  const [heightMode, setHeightMode] = useState<PortfolioHeightMode>(
-    getInitialPortfolioHeightMode,
-  );
-  const [isAutoplayPaused, setIsAutoplayPaused] = useState(false);
+	const [heightMode, setHeightMode] = useState<PortfolioHeightMode>(
+		getInitialPortfolioHeightMode
+	);
+	const [isAutoplayPaused, setIsAutoplayPaused] = useState(false);
 
-  const {
-    activeIndex,
-    activeProject,
-    hasPrevious,
-    hasNext,
-    setActiveIndex,
-    goToPrevious,
-    goToNext,
-  } = usePortfolioActiveItem({
-    projects: portfolioProjects,
-    defaultProjectId: defaultPortfolioProjectId,
-  });
+	const {
+		activeIndex,
+		activeProject,
+		hasPrevious,
+		hasNext,
+		setActiveIndex,
+		goToPrevious,
+		goToNext,
+	} = usePortfolioActiveItem({
+		projects: portfolioProjects,
+		defaultProjectId: defaultPortfolioProjectId,
+	});
 
-  const canAutoplay = portfolioProjects.length > 1;
+	const { activeSectionId } = useLandingSectionNavigation();
+	const wasPortfolioActiveRef = useRef(false);
 
-  useEffect(() => {
-    if (typeof globalThis.window === "undefined") {
-      return undefined;
-    }
+	const canAutoplay = portfolioProjects.length > 1;
+	const isPortfolioActive = activeSectionId === "portfolio";
 
-    function syncHeightMode() {
-      setHeightMode(resolvePortfolioHeightMode(globalThis.innerHeight));
-    }
+	useEffect(() => {
+		if (!globalThis.window) {
+			return undefined;
+		}
 
-    syncHeightMode();
-    globalThis.addEventListener("resize", syncHeightMode);
+		function syncHeightMode() {
+			setHeightMode(resolvePortfolioHeightMode(globalThis.innerHeight));
+		}
 
-    return () => {
-      globalThis.removeEventListener("resize", syncHeightMode);
-    };
-  }, []);
+		syncHeightMode();
+		globalThis.addEventListener("resize", syncHeightMode);
 
-  useEffect(() => {
-    if (typeof globalThis.window === "undefined") {
-      return undefined;
-    }
+		return () => {
+			globalThis.removeEventListener("resize", syncHeightMode);
+		};
+	}, []);
 
-    if (!canAutoplay || isAutoplayPaused) {
-      return undefined;
-    }
+	useEffect(() => {
+		const hasJustEnteredPortfolio =
+			isPortfolioActive && !wasPortfolioActiveRef.current;
 
-    const intervalId = globalThis.setInterval(() => {
-      goToNext();
-    }, PORTFOLIO_AUTOPLAY_INTERVAL_MS);
+		if (hasJustEnteredPortfolio) {
+			setActiveIndex(0);
+			setIsAutoplayPaused(false);
+		}
 
-    return () => {
-      globalThis.clearInterval(intervalId);
-    };
-  }, [canAutoplay, goToNext, isAutoplayPaused]);
+		wasPortfolioActiveRef.current = isPortfolioActive;
+	}, [isPortfolioActive, setActiveIndex]);
 
-  useEffect(() => {
-    if (typeof globalThis.window === "undefined") {
-      return undefined;
-    }
+	useEffect(() => {
+		if (!globalThis.window) {
+			return undefined;
+		}
 
-    function handleGlobalKeyDown(event: KeyboardEvent) {
-      if (!canAutoplay) {
-        return;
-      }
+		if (!isPortfolioActive || !canAutoplay || isAutoplayPaused) {
+			return undefined;
+		}
 
-      const target = event.target;
-      const isTypingTarget =
-        target instanceof HTMLElement &&
-        (target.tagName === "INPUT" ||
-          target.tagName === "TEXTAREA" ||
-          target.tagName === "SELECT" ||
-          target.isContentEditable);
+		const intervalId = globalThis.setInterval(() => {
+			goToNext();
+		}, PORTFOLIO_AUTOPLAY_INTERVAL_MS);
 
-      const isWithinTimelineRail =
-        target instanceof HTMLElement &&
-        Boolean(target.closest('[data-portfolio-timeline="true"]'));
+		return () => {
+			globalThis.clearInterval(intervalId);
+		};
+	}, [canAutoplay, goToNext, isAutoplayPaused, isPortfolioActive]);
 
-      if (isTypingTarget || isWithinTimelineRail) {
-        return;
-      }
+	useEffect(() => {
+		if (!globalThis.window) {
+			return undefined;
+		}
 
-      if (event.key === "ArrowLeft" && hasPrevious) {
-        event.preventDefault();
-        goToPrevious();
-        return;
-      }
+		function handleGlobalKeyDown(event: KeyboardEvent) {
+			if (!isPortfolioActive || !canAutoplay) {
+				return;
+			}
 
-      if (event.key === "ArrowRight" && hasNext) {
-        event.preventDefault();
-        goToNext();
-      }
-    }
+			const target = event.target;
+			const isTypingTarget =
+				target instanceof HTMLElement &&
+				(target.tagName === "INPUT" ||
+					target.tagName === "TEXTAREA" ||
+					target.tagName === "SELECT" ||
+					target.isContentEditable);
 
-    globalThis.addEventListener("keydown", handleGlobalKeyDown);
+			const isWithinTimelineRail =
+				target instanceof HTMLElement &&
+				Boolean(target.closest('[data-portfolio-timeline="true"]'));
 
-    return () => {
-      globalThis.removeEventListener("keydown", handleGlobalKeyDown);
-    };
-  }, [canAutoplay, goToNext, goToPrevious, hasNext, hasPrevious]);
+			if (isTypingTarget || isWithinTimelineRail) {
+				return;
+			}
 
-  const handleAutoplayPause = useCallback(() => {
-    setIsAutoplayPaused(true);
-  }, []);
+			if (event.key === "ArrowLeft" && hasPrevious) {
+				event.preventDefault();
+				goToPrevious();
+				return;
+			}
 
-  const handleAutoplayResume = useCallback(() => {
-    setIsAutoplayPaused(false);
-  }, []);
+			if (event.key === "ArrowRight" && hasNext) {
+				event.preventDefault();
+				goToNext();
+			}
+		}
 
-  const handleSelectProjectIndex = useCallback(
-    (index: number) => {
-      setActiveIndex(index);
-      setIsAutoplayPaused(true);
-    },
-    [setActiveIndex],
-  );
+		globalThis.addEventListener("keydown", handleGlobalKeyDown);
 
-  const railItems = useMemo(
-    () =>
-      portfolioProjects.map((project) => ({
-        id: project.id,
-        year: project.year,
-        title: project.name,
-        subtitle: project.subtitle,
-        statusLabel: project.statusLabel,
-        railLogoSrc: project.logoSrc,
-        railLogoAlt: project.logoAlt,
-        isActive: project.id === activeProject.id,
-      })),
-    [activeProject.id],
-  );
+		return () => {
+			globalThis.removeEventListener("keydown", handleGlobalKeyDown);
+		};
+	}, [
+		canAutoplay,
+		goToNext,
+		goToPrevious,
+		hasNext,
+		hasPrevious,
+		isPortfolioActive,
+	]);
 
-  const responsivePreset = PORTFOLIO_RESPONSIVE_PRESETS[heightMode];
+	const handleAutoplayPause = useCallback(() => {
+		setIsAutoplayPaused(true);
+	}, []);
 
-  const responsiveStyle = useMemo(
-    () =>
-      ({
-        "--portfolio-section-min-height": responsivePreset.sectionMinHeight,
-        "--portfolio-section-padding-top": responsivePreset.sectionPaddingTop,
-        "--portfolio-section-padding-bottom":
-          responsivePreset.sectionPaddingBottom,
-        "--portfolio-layout-gap": responsivePreset.layoutGap,
-        "--portfolio-rail-column-width": responsivePreset.railColumnWidth,
-        "--portfolio-rail-counter-size": responsivePreset.railCounterSize,
-        "--portfolio-rail-gap": responsivePreset.railGap,
-        "--portfolio-stage-aspect-ratio": "16 / 9",
-        "--portfolio-timeline-max-height":
-          responsivePreset.timelineMaxHeight,
-        "--portfolio-control-size": responsivePreset.controlSize,
-      }) as CSSProperties,
-    [responsivePreset],
-  );
+	const handleAutoplayResume = useCallback(() => {
+		if (!isPortfolioActive) {
+			return;
+		}
 
-  return (
-    <section
-      className={rootStyles.portfolioRoot}
-      aria-label="Portfólio"
-      data-portfolio-root="true"
-      data-portfolio-height-mode={heightMode}
-      data-portfolio-autoplay={isAutoplayPaused ? "paused" : "running"}
-      style={responsiveStyle}
-    >
-      <div className={rootStyles.portfolioSection}>
-        <div className={rootStyles.portfolioContent}>
-          <div className={rootStyles.portfolioStageColumn}>
-            <PortfolioStage
-              project={activeProject}
-              onPrevious={goToPrevious}
-              onNext={goToNext}
-              onHoverStart={handleAutoplayPause}
-              onHoverEnd={handleAutoplayResume}
-            />
-          </div>
+		setIsAutoplayPaused(false);
+	}, [isPortfolioActive]);
 
-          <aside
-            className={rootStyles.portfolioRailColumn}
-            aria-label="Navegação de projetos"
-          >
-            <PortfolioTimelineRail
-              items={railItems}
-              activeIndex={activeIndex}
-              paused={isAutoplayPaused}
-              counterLabel="PROJECT INDEX"
-              counterCaption="PORTFOLIO"
-              onSelectIndex={handleSelectProjectIndex}
-            />
-          </aside>
-        </div>
-      </div>
-    </section>
-  );
+	const handleSelectProjectIndex = useCallback(
+		(index: number) => {
+			setActiveIndex(index);
+			setIsAutoplayPaused(true);
+		},
+		[setActiveIndex]
+	);
+
+	const railItems = useMemo(
+		() =>
+			portfolioProjects.map((project) => ({
+				id: project.id,
+				year: project.year,
+				title: project.name,
+				subtitle: project.subtitle,
+				statusLabel: project.statusLabel,
+				railLogoSrc: project.logoSrc,
+				railLogoAlt: project.logoAlt,
+				isActive: project.id === activeProject.id,
+			})),
+		[activeProject.id]
+	);
+
+	const responsivePreset = PORTFOLIO_RESPONSIVE_PRESETS[heightMode];
+
+	const responsiveStyle = useMemo(
+		() =>
+			({
+				"--portfolio-section-min-height": responsivePreset.sectionMinHeight,
+				"--portfolio-section-padding-top": responsivePreset.sectionPaddingTop,
+				"--portfolio-section-padding-bottom":
+					responsivePreset.sectionPaddingBottom,
+				"--portfolio-layout-gap": responsivePreset.layoutGap,
+				"--portfolio-rail-column-width": responsivePreset.railColumnWidth,
+				"--portfolio-rail-counter-size": responsivePreset.railCounterSize,
+				"--portfolio-rail-gap": responsivePreset.railGap,
+				"--portfolio-stage-aspect-ratio": "16 / 9",
+				"--portfolio-timeline-max-height": responsivePreset.timelineMaxHeight,
+				"--portfolio-control-size": responsivePreset.controlSize,
+			}) as CSSProperties,
+		[responsivePreset]
+	);
+
+	return (
+		<section
+			className={rootStyles.portfolioRoot}
+			aria-label="Portfólio"
+			data-portfolio-root="true"
+			data-portfolio-height-mode={heightMode}
+			data-portfolio-active={isPortfolioActive ? "true" : "false"}
+			data-portfolio-autoplay={isAutoplayPaused ? "paused" : "running"}
+			style={responsiveStyle}
+		>
+			<div className={rootStyles.portfolioSection}>
+				<div className={rootStyles.portfolioContent}>
+					<div className={rootStyles.portfolioStageColumn}>
+						<PortfolioStage
+							project={activeProject}
+							onPrevious={goToPrevious}
+							onNext={goToNext}
+							onHoverStart={handleAutoplayPause}
+							onHoverEnd={handleAutoplayResume}
+						/>
+					</div>
+
+					<aside
+						className={rootStyles.portfolioRailColumn}
+						aria-label="Navegação de projetos"
+					>
+						<PortfolioTimelineRail
+							items={railItems}
+							activeIndex={activeIndex}
+							paused={isAutoplayPaused}
+							counterLabel="PROJECT INDEX"
+							counterCaption="PORTFOLIO"
+							onSelectIndex={handleSelectProjectIndex}
+						/>
+					</aside>
+				</div>
+			</div>
+		</section>
+	);
 }
