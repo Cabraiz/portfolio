@@ -136,23 +136,25 @@
 
 .portfolioProjectCardNavEyebrow {
   position: absolute;
-  left: 50%;
   bottom: calc(100% + 10px);
-  transform: translateX(-50%);
   z-index: 2;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  min-height: 28px;
   padding: 7px 10px;
   border-radius: 999px;
+  max-width: min(220px, 22vw);
+  overflow: hidden;
   white-space: nowrap;
+  text-overflow: ellipsis;
   font-size: 0.56rem;
   font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   line-height: 1;
-  color: rgba(244, 247, 251, 0.78);
-  background: rgba(10, 12, 18, 0.44);
+  color: rgba(244, 247, 251, 0.82);
+  background: rgba(10, 12, 18, 0.48);
   border: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0 8px 18px rgba(0, 0, 0, 0.16);
   opacity: 0;
@@ -163,11 +165,17 @@
 }
 
 .portfolioProjectCardNavPillPrevious .portfolioProjectCardNavEyebrow {
-  transform: translateX(-50%) translateY(4px);
+  left: 0;
+  transform: translateY(4px);
+  transform-origin: left center;
+  text-align: left;
 }
 
 .portfolioProjectCardNavPillNext .portfolioProjectCardNavEyebrow {
-  transform: translateX(-50%) translateY(4px);
+  right: 0;
+  transform: translateY(4px);
+  transform-origin: right center;
+  text-align: right;
 }
 
 .portfolioProjectCardNavMain {
@@ -419,9 +427,12 @@
     opacity: 1;
   }
 
-  .portfolioProjectCardNavZonePrevious:hover .portfolioProjectCardNavEyebrow,
+  .portfolioProjectCardNavZonePrevious:hover .portfolioProjectCardNavEyebrow {
+    transform: translateY(0);
+  }
+
   .portfolioProjectCardNavZoneNext:hover .portfolioProjectCardNavEyebrow {
-    transform: translateX(-50%) translateY(0);
+    transform: translateY(0);
   }
 
   .portfolioProjectCardNavZonePrevious:hover .portfolioProjectCardNavIcon {
@@ -441,6 +452,18 @@
   .portfolioProjectCardNavPill {
     width: 72px;
     height: 72px;
+  }
+
+  .portfolioProjectCardNavEyebrow {
+    max-width: 240px;
+  }
+}
+
+@media (max-width: 1180px) {
+  .portfolioProjectCardNavEyebrow {
+    max-width: 180px;
+    font-size: 0.53rem;
+    letter-spacing: 0.16em;
   }
 }
 
