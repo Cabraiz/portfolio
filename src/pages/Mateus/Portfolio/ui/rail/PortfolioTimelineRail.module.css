@@ -21,6 +21,10 @@
   --portfolio-rail-accent-soft: rgba(242, 201, 76, 0.18);
   --portfolio-rail-accent-border: rgba(242, 201, 76, 0.28);
 
+  --portfolio-rail-logo-slot-size: 56px;
+  --portfolio-rail-logo-inner-size: 80%;
+  --portfolio-rail-logo-left-radius: 0.62rem;
+
   position: relative;
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
@@ -106,7 +110,7 @@
   width: 100%;
   min-width: 0;
   min-height: 72px;
-  padding: 0.74rem 0.82rem 0.74rem 0.94rem;
+  padding: 0.74rem 0 0.74rem 0.94rem;
   border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: clamp(1rem, 1.1vw, 1.15rem);
   background: linear-gradient(
@@ -125,6 +129,7 @@
     box-shadow 220ms ease,
     opacity 220ms ease;
   isolation: isolate;
+  overflow: hidden;
 }
 
 .card::before {
@@ -204,10 +209,11 @@
   position: relative;
   z-index: 1;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 34px;
-  column-gap: 0.52rem;
+  grid-template-columns: minmax(0, 1fr) var(--portfolio-rail-logo-slot-size);
+  column-gap: 0.4rem;
   align-items: center;
   min-width: 0;
+  transform: translateY(-2px);
 }
 
 .cardContent {
@@ -270,28 +276,45 @@
 }
 
 .logoSlot {
-  display: grid;
-  place-items: center;
-  inline-size: 34px;
-  block-size: 34px;
-  min-inline-size: 34px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: var(--portfolio-rail-logo-slot-size);
+  block-size: var(--portfolio-rail-logo-slot-size);
+  min-inline-size: var(--portfolio-rail-logo-slot-size);
+  min-block-size: var(--portfolio-rail-logo-slot-size);
+  max-inline-size: var(--portfolio-rail-logo-slot-size);
+  max-block-size: var(--portfolio-rail-logo-slot-size);
+  aspect-ratio: 1 / 1;
+  padding: 0;
   align-self: center;
   justify-self: end;
-  border-radius: 0.62rem;
+  margin: 0;
+  box-sizing: border-box;
   background: rgba(255, 255, 255, 0.035);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border: none;
+  border-left: 1px solid rgba(255, 255, 255, 0.06);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
   overflow: hidden;
+  border-top-left-radius: var(--portfolio-rail-logo-left-radius);
+  border-bottom-left-radius: var(--portfolio-rail-logo-left-radius);
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  flex: 0 0 var(--portfolio-rail-logo-slot-size);
 }
 
 .logo {
   display: block;
-  inline-size: auto;
-  block-size: auto;
-  max-inline-size: 68%;
-  max-block-size: 68%;
+  width: var(--portfolio-rail-logo-inner-size);
+  height: var(--portfolio-rail-logo-inner-size);
+  max-width: var(--portfolio-rail-logo-inner-size);
+  max-height: var(--portfolio-rail-logo-inner-size);
+  margin: 0 auto;
   object-fit: contain;
+  object-position: center;
   filter: brightness(1.02) contrast(1.04);
+  flex-shrink: 0;
 }
 
 .logoFallback {
@@ -320,6 +343,9 @@
 
 @media (max-height: 820px) {
   .rail {
+    --portfolio-rail-logo-slot-size: 50px;
+    --portfolio-rail-logo-inner-size: 78%;
+    --portfolio-rail-logo-left-radius: 0.58rem;
     padding: 0.72rem;
   }
 
@@ -329,7 +355,7 @@
 
   .card {
     min-height: 68px;
-    padding: 0.7rem 0.78rem 0.7rem 0.9rem;
+    padding: 0.7rem 0 0.7rem 0.9rem;
   }
 
   .card::after {
@@ -338,8 +364,7 @@
   }
 
   .cardGrid {
-    grid-template-columns: minmax(0, 1fr) 32px;
-    column-gap: 0.48rem;
+    column-gap: 0.36rem;
   }
 
   .title {
@@ -349,16 +374,13 @@
   .subtitle {
     font-size: clamp(0.54rem, 0.58vw, 0.6rem);
   }
-
-  .logoSlot {
-    inline-size: 32px;
-    block-size: 32px;
-    min-inline-size: 32px;
-  }
 }
 
 @media (max-width: 1280px) {
   .rail {
+    --portfolio-rail-logo-slot-size: 52px;
+    --portfolio-rail-logo-inner-size: 79%;
+    --portfolio-rail-logo-left-radius: 0.6rem;
     padding: 0.74rem;
   }
 
@@ -368,11 +390,11 @@
 
   .card {
     min-height: 70px;
-    padding: 0.72rem 0.8rem 0.72rem 0.92rem;
+    padding: 0.72rem 0 0.72rem 0.92rem;
   }
 
   .cardGrid {
-    grid-template-columns: minmax(0, 1fr) 33px;
+    column-gap: 0.38rem;
   }
 
   .title {
@@ -381,12 +403,6 @@
 
   .subtitle {
     font-size: clamp(0.56rem, 0.6vw, 0.62rem);
-  }
-
-  .logoSlot {
-    inline-size: 33px;
-    block-size: 33px;
-    min-inline-size: 33px;
   }
 }
 
