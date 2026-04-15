@@ -154,7 +154,24 @@ function PortfolioProjectMediaComponent({
   const objectPosition = resolveObjectPosition(project);
   const compactObjectPosition = resolveCompactObjectPosition(project);
   const aspectRatio = resolveAspectRatio(project);
-  const worldLocation = resolveWorldLocation(project);
+
+  /**
+   * Payload estável do globo.
+   * A ideia aqui é desacoplar a mídia visual da imagem
+   * do payload geográfico consumido pelo globo.
+   */
+  const worldLocation = useMemo(() => resolveWorldLocation(project), [project]);
+
+  const worldGlobeLocation = useMemo(
+    () =>
+      worldLocation
+        ? {
+            lat: worldLocation.lat,
+            lng: worldLocation.lng,
+          }
+        : null,
+    [worldLocation]
+  );
 
   const style = useMemo(
     () =>
@@ -231,7 +248,7 @@ function PortfolioProjectMediaComponent({
           </div>
         )}
 
-        {worldLocation ? (
+        {worldLocation && worldGlobeLocation ? (
           <PortfolioProjectWorldGlobe
             className={styles.portfolioProjectMediaWorldGlobe}
             compact
@@ -239,10 +256,7 @@ function PortfolioProjectMediaComponent({
             country={worldLocation.country}
             city={worldLocation.city}
             region={worldLocation.region}
-            location={{
-              lat: worldLocation.lat,
-              lng: worldLocation.lng,
-            }}
+            location={worldGlobeLocation}
             showHeader={false}
             showFooterCard
             showConnectionArc

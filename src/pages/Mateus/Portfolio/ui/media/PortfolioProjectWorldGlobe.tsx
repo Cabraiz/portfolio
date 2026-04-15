@@ -60,20 +60,44 @@ const INITIAL_SIZE: CanvasSize = {
 };
 
 /**
- * Velocidade do giro contínuo.
- *
- * Aumente para girar mais rápido.
- * Diminua para girar mais devagar.
+ * Auto-rotação base do mundo.
+ * Mantida baixa para não contaminar o foco.
  */
 const AUTO_ROTATE_SPEED = 0.0024;
 
 /**
- * Suavização do phi orbital.
- *
- * Quanto maior, mais rápido encosta no alvo.
- * Quanto menor, mais macio.
+ * Suavização do phi renderizado.
  */
-const ORBITAL_PHI_LERP = 0.075;
+const PHI_LERP = 0.075;
+
+/**
+ * Suavização do theta renderizado.
+ */
+const THETA_LERP = 0.12;
+
+/**
+ * Quanto a micro-rotação estética pode influenciar no phi final
+ * quando o globo já está assentado.
+ *
+ * Mantido bem pequeno para não deslocar visualmente o destino.
+ */
+const IDLE_ORBIT_MAX_OFFSET = 0.08;
+
+/**
+ * Velocidade com que a rotação residual é drenada durante transição.
+ */
+const TRANSITION_ORBIT_DAMPING = 0.18;
+
+/**
+ * Velocidade com que a micro-rotação volta quando o globo está assentado.
+ */
+const IDLE_ORBIT_RETURN_LERP = 0.02;
+
+/**
+ * Duração padrão da viagem entre projetos.
+ */
+const COMPACT_TRANSITION_DURATION_MS = 1225;
+const DEFAULT_TRANSITION_DURATION_MS = 1040;
 
 function joinClasses(
   ...classes: Array<string | false | null | undefined>
@@ -155,7 +179,14 @@ function lerpAngle(from: number, to: number, t: number): number {
   return normalizeAngle(from + delta * t);
 }
 
-function useCanvasSize<T extends HTMLElement>(): [RefObject<T | null>, CanvasSize] {
+function areGeoPointsEqual(a: GlobeGeoPoint, b: GlobeGeoPoint): boolean {
+  return Math.abs(a.lat - b.lat) < 0.0001 && Math.abs(a.lng - b.lng) < 0.0001;
+}
+
+function useCanvasSize<T extends HTMLElement>(): [
+  RefObject<T | null>,
+  CanvasSize
+] {
   const ref = useRef<T>(null);
   const [size, setSize] = useState<CanvasSize>(INITIAL_SIZE);
 
@@ -236,33 +267,53 @@ function PortfolioProjectWorldGlobeComponent({
 
   const resolvedScale = compact ? 1.08 : 1.02;
 
+  /**
+   * Foco-alvo do projeto atual.
+   */
   const targetFocus = useMemo(() => {
     return resolveGlobeFocus(resolveInitialFocusPoint(origin, location));
   }, [origin, location]);
 
   /**
-   * Foco base calculado pela lógica do destino.
-   * Este é o foco "real" antes do giro orbital contínuo.
+   * Foco lógico atual.
    */
   const currentFocusRef = useRef<GlobeFocus>(targetFocus);
 
   /**
    * Phi efetivamente desenhado no canvas.
-   * Fica separado para permitir suavização do giro contínuo.
    */
   const renderedPhiRef = useRef<number>(targetFocus.phi);
 
   /**
-   * Offset acumulado do giro automático.
-   * Ele nunca substitui o foco do destino;
-   * apenas orbita suavemente em torno dele.
+   * Theta efetivamente desenhado no canvas.
+   */
+  const renderedThetaRef = useRef<number>(targetFocus.theta);
+
+  /**
+   * Offset estético residual de rotação.
+   * Agora ele não manda no foco.
    */
   const orbitOffsetRef = useRef<number>(0);
 
+  /**
+   * Localização geográfica interpolada.
+   */
   const currentLocationRef = useRef<GlobeGeoPoint>(location);
+
+  /**
+   * Últimos valores estáveis de props.
+   */
   const settledLocationRef = useRef<GlobeGeoPoint>(location);
+  const settledOriginRef = useRef<GlobeGeoPoint>(origin);
+
+  /**
+   * Estado de transição entre projetos.
+   */
   const transitionRef = useRef<GlobeTransitionState>(null);
 
+  /**
+   * Refs sempre atualizados com o estado vivo das props.
+   */
   const latestLocationRef = useRef<GlobeGeoPoint>(location);
   const latestOriginRef = useRef<GlobeGeoPoint>(origin);
   const latestCompactRef = useRef<boolean>(compact);
@@ -286,6 +337,10 @@ function PortfolioProjectWorldGlobeComponent({
     showConnectionArc,
   ]);
 
+  /**
+   * Espera o stage estabilizar antes de iniciar o cobe,
+   * evitando nascer pequeno e depois crescer.
+   */
   useEffect(() => {
     if (hasStableInitialStage || !stageIsValid) {
       return;
@@ -306,25 +361,35 @@ function PortfolioProjectWorldGlobeComponent({
     };
   }, [hasStableInitialStage, stageIsValid]);
 
+  /**
+   * Quando location/origin mudam, agenda uma nova transição
+   * sem recriar o globo.
+   */
   useEffect(() => {
     const previousLocation = settledLocationRef.current;
+    const previousOrigin = settledOriginRef.current;
 
-    const locationChanged =
-      Math.abs(previousLocation.lat - location.lat) > 0.0001 ||
-      Math.abs(previousLocation.lng - location.lng) > 0.0001;
+    const locationChanged = !areGeoPointsEqual(previousLocation, location);
+    const originChanged = !areGeoPointsEqual(previousOrigin, origin);
 
-    if (!locationChanged) {
+    if (!locationChanged && !originChanged) {
       settledLocationRef.current = location;
-      currentLocationRef.current = location;
-      currentFocusRef.current = targetFocus;
+      settledOriginRef.current = origin;
       return;
     }
 
+    const nextFocus = resolveGlobeFocus(
+      resolveInitialFocusPoint(origin, location)
+    );
+
     if (!globeInstanceRef.current) {
       settledLocationRef.current = location;
+      settledOriginRef.current = origin;
       currentLocationRef.current = location;
-      currentFocusRef.current = targetFocus;
-      renderedPhiRef.current = targetFocus.phi;
+      currentFocusRef.current = nextFocus;
+      renderedPhiRef.current = nextFocus.phi;
+      renderedThetaRef.current = nextFocus.theta;
+      orbitOffsetRef.current = 0;
       return;
     }
 
@@ -333,16 +398,22 @@ function PortfolioProjectWorldGlobeComponent({
 
     transitionRef.current = {
       fromFocus: currentFocusRef.current,
-      toFocus: targetFocus,
+      toFocus: nextFocus,
       fromLocation: currentLocationRef.current,
       toLocation: location,
       startedAt: now,
-      durationMs: compact ? 1225 : 1040,
+      durationMs: compact
+        ? COMPACT_TRANSITION_DURATION_MS
+        : DEFAULT_TRANSITION_DURATION_MS,
     };
 
     settledLocationRef.current = location;
-  }, [compact, location, targetFocus]);
+    settledOriginRef.current = origin;
+  }, [compact, location, origin]);
 
+  /**
+   * Inicializa o cobe uma única vez.
+   */
   useEffect(() => {
     if (!stageIsValid || !hasStableInitialStage) {
       return;
@@ -369,7 +440,10 @@ function PortfolioProjectWorldGlobeComponent({
       currentFocusRef.current = targetFocus;
       currentLocationRef.current = location;
       settledLocationRef.current = location;
+      settledOriginRef.current = origin;
       renderedPhiRef.current = targetFocus.phi;
+      renderedThetaRef.current = targetFocus.theta;
+      orbitOffsetRef.current = 0;
 
       globeInstanceRef.current = createGlobe(canvas, {
         devicePixelRatio: dpr,
@@ -417,6 +491,12 @@ function PortfolioProjectWorldGlobeComponent({
     targetFocus,
   ]);
 
+  /**
+   * Loop contínuo:
+   * - mantém a instância viva
+   * - interpola location/focus entre projetos
+   * - não deixa a rotação casual quebrar a centralização
+   */
   useEffect(() => {
     if (!stageIsValid || !hasStableInitialStage || !globeInstanceRef.current) {
       return;
@@ -444,6 +524,7 @@ function PortfolioProjectWorldGlobeComponent({
       let nextFocus = currentFocusRef.current;
 
       const activeTransition = transitionRef.current;
+      const isTransitioning = Boolean(activeTransition);
 
       if (activeTransition) {
         const rawT =
@@ -464,21 +545,23 @@ function PortfolioProjectWorldGlobeComponent({
           ),
         };
 
-        /**
-         * Foco sempre no destinatário final.
-         * A linha e os pontos podem interpolar,
-         * mas a câmera base continua mirando o destino real.
-         */
-        nextFocus = resolveGlobeFocus(
-          resolveInitialFocusPoint(liveOrigin, activeTransition.toLocation)
-        );
+        nextFocus = {
+          phi: lerpAngle(
+            activeTransition.fromFocus.phi,
+            activeTransition.toFocus.phi,
+            easedT
+          ),
+          theta: mix(
+            activeTransition.fromFocus.theta,
+            activeTransition.toFocus.theta,
+            easedT
+          ),
+        };
 
         if (t >= 1) {
           transitionRef.current = null;
           nextLocation = activeTransition.toLocation;
-          nextFocus = resolveGlobeFocus(
-            resolveInitialFocusPoint(liveOrigin, activeTransition.toLocation)
-          );
+          nextFocus = activeTransition.toFocus;
         }
       } else {
         nextLocation = liveTargetLocation;
@@ -491,34 +574,51 @@ function PortfolioProjectWorldGlobeComponent({
       currentFocusRef.current = nextFocus;
 
       /**
-       * Giro contínuo:
-       * o mundo continua vivo mesmo quando o foco já está resolvido.
+       * Durante transição:
+       * drena a rotação residual para zero.
+       *
+       * Parado no destino:
+       * permite uma micro-rotação estética muito pequena.
        */
-      orbitOffsetRef.current = normalizeAngle(
-        orbitOffsetRef.current + AUTO_ROTATE_SPEED
-      );
+      if (isTransitioning) {
+        orbitOffsetRef.current = mix(
+          orbitOffsetRef.current,
+          0,
+          TRANSITION_ORBIT_DAMPING
+        );
+      } else {
+        const idleTargetOffset = Math.sin(now * AUTO_ROTATE_SPEED) * IDLE_ORBIT_MAX_OFFSET;
+
+        orbitOffsetRef.current = mix(
+          orbitOffsetRef.current,
+          idleTargetOffset,
+          IDLE_ORBIT_RETURN_LERP
+        );
+      }
 
       /**
-       * Phi orbital = foco do destino + giro contínuo acumulado.
+       * O foco final renderizado agora prioriza o destino real.
+       * A rotação residual, quando existe, é mínima e só em idle.
        */
-      const orbitalPhi = normalizeAngle(
-        nextFocus.phi + orbitOffsetRef.current
-      );
+      const finalPhi = normalizeAngle(nextFocus.phi + orbitOffsetRef.current);
 
-      /**
-       * Suaviza o phi renderizado para evitar trancos.
-       */
       renderedPhiRef.current = lerpAngle(
         renderedPhiRef.current,
-        orbitalPhi,
-        ORBITAL_PHI_LERP
+        finalPhi,
+        PHI_LERP
+      );
+
+      renderedThetaRef.current = mix(
+        renderedThetaRef.current,
+        nextFocus.theta,
+        THETA_LERP
       );
 
       globeInstanceRef.current.update({
         width: Math.max(1, Math.round(liveCanvasSize.width * liveDpr)),
         height: Math.max(1, Math.round(liveCanvasSize.height * liveDpr)),
         phi: renderedPhiRef.current,
-        theta: nextFocus.theta,
+        theta: renderedThetaRef.current,
         scale: liveScale,
         markers: buildMarkerModels(liveOrigin, nextLocation, liveCompact),
         arcs: buildArcModels(
@@ -539,6 +639,9 @@ function PortfolioProjectWorldGlobeComponent({
     };
   }, [hasStableInitialStage, stageIsValid]);
 
+  /**
+   * Destroi a instância apenas quando o componente realmente desmonta.
+   */
   useEffect(() => {
     return () => {
       window.cancelAnimationFrame(animationFrameIdRef.current);

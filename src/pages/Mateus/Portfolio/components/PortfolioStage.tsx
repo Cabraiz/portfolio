@@ -40,7 +40,6 @@ function PortfolioStageComponent({
         data-portfolio-stage-frame="true"
       >
         <PortfolioProjectCard
-          key={project.id}
           project={project}
           className={styles.portfolioViewportActiveCard}
           onPrevious={onPrevious}
