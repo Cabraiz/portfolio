@@ -3,6 +3,7 @@ import { useId, useMemo, useState } from "react";
 import { useRoadMapState } from "./application/hooks/useRoadMapState";
 import { resolveRoadMapRelations } from "./application/services/resolveRoadMapRelations";
 import { roadMapGraph } from "./domain/data";
+import type { RoadMapNode } from "./domain/model/roadmap.types";
 import RoadMapCanvas from "./ui/canvas/RoadMapCanvas";
 import RoadMapDetailsPanel from "./ui/chrome/RoadMapDetailsPanel";
 import RoadMapFilters from "./ui/chrome/RoadMapFilters";
@@ -23,6 +24,60 @@ function resolveCompactTitle(title: string): string {
     .replace(/^roadmap de\s*/i, "")
     .replace(/^roadmap\s*/i, "")
     .trim();
+}
+
+function readStringField(node: RoadMapNode, field: string): string | null {
+  const value = (node as Record<string, unknown>)[field];
+
+  return typeof value === "string" && value.trim().length > 0
+    ? value.trim()
+    : null;
+}
+
+function readNumberField(node: RoadMapNode, field: string): number | null {
+  const value = (node as Record<string, unknown>)[field];
+  return typeof value === "number" && Number.isFinite(value) ? value : null;
+}
+
+function resolveInitialAnchorNodeId(
+  nodes: readonly RoadMapNode[],
+  activeNodeId?: string | null,
+): string | null {
+  if (activeNodeId && nodes.some((node) => node.id === activeNodeId)) {
+    return activeNodeId;
+  }
+
+  const explicitRoot =
+    nodes.find((node) => {
+      const kind = readStringField(node, "kind");
+      const type = readStringField(node, "type");
+      const tipo = readStringField(node, "tipo");
+
+      return (
+        kind === "main" ||
+        kind === "root" ||
+        type === "main" ||
+        type === "root" ||
+        tipo === "main" ||
+        tipo === "root"
+      );
+    }) ?? null;
+
+  if (explicitRoot) {
+    return explicitRoot.id;
+  }
+
+  const tierOneNode =
+    nodes.find((node) => {
+      const tier = readNumberField(node, "tier");
+      return tier === 1;
+    }) ?? null;
+
+  if (tierOneNode) {
+    return tierOneNode.id;
+  }
+
+  return nodes[0]?.id ?? null;
 }
 
 export default function RoadMap({ className }: RoadMapProps) {
@@ -58,6 +113,15 @@ export default function RoadMap({ className }: RoadMapProps) {
   }, [graph.title]);
 
   const canvasMinHeight = isReadingExpanded ? 980 : 920;
+
+  const initialAnchorNodeId = useMemo(
+    () =>
+      resolveInitialAnchorNodeId(
+        visibleNodes,
+        selectionApi.activeNodeId ?? null,
+      ),
+    [selectionApi.activeNodeId, visibleNodes],
+  );
 
   return (
     <section className={joinClassNames(styles.root, className)}>
@@ -153,6 +217,7 @@ export default function RoadMap({ className }: RoadMapProps) {
                 onNodeSelect={selectionApi.selectNode}
                 onNodeHover={selectionApi.hoverNode}
                 minHeight={canvasMinHeight}
+                initialAnchorNodeId={initialAnchorNodeId}
                 emptyTitle="Nenhum item disponível"
                 emptyDescription="Ajuste os filtros para exibir tecnologias, práticas e conexões."
               />

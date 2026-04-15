@@ -2,14 +2,22 @@
   --roadmap-page-max-width: 1680px;
   --roadmap-page-padding-x: clamp(12px, 1.4vw, 22px);
   --roadmap-page-padding-y: clamp(12px, 1.4vw, 20px);
-  --roadmap-main-gap: 12px;
-  --roadmap-grid-gap: 12px;
-  --roadmap-side-expanded-width: clamp(320px, 24vw, 380px);
+  --roadmap-main-gap: clamp(10px, 1vw, 14px);
+  --roadmap-grid-gap: clamp(10px, 1vw, 14px);
+
+  --roadmap-side-expanded-width: clamp(300px, 24vw, 380px);
+  --roadmap-side-expanded-width-compact: clamp(280px, 22vw, 340px);
   --roadmap-side-collapsed-width: 56px;
+
   --roadmap-surface-bg: #ffffff;
   --roadmap-surface-border: rgba(148, 163, 184, 0.16);
   --roadmap-shadow-soft: 0 14px 32px rgba(15, 23, 42, 0.05);
   --roadmap-sticky-top: 12px;
+
+  --roadmap-canvas-min-height-desktop: clamp(920px, 78vh, 1120px);
+  --roadmap-canvas-min-height-laptop: clamp(820px, 74vh, 980px);
+  --roadmap-canvas-min-height-tablet: clamp(720px, 72vh, 900px);
+  --roadmap-canvas-min-height-mobile: clamp(620px, 70vh, 820px);
 
   --roadmap-edge-color-base: rgba(100, 116, 139, 0.92);
   --roadmap-edge-requires: rgba(100, 116, 139, 0.92);
@@ -84,6 +92,7 @@
   align-items: center;
   gap: 8px;
   flex: 0 0 auto;
+  min-width: 0;
 }
 
 .chromeToggle {
@@ -180,7 +189,7 @@
 }
 
 .contentGridSideExpanded {
-  grid-template-columns: minmax(0, 1fr) minmax(320px, var(--roadmap-side-expanded-width));
+  grid-template-columns: minmax(0, 1fr) minmax(300px, var(--roadmap-side-expanded-width));
 }
 
 .mainColumn {
@@ -194,7 +203,7 @@
 .canvasBlock {
   min-width: 0;
   width: 100%;
-  min-height: clamp(920px, 78vh, 1120px);
+  min-height: var(--roadmap-canvas-min-height-desktop);
   padding: 8px;
   border: 1px solid var(--roadmap-surface-border);
   border-radius: 24px;
@@ -206,6 +215,7 @@
 }
 
 .sideColumn {
+  position: relative;
   min-width: 0;
   max-width: 100%;
   align-self: start;
@@ -214,23 +224,31 @@
 .sideColumnCollapsed {
   display: grid;
   justify-items: end;
+  position: relative;
+  min-width: 0;
+  width: var(--roadmap-side-collapsed-width);
 }
 
 .sideColumnExpanded {
   display: block;
+  position: relative;
+  min-width: 0;
 }
 
 .sideCollapsedTrigger {
   position: sticky;
   top: calc(var(--roadmap-sticky-top) + 60px);
+  right: 0;
   width: 40px;
   height: 40px;
   margin-top: 6px;
+  margin-left: auto;
   border: 1px solid rgba(148, 163, 184, 0.16);
   border-radius: 14px;
   background: rgba(255, 255, 255, 0.96);
   box-shadow: 0 10px 24px rgba(15, 23, 42, 0.04);
   cursor: pointer;
+  z-index: 20;
   transition:
     border-color 160ms ease,
     box-shadow 160ms ease,
@@ -442,35 +460,71 @@
     --roadmap-page-max-width: min(1275px, 85vw);
     --roadmap-page-padding-x: clamp(26px, 3.9vw, 48px);
   }
+
+  .canvasBlock {
+    min-height: var(--roadmap-canvas-min-height-laptop);
+  }
 }
 
-@media (max-width: 1360px) {
-  .contentGridSideCollapsed,
+/* desktop intermediário:
+   mantém sidebar/rail à direita em vez de desmontar tudo cedo demais */
+@media (max-width: 1360px) and (min-width: 993px) {
+  .root {
+    --roadmap-page-padding-x: clamp(10px, 1.2vw, 18px);
+    --roadmap-side-expanded-width: var(--roadmap-side-expanded-width-compact);
+  }
+
+  .contentGridSideCollapsed {
+    grid-template-columns: minmax(0, 1fr) var(--roadmap-side-collapsed-width);
+  }
+
   .contentGridSideExpanded {
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) minmax(280px, var(--roadmap-side-expanded-width-compact));
+  }
+
+  .canvasBlock {
+    min-height: var(--roadmap-canvas-min-height-laptop);
   }
 
   .sideColumnCollapsed,
+  .sideColumnExpanded {
+    position: relative;
+    min-width: 0;
+    align-self: start;
+  }
+
+  .sideColumnCollapsed {
+    display: grid;
+    justify-items: end;
+    width: var(--roadmap-side-collapsed-width);
+  }
+
   .sideColumnExpanded {
     display: block;
   }
 
   .sideCollapsedTrigger {
-    position: static;
+    position: sticky;
+    top: calc(var(--roadmap-sticky-top) + 56px);
+    right: 0;
+    margin-top: 0;
+    margin-left: auto;
     width: 44px;
     height: 44px;
-    margin-top: 0;
   }
 
   .sidePanelCard {
-    position: static;
-    max-height: none;
+    top: calc(var(--roadmap-sticky-top) + 56px);
+    max-height: calc(100vh - 84px);
   }
 }
 
+/* tablet / layout de uma coluna */
 @media (max-width: 992px) {
   .root {
-    padding: 14px 12px;
+    --roadmap-page-padding-x: 12px;
+    --roadmap-page-padding-y: 14px;
+    padding: var(--roadmap-page-padding-y) var(--roadmap-page-padding-x);
   }
 
   .stack {
@@ -486,6 +540,49 @@
   .topActions {
     justify-content: flex-start;
     flex-wrap: wrap;
+  }
+
+  .contentGridSideCollapsed,
+  .contentGridSideExpanded {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .mainColumn {
+    order: 1;
+  }
+
+  .sideColumn,
+  .sideColumnCollapsed,
+  .sideColumnExpanded {
+    order: 2;
+    display: block;
+    position: relative;
+    min-width: 0;
+    width: 100%;
+  }
+
+  .canvasBlock {
+    min-height: var(--roadmap-canvas-min-height-tablet);
+    border-radius: 20px;
+    padding: 6px;
+  }
+
+  .sideCollapsedTrigger {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    left: auto;
+    bottom: auto;
+    z-index: 30;
+    width: 44px;
+    height: 44px;
+    margin: 0;
+  }
+
+  .sidePanelCard {
+    position: static;
+    max-height: none;
+    margin-top: 0;
   }
 }
 
@@ -506,7 +603,7 @@
   }
 
   .canvasBlock {
-    min-height: clamp(700px, 72vh, 920px);
+    min-height: var(--roadmap-canvas-min-height-mobile);
     padding: 4px;
     border-radius: 16px;
   }
@@ -528,6 +625,14 @@
   .sidePanelCard {
     padding: 12px;
     border-radius: 20px;
+  }
+
+  .sideCollapsedTrigger {
+    top: 10px;
+    right: 10px;
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
   }
 
   .roadMapGraphEdge {

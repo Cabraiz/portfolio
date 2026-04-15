@@ -1,4 +1,10 @@
-import { memo, useMemo, type CSSProperties } from "react";
+import {
+  memo,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  type CSSProperties,
+} from "react";
 
 import type { RoadMapLayoutViewport } from "../../domain/model/roadmap.layout.types";
 import type {
@@ -27,6 +33,7 @@ type RoadMapCanvasProps = Readonly<{
   minHeight?: number;
   emptyTitle?: string;
   emptyDescription?: string;
+  initialAnchorNodeId?: string | null;
 }>;
 
 type RoadMapCanvasBounds = Readonly<{
@@ -34,6 +41,12 @@ type RoadMapCanvasBounds = Readonly<{
   minY: number;
   maxRight: number;
   maxBottom: number;
+}>;
+
+type ResolvedAnchor = Readonly<{
+  node: RoadMapNode;
+  centerX: number;
+  centerY: number;
 }>;
 
 function getCanvasNodeBounds(
@@ -96,6 +109,93 @@ function getCanvasSize(
   };
 }
 
+function readStringField(
+  node: RoadMapNode,
+  field: string,
+): string | null {
+  const value = (node as Record<string, unknown>)[field];
+
+  return typeof value === "string" && value.trim().length > 0
+    ? value.trim()
+    : null;
+}
+
+function readNumberField(
+  node: RoadMapNode,
+  field: string,
+): number | null {
+  const value = (node as Record<string, unknown>)[field];
+  return typeof value === "number" && Number.isFinite(value) ? value : null;
+}
+
+function resolveInitialAnchorNode(
+  nodes: readonly RoadMapNode[],
+  preferredNodeId?: string | null,
+): RoadMapNode | null {
+  if (nodes.length === 0) {
+    return null;
+  }
+
+  if (preferredNodeId) {
+    const preferredNode =
+      nodes.find((node) => node.id === preferredNodeId) ?? null;
+
+    if (preferredNode) {
+      return preferredNode;
+    }
+  }
+
+  const mainNode =
+    nodes.find((node) => {
+      const kind = readStringField(node, "kind");
+      const type = readStringField(node, "type");
+      const tipo = readStringField(node, "tipo");
+
+      return (
+        kind === "main" ||
+        kind === "root" ||
+        type === "main" ||
+        type === "root" ||
+        tipo === "main" ||
+        tipo === "root"
+      );
+    }) ?? null;
+
+  if (mainNode) {
+    return mainNode;
+  }
+
+  const tierOneNode =
+    nodes.find((node) => {
+      const tier = readNumberField(node, "tier");
+      return tier === 1;
+    }) ?? null;
+
+  if (tierOneNode) {
+    return tierOneNode;
+  }
+
+  return nodes[0] ?? null;
+}
+
+function resolveAnchorCenter(
+  node: RoadMapNode | null,
+  positionKey: RoadMapLayoutViewport,
+): ResolvedAnchor | null {
+  if (!node) {
+    return null;
+  }
+
+  const position = getRoadMapNodePosition(node, positionKey);
+  const dimensions = getRoadMapNodeDimensions(node);
+
+  return {
+    node,
+    centerX: position.x + dimensions.width / 2,
+    centerY: position.y + dimensions.height / 2,
+  };
+}
+
 function RoadMapCanvasComponent({
   nodes,
   edges,
@@ -109,7 +209,11 @@ function RoadMapCanvasComponent({
   minHeight = 920,
   emptyTitle = "Mapa indisponível",
   emptyDescription = "Nenhum item foi encontrado para esta visualização.",
+  initialAnchorNodeId = null,
 }: RoadMapCanvasProps) {
+  const scrollerRef = useRef<HTMLDivElement | null>(null);
+  const lastCenteredKeyRef = useRef<string | null>(null);
+
   const nodeMap = useMemo(
     () => new Map(nodes.map((node) => [node.id, node])),
     [nodes],
@@ -119,6 +223,51 @@ function RoadMapCanvasComponent({
     () => getCanvasSize(nodes, positionKey, minHeight),
     [nodes, positionKey, minHeight],
   );
+
+  const initialAnchorNode = useMemo(
+    () => resolveInitialAnchorNode(nodes, initialAnchorNodeId),
+    [nodes, initialAnchorNodeId],
+  );
+
+  const initialAnchor = useMemo(
+    () => resolveAnchorCenter(initialAnchorNode, positionKey),
+    [initialAnchorNode, positionKey],
+  );
+
+  const centeringKey = useMemo(() => {
+    if (!initialAnchorNode) {
+      return null;
+    }
+
+    return [
+      positionKey,
+      initialAnchorNode.id,
+      nodes.length,
+      canvasSize.width,
+      canvasSize.height,
+    ].join(":");
+  }, [canvasSize.height, canvasSize.width, initialAnchorNode, nodes.length, positionKey]);
+
+  useLayoutEffect(() => {
+    const scroller = scrollerRef.current;
+
+    if (!scroller || !initialAnchor || !centeringKey) {
+      return;
+    }
+
+    if (lastCenteredKeyRef.current === centeringKey) {
+      return;
+    }
+
+    const maxScrollLeft = Math.max(0, canvasSize.width - scroller.clientWidth);
+    const nextScrollLeft = Math.min(
+      maxScrollLeft,
+      Math.max(0, initialAnchor.centerX - scroller.clientWidth / 2),
+    );
+
+    scroller.scrollLeft = nextScrollLeft;
+    lastCenteredKeyRef.current = centeringKey;
+  }, [canvasSize.width, centeringKey, initialAnchor]);
 
   const wrapperStyle = useMemo<CSSProperties>(
     () => ({
@@ -175,6 +324,7 @@ function RoadMapCanvasComponent({
       overflowY: "hidden",
       padding: "16px 0 0 0",
       scrollbarWidth: "thin",
+      scrollBehavior: "auto",
     }),
     [],
   );
@@ -279,7 +429,7 @@ function RoadMapCanvasComponent({
         <span style={badgeStyle}>{clusters.length} agrupamentos</span>
       </div>
 
-      <div style={scrollerStyle}>
+      <div ref={scrollerRef} style={scrollerStyle}>
         <div style={stageStyle}>
           <svg
             width={canvasSize.width}
