@@ -4,6 +4,9 @@
     --portfolio-project-image-position,
     center top
   );
+  --portfolio-project-world-globe-inset-top: clamp(10px, 1.2vw, 16px);
+  --portfolio-project-world-globe-inset-right: clamp(10px, 1.2vw, 16px);
+  --portfolio-project-world-globe-max-width: min(30%, 280px);
 
   position: relative;
   width: 100%;
@@ -38,6 +41,7 @@
 .portfolioProjectMediaImage {
   position: absolute;
   inset: 0;
+  z-index: 0;
   width: 100%;
   height: 100%;
   display: block;
@@ -55,6 +59,7 @@
 .portfolioProjectMediaFallback {
   position: absolute;
   inset: 0;
+  z-index: 0;
   display: grid;
   place-items: center;
   overflow: hidden;
@@ -96,6 +101,23 @@
   letter-spacing: 0.08em;
 }
 
+.portfolioProjectMediaWorldGlobe {
+  position: absolute;
+  top: var(--portfolio-project-world-globe-inset-top);
+  right: var(--portfolio-project-world-globe-inset-right);
+  z-index: 3;
+  width: var(--portfolio-project-world-globe-max-width);
+  max-width: calc(
+    100% - (var(--portfolio-project-world-globe-inset-right) * 2)
+  );
+  pointer-events: none;
+  transform: translateZ(0);
+}
+
+.portfolioProjectMedia[data-has-world-globe="true"] .portfolioProjectMediaImage {
+  object-position: var(--portfolio-project-image-position, center top);
+}
+
 @media (max-height: 820px) {
   .portfolioProjectMediaImage {
     object-position: var(
@@ -103,11 +125,20 @@
       var(--portfolio-project-image-position, center 12%)
     );
   }
+
+  .portfolioProjectMedia {
+    --portfolio-project-world-globe-max-width: min(28%, 228px);
+    --portfolio-project-world-globe-inset-top: 10px;
+    --portfolio-project-world-globe-inset-right: 10px;
+  }
 }
 
 @media (max-width: 768px) {
   .portfolioProjectMedia {
     height: auto;
+    --portfolio-project-world-globe-max-width: min(38%, 206px);
+    --portfolio-project-world-globe-inset-top: 10px;
+    --portfolio-project-world-globe-inset-right: 10px;
   }
 
   .portfolioProjectMediaImage {
@@ -119,5 +150,13 @@
 
   .portfolioProjectMediaFallbackTitle {
     max-width: 16ch;
+  }
+}
+
+@media (max-width: 640px) {
+  .portfolioProjectMedia {
+    --portfolio-project-world-globe-max-width: min(44%, 176px);
+    --portfolio-project-world-globe-inset-top: 8px;
+    --portfolio-project-world-globe-inset-right: 8px;
   }
 }

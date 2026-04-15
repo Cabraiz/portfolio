@@ -6,7 +6,11 @@ import {
   type SyntheticEvent,
 } from "react";
 
-import type { PortfolioProject } from "../../types";
+import type {
+  PortfolioProject,
+  PortfolioProjectWorldLocation,
+} from "../../types";
+import PortfolioProjectWorldGlobe from "./PortfolioProjectWorldGlobe";
 import styles from "./PortfolioProjectMedia.module.css";
 
 type PortfolioProjectMediaProps = Readonly<{
@@ -53,7 +57,7 @@ function resolveObjectPosition(project: PortfolioProject): string {
 
 function shiftObjectPositionTowardTop(
   position: string,
-  deltaPercent: number,
+  deltaPercent: number
 ): string {
   const tokens = position.trim().split(/\s+/).filter(Boolean);
 
@@ -63,7 +67,7 @@ function shiftObjectPositionTowardTop(
   if (/^-?\d+(\.\d+)?%$/.test(rawY)) {
     const nextPercent = Math.max(
       0,
-      Number.parseFloat(rawY.replace("%", "")) - deltaPercent,
+      Number.parseFloat(rawY.replace("%", "")) - deltaPercent
     );
 
     return `${rawX} ${nextPercent}%`;
@@ -98,6 +102,40 @@ function resolveAspectRatio(project: PortfolioProject): string {
   return project.media?.aspectRatio ?? "16 / 9";
 }
 
+function resolveWorldLocation(
+  project: PortfolioProject
+): PortfolioProjectWorldLocation | null {
+  const candidate = project.worldLocation;
+
+  if (!candidate) {
+    return null;
+  }
+
+  if (
+    typeof candidate.country !== "string" ||
+    candidate.country.trim().length === 0
+  ) {
+    return null;
+  }
+
+  if (
+    typeof candidate.lat !== "number" ||
+    Number.isNaN(candidate.lat) ||
+    typeof candidate.lng !== "number" ||
+    Number.isNaN(candidate.lng)
+  ) {
+    return null;
+  }
+
+  return {
+    country: candidate.country,
+    city: candidate.city,
+    region: candidate.region,
+    lat: candidate.lat,
+    lng: candidate.lng,
+  };
+}
+
 function PortfolioProjectMediaComponent({
   project,
   className,
@@ -116,6 +154,7 @@ function PortfolioProjectMediaComponent({
   const objectPosition = resolveObjectPosition(project);
   const compactObjectPosition = resolveCompactObjectPosition(project);
   const aspectRatio = resolveAspectRatio(project);
+  const worldLocation = resolveWorldLocation(project);
 
   const style = useMemo(
     () =>
@@ -126,7 +165,7 @@ function PortfolioProjectMediaComponent({
         "--portfolio-project-image-position-compact": compactObjectPosition,
         "--portfolio-project-media-radius": "inherit",
       }) as CSSProperties,
-    [aspectRatio, compactObjectPosition, objectFit, objectPosition],
+    [aspectRatio, compactObjectPosition, objectFit, objectPosition]
   );
 
   const hasRenderableImage =
@@ -152,13 +191,14 @@ function PortfolioProjectMediaComponent({
       data-media-fit={objectFit}
       data-media-position={objectPosition}
       data-media-position-compact={compactObjectPosition}
+      data-has-world-globe={worldLocation ? "true" : "false"}
     >
       <div className={styles.portfolioProjectMediaViewport}>
         {hasRenderableImage ? (
           <img
             className={joinClasses(
               styles.portfolioProjectMediaImage,
-              imageClassName,
+              imageClassName
             )}
             src={project.imageSrc}
             alt={project.imageAlt}
@@ -190,6 +230,24 @@ function PortfolioProjectMediaComponent({
             </div>
           </div>
         )}
+
+        {worldLocation ? (
+          <PortfolioProjectWorldGlobe
+            className={styles.portfolioProjectMediaWorldGlobe}
+            compact
+            projectName={project.name}
+            country={worldLocation.country}
+            city={worldLocation.city}
+            region={worldLocation.region}
+            location={{
+              lat: worldLocation.lat,
+              lng: worldLocation.lng,
+            }}
+            showHeader={false}
+            showFooterCard
+            showConnectionArc
+          />
+        ) : null}
       </div>
     </div>
   );

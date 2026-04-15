@@ -50,6 +50,13 @@ export const portfolioProjects: ReadonlyArray<PortfolioProject> = [
       ...defaultProjectMedia,
       position: "center 8%",
     },
+    worldLocation: {
+      country: "Brasil",
+      city: "Fortaleza",
+      region: "América do Sul",
+      lat: -3.7319,
+      lng: -38.5267,
+    },
   },
   {
     id: "app-bank",
@@ -69,6 +76,13 @@ export const portfolioProjects: ReadonlyArray<PortfolioProject> = [
     media: {
       ...defaultProjectMedia,
       position: "50% 14%",
+    },
+    worldLocation: {
+      country: "Canadá",
+      city: "Winnipeg",
+      region: "América do Norte",
+      lat: 49.8951,
+      lng: -97.1384,
     },
   },
   {
@@ -90,6 +104,13 @@ export const portfolioProjects: ReadonlyArray<PortfolioProject> = [
       ...defaultProjectMedia,
       position: "50% 12%",
     },
+    worldLocation: {
+      country: "Brasil",
+      city: "São Paulo",
+      region: "América do Sul",
+      lat: -23.5505,
+      lng: -46.6333,
+    },
   },
   {
     id: "site-adv",
@@ -109,6 +130,13 @@ export const portfolioProjects: ReadonlyArray<PortfolioProject> = [
     media: {
       ...defaultProjectMedia,
       position: "50% 8%",
+    },
+    worldLocation: {
+      country: "Brasil",
+      city: "Brasília",
+      region: "América do Sul",
+      lat: -15.7939,
+      lng: -47.8828,
     },
   },
   {
@@ -130,6 +158,13 @@ export const portfolioProjects: ReadonlyArray<PortfolioProject> = [
       ...defaultProjectMedia,
       position: "58% 14%",
     },
+    worldLocation: {
+      country: "Brasil",
+      city: "Rio de Janeiro",
+      region: "América do Sul",
+      lat: -22.9068,
+      lng: -43.1729,
+    },
   },
 ] as const;
 
@@ -137,7 +172,7 @@ export const defaultPortfolioProjectId: PortfolioProjectId =
   portfolioProjects[0].id;
 
 export const portfolioProjectIds = portfolioProjects.map(
-  (project) => project.id,
+  (project) => project.id
 ) as ReadonlyArray<PortfolioProjectId>;
 
 export const portfolioProjectListItems: ReadonlyArray<PortfolioProjectListItem> =
@@ -154,17 +189,17 @@ export const portfolioProjectListItems: ReadonlyArray<PortfolioProjectListItem> 
   }));
 
 export const portfolioProjectLookup: PortfolioProjectLookup = new Map(
-  portfolioProjects.map((project) => [project.id, project]),
+  portfolioProjects.map((project) => [project.id, project])
 );
 
 export function getPortfolioProjectById(
-  projectId: PortfolioProjectId,
+  projectId: PortfolioProjectId
 ): PortfolioProject | undefined {
   return portfolioProjectLookup.get(projectId);
 }
 
 export function getPortfolioProjectIndex(
-  projectId: PortfolioProjectId,
+  projectId: PortfolioProjectId
 ): number {
   return portfolioProjects.findIndex((project) => project.id === projectId);
 }

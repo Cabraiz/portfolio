@@ -46,6 +46,14 @@ export type PortfolioProjectMedia = Readonly<{
   focalPointY?: PortfolioMediaAnchorY;
 }>;
 
+export type PortfolioProjectWorldLocation = Readonly<{
+  country: string;
+  city?: string;
+  region?: string;
+  lat: number;
+  lng: number;
+}>;
+
 export type PortfolioProject = Readonly<{
   id: PortfolioProjectId;
   name: string;
@@ -62,6 +70,7 @@ export type PortfolioProject = Readonly<{
   tags?: readonly string[];
   technologies: readonly PortfolioTechnologyName[];
   media?: PortfolioProjectMedia;
+  worldLocation?: PortfolioProjectWorldLocation;
 }>;
 
 export type PortfolioSectionCopy = Readonly<{
