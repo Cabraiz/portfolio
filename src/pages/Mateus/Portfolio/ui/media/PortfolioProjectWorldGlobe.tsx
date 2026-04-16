@@ -30,7 +30,6 @@ import type {
   CanvasSize,
   GlobeFocus,
   GlobeGeoPoint,
-  GlobeTransitionState,
 } from "../../domain/worldGlobe/worldGlobe.types";
 
 export type PortfolioProjectWorldGlobeProps = Readonly<{
@@ -54,21 +53,36 @@ export type PortfolioProjectWorldGlobeProps = Readonly<{
   decorative?: boolean;
 }>;
 
+type GlobeTransitionPhase = "unwind" | "travel";
+
+type LocalGlobeTransitionState = Readonly<{
+  phase: GlobeTransitionPhase;
+  fromFocus: GlobeFocus;
+  toFocus: GlobeFocus;
+  fromLocation: GlobeGeoPoint;
+  toLocation: GlobeGeoPoint;
+  fromOrbitAngle: number;
+  toOrbitAngle: number;
+  startedAt: number;
+  durationMs: number;
+  nextPhaseDurationMs?: number;
+}> | null;
+
 const INITIAL_SIZE: CanvasSize = {
   width: 0,
   height: 0,
 };
 
 /**
- * Auto-rotação base do mundo.
- * Mantida baixa para não contaminar o foco.
+ * Velocidade da rotação contínua em idle.
+ * Unidade: radianos por ms.
  */
-const AUTO_ROTATE_SPEED = 0.0024;
+const IDLE_SPIN_SPEED_RAD_PER_MS = 0.00022;
 
 /**
  * Suavização do phi renderizado.
  */
-const PHI_LERP = 0.075;
+const PHI_LERP = 0.082;
 
 /**
  * Suavização do theta renderizado.
@@ -76,22 +90,10 @@ const PHI_LERP = 0.075;
 const THETA_LERP = 0.12;
 
 /**
- * Quanto a micro-rotação estética pode influenciar no phi final
- * quando o globo já está assentado.
- *
- * Mantido bem pequeno para não deslocar visualmente o destino.
+ * Duração do retorno da rotação acumulada antes da viagem.
  */
-const IDLE_ORBIT_MAX_OFFSET = 0.08;
-
-/**
- * Velocidade com que a rotação residual é drenada durante transição.
- */
-const TRANSITION_ORBIT_DAMPING = 0.18;
-
-/**
- * Velocidade com que a micro-rotação volta quando o globo está assentado.
- */
-const IDLE_ORBIT_RETURN_LERP = 0.02;
+const COMPACT_UNWIND_DURATION_MS = 440;
+const DEFAULT_UNWIND_DURATION_MS = 520;
 
 /**
  * Duração padrão da viagem entre projetos.
@@ -158,6 +160,20 @@ function normalizeAngle(angle: number): number {
 
   if (normalized < 0) {
     normalized += fullTurn;
+  }
+
+  return normalized;
+}
+
+/**
+ * Normaliza para a faixa [-PI, PI].
+ * Útil para “devolver” a rotação acumulada pelo caminho coerente.
+ */
+function normalizeSignedAngle(angle: number): number {
+  const normalized = normalizeAngle(angle);
+
+  if (normalized > Math.PI) {
+    return normalized - Math.PI * 2;
   }
 
   return normalized;
@@ -268,7 +284,7 @@ function PortfolioProjectWorldGlobeComponent({
   const resolvedScale = compact ? 1.08 : 1.02;
 
   /**
-   * Foco-alvo do projeto atual.
+   * Foco-alvo lógico do projeto atual.
    */
   const targetFocus = useMemo(() => {
     return resolveGlobeFocus(resolveInitialFocusPoint(origin, location));
@@ -290,10 +306,20 @@ function PortfolioProjectWorldGlobeComponent({
   const renderedThetaRef = useRef<number>(targetFocus.theta);
 
   /**
-   * Offset estético residual de rotação.
-   * Agora ele não manda no foco.
+   * Spin contínuo acumulado enquanto o globo está em idle.
    */
-  const orbitOffsetRef = useRef<number>(0);
+  const idleSpinAngleRef = useRef<number>(0);
+
+  /**
+   * Offset transitório usado para “desenrolar” a rotação
+   * antes de iniciar a viagem para o próximo país.
+   */
+  const unwindOrbitAngleRef = useRef<number>(0);
+
+  /**
+   * Timestamp do último frame para calcular delta time.
+   */
+  const lastFrameTimeRef = useRef<number | null>(null);
 
   /**
    * Localização geográfica interpolada.
@@ -309,7 +335,7 @@ function PortfolioProjectWorldGlobeComponent({
   /**
    * Estado de transição entre projetos.
    */
-  const transitionRef = useRef<GlobeTransitionState>(null);
+  const transitionRef = useRef<LocalGlobeTransitionState>(null);
 
   /**
    * Refs sempre atualizados com o estado vivo das props.
@@ -362,8 +388,10 @@ function PortfolioProjectWorldGlobeComponent({
   }, [hasStableInitialStage, stageIsValid]);
 
   /**
-   * Quando location/origin mudam, agenda uma nova transição
-   * sem recriar o globo.
+   * Quando location/origin mudam:
+   * 1) congela o spin acumulado
+   * 2) faz unwind desse spin
+   * 3) só depois viaja para o novo país
    */
   useEffect(() => {
     const previousLocation = settledLocationRef.current;
@@ -389,23 +417,38 @@ function PortfolioProjectWorldGlobeComponent({
       currentFocusRef.current = nextFocus;
       renderedPhiRef.current = nextFocus.phi;
       renderedThetaRef.current = nextFocus.theta;
-      orbitOffsetRef.current = 0;
+      idleSpinAngleRef.current = 0;
+      unwindOrbitAngleRef.current = 0;
       return;
     }
 
     const now =
       typeof performance !== "undefined" ? performance.now() : Date.now();
 
+    const frozenIdleSpin = normalizeSignedAngle(idleSpinAngleRef.current);
+
     transitionRef.current = {
+      phase: "unwind",
       fromFocus: currentFocusRef.current,
       toFocus: nextFocus,
       fromLocation: currentLocationRef.current,
       toLocation: location,
+      fromOrbitAngle: frozenIdleSpin,
+      toOrbitAngle: 0,
       startedAt: now,
       durationMs: compact
+        ? COMPACT_UNWIND_DURATION_MS
+        : DEFAULT_UNWIND_DURATION_MS,
+      nextPhaseDurationMs: compact
         ? COMPACT_TRANSITION_DURATION_MS
         : DEFAULT_TRANSITION_DURATION_MS,
     };
+
+    /**
+     * Congela o spin no offset de unwind e zera o idle contínuo.
+     */
+    idleSpinAngleRef.current = 0;
+    unwindOrbitAngleRef.current = frozenIdleSpin;
 
     settledLocationRef.current = location;
     settledOriginRef.current = origin;
@@ -443,7 +486,8 @@ function PortfolioProjectWorldGlobeComponent({
       settledOriginRef.current = origin;
       renderedPhiRef.current = targetFocus.phi;
       renderedThetaRef.current = targetFocus.theta;
-      orbitOffsetRef.current = 0;
+      idleSpinAngleRef.current = 0;
+      unwindOrbitAngleRef.current = 0;
 
       globeInstanceRef.current = createGlobe(canvas, {
         devicePixelRatio: dpr,
@@ -494,8 +538,9 @@ function PortfolioProjectWorldGlobeComponent({
   /**
    * Loop contínuo:
    * - mantém a instância viva
-   * - interpola location/focus entre projetos
-   * - não deixa a rotação casual quebrar a centralização
+   * - acumula rotação contínua em idle
+   * - ao trocar de projeto, faz unwind
+   * - depois viaja para o novo país
    */
   useEffect(() => {
     if (!stageIsValid || !hasStableInitialStage || !globeInstanceRef.current) {
@@ -520,11 +565,17 @@ function PortfolioProjectWorldGlobeComponent({
       const liveScale = latestScaleRef.current;
       const liveDpr = getDevicePixelRatio();
 
+      if (lastFrameTimeRef.current == null) {
+        lastFrameTimeRef.current = now;
+      }
+
+      const deltaMs = Math.max(0, now - lastFrameTimeRef.current);
+      lastFrameTimeRef.current = now;
+
       let nextLocation = currentLocationRef.current;
       let nextFocus = currentFocusRef.current;
 
       const activeTransition = transitionRef.current;
-      const isTransitioning = Boolean(activeTransition);
 
       if (activeTransition) {
         const rawT =
@@ -532,75 +583,103 @@ function PortfolioProjectWorldGlobeComponent({
         const t = clamp(rawT, 0, 1);
         const easedT = easeInOutCubic(t);
 
-        nextLocation = {
-          lat: mix(
-            activeTransition.fromLocation.lat,
-            activeTransition.toLocation.lat,
-            easedT
-          ),
-          lng: mix(
-            activeTransition.fromLocation.lng,
-            activeTransition.toLocation.lng,
-            easedT
-          ),
-        };
+        if (activeTransition.phase === "unwind") {
+          /**
+           * Mantém o país atual, apenas devolvendo a rotação acumulada.
+           */
+          nextLocation = activeTransition.fromLocation;
+          nextFocus = activeTransition.fromFocus;
 
-        nextFocus = {
-          phi: lerpAngle(
-            activeTransition.fromFocus.phi,
-            activeTransition.toFocus.phi,
+          unwindOrbitAngleRef.current = mix(
+            activeTransition.fromOrbitAngle,
+            activeTransition.toOrbitAngle,
             easedT
-          ),
-          theta: mix(
-            activeTransition.fromFocus.theta,
-            activeTransition.toFocus.theta,
-            easedT
-          ),
-        };
+          );
 
-        if (t >= 1) {
-          transitionRef.current = null;
-          nextLocation = activeTransition.toLocation;
-          nextFocus = activeTransition.toFocus;
+          if (t >= 1) {
+            unwindOrbitAngleRef.current = 0;
+
+            transitionRef.current = {
+              phase: "travel",
+              fromFocus: activeTransition.fromFocus,
+              toFocus: activeTransition.toFocus,
+              fromLocation: activeTransition.fromLocation,
+              toLocation: activeTransition.toLocation,
+              fromOrbitAngle: 0,
+              toOrbitAngle: 0,
+              startedAt: now,
+              durationMs:
+                activeTransition.nextPhaseDurationMs ??
+                DEFAULT_TRANSITION_DURATION_MS,
+            };
+          }
+        } else {
+          /**
+           * Viaja para o novo país já sem spin residual.
+           */
+          nextLocation = {
+            lat: mix(
+              activeTransition.fromLocation.lat,
+              activeTransition.toLocation.lat,
+              easedT
+            ),
+            lng: mix(
+              activeTransition.fromLocation.lng,
+              activeTransition.toLocation.lng,
+              easedT
+            ),
+          };
+
+          nextFocus = {
+            phi: lerpAngle(
+              activeTransition.fromFocus.phi,
+              activeTransition.toFocus.phi,
+              easedT
+            ),
+            theta: mix(
+              activeTransition.fromFocus.theta,
+              activeTransition.toFocus.theta,
+              easedT
+            ),
+          };
+
+          unwindOrbitAngleRef.current = 0;
+          idleSpinAngleRef.current = 0;
+
+          if (t >= 1) {
+            transitionRef.current = null;
+            nextLocation = activeTransition.toLocation;
+            nextFocus = activeTransition.toFocus;
+          }
         }
       } else {
+        /**
+         * Idle contínuo:
+         * gira de verdade e acumula o valor da rotação.
+         */
         nextLocation = liveTargetLocation;
         nextFocus = resolveGlobeFocus(
           resolveInitialFocusPoint(liveOrigin, liveTargetLocation)
         );
+
+        idleSpinAngleRef.current = normalizeSignedAngle(
+          idleSpinAngleRef.current + deltaMs * IDLE_SPIN_SPEED_RAD_PER_MS
+        );
+
+        unwindOrbitAngleRef.current = 0;
       }
 
       currentLocationRef.current = nextLocation;
       currentFocusRef.current = nextFocus;
 
       /**
-       * Durante transição:
-       * drena a rotação residual para zero.
-       *
-       * Parado no destino:
-       * permite uma micro-rotação estética muito pequena.
+       * Foco renderizado = foco lógico + spin idle + unwind transitório.
        */
-      if (isTransitioning) {
-        orbitOffsetRef.current = mix(
-          orbitOffsetRef.current,
-          0,
-          TRANSITION_ORBIT_DAMPING
-        );
-      } else {
-        const idleTargetOffset = Math.sin(now * AUTO_ROTATE_SPEED) * IDLE_ORBIT_MAX_OFFSET;
-
-        orbitOffsetRef.current = mix(
-          orbitOffsetRef.current,
-          idleTargetOffset,
-          IDLE_ORBIT_RETURN_LERP
-        );
-      }
-
-      /**
-       * O foco final renderizado agora prioriza o destino real.
-       * A rotação residual, quando existe, é mínima e só em idle.
-       */
-      const finalPhi = normalizeAngle(nextFocus.phi + orbitOffsetRef.current);
+      const finalPhi = normalizeAngle(
+        nextFocus.phi +
+          idleSpinAngleRef.current +
+          unwindOrbitAngleRef.current
+      );
 
       renderedPhiRef.current = lerpAngle(
         renderedPhiRef.current,
@@ -636,6 +715,7 @@ function PortfolioProjectWorldGlobeComponent({
     return () => {
       destroyed = true;
       window.cancelAnimationFrame(animationFrameIdRef.current);
+      lastFrameTimeRef.current = null;
     };
   }, [hasStableInitialStage, stageIsValid]);
 
@@ -647,6 +727,7 @@ function PortfolioProjectWorldGlobeComponent({
       window.cancelAnimationFrame(animationFrameIdRef.current);
       globeInstanceRef.current?.destroy();
       globeInstanceRef.current = null;
+      lastFrameTimeRef.current = null;
     };
   }, []);
 
