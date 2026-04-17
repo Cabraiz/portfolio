@@ -1,5 +1,6 @@
 import { memo } from "react";
 
+import { getPortfolioTechnologyIcons } from "../portfolio.technology-icons";
 import type { PortfolioProject } from "../types";
 import PortfolioProjectMedia from "../ui/media/PortfolioProjectMedia";
 import PortfolioStageSurface from "../ui/stage/PortfolioStageSurface";
@@ -28,11 +29,14 @@ function PortfolioProjectCardComponent({
   onHoverStart,
   onHoverEnd,
 }: PortfolioProjectCardProps) {
-  const hasLogo =
-    typeof project.logoSrc === "string" && project.logoSrc.trim().length > 0;
-
   const hasPrevious = typeof onPrevious === "function";
   const hasNext = typeof onNext === "function";
+
+  const technologyIcons = getPortfolioTechnologyIcons(
+    project.technologies ?? [],
+    5,
+  );
+  const hasTechnologyIcons = technologyIcons.length > 0;
 
   return (
     <PortfolioStageSurface
@@ -112,43 +116,40 @@ function PortfolioProjectCardComponent({
       </div>
 
       <div className={styles.portfolioProjectCardOverlay}>
-        <div className={styles.portfolioProjectCardBottomRow}>
+        {hasTechnologyIcons ? (
           <div
-            className={styles.portfolioProjectCardIdentity}
-            data-portfolio-glass-panel="true"
-            data-lenis-parallax="soft"
-            data-gsap="portfolio-glass-panel"
+            className={styles.portfolioProjectCardTechRail}
+            aria-label={`Tecnologias utilizadas no projeto ${project.name}`}
           >
-            {hasLogo ? (
-              <div
-                className={styles.portfolioProjectCardLogoBox}
-                data-gsap="portfolio-glass-logo"
-              >
-                <img
-                  src={project.logoSrc}
-                  alt={project.logoAlt ?? `Logo do projeto ${project.name}`}
-                  className={styles.portfolioProjectCardLogo}
-                  loading="lazy"
-                  decoding="async"
-                  draggable={false}
-                />
-              </div>
-            ) : null}
+            <ul className={styles.portfolioProjectCardTechList}>
+              {technologyIcons.map((technology) => (
+                <li
+                  key={`${project.id}-${technology.label}`}
+                  className={styles.portfolioProjectCardTechEntry}
+                >
+                  <div
+                    className={styles.portfolioProjectCardTechChip}
+                    title={technology.label}
+                    aria-label={technology.label}
+                  >
+                    <img
+                      src={technology.src}
+                      alt={technology.label}
+                      className={styles.portfolioProjectCardTechIcon}
+                      loading="lazy"
+                      decoding="async"
+                      draggable={false}
+                    />
 
-            <div
-              className={styles.portfolioProjectCardTextGroup}
-              data-gsap="portfolio-glass-copy"
-            >
-              <h3 className={styles.portfolioProjectCardTitle}>
-                {project.name}
-              </h3>
-
-              <p className={styles.portfolioProjectCardMeta}>
-                Projeto em destaque
-              </p>
-            </div>
+                    <span className={styles.portfolioProjectCardTechLabel}>
+                      {technology.label}
+                    </span>
+                  </div>
+                </li>
+              ))}
+            </ul>
           </div>
-        </div>
+        ) : null}
       </div>
     </PortfolioStageSurface>
   );

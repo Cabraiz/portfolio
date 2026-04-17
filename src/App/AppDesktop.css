@@ -7,9 +7,10 @@
 }
 
 @font-face {
-  font-family: "BlommingElegant";
-  src: local("BlommingElegant"),
-    url("/fonts/BloomingElegant/Blooming/Elegant/Sans.otf");
+  font-family: "BloomingElegant";
+  src: url("/fonts/BloomingElegant/BloomingElegantSans.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
 }
 
 @font-face {

@@ -21,9 +21,11 @@
   --portfolio-rail-accent-soft: rgba(242, 201, 76, 0.18);
   --portfolio-rail-accent-border: rgba(242, 201, 76, 0.28);
 
-  --portfolio-rail-logo-slot-size: 56px;
-  --portfolio-rail-logo-inner-size: 80%;
+  --portfolio-rail-logo-slot-size: clamp(54px, 4.8vw, 72px);
+  --portfolio-rail-logo-inner-size: 88%;
   --portfolio-rail-logo-left-radius: 0.62rem;
+  --portfolio-rail-logo-offset-x: -50%;
+  --portfolio-rail-logo-offset-y: -50%;
 
   position: relative;
   display: grid;
@@ -71,7 +73,10 @@
 }
 
 .counterSlot :global(.counter) {
-  --counter-size: var(--portfolio-rail-counter-size, clamp(5rem, 6.8vw, 6.4rem));
+  --counter-size: var(
+    --portfolio-rail-counter-size,
+    clamp(5rem, 6.8vw, 6.4rem)
+  );
 }
 
 .list {
@@ -191,6 +196,7 @@
     0 1rem 2rem -1.2rem rgba(0, 0, 0, 0.34),
     0 0 0 1px rgba(242, 201, 76, 0.06),
     inset 0 1px 0 rgba(255, 250, 235, 0.06);
+  animation: railCardActiveBreath 5.8s ease-in-out infinite;
 }
 
 .cardActive::after {
@@ -203,6 +209,7 @@
     0 0 0.9rem rgba(242, 201, 76, 0.25),
     0 0 1.4rem rgba(242, 201, 76, 0.14);
   opacity: 1;
+  animation: railActiveBarBreath 5.8s ease-in-out infinite;
 }
 
 .cardGrid {
@@ -210,7 +217,7 @@
   z-index: 1;
   display: grid;
   grid-template-columns: minmax(0, 1fr) var(--portfolio-rail-logo-slot-size);
-  column-gap: 0.4rem;
+  column-gap: 0.46rem;
   align-items: center;
   min-width: 0;
   transform: translateY(-2px);
@@ -277,9 +284,8 @@
 
 .logoSlot {
   position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: grid;
+  place-items: center;
   inline-size: var(--portfolio-rail-logo-slot-size);
   block-size: var(--portfolio-rail-logo-slot-size);
   min-inline-size: var(--portfolio-rail-logo-slot-size);
@@ -287,34 +293,128 @@
   max-inline-size: var(--portfolio-rail-logo-slot-size);
   max-block-size: var(--portfolio-rail-logo-slot-size);
   aspect-ratio: 1 / 1;
-  padding: 0;
   align-self: center;
   justify-self: end;
   margin: 0;
+  padding: 0;
   box-sizing: border-box;
-  background: rgba(255, 255, 255, 0.035);
-  border: none;
-  border-left: 1px solid rgba(255, 255, 255, 0.06);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
   overflow: hidden;
+  flex: 0 0 var(--portfolio-rail-logo-slot-size);
+
+  background: linear-gradient(
+    180deg,
+    rgba(242, 246, 250, 0.88) 0%,
+    rgba(231, 237, 244, 0.82) 100%
+  );
+
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.52),
+    inset 0 -1px 0 rgba(15, 23, 42, 0.05),
+    0 0.48rem 1rem -0.78rem rgba(15, 23, 42, 0.26);
+
   border-top-left-radius: var(--portfolio-rail-logo-left-radius);
   border-bottom-left-radius: var(--portfolio-rail-logo-left-radius);
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
-  flex: 0 0 var(--portfolio-rail-logo-slot-size);
+
+  opacity: 0;
+  transform: translateY(6px);
+  animation: railLogoFadeIn 440ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.logoSurface {
+  position: absolute;
+  inset: 3px;
+  z-index: 0;
+
+  border-top-left-radius: calc(
+    var(--portfolio-rail-logo-left-radius) - 0.06rem
+  );
+  border-bottom-left-radius: calc(
+    var(--portfolio-rail-logo-left-radius) - 0.06rem
+  );
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.5) 0%,
+    rgba(255, 255, 255, 0.25) 38%,
+    rgba(255, 255, 255, 0.12) 100%
+  );
+
+  border: 1px solid rgba(255, 255, 255, 0.34);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.68),
+    inset 0 -1px 0 rgba(15, 23, 42, 0.06);
+
+  backdrop-filter: blur(10px) saturate(1.08);
+  -webkit-backdrop-filter: blur(10px) saturate(1.08);
+
+  animation: railGlassIdle 5.2s ease-in-out infinite;
+}
+
+.logoSurface::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-top-left-radius: inherit;
+  border-bottom-left-radius: inherit;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.58) 0%,
+    rgba(255, 255, 255, 0.24) 30%,
+    rgba(255, 255, 255, 0.06) 60%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  opacity: 0.88;
+}
+
+.logoSurface::after {
+  content: "";
+  position: absolute;
+  inset: -8% -18%;
+  pointer-events: none;
+  background: linear-gradient(
+    105deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.05) 38%,
+    rgba(255, 255, 255, 0.15) 50%,
+    rgba(255, 255, 255, 0.05) 62%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: translateX(-58%);
+  opacity: 0.36;
+  animation: railGlassSweep 6.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
 .logo {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 1;
   display: block;
   width: var(--portfolio-rail-logo-inner-size);
   height: var(--portfolio-rail-logo-inner-size);
   max-width: var(--portfolio-rail-logo-inner-size);
   max-height: var(--portfolio-rail-logo-inner-size);
-  margin: 0 auto;
   object-fit: contain;
   object-position: center;
-  filter: brightness(1.02) contrast(1.04);
-  flex-shrink: 0;
+  transform: translate(
+      var(--portfolio-rail-logo-offset-x),
+      var(--portfolio-rail-logo-offset-y)
+    )
+    translateY(0)
+    scale(1);
+  background: transparent;
+  filter: brightness(1.04) contrast(1.06) saturate(1.04);
+  pointer-events: none;
+  animation: railLogoIdle 4.6s ease-in-out infinite;
+  will-change: transform, filter;
 }
 
 .logoFallback {
@@ -341,11 +441,124 @@
   color: var(--portfolio-rail-text-muted);
 }
 
+@keyframes railLogoFadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes railLogoIdle {
+  0%,
+  100% {
+    transform: translate(
+        var(--portfolio-rail-logo-offset-x),
+        var(--portfolio-rail-logo-offset-y)
+      )
+      translateY(0)
+      scale(1);
+    filter: brightness(1.04) contrast(1.06) saturate(1.04);
+  }
+  25% {
+    transform: translate(
+        var(--portfolio-rail-logo-offset-x),
+        var(--portfolio-rail-logo-offset-y)
+      )
+      translateY(-1.4px)
+      scale(1.016);
+    filter: brightness(1.065) contrast(1.08) saturate(1.05);
+  }
+  50% {
+    transform: translate(
+        var(--portfolio-rail-logo-offset-x),
+        var(--portfolio-rail-logo-offset-y)
+      )
+      translateY(-2.2px)
+      scale(1.022);
+    filter: brightness(1.08) contrast(1.09) saturate(1.055);
+  }
+  75% {
+    transform: translate(
+        var(--portfolio-rail-logo-offset-x),
+        var(--portfolio-rail-logo-offset-y)
+      )
+      translateY(-1px)
+      scale(1.012);
+    filter: brightness(1.06) contrast(1.075) saturate(1.048);
+  }
+}
+
+@keyframes railGlassIdle {
+  0%,
+  100% {
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.68),
+      inset 0 -1px 0 rgba(15, 23, 42, 0.06);
+    opacity: 0.96;
+  }
+  50% {
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.8),
+      inset 0 -1px 0 rgba(15, 23, 42, 0.08);
+    opacity: 1;
+  }
+}
+
+@keyframes railGlassSweep {
+  0%,
+  100% {
+    transform: translateX(-58%);
+    opacity: 0.22;
+  }
+  50% {
+    transform: translateX(18%);
+    opacity: 0.5;
+  }
+}
+
+@keyframes railCardActiveBreath {
+  0%,
+  100% {
+    box-shadow:
+      0 1rem 2rem -1.2rem rgba(0, 0, 0, 0.34),
+      0 0 0 1px rgba(242, 201, 76, 0.06),
+      inset 0 1px 0 rgba(255, 250, 235, 0.06);
+  }
+  50% {
+    box-shadow:
+      0 1.15rem 2.25rem -1.15rem rgba(0, 0, 0, 0.4),
+      0 0 0 1px rgba(242, 201, 76, 0.1),
+      0 0 1.1rem rgba(242, 201, 76, 0.08),
+      inset 0 1px 0 rgba(255, 250, 235, 0.085);
+  }
+}
+
+@keyframes railActiveBarBreath {
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow:
+      0 0 0.9rem rgba(242, 201, 76, 0.25),
+      0 0 1.4rem rgba(242, 201, 76, 0.14);
+  }
+  50% {
+    opacity: 1;
+    box-shadow:
+      0 0 1.1rem rgba(242, 201, 76, 0.32),
+      0 0 1.6rem rgba(242, 201, 76, 0.18);
+  }
+}
+
 @media (max-height: 820px) {
   .rail {
-    --portfolio-rail-logo-slot-size: 50px;
-    --portfolio-rail-logo-inner-size: 78%;
+    --portfolio-rail-logo-slot-size: clamp(50px, 4.6vw, 62px);
+    --portfolio-rail-logo-inner-size: 86%;
     --portfolio-rail-logo-left-radius: 0.58rem;
+    --portfolio-rail-logo-offset-x: -49%;
     padding: 0.72rem;
   }
 
@@ -364,7 +577,7 @@
   }
 
   .cardGrid {
-    column-gap: 0.36rem;
+    column-gap: 0.4rem;
   }
 
   .title {
@@ -378,9 +591,10 @@
 
 @media (max-width: 1280px) {
   .rail {
-    --portfolio-rail-logo-slot-size: 52px;
-    --portfolio-rail-logo-inner-size: 79%;
+    --portfolio-rail-logo-slot-size: clamp(52px, 4.6vw, 66px);
+    --portfolio-rail-logo-inner-size: 87%;
     --portfolio-rail-logo-left-radius: 0.6rem;
+    --portfolio-rail-logo-offset-x: -49.5%;
     padding: 0.74rem;
   }
 
@@ -394,7 +608,7 @@
   }
 
   .cardGrid {
-    column-gap: 0.38rem;
+    column-gap: 0.42rem;
   }
 
   .title {
@@ -406,9 +620,125 @@
   }
 }
 
+@media (max-width: 960px) {
+  .rail {
+    --portfolio-rail-logo-slot-size: clamp(48px, 5.2vw, 58px);
+    --portfolio-rail-logo-inner-size: 88%;
+    --portfolio-rail-logo-offset-x: -49%;
+  }
+
+  .cardGrid {
+    column-gap: 0.38rem;
+  }
+}
+
+@media (max-width: 720px), (max-height: 720px) {
+  .rail {
+    --portfolio-rail-logo-slot-size: 56px;
+    --portfolio-rail-logo-inner-size: 86%;
+    --portfolio-rail-logo-left-radius: 0.56rem;
+    --portfolio-rail-logo-offset-x: -48.5%;
+    padding: 0.68rem;
+  }
+
+  .list {
+    gap: 0.46rem;
+    padding-right: 0.24rem;
+  }
+
+  .card {
+    min-height: 64px;
+    padding: 0.62rem 0 0.62rem 0.82rem;
+  }
+
+  .card::after {
+    top: 0.66rem;
+    bottom: 0.66rem;
+    left: 0.52rem;
+  }
+
+  .cardGrid {
+    column-gap: 0.34rem;
+  }
+
+  .cardTopline,
+  .cardBody {
+    padding-left: 0.36rem;
+  }
+
+  .year {
+    font-size: 0.62rem;
+    letter-spacing: 0.14em;
+  }
+
+  .title {
+    font-size: 0.72rem;
+    line-height: 0.98;
+  }
+
+  .subtitle {
+    font-size: 0.52rem;
+    line-height: 1.02;
+  }
+
+  .logoSurface {
+    inset: 2px;
+    animation-duration: 5.8s;
+  }
+
+  .logoSurface::after {
+    animation-duration: 7s;
+  }
+
+  .logo {
+    animation-duration: 5s;
+  }
+
+  .cardActive,
+  .cardActive::after {
+    animation-duration: 6.2s;
+  }
+}
+
+@media (max-width: 560px) {
+  .rail {
+    --portfolio-rail-logo-slot-size: clamp(42px, 6vw, 52px);
+    --portfolio-rail-logo-inner-size: 88%;
+    --portfolio-rail-logo-left-radius: 0.56rem;
+    --portfolio-rail-logo-offset-x: -49%;
+  }
+
+  .cardGrid {
+    column-gap: 0.32rem;
+  }
+
+  .cardTopline,
+  .cardBody {
+    padding-left: 0.42rem;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .card,
-  .card::after {
+  .card::after,
+  .logoSlot,
+  .logoSurface,
+  .logoSurface::after,
+  .logo {
     transition: none;
+    animation: none;
+  }
+
+  .logoSlot {
+    opacity: 1;
+    transform: none;
+  }
+
+  .logo {
+    transform: translate(
+      var(--portfolio-rail-logo-offset-x),
+      var(--portfolio-rail-logo-offset-y)
+    );
+    filter: brightness(1.04) contrast(1.06) saturate(1.04);
   }
 }

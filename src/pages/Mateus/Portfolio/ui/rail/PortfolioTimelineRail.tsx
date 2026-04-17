@@ -59,6 +59,7 @@ const PortfolioTimelineRail: React.FC<PortfolioTimelineRailProps> = ({
         {hasItems ? (
           items.map((item, index) => {
             const isActive = index === activeIndex || item.isActive === true;
+            const hasLogo = Boolean(item.railLogoSrc);
 
             return (
               <button
@@ -92,16 +93,19 @@ const PortfolioTimelineRail: React.FC<PortfolioTimelineRailProps> = ({
 
                   <span
                     className={styles.logoSlot}
-                    aria-hidden={!item.railLogoSrc}
+                    data-has-logo={hasLogo ? "true" : "false"}
+                    aria-hidden={!hasLogo}
                   >
-                    {item.railLogoSrc ? (
-                      <img
-                        src={item.railLogoSrc}
-                        alt={item.railLogoAlt ?? item.title}
-                        className={styles.logo}
-                        loading="lazy"
-                        decoding="async"
-                      />
+                    {hasLogo ? (
+                      <span className={styles.logoSurface}>
+                        <img
+                          src={item.railLogoSrc}
+                          alt={item.railLogoAlt ?? item.title}
+                          className={styles.logo}
+                          loading="lazy"
+                          decoding="async"
+                        />
+                      </span>
                     ) : (
                       <span className={styles.logoFallback} aria-hidden="true">
                         •

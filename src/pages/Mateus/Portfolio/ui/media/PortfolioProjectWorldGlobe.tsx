@@ -77,7 +77,7 @@ const INITIAL_SIZE: CanvasSize = {
  * Velocidade da rotação contínua em idle.
  * Unidade: radianos por ms.
  */
-const IDLE_SPIN_SPEED_RAD_PER_MS = 0.00022;
+const IDLE_SPIN_SPEED_RAD_PER_MS = 0.0001;
 
 /**
  * Suavização do phi renderizado.
@@ -144,6 +144,20 @@ function formatMetaLabel(
   }
 
   return "";
+}
+
+function getLocationLine(
+  country: string,
+  city: string | undefined,
+  region: string | undefined
+): string {
+  const meta = formatMetaLabel(city, region);
+
+  if (meta) {
+    return meta;
+  }
+
+  return country;
 }
 
 function getDevicePixelRatio(): number {
@@ -444,9 +458,6 @@ function PortfolioProjectWorldGlobeComponent({
         : DEFAULT_TRANSITION_DURATION_MS,
     };
 
-    /**
-     * Congela o spin no offset de unwind e zera o idle contínuo.
-     */
     idleSpinAngleRef.current = 0;
     unwindOrbitAngleRef.current = frozenIdleSpin;
 
@@ -584,9 +595,6 @@ function PortfolioProjectWorldGlobeComponent({
         const easedT = easeInOutCubic(t);
 
         if (activeTransition.phase === "unwind") {
-          /**
-           * Mantém o país atual, apenas devolvendo a rotação acumulada.
-           */
           nextLocation = activeTransition.fromLocation;
           nextFocus = activeTransition.fromFocus;
 
@@ -614,9 +622,6 @@ function PortfolioProjectWorldGlobeComponent({
             };
           }
         } else {
-          /**
-           * Viaja para o novo país já sem spin residual.
-           */
           nextLocation = {
             lat: mix(
               activeTransition.fromLocation.lat,
@@ -653,10 +658,6 @@ function PortfolioProjectWorldGlobeComponent({
           }
         }
       } else {
-        /**
-         * Idle contínuo:
-         * gira de verdade e acumula o valor da rotação.
-         */
         nextLocation = liveTargetLocation;
         nextFocus = resolveGlobeFocus(
           resolveInitialFocusPoint(liveOrigin, liveTargetLocation)
@@ -672,9 +673,6 @@ function PortfolioProjectWorldGlobeComponent({
       currentLocationRef.current = nextLocation;
       currentFocusRef.current = nextFocus;
 
-      /**
-       * Foco renderizado = foco lógico + spin idle + unwind transitório.
-       */
       const finalPhi = normalizeAngle(
         nextFocus.phi +
           idleSpinAngleRef.current +
@@ -731,9 +729,7 @@ function PortfolioProjectWorldGlobeComponent({
     };
   }, []);
 
-  const footerLabel = country;
-  const footerTitle = projectName?.trim() || country;
-  const footerMeta = formatMetaLabel(city, region);
+  const locationLine = getLocationLine(country, city, region);
 
   return (
     <aside
@@ -775,25 +771,17 @@ function PortfolioProjectWorldGlobeComponent({
           className={styles.portfolioProjectWorldGlobeCanvas}
           aria-label={`Globo focado em ${country}`}
         />
-      </div>
 
-      {showFooterCard ? (
-        <div className={styles.portfolioProjectWorldGlobeInfoCard}>
-          <span className={styles.portfolioProjectWorldGlobeInfoLabel}>
-            {footerLabel}
+        <div className={styles.portfolioProjectWorldGlobeOverlay}>
+          <span className={styles.portfolioProjectWorldGlobeOverlayCountry}>
+            {country}
           </span>
 
-          <strong className={styles.portfolioProjectWorldGlobeInfoTitle}>
-            {footerTitle}
-          </strong>
-
-          {footerMeta ? (
-            <span className={styles.portfolioProjectWorldGlobeInfoMeta}>
-              {footerMeta}
-            </span>
-          ) : null}
+          <span className={styles.portfolioProjectWorldGlobeOverlayLocation}>
+            {locationLine}
+          </span>
         </div>
-      ) : null}
+      </div>
     </aside>
   );
 }
