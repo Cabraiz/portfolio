@@ -1,6 +1,6 @@
-export type MateusHeroViewportMode = "compact" | "default" | "tall";
+export type HomeHeroViewportMode = "compact" | "default" | "tall";
 
-export const mateusHeroTokens = {
+export const homeHeroTokens = {
   breakpoints: {
     desktopMinWidth: 961,
     compactHeightMax: 760,
@@ -9,9 +9,8 @@ export const mateusHeroTokens = {
 
   section: {
     /**
-     * A LandingSectionShell já é a dona da altura da seção.
-     * O hero não recalcula viewport nem desconta navbar aqui;
-     * ele apenas ocupa 100% do bloco recebido do pai.
+     * A LandingSectionShell continua dona da altura da seção.
+     * O hero só ocupa o bloco disponível, sem compensar navbar aqui.
      */
     minHeight: {
       compact: "100%",
@@ -20,22 +19,20 @@ export const mateusHeroTokens = {
     },
 
     /**
-     * Respiro superior pequeno e controlado.
-     * Sem exagero para não empurrar o conteúdo para baixo.
+     * Compact/mobile mais contido para não abrir um vão grande
+     * antes do conteúdo principal.
      */
     paddingTop: {
-      compact: "16px",
+      compact: "8px",
       default: "12px",
       tall: "16px",
     },
 
     /**
-     * Respiro inferior reduzido.
-     * O excesso anterior, somado ao padding da row,
-     * era parte da causa da faixa da próxima seção aparecer.
+     * Respiro inferior curto para não vazar visual de próxima seção.
      */
     paddingBottom: {
-      compact: "8px",
+      compact: "6px",
       default: "8px",
       tall: "10px",
     },
@@ -43,12 +40,12 @@ export const mateusHeroTokens = {
 
   profileColumn: {
     paddingLeft: {
-      compact: "10px",
+      compact: "8px",
       default: "12px",
       tall: "14px",
     },
     paddingRight: {
-      compact: "10px",
+      compact: "8px",
       default: "12px",
       tall: "14px",
     },
@@ -62,22 +59,22 @@ export const mateusHeroTokens = {
       tall: "0px",
     },
     padding: {
-      compact: "20px 20px 24px",
+      compact: "14px 14px 16px",
       default: "28px 28px 32px",
       tall: "30px 30px 34px",
     },
     borderRadius: {
-      compact: "18px",
+      compact: "16px",
       default: "20px",
       tall: "24px",
     },
     width: {
-      compact: "min(100%, 430px)",
+      compact: "min(100%, 350px)",
       default: "min(100%, 590px)",
       tall: "min(100%, 650px)",
     },
     gap: {
-      compact: "18px",
+      compact: "12px",
       default: "24px",
       tall: "28px",
     },
@@ -100,12 +97,12 @@ export const mateusHeroTokens = {
 
   profileImage: {
     maxWidth: {
-      compact: "350px",
+      compact: "100%",
       default: "495px",
       tall: "545px",
     },
     borderRadius: {
-      compact: "1.85rem",
+      compact: "1.25rem",
       default: "2.25rem",
       tall: "2.75rem",
     },
@@ -115,7 +112,7 @@ export const mateusHeroTokens = {
 
   socialRow: {
     gap: {
-      compact: "12px",
+      compact: "10px",
       default: "16px",
       tall: "18px",
     },

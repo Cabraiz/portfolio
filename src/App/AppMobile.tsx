@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import { ReactLenis } from "lenis/react";
@@ -27,6 +27,10 @@ import type {
 } from "../features/scroll/lenisScrollProfiles";
 
 const APP_LENIS_SCROLL_CLASS = "desktop-lenis-scroll";
+const APP_LENIS_MOBILE_SCROLL_CLASS = "mobile-lenis-scroll";
+
+const MOBILE_APP_BACKGROUND =
+  "linear-gradient(180deg, #050505 0%, #0a0a0a 38%, #0d0d0d 100%)";
 
 const links: readonly LandingSectionId[] = [
   "portfolio",
@@ -192,27 +196,50 @@ function AppMobile() {
     const html = browserDocument.documentElement;
     const { body } = browserDocument;
 
-    const previousHtmlOverflow = html.style.overflow;
-    const previousBodyOverflow = body.style.overflow;
-    const previousHtmlOverscroll = html.style.overscrollBehavior;
-    const previousBodyOverscroll = body.style.overscrollBehavior;
+    html.classList.remove(APP_LENIS_SCROLL_CLASS);
+    body.classList.remove(APP_LENIS_SCROLL_CLASS);
 
-    html.classList.add(APP_LENIS_SCROLL_CLASS);
-    body.classList.add(APP_LENIS_SCROLL_CLASS);
+    html.classList.add(APP_LENIS_MOBILE_SCROLL_CLASS);
+    body.classList.add(APP_LENIS_MOBILE_SCROLL_CLASS);
 
-    html.style.overflow = "hidden";
-    body.style.overflow = "hidden";
-    html.style.overscrollBehavior = "none";
-    body.style.overscrollBehavior = "none";
+    const previousHtmlBackground = html.style.background;
+    const previousBodyBackground = body.style.background;
+
+    html.style.background = "#050505";
+    body.style.background = "#050505";
 
     return () => {
-      html.classList.remove(APP_LENIS_SCROLL_CLASS);
-      body.classList.remove(APP_LENIS_SCROLL_CLASS);
+      html.classList.remove(APP_LENIS_MOBILE_SCROLL_CLASS);
+      body.classList.remove(APP_LENIS_MOBILE_SCROLL_CLASS);
 
-      html.style.overflow = previousHtmlOverflow;
-      body.style.overflow = previousBodyOverflow;
-      html.style.overscrollBehavior = previousHtmlOverscroll;
-      body.style.overscrollBehavior = previousBodyOverscroll;
+      html.style.background = previousHtmlBackground;
+      body.style.background = previousBodyBackground;
+    };
+  }, []);
+
+  const mobileLayoutStyle = useMemo<React.CSSProperties>(() => {
+    return {
+      "--mobile-safe-top": "max(env(safe-area-inset-top), 0px)",
+      "--mobile-safe-bottom": "max(env(safe-area-inset-bottom), 0px)",
+      position: "relative",
+      width: "100%",
+      minHeight: "100dvh",
+      background: MOBILE_APP_BACKGROUND,
+      display: "flex",
+      flexDirection: "column",
+    } as React.CSSProperties;
+  }, []);
+
+  const mobilePageContentStyle = useMemo<React.CSSProperties>(() => {
+    return {
+      position: "relative",
+      width: "100%",
+      flex: 1,
+      minHeight: "0",
+      paddingTop: "0px",
+      paddingBottom: "var(--mobile-safe-bottom, 0px)",
+      boxSizing: "border-box",
+      background: MOBILE_APP_BACKGROUND,
     };
   }, []);
 
@@ -230,7 +257,7 @@ function AppMobile() {
         touchMultiplier: smoothOptions.touchMultiplier,
       }}
     >
-      <div className="app-lenis-content">
+      <div className="app-lenis-content" style={mobileLayoutStyle}>
         <TitleWebsite title1="Bem Vindo! 🤝" title2="Cabraiz" />
 
         {!isNavHidden && (
@@ -244,7 +271,9 @@ function AppMobile() {
           />
         )}
 
-        <AppRoutes />
+        <main style={mobilePageContentStyle}>
+          <AppRoutes />
+        </main>
 
         <ToastContainer />
       </div>

@@ -1,20 +1,22 @@
 import { type CSSProperties, useEffect, useMemo, useState } from "react";
 import {
-  mateusHeroTokens,
-  type MateusHeroViewportMode,
-} from "../layout/mateusHero.tokens";
+  homeHeroTokens,
+  type HomeHeroViewportMode,
+} from "../layout/homeHero.tokens";
+import { getHomeHeroViewportMode } from "../layout/getHomeHeroViewportMode";
 
 type ViewportSize = Readonly<{
   width: number;
   height: number;
 }>;
 
-type UseMateusHeroLayoutResult = Readonly<{
-  mode: MateusHeroViewportMode;
+type UseHomeHeroLayoutResult = Readonly<{
+  mode: HomeHeroViewportMode;
   viewportWidth: number;
   viewportHeight: number;
   isCompactDesktop: boolean;
   isTallDesktop: boolean;
+  isMobileViewport: boolean;
   sectionStyle: CSSProperties;
   profileColumnStyle: CSSProperties;
   profileCardStyle: CSSProperties;
@@ -38,32 +40,7 @@ function getInitialViewport(): ViewportSize {
   };
 }
 
-function resolveViewportMode(
-  width: number,
-  height: number,
-): MateusHeroViewportMode {
-  const {
-    desktopMinWidth,
-    compactHeightMax,
-    tallHeightMin,
-  } = mateusHeroTokens.breakpoints;
-
-  if (width < desktopMinWidth) {
-    return "compact";
-  }
-
-  if (height <= compactHeightMax) {
-    return "compact";
-  }
-
-  if (height >= tallHeightMin) {
-    return "tall";
-  }
-
-  return "default";
-}
-
-export function useMateusHeroLayout(): UseMateusHeroLayoutResult {
+export function useHomeHeroLayout(): UseHomeHeroLayoutResult {
   const [viewport, setViewport] = useState<ViewportSize>(() =>
     getInitialViewport(),
   );
@@ -120,15 +97,19 @@ export function useMateusHeroLayout(): UseMateusHeroLayoutResult {
     };
   }, []);
 
-  const mode = useMemo<MateusHeroViewportMode>(() => {
-    return resolveViewportMode(viewport.width, viewport.height);
+  const mode = useMemo<HomeHeroViewportMode>(() => {
+    return getHomeHeroViewportMode(viewport.width, viewport.height);
   }, [viewport.width, viewport.height]);
+
+  const isMobileViewport = useMemo<boolean>(() => {
+    return viewport.width < homeHeroTokens.breakpoints.desktopMinWidth;
+  }, [viewport.width]);
 
   const sectionStyle = useMemo<CSSProperties>(() => {
     return {
-      minHeight: mateusHeroTokens.section.minHeight[mode],
-      paddingTop: mateusHeroTokens.section.paddingTop[mode],
-      paddingBottom: mateusHeroTokens.section.paddingBottom[mode],
+      minHeight: homeHeroTokens.section.minHeight[mode],
+      paddingTop: homeHeroTokens.section.paddingTop[mode],
+      paddingBottom: homeHeroTokens.section.paddingBottom[mode],
       display: "flex",
       alignItems: "stretch",
       justifyContent: mode === "compact" ? "center" : "flex-start",
@@ -144,8 +125,8 @@ export function useMateusHeroLayout(): UseMateusHeroLayoutResult {
       display: "flex",
       justifyContent: "center",
       alignItems: "center",
-      paddingLeft: mateusHeroTokens.profileColumn.paddingLeft[mode],
-      paddingRight: mateusHeroTokens.profileColumn.paddingRight[mode],
+      paddingLeft: homeHeroTokens.profileColumn.paddingLeft[mode],
+      paddingRight: homeHeroTokens.profileColumn.paddingRight[mode],
       paddingTop: "0px",
       boxSizing: "border-box",
     };
@@ -153,46 +134,60 @@ export function useMateusHeroLayout(): UseMateusHeroLayoutResult {
 
   const profileCardStyle = useMemo<CSSProperties>(() => {
     return {
-      backgroundColor: mateusHeroTokens.profileCard.backgroundColor,
-      marginLeft: mateusHeroTokens.profileCard.marginLeft[mode],
-      padding: mateusHeroTokens.profileCard.padding[mode],
-      borderRadius: mateusHeroTokens.profileCard.borderRadius[mode],
+      backgroundColor: homeHeroTokens.profileCard.backgroundColor,
+      marginLeft: homeHeroTokens.profileCard.marginLeft[mode],
+      padding: homeHeroTokens.profileCard.padding[mode],
+      borderRadius: homeHeroTokens.profileCard.borderRadius[mode],
       display: "flex",
       flexDirection: "column",
       justifyContent: "flex-start",
       alignItems: "center",
-      width: mateusHeroTokens.profileCard.width[mode],
+      width: homeHeroTokens.profileCard.width[mode],
       height: "auto",
-      gap: mateusHeroTokens.profileCard.gap[mode],
-      border: mateusHeroTokens.profileCard.border[mode],
-      boxShadow: mateusHeroTokens.profileCard.shadow[mode],
+      gap: homeHeroTokens.profileCard.gap[mode],
+      border: homeHeroTokens.profileCard.border[mode],
+      boxShadow: homeHeroTokens.profileCard.shadow[mode],
       boxSizing: "border-box",
     };
   }, [mode]);
 
   const profileImageWrapperStyle = useMemo<CSSProperties>(() => {
     return {
-      borderRadius: mateusHeroTokens.profileImage.borderRadius[mode],
+      borderRadius: homeHeroTokens.profileImage.borderRadius[mode],
       overflow: "hidden",
       width: "100%",
-      maxWidth: mateusHeroTokens.profileImage.maxWidth[mode],
-      aspectRatio: mateusHeroTokens.profileImage.aspectRatio,
+      maxWidth: homeHeroTokens.profileImage.maxWidth[mode],
+      aspectRatio: homeHeroTokens.profileImage.aspectRatio,
       position: "relative",
-      boxShadow: mateusHeroTokens.profileImage.shadow,
+      boxShadow: homeHeroTokens.profileImage.shadow,
       flexShrink: 0,
     };
   }, [mode]);
 
   const socialRowStyle = useMemo<CSSProperties>(() => {
+    if (isMobileViewport) {
+      return {
+        display: "grid",
+        gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+        justifyItems: "center",
+        alignItems: "center",
+        columnGap: "12px",
+        rowGap: "12px",
+        width: "100%",
+        maxWidth: "220px",
+        margin: "0 auto",
+      };
+    }
+
     return {
       display: "flex",
       justifyContent: "center",
       alignItems: "center",
-      gap: mateusHeroTokens.socialRow.gap[mode],
+      gap: homeHeroTokens.socialRow.gap[mode],
       width: "100%",
       flexWrap: "nowrap",
     };
-  }, [mode]);
+  }, [isMobileViewport, mode]);
 
   return {
     mode,
@@ -200,6 +195,7 @@ export function useMateusHeroLayout(): UseMateusHeroLayoutResult {
     viewportHeight: viewport.height,
     isCompactDesktop: mode === "compact",
     isTallDesktop: mode === "tall",
+    isMobileViewport,
     sectionStyle,
     profileColumnStyle,
     profileCardStyle,
@@ -208,4 +204,4 @@ export function useMateusHeroLayout(): UseMateusHeroLayoutResult {
   };
 }
 
-export default useMateusHeroLayout;
+export default useHomeHeroLayout;

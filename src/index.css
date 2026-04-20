@@ -19,6 +19,7 @@ body {
   min-height: 100%;
 }
 
+/* Desktop mantém a política atual de scroll travado no html/body */
 html.desktop-lenis-scroll,
 body.desktop-lenis-scroll {
   height: 100%;
@@ -33,19 +34,49 @@ body.desktop-lenis-scroll #root {
   overflow: hidden;
 }
 
-/* Mantém o host real do Lenis scrollável */
+/* Mobile: não trava html/body, deixa o host do Lenis assumir a rolagem */
+html.mobile-lenis-scroll,
+body.mobile-lenis-scroll {
+  min-height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-y: auto;
+}
+
+/* Host real do Lenis */
 .app-lenis-root,
 .app-lenis-root.lenis,
 .app-lenis-root.lenis.lenis-smooth {
   width: 100%;
-  height: 100%;
   min-height: 100dvh;
   overflow-y: auto !important;
   overflow-x: hidden !important;
-  overscroll-behavior: none;
   position: relative;
+  -webkit-overflow-scrolling: touch;
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/* Desktop continua ocupando a altura toda do viewport */
+html.desktop-lenis-scroll .app-lenis-root,
+html.desktop-lenis-scroll .app-lenis-root.lenis,
+html.desktop-lenis-scroll .app-lenis-root.lenis.lenis-smooth,
+body.desktop-lenis-scroll .app-lenis-root,
+body.desktop-lenis-scroll .app-lenis-root.lenis,
+body.desktop-lenis-scroll .app-lenis-root.lenis.lenis-smooth {
+  height: 100%;
+}
+
+/* Mobile precisa deixar a altura crescer com o conteúdo */
+html.mobile-lenis-scroll .app-lenis-root,
+html.mobile-lenis-scroll .app-lenis-root.lenis,
+html.mobile-lenis-scroll .app-lenis-root.lenis.lenis-smooth,
+body.mobile-lenis-scroll .app-lenis-root,
+body.mobile-lenis-scroll .app-lenis-root.lenis,
+body.mobile-lenis-scroll .app-lenis-root.lenis.lenis-smooth {
+  height: auto;
+  min-height: 100dvh;
+  overscroll-behavior-y: auto;
 }
 
 /* Esconde a barra visual do host real */

@@ -18,11 +18,11 @@ const routerRootStyle: CSSProperties = {
 };
 
 function getBrowserWindow(): Window | null {
-  if (globalThis.window === undefined) {
+  if (typeof window === "undefined") {
     return null;
   }
 
-  return globalThis.window;
+  return window;
 }
 
 function resolveIsMobileFromWindow(browserWindow: Window): boolean {

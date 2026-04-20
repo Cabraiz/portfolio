@@ -42,7 +42,7 @@ type ViewportState = Readonly<{
   height: number;
 }>;
 
-const navbarRootStyle: CSSProperties = {
+const desktopNavbarRootStyle: CSSProperties = {
   position: "fixed",
   top: 0,
   left: 0,
@@ -54,6 +54,20 @@ const navbarRootStyle: CSSProperties = {
   backdropFilter: "blur(14px)",
   WebkitBackdropFilter: "blur(14px)",
   boxShadow: "0 12px 32px rgba(0, 0, 0, 0.18)",
+};
+
+const mobileNavbarRootStyle: CSSProperties = {
+  position: "fixed",
+  top: 0,
+  left: 0,
+  right: 0,
+  zIndex: 1000,
+  borderBottom: "1px solid rgba(255, 255, 255, 0.08)",
+  background:
+    "linear-gradient(180deg, rgba(10, 10, 14, 0.96) 0%, rgba(8, 8, 12, 0.92) 100%)",
+  backdropFilter: "blur(12px)",
+  WebkitBackdropFilter: "blur(12px)",
+  boxShadow: "0 8px 22px rgba(0, 0, 0, 0.16)",
 };
 
 function getBrowserWindow(): Window | null {
@@ -183,18 +197,27 @@ export default function AppNavbar({
       justifyContent: "space-between",
       gap: getNavbarGap(isMobileView),
       minWidth: 0,
+      paddingInline: isMobileView ? "clamp(14px, 4vw, 18px)" : 0,
+      boxSizing: "border-box",
     }),
     [isMobileView],
   );
 
+  const resolvedNavbarRootStyle = useMemo<CSSProperties>(() => {
+    return isMobileView ? mobileNavbarRootStyle : desktopNavbarRootStyle;
+  }, [isMobileView]);
+
+  const resolvedNavbarStyle = useMemo<CSSProperties>(
+    () => ({
+      ...resolvedNavbarRootStyle,
+      height: `${navbarHeight}px`,
+      padding: getNavbarPadding(isMobileView),
+    }),
+    [isMobileView, navbarHeight, resolvedNavbarRootStyle],
+  );
+
   return (
-    <Navbar
-      style={{
-        ...navbarRootStyle,
-        height: `${navbarHeight}px`,
-        padding: getNavbarPadding(isMobileView),
-      }}
-    >
+    <Navbar style={resolvedNavbarStyle}>
       <div style={containerStyle}>
         {isMobileView ? (
           <MobileNavbar
