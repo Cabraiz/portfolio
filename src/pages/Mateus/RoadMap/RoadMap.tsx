@@ -1,4 +1,4 @@
-import { useId, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 import { useRoadMapState } from "./application/hooks/useRoadMapState";
 import { resolveRoadMapRelations } from "./application/services/resolveRoadMapRelations";
@@ -93,11 +93,8 @@ export default function RoadMap({ className }: RoadMapProps) {
     autoSelectFirstVisibleNode: true,
   });
 
-  const [isFiltersExpanded, setIsFiltersExpanded] = useState(false);
-  const [isReadingExpanded, setIsReadingExpanded] = useState(false);
-
-  const filtersPanelId = useId();
-  const readingPanelId = useId();
+  const [isFiltersExpanded, setIsFiltersExpanded] = useState(true);
+  const [isReadingExpanded, setIsReadingExpanded] = useState(true);
 
   const resolvedRelations = useMemo(() => {
     if (!selectionApi.activeNodeId) {
@@ -112,7 +109,8 @@ export default function RoadMap({ className }: RoadMapProps) {
     return normalized || graph.title;
   }, [graph.title]);
 
-  const canvasMinHeight = isReadingExpanded ? 980 : 920;
+  const isSidePanelExpanded = isFiltersExpanded || isReadingExpanded;
+  const canvasMinHeight = isSidePanelExpanded ? 980 : 920;
 
   const initialAnchorNodeId = useMemo(
     () =>
@@ -123,84 +121,31 @@ export default function RoadMap({ className }: RoadMapProps) {
     [selectionApi.activeNodeId, visibleNodes],
   );
 
+  const openWorkspacePanel = () => {
+    setIsFiltersExpanded(true);
+    setIsReadingExpanded(true);
+  };
+
+  const toggleFiltersPanel = () => {
+    setIsFiltersExpanded((current) => !current);
+  };
+
+  const toggleReadingPanel = () => {
+    setIsReadingExpanded((current) => !current);
+  };
+
+  const closeSidePanel = () => {
+    setIsFiltersExpanded(false);
+    setIsReadingExpanded(false);
+  };
+
   return (
     <section className={joinClassNames(styles.root, className)}>
       <div className={styles.stack}>
-        <div className={styles.topBar}>
-          <div className={styles.topBarContent}>
-            <strong className={styles.topBarTitle} title={graph.title}>
-              {compactTitle}
-            </strong>
-          </div>
-
-          <div className={styles.topActions}>
-            <button
-              type="button"
-              className={joinClassNames(
-                styles.chromeToggle,
-                isFiltersExpanded && styles.chromeToggleActive,
-              )}
-              onClick={() => setIsFiltersExpanded((current) => !current)}
-              aria-expanded={isFiltersExpanded}
-              aria-controls={filtersPanelId}
-            >
-              <span>Filtros</span>
-
-              {filtersApi.activeFilterCount > 0 ? (
-                <span className={styles.toggleCount}>
-                  {filtersApi.activeFilterCount}
-                </span>
-              ) : null}
-
-              <span className={styles.toggleChevron} aria-hidden="true">
-                {isFiltersExpanded ? "▴" : "▾"}
-              </span>
-            </button>
-
-            <button
-              type="button"
-              className={joinClassNames(
-                styles.chromeToggle,
-                isReadingExpanded && styles.chromeToggleActive,
-              )}
-              onClick={() => setIsReadingExpanded((current) => !current)}
-              aria-expanded={isReadingExpanded}
-              aria-controls={readingPanelId}
-            >
-              <span>Leitura</span>
-              <span className={styles.toggleChevron} aria-hidden="true">
-                {isReadingExpanded ? "▴" : "▾"}
-              </span>
-            </button>
-          </div>
-        </div>
-
-        {isFiltersExpanded ? (
-          <div className={styles.topChrome}>
-            <div id={filtersPanelId} className={styles.topPanel}>
-              <div className={styles.chromeCard}>
-                <RoadMapFilters
-                  filters={filtersApi.filters}
-                  activeFilterCount={filtersApi.activeFilterCount}
-                  onQueryChange={filtersApi.setQuery}
-                  onReset={filtersApi.resetFilters}
-                  onToggleCategory={filtersApi.toggleCategory}
-                  onToggleDemand={filtersApi.toggleDemand}
-                  onToggleKind={filtersApi.toggleKind}
-                  onToggleSignal={filtersApi.toggleSignal}
-                  onToggleRelationType={filtersApi.toggleRelationType}
-                  onShowDeprecatedChange={filtersApi.setShowDeprecated}
-                  onShowHiddenChange={filtersApi.setShowHidden}
-                />
-              </div>
-            </div>
-          </div>
-        ) : null}
-
         <div
           className={joinClassNames(
             styles.contentGrid,
-            isReadingExpanded
+            isSidePanelExpanded
               ? styles.contentGridSideExpanded
               : styles.contentGridSideCollapsed,
           )}
@@ -227,58 +172,152 @@ export default function RoadMap({ className }: RoadMapProps) {
           <aside
             className={joinClassNames(
               styles.sideColumn,
-              isReadingExpanded
+              isSidePanelExpanded
                 ? styles.sideColumnExpanded
                 : styles.sideColumnCollapsed,
             )}
           >
-            {isReadingExpanded ? (
-              <div id={readingPanelId} className={styles.sidePanelCard}>
+            {isSidePanelExpanded ? (
+              <div className={styles.sidePanelCard}>
+                <div
+                  className={styles.sideTitleCard}
+                  title={graph.title}
+                  aria-label={graph.title}
+                >
+                  <strong className={styles.sideTitleText}>{compactTitle}</strong>
+                </div>
+
                 <div className={styles.sidePanelHeader}>
                   <div className={styles.sidePanelHeading}>
-                    <span className={styles.sidePanelEyebrow}>Guia</span>
-                    <h2 className={styles.sidePanelTitle}>Leitura</h2>
+                    <h2 className={styles.sidePanelTitle}>Navegação</h2>
+                    <p className={styles.sidePanelDescription}>
+                      Controle os filtros e consulte os detalhes do tópico selecionado.
+                    </p>
                   </div>
 
                   <button
                     type="button"
                     className={styles.sidePanelClose}
-                    onClick={() => setIsReadingExpanded(false)}
-                    aria-label="Fechar leitura"
+                    onClick={closeSidePanel}
+                    aria-label="Fechar painel lateral"
                   >
                     ×
                   </button>
                 </div>
 
-                <div className={styles.sidePanelBody}>
-                  <div className={styles.sideLegendBlock}>
-                    <RoadMapLegend />
-                  </div>
+                <div className={styles.sidePanelToggles}>
+                  <button
+                    type="button"
+                    className={joinClassNames(
+                      styles.chromeToggle,
+                      isFiltersExpanded && styles.chromeToggleActive,
+                    )}
+                    onClick={toggleFiltersPanel}
+                    aria-expanded={isFiltersExpanded}
+                  >
+                    <span>Filtros</span>
 
-                  <div className={styles.sideDetailsBlock}>
-                    <RoadMapDetailsPanel
-                      node={selectionApi.activeNode}
-                      parentNode={selectionApi.parentNode}
-                      childNodes={selectionApi.childNodes}
-                      relatedNodes={selectionApi.relatedNodes}
-                      lineageNodes={selectionApi.lineageNodes}
-                      resolvedRelations={resolvedRelations}
-                    />
-                  </div>
+                    {filtersApi.activeFilterCount > 0 ? (
+                      <span className={styles.toggleCount}>
+                        {filtersApi.activeFilterCount}
+                      </span>
+                    ) : null}
+
+                    <span className={styles.toggleChevron} aria-hidden="true">
+                      {isFiltersExpanded ? "▴" : "▾"}
+                    </span>
+                  </button>
+
+                  <button
+                    type="button"
+                    className={joinClassNames(
+                      styles.chromeToggle,
+                      isReadingExpanded && styles.chromeToggleActive,
+                    )}
+                    onClick={toggleReadingPanel}
+                    aria-expanded={isReadingExpanded}
+                  >
+                    <span>Leitura</span>
+                    <span className={styles.toggleChevron} aria-hidden="true">
+                      {isReadingExpanded ? "▴" : "▾"}
+                    </span>
+                  </button>
+                </div>
+
+                <div className={styles.sidePanelBody}>
+                  {isFiltersExpanded ? (
+                    <section className={styles.sideSection}>
+                      <div className={styles.sideSectionHeader}>
+                        <h3 className={styles.sideSectionTitle}>Filtros</h3>
+                      </div>
+
+                      <div className={styles.sideFiltersBlock}>
+                        <RoadMapFilters
+                          filters={filtersApi.filters}
+                          activeFilterCount={filtersApi.activeFilterCount}
+                          onQueryChange={filtersApi.setQuery}
+                          onReset={filtersApi.resetFilters}
+                          onToggleCategory={filtersApi.toggleCategory}
+                          onToggleDemand={filtersApi.toggleDemand}
+                          onToggleKind={filtersApi.toggleKind}
+                          onToggleSignal={filtersApi.toggleSignal}
+                          onToggleRelationType={filtersApi.toggleRelationType}
+                          onShowDeprecatedChange={filtersApi.setShowDeprecated}
+                          onShowHiddenChange={filtersApi.setShowHidden}
+                        />
+                      </div>
+                    </section>
+                  ) : null}
+
+                  {isReadingExpanded ? (
+                    <section className={styles.sideSection}>
+                      <div className={styles.sideSectionHeader}>
+                        <h3 className={styles.sideSectionTitle}>Leitura</h3>
+                      </div>
+
+                      <div className={styles.sideLegendBlock}>
+                        <RoadMapLegend />
+                      </div>
+
+                      <div className={styles.sideDetailsBlock}>
+                        <RoadMapDetailsPanel
+                          node={selectionApi.activeNode}
+                          parentNode={selectionApi.parentNode}
+                          childNodes={selectionApi.childNodes}
+                          relatedNodes={selectionApi.relatedNodes}
+                          lineageNodes={selectionApi.lineageNodes}
+                          resolvedRelations={resolvedRelations}
+                        />
+                      </div>
+                    </section>
+                  ) : null}
                 </div>
               </div>
             ) : (
-              <button
-                type="button"
-                className={styles.sideCollapsedTrigger}
-                onClick={() => setIsReadingExpanded(true)}
-                aria-expanded={false}
-                aria-controls={readingPanelId}
-                aria-label="Abrir guia de leitura"
-                title="Abrir guia de leitura"
-              >
-                <span className={styles.sideCollapsedIcon} aria-hidden="true" />
-              </button>
+              <div className={styles.sideCollapsedRail}>
+                <div
+                  className={styles.sideCollapsedTitleCard}
+                  title={graph.title}
+                  aria-label={graph.title}
+                >
+                  <strong className={styles.sideCollapsedTitleText}>
+                    {compactTitle}
+                  </strong>
+                </div>
+
+                <button
+                  type="button"
+                  className={styles.sideCollapsedPrimaryAction}
+                  onClick={openWorkspacePanel}
+                  aria-label="Abrir navegação do roadmap"
+                  title="Abrir navegação"
+                >
+                  <span
+                    className={styles.sideCollapsedPrimaryActionIcon}
+                    aria-hidden="true"
+                  />
+                </button>
+              </div>
             )}
           </aside>
         </div>

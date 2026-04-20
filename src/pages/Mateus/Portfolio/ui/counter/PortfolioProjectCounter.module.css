@@ -6,9 +6,11 @@
   --counter-motion-duration: 680ms;
   --counter-motion-easing: cubic-bezier(0.22, 1, 0.36, 1);
 
-  --counter-mark-width: 0.16rem;
-  --counter-mark-height: 0.72rem;
-  --counter-mark-radius-offset: calc(50% - 1.05rem);
+  --counter-ring-stroke: clamp(0.2rem, calc(var(--counter-size) * 0.045), 0.34rem);
+
+  --counter-mark-width: clamp(0.12rem, calc(var(--counter-size) * 0.022), 0.16rem);
+  --counter-mark-height: clamp(0.54rem, calc(var(--counter-size) * 0.112), 0.72rem);
+  --counter-mark-radius-offset: calc(50% - clamp(0.8rem, calc(var(--counter-size) * 0.17), 1.05rem));
   --counter-rotation: var(--portfolio-project-counter-rotation, 0deg);
 
   --counter-surface-top: rgba(16, 18, 24, 0.96);
@@ -53,14 +55,14 @@
     inset 0 -1.2rem 2rem rgba(0, 0, 0, 0.24);
 }
 
-/* anel vermelho por cima */
+/* anel vermelho */
 .discFrame::before {
   content: "";
   position: absolute;
   inset: 0;
   z-index: 4;
   border-radius: 999px;
-  border: 0.34rem solid var(--counter-border-outer);
+  border: var(--counter-ring-stroke) solid var(--counter-border-outer);
   box-shadow: 0 0 0.95rem rgba(230, 35, 35, 0.2);
   pointer-events: none;
 }
@@ -147,19 +149,21 @@
   outline-offset: 0.15rem;
 }
 
-/* retângulo */
+/* caixa central do número */
 .core {
   position: absolute;
   top: 50%;
   left: 50%;
   z-index: 2;
-  width: 53.2%;
-  height: 81.4%;
+  width: 44%;
+  height: 68%;
+  min-width: 2.2rem;
+  min-height: 3.2rem;
   transform: translate(-50%, -50%);
   display: grid;
   place-items: center;
-  padding-block: 5%;
-  padding-inline: 8%;
+  padding-block: 4%;
+  padding-inline: 7%;
   box-sizing: border-box;
   border-radius: 0.14rem;
   background: linear-gradient(
@@ -181,7 +185,7 @@
   position: absolute;
   top: 0.08rem;
   bottom: 0.08rem;
-  width: 2px;
+  width: 1px;
   background: linear-gradient(
     180deg,
     rgba(255, 245, 220, 0.34) 0%,
@@ -192,11 +196,11 @@
 }
 
 .core::before {
-  left: 0.16rem;
+  left: 0.18rem;
 }
 
 .core::after {
-  right: 0.16rem;
+  right: 0.18rem;
 }
 
 /* número */
@@ -214,15 +218,15 @@
 
 .value {
   font-family: "Bowlby One SC", sans-serif;
-  font-size: clamp(2.35rem, 3.5vw, 3.6rem);
+  font-size: clamp(2rem, calc(var(--counter-size) * 0.48), 3.8rem);
   font-weight: 400;
-  line-height: 0.8;
-  letter-spacing: -0.05em;
+  line-height: 0.78;
+  letter-spacing: -0.045em;
   text-indent: 0;
   color: var(--counter-text-strong);
   text-shadow: 0 0 0.25rem rgba(255, 255, 255, 0.02);
-  transform: translateX(-12%) scaleX(0.8);
-  transform-origin: center;
+  transform: translateX(-8%) translateY(2%) scaleX(0.8);
+  transform-origin: center center;
   white-space: nowrap;
   max-inline-size: 100%;
 }
@@ -231,29 +235,73 @@
   opacity: 0.84;
 }
 
-@media (max-height: 820px) {
+@media (max-height: 900px) {
   .counter {
-    --counter-size: clamp(5.25rem, 7.2vw, 7rem);
-    --counter-mark-radius-offset: calc(50% - 0.96rem);
-  }
-
-  .mark {
-    height: 0.64rem;
+    --counter-size: clamp(5.3rem, 7.4vw, 7.2rem);
+    --counter-mark-radius-offset: calc(50% - clamp(0.76rem, calc(var(--counter-size) * 0.16), 0.98rem));
   }
 
   .core {
-    width: 49.35%;
-    height: 75%;
+    width: 43%;
+    height: 67%;
   }
 
   .value {
-    font-size: clamp(2.8rem, 3.95vw, 3.95rem);
+    font-size: clamp(1.9rem, calc(var(--counter-size) * 0.47), 3.3rem);
+  }
+}
+
+@media (max-height: 720px) {
+  .counter {
+    --counter-size: clamp(4.8rem, 6.8vw, 6.15rem);
+    --counter-mark-height: clamp(0.48rem, calc(var(--counter-size) * 0.1), 0.58rem);
+    --counter-mark-radius-offset: calc(50% - clamp(0.68rem, calc(var(--counter-size) * 0.15), 0.86rem));
+  }
+
+  .discFrame::before {
+    box-shadow: 0 0 0.65rem rgba(230, 35, 35, 0.16);
+  }
+
+  .core {
+    width: 42%;
+    height: 66%;
+    min-width: 2rem;
+    min-height: 2.95rem;
+  }
+
+  .core::before {
+    left: 0.14rem;
+  }
+
+  .core::after {
+    right: 0.14rem;
+  }
+
+  .value {
+    font-size: clamp(1.72rem, calc(var(--counter-size) * 0.455), 2.7rem);
+    line-height: 0.76;
+    transform: translateX(-7%) translateY(1%) scaleX(0.79);
   }
 }
 
 @media (max-width: 1024px) {
   .counter {
-    --counter-size: clamp(5.1rem, 22vw, 6.8rem);
+    --counter-size: clamp(5rem, 22vw, 6.8rem);
+  }
+}
+
+@media (max-width: 768px) {
+  .counter {
+    --counter-size: clamp(4.6rem, 24vw, 5.8rem);
+  }
+
+  .core {
+    width: 43%;
+    height: 67%;
+  }
+
+  .value {
+    font-size: clamp(1.8rem, calc(var(--counter-size) * 0.47), 2.8rem);
   }
 }
 

@@ -6,6 +6,18 @@ import perfilMini from "../../assets/Mateus/perfilMini.webp";
 import { AnimatePresence, motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 
+type TriggerAvatarItem =
+  | {
+      type: "image";
+      src: string;
+      alt: string;
+    }
+  | {
+      type: "more";
+      label: string;
+      ariaLabel: string;
+    };
+
 export default function FloatingChat() {
   const [isOpen, setIsOpen] = useState(false);
   const [inputValue, setInputValue] = useState("");
@@ -26,6 +38,24 @@ export default function FloatingChat() {
   const bottomOffset = isMobile ? "30px" : "3vh";
   const rightOffset = isMobile ? "30px" : "3vw";
 
+  const triggerItems: TriggerAvatarItem[] = [
+    {
+      type: "image",
+      src: mySelf,
+      alt: "Mateus Cabral",
+    },
+    {
+      type: "image",
+      src: "https://i.pravatar.cc/300?img=12",
+      alt: "Contato 1",
+    },
+    {
+      type: "more",
+      label: "...",
+      ariaLabel: "Mais contatos",
+    },
+  ];
+
   useEffect(() => {
     if (!isOpen) return;
 
@@ -36,6 +66,7 @@ export default function FloatingChat() {
     };
 
     document.addEventListener("mousedown", handleClickOutside);
+
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
@@ -64,7 +95,7 @@ export default function FloatingChat() {
         if (char !== undefined) {
           setInputValue((prev) => prev + char);
         }
-        i++;
+        i += 1;
       } else {
         clearInterval(interval);
       }
@@ -193,52 +224,72 @@ export default function FloatingChat() {
                   alignItems: "center",
                   flexShrink: 0,
                   marginLeft: `${scale(0.9)}rem`,
+                  paddingRight: "2px",
                 }}
               >
-                <div
-                  style={{
+                {triggerItems.map((item, index) => {
+                  const commonStyle: React.CSSProperties = {
                     width: "28px",
                     height: "28px",
                     borderRadius: "50%",
                     overflow: "hidden",
                     border: "2px solid rgba(33, 35, 40, 1)",
-                    zIndex: 2,
+                    marginLeft: index === 0 ? "0" : "-10px",
+                    zIndex: triggerItems.length - index,
                     backgroundColor: "#000",
-                  }}
-                >
-                  <img
-                    src={mySelf}
-                    alt="Myself"
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "cover",
-                    }}
-                  />
-                </div>
+                    boxShadow: "0 2px 6px rgba(0,0,0,0.22)",
+                    flexShrink: 0,
+                  };
 
-                <div
-                  style={{
-                    width: "28px",
-                    height: "28px",
-                    borderRadius: "50%",
-                    overflow: "hidden",
-                    border: "2px solid rgba(33, 35, 40, 1)",
-                    marginLeft: "-10px",
-                    zIndex: 1,
-                    backgroundColor: "#000",
-                  }}
-                >
-                  <img
-                    src="https://i.pravatar.cc/300"
-                    alt="Perfil"
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "cover",
-                    }}
-                  />
-                </div>
+                  if (item.type === "image") {
+                    return (
+                      <div
+                        key={`${item.alt}-${index}`}
+                        style={commonStyle}
+                      >
+                        <img
+                          src={item.src}
+                          alt={item.alt}
+                          style={{
+                            width: "100%",
+                            height: "100%",
+                            objectFit: "cover",
+                            display: "block",
+                          }}
+                        />
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <div
+                      key={`${item.ariaLabel}-${index}`}
+                      aria-label={item.ariaLabel}
+                      title={item.ariaLabel}
+                      style={{
+                        ...commonStyle,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        background:
+                          "linear-gradient(180deg, rgba(56,58,64,0.98) 0%, rgba(28,30,34,1) 100%)",
+                        color: "rgba(255,255,255,0.92)",
+                        fontSize: "15px",
+                        fontWeight: 700,
+                        letterSpacing: "0.02em",
+                        lineHeight: 1,
+                      }}
+                    >
+                      <span
+                        style={{
+                          transform: "translateY(-1px)",
+                        }}
+                      >
+                        {item.label}
+                      </span>
+                    </div>
+                  );
+                })}
               </div>
             </>
           ) : (

@@ -207,111 +207,53 @@ function RoadMapCanvasComponent({
   onNodeHover,
   className,
   minHeight = 920,
-  emptyTitle = "Mapa indisponível",
+  emptyTitle = "Roadmap indisponível",
   emptyDescription = "Nenhum item foi encontrado para esta visualização.",
   initialAnchorNodeId = null,
 }: RoadMapCanvasProps) {
   const scrollerRef = useRef<HTMLDivElement | null>(null);
-  const lastCenteredKeyRef = useRef<string | null>(null);
-
-  const nodeMap = useMemo(
-    () => new Map(nodes.map((node) => [node.id, node])),
-    [nodes],
-  );
 
   const canvasSize = useMemo(
     () => getCanvasSize(nodes, positionKey, minHeight),
     [nodes, positionKey, minHeight],
   );
 
-  const initialAnchorNode = useMemo(
+  const nodeMap = useMemo(
+    () => new Map(nodes.map((node) => [node.id, node])),
+    [nodes],
+  );
+
+  const anchorNode = useMemo(
     () => resolveInitialAnchorNode(nodes, initialAnchorNodeId),
-    [nodes, initialAnchorNodeId],
+    [initialAnchorNodeId, nodes],
   );
 
-  const initialAnchor = useMemo(
-    () => resolveAnchorCenter(initialAnchorNode, positionKey),
-    [initialAnchorNode, positionKey],
+  const anchor = useMemo(
+    () => resolveAnchorCenter(anchorNode, positionKey),
+    [anchorNode, positionKey],
   );
-
-  const centeringKey = useMemo(() => {
-    if (!initialAnchorNode) {
-      return null;
-    }
-
-    return [
-      positionKey,
-      initialAnchorNode.id,
-      nodes.length,
-      canvasSize.width,
-      canvasSize.height,
-    ].join(":");
-  }, [canvasSize.height, canvasSize.width, initialAnchorNode, nodes.length, positionKey]);
 
   useLayoutEffect(() => {
     const scroller = scrollerRef.current;
 
-    if (!scroller || !initialAnchor || !centeringKey) {
+    if (!scroller || !anchor) {
       return;
     }
 
-    if (lastCenteredKeyRef.current === centeringKey) {
-      return;
-    }
-
-    const maxScrollLeft = Math.max(0, canvasSize.width - scroller.clientWidth);
-    const nextScrollLeft = Math.min(
-      maxScrollLeft,
-      Math.max(0, initialAnchor.centerX - scroller.clientWidth / 2),
+    const nextLeft = Math.max(
+      0,
+      anchor.centerX - scroller.clientWidth / 2,
     );
 
-    scroller.scrollLeft = nextScrollLeft;
-    lastCenteredKeyRef.current = centeringKey;
-  }, [canvasSize.width, centeringKey, initialAnchor]);
+    scroller.scrollLeft = nextLeft;
+  }, [anchor, canvasSize.width]);
 
   const wrapperStyle = useMemo<CSSProperties>(
     () => ({
-      position: "relative",
+      display: "grid",
+      gap: "12px",
       width: "100%",
-      overflow: "hidden",
-      borderRadius: "24px",
-      border: "1px solid rgba(148, 163, 184, 0.14)",
-      background:
-        "linear-gradient(180deg, rgba(255,255,255,0.92) 0%, rgba(248,250,252,0.96) 100%)",
-      boxShadow: "0 18px 48px rgba(15, 23, 42, 0.05)",
-    }),
-    [],
-  );
-
-  const summaryStyle = useMemo<CSSProperties>(
-    () => ({
-      display: "flex",
-      flexWrap: "wrap",
-      gap: "10px",
-      alignItems: "center",
-      padding: "16px 18px 0 18px",
-    }),
-    [],
-  );
-
-  const badgeStyle = useMemo<CSSProperties>(
-    () => ({
-      display: "inline-flex",
-      alignItems: "center",
-      justifyContent: "center",
-      minHeight: "30px",
-      padding: "0 12px",
-      borderRadius: "999px",
-      border: "1px solid rgba(148, 163, 184, 0.18)",
-      background: "rgba(255,255,255,0.8)",
-      color: "#334155",
-      fontSize: "0.75rem",
-      fontWeight: 700,
-      lineHeight: 1,
-      whiteSpace: "nowrap",
-      boxShadow: "0 8px 18px rgba(15, 23, 42, 0.04)",
-      fontFamily:
-        'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+      minWidth: 0,
     }),
     [],
   );
@@ -322,44 +264,38 @@ function RoadMapCanvasComponent({
       width: "100%",
       overflowX: "auto",
       overflowY: "hidden",
-      padding: "16px 0 0 0",
+      overscrollBehaviorX: "contain",
+      overscrollBehaviorY: "none",
+      WebkitOverflowScrolling: "touch",
       scrollbarWidth: "thin",
-      scrollBehavior: "auto",
+      minHeight,
+      paddingBottom: positionKey === "mobile" ? "10px" : "14px",
     }),
-    [],
+    [minHeight, positionKey],
   );
 
   const stageStyle = useMemo<CSSProperties>(
     () => ({
       position: "relative",
-      width: `${canvasSize.width}px`,
-      minWidth: `${canvasSize.width}px`,
-      height: `${canvasSize.height}px`,
-      minHeight: `${canvasSize.height}px`,
-      backgroundColor: "#f8fafc",
-      backgroundImage:
-        "linear-gradient(rgba(148, 163, 184, 0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(148, 163, 184, 0.08) 1px, transparent 1px)",
-      backgroundSize: positionKey === "mobile" ? "24px 24px" : "32px 32px",
-      backgroundPosition: "0 0",
+      width: canvasSize.width,
+      height: canvasSize.height,
+      minHeight,
+      overflow: "hidden",
+      borderRadius: "24px",
+      border: "1px solid rgba(148, 163, 184, 0.14)",
+      background:
+        "linear-gradient(180deg, rgba(255,255,255,0.92) 0%, rgba(248,250,252,0.96) 100%)",
+      boxShadow: "0 18px 48px rgba(15, 23, 42, 0.05)",
     }),
-    [canvasSize.height, canvasSize.width, positionKey],
+    [canvasSize.height, canvasSize.width, minHeight],
   );
 
   const svgStyle = useMemo<CSSProperties>(
     () => ({
       position: "absolute",
       inset: 0,
-      width: `${canvasSize.width}px`,
-      height: `${canvasSize.height}px`,
       overflow: "visible",
       pointerEvents: "none",
-    }),
-    [canvasSize.height, canvasSize.width],
-  );
-
-  const emptyStateShellStyle = useMemo<CSSProperties>(
-    () => ({
-      padding: "24px",
     }),
     [],
   );
@@ -368,21 +304,27 @@ function RoadMapCanvasComponent({
     () => ({
       display: "grid",
       placeItems: "center",
-      minHeight: `${Math.max(320, minHeight)}px`,
-      padding: "32px",
-      textAlign: "center",
+      minHeight,
+      width: "100%",
     }),
     [minHeight],
   );
 
   const emptyCardStyle = useMemo<CSSProperties>(
     () => ({
-      maxWidth: "520px",
-      padding: "28px 24px",
-      borderRadius: "22px",
+      display: "grid",
+      gap: "10px",
+      width: "min(100%, 480px)",
+      padding: "28px 22px",
+      borderRadius: "24px",
       border: "1px solid rgba(148, 163, 184, 0.14)",
-      background: "rgba(255,255,255,0.84)",
-      boxShadow: "0 18px 36px rgba(15, 23, 42, 0.04)",
+      background:
+        "linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(248,250,252,0.96) 100%)",
+      boxShadow:
+        "0 18px 50px rgba(15, 23, 42, 0.06), inset 0 1px 0 rgba(255,255,255,0.78)",
+      textAlign: "center",
+      fontFamily:
+        'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
     }),
     [],
   );
@@ -390,15 +332,21 @@ function RoadMapCanvasComponent({
   if (nodes.length === 0) {
     return (
       <div className={className} style={wrapperStyle}>
-        <div style={emptyStateShellStyle}>
-          <section style={emptyStateStyle}>
-            <div style={emptyCardStyle}>
+        <div style={emptyStateStyle}>
+          <section style={emptyCardStyle}>
+            <div
+              style={{
+                display: "grid",
+                gap: "8px",
+              }}
+            >
               <h3
                 style={{
-                  margin: "0 0 8px 0",
+                  margin: 0,
                   color: "#0f172a",
-                  fontSize: "1.1rem",
-                  lineHeight: 1.2,
+                  fontSize: "1rem",
+                  fontWeight: 900,
+                  lineHeight: 1.1,
                 }}
               >
                 {emptyTitle}
@@ -423,12 +371,6 @@ function RoadMapCanvasComponent({
 
   return (
     <div className={className} style={wrapperStyle}>
-      <div style={summaryStyle}>
-        <span style={badgeStyle}>{nodes.length} nós visíveis</span>
-        <span style={badgeStyle}>{edges.length} relações visíveis</span>
-        <span style={badgeStyle}>{clusters.length} agrupamentos</span>
-      </div>
-
       <div ref={scrollerRef} style={scrollerStyle}>
         <div style={stageStyle}>
           <svg
