@@ -27,14 +27,20 @@ const heroTextColumnBaseStyle: CSSProperties = {
 	position: "relative",
 	zIndex: 2,
 	overflow: "visible",
+	minWidth: 0,
+	maxWidth: "100%",
+	boxSizing: "border-box",
 };
 
 const heroActionsWrapperStyle: CSSProperties = {
 	position: "relative",
 	zIndex: 6,
 	width: "100%",
+	maxWidth: "100%",
+	minWidth: 0,
 	overflow: "visible",
 	isolation: "isolate",
+	boxSizing: "border-box",
 };
 
 export default function HeroTextColumn({
@@ -52,22 +58,32 @@ export default function HeroTextColumn({
 			color: "#f1c40f",
 			marginBottom: isCompactDesktop ? "2rem" : "3.2rem",
 			lineHeight: 1,
+			maxWidth: "100%",
+			wordBreak: "break-word",
 		};
 	}, [isCompactDesktop]);
 
 	const roleContainerStyle = useMemo<CSSProperties>(() => {
 		return {
+			width: "100%",
+			maxWidth: "100%",
+			minWidth: 0,
 			backgroundImage: "linear-gradient(90deg, #f1c40f 100%, #f1c40f 100%)",
 			marginBottom: isCompactDesktop ? "28px" : "40px",
 			display: "flex",
 			alignItems: "center",
 			justifyContent: "flex-start",
 			height: isCompactDesktop ? "3rem" : "3.5rem",
+			boxSizing: "border-box",
+			overflow: "visible",
 		};
 	}, [isCompactDesktop]);
 
 	const sealsContainerStyle = useMemo<CSSProperties>(() => {
 		return {
+			width: "100%",
+			maxWidth: "100%",
+			minWidth: 0,
 			display: "flex",
 			justifyContent: "center",
 			alignItems: "center",
@@ -78,13 +94,18 @@ export default function HeroTextColumn({
 			borderRadius: isCompactDesktop ? "16px" : "20px",
 			marginBottom: isCompactDesktop ? "6px" : "-1vh",
 			boxSizing: "border-box",
+			overflow: "visible",
+			flexWrap: "nowrap",
 		};
 	}, [isCompactDesktop]);
 
 	const heroTextColumnStyle = useMemo<CSSProperties>(() => {
 		return {
 			...heroTextColumnBaseStyle,
-			paddingTop: isCompactDesktop ? "clamp(100px, 2.6vh, 24px)" : "11vh",
+			paddingTop: isCompactDesktop ? "clamp(24px, 2.6vh, 40px)" : "11vh",
+			paddingRight: 0,
+			paddingLeft: 0,
+			flex: "1 1 0",
 		};
 	}, [isCompactDesktop]);
 
@@ -135,7 +156,7 @@ export default function HeroTextColumn({
 	}, [isCompactDesktop, secondaryLabel]);
 
 	return (
-		<Col md={5} style={heroTextColumnStyle}>
+		<Col md={5} style={heroTextColumnStyle} className="px-0">
 			<div style={seniorTitleStyle}>Senior</div>
 
 			<div className="font-sequel" style={roleContainerStyle}>
@@ -153,14 +174,28 @@ export default function HeroTextColumn({
 									gap: "1rem",
 									maxWidth: "280px",
 									padding: "4px",
+									boxSizing: "border-box",
 								}}
 							>
 								<img
 									src={seal.cat}
 									alt={`${seal.alt} mascot`}
-									style={{ height: "11vh", borderRadius: "8px" }}
+									style={{
+										height: "11vh",
+										maxWidth: "96px",
+										width: "auto",
+										borderRadius: "8px",
+										display: "block",
+										flexShrink: 0,
+									}}
 								/>
-								<p style={{ fontSize: "12px", margin: 0 }}>
+								<p
+									style={{
+										fontSize: "12px",
+										margin: 0,
+										wordBreak: "break-word",
+									}}
+								>
 									{t(`selo.${seal.key}`)}
 								</p>
 							</div>
@@ -172,12 +207,23 @@ export default function HeroTextColumn({
 						theme="bubble"
 						offset={[0, 20]}
 					>
-						<div>
+						<div
+							style={{
+								minWidth: 0,
+								maxWidth: "100%",
+								display: "flex",
+								alignItems: "center",
+								justifyContent: "center",
+							}}
+						>
 							<img
 								src={seal.src}
 								alt={seal.alt}
 								style={{
 									height: isCompactDesktop ? "32px" : "40px",
+									maxWidth: "100%",
+									width: "auto",
+									display: "block",
 									filter: "grayscale(100%)",
 									opacity: 0.8,
 									...seal.style,

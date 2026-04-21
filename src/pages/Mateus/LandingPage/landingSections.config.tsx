@@ -11,7 +11,7 @@ import type { LandingSectionId } from "@/features/navigation/landingSections";
 import ContactDesktop from "../Contact/ContactDesktop";
 import ContactMobile from "../Contact/ContactMobile";
 import Live from "../Live/Live";
-import MateusDesktop from "../Home/variants/HomeDesktop";
+import HomeDesktop from "../Home/variants/HomeDesktop";
 import Portfolio from "../Portfolio/Portfolio";
 import RoadMapErrorBoundary from "../RoadMap/ui/chrome/RoadMapErrorBoundary";
 import Technologies from "../Technologies/Technologies";
@@ -297,7 +297,7 @@ export const LANDING_SECTIONS_CONFIG = [
 		order: 0,
 		desktop: createViewportConfig(
 			"desktop",
-			MateusDesktop,
+			HomeDesktop,
 			DESKTOP_HERO_STABLE_BEHAVIOR,
 			{
 				sectionRole: "hero",
@@ -314,7 +314,7 @@ export const LANDING_SECTIONS_CONFIG = [
 		),
 		mobile: createViewportConfig(
 			"mobile",
-			MateusDesktop,
+			HomeDesktop,
 			MOBILE_HERO_STABLE_BEHAVIOR,
 			{
 				sectionRole: "hero",
