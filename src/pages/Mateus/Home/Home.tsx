@@ -1,9 +1,9 @@
 import HomeDesktop from "./variants/HomeDesktop";
-import MateusMobile from "./variants/HomeMobile";
+import HomeMobile from "./variants/HomeMobile";
 import { useMateusViewport } from "./hooks/useHomeViewport";
 
-export default function Mateus() {
-	const { isMobile } = useMateusViewport();
+export default function Home() {
+  const { isMobile } = useMateusViewport();
 
-	return isMobile ? <MateusMobile /> : <HomeDesktop />;
+  return isMobile ? <HomeMobile /> : <HomeDesktop />;
 }

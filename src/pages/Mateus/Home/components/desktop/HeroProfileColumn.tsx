@@ -90,6 +90,15 @@ export default function HeroProfileColumn({
 					marginLeft: isMobileViewport ? 0 : desktopCardOffset,
 					marginRight: 0,
 					overflow: "hidden",
+					paddingTop: isMobileViewport
+						? "clamp(12px, 2.4vw, 16px)"
+						: "clamp(14px, 1.2vw, 20px)",
+					paddingInline: isMobileViewport
+						? "clamp(12px, 2.8vw, 18px)"
+						: "clamp(16px, 1.4vw, 24px)",
+					paddingBottom: isMobileViewport
+						? "clamp(14px, 2.8vw, 20px)"
+						: "clamp(18px, 1.6vw, 26px)",
 				}}
 			>
 				<div
@@ -100,6 +109,12 @@ export default function HeroProfileColumn({
 						maxWidth: "100%",
 						boxSizing: "border-box",
 						overflow: "hidden",
+						height: isMobileViewport
+							? "auto"
+							: isCompactDesktop
+								? "clamp(360px, 48vh, 420px)"
+								: "clamp(400px, 52vh, 460px)",
+						aspectRatio: "auto",
 					}}
 				>
 					<img

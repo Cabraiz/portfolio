@@ -12,6 +12,7 @@ import ContactDesktop from "../Contact/ContactDesktop";
 import ContactMobile from "../Contact/ContactMobile";
 import Live from "../Live/Live";
 import HomeDesktop from "../Home/variants/HomeDesktop";
+import HomeMobile from "../Home/variants/HomeMobile";
 import Portfolio from "../Portfolio/Portfolio";
 import RoadMapErrorBoundary from "../RoadMap/ui/chrome/RoadMapErrorBoundary";
 import Technologies from "../Technologies/Technologies";
@@ -314,7 +315,7 @@ export const LANDING_SECTIONS_CONFIG = [
 		),
 		mobile: createViewportConfig(
 			"mobile",
-			HomeDesktop,
+			HomeMobile,
 			MOBILE_HERO_STABLE_BEHAVIOR,
 			{
 				sectionRole: "hero",
@@ -323,10 +324,7 @@ export const LANDING_SECTIONS_CONFIG = [
 						preferDynamicViewport: false,
 						sectionRole: "hero",
 					}),
-					height: resolveLandingSectionMinHeight("mobile", {
-						preferDynamicViewport: false,
-						sectionRole: "hero",
-					}),
+					height: "auto",
 					padding: 0,
 					overflow: "visible",
 					background: "transparent",
@@ -334,7 +332,7 @@ export const LANDING_SECTIONS_CONFIG = [
 				},
 				contentStyle: {
 					minHeight: "100%",
-					height: "100%",
+					height: "auto",
 					overflow: "visible",
 					padding: 0,
 				},

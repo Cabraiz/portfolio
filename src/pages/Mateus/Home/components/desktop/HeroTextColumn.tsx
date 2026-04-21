@@ -53,59 +53,82 @@ export default function HeroTextColumn({
 
 	const seniorTitleStyle = useMemo<CSSProperties>(() => {
 		return {
-			fontSize: isCompactDesktop ? "3.1rem" : "4rem",
+			fontSize: isCompactDesktop ? "3rem" : "4rem",
 			fontWeight: 700,
 			color: "#f1c40f",
-			marginBottom: isCompactDesktop ? "2rem" : "3.2rem",
+			marginBottom: isCompactDesktop ? "30px" : "3.2rem",
 			lineHeight: 1,
 			maxWidth: "100%",
 			wordBreak: "break-word",
 		};
 	}, [isCompactDesktop]);
 
-	const roleContainerStyle = useMemo<CSSProperties>(() => {
+	const contentBlockWidth = useMemo(() => {
+		if (isCompactDesktop) {
+			return {
+				width: "92%",
+				maxWidth: "92%",
+			};
+		}
+
 		return {
-			width: "100%",
-			maxWidth: "100%",
-			minWidth: 0,
-			backgroundImage: "linear-gradient(90deg, #f1c40f 100%, #f1c40f 100%)",
-			marginBottom: isCompactDesktop ? "28px" : "40px",
-			display: "flex",
-			alignItems: "center",
-			justifyContent: "flex-start",
-			height: isCompactDesktop ? "3rem" : "3.5rem",
-			boxSizing: "border-box",
-			overflow: "visible",
+			width: "91%",
+			maxWidth: "880px",
 		};
 	}, [isCompactDesktop]);
 
+	const roleContainerStyle = useMemo<CSSProperties>(() => {
+		return {
+			...contentBlockWidth,
+			minWidth: 0,
+			backgroundImage: "linear-gradient(90deg, #f1c40f 100%, #f1c40f 100%)",
+			marginBottom: isCompactDesktop ? "30px" : "46px",
+			display: "flex",
+			alignItems: "center",
+			justifyContent: "flex-start",
+			height: isCompactDesktop ? "3rem" : "4rem",
+			boxSizing: "border-box",
+			overflow: "visible",
+		};
+	}, [contentBlockWidth, isCompactDesktop]);
+
 	const sealsContainerStyle = useMemo<CSSProperties>(() => {
 		return {
-			width: "100%",
-			maxWidth: "100%",
+			...contentBlockWidth,
 			minWidth: 0,
 			display: "flex",
 			justifyContent: "center",
 			alignItems: "center",
-			gap: isCompactDesktop ? "1rem" : "2rem",
-			padding: isCompactDesktop ? "0.75rem 1rem" : "1.2rem 2rem",
+			gap: isCompactDesktop ? "0.9rem" : "2rem",
+			padding: isCompactDesktop ? "0.72rem 0.9rem" : "1.2rem 2rem",
 			backgroundColor: "rgba(255, 255, 255, 0.035)",
 			border: "1px solid rgba(255, 255, 255, 0.06)",
 			borderRadius: isCompactDesktop ? "16px" : "20px",
-			marginBottom: isCompactDesktop ? "6px" : "-1vh",
+			marginBottom: isCompactDesktop ? "30px" : "8px",
 			boxSizing: "border-box",
 			overflow: "visible",
 			flexWrap: "nowrap",
 		};
-	}, [isCompactDesktop]);
+	}, [contentBlockWidth, isCompactDesktop]);
 
 	const heroTextColumnStyle = useMemo<CSSProperties>(() => {
 		return {
 			...heroTextColumnBaseStyle,
-			paddingTop: isCompactDesktop ? "clamp(24px, 2.6vh, 40px)" : "11vh",
+			paddingTop: isCompactDesktop ? "clamp(60px, 8vh, 88px)" : "12vh",
 			paddingRight: 0,
-			paddingLeft: 0,
+			paddingLeft: isCompactDesktop ? "clamp(6px, 0.8vw, 12px)" : 0,
 			flex: "1 1 0",
+		};
+	}, [isCompactDesktop]);
+
+	const primaryActionOffsetStyle = useMemo<CSSProperties>(() => {
+		return {
+			width: "100%",
+			maxWidth: "100%",
+			transform: isCompactDesktop
+				? "none"
+				: "translateX(clamp(-14px, -1vw, -24px)) scale(1.3)",
+			transformOrigin: "center left",
 		};
 	}, [isCompactDesktop]);
 
@@ -154,6 +177,10 @@ export default function HeroTextColumn({
 			/>
 		);
 	}, [isCompactDesktop, secondaryLabel]);
+
+	const primaryHeroActionWithOffset = useMemo(() => {
+		return <div style={primaryActionOffsetStyle}>{primaryHeroAction}</div>;
+	}, [primaryActionOffsetStyle, primaryHeroAction]);
 
 	return (
 		<Col md={5} style={heroTextColumnStyle} className="px-0">
@@ -238,7 +265,7 @@ export default function HeroTextColumn({
 				<WhatsAppHeroSlot
 					compact={isCompactDesktop}
 					preserveDesktopOffset={!isCompactDesktop}
-					primary={primaryHeroAction}
+					primary={primaryHeroActionWithOffset}
 					secondary={secondaryHeroAction}
 				/>
 			</div>

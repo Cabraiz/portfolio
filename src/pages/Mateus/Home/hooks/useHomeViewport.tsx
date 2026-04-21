@@ -33,7 +33,7 @@ export function useMateusViewport() {
     }
 
     const mediaQuery = browserWindow.matchMedia(
-      `(max-width: ${MOBILE_BREAKPOINT_PX - 1}px)`,
+      `(max-width: ${MOBILE_BREAKPOINT_PX - 1}px)`
     );
 
     const applyMatch = (): void => {

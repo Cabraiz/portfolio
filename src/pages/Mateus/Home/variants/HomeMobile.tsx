@@ -10,24 +10,17 @@ import { useTranslation } from "react-i18next";
 import i18n from "@/i18n/i18n";
 import "tippy.js/dist/tippy.css";
 
-import "../../styles/styles.css";
+import "../../../../styles/styles.css";
 
 import gsap from "gsap";
 
 import HeroMobileStack from "../components/mobile/HeroMobileStack";
-import { useHomeHeroLayout } from "../hooks/useHomeHeroLayout";
-import { getWhatsAppGreeting } from "../utils/home.utils";
 import { shouldDisableScrollFades } from "../../../../features/scroll/scrollMotionFlags";
 
-import fotoMateus from "../../assets/Mateus/perfil.webp";
-import iconLinkedin from "../../assets/Mateus/Icon/IconLinkedIn.png";
-import iconMail from "../../assets/Mateus/Icon/IconGmail.png";
-import iconInstagram from "../../assets/Mateus/Icon/IconInsta.png";
-
-import bnbLogo from "../../assets/Mateus/logos/bnb.svg";
-import uniforLogo from "../../assets/Mateus/logos/unifor.svg";
-import sanofiLogo from "../../assets/Mateus/logos/sanofi.svg";
-import sedihLogo from "../../assets/Mateus/logos/sedih.svg";
+import fotoMateus from "../../../../assets/Mateus/perfil.webp";
+import iconLinkedin from "../../../../assets/Mateus/Icon/IconLinkedIn.png";
+import iconMail from "../../../../assets/Mateus/Icon/IconGmail.png";
+import iconInstagram from "../../../../assets/Mateus/Icon/IconInsta.png";
 
 const MOBILE_HERO_BACKGROUND = `
   radial-gradient(
@@ -49,8 +42,6 @@ function HomeMobile() {
   const containerRef = useRef<HTMLDivElement>(null);
 
   const { t } = useTranslation();
-  const { sectionStyle } = useHomeHeroLayout();
-
   const [isImageLoaded, setIsImageLoaded] = useState(false);
 
   const currentLanguage = i18n.resolvedLanguage ?? i18n.language ?? "pt";
@@ -67,49 +58,75 @@ function HomeMobile() {
     return t("buttons.downloadCV");
   }, [t, currentLanguage]);
 
-  const whatsappTopLabel = useMemo(() => {
-    return getWhatsAppGreeting();
+  const socialIconImageStyle = useMemo<CSSProperties>(() => {
+    return {
+      width: "18px",
+      height: "18px",
+      display: "block",
+      objectFit: "contain",
+      userSelect: "none",
+      pointerEvents: "none",
+    };
   }, []);
 
   const socialItems = useMemo(() => {
     return [
       {
-        key: "linkedin",
+        id: "linkedin",
+        label: "LinkedIn",
+        ariaLabel: "Abrir LinkedIn",
         href: "https://www.linkedin.com/in/mateuscabrals/",
-        icon: iconLinkedin,
-        alt: "LinkedIn",
+        icon: (
+          <img
+            src={iconLinkedin}
+            alt=""
+            aria-hidden="true"
+            style={socialIconImageStyle}
+            draggable={false}
+          />
+        ),
       },
       {
-        key: "email",
+        id: "email",
+        label: "Email",
+        ariaLabel: "Enviar email",
         href: "mailto:mateuscabrals@gmail.com",
-        icon: iconMail,
-        alt: "Email",
         target: "_self" as const,
         rel: "noopener noreferrer",
+        icon: (
+          <img
+            src={iconMail}
+            alt=""
+            aria-hidden="true"
+            style={socialIconImageStyle}
+            draggable={false}
+          />
+        ),
       },
       {
-        key: "instagram",
+        id: "instagram",
+        label: "Instagram",
+        ariaLabel: "Abrir Instagram",
         href: "https://www.instagram.com/mtscrl/",
-        icon: iconInstagram,
-        alt: "Instagram",
+        icon: (
+          <img
+            src={iconInstagram}
+            alt=""
+            aria-hidden="true"
+            style={socialIconImageStyle}
+            draggable={false}
+          />
+        ),
       },
     ] as const;
-  }, []);
-
-  const logoItems = useMemo(() => {
-    return [
-      { key: "bnb", src: bnbLogo, alt: "Banco do Nordeste" },
-      { key: "unifor", src: uniforLogo, alt: "Unifor" },
-      { key: "sanofi", src: sanofiLogo, alt: "Sanofi" },
-      { key: "sedih", src: sedihLogo, alt: "SEDIH" },
-    ] as const;
-  }, []);
+  }, [socialIconImageStyle]);
 
   const rootStyle = useMemo<CSSProperties>(() => {
     return {
       position: "relative",
       width: "100%",
       minWidth: 0,
+      minHeight: "100%",
       display: "flex",
       flexDirection: "column",
       overflowX: "clip",
@@ -125,7 +142,6 @@ function HomeMobile() {
 
   const containerStyle = useMemo<CSSProperties>(() => {
     return {
-      ...sectionStyle,
       width: "100%",
       minWidth: 0,
       maxWidth: "100%",
@@ -133,14 +149,14 @@ function HomeMobile() {
       flexDirection: "column",
       justifyContent: "flex-start",
       alignItems: "stretch",
-      paddingTop: "clamp(20px, 6vw, 28px)",
+      paddingTop: "clamp(72px, 14vw, 92px)",
       paddingBottom: "clamp(32px, 8vw, 44px)",
       paddingInline: "clamp(16px, 5vw, 24px)",
       background: "transparent",
       backgroundColor: "transparent",
       boxSizing: "border-box",
     };
-  }, [sectionStyle]);
+  }, []);
 
   const stackWrapStyle = useMemo<CSSProperties>(() => {
     return {
@@ -154,7 +170,10 @@ function HomeMobile() {
 
   useLayoutEffect(() => {
     const container = containerRef.current;
-    if (!container) return;
+
+    if (!container) {
+      return;
+    }
 
     if (shouldDisableScrollFades()) {
       gsap.set(container, {
@@ -202,11 +221,8 @@ function HomeMobile() {
             imageSrc={fotoMateus}
             imageAlt="Mateus Cabral"
             roleLabel={roleLabel}
-            seniorLabel={undefined}
             secondaryLabel={secondaryLabel}
-            whatsappTopLabel={whatsappTopLabel}
             socialItems={socialItems}
-            logoItems={logoItems}
             imageLoaded={isImageLoaded}
             onImageLoad={() => setIsImageLoaded(true)}
           />
