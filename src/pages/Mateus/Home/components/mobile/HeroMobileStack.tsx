@@ -33,9 +33,8 @@ function HeroMobileStack({
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
-      padding: "20px 16px 28px",
-      background:
-        "radial-gradient(circle at top, rgba(196, 148, 62, 0.16), rgba(196, 148, 62, 0) 34%), linear-gradient(180deg, #070708 0%, #0c0c0f 42%, #09090b 100%)",
+      padding: "0",
+      background: "transparent",
     };
   }, []);
 
@@ -46,7 +45,6 @@ function HeroMobileStack({
       flexDirection: "column",
       alignItems: "center",
       justifyContent: "center",
-      gap: "16px",
     };
   }, []);
 

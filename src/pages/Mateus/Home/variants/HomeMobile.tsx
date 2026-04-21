@@ -149,7 +149,7 @@ function HomeMobile() {
       flexDirection: "column",
       justifyContent: "flex-start",
       alignItems: "stretch",
-      paddingTop: "clamp(72px, 14vw, 92px)",
+      paddingTop: "clamp(78px, 15vw, 98px)",
       paddingBottom: "clamp(32px, 8vw, 44px)",
       paddingInline: "clamp(16px, 5vw, 24px)",
       background: "transparent",

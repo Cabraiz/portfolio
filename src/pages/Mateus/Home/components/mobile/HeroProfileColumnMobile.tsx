@@ -34,37 +34,16 @@ export default function HeroProfileColumnMobile({
       display: "flex",
       flexDirection: "column",
       alignItems: "stretch",
-      gap: "18px",
-    };
-  }, []);
-
-  const portraitShellStyle = useMemo<React.CSSProperties>(() => {
-    return {
-      position: "relative",
-      width: "100%",
-      padding: "18px 18px 14px",
+      gap: "16px",
+      padding: "14px 12px 18px",
       borderRadius: "28px",
       background:
-        "radial-gradient(circle at top, rgba(255, 210, 120, 0.10), rgba(255, 210, 120, 0) 46%), linear-gradient(180deg, rgba(20,20,22,0.94) 0%, rgba(10,10,12,0.98) 100%)",
-      border: "1px solid rgba(255, 215, 150, 0.12)",
+        "linear-gradient(180deg, rgba(16,16,20,0.94) 0%, rgba(8,8,10,0.98) 100%)",
+      border: "1px solid rgba(255, 210, 120, 0.08)",
       boxShadow:
-        "0 18px 40px rgba(0, 0, 0, 0.32), inset 0 1px 0 rgba(255,255,255,0.05)",
+        "0 18px 40px rgba(0, 0, 0, 0.24), inset 0 1px 0 rgba(255,255,255,0.04)",
+      boxSizing: "border-box",
       overflow: "hidden",
-    };
-  }, []);
-
-  const portraitAuraStyle = useMemo<React.CSSProperties>(() => {
-    return {
-      position: "absolute",
-      inset: "auto 50% 18px 50%",
-      width: "74%",
-      height: "22%",
-      transform: "translateX(-50%)",
-      borderRadius: "999px",
-      background:
-        "radial-gradient(circle, rgba(255, 196, 92, 0.26) 0%, rgba(255, 196, 92, 0.12) 38%, rgba(255, 196, 92, 0) 72%)",
-      filter: "blur(18px)",
-      pointerEvents: "none",
     };
   }, []);
 
@@ -73,13 +52,13 @@ export default function HeroProfileColumnMobile({
       position: "relative",
       width: "100%",
       aspectRatio: "0.88 / 1",
-      borderRadius: "24px",
+      borderRadius: "22px",
       overflow: "hidden",
       background:
-        "linear-gradient(180deg, rgba(40,40,46,0.94) 0%, rgba(18,18,22,0.98) 100%)",
+        "linear-gradient(180deg, rgba(34,34,38,0.94) 0%, rgba(16,16,20,0.98) 100%)",
       border: "1px solid rgba(255,255,255,0.05)",
       boxShadow:
-        "inset 0 1px 0 rgba(255,255,255,0.06), 0 16px 28px rgba(0,0,0,0.28)",
+        "inset 0 1px 0 rgba(255,255,255,0.05), 0 12px 24px rgba(0,0,0,0.22)",
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
@@ -103,7 +82,7 @@ export default function HeroProfileColumnMobile({
   const skeletonStyle = useMemo<React.CSSProperties>(() => {
     return {
       position: "absolute",
-      inset: "0",
+      inset: 0,
       background:
         "linear-gradient(90deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.07) 50%, rgba(255,255,255,0.03) 100%)",
       opacity: imageLoaded ? 0 : 1,
@@ -114,21 +93,17 @@ export default function HeroProfileColumnMobile({
 
   return (
     <div className={className} style={rootStyle}>
-      <div style={portraitShellStyle}>
-        <div style={portraitAuraStyle} />
-
-        <div style={imageFrameStyle}>
-          <img
-            src={imageSrc}
-            alt={imageAlt}
-            style={imageStyle}
-            onLoad={onImageLoad}
-            loading="eager"
-            decoding="async"
-            draggable={false}
-          />
-          <div style={skeletonStyle} />
-        </div>
+      <div style={imageFrameStyle}>
+        <img
+          src={imageSrc}
+          alt={imageAlt}
+          style={imageStyle}
+          onLoad={onImageLoad}
+          loading="eager"
+          decoding="async"
+          draggable={false}
+        />
+        <div style={skeletonStyle} />
       </div>
 
       <HeroIdentityMobile
