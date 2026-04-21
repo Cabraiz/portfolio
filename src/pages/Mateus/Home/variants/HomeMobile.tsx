@@ -13,8 +13,11 @@ import "tippy.js/dist/tippy.css";
 import "../../../../styles/styles.css";
 
 import gsap from "gsap";
+import { FaWhatsapp } from "react-icons/fa";
+import { HiOutlineDocumentText } from "react-icons/hi2";
 
 import HeroMobileStack from "../components/mobile/HeroMobileStack";
+import { getWhatsAppGreeting } from "../utils/home.utils";
 import { shouldDisableScrollFades } from "../../../../features/scroll/scrollMotionFlags";
 
 import fotoMateus from "../../../../assets/Mateus/perfil.webp";
@@ -24,17 +27,24 @@ import iconInstagram from "../../../../assets/Mateus/Icon/IconInsta.png";
 
 const MOBILE_HERO_BACKGROUND = `
   radial-gradient(
-    circle at 12% 28%,
-    rgba(255, 196, 0, 0.16) 0%,
-    rgba(255, 196, 0, 0.10) 18%,
-    rgba(255, 196, 0, 0.04) 34%,
-    rgba(255, 196, 0, 0.00) 56%
+    circle at 18% 16%,
+    rgba(168, 120, 28, 0.14) 0%,
+    rgba(168, 120, 28, 0.08) 18%,
+    rgba(168, 120, 28, 0.03) 34%,
+    rgba(168, 120, 28, 0.00) 54%
+  ),
+  radial-gradient(
+    circle at 82% 10%,
+    rgba(76, 88, 112, 0.12) 0%,
+    rgba(76, 88, 112, 0.06) 24%,
+    rgba(76, 88, 112, 0.00) 52%
   ),
   linear-gradient(
     180deg,
-    #09090b 0%,
-    #08080a 52%,
-    #060608 100%
+    #0b0d11 0%,
+    #090b0f 38%,
+    #07080b 72%,
+    #050608 100%
   )
 `;
 
@@ -55,8 +65,22 @@ function HomeMobile() {
   }, [isPT]);
 
   const secondaryLabel = useMemo(() => {
+    return isPT
+      ? "Disponível para produtos, plataformas e soluções digitais"
+      : "Available for products, platforms and digital solutions";
+  }, [isPT]);
+
+  const resumeLabel = useMemo(() => {
     return t("buttons.downloadCV");
   }, [t, currentLanguage]);
+
+  const whatsAppLabel = useMemo(() => {
+    return "WhatsApp";
+  }, []);
+
+  const whatsAppGreeting = useMemo(() => {
+    return getWhatsAppGreeting();
+  }, []);
 
   const socialIconImageStyle = useMemo<CSSProperties>(() => {
     return {
@@ -69,13 +93,54 @@ function HomeMobile() {
     };
   }, []);
 
+  const primaryIconStyle = useMemo<CSSProperties>(() => {
+    return {
+      width: "18px",
+      height: "18px",
+      display: "block",
+      flexShrink: 0,
+    };
+  }, []);
+
+  const primaryActions = useMemo(() => {
+    return [
+      {
+        id: "resume",
+        label: resumeLabel,
+        ariaLabel: isPT ? "Abrir currículo" : "Open resume",
+        href: "/files/mateus-cabral-resume.pdf",
+        target: "_blank" as const,
+        rel: "noreferrer noopener",
+        variant: "primary" as const,
+        icon: (
+          <HiOutlineDocumentText
+            aria-hidden="true"
+            style={primaryIconStyle}
+          />
+        ),
+      },
+      {
+        id: "whatsapp",
+        label: whatsAppLabel,
+        ariaLabel: "Abrir WhatsApp",
+        href: `https://wa.me/5585998575707?text=${encodeURIComponent(
+          whatsAppGreeting
+        )}`,
+        target: "_blank" as const,
+        rel: "noreferrer noopener",
+        variant: "secondary" as const,
+        icon: <FaWhatsapp aria-hidden="true" style={primaryIconStyle} />,
+      },
+    ] as const;
+  }, [resumeLabel, whatsAppGreeting, whatsAppLabel, isPT, primaryIconStyle]);
+
   const socialItems = useMemo(() => {
     return [
       {
         id: "linkedin",
         label: "LinkedIn",
         ariaLabel: "Abrir LinkedIn",
-        href: "https://www.linkedin.com/in/mateuscabrals/",
+        href: "https://www.linkedin.com/in/cabraiz/",
         icon: (
           <img
             src={iconLinkedin}
@@ -107,7 +172,7 @@ function HomeMobile() {
         id: "instagram",
         label: "Instagram",
         ariaLabel: "Abrir Instagram",
-        href: "https://www.instagram.com/mtscrl/",
+        href: "https://www.instagram.com/cabraiz/",
         icon: (
           <img
             src={iconInstagram}
@@ -131,11 +196,11 @@ function HomeMobile() {
       flexDirection: "column",
       overflowX: "clip",
       overflowY: "visible",
-      backgroundColor: "#08080a",
+      backgroundColor: "#07080b",
       backgroundImage: MOBILE_HERO_BACKGROUND,
       backgroundRepeat: "no-repeat",
       backgroundSize: "cover",
-      backgroundPosition: "left top",
+      backgroundPosition: "center top",
       boxSizing: "border-box",
     };
   }, []);
@@ -145,12 +210,13 @@ function HomeMobile() {
       width: "100%",
       minWidth: 0,
       maxWidth: "100%",
+      minHeight: "calc(100dvh - 60px)",
       display: "flex",
       flexDirection: "column",
-      justifyContent: "flex-start",
+      justifyContent: "center",
       alignItems: "stretch",
-      paddingTop: "clamp(78px, 15vw, 98px)",
-      paddingBottom: "clamp(32px, 8vw, 44px)",
+      paddingTop: "clamp(70px, 13vw, 88px)",
+      paddingBottom: "clamp(18px, 4vw, 28px)",
       paddingInline: "clamp(16px, 5vw, 24px)",
       background: "transparent",
       backgroundColor: "transparent",
@@ -165,6 +231,7 @@ function HomeMobile() {
       margin: "0 auto",
       display: "flex",
       flexDirection: "column",
+      justifyContent: "center",
     };
   }, []);
 
@@ -222,6 +289,7 @@ function HomeMobile() {
             imageAlt="Mateus Cabral"
             roleLabel={roleLabel}
             secondaryLabel={secondaryLabel}
+            primaryActions={primaryActions}
             socialItems={socialItems}
             imageLoaded={isImageLoaded}
             onImageLoad={() => setIsImageLoaded(true)}

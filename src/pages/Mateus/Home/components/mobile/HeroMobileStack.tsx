@@ -1,5 +1,8 @@
 import React, { useMemo } from "react";
 
+import HeroPrimaryActionsMobile, {
+  type HeroPrimaryActionMobile,
+} from "./HeroPrimaryActionsMobile";
 import HeroProfileColumnMobile from "./HeroProfileColumnMobile";
 import type { MobileSocialItem } from "./SocialRowMobile";
 
@@ -7,6 +10,7 @@ export type HeroMobileStackProps = Readonly<{
   imageSrc: string;
   imageAlt?: string;
   socialItems: readonly MobileSocialItem[];
+  primaryActions?: readonly HeroPrimaryActionMobile[];
   roleLabel?: string;
   secondaryLabel?: string;
   imageLoaded?: boolean;
@@ -19,6 +23,7 @@ function HeroMobileStack({
   imageSrc,
   imageAlt = "Mateus Cabral",
   socialItems,
+  primaryActions = [],
   roleLabel,
   secondaryLabel,
   imageLoaded = true,
@@ -33,7 +38,7 @@ function HeroMobileStack({
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
-      padding: "0",
+      padding: 0,
       background: "transparent",
     };
   }, []);
@@ -48,6 +53,15 @@ function HeroMobileStack({
     };
   }, []);
 
+  const actionsWrapStyle = useMemo<React.CSSProperties>(() => {
+    return {
+      width: "100%",
+      marginTop: "2px",
+      display: "flex",
+      flexDirection: "column",
+    };
+  }, []);
+
   return (
     <section className={className} style={sectionStyle}>
       <div style={contentStyle}>
@@ -59,7 +73,16 @@ function HeroMobileStack({
           secondaryLabel={secondaryLabel}
           imageLoaded={imageLoaded}
           onImageLoad={onImageLoad}
-          bottomSlot={bottomSlot}
+          bottomSlot={
+            <>
+              {bottomSlot}
+              {primaryActions.length ? (
+                <div style={actionsWrapStyle}>
+                  <HeroPrimaryActionsMobile items={primaryActions} />
+                </div>
+              ) : null}
+            </>
+          }
         />
       </div>
     </section>
