@@ -25,14 +25,17 @@ export default function HeroProfileColumnMobile({
   const rootStyle = useMemo<React.CSSProperties>(() => {
     return {
       width: "100%",
-      maxWidth: "420px",
-      margin: "0 auto",
+      minWidth: 0,
+      maxWidth: "100%",
+      margin: 0,
+      minHeight: "clamp(560px, calc(100dvh - 108px), 860px)",
       display: "flex",
       flexDirection: "column",
       alignItems: "stretch",
+      justifyContent: "space-between",
       gap: "10px",
-      padding: "14px 12px 18px",
-      borderRadius: "28px",
+      padding: "12px 10px 14px",
+      borderRadius: "24px",
       background:
         "linear-gradient(180deg, rgba(16,16,20,0.94) 0%, rgba(8,8,10,0.985) 100%)",
       border: "1px solid rgba(255, 210, 120, 0.08)",
@@ -49,8 +52,9 @@ export default function HeroProfileColumnMobile({
       display: "flex",
       justifyContent: "center",
       alignItems: "center",
-      paddingTop: "2px",
-      marginBottom: "0px",
+      paddingTop: 0,
+      marginBottom: 0,
+      boxSizing: "border-box",
     };
   }, []);
 
@@ -58,8 +62,10 @@ export default function HeroProfileColumnMobile({
     return {
       position: "relative",
       width: "100%",
-      aspectRatio: "0.88 / 1",
-      borderRadius: "22px",
+      minWidth: 0,
+      flex: "1 1 auto",
+      minHeight: "clamp(340px, 56dvh, 640px)",
+      borderRadius: "20px",
       overflow: "hidden",
       background:
         "linear-gradient(180deg, rgba(34,34,38,0.94) 0%, rgba(16,16,20,0.98) 100%)",
@@ -69,6 +75,7 @@ export default function HeroProfileColumnMobile({
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
+      boxSizing: "border-box",
     };
   }, []);
 
@@ -85,6 +92,7 @@ export default function HeroProfileColumnMobile({
       justifyContent: "center",
       alignItems: "stretch",
       marginTop: "2px",
+      boxSizing: "border-box",
     };
   }, [bottomSlot]);
 

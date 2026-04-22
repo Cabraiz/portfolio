@@ -5,7 +5,6 @@ import {
   useState,
   type CSSProperties,
 } from "react";
-import { Container } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import i18n from "@/i18n/i18n";
 import "tippy.js/dist/tippy.css";
@@ -181,10 +180,10 @@ function HomeMobile() {
       position: "relative",
       width: "100%",
       minWidth: 0,
-      minHeight: "100%",
+      minHeight: "100dvh",
       display: "flex",
       flexDirection: "column",
-      overflowX: "clip",
+      overflowX: "hidden",
       overflowY: "visible",
       backgroundColor: "#07080b",
       backgroundImage: MOBILE_HERO_BACKGROUND,
@@ -199,17 +198,14 @@ function HomeMobile() {
     return {
       width: "100%",
       minWidth: 0,
-      maxWidth: "100%",
-      minHeight: "calc(100dvh - 60px)",
+      minHeight: "100dvh",
       display: "flex",
       flexDirection: "column",
-      justifyContent: "center",
       alignItems: "stretch",
-      paddingTop: "clamp(70px, 13vw, 88px)",
-      paddingBottom: "clamp(18px, 4vw, 28px)",
-      paddingInline: "clamp(16px, 5vw, 24px)",
-      background: "transparent",
-      backgroundColor: "transparent",
+      justifyContent: "flex-start",
+      paddingTop: "clamp(58px, 11vw, 76px)",
+      paddingBottom: "clamp(10px, 3vw, 18px)",
+      paddingInline: "clamp(8px, 3.2vw, 14px)",
       boxSizing: "border-box",
     };
   }, []);
@@ -217,11 +213,15 @@ function HomeMobile() {
   const stackWrapStyle = useMemo<CSSProperties>(() => {
     return {
       width: "100%",
-      maxWidth: "420px",
-      margin: "0 auto",
+      minWidth: 0,
+      maxWidth: "100%",
+      margin: 0,
       display: "flex",
       flexDirection: "column",
-      justifyContent: "center",
+      alignItems: "stretch",
+      justifyContent: "stretch",
+      flex: "1 1 auto",
+      boxSizing: "border-box",
     };
   }, []);
 
@@ -272,7 +272,7 @@ function HomeMobile() {
 
   return (
     <div ref={containerRef} style={rootStyle}>
-      <Container fluid style={containerStyle}>
+      <div style={containerStyle}>
         <div style={stackWrapStyle}>
           <HeroMobileStack
             imageSrc={fotoMateus}
@@ -283,7 +283,7 @@ function HomeMobile() {
             onImageLoad={() => setIsImageLoaded(true)}
           />
         </div>
-      </Container>
+      </div>
     </div>
   );
 }
