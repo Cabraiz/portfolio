@@ -201,26 +201,25 @@ function HomeMobile() {
       minHeight: "100dvh",
       display: "flex",
       flexDirection: "column",
-      alignItems: "stretch",
-      justifyContent: "flex-start",
-      paddingTop: "clamp(58px, 11vw, 76px)",
-      paddingBottom: "clamp(10px, 3vw, 18px)",
-      paddingInline: "clamp(8px, 3.2vw, 14px)",
+      alignItems: "center",
+      justifyContent: "center",
+      paddingTop: "clamp(58px, 10vw, 74px)",
+      paddingBottom: "clamp(18px, 4vw, 28px)",
+      paddingInline: "clamp(12px, 4vw, 20px)",
       boxSizing: "border-box",
     };
   }, []);
 
   const stackWrapStyle = useMemo<CSSProperties>(() => {
     return {
-      width: "100%",
+      width: "min(100%, 468px)",
       minWidth: 0,
-      maxWidth: "100%",
-      margin: 0,
+      maxWidth: "468px",
+      margin: "0 auto",
       display: "flex",
       flexDirection: "column",
       alignItems: "stretch",
-      justifyContent: "stretch",
-      flex: "1 1 auto",
+      justifyContent: "center",
       boxSizing: "border-box",
     };
   }, []);

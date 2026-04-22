@@ -26,15 +26,15 @@ export default function HeroProfileColumnMobile({
     return {
       width: "100%",
       minWidth: 0,
-      maxWidth: "100%",
-      margin: 0,
-      minHeight: "clamp(560px, calc(100dvh - 108px), 860px)",
+      maxWidth: "468px",
+      margin: "0 auto",
+      minHeight: "clamp(540px, 78dvh, 820px)",
       display: "flex",
       flexDirection: "column",
       alignItems: "stretch",
       justifyContent: "space-between",
       gap: "10px",
-      padding: "12px 10px 14px",
+      padding: "14px 12px 16px",
       borderRadius: "24px",
       background:
         "linear-gradient(180deg, rgba(16,16,20,0.94) 0%, rgba(8,8,10,0.985) 100%)",
@@ -64,7 +64,7 @@ export default function HeroProfileColumnMobile({
       width: "100%",
       minWidth: 0,
       flex: "1 1 auto",
-      minHeight: "clamp(340px, 56dvh, 640px)",
+      minHeight: "clamp(320px, 50dvh, 560px)",
       borderRadius: "20px",
       overflow: "hidden",
       background:
