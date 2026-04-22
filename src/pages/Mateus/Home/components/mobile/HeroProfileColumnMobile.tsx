@@ -1,14 +1,12 @@
 import React, { useMemo } from "react";
 
-import HeroIdentityMobile from "./HeroIdentityMobile";
+import HeroMarqueeMobile from "./HeroMarqueeMobile";
 import SocialRowMobile, { type MobileSocialItem } from "./SocialRowMobile";
 
 export type HeroProfileColumnMobileProps = Readonly<{
   imageSrc: string;
   imageAlt?: string;
   socialItems: readonly MobileSocialItem[];
-  roleLabel?: string;
-  secondaryLabel?: string;
   imageLoaded?: boolean;
   onImageLoad?: () => void;
   bottomSlot?: React.ReactNode;
@@ -19,8 +17,6 @@ export default function HeroProfileColumnMobile({
   imageSrc,
   imageAlt = "Mateus Cabral",
   socialItems,
-  roleLabel,
-  secondaryLabel,
   imageLoaded = true,
   onImageLoad,
   bottomSlot,
@@ -34,16 +30,27 @@ export default function HeroProfileColumnMobile({
       display: "flex",
       flexDirection: "column",
       alignItems: "stretch",
-      gap: "16px",
+      gap: "10px",
       padding: "14px 12px 18px",
       borderRadius: "28px",
       background:
-        "linear-gradient(180deg, rgba(16,16,20,0.94) 0%, rgba(8,8,10,0.98) 100%)",
+        "linear-gradient(180deg, rgba(16,16,20,0.94) 0%, rgba(8,8,10,0.985) 100%)",
       border: "1px solid rgba(255, 210, 120, 0.08)",
       boxShadow:
         "0 18px 40px rgba(0, 0, 0, 0.24), inset 0 1px 0 rgba(255,255,255,0.04)",
       boxSizing: "border-box",
       overflow: "hidden",
+    };
+  }, []);
+
+  const marqueeWrapStyle = useMemo<React.CSSProperties>(() => {
+    return {
+      width: "100%",
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      paddingTop: "2px",
+      marginBottom: "0px",
     };
   }, []);
 
@@ -64,6 +71,22 @@ export default function HeroProfileColumnMobile({
       justifyContent: "center",
     };
   }, []);
+
+  const actionsWrapStyle = useMemo<React.CSSProperties>(() => {
+    if (!bottomSlot) {
+      return {
+        display: "none",
+      };
+    }
+
+    return {
+      width: "100%",
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "stretch",
+      marginTop: "2px",
+    };
+  }, [bottomSlot]);
 
   const imageStyle = useMemo<React.CSSProperties>(() => {
     return {
@@ -93,6 +116,10 @@ export default function HeroProfileColumnMobile({
 
   return (
     <div className={className} style={rootStyle}>
+      <div style={marqueeWrapStyle}>
+        <HeroMarqueeMobile />
+      </div>
+
       <div style={imageFrameStyle}>
         <img
           src={imageSrc}
@@ -106,11 +133,7 @@ export default function HeroProfileColumnMobile({
         <div style={skeletonStyle} />
       </div>
 
-      <HeroIdentityMobile
-        roleLabel={roleLabel}
-        secondaryLabel={secondaryLabel}
-        bottomSlot={bottomSlot}
-      />
+      {bottomSlot ? <div style={actionsWrapStyle}>{bottomSlot}</div> : null}
 
       <SocialRowMobile items={socialItems} />
     </div>

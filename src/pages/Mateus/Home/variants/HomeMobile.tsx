@@ -60,16 +60,6 @@ function HomeMobile() {
     return currentLanguage === "pt" || currentLanguage.startsWith("pt");
   }, [currentLanguage]);
 
-  const roleLabel = useMemo(() => {
-    return isPT ? "Engenheiro de Software" : "Software Engineer";
-  }, [isPT]);
-
-  const secondaryLabel = useMemo(() => {
-    return isPT
-      ? "Disponível para produtos, plataformas e soluções digitais"
-      : "Available for products, platforms and digital solutions";
-  }, [isPT]);
-
   const resumeLabel = useMemo(() => {
     return t("buttons.downloadCV");
   }, [t, currentLanguage]);
@@ -287,8 +277,6 @@ function HomeMobile() {
           <HeroMobileStack
             imageSrc={fotoMateus}
             imageAlt="Mateus Cabral"
-            roleLabel={roleLabel}
-            secondaryLabel={secondaryLabel}
             primaryActions={primaryActions}
             socialItems={socialItems}
             imageLoaded={isImageLoaded}

@@ -11,8 +11,6 @@ export type HeroMobileStackProps = Readonly<{
   imageAlt?: string;
   socialItems: readonly MobileSocialItem[];
   primaryActions?: readonly HeroPrimaryActionMobile[];
-  roleLabel?: string;
-  secondaryLabel?: string;
   imageLoaded?: boolean;
   onImageLoad?: () => void;
   bottomSlot?: React.ReactNode;
@@ -24,8 +22,6 @@ function HeroMobileStack({
   imageAlt = "Mateus Cabral",
   socialItems,
   primaryActions = [],
-  roleLabel,
-  secondaryLabel,
   imageLoaded = true,
   onImageLoad,
   bottomSlot,
@@ -53,14 +49,23 @@ function HeroMobileStack({
     };
   }, []);
 
-  const actionsWrapStyle = useMemo<React.CSSProperties>(() => {
-    return {
-      width: "100%",
-      marginTop: "2px",
-      display: "flex",
-      flexDirection: "column",
-    };
-  }, []);
+  const stackedBottomSlot = useMemo(() => {
+    const hasPrimaryActions = primaryActions.length > 0;
+    const hasBottomSlot = Boolean(bottomSlot);
+
+    if (!hasPrimaryActions && !hasBottomSlot) {
+      return null;
+    }
+
+    return (
+      <>
+        {hasBottomSlot ? bottomSlot : null}
+        {hasPrimaryActions ? (
+          <HeroPrimaryActionsMobile items={primaryActions} />
+        ) : null}
+      </>
+    );
+  }, [bottomSlot, primaryActions]);
 
   return (
     <section className={className} style={sectionStyle}>
@@ -69,20 +74,9 @@ function HeroMobileStack({
           imageSrc={imageSrc}
           imageAlt={imageAlt}
           socialItems={socialItems}
-          roleLabel={roleLabel}
-          secondaryLabel={secondaryLabel}
           imageLoaded={imageLoaded}
           onImageLoad={onImageLoad}
-          bottomSlot={
-            <>
-              {bottomSlot}
-              {primaryActions.length ? (
-                <div style={actionsWrapStyle}>
-                  <HeroPrimaryActionsMobile items={primaryActions} />
-                </div>
-              ) : null}
-            </>
-          }
+          bottomSlot={stackedBottomSlot}
         />
       </div>
     </section>
