@@ -6,16 +6,17 @@
   overflow: visible;
 
   /*
-    Agora o cockpit é comandado pela câmera do HomeDriveViewport.
-
     Importante:
-    - o zoom vem de --home-drive-cockpit-width;
-    - não usamos mais height em %, vh ou dvh para escalar o cockpit;
-    - a altura é derivada da largura/aspect ratio pelo hook.
+    NÃO declare aqui:
+    --home-drive-cockpit-width
+    --home-drive-cockpit-height
+    --home-drive-cockpit-bottom
+    --home-drive-steering-width
+    --home-drive-steering-bottom
+
+    Essas variáveis agora vêm do HomeDriveViewport via useHomeDriveViewportProfile.
+    Se declarar aqui, o CSS local sobrescreve a câmera central.
   */
-  --home-drive-cockpit-width: 968px;
-  --home-drive-cockpit-height: 545px;
-  --home-drive-cockpit-bottom: -72px;
 
   /*
     Eixo real de rotação do PNG do volante.
@@ -25,17 +26,14 @@
 
   /*
     Offset visual interno.
+    X negativo = volante mais para esquerda.
+    X positivo = volante mais para direita.
+
     Y positivo = volante desce dentro da própria shell.
     Y negativo = volante sobe dentro da própria shell.
   */
   --home-drive-steering-inner-x: -9.5%;
   --home-drive-steering-inner-y: 8.5%;
-
-  /*
-    Volante também vem da câmera.
-  */
-  --home-drive-steering-bottom: -190px;
-  --home-drive-steering-width: 651px;
 }
 
 .glassReflection {
@@ -77,15 +75,15 @@
 /*
   Cockpit PNG 16:9.
 
-  O erro anterior era escalar por height.
-  Agora escala por width fixado pela câmera.
+  Agora o cockpit escala por WIDTH vindo da câmera central.
+  Não há mais zoom por height/vh/dvh neste arquivo.
 */
 .cockpitImageShell {
   position: absolute;
   left: 50%;
-  bottom: var(--home-drive-cockpit-bottom);
-  width: var(--home-drive-cockpit-width);
-  height: var(--home-drive-cockpit-height);
+  bottom: var(--home-drive-cockpit-bottom, -80px);
+  width: var(--home-drive-cockpit-width, 1084px);
+  height: var(--home-drive-cockpit-height, 610px);
   aspect-ratio: 16 / 9;
   z-index: 5;
   transform: translateX(-50%);
@@ -112,8 +110,8 @@
 .steeringWheelShell {
   position: absolute;
   left: 50%;
-  bottom: var(--home-drive-steering-bottom);
-  width: var(--home-drive-steering-width);
+  bottom: var(--home-drive-steering-bottom, -190px);
+  width: var(--home-drive-steering-width, 651px);
   aspect-ratio: 1 / 1;
   z-index: 40;
   transform: translateX(-50%);
@@ -170,6 +168,7 @@
 
 /*
   Não há mais breakpoints de zoom aqui.
+
   O HomeDriveViewport injeta:
   - --home-drive-cockpit-width
   - --home-drive-cockpit-height

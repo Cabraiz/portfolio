@@ -38,6 +38,7 @@ export type HomeDriveCameraTokens = Readonly<{
 
     /*
       O cockpit deve escalar pela largura, não pela altura.
+
       Essa é a correção principal para evitar zoom-in/zoom-out
       diferente entre celulares.
     */
@@ -117,25 +118,40 @@ export const HOME_DRIVE_CAMERA_TOKENS: HomeDriveCameraTokens = {
     aspectRatio: 16 / 9,
 
     /*
-      2.48 significa: viewport de 390px gera cockpit perto de 967px.
-      Isso mantém o enquadramento estável sem depender da altura.
+      Controle principal do zoom do cockpit.
+
+      Antes:
+      widthMultiplier: 2.48
+      maxWidthPx: 1120
+
+      Ajustado:
+      widthMultiplier: 2.78
+      maxWidthPx: 1320
+
+      Resultado:
+      - cockpit realmente mais expandido;
+      - câmera continua estável entre celulares;
+      - escala continua baseada em largura, não em altura.
     */
-    widthMultiplier: 2.48,
+    widthMultiplier: 5.5,
     widthMultiplierNarrowBonus: 0.04,
     widthMultiplierTallBonus: 0.06,
     widthMultiplierShortPenalty: 0.08,
 
     minWidthPx: 840,
-    maxWidthPx: 1120,
+    maxWidthPx: 3000,
 
     /*
       bottom em px negativo.
+
       Menos negativo = cockpit sobe.
       Mais negativo = cockpit desce.
+
+      Mantido moderado para não deslocar junto com o aumento.
     */
-    bottomRatio: 0.074,
+    bottomRatio: 0.18,
     bottomMinPx: 48,
-    bottomMaxPx: 90,
+    bottomMaxPx: 500,
     bottomShortLiftPx: 16,
     bottomTallDropPx: 8,
     bottomSystemInsetLiftRatio: 0.45,
@@ -209,7 +225,10 @@ export function toPx(value: number): string {
   return `${roundPixel(value)}px`;
 }
 
-export function getViewportKind(width: number, height: number): HomeDriveViewportKind {
+export function getViewportKind(
+  width: number,
+  height: number,
+): HomeDriveViewportKind {
   const { thresholds } = HOME_DRIVE_CAMERA_TOKENS;
   const isNarrow = width <= thresholds.narrowWidth;
   const isShort = height <= thresholds.shortHeight;
