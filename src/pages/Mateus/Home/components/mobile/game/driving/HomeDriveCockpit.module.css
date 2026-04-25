@@ -6,43 +6,37 @@
   overflow: visible;
 
   /*
-    Ajuste fino do eixo real do PNG do volante.
-
-    Se ainda parecer girar fora do centro:
-    - aumente Y para girar mais baixo: 50% -> 51% / 52%
-    - diminua X para eixo mais à esquerda: 50% -> 49%
-    - aumente X para eixo mais à direita: 50% -> 51%
+    Eixo real de rotação do PNG do volante.
   */
   --home-drive-steering-pivot-x: 50%;
   --home-drive-steering-pivot-y: 50%;
 
   /*
-    Offset visual do volante dentro da área dele.
-
-    Mantém o volante um pouco mais para esquerda/baixo
-    sem contaminar o eixo de rotação.
+    Offset visual interno.
+    Y positivo = volante desce dentro da própria shell.
+    Y negativo = volante sobe dentro da própria shell.
   */
   --home-drive-steering-inner-x: -9.5%;
   --home-drive-steering-inner-y: 8.5%;
 
   /*
-    Posição vertical da peça inteira do volante.
+    POSIÇÃO PRINCIPAL DO VOLANTE.
 
-    Mais negativo = desce o volante.
-    Menos negativo = sobe o volante.
+    Menos negativo = sobe.
+    Mais negativo = desce.
 
-    Esse valor resolve o problema dos celulares Android
-    com navegação por 3 botões, onde a área útil fica menor
-    e o volante parecia subir demais.
+    Base normal: -22.5%.
   */
-  --home-drive-steering-bottom: -25.5%;
+  --home-drive-steering-bottom: -22.5%;
 
   /*
-    Fallback para aparelhos/navegadores que expõem área segura inferior.
-    Em Android comum pode vir como 0px, por isso ainda existem os
-    media queries por altura mais abaixo.
+    Compensação opcional vinda do viewport.
+    Se não existir, fica 0px.
   */
-  --home-drive-steering-safe-drop: env(safe-area-inset-bottom, 0px);
+  --home-drive-steering-system-drop: var(
+    --home-drive-system-bottom-compensation,
+    0px
+  );
 }
 
 .glassReflection {
@@ -81,10 +75,6 @@
     );
 }
 
-/*
-  Cockpit PNG 16:9 expandido.
-  Mantido separado do volante para não contaminar a rotação.
-*/
 .cockpitImageShell {
   position: absolute;
   left: 50%;
@@ -113,19 +103,19 @@
   image-rendering: auto;
 }
 
-/*
-  Volante independente do cockpit PNG.
-
-  A shell NÃO gira.
-  Ela só posiciona o bloco inteiro do volante.
-  A rotação fica apenas na imagem para o eixo não orbitar.
-*/
 .steeringWheelShell {
   position: absolute;
   left: 50%;
+
+  /*
+    AQUI é o ponto que manda no volante inteiro.
+    Não coloque bottom direto nos breakpoints.
+  */
   bottom: calc(
-    var(--home-drive-steering-bottom) - var(--home-drive-steering-safe-drop)
+    var(--home-drive-steering-bottom) -
+    var(--home-drive-steering-system-drop)
   );
+
   width: min(167%, 692px);
   aspect-ratio: 1 / 1;
   z-index: 40;
@@ -138,13 +128,6 @@
     drop-shadow(0 2px 0 rgba(255, 255, 255, 0.04));
 }
 
-/*
-  Compatível com a versão do TS que tem um wrapper interno
-  dentro de .steeringWheelShell.
-
-  Esse wrapper desloca visualmente o volante,
-  mas sem receber rotate. O rotate fica só na imagem.
-*/
 .steeringWheelShell > div {
   position: absolute;
   inset: 0;
@@ -190,7 +173,7 @@
 
 @media (max-width: 430px) {
   .root {
-    --home-drive-steering-bottom: -26.5%;
+    --home-drive-steering-bottom: -22.8%;
   }
 
   .cockpitImageShell {
@@ -205,7 +188,7 @@
 
 @media (max-width: 390px) {
   .root {
-    --home-drive-steering-bottom: -27.5%;
+    --home-drive-steering-bottom: -23.2%;
   }
 
   .cockpitImageShell {
@@ -220,7 +203,7 @@
 
 @media (max-width: 360px) {
   .root {
-    --home-drive-steering-bottom: -28.5%;
+    --home-drive-steering-bottom: -23.8%;
   }
 
   .cockpitImageShell {
@@ -234,26 +217,18 @@
 }
 
 /*
-  Correção específica para celulares baixos ou com viewport útil menor,
-  comum quando o Android usa navegação por 3 botões.
-
-  Isso evita o volante subir visualmente.
+  Não force -30%, -33%, -36%.
+  Isso derruba o volante em aparelho normal também.
 */
-@media (max-height: 760px) and (pointer: coarse) {
+@media (max-height: 720px) and (pointer: coarse) {
   .root {
-    --home-drive-steering-bottom: -30%;
+    --home-drive-steering-bottom: -24.8%;
   }
 }
 
-@media (max-height: 700px) and (pointer: coarse) {
+@media (max-height: 650px) and (pointer: coarse) {
   .root {
-    --home-drive-steering-bottom: -33%;
-  }
-}
-
-@media (max-height: 640px) and (pointer: coarse) {
-  .root {
-    --home-drive-steering-bottom: -36%;
+    --home-drive-steering-bottom: -25.8%;
   }
 }
 
