@@ -24,6 +24,25 @@
   */
   --home-drive-steering-inner-x: -9.5%;
   --home-drive-steering-inner-y: 8.5%;
+
+  /*
+    Posição vertical da peça inteira do volante.
+
+    Mais negativo = desce o volante.
+    Menos negativo = sobe o volante.
+
+    Esse valor resolve o problema dos celulares Android
+    com navegação por 3 botões, onde a área útil fica menor
+    e o volante parecia subir demais.
+  */
+  --home-drive-steering-bottom: -25.5%;
+
+  /*
+    Fallback para aparelhos/navegadores que expõem área segura inferior.
+    Em Android comum pode vir como 0px, por isso ainda existem os
+    media queries por altura mais abaixo.
+  */
+  --home-drive-steering-safe-drop: env(safe-area-inset-bottom, 0px);
 }
 
 .glassReflection {
@@ -64,7 +83,7 @@
 
 /*
   Cockpit PNG 16:9 expandido.
-  Movido ~20% mais para baixo.
+  Mantido separado do volante para não contaminar a rotação.
 */
 .cockpitImageShell {
   position: absolute;
@@ -97,14 +116,16 @@
 /*
   Volante independente do cockpit PNG.
 
-  A shell agora NÃO gira.
-  Ela só posiciona o bloco do volante.
-  A rotação fica na imagem para o eixo não orbitar.
+  A shell NÃO gira.
+  Ela só posiciona o bloco inteiro do volante.
+  A rotação fica apenas na imagem para o eixo não orbitar.
 */
 .steeringWheelShell {
   position: absolute;
   left: 50%;
-  bottom: -22.5%;
+  bottom: calc(
+    var(--home-drive-steering-bottom) - var(--home-drive-steering-safe-drop)
+  );
   width: min(167%, 692px);
   aspect-ratio: 1 / 1;
   z-index: 40;
@@ -168,6 +189,10 @@
 }
 
 @media (max-width: 430px) {
+  .root {
+    --home-drive-steering-bottom: -26.5%;
+  }
+
   .cockpitImageShell {
     bottom: -44%;
     height: 143%;
@@ -175,11 +200,14 @@
 
   .steeringWheelShell {
     width: min(170%, 648px);
-    bottom: -22.3%;
   }
 }
 
 @media (max-width: 390px) {
+  .root {
+    --home-drive-steering-bottom: -27.5%;
+  }
+
   .cockpitImageShell {
     bottom: -46%;
     height: 149%;
@@ -187,11 +215,14 @@
 
   .steeringWheelShell {
     width: min(176%, 620px);
-    bottom: -22.1%;
   }
 }
 
 @media (max-width: 360px) {
+  .root {
+    --home-drive-steering-bottom: -28.5%;
+  }
+
   .cockpitImageShell {
     bottom: -48%;
     height: 156%;
@@ -199,7 +230,30 @@
 
   .steeringWheelShell {
     width: min(181%, 576px);
-    bottom: -21.9%;
+  }
+}
+
+/*
+  Correção específica para celulares baixos ou com viewport útil menor,
+  comum quando o Android usa navegação por 3 botões.
+
+  Isso evita o volante subir visualmente.
+*/
+@media (max-height: 760px) and (pointer: coarse) {
+  .root {
+    --home-drive-steering-bottom: -30%;
+  }
+}
+
+@media (max-height: 700px) and (pointer: coarse) {
+  .root {
+    --home-drive-steering-bottom: -33%;
+  }
+}
+
+@media (max-height: 640px) and (pointer: coarse) {
+  .root {
+    --home-drive-steering-bottom: -36%;
   }
 }
 
