@@ -4,6 +4,97 @@
   z-index: 20;
   box-sizing: border-box;
   pointer-events: none;
+
+  /*
+    Velocímetro fluido.
+
+    Tamanho:
+    - mínimo: 84px
+    - ideal: proporcional à tela
+    - máximo: 112px
+  */
+  --home-drive-speedometer-fluid-size: clamp(
+    84px,
+    min(24.5vw, 13.8vh),
+    112px
+  );
+
+  --home-drive-speedometer-size: var(--home-drive-speedometer-fluid-size);
+
+  /*
+    Posição horizontal.
+
+    Menor valor depois do "-" = mais para a direita.
+    Maior valor depois do "-" = mais para a esquerda.
+
+    Ajustado agora: um pouco mais à direita.
+  */
+  --home-drive-speedometer-left-shift: clamp(26px, 9vw, 50px);
+  --home-drive-speedometer-left: calc(
+    50% - var(--home-drive-speedometer-left-shift)
+  );
+
+  /*
+    Posição vertical fluida.
+
+    Não força tamanho pequeno em celulares baixos.
+    Apenas reposiciona verticalmente.
+  */
+  --home-drive-speedometer-bottom: max(
+    clamp(112px, 18vh, 150px),
+    calc(env(safe-area-inset-bottom) + 78px)
+  );
+
+  --home-drive-speedometer-number-size: clamp(
+    6.6px,
+    calc(var(--home-drive-speedometer-size) * 0.08),
+    8.8px
+  );
+
+  --home-drive-speedometer-number-stroke: clamp(
+    1.35px,
+    calc(var(--home-drive-speedometer-size) * 0.019),
+    2px
+  );
+
+  --home-drive-speedometer-ring-stroke: clamp(
+    6.4px,
+    calc(var(--home-drive-speedometer-size) * 0.078),
+    8.3px
+  );
+
+  --home-drive-speedometer-needle-shadow-stroke: clamp(
+    2.8px,
+    calc(var(--home-drive-speedometer-size) * 0.04),
+    4px
+  );
+
+  --home-drive-speedometer-needle-stroke: clamp(
+    1.9px,
+    calc(var(--home-drive-speedometer-size) * 0.026),
+    2.6px
+  );
+
+  --home-drive-speedometer-hub-stroke: clamp(
+    1px,
+    calc(var(--home-drive-speedometer-size) * 0.015),
+    1.5px
+  );
+}
+
+@supports (height: 100dvh) {
+  .root {
+    --home-drive-speedometer-fluid-size: clamp(
+      84px,
+      min(24.5vw, 13.8dvh),
+      112px
+    );
+
+    --home-drive-speedometer-bottom: max(
+      clamp(112px, 18dvh, 150px),
+      calc(env(safe-area-inset-bottom) + 78px)
+    );
+  }
 }
 
 .topRow {
@@ -246,8 +337,8 @@
 
 .speedometerDock {
   position: absolute;
-  left: calc(50% - 45px);
-  bottom: max(145px, calc(env(safe-area-inset-bottom) + 92px));
+  left: var(--home-drive-speedometer-left);
+  bottom: var(--home-drive-speedometer-bottom);
   transform: translateX(-50%);
   z-index: 24;
   pointer-events: none;
@@ -255,8 +346,8 @@
 
 .speedometerCard {
   position: relative;
-  width: 95px;
-  height: 95px;
+  width: var(--home-drive-speedometer-size);
+  height: var(--home-drive-speedometer-size);
   border-radius: 999px;
   background:
     radial-gradient(
@@ -284,14 +375,14 @@
 .speedometerTrack {
   fill: none;
   stroke: rgba(255, 255, 255, 0.1);
-  stroke-width: 8;
+  stroke-width: var(--home-drive-speedometer-ring-stroke);
   stroke-linecap: round;
 }
 
 .speedometerProgress {
   fill: none;
   stroke: rgba(216, 190, 120, 0.96);
-  stroke-width: 8;
+  stroke-width: var(--home-drive-speedometer-ring-stroke);
   stroke-linecap: round;
   filter: drop-shadow(0 0 6px rgba(216, 190, 120, 0.16));
 }
@@ -313,12 +404,12 @@
 
 .speedometerNumber {
   fill: rgba(247, 242, 232, 0.78);
-  font-size: 8px;
+  font-size: var(--home-drive-speedometer-number-size);
   font-weight: 900;
   letter-spacing: 0.02em;
   paint-order: stroke;
   stroke: rgba(0, 0, 0, 0.52);
-  stroke-width: 2px;
+  stroke-width: var(--home-drive-speedometer-number-stroke);
   pointer-events: none;
 }
 
@@ -328,13 +419,13 @@
 
 .speedometerNeedleShadow {
   stroke: rgba(0, 0, 0, 0.42);
-  stroke-width: 4;
+  stroke-width: var(--home-drive-speedometer-needle-shadow-stroke);
   stroke-linecap: round;
 }
 
 .speedometerNeedle {
   stroke: rgba(247, 242, 232, 0.98);
-  stroke-width: 2.5;
+  stroke-width: var(--home-drive-speedometer-needle-stroke);
   stroke-linecap: round;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.34));
 }
@@ -346,7 +437,7 @@
 .speedometerHub {
   fill: #efe8d9;
   stroke: rgba(65, 60, 48, 0.68);
-  stroke-width: 1.5;
+  stroke-width: var(--home-drive-speedometer-hub-stroke);
 }
 
 .interactive {
@@ -395,7 +486,17 @@
   display: none !important;
 }
 
+@media (max-width: 430px) {
+  .root {
+    --home-drive-speedometer-left-shift: clamp(30px, 10vw, 54px);
+  }
+}
+
 @media (max-width: 390px) {
+  .root {
+    --home-drive-speedometer-left-shift: clamp(34px, 11vw, 56px);
+  }
+
   .topRow {
     gap: 7px;
     padding:
@@ -432,20 +533,100 @@
     font-size: 9px;
     padding-inline: 8px;
   }
+}
 
-  .speedometerDock {
-    left: calc(50% - 10px);
-    bottom: max(98px, calc(env(safe-area-inset-bottom) + 86px));
+@media (max-width: 360px) {
+  .root {
+    --home-drive-speedometer-left-shift: clamp(38px, 12vw, 58px);
+
+    /*
+      Em telas muito estreitas, reduz pouco.
+      Não derruba para 66px/68px.
+    */
+    --home-drive-speedometer-fluid-size: clamp(
+      80px,
+      min(24vw, 13.4vh),
+      102px
+    );
   }
+}
 
-  .speedometerCard {
-    width: 122px;
-    height: 122px;
+@supports (height: 100dvh) {
+  @media (max-width: 360px) {
+    .root {
+      --home-drive-speedometer-fluid-size: clamp(
+        80px,
+        min(24vw, 13.4dvh),
+        102px
+      );
+    }
   }
+}
 
-  .speedometerNumber {
-    font-size: 7px;
-    stroke-width: 1.8px;
+@media (max-width: 340px) {
+  .root {
+    --home-drive-speedometer-left-shift: clamp(40px, 13vw, 60px);
+    --home-drive-speedometer-fluid-size: clamp(
+      78px,
+      min(23.5vw, 13vh),
+      96px
+    );
+  }
+}
+
+@supports (height: 100dvh) {
+  @media (max-width: 340px) {
+    .root {
+      --home-drive-speedometer-fluid-size: clamp(
+        78px,
+        min(23.5vw, 13dvh),
+        96px
+      );
+    }
+  }
+}
+
+@media (max-height: 700px) and (pointer: coarse) {
+  .root {
+    /*
+      Em celular baixo, muda principalmente a altura,
+      não o tamanho do velocímetro.
+    */
+    --home-drive-speedometer-bottom: max(
+      clamp(98px, 16vh, 124px),
+      calc(env(safe-area-inset-bottom) + 64px)
+    );
+  }
+}
+
+@supports (height: 100dvh) {
+  @media (max-height: 700px) and (pointer: coarse) {
+    .root {
+      --home-drive-speedometer-bottom: max(
+        clamp(98px, 16dvh, 124px),
+        calc(env(safe-area-inset-bottom) + 64px)
+      );
+    }
+  }
+}
+
+@media (max-height: 640px) and (pointer: coarse) {
+  .root {
+    --home-drive-speedometer-bottom: max(
+      clamp(90px, 15vh, 114px),
+      calc(env(safe-area-inset-bottom) + 58px)
+    );
+  }
+}
+
+@supports (height: 100dvh) {
+  @media (max-height: 640px) and (pointer: coarse) {
+    .root {
+      --home-drive-speedometer-bottom: max(
+        clamp(90px, 15dvh, 114px),
+        calc(env(safe-area-inset-bottom) + 58px)
+      );
+    }
   }
 }
 
