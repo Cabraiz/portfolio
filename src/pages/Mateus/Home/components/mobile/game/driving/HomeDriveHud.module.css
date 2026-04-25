@@ -6,44 +6,13 @@
   pointer-events: none;
 
   /*
-    Velocímetro fluido.
+    Agora o velocímetro é comandado pela câmera do HomeDriveViewport.
 
-    Tamanho:
-    - mínimo: 84px
-    - ideal: proporcional à tela
-    - máximo: 112px
+    Fallbacks abaixo só existem para o caso de o hook não estar montado.
   */
-  --home-drive-speedometer-fluid-size: clamp(
-    84px,
-    min(24.5vw, 13.8vh),
-    112px
-  );
-
-  --home-drive-speedometer-size: var(--home-drive-speedometer-fluid-size);
-
-  /*
-    Posição horizontal.
-
-    Menor valor depois do "-" = mais para a direita.
-    Maior valor depois do "-" = mais para a esquerda.
-
-    Ajustado agora: um pouco mais à direita.
-  */
-  --home-drive-speedometer-left-shift: clamp(26px, 9vw, 50px);
-  --home-drive-speedometer-left: calc(
-    50% - var(--home-drive-speedometer-left-shift)
-  );
-
-  /*
-    Posição vertical fluida.
-
-    Não força tamanho pequeno em celulares baixos.
-    Apenas reposiciona verticalmente.
-  */
-  --home-drive-speedometer-bottom: max(
-    clamp(112px, 18vh, 150px),
-    calc(env(safe-area-inset-bottom) + 78px)
-  );
+  --home-drive-speedometer-size: 96px;
+  --home-drive-speedometer-x: calc(50% - 28px);
+  --home-drive-speedometer-y: 142px;
 
   --home-drive-speedometer-number-size: clamp(
     6.6px,
@@ -80,21 +49,6 @@
     calc(var(--home-drive-speedometer-size) * 0.015),
     1.5px
   );
-}
-
-@supports (height: 100dvh) {
-  .root {
-    --home-drive-speedometer-fluid-size: clamp(
-      84px,
-      min(24.5vw, 13.8dvh),
-      112px
-    );
-
-    --home-drive-speedometer-bottom: max(
-      clamp(112px, 18dvh, 150px),
-      calc(env(safe-area-inset-bottom) + 78px)
-    );
-  }
 }
 
 .topRow {
@@ -337,8 +291,8 @@
 
 .speedometerDock {
   position: absolute;
-  left: var(--home-drive-speedometer-left);
-  bottom: var(--home-drive-speedometer-bottom);
+  left: var(--home-drive-speedometer-x);
+  bottom: var(--home-drive-speedometer-y);
   transform: translateX(-50%);
   z-index: 24;
   pointer-events: none;
@@ -486,17 +440,7 @@
   display: none !important;
 }
 
-@media (max-width: 430px) {
-  .root {
-    --home-drive-speedometer-left-shift: clamp(30px, 10vw, 54px);
-  }
-}
-
 @media (max-width: 390px) {
-  .root {
-    --home-drive-speedometer-left-shift: clamp(34px, 11vw, 56px);
-  }
-
   .topRow {
     gap: 7px;
     padding:
@@ -532,101 +476,6 @@
     border-radius: 12px;
     font-size: 9px;
     padding-inline: 8px;
-  }
-}
-
-@media (max-width: 360px) {
-  .root {
-    --home-drive-speedometer-left-shift: clamp(38px, 12vw, 58px);
-
-    /*
-      Em telas muito estreitas, reduz pouco.
-      Não derruba para 66px/68px.
-    */
-    --home-drive-speedometer-fluid-size: clamp(
-      80px,
-      min(24vw, 13.4vh),
-      102px
-    );
-  }
-}
-
-@supports (height: 100dvh) {
-  @media (max-width: 360px) {
-    .root {
-      --home-drive-speedometer-fluid-size: clamp(
-        80px,
-        min(24vw, 13.4dvh),
-        102px
-      );
-    }
-  }
-}
-
-@media (max-width: 340px) {
-  .root {
-    --home-drive-speedometer-left-shift: clamp(40px, 13vw, 60px);
-    --home-drive-speedometer-fluid-size: clamp(
-      78px,
-      min(23.5vw, 13vh),
-      96px
-    );
-  }
-}
-
-@supports (height: 100dvh) {
-  @media (max-width: 340px) {
-    .root {
-      --home-drive-speedometer-fluid-size: clamp(
-        78px,
-        min(23.5vw, 13dvh),
-        96px
-      );
-    }
-  }
-}
-
-@media (max-height: 700px) and (pointer: coarse) {
-  .root {
-    /*
-      Em celular baixo, muda principalmente a altura,
-      não o tamanho do velocímetro.
-    */
-    --home-drive-speedometer-bottom: max(
-      clamp(98px, 16vh, 124px),
-      calc(env(safe-area-inset-bottom) + 64px)
-    );
-  }
-}
-
-@supports (height: 100dvh) {
-  @media (max-height: 700px) and (pointer: coarse) {
-    .root {
-      --home-drive-speedometer-bottom: max(
-        clamp(98px, 16dvh, 124px),
-        calc(env(safe-area-inset-bottom) + 64px)
-      );
-    }
-  }
-}
-
-@media (max-height: 640px) and (pointer: coarse) {
-  .root {
-    --home-drive-speedometer-bottom: max(
-      clamp(90px, 15vh, 114px),
-      calc(env(safe-area-inset-bottom) + 58px)
-    );
-  }
-}
-
-@supports (height: 100dvh) {
-  @media (max-height: 640px) and (pointer: coarse) {
-    .root {
-      --home-drive-speedometer-bottom: max(
-        clamp(90px, 15dvh, 114px),
-        calc(env(safe-area-inset-bottom) + 58px)
-      );
-    }
   }
 }
 

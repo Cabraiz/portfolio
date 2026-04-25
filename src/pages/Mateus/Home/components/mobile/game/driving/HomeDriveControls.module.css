@@ -5,6 +5,27 @@
   box-sizing: border-box;
   pointer-events: none;
   overflow: hidden;
+
+  /*
+    Variáveis vindas de useHomeDriveViewportProfile via HomeDriveViewport.
+    Mantém fallback para o caso de o hook ainda não estar ligado.
+  */
+  --home-drive-controls-bottom-safe-zone: var(
+    --home-drive-bottom-safe-zone,
+    max(18px, calc(env(safe-area-inset-bottom) + 14px))
+  );
+
+  --home-drive-controls-visual-bottom: calc(
+    var(--home-drive-controls-bottom-safe-zone) + 12px
+  );
+
+  --home-drive-controls-surface-height: clamp(280px, 62vh, 520px);
+}
+
+@supports (height: 100dvh) {
+  .root {
+    --home-drive-controls-surface-height: clamp(280px, 62dvh, 520px);
+  }
 }
 
 /**
@@ -20,7 +41,7 @@
   position: absolute;
   inset-inline: 0;
   bottom: 0;
-  height: min(62vh, 520px);
+  height: var(--home-drive-controls-surface-height);
   z-index: 6;
   pointer-events: auto;
   touch-action: none;
@@ -37,9 +58,10 @@
 .gestureSurface::before {
   content: "";
   position: absolute;
-  inset-inline: max(22px, env(safe-area-inset-left))
+  inset-inline:
+    max(22px, env(safe-area-inset-left))
     max(22px, env(safe-area-inset-right));
-  bottom: max(22px, calc(env(safe-area-inset-bottom) + 18px));
+  bottom: var(--home-drive-controls-bottom-safe-zone);
   height: 118px;
   border-radius: 999px;
   opacity: 0;
@@ -96,7 +118,7 @@
 .gestureVisual {
   position: absolute;
   left: 50%;
-  bottom: max(34px, calc(env(safe-area-inset-bottom) + 30px));
+  bottom: var(--home-drive-controls-visual-bottom);
   width: 118px;
   height: 118px;
   opacity: 0;
@@ -190,19 +212,14 @@
 }
 
 @media (max-width: 390px) {
-  .gestureSurface {
-    height: min(66vh, 500px);
-  }
-
   .gestureSurface::before {
-    inset-inline: max(16px, env(safe-area-inset-left))
+    inset-inline:
+      max(16px, env(safe-area-inset-left))
       max(16px, env(safe-area-inset-right));
-    bottom: max(18px, calc(env(safe-area-inset-bottom) + 14px));
     height: 108px;
   }
 
   .gestureVisual {
-    bottom: max(28px, calc(env(safe-area-inset-bottom) + 24px));
     width: 108px;
     height: 108px;
   }
@@ -217,6 +234,20 @@
 
   .gestureHorizontalLine {
     width: 70px;
+  }
+}
+
+@media (max-height: 660px) and (pointer: coarse) {
+  .root {
+    --home-drive-controls-surface-height: clamp(250px, 58vh, 460px);
+  }
+}
+
+@supports (height: 100dvh) {
+  @media (max-height: 660px) and (pointer: coarse) {
+    .root {
+      --home-drive-controls-surface-height: clamp(250px, 58dvh, 460px);
+    }
   }
 }
 

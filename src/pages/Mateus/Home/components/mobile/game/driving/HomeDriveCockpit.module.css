@@ -6,16 +6,16 @@
   overflow: visible;
 
   /*
-    Cockpit PNG responsivo.
+    Agora o cockpit é comandado pela câmera do HomeDriveViewport.
 
-    height maior = cockpit maior.
-    bottom mais negativo = cockpit mais para baixo.
-    bottom menos negativo = cockpit mais para cima.
-
-    Ajustado agora: cockpit ~5% mais para cima.
+    Importante:
+    - o zoom vem de --home-drive-cockpit-width;
+    - não usamos mais height em %, vh ou dvh para escalar o cockpit;
+    - a altura é derivada da largura/aspect ratio pelo hook.
   */
-  --home-drive-cockpit-height: clamp(132%, calc(132% + 2vh), 154%);
-  --home-drive-cockpit-bottom: clamp(-41%, calc(-34% - 1.2vh), -32%);
+  --home-drive-cockpit-width: 968px;
+  --home-drive-cockpit-height: 545px;
+  --home-drive-cockpit-bottom: -72px;
 
   /*
     Eixo real de rotação do PNG do volante.
@@ -32,29 +32,10 @@
   --home-drive-steering-inner-y: 8.5%;
 
   /*
-    Posição/tamanho principal do volante.
-
-    Menos negativo = sobe.
-    Mais negativo = desce.
+    Volante também vem da câmera.
   */
-  --home-drive-steering-bottom: -22.5%;
-  --home-drive-steering-width: min(167%, 692px);
-
-  /*
-    Compensação opcional vinda do viewport.
-    Se não existir, fica 0px.
-  */
-  --home-drive-steering-system-drop: var(
-    --home-drive-system-bottom-compensation,
-    0px
-  );
-}
-
-@supports (height: 100dvh) {
-  .root {
-    --home-drive-cockpit-height: clamp(132%, calc(132% + 2dvh), 154%);
-    --home-drive-cockpit-bottom: clamp(-41%, calc(-34% - 1.2dvh), -32%);
-  }
+  --home-drive-steering-bottom: -190px;
+  --home-drive-steering-width: 651px;
 }
 
 .glassReflection {
@@ -93,10 +74,17 @@
     );
 }
 
+/*
+  Cockpit PNG 16:9.
+
+  O erro anterior era escalar por height.
+  Agora escala por width fixado pela câmera.
+*/
 .cockpitImageShell {
   position: absolute;
   left: 50%;
   bottom: var(--home-drive-cockpit-bottom);
+  width: var(--home-drive-cockpit-width);
   height: var(--home-drive-cockpit-height);
   aspect-ratio: 16 / 9;
   z-index: 5;
@@ -124,10 +112,7 @@
 .steeringWheelShell {
   position: absolute;
   left: 50%;
-  bottom: calc(
-    var(--home-drive-steering-bottom) -
-    var(--home-drive-steering-system-drop)
-  );
+  bottom: var(--home-drive-steering-bottom);
   width: var(--home-drive-steering-width);
   aspect-ratio: 1 / 1;
   z-index: 40;
@@ -183,120 +168,15 @@
   display: none !important;
 }
 
-@media (max-width: 430px) {
-  .root {
-    --home-drive-cockpit-height: clamp(138%, calc(138% + 2vh), 162%);
-    --home-drive-cockpit-bottom: clamp(-45%, calc(-37% - 1.2vh), -35%);
-
-    --home-drive-steering-bottom: -22.8%;
-    --home-drive-steering-width: min(170%, 648px);
-  }
-}
-
-@supports (height: 100dvh) {
-  @media (max-width: 430px) {
-    .root {
-      --home-drive-cockpit-height: clamp(138%, calc(138% + 2dvh), 162%);
-      --home-drive-cockpit-bottom: clamp(-45%, calc(-37% - 1.2dvh), -35%);
-    }
-  }
-}
-
-@media (max-width: 390px) {
-  .root {
-    --home-drive-cockpit-height: clamp(142%, calc(142% + 2vh), 166%);
-    --home-drive-cockpit-bottom: clamp(-47%, calc(-39% - 1.3vh), -36%);
-
-    --home-drive-steering-bottom: -23.2%;
-    --home-drive-steering-width: min(176%, 620px);
-  }
-}
-
-@supports (height: 100dvh) {
-  @media (max-width: 390px) {
-    .root {
-      --home-drive-cockpit-height: clamp(142%, calc(142% + 2dvh), 166%);
-      --home-drive-cockpit-bottom: clamp(-47%, calc(-39% - 1.3dvh), -36%);
-    }
-  }
-}
-
-@media (max-width: 360px) {
-  .root {
-    --home-drive-cockpit-height: clamp(146%, calc(146% + 1.6vh), 170%);
-    --home-drive-cockpit-bottom: clamp(-49%, calc(-41% - 1.2vh), -38%);
-
-    --home-drive-steering-bottom: -23.8%;
-    --home-drive-steering-width: min(181%, 576px);
-  }
-}
-
-@supports (height: 100dvh) {
-  @media (max-width: 360px) {
-    .root {
-      --home-drive-cockpit-height: clamp(146%, calc(146% + 1.6dvh), 170%);
-      --home-drive-cockpit-bottom: clamp(-49%, calc(-41% - 1.2dvh), -38%);
-    }
-  }
-}
-
 /*
-  Celulares baixos ou com viewport útil reduzido.
-
-  Aqui o cockpit também foi movido ~5% para cima,
-  sem alterar agressivamente o volante.
+  Não há mais breakpoints de zoom aqui.
+  O HomeDriveViewport injeta:
+  - --home-drive-cockpit-width
+  - --home-drive-cockpit-height
+  - --home-drive-cockpit-bottom
+  - --home-drive-steering-width
+  - --home-drive-steering-bottom
 */
-@media (max-height: 720px) and (pointer: coarse) {
-  .root {
-    --home-drive-cockpit-height: clamp(128%, calc(128% + 1vh), 146%);
-    --home-drive-cockpit-bottom: clamp(-39%, calc(-33% - 0.8vh), -30%);
-
-    --home-drive-steering-bottom: -24.4%;
-  }
-}
-
-@supports (height: 100dvh) {
-  @media (max-height: 720px) and (pointer: coarse) {
-    .root {
-      --home-drive-cockpit-height: clamp(128%, calc(128% + 1dvh), 146%);
-      --home-drive-cockpit-bottom: clamp(-39%, calc(-33% - 0.8dvh), -30%);
-    }
-  }
-}
-
-@media (max-height: 650px) and (pointer: coarse) {
-  .root {
-    --home-drive-cockpit-height: clamp(124%, calc(124% + 1vh), 140%);
-    --home-drive-cockpit-bottom: clamp(-37%, calc(-31% - 0.8vh), -28%);
-
-    --home-drive-steering-bottom: -25.2%;
-  }
-}
-
-@supports (height: 100dvh) {
-  @media (max-height: 650px) and (pointer: coarse) {
-    .root {
-      --home-drive-cockpit-height: clamp(124%, calc(124% + 1dvh), 140%);
-      --home-drive-cockpit-bottom: clamp(-37%, calc(-31% - 0.8dvh), -28%);
-    }
-  }
-}
-
-@media (min-height: 860px) and (pointer: coarse) {
-  .root {
-    --home-drive-cockpit-height: clamp(140%, calc(140% + 1.4vh), 164%);
-    --home-drive-cockpit-bottom: clamp(-45%, calc(-37% - 1vh), -34%);
-  }
-}
-
-@supports (height: 100dvh) {
-  @media (min-height: 860px) and (pointer: coarse) {
-    .root {
-      --home-drive-cockpit-height: clamp(140%, calc(140% + 1.4dvh), 164%);
-      --home-drive-cockpit-bottom: clamp(-45%, calc(-37% - 1dvh), -34%);
-    }
-  }
-}
 
 @media (prefers-reduced-motion: reduce) {
   .steeringWheelImage {
