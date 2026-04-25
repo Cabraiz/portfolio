@@ -8,31 +8,18 @@ export const homeHeroTokens = {
   },
 
   section: {
-    /**
-     * A LandingSectionShell continua dona da altura da seção.
-     * O hero só ocupa o bloco disponível, sem compensar navbar aqui.
-     */
     minHeight: {
       compact: "100%",
       default: "100%",
       tall: "100%",
     },
 
-    /**
-     * 720p continua mais contido.
-     * 1080p ganha um pouco mais de respiro, mas já compensado
-     * com base equivalente para o conjunto ficar mais centrado.
-     */
     paddingTop: {
       compact: "8px",
       default: "10px",
       tall: "12px",
     },
 
-    /**
-     * Equilibra com o topo para o hero parecer mais centralizado
-     * dentro da área útil em 1080p.
-     */
     paddingBottom: {
       compact: "6px",
       default: "10px",
@@ -41,10 +28,6 @@ export const homeHeroTokens = {
   },
 
   profileColumn: {
-    /**
-     * A coluna direita continua respirando,
-     * mas agora sem “roubar” tanto espaço da esquerda.
-     */
     paddingLeft: {
       compact: "6px",
       default: "10px",
@@ -66,10 +49,6 @@ export const homeHeroTokens = {
       tall: "0px",
     },
 
-    /**
-     * Em 1080p o card continua com presença,
-     * mas ligeiramente mais contido para a esquerda expandir.
-     */
     padding: {
       compact: "14px 14px 16px",
       default: "22px 22px 26px",
@@ -82,10 +61,6 @@ export const homeHeroTokens = {
       tall: "22px",
     },
 
-    /**
-     * Redução controlada do card da direita.
-     * Isso ajuda a abrir mais área útil para a coluna esquerda.
-     */
     width: {
       compact: "min(100%, 350px)",
       default: "min(100%, 480px)",
@@ -118,10 +93,6 @@ export const homeHeroTokens = {
   },
 
   profileImage: {
-    /**
-     * A imagem segue grande, mas um pouco mais controlada
-     * para a coluna direita não dominar a composição.
-     */
     maxWidth: {
       compact: "100%",
       default: "410px",
@@ -141,8 +112,87 @@ export const homeHeroTokens = {
   socialRow: {
     gap: {
       compact: "10px",
-      default: "14px",
-      tall: "16px",
+      default: "10px",
+      tall: "12px",
     },
+
+    showLabelsByDefault: false,
+
+    dock: {
+      minHeight: "58px",
+      paddingWithLabel: "12px 12px",
+      paddingIconOnly: "12px 10px",
+      borderRadius: "18px",
+      border: "1px solid rgba(255, 215, 140, 0.14)",
+      background:
+        "linear-gradient(180deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 100%)",
+      shadow:
+        "0 12px 24px rgba(0, 0, 0, 0.22), inset 0 1px 0 rgba(255,255,255,0.08)",
+      color: "rgba(255, 247, 230, 0.96)",
+      iconSize: "18px",
+      labelFontSize: "0.78rem",
+      labelColor: "rgba(255, 243, 220, 0.92)",
+    },
+  },
+
+  primaryActions: {
+    gap: {
+      compact: "10px",
+      default: "10px",
+      tall: "12px",
+    },
+    height: "54px",
+    padding: "12px 14px",
+    borderRadius: "18px",
+    fontSize: "0.86rem",
+    iconSize: "18px",
+
+    primary: {
+      border: "1px solid rgba(255, 210, 120, 0.22)",
+      background:
+        "linear-gradient(180deg, rgba(255, 205, 110, 0.16) 0%, rgba(255, 205, 110, 0.07) 100%)",
+      shadow:
+        "0 14px 28px rgba(0, 0, 0, 0.24), inset 0 1px 0 rgba(255,255,255,0.08)",
+      color: "rgba(255, 247, 230, 0.98)",
+    },
+
+    secondary: {
+      border: "1px solid rgba(255, 210, 120, 0.10)",
+      background:
+        "linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.03) 100%)",
+      shadow:
+        "0 12px 24px rgba(0, 0, 0, 0.20), inset 0 1px 0 rgba(255,255,255,0.05)",
+      color: "rgba(255, 243, 220, 0.92)",
+    },
+  },
+
+  mobileAttractMode: {
+    cardMaxWidth: "468px",
+    cardMinHeight: "clamp(540px, 78dvh, 820px)",
+    cardRadius: "24px",
+    imageMinHeight: "clamp(320px, 50dvh, 560px)",
+    launcherWidth: "min(100%, 224px)",
+    launcherMinHeight: "54px",
+  },
+
+  mobileGame: {
+    overlayBlur: "18px",
+    overlayBackdrop:
+      "radial-gradient(circle at 50% 50%, rgba(255, 190, 95, 0.08) 0%, rgba(12, 12, 16, 0.78) 42%, rgba(4, 4, 7, 0.94) 100%)",
+    cardScaleWhenOpen: 0.995,
+    imageScaleWhenOpen: 0.988,
+    socialOpacityWhenOpen: 0.72,
+    marqueeOpacityWhenOpen: 0.78,
+  },
+
+  mobileArcade: {
+    overlayMaxWidth: "480px",
+    overlayInset: "12px",
+    overlayRadius: "30px",
+    controlsGap: "10px",
+    hudGap: "12px",
+    arenaHeight: "386px",
+    groundHeight: "76px",
+    progressHeight: "10px",
   },
 } as const;

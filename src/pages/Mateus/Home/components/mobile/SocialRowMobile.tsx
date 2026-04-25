@@ -1,5 +1,7 @@
 import React, { useMemo } from "react";
 
+import { homeHeroTokens } from "../../layout/homeHero.tokens";
+
 export type MobileSocialItem = Readonly<{
   id?: string;
   label: string;
@@ -13,11 +15,13 @@ export type MobileSocialItem = Readonly<{
 export type SocialRowMobileProps = Readonly<{
   items: readonly MobileSocialItem[];
   className?: string;
+  showLabels?: boolean;
 }>;
 
 export default function SocialRowMobile({
   items,
   className,
+  showLabels = homeHeroTokens.socialRow.showLabelsByDefault,
 }: SocialRowMobileProps) {
   if (!items.length) {
     return null;
@@ -28,41 +32,56 @@ export default function SocialRowMobile({
       width: "100%",
       display: "grid",
       gridTemplateColumns: `repeat(${Math.min(items.length, 3)}, minmax(0, 1fr))`,
-      gap: "10px",
+      gap: homeHeroTokens.socialRow.gap.default,
       alignItems: "stretch",
+      boxSizing: "border-box",
     };
   }, [items.length]);
 
   const getButtonStyle = (): React.CSSProperties => {
     return {
-      minHeight: "54px",
-      padding: "12px 12px",
-      borderRadius: "18px",
-      border: "1px solid rgba(255, 215, 140, 0.14)",
-      background:
-        "linear-gradient(180deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 100%)",
-      boxShadow:
-        "0 12px 24px rgba(0, 0, 0, 0.22), inset 0 1px 0 rgba(255,255,255,0.08)",
+      position: "relative",
+      minHeight: homeHeroTokens.socialRow.dock.minHeight,
+      padding: showLabels
+        ? homeHeroTokens.socialRow.dock.paddingWithLabel
+        : homeHeroTokens.socialRow.dock.paddingIconOnly,
+      borderRadius: homeHeroTokens.socialRow.dock.borderRadius,
+      border: homeHeroTokens.socialRow.dock.border,
+      background: homeHeroTokens.socialRow.dock.background,
+      boxShadow: homeHeroTokens.socialRow.dock.shadow,
       display: "flex",
+      flexDirection: showLabels ? "row" : "column",
       alignItems: "center",
       justifyContent: "center",
-      gap: "8px",
+      gap: showLabels ? "8px" : "0",
       textDecoration: "none",
-      color: "rgba(255, 247, 230, 0.96)",
-      fontSize: "0.82rem",
-      fontWeight: 700,
-      letterSpacing: "0.01em",
+      color: homeHeroTokens.socialRow.dock.color,
       textAlign: "center",
       WebkitTapHighlightColor: "transparent",
+      overflow: "hidden",
       transition:
-        "transform 180ms ease, border-color 180ms ease, background 180ms ease, box-shadow 180ms ease",
+        "transform 180ms ease, border-color 180ms ease, background 180ms ease, box-shadow 180ms ease, opacity 180ms ease",
+      boxSizing: "border-box",
     };
   };
 
+  const glowStyle = useMemo<React.CSSProperties>(() => {
+    return {
+      position: "absolute",
+      inset: 0,
+      pointerEvents: "none",
+      background:
+        "linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.00) 34%, rgba(255,210,120,0.05) 100%)",
+      opacity: 0.9,
+    };
+  }, []);
+
   const iconWrapStyle = useMemo<React.CSSProperties>(() => {
     return {
-      width: "18px",
-      height: "18px",
+      position: "relative",
+      zIndex: 1,
+      width: homeHeroTokens.socialRow.dock.iconSize,
+      height: homeHeroTokens.socialRow.dock.iconSize,
       display: "inline-flex",
       alignItems: "center",
       justifyContent: "center",
@@ -72,6 +91,8 @@ export default function SocialRowMobile({
 
   const labelStyle = useMemo<React.CSSProperties>(() => {
     return {
+      position: "relative",
+      zIndex: 1,
       display: "inline-flex",
       alignItems: "center",
       justifyContent: "center",
@@ -79,6 +100,12 @@ export default function SocialRowMobile({
       overflow: "hidden",
       textOverflow: "ellipsis",
       whiteSpace: "nowrap",
+      fontSize: homeHeroTokens.socialRow.dock.labelFontSize,
+      fontWeight: 700,
+      letterSpacing: "-0.01em",
+      lineHeight: 1,
+      color: homeHeroTokens.socialRow.dock.labelColor,
+      opacity: 0.92,
     };
   }, []);
 
@@ -87,7 +114,8 @@ export default function SocialRowMobile({
       {items.map((item, index) => {
         const key = item.id ?? `${item.label}-${index}`;
         const target = item.target ?? "_blank";
-        const rel = item.rel ?? (target === "_blank" ? "noreferrer noopener" : undefined);
+        const rel =
+          item.rel ?? (target === "_blank" ? "noreferrer noopener" : undefined);
 
         return (
           <a
@@ -98,8 +126,9 @@ export default function SocialRowMobile({
             aria-label={item.ariaLabel ?? item.label}
             style={getButtonStyle()}
           >
+            <span style={glowStyle} />
             {item.icon ? <span style={iconWrapStyle}>{item.icon}</span> : null}
-            <span style={labelStyle}>{item.label}</span>
+            {showLabels ? <span style={labelStyle}>{item.label}</span> : null}
           </a>
         );
       })}

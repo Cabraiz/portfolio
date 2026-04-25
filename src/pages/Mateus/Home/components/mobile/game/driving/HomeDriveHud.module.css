@@ -1,0 +1,457 @@
+.root {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  box-sizing: border-box;
+  pointer-events: none;
+}
+
+.topRow {
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 8px;
+  pointer-events: auto;
+  padding:
+    max(12px, env(safe-area-inset-top))
+    max(12px, env(safe-area-inset-right))
+    0
+    max(12px, env(safe-area-inset-left));
+}
+
+.card {
+  min-width: 0;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background:
+    linear-gradient(
+      180deg,
+      rgba(7, 8, 11, 0.68),
+      rgba(7, 8, 11, 0.46)
+    );
+  backdrop-filter: blur(12px);
+  box-shadow:
+    0 14px 26px rgba(0, 0, 0, 0.24),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.summaryCard {
+  padding: 10px 12px;
+}
+
+.summaryHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 9px;
+}
+
+.title {
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #f7f2e8;
+}
+
+.phase {
+  margin-top: 4px;
+  font-size: 9px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.phaseReady {
+  color: #bfc7d6;
+}
+
+.phasePlaying {
+  color: #d9dfad;
+}
+
+.phasePaused {
+  color: #d8a967;
+}
+
+.assistBadge {
+  flex: 0 0 auto;
+  min-height: 24px;
+  padding: 0 9px;
+  border-radius: 999px;
+  display: inline-grid;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  font-size: 9px;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #f7f2e8;
+  background: rgba(255, 255, 255, 0.07);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.assistAuto {
+  border-color: rgba(216, 190, 120, 0.2);
+  background:
+    linear-gradient(
+      180deg,
+      rgba(216, 190, 120, 0.18),
+      rgba(49, 43, 27, 0.34)
+    );
+}
+
+.assistBoost {
+  border-color: rgba(255, 213, 123, 0.32);
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 213, 123, 0.28),
+      rgba(92, 58, 18, 0.44)
+    );
+}
+
+.assistControl {
+  border-color: rgba(125, 201, 255, 0.28);
+  background:
+    linear-gradient(
+      180deg,
+      rgba(125, 201, 255, 0.24),
+      rgba(18, 50, 75, 0.42)
+    );
+}
+
+.assistDanger {
+  border-color: rgba(255, 139, 107, 0.34);
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 139, 107, 0.3),
+      rgba(78, 24, 18, 0.44)
+    );
+}
+
+.assistPaused {
+  border-color: rgba(210, 210, 210, 0.18);
+  background:
+    linear-gradient(
+      180deg,
+      rgba(210, 210, 210, 0.12),
+      rgba(24, 24, 24, 0.44)
+    );
+}
+
+.summaryFooter {
+  display: grid;
+  gap: 3px;
+  margin-top: 4px;
+  font-size: 11px;
+  line-height: 1.25;
+  color: rgba(247, 242, 232, 0.76);
+}
+
+.summaryFooter strong {
+  color: rgba(247, 242, 232, 0.96);
+  font-weight: 900;
+}
+
+.routeTrack {
+  position: relative;
+  height: 4px;
+  margin-top: 8px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.routeFill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 0%;
+  min-width: 2px;
+  border-radius: inherit;
+  background:
+    linear-gradient(
+      90deg,
+      rgba(247, 242, 232, 0.42),
+      rgba(247, 242, 232, 0.9)
+    );
+  transition: width 180ms ease;
+}
+
+.actions {
+  display: grid;
+  gap: 7px;
+}
+
+.actionButton {
+  min-width: 62px;
+  min-height: 38px;
+  padding-inline: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 13px;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.08),
+      rgba(12, 12, 15, 0.88)
+    );
+  color: #f5efe3;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  box-shadow:
+    0 10px 18px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  transition:
+    transform 150ms ease,
+    border-color 150ms ease,
+    background 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.actionButton:active {
+  transform: translateY(1px) scale(0.985);
+}
+
+.actionPrimary {
+  border-color: rgba(255, 216, 143, 0.3);
+  background:
+    linear-gradient(
+      180deg,
+      rgba(203, 154, 82, 0.36),
+      rgba(92, 58, 18, 0.86)
+    );
+}
+
+.actionExit {
+  opacity: 0.88;
+}
+
+/* SPEEDOMETER */
+
+.speedometerDock {
+  position: absolute;
+  left: calc(50% - 45px);
+  bottom: max(145px, calc(env(safe-area-inset-bottom) + 92px));
+  transform: translateX(-50%);
+  z-index: 24;
+  pointer-events: none;
+}
+
+.speedometerCard {
+  position: relative;
+  width: 95px;
+  height: 95px;
+  border-radius: 999px;
+  background:
+    radial-gradient(
+      circle at 50% 42%,
+      rgba(255, 255, 255, 0.08),
+      rgba(10, 10, 14, 0.88) 62%,
+      rgba(7, 8, 11, 0.96) 100%
+    );
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow:
+    0 14px 26px rgba(0, 0, 0, 0.42),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    inset 0 -12px 24px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+}
+
+.speedometerSvg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.speedometerTrack {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.1);
+  stroke-width: 8;
+  stroke-linecap: round;
+}
+
+.speedometerProgress {
+  fill: none;
+  stroke: rgba(216, 190, 120, 0.96);
+  stroke-width: 8;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 6px rgba(216, 190, 120, 0.16));
+}
+
+.speedometerProgressBoost {
+  stroke: rgba(255, 214, 134, 0.98);
+  filter: drop-shadow(0 0 8px rgba(255, 214, 134, 0.22));
+}
+
+.speedometerProgressControl {
+  stroke: rgba(138, 211, 255, 0.96);
+  filter: drop-shadow(0 0 8px rgba(138, 211, 255, 0.2));
+}
+
+.speedometerProgressDanger {
+  stroke: rgba(255, 139, 107, 0.96);
+  filter: drop-shadow(0 0 8px rgba(255, 139, 107, 0.22));
+}
+
+.speedometerNumber {
+  fill: rgba(247, 242, 232, 0.78);
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  paint-order: stroke;
+  stroke: rgba(0, 0, 0, 0.52);
+  stroke-width: 2px;
+  pointer-events: none;
+}
+
+.speedometerNumberEdge {
+  fill: rgba(247, 242, 232, 0.58);
+}
+
+.speedometerNeedleShadow {
+  stroke: rgba(0, 0, 0, 0.42);
+  stroke-width: 4;
+  stroke-linecap: round;
+}
+
+.speedometerNeedle {
+  stroke: rgba(247, 242, 232, 0.98);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.34));
+}
+
+.speedometerHubShadow {
+  fill: rgba(0, 0, 0, 0.34);
+}
+
+.speedometerHub {
+  fill: #efe8d9;
+  stroke: rgba(65, 60, 48, 0.68);
+  stroke-width: 1.5;
+}
+
+.interactive {
+  pointer-events: auto;
+}
+
+.stack,
+.metricsCard,
+.metricsGrid,
+.progressGroup,
+.progressHead,
+.progressTrack,
+.progressFill,
+.progressMeta,
+.motorCard,
+.motorHead,
+.motorTrack,
+.motorFill,
+.motorFillHot,
+.footerActions,
+.footerActionsWithStart,
+.footerActionsDefault,
+.footerButtonWide,
+.footerButtonCompact,
+.summaryLine,
+.summaryMuted,
+.actionButtonActive,
+.compactGrid,
+.metricBlock,
+.metricBlockCenter,
+.metricBlockRight,
+.metricLabel,
+.metricValue,
+.metricSubLabel,
+.flowGroup,
+.flowHead,
+.flowTrack,
+.flowFill,
+.flowFillBoost,
+.flowFillControl,
+.flowFillDanger,
+.speedometerCenter,
+.speedometerValue,
+.speedometerUnit,
+.speedometerScale {
+  display: none !important;
+}
+
+@media (max-width: 390px) {
+  .topRow {
+    gap: 7px;
+    padding:
+      max(10px, env(safe-area-inset-top))
+      max(10px, env(safe-area-inset-right))
+      0
+      max(10px, env(safe-area-inset-left));
+  }
+
+  .summaryCard {
+    padding: 9px 10px;
+    border-radius: 16px;
+  }
+
+  .title {
+    font-size: 12px;
+  }
+
+  .assistBadge {
+    min-height: 22px;
+    padding-inline: 8px;
+    font-size: 8px;
+    letter-spacing: 0.1em;
+  }
+
+  .summaryFooter {
+    font-size: 10px;
+  }
+
+  .actionButton {
+    min-width: 56px;
+    min-height: 36px;
+    border-radius: 12px;
+    font-size: 9px;
+    padding-inline: 8px;
+  }
+
+  .speedometerDock {
+    left: calc(50% - 10px);
+    bottom: max(98px, calc(env(safe-area-inset-bottom) + 86px));
+  }
+
+  .speedometerCard {
+    width: 122px;
+    height: 122px;
+  }
+
+  .speedometerNumber {
+    font-size: 7px;
+    stroke-width: 1.8px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .routeFill,
+  .actionButton {
+    transition: none;
+  }
+}

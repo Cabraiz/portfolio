@@ -17,11 +17,17 @@ type UseHomeHeroLayoutResult = Readonly<{
   isCompactDesktop: boolean;
   isTallDesktop: boolean;
   isMobileViewport: boolean;
+  isCompactMobile: boolean;
+  isTallMobile: boolean;
   sectionStyle: CSSProperties;
   profileColumnStyle: CSSProperties;
   profileCardStyle: CSSProperties;
   profileImageWrapperStyle: CSSProperties;
   socialRowStyle: CSSProperties;
+  mobileAttractCardStyle: CSSProperties;
+  mobileAttractImageFrameStyle: CSSProperties;
+  mobileLauncherStyle: CSSProperties;
+  mobileGameMutedStateStyle: CSSProperties;
 }>;
 
 function getInitialViewport(): ViewportSize {
@@ -105,6 +111,20 @@ export function useHomeHeroLayout(): UseHomeHeroLayoutResult {
     return viewport.width < homeHeroTokens.breakpoints.desktopMinWidth;
   }, [viewport.width]);
 
+  const isCompactMobile = useMemo<boolean>(() => {
+    return (
+      isMobileViewport &&
+      viewport.height <= homeHeroTokens.breakpoints.compactHeightMax
+    );
+  }, [isMobileViewport, viewport.height]);
+
+  const isTallMobile = useMemo<boolean>(() => {
+    return (
+      isMobileViewport &&
+      viewport.height >= homeHeroTokens.breakpoints.tallHeightMin
+    );
+  }, [isMobileViewport, viewport.height]);
+
   const sectionStyle = useMemo<CSSProperties>(() => {
     return {
       minHeight: homeHeroTokens.section.minHeight[mode],
@@ -112,11 +132,16 @@ export function useHomeHeroLayout(): UseHomeHeroLayoutResult {
       paddingBottom: homeHeroTokens.section.paddingBottom[mode],
       display: "flex",
       alignItems: "stretch",
-      justifyContent: mode === "compact" ? "center" : "flex-start",
+      justifyContent: isMobileViewport
+        ? "center"
+        : mode === "compact"
+          ? "center"
+          : "flex-start",
       height: "100%",
+      width: "100%",
       boxSizing: "border-box",
     };
-  }, [mode]);
+  }, [isMobileViewport, mode]);
 
   const profileColumnStyle = useMemo<CSSProperties>(() => {
     return {
@@ -128,6 +153,7 @@ export function useHomeHeroLayout(): UseHomeHeroLayoutResult {
       paddingLeft: homeHeroTokens.profileColumn.paddingLeft[mode],
       paddingRight: homeHeroTokens.profileColumn.paddingRight[mode],
       paddingTop: "0px",
+      width: "100%",
       boxSizing: "border-box",
     };
   }, [mode]);
@@ -148,6 +174,8 @@ export function useHomeHeroLayout(): UseHomeHeroLayoutResult {
       border: homeHeroTokens.profileCard.border[mode],
       boxShadow: homeHeroTokens.profileCard.shadow[mode],
       boxSizing: "border-box",
+      backdropFilter: homeHeroTokens.profileCard.blur[mode],
+      WebkitBackdropFilter: homeHeroTokens.profileCard.blur[mode],
     };
   }, [mode]);
 
@@ -169,13 +197,14 @@ export function useHomeHeroLayout(): UseHomeHeroLayoutResult {
       return {
         display: "grid",
         gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
-        justifyItems: "center",
-        alignItems: "center",
-        columnGap: "12px",
-        rowGap: "12px",
+        justifyItems: "stretch",
+        alignItems: "stretch",
+        columnGap: homeHeroTokens.socialRow.gap.default,
+        rowGap: homeHeroTokens.socialRow.gap.default,
         width: "100%",
-        maxWidth: "220px",
+        maxWidth: "100%",
         margin: "0 auto",
+        boxSizing: "border-box",
       };
     }
 
@@ -186,8 +215,45 @@ export function useHomeHeroLayout(): UseHomeHeroLayoutResult {
       gap: homeHeroTokens.socialRow.gap[mode],
       width: "100%",
       flexWrap: "nowrap",
+      boxSizing: "border-box",
     };
   }, [isMobileViewport, mode]);
+
+  const mobileAttractCardStyle = useMemo<CSSProperties>(() => {
+    return {
+      width: "100%",
+      maxWidth: homeHeroTokens.mobileAttractMode.cardMaxWidth,
+      minHeight: homeHeroTokens.mobileAttractMode.cardMinHeight,
+      borderRadius: homeHeroTokens.mobileAttractMode.cardRadius,
+      boxSizing: "border-box",
+    };
+  }, []);
+
+  const mobileAttractImageFrameStyle = useMemo<CSSProperties>(() => {
+    return {
+      width: "100%",
+      minHeight: homeHeroTokens.mobileAttractMode.imageMinHeight,
+      borderRadius: "20px",
+      boxSizing: "border-box",
+    };
+  }, []);
+
+  const mobileLauncherStyle = useMemo<CSSProperties>(() => {
+    return {
+      width: homeHeroTokens.mobileAttractMode.launcherWidth,
+      minHeight: homeHeroTokens.mobileAttractMode.launcherMinHeight,
+      boxSizing: "border-box",
+    };
+  }, []);
+
+  const mobileGameMutedStateStyle = useMemo<CSSProperties>(() => {
+    return {
+      opacity: homeHeroTokens.mobileGame.socialOpacityWhenOpen,
+      transform: `scale(${homeHeroTokens.mobileGame.cardScaleWhenOpen})`,
+      transition: "opacity 220ms ease, transform 220ms ease",
+      boxSizing: "border-box",
+    };
+  }, []);
 
   return {
     mode,
@@ -196,11 +262,17 @@ export function useHomeHeroLayout(): UseHomeHeroLayoutResult {
     isCompactDesktop: mode === "compact",
     isTallDesktop: mode === "tall",
     isMobileViewport,
+    isCompactMobile,
+    isTallMobile,
     sectionStyle,
     profileColumnStyle,
     profileCardStyle,
     profileImageWrapperStyle,
     socialRowStyle,
+    mobileAttractCardStyle,
+    mobileAttractImageFrameStyle,
+    mobileLauncherStyle,
+    mobileGameMutedStateStyle,
   };
 }
 

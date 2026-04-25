@@ -1,28 +1,29 @@
 import {
+  useCallback,
+  useEffect,
   useLayoutEffect,
   useMemo,
   useRef,
   useState,
   type CSSProperties,
 } from "react";
-import { useTranslation } from "react-i18next";
 import i18n from "@/i18n/i18n";
 import "tippy.js/dist/tippy.css";
 
 import "../../../../styles/styles.css";
 
 import gsap from "gsap";
-import { FaWhatsapp } from "react-icons/fa";
-import { HiOutlineDocumentText } from "react-icons/hi2";
 
 import HeroMobileStack from "../components/mobile/HeroMobileStack";
-import { getWhatsAppGreeting } from "../utils/home.utils";
+import type { MobileSocialItem } from "../components/mobile/SocialRowMobile";
+import HomeDriveGame from "../components/mobile/game/driving/HomeDriveGame";
 import { shouldDisableScrollFades } from "../../../../features/scroll/scrollMotionFlags";
-
-import fotoMateus from "../../../../assets/Mateus/perfil.webp";
-import iconLinkedin from "../../../../assets/Mateus/Icon/IconLinkedIn.png";
-import iconMail from "../../../../assets/Mateus/Icon/IconGmail.png";
-import iconInstagram from "../../../../assets/Mateus/Icon/IconInsta.png";
+import {
+  HOME_MOBILE_SOCIAL_LINKS,
+  PROFILE_IMAGE,
+  SOCIAL_ICONS,
+} from "../data/home.data";
+import { homeHeroTokens } from "../layout/homeHero.tokens";
 
 const MOBILE_HERO_BACKGROUND = `
   radial-gradient(
@@ -50,8 +51,8 @@ const MOBILE_HERO_BACKGROUND = `
 function HomeMobile() {
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const { t } = useTranslation();
   const [isImageLoaded, setIsImageLoaded] = useState(false);
+  const [isGameOpen, setIsGameOpen] = useState(false);
 
   const currentLanguage = i18n.resolvedLanguage ?? i18n.language ?? "pt";
 
@@ -59,17 +60,13 @@ function HomeMobile() {
     return currentLanguage === "pt" || currentLanguage.startsWith("pt");
   }, [currentLanguage]);
 
-  const resumeLabel = useMemo(() => {
-    return t("buttons.downloadCV");
-  }, [t, currentLanguage]);
+  const playLabel = useMemo(() => {
+    return isPT ? "Dirigir" : "Drive";
+  }, [isPT]);
 
-  const whatsAppLabel = useMemo(() => {
-    return "WhatsApp";
-  }, []);
-
-  const whatsAppGreeting = useMemo(() => {
-    return getWhatsAppGreeting();
-  }, []);
+  const playAriaLabel = useMemo(() => {
+    return isPT ? "Abrir driving game" : "Open driving game";
+  }, [isPT]);
 
   const socialIconImageStyle = useMemo<CSSProperties>(() => {
     return {
@@ -82,97 +79,28 @@ function HomeMobile() {
     };
   }, []);
 
-  const primaryIconStyle = useMemo<CSSProperties>(() => {
-    return {
-      width: "18px",
-      height: "18px",
-      display: "block",
-      flexShrink: 0,
-    };
-  }, []);
+  const socialItems = useMemo<readonly MobileSocialItem[]>(() => {
+    return HOME_MOBILE_SOCIAL_LINKS.map((item) => {
+      const iconSrc = SOCIAL_ICONS[item.iconKey];
 
-  const primaryActions = useMemo(() => {
-    return [
-      {
-        id: "resume",
-        label: resumeLabel,
-        ariaLabel: isPT ? "Abrir currículo" : "Open resume",
-        href: "/files/mateus-cabral-resume.pdf",
-        target: "_blank" as const,
-        rel: "noreferrer noopener",
-        variant: "primary" as const,
-        icon: (
-          <HiOutlineDocumentText
-            aria-hidden="true"
-            style={primaryIconStyle}
-          />
-        ),
-      },
-      {
-        id: "whatsapp",
-        label: whatsAppLabel,
-        ariaLabel: "Abrir WhatsApp",
-        href: `https://wa.me/5585998575707?text=${encodeURIComponent(
-          whatsAppGreeting
-        )}`,
-        target: "_blank" as const,
-        rel: "noreferrer noopener",
-        variant: "secondary" as const,
-        icon: <FaWhatsapp aria-hidden="true" style={primaryIconStyle} />,
-      },
-    ] as const;
-  }, [resumeLabel, whatsAppGreeting, whatsAppLabel, isPT, primaryIconStyle]);
-
-  const socialItems = useMemo(() => {
-    return [
-      {
-        id: "linkedin",
-        label: "LinkedIn",
-        ariaLabel: "Abrir LinkedIn",
-        href: "https://www.linkedin.com/in/cabraiz/",
+      return {
+        id: item.id,
+        label: item.label,
+        ariaLabel: item.ariaLabel,
+        href: item.href,
+        target: item.target,
+        rel: item.rel,
         icon: (
           <img
-            src={iconLinkedin}
+            src={iconSrc}
             alt=""
             aria-hidden="true"
             style={socialIconImageStyle}
             draggable={false}
           />
         ),
-      },
-      {
-        id: "email",
-        label: "Email",
-        ariaLabel: "Enviar email",
-        href: "mailto:mateuscabrals@gmail.com",
-        target: "_self" as const,
-        rel: "noopener noreferrer",
-        icon: (
-          <img
-            src={iconMail}
-            alt=""
-            aria-hidden="true"
-            style={socialIconImageStyle}
-            draggable={false}
-          />
-        ),
-      },
-      {
-        id: "instagram",
-        label: "Instagram",
-        ariaLabel: "Abrir Instagram",
-        href: "https://www.instagram.com/cabraiz/",
-        icon: (
-          <img
-            src={iconInstagram}
-            alt=""
-            aria-hidden="true"
-            style={socialIconImageStyle}
-            draggable={false}
-          />
-        ),
-      },
-    ] as const;
+      };
+    });
   }, [socialIconImageStyle]);
 
   const rootStyle = useMemo<CSSProperties>(() => {
@@ -184,7 +112,7 @@ function HomeMobile() {
       display: "flex",
       flexDirection: "column",
       overflowX: "hidden",
-      overflowY: "visible",
+      overflowY: isGameOpen ? "hidden" : "visible",
       backgroundColor: "#07080b",
       backgroundImage: MOBILE_HERO_BACKGROUND,
       backgroundRepeat: "no-repeat",
@@ -192,7 +120,7 @@ function HomeMobile() {
       backgroundPosition: "center top",
       boxSizing: "border-box",
     };
-  }, []);
+  }, [isGameOpen]);
 
   const containerStyle = useMemo<CSSProperties>(() => {
     return {
@@ -212,9 +140,9 @@ function HomeMobile() {
 
   const stackWrapStyle = useMemo<CSSProperties>(() => {
     return {
-      width: "min(100%, 468px)",
+      width: `min(100%, ${homeHeroTokens.mobileAttractMode.cardMaxWidth})`,
       minWidth: 0,
-      maxWidth: "468px",
+      maxWidth: homeHeroTokens.mobileAttractMode.cardMaxWidth,
       margin: "0 auto",
       display: "flex",
       flexDirection: "column",
@@ -224,10 +152,149 @@ function HomeMobile() {
     };
   }, []);
 
+  const playWrapStyle = useMemo<CSSProperties>(() => {
+    return {
+      width: "100%",
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      boxSizing: "border-box",
+    };
+  }, []);
+
+  const playButtonStyle = useMemo<CSSProperties>(() => {
+    return {
+      position: "relative",
+      width: homeHeroTokens.mobileAttractMode.launcherWidth,
+      minHeight: homeHeroTokens.mobileAttractMode.launcherMinHeight,
+      display: "inline-flex",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: "10px",
+      padding: "0 18px",
+      borderRadius: "16px",
+      border: "1px solid rgba(255, 210, 132, 0.18)",
+      background:
+        "linear-gradient(180deg, rgba(36,36,44,0.92) 0%, rgba(12,12,16,0.98) 100%)",
+      color: "rgba(255, 244, 226, 0.96)",
+      fontSize: "0.98rem",
+      fontWeight: 700,
+      letterSpacing: "-0.02em",
+      boxShadow:
+        "0 16px 32px rgba(0,0,0,0.24), 0 0 0 1px rgba(255,255,255,0.02) inset",
+      cursor: "pointer",
+      WebkitTapHighlightColor: "transparent",
+      transition:
+        "transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease, opacity 180ms ease",
+      overflow: "hidden",
+      boxSizing: "border-box",
+    };
+  }, []);
+
+  const playPulseStyle = useMemo<CSSProperties>(() => {
+    return {
+      position: "absolute",
+      inset: 0,
+      pointerEvents: "none",
+      background:
+        "linear-gradient(90deg, rgba(255,210,120,0.00) 0%, rgba(255,210,120,0.07) 18%, rgba(255,210,120,0.14) 50%, rgba(255,210,120,0.07) 82%, rgba(255,210,120,0.00) 100%)",
+      opacity: 0.92,
+    };
+  }, []);
+
+  const playIconStyle = useMemo<CSSProperties>(() => {
+    return {
+      position: "relative",
+      zIndex: 1,
+      width: "12px",
+      height: "12px",
+      borderRadius: "999px",
+      background:
+        "radial-gradient(circle, rgba(255,228,178,1) 0%, rgba(255,195,90,0.98) 54%, rgba(255,175,66,0.92) 100%)",
+      boxShadow:
+        "0 0 14px rgba(255, 194, 90, 0.3), 0 0 0 1px rgba(255,255,255,0.05) inset",
+      flexShrink: 0,
+    };
+  }, []);
+
+  const playLabelStyle = useMemo<CSSProperties>(() => {
+    return {
+      position: "relative",
+      zIndex: 1,
+      whiteSpace: "nowrap",
+      textOverflow: "ellipsis",
+      overflow: "hidden",
+    };
+  }, []);
+
+  const driveOverlayStyle = useMemo<CSSProperties>(() => {
+    return {
+      position: "fixed",
+      inset: 0,
+      width: "100vw",
+      height: "100dvh",
+      zIndex: 999,
+      background: "#040507",
+      overflow: "hidden",
+    };
+  }, []);
+
+  const handleOpenDrive = useCallback(() => {
+    setIsGameOpen(true);
+  }, []);
+
+  const handleCloseDrive = useCallback(() => {
+    setIsGameOpen(false);
+  }, []);
+
+  const playLauncher = useMemo(() => {
+    return (
+      <div style={playWrapStyle}>
+        <button
+          type="button"
+          aria-label={playAriaLabel}
+          style={playButtonStyle}
+          onClick={handleOpenDrive}
+        >
+          <span style={playPulseStyle} />
+          <span style={playIconStyle} />
+          <span style={playLabelStyle}>{playLabel}</span>
+        </button>
+      </div>
+    );
+  }, [
+    handleOpenDrive,
+    playAriaLabel,
+    playButtonStyle,
+    playIconStyle,
+    playLabel,
+    playLabelStyle,
+    playPulseStyle,
+    playWrapStyle,
+  ]);
+
+  useEffect(() => {
+    const previousHtmlOverflow = document.documentElement.style.overflow;
+    const previousBodyOverflow = document.body.style.overflow;
+    const previousBodyTouchAction = document.body.style.touchAction;
+
+    if (isGameOpen) {
+      document.documentElement.style.overflow = "hidden";
+      document.body.style.overflow = "hidden";
+      document.body.style.touchAction = "none";
+    }
+
+    return () => {
+      document.documentElement.style.overflow = previousHtmlOverflow;
+      document.body.style.overflow = previousBodyOverflow;
+      document.body.style.touchAction = previousBodyTouchAction;
+    };
+  }, [isGameOpen]);
+
   useLayoutEffect(() => {
     const container = containerRef.current;
 
-    if (!container) {
+    if (!container || isGameOpen) {
       return;
     }
 
@@ -267,22 +334,31 @@ function HomeMobile() {
       ctx.revert();
       container.style.willChange = "auto";
     };
-  }, []);
+  }, [isGameOpen]);
 
   return (
     <div ref={containerRef} style={rootStyle}>
-      <div style={containerStyle}>
-        <div style={stackWrapStyle}>
-          <HeroMobileStack
-            imageSrc={fotoMateus}
-            imageAlt="Mateus Cabral"
-            primaryActions={primaryActions}
-            socialItems={socialItems}
-            imageLoaded={isImageLoaded}
-            onImageLoad={() => setIsImageLoaded(true)}
-          />
+      {!isGameOpen ? (
+        <div style={containerStyle}>
+          <div style={stackWrapStyle}>
+            <HeroMobileStack
+              imageSrc={PROFILE_IMAGE}
+              imageAlt="Mateus Cabral"
+              socialItems={socialItems}
+              imageLoaded={isImageLoaded}
+              onImageLoad={() => setIsImageLoaded(true)}
+              bottomSlot={playLauncher}
+              isGameOpen={isGameOpen}
+            />
+          </div>
         </div>
-      </div>
+      ) : null}
+
+      {isGameOpen ? (
+        <div style={driveOverlayStyle}>
+          <HomeDriveGame onClose={handleCloseDrive} />
+        </div>
+      ) : null}
     </div>
   );
 }

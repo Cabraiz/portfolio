@@ -1,8 +1,11 @@
 import React, { useEffect, useMemo, useState } from "react";
 import i18n from "@/i18n/i18n";
 
+import { homeHeroTokens } from "../../layout/homeHero.tokens";
+
 export type HeroMarqueeMobileProps = Readonly<{
   className?: string;
+  isGameOpen?: boolean;
 }>;
 
 function prefersReducedMotion(): boolean {
@@ -14,6 +17,7 @@ function prefersReducedMotion(): boolean {
 
 export default function HeroMarqueeMobile({
   className,
+  isGameOpen = false,
 }: HeroMarqueeMobileProps) {
   const currentLanguage = i18n.resolvedLanguage ?? i18n.language ?? "pt";
 
@@ -45,7 +49,7 @@ export default function HeroMarqueeMobile({
   const [isVisible, setIsVisible] = useState(true);
 
   useEffect(() => {
-    if (prefersReducedMotion()) {
+    if (prefersReducedMotion() || isGameOpen) {
       return;
     }
 
@@ -64,7 +68,7 @@ export default function HeroMarqueeMobile({
       window.clearInterval(intervalId);
       window.clearTimeout(timeoutId);
     };
-  }, [titles]);
+  }, [isGameOpen, titles]);
 
   const containerStyle = useMemo<React.CSSProperties>(() => {
     return {
@@ -75,8 +79,13 @@ export default function HeroMarqueeMobile({
       justifyContent: "center",
       gap: "8px",
       boxSizing: "border-box",
+      opacity: isGameOpen
+        ? homeHeroTokens.mobileGame.marqueeOpacityWhenOpen
+        : 1,
+      transform: isGameOpen ? "translateY(-1px)" : "translateY(0)",
+      transition: "opacity 220ms ease, transform 220ms ease",
     };
-  }, []);
+  }, [isGameOpen]);
 
   const seniorStyle = useMemo<React.CSSProperties>(() => {
     return {
@@ -128,8 +137,11 @@ export default function HeroMarqueeMobile({
       borderRight: "1px solid rgba(241, 196, 15, 0.16)",
       boxShadow:
         "0 10px 24px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.03)",
+      transform: isGameOpen ? "scale(0.994)" : "scale(1)",
+      transition:
+        "transform 220ms ease, opacity 220ms ease, border-color 220ms ease",
     };
-  }, []);
+  }, [isGameOpen]);
 
   const accentGlowStyle = useMemo<React.CSSProperties>(() => {
     return {
@@ -138,9 +150,22 @@ export default function HeroMarqueeMobile({
       pointerEvents: "none",
       background:
         "linear-gradient(90deg, rgba(241,196,15,0.00) 0%, rgba(241,196,15,0.08) 18%, rgba(241,196,15,0.12) 50%, rgba(241,196,15,0.08) 82%, rgba(241,196,15,0.00) 100%)",
-      opacity: 0.9,
+      opacity: isGameOpen ? 0.48 : 0.9,
+      transition: "opacity 220ms ease",
     };
-  }, []);
+  }, [isGameOpen]);
+
+  const scanStyle = useMemo<React.CSSProperties>(() => {
+    return {
+      position: "absolute",
+      inset: 0,
+      pointerEvents: "none",
+      background:
+        "linear-gradient(180deg, rgba(255,255,255,0.00) 0%, rgba(255,217,130,0.10) 50%, rgba(255,255,255,0.00) 100%)",
+      opacity: isGameOpen ? 0.32 : 0.55,
+      transition: "opacity 220ms ease",
+    };
+  }, [isGameOpen]);
 
   const titleStyle = useMemo<React.CSSProperties>(() => {
     return {
@@ -163,12 +188,16 @@ export default function HeroMarqueeMobile({
       overflow: "hidden",
       textOverflow: "ellipsis",
       boxSizing: "border-box",
-      opacity: isVisible ? 1 : 0,
-      transform: isVisible ? "translateY(0)" : "translateY(1px)",
+      opacity: isGameOpen ? 0.88 : isVisible ? 1 : 0,
+      transform: isGameOpen
+        ? "translateY(0)"
+        : isVisible
+          ? "translateY(0)"
+          : "translateY(1px)",
       transition: "opacity 140ms ease, transform 140ms ease",
       textShadow: "0 1px 8px rgba(0, 0, 0, 0.28)",
     };
-  }, [isVisible]);
+  }, [isGameOpen, isVisible]);
 
   return (
     <div className={className} style={containerStyle}>
@@ -177,6 +206,7 @@ export default function HeroMarqueeMobile({
       <div style={marqueeShellStyle}>
         <div style={marqueeStyle}>
           <div style={accentGlowStyle} />
+          <div style={scanStyle} />
           <div style={titleStyle}>{titles[index]}</div>
         </div>
       </div>

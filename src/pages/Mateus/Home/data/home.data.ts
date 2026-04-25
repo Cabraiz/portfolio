@@ -26,6 +26,30 @@ export type SealItem = Readonly<{
   style?: CSSProperties;
 }>;
 
+export type SocialIconKey =
+  | "gmail"
+  | "instagram"
+  | "linkedin"
+  | "whatsapp"
+  | "meet";
+
+export type HomeMobileSocialLink = Readonly<{
+  id: string;
+  label: string;
+  ariaLabel: string;
+  href: string;
+  iconKey: SocialIconKey;
+  target?: "_self" | "_blank";
+  rel?: string;
+  gameOrbit?: Readonly<{
+    x: number;
+    y: number;
+    scale?: number;
+    delayMs?: number;
+    durationMs?: number;
+  }>;
+}>;
+
 export const COMPACT_DESKTOP_MEDIA_QUERY =
   "(max-height: 1080px) and (min-width: 961px)";
 
@@ -52,6 +76,57 @@ export const SOCIAL_ICONS = {
   whatsapp: whatsAppIcon,
   meet: meetIcon,
 } as const;
+
+export const HOME_MOBILE_SOCIAL_LINKS: readonly HomeMobileSocialLink[] = [
+  {
+    id: "linkedin",
+    label: "LinkedIn",
+    ariaLabel: "Abrir LinkedIn",
+    href: "https://www.linkedin.com/in/cabraiz/",
+    iconKey: "linkedin",
+    target: "_blank",
+    rel: "noreferrer noopener",
+    gameOrbit: {
+      x: 18,
+      y: 28,
+      scale: 1,
+      delayMs: 0,
+      durationMs: 6200,
+    },
+  },
+  {
+    id: "email",
+    label: "Email",
+    ariaLabel: "Enviar email",
+    href: "mailto:mateuscabrals@gmail.com",
+    iconKey: "gmail",
+    target: "_self",
+    rel: "noopener noreferrer",
+    gameOrbit: {
+      x: 82,
+      y: 28,
+      scale: 1.04,
+      delayMs: 420,
+      durationMs: 6900,
+    },
+  },
+  {
+    id: "instagram",
+    label: "Instagram",
+    ariaLabel: "Abrir Instagram",
+    href: "https://www.instagram.com/cabraiz/",
+    iconKey: "instagram",
+    target: "_blank",
+    rel: "noreferrer noopener",
+    gameOrbit: {
+      x: 50,
+      y: 16,
+      scale: 0.98,
+      delayMs: 880,
+      durationMs: 6600,
+    },
+  },
+] as const;
 
 export const seals: readonly SealItem[] = [
   {

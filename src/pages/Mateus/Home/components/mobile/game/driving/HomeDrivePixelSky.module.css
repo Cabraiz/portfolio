@@ -1,0 +1,467 @@
+.root {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  image-rendering: pixelated;
+  background: var(--home-drive-sky-lower);
+  contain: layout paint style;
+}
+
+.gradientBands {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(
+      180deg,
+      var(--home-drive-sky-top) 0%,
+      var(--home-drive-sky-top) 16%,
+      var(--home-drive-sky-upper) 16.5%,
+      var(--home-drive-sky-upper) 34%,
+      var(--home-drive-sky-middle) 34.5%,
+      var(--home-drive-sky-middle) 58%,
+      var(--home-drive-sky-horizon) 58.5%,
+      var(--home-drive-sky-horizon) 77%,
+      var(--home-drive-sky-lower) 77.5%,
+      var(--home-drive-sky-lower) 100%
+    );
+}
+
+.gradientBands::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.26;
+  background:
+    linear-gradient(
+      180deg,
+      transparent 0%,
+      transparent 42%,
+      rgba(255, 255, 255, 0.12) 42.5%,
+      rgba(255, 255, 255, 0.08) 44%,
+      transparent 45%
+    ),
+    linear-gradient(
+      180deg,
+      transparent 0%,
+      transparent 61%,
+      rgba(0, 0, 0, 0.09) 61.5%,
+      rgba(0, 0, 0, 0.04) 66%,
+      transparent 66.5%
+    );
+}
+
+.gradientBands::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.1;
+  background:
+    repeating-linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.18) 0 1px,
+      transparent 1px 7px
+    );
+  mix-blend-mode: soft-light;
+}
+
+.horizonGlow {
+  position: absolute;
+  left: -12%;
+  right: -12%;
+  top: 50%;
+  height: 32%;
+  opacity: var(--home-drive-sky-horizon-intensity);
+  background:
+    linear-gradient(
+      180deg,
+      transparent 0%,
+      var(--home-drive-sky-horizon-glow) 38%,
+      rgba(255, 255, 255, 0.05) 48%,
+      transparent 100%
+    );
+  transform: translate3d(0, 0, 0);
+}
+
+.haze {
+  position: absolute;
+  left: -10%;
+  right: -10%;
+  top: 28%;
+  height: 58%;
+  opacity: 0.8;
+  background:
+    radial-gradient(
+      ellipse at 50% 62%,
+      var(--home-drive-sky-haze) 0%,
+      rgba(255, 255, 255, 0.035) 34%,
+      transparent 70%
+    );
+}
+
+.stars {
+  position: absolute;
+  inset: 0;
+  opacity: var(--home-drive-sky-star-opacity);
+  transform: translate3d(calc(var(--home-drive-sky-star-shift) * 1), 0, 0);
+  transition: opacity 700ms ease;
+}
+
+.stars span {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: var(--home-drive-sky-star);
+  box-shadow:
+    4px 0 0 var(--home-drive-sky-star-dim),
+    0 4px 0 rgba(255, 255, 255, 0.24);
+}
+
+.star0 {
+  left: 8%;
+  top: 12%;
+}
+
+.star1 {
+  left: 18%;
+  top: 24%;
+}
+
+.star2 {
+  left: 29%;
+  top: 9%;
+}
+
+.star3 {
+  left: 38%;
+  top: 20%;
+}
+
+.star4 {
+  left: 48%;
+  top: 14%;
+}
+
+.star5 {
+  left: 57%;
+  top: 28%;
+}
+
+.star6 {
+  left: 66%;
+  top: 10%;
+}
+
+.star7 {
+  left: 76%;
+  top: 22%;
+}
+
+.star8 {
+  left: 88%;
+  top: 16%;
+}
+
+.star9 {
+  left: 12%;
+  top: 36%;
+}
+
+.star10 {
+  left: 72%;
+  top: 38%;
+}
+
+.star11 {
+  left: 92%;
+  top: 34%;
+}
+
+.sun {
+  position: absolute;
+  left: 66%;
+  top: calc(13% + var(--home-drive-sky-sun-drop));
+  width: 42px;
+  height: 42px;
+  opacity: var(--home-drive-sky-sun-opacity);
+  transform: translate3d(0, 0, 0);
+  transition:
+    opacity 700ms ease,
+    top 900ms ease;
+}
+
+.sunCore,
+.sunStepA,
+.sunStepB {
+  position: absolute;
+  display: block;
+  image-rendering: pixelated;
+}
+
+.sunCore {
+  inset: 6px;
+  background: var(--home-drive-sky-sun);
+  box-shadow:
+    -6px 6px 0 var(--home-drive-sky-sun-shadow),
+    6px 6px 0 var(--home-drive-sky-sun-shadow),
+    0 -6px 0 rgba(255, 255, 255, 0.24),
+    0 0 0 8px var(--home-drive-sky-sun-glow);
+}
+
+.sunStepA {
+  left: 0;
+  top: 12px;
+  width: 42px;
+  height: 18px;
+  background: var(--home-drive-sky-sun);
+}
+
+.sunStepB {
+  left: 12px;
+  top: 0;
+  width: 18px;
+  height: 42px;
+  background: var(--home-drive-sky-sun);
+}
+
+.moon {
+  position: absolute;
+  left: 71%;
+  top: 12%;
+  width: 38px;
+  height: 38px;
+  opacity: var(--home-drive-sky-moon-opacity);
+  transform: translate3d(0, 0, 0);
+  transition: opacity 700ms ease;
+}
+
+.moonCore,
+.moonCut,
+.moonPixelA,
+.moonPixelB {
+  position: absolute;
+  display: block;
+  image-rendering: pixelated;
+}
+
+.moonCore {
+  left: 5px;
+  top: 4px;
+  width: 28px;
+  height: 28px;
+  background: var(--home-drive-sky-moon);
+  box-shadow:
+    0 0 0 4px rgba(255, 244, 210, 0.08),
+    6px 8px 0 rgba(255, 244, 210, 0.12);
+}
+
+.moonCut {
+  left: 17px;
+  top: 2px;
+  width: 20px;
+  height: 30px;
+  background: var(--home-drive-sky-upper);
+}
+
+.moonPixelA {
+  left: 8px;
+  top: 9px;
+  width: 4px;
+  height: 4px;
+  background: var(--home-drive-sky-moon-shade);
+}
+
+.moonPixelB {
+  left: 14px;
+  top: 22px;
+  width: 5px;
+  height: 5px;
+  background: var(--home-drive-sky-moon-shade);
+}
+
+.cloudLayer {
+  position: absolute;
+  inset: 0;
+  opacity: var(--home-drive-sky-cloud-opacity);
+  transform: translate3d(var(--home-drive-sky-cloud-shift), 0, 0);
+  transition: opacity 700ms ease;
+}
+
+.cloud {
+  position: absolute;
+  display: block;
+  width: 64px;
+  height: 16px;
+  background: var(--home-drive-sky-cloud);
+  image-rendering: pixelated;
+  box-shadow:
+    12px -8px 0 var(--home-drive-sky-cloud),
+    28px -8px 0 var(--home-drive-sky-cloud-accent),
+    42px 0 0 var(--home-drive-sky-cloud),
+    56px 8px 0 var(--home-drive-sky-cloud-shade),
+    18px 8px 0 var(--home-drive-sky-cloud-shade);
+}
+
+.cloud::before {
+  content: "";
+  position: absolute;
+  left: -14px;
+  top: 8px;
+  width: 18px;
+  height: 8px;
+  background: var(--home-drive-sky-cloud-shade);
+}
+
+.cloud::after {
+  content: "";
+  position: absolute;
+  right: -16px;
+  top: 0;
+  width: 18px;
+  height: 8px;
+  background: var(--home-drive-sky-cloud);
+}
+
+.cloudFarLeft {
+  left: -18%;
+  top: 18%;
+  transform: scale(0.72);
+  opacity: 0.72;
+}
+
+.cloudNearLeft {
+  left: 14%;
+  top: 31%;
+  transform: scale(0.94);
+  opacity: 0.86;
+}
+
+.cloudCenter {
+  left: 43%;
+  top: 22%;
+  transform: scale(0.82);
+  opacity: 0.74;
+}
+
+.cloudFarRight {
+  left: 78%;
+  top: 36%;
+  transform: scale(1.06);
+  opacity: 0.8;
+}
+
+.pixelDust {
+  position: absolute;
+  inset: 0;
+  opacity: var(--home-drive-sky-dust-opacity);
+  transform: translate3d(calc(var(--home-drive-sky-dust-shift) * 1), 0, 0);
+  background:
+    repeating-linear-gradient(
+      90deg,
+      var(--home-drive-sky-pixel-dust) 0 1px,
+      transparent 1px 18px
+    ),
+    repeating-linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.08) 0 1px,
+      transparent 1px 22px
+    );
+  mix-blend-mode: soft-light;
+}
+
+.scanline {
+  position: absolute;
+  inset: 0;
+  opacity: 0.16;
+  background:
+    repeating-linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.035) 0 1px,
+      transparent 1px 4px
+    );
+  mix-blend-mode: soft-light;
+}
+
+.vignette {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(
+      ellipse at 50% 42%,
+      transparent 0%,
+      transparent 46%,
+      var(--home-drive-sky-vignette) 100%
+    );
+}
+
+.contrast {
+  position: absolute;
+  inset: 0;
+  opacity: var(--home-drive-sky-contrast-opacity);
+  background:
+    linear-gradient(
+      180deg,
+      rgba(0, 0, 0, 0.12) 0%,
+      transparent 32%,
+      transparent 66%,
+      rgba(0, 0, 0, 0.48) 100%
+    );
+}
+
+@media (max-width: 390px) {
+  .sun {
+    left: 63%;
+    top: calc(12% + var(--home-drive-sky-sun-drop));
+    width: 36px;
+    height: 36px;
+  }
+
+  .sunCore {
+    inset: 5px;
+  }
+
+  .sunStepA {
+    width: 36px;
+    height: 16px;
+  }
+
+  .sunStepB {
+    left: 10px;
+    width: 16px;
+    height: 36px;
+  }
+
+  .moon {
+    left: 69%;
+    width: 34px;
+    height: 34px;
+  }
+
+  .cloud {
+    transform-origin: left top;
+  }
+
+  .cloudNearLeft {
+    left: 10%;
+  }
+
+  .cloudCenter {
+    left: 38%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stars,
+  .cloudLayer,
+  .pixelDust {
+    transform: none;
+  }
+
+  .sun,
+  .moon,
+  .stars,
+  .cloudLayer {
+    transition: none;
+  }
+}

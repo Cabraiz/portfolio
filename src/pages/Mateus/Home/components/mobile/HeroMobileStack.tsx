@@ -5,6 +5,7 @@ import HeroPrimaryActionsMobile, {
 } from "./HeroPrimaryActionsMobile";
 import HeroProfileColumnMobile from "./HeroProfileColumnMobile";
 import type { MobileSocialItem } from "./SocialRowMobile";
+import { homeHeroTokens } from "../../layout/homeHero.tokens";
 
 export type HeroMobileStackProps = Readonly<{
   imageSrc: string;
@@ -15,6 +16,7 @@ export type HeroMobileStackProps = Readonly<{
   onImageLoad?: () => void;
   bottomSlot?: React.ReactNode;
   className?: string;
+  isGameOpen?: boolean;
 }>;
 
 function HeroMobileStack({
@@ -26,6 +28,7 @@ function HeroMobileStack({
   onImageLoad,
   bottomSlot,
   className,
+  isGameOpen = false,
 }: HeroMobileStackProps) {
   const sectionStyle = useMemo<React.CSSProperties>(() => {
     return {
@@ -36,6 +39,7 @@ function HeroMobileStack({
       justifyContent: "center",
       padding: 0,
       background: "transparent",
+      boxSizing: "border-box",
     };
   }, []);
 
@@ -46,8 +50,15 @@ function HeroMobileStack({
       flexDirection: "column",
       alignItems: "center",
       justifyContent: "center",
+      transform: isGameOpen
+        ? `scale(${homeHeroTokens.mobileGame.cardScaleWhenOpen})`
+        : "scale(1)",
+      opacity: isGameOpen ? 0.94 : 1,
+      transition: "transform 220ms ease, opacity 220ms ease",
+      boxSizing: "border-box",
+      pointerEvents: isGameOpen ? "none" : "auto",
     };
-  }, []);
+  }, [isGameOpen]);
 
   const stackedBottomSlot = useMemo(() => {
     const hasPrimaryActions = primaryActions.length > 0;
@@ -77,6 +88,7 @@ function HeroMobileStack({
           imageLoaded={imageLoaded}
           onImageLoad={onImageLoad}
           bottomSlot={stackedBottomSlot}
+          isGameOpen={isGameOpen}
         />
       </div>
     </section>

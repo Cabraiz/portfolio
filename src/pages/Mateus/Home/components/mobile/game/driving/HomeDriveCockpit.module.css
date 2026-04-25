@@ -1,0 +1,210 @@
+.root {
+  position: absolute;
+  inset: 0;
+  z-index: auto;
+  pointer-events: none;
+  overflow: visible;
+
+  /*
+    Ajuste fino do eixo real do PNG do volante.
+
+    Se ainda parecer girar fora do centro:
+    - aumente Y para girar mais baixo: 50% -> 51% / 52%
+    - diminua X para eixo mais à esquerda: 50% -> 49%
+    - aumente X para eixo mais à direita: 50% -> 51%
+  */
+  --home-drive-steering-pivot-x: 50%;
+  --home-drive-steering-pivot-y: 50%;
+
+  /*
+    Offset visual do volante dentro da área dele.
+
+    Mantém o volante um pouco mais para esquerda/baixo
+    sem contaminar o eixo de rotação.
+  */
+  --home-drive-steering-inner-x: -9.5%;
+  --home-drive-steering-inner-y: 8.5%;
+}
+
+.glassReflection {
+  position: absolute;
+  inset-inline: 8%;
+  top: 2%;
+  height: 18%;
+  border-radius: 0 0 28px 28px;
+  z-index: 4;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.08),
+      rgba(255, 255, 255, 0.02) 36%,
+      rgba(255, 255, 255, 0) 100%
+    );
+  filter: blur(2px);
+  opacity: 0.5;
+}
+
+.windshieldTop {
+  position: absolute;
+  inset-inline: 6%;
+  top: 0;
+  height: 8%;
+  z-index: 4;
+  border-bottom-left-radius: 18px;
+  border-bottom-right-radius: 18px;
+  opacity: 0.66;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(2, 4, 8, 0.44),
+      rgba(2, 4, 8, 0.08) 72%,
+      transparent 100%
+    );
+}
+
+/*
+  Cockpit PNG 16:9 expandido.
+  Movido ~20% mais para baixo.
+*/
+.cockpitImageShell {
+  position: absolute;
+  left: 50%;
+  bottom: -42%;
+  height: 134%;
+  aspect-ratio: 16 / 9;
+  z-index: 5;
+  transform: translateX(-50%);
+  pointer-events: none;
+  overflow: visible;
+  filter:
+    drop-shadow(0 -8px 14px rgba(0, 0, 0, 0.16))
+    drop-shadow(0 16px 28px rgba(0, 0, 0, 0.28));
+}
+
+.cockpitImage {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center bottom;
+  user-select: none;
+  -webkit-user-drag: none;
+  image-rendering: auto;
+}
+
+/*
+  Volante independente do cockpit PNG.
+
+  A shell agora NÃO gira.
+  Ela só posiciona o bloco do volante.
+  A rotação fica na imagem para o eixo não orbitar.
+*/
+.steeringWheelShell {
+  position: absolute;
+  left: 50%;
+  bottom: -22.5%;
+  width: min(167%, 692px);
+  aspect-ratio: 1 / 1;
+  z-index: 40;
+  transform: translateX(-50%);
+  transform-origin: 50% 50%;
+  pointer-events: none;
+  overflow: visible;
+  filter:
+    drop-shadow(0 24px 34px rgba(0, 0, 0, 0.36))
+    drop-shadow(0 2px 0 rgba(255, 255, 255, 0.04));
+}
+
+/*
+  Compatível com a versão do TS que tem um wrapper interno
+  dentro de .steeringWheelShell.
+
+  Esse wrapper desloca visualmente o volante,
+  mas sem receber rotate. O rotate fica só na imagem.
+*/
+.steeringWheelShell > div {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  transform:
+    translate(
+      var(--home-drive-steering-inner-x),
+      var(--home-drive-steering-inner-y)
+    ) !important;
+  transform-origin: 50% 50%;
+}
+
+.steeringWheelImage {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  user-select: none;
+  -webkit-user-drag: none;
+  image-rendering: auto;
+  transform: rotate(var(--home-drive-steering-rotation));
+  transform-origin:
+    var(--home-drive-steering-pivot-x)
+    var(--home-drive-steering-pivot-y);
+  will-change: transform;
+  transition: transform 72ms linear;
+}
+
+.dashboard,
+.consoleGlow,
+.lowerConsole,
+.instrumentPod,
+.steeringWheelHub,
+.steeringWheelAccent {
+  display: none !important;
+}
+
+@media (max-width: 430px) {
+  .cockpitImageShell {
+    bottom: -44%;
+    height: 143%;
+  }
+
+  .steeringWheelShell {
+    width: min(170%, 648px);
+    bottom: -22.3%;
+  }
+}
+
+@media (max-width: 390px) {
+  .cockpitImageShell {
+    bottom: -46%;
+    height: 149%;
+  }
+
+  .steeringWheelShell {
+    width: min(176%, 620px);
+    bottom: -22.1%;
+  }
+}
+
+@media (max-width: 360px) {
+  .cockpitImageShell {
+    bottom: -48%;
+    height: 156%;
+  }
+
+  .steeringWheelShell {
+    width: min(181%, 576px);
+    bottom: -21.9%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .steeringWheelImage {
+    transition: none;
+  }
+}

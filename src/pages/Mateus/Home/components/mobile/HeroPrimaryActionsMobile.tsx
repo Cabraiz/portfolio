@@ -1,5 +1,7 @@
 import React, { useMemo } from "react";
 
+import { homeHeroTokens } from "../../layout/homeHero.tokens";
+
 export type HeroPrimaryActionMobile = Readonly<{
   id?: string;
   label: string;
@@ -30,54 +32,72 @@ export default function HeroPrimaryActionsMobile({
     return {
       width: "100%",
       display: "grid",
-      gridTemplateColumns: isSingle ? "minmax(0, 1fr)" : "repeat(2, minmax(0, 1fr))",
-      gap: "10px",
+      gridTemplateColumns: isSingle
+        ? "minmax(0, 1fr)"
+        : "repeat(2, minmax(0, 1fr))",
+      gap: homeHeroTokens.primaryActions.gap.default,
       alignItems: "stretch",
+      boxSizing: "border-box",
     };
   }, [items.length]);
 
   const getActionStyle = (
-    variant: HeroPrimaryActionMobile["variant"]
+    variant: HeroPrimaryActionMobile["variant"],
   ): React.CSSProperties => {
     const isPrimary = (variant ?? "primary") === "primary";
 
     return {
-      minHeight: "54px",
+      position: "relative",
+      minHeight: homeHeroTokens.primaryActions.height,
       width: "100%",
-      padding: "12px 14px",
-      borderRadius: "18px",
+      padding: homeHeroTokens.primaryActions.padding,
+      borderRadius: homeHeroTokens.primaryActions.borderRadius,
       border: isPrimary
-        ? "1px solid rgba(255, 210, 120, 0.22)"
-        : "1px solid rgba(255, 210, 120, 0.10)",
+        ? homeHeroTokens.primaryActions.primary.border
+        : homeHeroTokens.primaryActions.secondary.border,
       background: isPrimary
-        ? "linear-gradient(180deg, rgba(255, 205, 110, 0.16) 0%, rgba(255, 205, 110, 0.07) 100%)"
-        : "linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.03) 100%)",
+        ? homeHeroTokens.primaryActions.primary.background
+        : homeHeroTokens.primaryActions.secondary.background,
       boxShadow: isPrimary
-        ? "0 14px 28px rgba(0, 0, 0, 0.24), inset 0 1px 0 rgba(255,255,255,0.08)"
-        : "0 12px 24px rgba(0, 0, 0, 0.20), inset 0 1px 0 rgba(255,255,255,0.05)",
+        ? homeHeroTokens.primaryActions.primary.shadow
+        : homeHeroTokens.primaryActions.secondary.shadow,
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
       gap: "10px",
       textDecoration: "none",
       color: isPrimary
-        ? "rgba(255, 247, 230, 0.98)"
-        : "rgba(255, 243, 220, 0.92)",
-      fontSize: "0.86rem",
+        ? homeHeroTokens.primaryActions.primary.color
+        : homeHeroTokens.primaryActions.secondary.color,
+      fontSize: homeHeroTokens.primaryActions.fontSize,
       fontWeight: 800,
-      letterSpacing: "0.01em",
+      letterSpacing: "-0.01em",
       textAlign: "center",
       WebkitTapHighlightColor: "transparent",
       boxSizing: "border-box",
+      overflow: "hidden",
       transition:
-        "transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease, background 180ms ease",
+        "transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease, opacity 180ms ease",
     };
   };
 
+  const actionGlowStyle = useMemo<React.CSSProperties>(() => {
+    return {
+      position: "absolute",
+      inset: 0,
+      pointerEvents: "none",
+      background:
+        "linear-gradient(90deg, rgba(255,210,120,0.00) 0%, rgba(255,210,120,0.06) 20%, rgba(255,210,120,0.12) 50%, rgba(255,210,120,0.06) 80%, rgba(255,210,120,0.00) 100%)",
+      opacity: 0.9,
+    };
+  }, []);
+
   const iconWrapStyle = useMemo<React.CSSProperties>(() => {
     return {
-      width: "18px",
-      height: "18px",
+      position: "relative",
+      zIndex: 1,
+      width: homeHeroTokens.primaryActions.iconSize,
+      height: homeHeroTokens.primaryActions.iconSize,
       display: "inline-flex",
       alignItems: "center",
       justifyContent: "center",
@@ -87,6 +107,8 @@ export default function HeroPrimaryActionsMobile({
 
   const labelStyle = useMemo<React.CSSProperties>(() => {
     return {
+      position: "relative",
+      zIndex: 1,
       minWidth: 0,
       display: "inline-flex",
       alignItems: "center",
@@ -94,6 +116,7 @@ export default function HeroPrimaryActionsMobile({
       overflow: "hidden",
       textOverflow: "ellipsis",
       whiteSpace: "nowrap",
+      lineHeight: 1,
     };
   }, []);
 
@@ -114,6 +137,7 @@ export default function HeroPrimaryActionsMobile({
             aria-label={item.ariaLabel ?? item.label}
             style={getActionStyle(item.variant)}
           >
+            <span style={actionGlowStyle} />
             {item.icon ? <span style={iconWrapStyle}>{item.icon}</span> : null}
             <span style={labelStyle}>{item.label}</span>
           </a>

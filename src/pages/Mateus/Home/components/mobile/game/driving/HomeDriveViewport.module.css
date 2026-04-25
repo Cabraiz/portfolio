@@ -1,0 +1,616 @@
+.root {
+  --home-drive-safe-top: max(14px, env(safe-area-inset-top));
+  --home-drive-safe-right: max(14px, env(safe-area-inset-right));
+  --home-drive-safe-bottom: max(16px, calc(env(safe-area-inset-bottom) + 16px));
+  --home-drive-safe-left: max(14px, env(safe-area-inset-left));
+
+  --home-drive-atmosphere-sky-glow: rgba(255, 194, 122, 0.18);
+  --home-drive-atmosphere-haze: rgba(91, 136, 188, 0.1);
+  --home-drive-noise-opacity: 0.05;
+
+  position: relative;
+  width: 100%;
+  height: 100dvh;
+  min-height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
+  isolation: isolate;
+  touch-action: none;
+  color: var(--home-drive-color-text, #f7f2e8);
+  background: #05070d;
+  overscroll-behavior: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.atmosphere,
+.noise,
+.skylineRoot,
+.roadsideRoot,
+.landmarkRoot,
+.cockpitRoot,
+.glassVignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.atmosphere {
+  z-index: 1;
+  background:
+    radial-gradient(
+      circle at 50% 16%,
+      var(--home-drive-atmosphere-sky-glow),
+      rgba(255, 190, 102, 0.018) 30%,
+      transparent 58%
+    ),
+    radial-gradient(
+      circle at 50% 31%,
+      var(--home-drive-atmosphere-haze),
+      transparent 66%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.018),
+      transparent 15%,
+      transparent 77%,
+      rgba(0, 0, 0, 0.28) 100%
+    );
+  mix-blend-mode: screen;
+  opacity: 0.74;
+}
+
+.noise {
+  z-index: 5;
+  opacity: var(--home-drive-noise-opacity);
+  mix-blend-mode: soft-light;
+  background:
+    repeating-linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.03) 0 1px,
+      transparent 1px 24px
+    ),
+    repeating-linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.02) 0 1px,
+      transparent 1px 18px
+    );
+}
+
+.skylineRoot {
+  z-index: 2;
+  will-change: transform;
+}
+
+.skylineHaze {
+  position: absolute;
+  left: -8%;
+  right: -8%;
+  top: 12%;
+  height: 22%;
+  opacity: 0.68;
+  filter: blur(22px);
+}
+
+.skylineGlow {
+  position: absolute;
+  left: -10%;
+  right: -10%;
+  top: 18%;
+  height: 10%;
+  filter: blur(20px);
+}
+
+.skyline {
+  position: absolute;
+  left: -8%;
+  right: -8%;
+  top: 10%;
+  height: 18%;
+  opacity: 0.62;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.skylineBar {
+  position: relative;
+  border-radius: 10px 10px 0 0;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    0 8px 18px rgba(0, 0, 0, 0.14);
+  overflow: hidden;
+}
+
+.skylineWindowPass {
+  position: absolute;
+  inset: 0;
+  opacity: 0.46;
+}
+
+.skylineBottomShade {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 18%;
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0),
+    rgba(0, 0, 0, 0.26) 100%
+  );
+}
+
+.roadSurface {
+  position: absolute;
+  bottom: 22%;
+  height: 42%;
+  overflow: hidden;
+  pointer-events: none;
+  transform-origin: center bottom;
+  border-top: 2px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 -30px 44px rgba(0, 0, 0, 0.24),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.roadShoulderGlow,
+.roadTopSheen,
+.roadBottomReflection {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.roadShoulderGlow {
+  opacity: 0.92;
+}
+
+.roadTopSheen {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.03),
+    transparent 16%,
+    transparent 72%,
+    rgba(0, 0, 0, 0.18) 100%
+  );
+}
+
+.roadBottomReflection {
+  left: 20%;
+  right: 20%;
+  bottom: 8%;
+  top: auto;
+  height: 16%;
+  opacity: 0.14;
+  filter: blur(10px);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0),
+    rgba(255, 255, 255, 0.18)
+  );
+}
+
+.centerLane {
+  position: absolute;
+  left: 50%;
+  top: -4%;
+  bottom: -10%;
+  min-width: 4px;
+  opacity: 0.95;
+  background: repeating-linear-gradient(
+    180deg,
+    rgba(246, 233, 184, 0.95) 0 34px,
+    transparent 34px 68px
+  );
+}
+
+.sideLaneLeft,
+.sideLaneRight {
+  position: absolute;
+  top: -2%;
+  bottom: -10%;
+  width: 2px;
+  opacity: 0.64;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.roadsideRoot {
+  z-index: 3;
+  will-change: transform;
+}
+
+.roadsideItem {
+  position: absolute;
+  transform-origin: center bottom;
+}
+
+.roadsideObject {
+  position: relative;
+  display: grid;
+  place-items: end center;
+}
+
+.roadsideGlow {
+  position: absolute;
+  bottom: -4px;
+  height: 14px;
+  border-radius: 999px;
+  filter: blur(8px);
+}
+
+.roadsideShaft {
+  border-radius: 999px;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.2);
+}
+
+.roadsideLampHead {
+  position: absolute;
+  top: 6px;
+  border-radius: 999px;
+}
+
+.roadsideBanner {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  height: 24px;
+  transform: translateX(-10%);
+  border-radius: 8px;
+  background: linear-gradient(
+    180deg,
+    rgba(214, 149, 82, 0.88),
+    rgba(120, 70, 28, 0.96)
+  );
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.18);
+}
+
+.roadsidePalmCrown {
+  position: absolute;
+  top: 4px;
+  left: 50%;
+  width: 34px;
+  height: 24px;
+  transform: translateX(-50%);
+}
+
+.roadsidePalmLeaf {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 18px;
+  height: 6px;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    rgba(94, 144, 80, 0.92),
+    rgba(38, 92, 42, 0.98)
+  );
+  transform-origin: left center;
+  box-shadow: 0 0 10px rgba(72, 120, 68, 0.18);
+}
+
+.landmarkRoot {
+  z-index: 4;
+  will-change: transform;
+}
+
+.landmark {
+  position: absolute;
+  pointer-events: none;
+  transform-origin: center bottom;
+}
+
+.landmarkBody {
+  position: relative;
+  display: grid;
+  justify-items: center;
+}
+
+.landmarkGlow {
+  position: absolute;
+  bottom: 8px;
+  height: 18px;
+  border-radius: 999px;
+  filter: blur(10px);
+}
+
+.landmarkMarker {
+  position: relative;
+  box-shadow:
+    0 14px 26px rgba(0, 0, 0, 0.26),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.landmarkMarkerSheen {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.12),
+    transparent 30%,
+    rgba(0, 0, 0, 0.18) 100%
+  );
+}
+
+.landmarkLabel {
+  margin-top: 8px;
+  padding: 6px 8px;
+  border-radius: 12px;
+  white-space: nowrap;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 10px 18px rgba(0, 0, 0, 0.2);
+  display: grid;
+  gap: 2px;
+  justify-items: start;
+}
+
+.landmarkTitle {
+  font-size: 10px;
+  line-height: 1.1;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.landmarkDistrict {
+  font-size: 9px;
+  line-height: 1.2;
+  color: rgba(247, 242, 232, 0.72);
+}
+
+.glassVignette {
+  z-index: 6;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.04),
+      transparent 18%,
+      transparent 82%,
+      rgba(0, 0, 0, 0.34)
+    ),
+    radial-gradient(
+      circle at 50% 50%,
+      transparent 56%,
+      rgba(0, 0, 0, 0.12) 100%
+    );
+}
+
+.cockpitRoot {
+  z-index: 7;
+}
+
+.glassReflection {
+  position: absolute;
+  inset-inline: 8%;
+  top: 2%;
+  height: 18%;
+  border-radius: 0 0 28px 28px;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.08),
+    rgba(255, 255, 255, 0.02) 36%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  filter: blur(2px);
+  opacity: 0.72;
+}
+
+.windshieldTop {
+  position: absolute;
+  inset-inline: 6%;
+  top: 0;
+  height: 8%;
+  border-bottom-left-radius: 18px;
+  border-bottom-right-radius: 18px;
+  opacity: 0.88;
+  background: linear-gradient(
+    180deg,
+    rgba(2, 4, 8, 0.56),
+    rgba(2, 4, 8, 0.12) 72%,
+    transparent 100%
+  );
+}
+
+.dashboard {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: 30%;
+  z-index: 7;
+  pointer-events: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  clip-path: polygon(0 20%, 22% 0, 78% 0, 100% 20%, 100% 100%, 0 100%);
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(0, 0, 0, 0.12) 14%,
+    rgba(8, 8, 10, 0.52) 15%,
+    rgba(12, 12, 14, 0.95) 45%,
+    rgba(6, 6, 7, 1) 100%
+  );
+  box-shadow: 0 -18px 40px rgba(0, 0, 0, 0.34);
+}
+
+.consoleGlow {
+  position: absolute;
+  left: 50%;
+  bottom: 13.4%;
+  width: 38%;
+  max-width: 190px;
+  height: 42px;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgba(255, 202, 118, 0.14),
+    rgba(255, 202, 118, 0) 72%
+  );
+  filter: blur(16px);
+  z-index: 7;
+}
+
+.lowerConsole {
+  position: absolute;
+  left: 50%;
+  bottom: 8.2%;
+  width: 74%;
+  max-width: 320px;
+  height: 74px;
+  transform: translateX(-50%);
+  border-radius: 26px;
+  background: linear-gradient(
+    180deg,
+    rgba(12, 12, 15, 0.18),
+    rgba(8, 8, 10, 0.64) 32%,
+    rgba(6, 6, 7, 0.96) 100%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  box-shadow:
+    0 -10px 24px rgba(0, 0, 0, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  z-index: 7;
+}
+
+.instrumentPod {
+  position: absolute;
+  left: 50%;
+  bottom: 11.2%;
+  width: 26%;
+  max-width: 120px;
+  height: 34px;
+  transform: translateX(-50%);
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(18, 18, 22, 0.9), rgba(8, 8, 10, 0.96));
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow:
+    0 10px 22px rgba(0, 0, 0, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  z-index: 8;
+}
+
+.steeringWheel {
+  position: absolute;
+  left: 50%;
+  bottom: 12.8%;
+  width: 46%;
+  max-width: 220px;
+  aspect-ratio: 1 / 1;
+  z-index: 8;
+  pointer-events: none;
+  border-radius: 50%;
+  border: 16px solid rgba(20, 20, 22, 0.96);
+  box-shadow:
+    0 20px 40px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.steeringInner {
+  position: absolute;
+  inset: 18%;
+  border-radius: 50%;
+  border: 10px solid rgba(52, 52, 56, 0.98);
+}
+
+.steeringSpokeLeft,
+.steeringSpokeRight,
+.steeringSpokeBottom {
+  position: absolute;
+  border-radius: 999px;
+}
+
+.steeringSpokeLeft {
+  left: 8%;
+  top: 44%;
+  width: 22%;
+  height: 12px;
+  background: linear-gradient(
+    90deg,
+    rgba(42, 42, 48, 0.98),
+    rgba(18, 18, 22, 0.96)
+  );
+}
+
+.steeringSpokeRight {
+  right: 8%;
+  top: 44%;
+  width: 22%;
+  height: 12px;
+  background: linear-gradient(
+    90deg,
+    rgba(18, 18, 22, 0.96),
+    rgba(42, 42, 48, 0.98)
+  );
+}
+
+.steeringSpokeBottom {
+  left: 50%;
+  bottom: 10%;
+  width: 14px;
+  height: 22%;
+  transform: translateX(-50%);
+  background: linear-gradient(180deg, rgba(40, 40, 46, 0.98), rgba(16, 16, 18, 0.98));
+}
+
+.steeringNub {
+  position: absolute;
+  left: 50%;
+  top: 9%;
+  width: 12px;
+  height: 22%;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(218, 171, 91, 0.96), rgba(110, 69, 21, 0.98));
+}
+
+.viewportChrome {
+  position: absolute;
+  inset: 0;
+  z-index: 9;
+  box-sizing: border-box;
+  padding:
+    var(--home-drive-safe-top)
+    var(--home-drive-safe-right)
+    var(--home-drive-safe-bottom)
+    var(--home-drive-safe-left);
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+}
+
+.hidden {
+  display: none !important;
+}
+
+@media (max-width: 390px) {
+  .root {
+    --home-drive-safe-top: max(12px, env(safe-area-inset-top));
+    --home-drive-safe-right: max(12px, env(safe-area-inset-right));
+    --home-drive-safe-bottom: max(14px, calc(env(safe-area-inset-bottom) + 14px));
+    --home-drive-safe-left: max(12px, env(safe-area-inset-left));
+  }
+
+  .glassVignette {
+    background:
+      linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.035),
+        transparent 16%,
+        transparent 82%,
+        rgba(0, 0, 0, 0.36)
+      ),
+      radial-gradient(
+        circle at 50% 52%,
+        transparent 54%,
+        rgba(0, 0, 0, 0.14) 100%
+      );
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skylineRoot,
+  .roadsideRoot,
+  .landmarkRoot {
+    will-change: auto;
+  }
+}
