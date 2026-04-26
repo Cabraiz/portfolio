@@ -16,6 +16,14 @@ type RoadsideLight = Readonly<{
   offset: number;
 }>;
 
+function clampNumber(value: number, min: number, max: number): number {
+  if (!Number.isFinite(value)) {
+    return min;
+  }
+
+  return Math.max(min, Math.min(max, value));
+}
+
 function getRoadsideLights(routeSegment: HomeDriveRouteSegment): readonly RoadsideLight[] {
   const density =
     routeSegment.ambience === "downtown"
@@ -60,6 +68,32 @@ function getLightColor(routeSegment: HomeDriveRouteSegment): string {
   return "rgba(228, 202, 148, 0.58)";
 }
 
+function getRootShift(runtime: HomeDriveRuntimeState): number {
+  return (
+    runtime.laneOffset * -7 +
+    runtime.parallaxPx * 0.42 +
+    runtime.horizonShiftPx * 0.18
+  );
+}
+
+function getLightHorizontal(
+  item: RoadsideLight,
+  runtime: HomeDriveRuntimeState,
+): number {
+  const horizontalBase = item.side === "left" ? 18 : 82;
+  const sideDirection = item.side === "left" ? -1 : 1;
+
+  const laneParallax = runtime.laneOffset * -5.4;
+  const steeringParallax = runtime.steering * -4.2 * item.depth;
+  const roadDrift = runtime.roadDriftPx * 0.035 * sideDirection;
+
+  return clampNumber(
+    horizontalBase + item.offset + laneParallax + steeringParallax + roadDrift,
+    4,
+    96,
+  );
+}
+
 export default function HomeDriveRoadside({
   runtime,
   routeSegment,
@@ -72,22 +106,29 @@ export default function HomeDriveRoadside({
     return {
       position: "absolute",
       inset: 0,
-      transform: `translateX(${runtime.laneOffset * -5}px)`,
+      transform: `translateX(${getRootShift(runtime)}px)`,
       transition: "transform 120ms linear",
       pointerEvents: "none",
       zIndex: 2,
     };
-  }, [runtime.laneOffset]);
+  }, [runtime]);
 
   return (
-    <div className={className} style={rootStyle}>
+    <div
+      className={className}
+      data-home-drive-roadside="true"
+      data-home-drive-roadside-steering={runtime.steering.toFixed(3)}
+      data-home-drive-roadside-lane-offset={runtime.laneOffset.toFixed(3)}
+      style={rootStyle}
+    >
       {lights.map((item) => {
         const scale = 0.22 + item.depth * 0.86;
-        const opacity = 0.08 + item.depth * 0.42;
+        const opacity =
+          0.08 +
+          item.depth * 0.42 +
+          runtime.steeringIntensity * item.depth * 0.08;
         const bottom = 30 + item.depth * 34;
-        const horizontalBase = item.side === "left" ? 18 : 82;
-        const horizontal =
-          horizontalBase + item.offset + runtime.laneOffset * (item.side === "left" ? -2 : -2);
+        const horizontal = getLightHorizontal(item, runtime);
 
         return (
           <div
@@ -98,7 +139,7 @@ export default function HomeDriveRoadside({
               bottom: `${bottom}%`,
               transform: `translateX(-50%) scale(${scale})`,
               transformOrigin: "center bottom",
-              opacity,
+              opacity: clampNumber(opacity, 0.08, 0.62),
             }}
           >
             <div
@@ -147,7 +188,7 @@ export default function HomeDriveRoadside({
                   borderRadius: 999,
                   background: lightColor,
                   filter: "blur(18px)",
-                  opacity: 0.18,
+                  opacity: 0.18 + runtime.steeringIntensity * 0.04,
                 }}
               />
             </div>

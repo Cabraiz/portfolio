@@ -24,10 +24,18 @@ type GestureState = Readonly<{
 
 type GestureMode = "idle" | "steer" | "boost" | "control";
 
-const STEER_FULL_DISTANCE_PX = 118;
-const BOOST_TRIGGER_DISTANCE_PX = -42;
-const BRAKE_TRIGGER_DISTANCE_PX = 46;
-const DEAD_ZONE_PX = 8;
+/*
+  Menor distância = direção mais responsiva.
+
+  Antes: 78.
+  Agora: 56 para o volante chegar em força máxima com menos arrasto.
+ */
+const STEER_FULL_DISTANCE_PX = 56;
+const STEER_RESPONSE_EXPONENT = 0.72;
+
+const BOOST_TRIGGER_DISTANCE_PX = -48;
+const BRAKE_TRIGGER_DISTANCE_PX = 58;
+const DEAD_ZONE_PX = 6;
 
 function buildClassName(...classNames: Array<string | false | undefined>): string {
   return classNames.filter(Boolean).join(" ");
@@ -41,6 +49,22 @@ function clampNumber(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value));
 }
 
+function normalizeSteer(deltaX: number): number {
+  const raw = clampNumber(deltaX / STEER_FULL_DISTANCE_PX, -1, 1);
+  const magnitude = Math.abs(raw);
+
+  if (magnitude <= 0.01) {
+    return 0;
+  }
+
+  /*
+    Curva não linear:
+    - pequenos movimentos já aparecem;
+    - movimento lateral forte chega rápido em -1/1.
+  */
+  return Math.sign(raw) * Math.pow(magnitude, STEER_RESPONSE_EXPONENT);
+}
+
 function getGestureMode(deltaX: number, deltaY: number): GestureMode {
   const absX = Math.abs(deltaX);
   const absY = Math.abs(deltaY);
@@ -49,11 +73,27 @@ function getGestureMode(deltaX: number, deltaY: number): GestureMode {
     return "idle";
   }
 
-  if (deltaY <= BOOST_TRIGGER_DISTANCE_PX && absY > absX * 0.58) {
+  /*
+    Regra principal:
+    se o movimento horizontal é relevante, é direção.
+    Isso impede o jogo de frear quando a pessoa está virando forte.
+  */
+  if (absX >= DEAD_ZONE_PX && absX >= absY * 0.62) {
+    return "steer";
+  }
+
+  /*
+    Boost só se o gesto for claramente vertical para cima.
+  */
+  if (deltaY <= BOOST_TRIGGER_DISTANCE_PX && absY > absX * 1.5) {
     return "boost";
   }
 
-  if (deltaY >= BRAKE_TRIGGER_DISTANCE_PX && absY > absX * 0.48) {
+  /*
+    Brake só se o gesto for claramente vertical para baixo.
+    Gesto diagonal de volante não ativa brake.
+  */
+  if (deltaY >= BRAKE_TRIGGER_DISTANCE_PX && absY > absX * 2.2) {
     return "control";
   }
 
@@ -120,14 +160,6 @@ export default function HomeDriveControls({
       return;
     }
 
-    /**
-     * Conceito novo:
-     * o carro mantém aceleração automática.
-     *
-     * O gesto para cima não precisa "segurar" o acelerador;
-     * ele apenas reforça a intenção de boost enquanto a física ainda usa
-     * o handler antigo booleano.
-     */
     onThrottleChange(true);
   }, [onBrakeChange, onStart, onThrottleChange, runtime.phase]);
 
@@ -198,7 +230,7 @@ export default function HomeDriveControls({
         lastY: event.clientY,
       };
 
-      const nextSteer = clampNumber(deltaX / STEER_FULL_DISTANCE_PX, -1, 1);
+      const nextSteer = normalizeSteer(deltaX);
       const nextMode = getGestureMode(deltaX, deltaY);
       const wantsBrake = nextMode === "control";
 
@@ -206,17 +238,11 @@ export default function HomeDriveControls({
 
       onSteerChange(nextSteer);
 
-      /**
-       * Arrastar para baixo vira controle/freio.
-       * Não existe botão visual de brake.
-       */
+      /*
+        Agora brake só acontece em gesto vertical claro.
+        Virar muito o volante nunca deve acionar brake.
+      */
       onBrakeChange(wantsBrake);
-
-      /**
-       * O acelerador fica automático.
-       * Se o jogador estiver freando, o throttle booleano antigo desliga
-       * para a física atual entender a intenção de controle.
-       */
       onThrottleChange(!wantsBrake);
     },
     [canDrive, onBrakeChange, onSteerChange, onThrottleChange, resetGesture],

@@ -42,14 +42,30 @@ function getProjectedPinScale(
   basePlacementScale: number,
   projectionScale: number,
 ): number {
-  /*
-    Combina:
-    - escala de profundidade da estrada;
-    - escala de aproximação do landmark.
-
-    Mantém limite para não virar um elemento gigante no para-brisa.
-  */
   return clampNumber(basePlacementScale * projectionScale, 0.28, 1.22);
+}
+
+function getLandmarkRootShift(runtime: HomeDriveRuntimeState): number {
+  return (
+    runtime.laneOffset * -5 +
+    runtime.parallaxPx * 0.22 +
+    runtime.roadDriftPx * 0.08
+  );
+}
+
+function getLandmarkHorizontal(
+  runtime: HomeDriveRuntimeState,
+  placement: ReturnType<typeof getLandmarkScreenPlacement>,
+): number {
+  const sideBias = placement.side === "left" ? 4 : -4;
+  const steeringDrift = runtime.steering * -7;
+  const laneDrift = runtime.laneOffset * -4.5;
+  const parallaxDrift = runtime.parallaxPx * 0.035;
+
+  const rawHorizontal =
+    placement.horizontal + sideBias + steeringDrift + laneDrift + parallaxDrift;
+
+  return clampNumber(rawHorizontal, 8, 92);
 }
 
 export default function HomeDriveLandmarkLayer({
@@ -64,16 +80,18 @@ export default function HomeDriveLandmarkLayer({
       inset: 0,
       zIndex: 3,
       pointerEvents: "none",
-      transform: `translateX(${runtime.laneOffset * -3}px)`,
-      transition: "transform 160ms linear",
+      transform: `translateX(${getLandmarkRootShift(runtime)}px)`,
+      transition: "transform 120ms linear",
     };
-  }, [runtime.laneOffset]);
+  }, [runtime]);
 
   return (
     <div
       className={className}
       data-home-drive-landmark-layer="true"
       data-home-drive-landmark-ambience={routeSegment.ambience}
+      data-home-drive-landmark-steering={runtime.steering.toFixed(3)}
+      data-home-drive-landmark-lane-offset={runtime.laneOffset.toFixed(3)}
       style={rootStyle}
     >
       {visibleLandmarks.slice(0, 2).map((item, index) => {
@@ -88,16 +106,13 @@ export default function HomeDriveLandmarkLayer({
           maxDistanceMeters: LANDMARK_PROJECTION_MAX_DISTANCE_METERS,
         });
 
-        const horizontal =
-          placement.side === "left"
-            ? Math.max(10, placement.horizontal + 4)
-            : Math.min(90, placement.horizontal - 4);
+        const horizontal = getLandmarkHorizontal(runtime, placement);
 
-        /*
-          Mantém o landmark dentro da região do horizonte/rua.
-          O movimento fino de aproximação fica no próprio pin via translateY.
-        */
-        const bottom = clampNumber(placement.bottom - 2, 28, 74);
+        const bottom = clampNumber(
+          placement.bottom - 2 + runtime.steeringIntensity * 1.4,
+          28,
+          76,
+        );
 
         const scale = getProjectedPinScale(
           Math.min(0.92, placement.scale),

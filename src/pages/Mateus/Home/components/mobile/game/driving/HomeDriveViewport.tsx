@@ -10,10 +10,12 @@ import HomeDriveDebugOverlay from "./HomeDriveDebugOverlay";
 import HomeDriveHud from "./HomeDriveHud";
 import HomeDriveIntroOverlay from "./HomeDriveIntroOverlay";
 import HomeDriveLandmarkLayer from "./HomeDriveLandmarkLayer";
+import HomeDriveParallelRoadLayer from "./HomeDriveParallelRoadLayer";
 import HomeDrivePauseOverlay from "./HomeDrivePauseOverlay";
 import HomeDrivePixelSky from "./HomeDrivePixelSky";
 import HomeDriveRoadside from "./HomeDriveRoadside";
 import HomeDriveRoadSurface from "./HomeDriveRoadSurface";
+import HomeDriveWorldRoadLayer from "./HomeDriveWorldRoadLayer";
 import styles from "./HomeDriveViewport.module.css";
 import useHomeDriveViewportProfile, {
   type HomeDriveViewportCssVars,
@@ -39,6 +41,11 @@ type ViewportCssVars = CSSProperties &
     "--home-drive-atmosphere-sky-glow": string;
     "--home-drive-atmosphere-haze": string;
     "--home-drive-noise-opacity": number;
+    "--home-drive-road-drift-x": string;
+    "--home-drive-camera-roll": string;
+    "--home-drive-horizon-shift-x": string;
+    "--home-drive-parallax-x": string;
+    "--home-drive-steering-intensity": number;
   }>;
 
 function buildViewportClassName(className?: string): string {
@@ -51,6 +58,14 @@ function toCssPx(value: number): string {
   }
 
   return `${Math.round(value)}px`;
+}
+
+function toDataNumber(value: number | undefined, digits = 2): string {
+  if (!Number.isFinite(value)) {
+    return "0";
+  }
+
+  return Number(value).toFixed(digits);
 }
 
 export default function HomeDriveViewport({
@@ -82,16 +97,8 @@ export default function HomeDriveViewport({
     const { values } = viewportProfile;
 
     return {
-      /*
-        Primeiro espalha tudo que vem do hook.
-      */
       ...viewportProfile.cssVars,
 
-      /*
-        Depois força explicitamente as variáveis críticas.
-        Isso garante que cockpit, volante e velocímetro recebam
-        valores mesmo se alguma versão do hook/cssVars estiver defasada.
-      */
       "--home-drive-camera-width-px": toCssPx(values.viewportWidth),
       "--home-drive-camera-height-px": toCssPx(values.viewportHeight),
       "--home-drive-visual-width-px": toCssPx(values.visualWidth),
@@ -113,6 +120,12 @@ export default function HomeDriveViewport({
       "--home-drive-speedometer-x": toCssPx(values.speedometerXpx),
       "--home-drive-speedometer-y": toCssPx(values.speedometerYpx),
 
+      "--home-drive-road-drift-x": toCssPx(runtime.roadDriftPx),
+      "--home-drive-camera-roll": `${runtime.cameraRollDeg}deg`,
+      "--home-drive-horizon-shift-x": toCssPx(runtime.horizonShiftPx),
+      "--home-drive-parallax-x": toCssPx(runtime.parallaxPx),
+      "--home-drive-steering-intensity": runtime.steeringIntensity,
+
       "--home-drive-atmosphere-sky-glow": scene.scenePreset.skyGlow,
       "--home-drive-atmosphere-haze": scene.scenePreset.haze,
       "--home-drive-noise-opacity": Math.min(
@@ -121,6 +134,11 @@ export default function HomeDriveViewport({
       ),
     };
   }, [
+    runtime.cameraRollDeg,
+    runtime.horizonShiftPx,
+    runtime.parallaxPx,
+    runtime.roadDriftPx,
+    runtime.steeringIntensity,
     scene.scenePreset.ambientNoiseOpacity,
     scene.scenePreset.haze,
     scene.scenePreset.skyGlow,
@@ -159,6 +177,18 @@ export default function HomeDriveViewport({
       data-home-drive-cockpit-bottom={viewportProfile.values.cockpitBottomPx}
       data-home-drive-steering-width={viewportProfile.values.steeringWidthPx}
       data-home-drive-steering-bottom={viewportProfile.values.steeringBottomPx}
+      data-home-drive-road-drift={runtime.roadDriftPx.toFixed(2)}
+      data-home-drive-camera-roll={runtime.cameraRollDeg.toFixed(2)}
+      data-home-drive-steering-intensity={runtime.steeringIntensity.toFixed(3)}
+      data-home-drive-world-x={toDataNumber(runtime.worldX)}
+      data-home-drive-world-y={toDataNumber(runtime.worldY)}
+      data-home-drive-heading={toDataNumber(runtime.headingDeg)}
+      data-home-drive-road-id={runtime.currentRoadId ?? "none"}
+      data-home-drive-road-label={runtime.currentRoadLabel ?? "none"}
+      data-home-drive-district-id={runtime.currentDistrictId ?? "none"}
+      data-home-drive-district-label={runtime.currentDistrictLabel ?? "none"}
+      data-home-drive-world-roads={scene.visibleWorldRoads?.length ?? 0}
+      data-home-drive-intersections={scene.intersectionsAhead?.length ?? 0}
       style={viewportStyle}
     >
       <HomeDrivePixelSky
@@ -177,11 +207,21 @@ export default function HomeDriveViewport({
             routeSegment={scene.routeSegment}
           />
 
+          <HomeDriveParallelRoadLayer
+            runtime={runtime}
+            routeSegment={scene.routeSegment}
+          />
+
           <HomeDriveRoadSurface
             runtime={runtime}
             routeSegment={scene.routeSegment}
             laneMarkerTranslateY={scene.laneMarkerTranslateY}
             roadCurveState={scene.roadCurveState}
+          />
+
+          <HomeDriveWorldRoadLayer
+            runtime={runtime}
+            projectedRoads={scene.visibleWorldRoads ?? runtime.visibleWorldRoads}
           />
 
           <HomeDriveLandmarkLayer
@@ -228,7 +268,7 @@ export default function HomeDriveViewport({
         onClose={onClose}
       />
 
-      <HomeDriveDebugOverlay profile={viewportProfile} />
+      <HomeDriveDebugOverlay profile={viewportProfile} runtime={runtime} />
     </div>
   );
 }

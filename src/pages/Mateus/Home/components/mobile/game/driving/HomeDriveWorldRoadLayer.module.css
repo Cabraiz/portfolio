@@ -1,0 +1,357 @@
+.root {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  overflow: hidden;
+  pointer-events: none;
+  transform:
+    translate3d(
+      calc(var(--home-drive-road-drift-x, 0px) * 0.08),
+      0,
+      0
+    )
+    rotate(calc(var(--home-drive-camera-roll, 0deg) * 0.18));
+  transform-origin: 50% 68%;
+  contain: layout paint;
+}
+
+/*
+  Antes existia uma grade forte no horizonte.
+  Ela virava uma "rua flutuando". Mantemos desligado.
+*/
+.horizonGrid {
+  display: none;
+}
+
+.road {
+  position: absolute;
+  left: var(--world-road-x);
+  bottom: var(--world-road-bottom);
+  z-index: var(--world-road-z);
+  width: var(--world-road-width);
+  height: var(--world-road-height);
+  opacity: var(--world-road-opacity);
+  filter: blur(var(--world-road-blur));
+  transform:
+    translate3d(-50%, 0, 0)
+    scale(var(--world-road-scale))
+    rotate(var(--world-road-rotate));
+  transform-origin: 50% 100%;
+  will-change: transform, opacity, filter;
+}
+
+/*
+  Sombra achatada no chão, não embaixo de um objeto flutuante.
+*/
+.roadShadow {
+  position: absolute;
+  left: 50%;
+  bottom: -26%;
+  width: 104%;
+  height: 70%;
+  border-radius: 999px;
+  opacity: 0.48;
+  background:
+    radial-gradient(
+      ellipse at 50% 50%,
+      rgba(0, 0, 0, 0.42) 0%,
+      rgba(0, 0, 0, 0.22) 46%,
+      transparent 74%
+    );
+  transform:
+    translate3d(-50%, 0, 0)
+    scaleX(1.08)
+    scaleY(0.38);
+  transform-origin: 50% 100%;
+}
+
+.roadBody {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: 18px 18px 8px 8px;
+  clip-path: polygon(9% 0%, 91% 0%, 100% 100%, 0% 100%);
+  background:
+    linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.07),
+      transparent 14%,
+      transparent 86%,
+      rgba(255, 255, 255, 0.07)
+    ),
+    linear-gradient(
+      180deg,
+      rgba(92, 97, 101, 0.88) 0%,
+      rgba(49, 52, 55, 0.94) 54%,
+      rgba(25, 27, 30, 0.98) 100%
+    );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    inset 0 -10px 22px rgba(0, 0, 0, 0.32);
+  transform:
+    perspective(420px)
+    rotateX(63deg)
+    scaleY(0.54);
+  transform-origin: 50% 100%;
+}
+
+.roadEdgeLeft,
+.roadEdgeRight {
+  position: absolute;
+  top: 7%;
+  bottom: 12%;
+  width: 2px;
+  opacity: 0.58;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 244, 190, 0.04),
+      rgba(255, 244, 190, 0.46),
+      rgba(255, 244, 190, 0.08)
+    );
+}
+
+.roadEdgeLeft {
+  left: 13%;
+}
+
+.roadEdgeRight {
+  right: 13%;
+}
+
+.roadCenterLine {
+  position: absolute;
+  left: 50%;
+  top: 9%;
+  bottom: 17%;
+  width: 2px;
+  opacity: 0.34;
+  transform: translate3d(-50%, 0, 0);
+  background:
+    repeating-linear-gradient(
+      180deg,
+      rgba(255, 232, 160, 0.62) 0 8px,
+      transparent 8px 17px
+    );
+}
+
+.roadSheen {
+  position: absolute;
+  inset: 0;
+  opacity: 0.22;
+  background:
+    linear-gradient(
+      115deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.09) 36%,
+      transparent 50%
+    );
+  mix-blend-mode: screen;
+}
+
+.roadFront {
+  filter: blur(var(--world-road-blur)) saturate(1.02);
+}
+
+.roadLeft {
+  transform:
+    translate3d(-50%, 0, 0)
+    translateX(calc(-4px - var(--world-road-steering) * 5px))
+    scale(var(--world-road-scale))
+    skewX(var(--world-road-skew))
+    rotate(var(--world-road-rotate));
+}
+
+.roadRight {
+  transform:
+    translate3d(-50%, 0, 0)
+    translateX(calc(4px - var(--world-road-steering) * 5px))
+    scale(var(--world-road-scale))
+    skewX(var(--world-road-skew))
+    rotate(var(--world-road-rotate));
+}
+
+.roadBehind {
+  opacity: calc(var(--world-road-opacity) * 0.18);
+}
+
+.roadAvenue .roadBody {
+  background:
+    linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.08),
+      transparent 11%,
+      transparent 89%,
+      rgba(255, 255, 255, 0.08)
+    ),
+    linear-gradient(
+      180deg,
+      rgba(104, 109, 113, 0.9) 0%,
+      rgba(53, 57, 60, 0.96) 52%,
+      rgba(24, 26, 29, 1) 100%
+    );
+}
+
+.roadCoastal .roadBody {
+  background:
+    linear-gradient(
+      90deg,
+      rgba(151, 201, 217, 0.16),
+      transparent 19%,
+      transparent 81%,
+      rgba(241, 203, 127, 0.12)
+    ),
+    linear-gradient(
+      180deg,
+      rgba(99, 107, 109, 0.9),
+      rgba(48, 54, 56, 0.96),
+      rgba(24, 27, 29, 1)
+    );
+}
+
+.roadStreet .roadBody {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(82, 87, 92, 0.88),
+      rgba(42, 46, 50, 0.96),
+      rgba(22, 24, 27, 1)
+    );
+}
+
+.roadService .roadBody {
+  opacity: 0.72;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(67, 69, 68, 0.84),
+      rgba(35, 36, 36, 0.94),
+      rgba(19, 20, 20, 1)
+    );
+}
+
+.roadCommercial .roadBody {
+  background:
+    linear-gradient(
+      90deg,
+      rgba(220, 165, 94, 0.1),
+      transparent 18%,
+      transparent 82%,
+      rgba(220, 165, 94, 0.1)
+    ),
+    linear-gradient(
+      180deg,
+      rgba(92, 92, 90, 0.9),
+      rgba(47, 48, 48, 0.96),
+      rgba(24, 25, 25, 1)
+    );
+}
+
+.roadRing .roadBody {
+  border-radius: 999px;
+  clip-path: ellipse(50% 45% at 50% 55%);
+  background:
+    radial-gradient(
+      ellipse at 50% 58%,
+      rgba(20, 22, 24, 0.18) 0%,
+      rgba(20, 22, 24, 0.18) 28%,
+      transparent 31%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(92, 97, 101, 0.88),
+      rgba(47, 51, 54, 0.96),
+      rgba(22, 24, 26, 1)
+    );
+}
+
+.roadIntersection .roadBody {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    inset 0 -10px 22px rgba(0, 0, 0, 0.34),
+    0 0 0 1px rgba(255, 232, 172, 0.06);
+}
+
+.roadIntersection .roadCenterLine {
+  opacity: 0.24;
+}
+
+.intersectionBeacon {
+  position: absolute;
+  left: 50%;
+  bottom: 48%;
+  z-index: 60;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: min(220px, 72vw);
+  padding: 5px 8px;
+  border-radius: 999px;
+  color: rgba(255, 241, 208, 0.94);
+  background:
+    linear-gradient(
+      180deg,
+      rgba(24, 26, 32, 0.62),
+      rgba(9, 10, 14, 0.56)
+    );
+  border: 1px solid rgba(255, 221, 144, 0.14);
+  box-shadow:
+    0 12px 32px rgba(0, 0, 0, 0.26),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(8px);
+  transform:
+    translate3d(
+      calc(-50% + var(--home-drive-horizon-shift-x, 0px) * 0.14),
+      0,
+      0
+    );
+}
+
+.intersectionBeacon[data-turn-side="left"] {
+  left: 39%;
+}
+
+.intersectionBeacon[data-turn-side="right"] {
+  left: 61%;
+}
+
+.intersectionBeacon[data-turn-side="behind"] {
+  opacity: 0.42;
+}
+
+.intersectionGlyph {
+  flex: 0 0 auto;
+  color: rgba(255, 216, 138, 0.98);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.intersectionName {
+  min-width: 0;
+  overflow: hidden;
+  font-size: 8px;
+  font-weight: 950;
+  letter-spacing: 0.08em;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+@media (max-width: 420px) {
+  .intersectionBeacon {
+    max-width: 68vw;
+    padding: 4px 7px;
+  }
+
+  .intersectionName {
+    font-size: 7px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .root,
+  .road,
+  .intersectionBeacon {
+    transition: none;
+  }
+}

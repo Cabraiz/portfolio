@@ -154,7 +154,17 @@
     var(--home-drive-steering-pivot-x)
     var(--home-drive-steering-pivot-y);
   will-change: transform;
-  transition: transform 72ms linear;
+
+  /*
+    Antes: 72ms linear.
+    Isso deixava o volante parar seco.
+
+    Agora:
+    - entrada continua responsiva;
+    - retorno visual fica mais orgânico;
+    - sem parecer delay pesado.
+  */
+  transition: transform 120ms cubic-bezier(0.22, 0.74, 0.26, 1);
 }
 
 .dashboard,

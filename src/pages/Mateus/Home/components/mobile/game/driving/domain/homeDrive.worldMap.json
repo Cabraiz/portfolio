@@ -1,0 +1,1446 @@
+{
+  "id": "pseudo-fortaleza-open-world-v1",
+  "label": "Pseudo Fortaleza Open World",
+  "version": 1,
+  "units": "virtual-meters",
+  "coordinateSystem": {
+    "x": "horizontal city axis; negative = oeste, positive = leste",
+    "y": "forward city axis; negative = litoral/orla, positive = cidade/interior"
+  },
+  "worldBounds": {
+    "minX": -1250,
+    "maxX": 1250,
+    "minY": -450,
+    "maxY": 2350
+  },
+  "spawn": {
+    "roadId": "av-beira-mar",
+    "position": {
+      "x": 0,
+      "y": -300
+    },
+    "headingDeg": 0,
+    "speedKmh": 0
+  },
+  "districts": [
+    {
+      "id": "meireles",
+      "label": "Meireles",
+      "center": {
+        "x": 0,
+        "y": -120
+      },
+      "ambience": "coast"
+    },
+    {
+      "id": "praia-de-iracema",
+      "label": "Praia de Iracema",
+      "center": {
+        "x": -520,
+        "y": -80
+      },
+      "ambience": "nightlife"
+    },
+    {
+      "id": "aldeota",
+      "label": "Aldeota",
+      "center": {
+        "x": 420,
+        "y": 560
+      },
+      "ambience": "residential"
+    },
+    {
+      "id": "centro",
+      "label": "Centro",
+      "center": {
+        "x": -520,
+        "y": 680
+      },
+      "ambience": "downtown"
+    },
+    {
+      "id": "benfica",
+      "label": "Benfica",
+      "center": {
+        "x": -180,
+        "y": 1280
+      },
+      "ambience": "academic"
+    },
+    {
+      "id": "castelao",
+      "label": "Castelão",
+      "center": {
+        "x": 760,
+        "y": 1880
+      },
+      "ambience": "stadium"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "n-orla-west",
+      "x": -900,
+      "y": -320
+    },
+    {
+      "id": "n-orla-iracema",
+      "x": -560,
+      "y": -300
+    },
+    {
+      "id": "n-orla-meireles",
+      "x": 0,
+      "y": -300
+    },
+    {
+      "id": "n-orla-mucuripe",
+      "x": 560,
+      "y": -260
+    },
+    {
+      "id": "n-orla-east",
+      "x": 940,
+      "y": -220
+    },
+    {
+      "id": "n-iracema-1",
+      "x": -760,
+      "y": 80
+    },
+    {
+      "id": "n-iracema-2",
+      "x": -520,
+      "y": 160
+    },
+    {
+      "id": "n-meireles-1",
+      "x": -120,
+      "y": 80
+    },
+    {
+      "id": "n-meireles-2",
+      "x": 120,
+      "y": 180
+    },
+    {
+      "id": "n-aldeota-1",
+      "x": 460,
+      "y": 160
+    },
+    {
+      "id": "n-varjota-1",
+      "x": 720,
+      "y": 120
+    },
+    {
+      "id": "n-centro-west",
+      "x": -900,
+      "y": 560
+    },
+    {
+      "id": "n-centro-core",
+      "x": -520,
+      "y": 620
+    },
+    {
+      "id": "n-centro-east",
+      "x": -120,
+      "y": 640
+    },
+    {
+      "id": "n-aldeota-core",
+      "x": 420,
+      "y": 620
+    },
+    {
+      "id": "n-papicu",
+      "x": 920,
+      "y": 640
+    },
+    {
+      "id": "n-benfica-west",
+      "x": -760,
+      "y": 1120
+    },
+    {
+      "id": "n-benfica-core",
+      "x": -220,
+      "y": 1180
+    },
+    {
+      "id": "n-fatimacentral",
+      "x": 160,
+      "y": 1120
+    },
+    {
+      "id": "n-cococore",
+      "x": 700,
+      "y": 1100
+    },
+    {
+      "id": "n-campus",
+      "x": -260,
+      "y": 1520
+    },
+    {
+      "id": "n-parangaba",
+      "x": -620,
+      "y": 1840
+    },
+    {
+      "id": "n-joquei",
+      "x": -80,
+      "y": 1880
+    },
+    {
+      "id": "n-castelao-west",
+      "x": 440,
+      "y": 1740
+    },
+    {
+      "id": "n-castelao-core",
+      "x": 760,
+      "y": 1880
+    },
+    {
+      "id": "n-castelao-east",
+      "x": 1080,
+      "y": 1980
+    },
+    {
+      "id": "n-south-west",
+      "x": -920,
+      "y": 2200
+    },
+    {
+      "id": "n-south-core",
+      "x": -180,
+      "y": 2220
+    },
+    {
+      "id": "n-south-east",
+      "x": 640,
+      "y": 2260
+    }
+  ],
+  "roads": [
+    {
+      "id": "av-beira-mar",
+      "label": "Av. Beira Mar",
+      "districtId": "meireles",
+      "kind": "coastal",
+      "roadTone": "boulevard",
+      "laneCount": 4,
+      "width": 24,
+      "speedLimitKmh": 55,
+      "bidirectional": true,
+      "surface": "asphalt",
+      "points": [
+        {
+          "x": -900,
+          "y": -320
+        },
+        {
+          "x": -560,
+          "y": -300
+        },
+        {
+          "x": 0,
+          "y": -300
+        },
+        {
+          "x": 560,
+          "y": -260
+        },
+        {
+          "x": 940,
+          "y": -220
+        }
+      ],
+      "tags": [
+        "main",
+        "coast",
+        "wide",
+        "scenic"
+      ]
+    },
+    {
+      "id": "rua-dragao-mar",
+      "label": "Rua Dragão do Mar",
+      "districtId": "praia-de-iracema",
+      "kind": "street",
+      "roadTone": "urban-core",
+      "laneCount": 2,
+      "width": 13,
+      "speedLimitKmh": 35,
+      "bidirectional": true,
+      "surface": "asphalt",
+      "points": [
+        {
+          "x": -760,
+          "y": 80
+        },
+        {
+          "x": -650,
+          "y": -40
+        },
+        {
+          "x": -560,
+          "y": -300
+        }
+      ],
+      "tags": [
+        "nightlife",
+        "curved",
+        "access"
+      ]
+    },
+    {
+      "id": "av-iracema-interna",
+      "label": "Av. Iracema Interna",
+      "districtId": "praia-de-iracema",
+      "kind": "avenue",
+      "roadTone": "avenue",
+      "laneCount": 3,
+      "width": 18,
+      "speedLimitKmh": 45,
+      "bidirectional": true,
+      "surface": "asphalt",
+      "points": [
+        {
+          "x": -900,
+          "y": 560
+        },
+        {
+          "x": -760,
+          "y": 80
+        },
+        {
+          "x": -520,
+          "y": 160
+        },
+        {
+          "x": -120,
+          "y": 80
+        }
+      ],
+      "tags": [
+        "diagonal",
+        "connector",
+        "slight-curve"
+      ]
+    },
+    {
+      "id": "av-monsenhor-tabosa-pseudo",
+      "label": "Av. Monsenhor Tabosa",
+      "districtId": "praia-de-iracema",
+      "kind": "commercial",
+      "roadTone": "corridor",
+      "laneCount": 2,
+      "width": 14,
+      "speedLimitKmh": 40,
+      "bidirectional": true,
+      "surface": "asphalt",
+      "points": [
+        {
+          "x": -760,
+          "y": 80
+        },
+        {
+          "x": -520,
+          "y": 160
+        },
+        {
+          "x": -120,
+          "y": 80
+        },
+        {
+          "x": 120,
+          "y": 180
+        },
+        {
+          "x": 460,
+          "y": 160
+        }
+      ],
+      "tags": [
+        "commercial",
+        "east-west",
+        "parallel"
+      ]
+    },
+    {
+      "id": "av-santos-dumont-pseudo",
+      "label": "Av. Santos Dumont",
+      "districtId": "aldeota",
+      "kind": "avenue",
+      "roadTone": "avenue",
+      "laneCount": 4,
+      "width": 22,
+      "speedLimitKmh": 55,
+      "bidirectional": true,
+      "surface": "asphalt",
+      "points": [
+        {
+          "x": -120,
+          "y": 640
+        },
+        {
+          "x": 420,
+          "y": 620
+        },
+        {
+          "x": 920,
+          "y": 640
+        }
+      ],
+      "tags": [
+        "main",
+        "east-west",
+        "fast"
+      ]
+    },
+    {
+      "id": "av-dom-luis-pseudo",
+      "label": "Av. Dom Luís",
+      "districtId": "meireles",
+      "kind": "avenue",
+      "roadTone": "boulevard",
+      "laneCount": 3,
+      "width": 18,
+      "speedLimitKmh": 45,
+      "bidirectional": true,
+      "surface": "asphalt",
+      "points": [
+        {
+          "x": -520,
+          "y": 620
+        },
+        {
+          "x": -120,
+          "y": 640
+        },
+        {
+          "x": 420,
+          "y": 620
+        },
+        {
+          "x": 700,
+          "y": 1100
+        }
+      ],
+      "tags": [
+        "shopping",
+        "connector",
+        "slight-diagonal"
+      ]
+    },
+    {
+      "id": "av-abolição-pseudo",
+      "label": "Av. Abolição",
+      "districtId": "meireles",
+      "kind": "avenue",
+      "roadTone": "corridor",
+      "laneCount": 3,
+      "width": 17,
+      "speedLimitKmh": 45,
+      "bidirectional": true,
+      "surface": "asphalt",
+      "points": [
+        {
+          "x": -560,
+          "y": -300
+        },
+        {
+          "x": -120,
+          "y": 80
+        },
+        {
+          "x": 120,
+          "y": 180
+        },
+        {
+          "x": 420,
+          "y": 620
+        }
+      ],
+      "tags": [
+        "coast-access",
+        "diagonal",
+        "slight-curve"
+      ]
+    },
+    {
+      "id": "av-desembargador-moreira-pseudo",
+      "label": "Av. Desembargador Moreira",
+      "districtId": "aldeota",
+      "kind": "avenue",
+      "roadTone": "avenue",
+      "laneCount": 4,
+      "width": 21,
+      "speedLimitKmh": 50,
+      "bidirectional": true,
+      "surface": "asphalt",
+      "points": [
+        {
+          "x": 460,
+          "y": 160
+        },
+        {
+          "x": 420,
+          "y": 620
+        },
+        {
+          "x": 160,
+          "y": 1120
+        },
+        {
+          "x": -80,
+          "y": 1880
+        }
+      ],
+      "tags": [
+        "north-south",
+        "main",
+        "long"
+      ]
+    },
+    {
+      "id": "av-barão-studart-pseudo",
+      "label": "Av. Barão de Studart",
+      "districtId": "aldeota",
+      "kind": "avenue",
+      "roadTone": "corridor",
+      "laneCount": 3,
+      "width": 18,
+      "speedLimitKmh": 45,
+      "bidirectional": true,
+      "surface": "asphalt",
+      "points": [
+        {
+          "x": 120,
+          "y": 180
+        },
+        {
+          "x": 160,
+          "y": 1120
+        },
+        {
+          "x": -260,
+          "y": 1520
+        },
+        {
+          "x": -180,
+          "y": 2220
+        }
+      ],
+      "tags": [
+        "north-south",
+        "connector",
+        "slightly-crooked"
+      ]
+    },
+    {
+      "id": "av-heraclito-graca-pseudo",
+      "label": "Av. Heráclito Graça",
+      "districtId": "centro",
+      "kind": "avenue",
+      "roadTone": "urban-core",
+      "laneCount": 3,
+      "width": 16,
+      "speedLimitKmh": 45,
+      "bidirectional": true,
+      "surface": "asphalt",
+      "points": [
+        {
+          "x": -900,
+          "y": 560
+        },
+        {
+          "x": -520,
+          "y": 620
+        },
+        {
+          "x": -120,
+          "y": 640
+        },
+        {
+          "x": 420,
+          "y": 620
+        }
+      ],
+      "tags": [
+        "center",
+        "east-west",
+        "dense"
+      ]
+    },
+    {
+      "id": "av-imperador-pseudo",
+      "label": "Av. Imperador",
+      "districtId": "centro",
+      "kind": "avenue",
+      "roadTone": "urban-core",
+      "laneCount": 3,
+      "width": 17,
+      "speedLimitKmh": 45,
+      "bidirectional": true,
+      "surface": "asphalt",
+      "points": [
+        {
+          "x": -520,
+          "y": 160
+        },
+        {
+          "x": -520,
+          "y": 620
+        },
+        {
+          "x": -760,
+          "y": 1120
+        },
+        {
+          "x": -620,
+          "y": 1840
+        }
+      ],
+      "tags": [
+        "north-south",
+        "downtown",
+        "long"
+      ]
+    },
+    {
+      "id": "av-universidade-pseudo",
+      "label": "Av. Universidade",
+      "districtId": "benfica",
+      "kind": "avenue",
+      "roadTone": "corridor",
+      "laneCount": 4,
+      "width": 20,
+      "speedLimitKmh": 50,
+      "bidirectional": true,
+      "surface": "asphalt",
+      "points": [
+        {
+          "x": -520,
+          "y": 620
+        },
+        {
+          "x": -220,
+          "y": 1180
+        },
+        {
+          "x": -260,
+          "y": 1520
+        },
+        {
+          "x": -80,
+          "y": 1880
+        }
+      ],
+      "tags": [
+        "academic",
+        "main",
+        "slight-curve"
+      ]
+    },
+    {
+      "id": "rua-benfica-grid-1",
+      "label": "Rua Benfica 01",
+      "districtId": "benfica",
+      "kind": "street",
+      "roadTone": "corridor",
+      "laneCount": 2,
+      "width": 11,
+      "speedLimitKmh": 30,
+      "bidirectional": true,
+      "surface": "asphalt",
+      "points": [
+        {
+          "x": -760,
+          "y": 1120
+        },
+        {
+          "x": -220,
+          "y": 1180
+        },
+        {
+          "x": 160,
+          "y": 1120
+        }
+      ],
+      "tags": [
+        "grid",
+        "academic",
+        "parallel"
+      ]
+    },
+    {
+      "id": "rua-benfica-grid-2",
+      "label": "Rua Benfica 02",
+      "districtId": "benfica",
+      "kind": "street",
+      "roadTone": "corridor",
+      "laneCount": 2,
+      "width": 10,
+      "speedLimitKmh": 30,
+      "bidirectional": true,
+      "surface": "asphalt",
+      "points": [
+        {
+          "x": -760,
+          "y": 1320
+        },
+        {
+          "x": -260,
+          "y": 1520
+        },
+        {
+          "x": 160,
+          "y": 1420
+        }
+      ],
+      "tags": [
+        "grid",
+        "slightly-crooked",
+        "secondary"
+      ]
+    },
+    {
+      "id": "rua-centro-grid-1",
+      "label": "Rua Centro 01",
+      "districtId": "centro",
+      "kind": "street",
+      "roadTone": "urban-core",
+      "laneCount": 2,
+      "width": 11,
+      "speedLimitKmh": 30,
+      "bidirectional": true,
+      "surface": "asphalt",
+      "points": [
+        {
+          "x": -900,
+          "y": 760
+        },
+        {
+          "x": -520,
+          "y": 760
+        },
+        {
+          "x": -120,
+          "y": 820
+        }
+      ],
+      "tags": [
+        "grid",
+        "downtown",
+        "dense"
+      ]
+    },
+    {
+      "id": "rua-centro-grid-2",
+      "label": "Rua Centro 02",
+      "districtId": "centro",
+      "kind": "street",
+      "roadTone": "urban-core",
+      "laneCount": 2,
+      "width": 10,
+      "speedLimitKmh": 30,
+      "bidirectional": true,
+      "surface": "asphalt",
+      "points": [
+        {
+          "x": -900,
+          "y": 960
+        },
+        {
+          "x": -520,
+          "y": 920
+        },
+        {
+          "x": -220,
+          "y": 1180
+        }
+      ],
+      "tags": [
+        "grid",
+        "downtown",
+        "crooked"
+      ]
+    },
+    {
+      "id": "rua-aldeota-grid-1",
+      "label": "Rua Aldeota 01",
+      "districtId": "aldeota",
+      "kind": "street",
+      "roadTone": "corridor",
+      "laneCount": 2,
+      "width": 11,
+      "speedLimitKmh": 35,
+      "bidirectional": true,
+      "surface": "asphalt",
+      "points": [
+        {
+          "x": 120,
+          "y": 180
+        },
+        {
+          "x": 460,
+          "y": 160
+        },
+        {
+          "x": 720,
+          "y": 120
+        }
+      ],
+      "tags": [
+        "grid",
+        "residential",
+        "parallel"
+      ]
+    },
+    {
+      "id": "rua-aldeota-grid-2",
+      "label": "Rua Aldeota 02",
+      "districtId": "aldeota",
+      "kind": "street",
+      "roadTone": "corridor",
+      "laneCount": 2,
+      "width": 11,
+      "speedLimitKmh": 35,
+      "bidirectional": true,
+      "surface": "asphalt",
+      "points": [
+        {
+          "x": 120,
+          "y": 380
+        },
+        {
+          "x": 420,
+          "y": 620
+        },
+        {
+          "x": 920,
+          "y": 640
+        }
+      ],
+      "tags": [
+        "grid",
+        "residential",
+        "slightly-crooked"
+      ]
+    },
+    {
+      "id": "rua-aldeota-grid-3",
+      "label": "Rua Aldeota 03",
+      "districtId": "aldeota",
+      "kind": "street",
+      "roadTone": "corridor",
+      "laneCount": 2,
+      "width": 10,
+      "speedLimitKmh": 30,
+      "bidirectional": true,
+      "surface": "asphalt",
+      "points": [
+        {
+          "x": 420,
+          "y": 620
+        },
+        {
+          "x": 520,
+          "y": 860
+        },
+        {
+          "x": 700,
+          "y": 1100
+        }
+      ],
+      "tags": [
+        "connector",
+        "coco",
+        "curved"
+      ]
+    },
+    {
+      "id": "av-washington-soares-pseudo",
+      "label": "Av. Washington Soares",
+      "districtId": "castelao",
+      "kind": "avenue",
+      "roadTone": "avenue",
+      "laneCount": 4,
+      "width": 24,
+      "speedLimitKmh": 60,
+      "bidirectional": true,
+      "surface": "asphalt",
+      "points": [
+        {
+          "x": 700,
+          "y": 1100
+        },
+        {
+          "x": 440,
+          "y": 1740
+        },
+        {
+          "x": 640,
+          "y": 2260
+        }
+      ],
+      "tags": [
+        "fast",
+        "south",
+        "long"
+      ]
+    },
+    {
+      "id": "av-alberto-craveiro-pseudo",
+      "label": "Av. Alberto Craveiro",
+      "districtId": "castelao",
+      "kind": "avenue",
+      "roadTone": "avenue",
+      "laneCount": 4,
+      "width": 23,
+      "speedLimitKmh": 60,
+      "bidirectional": true,
+      "surface": "asphalt",
+      "points": [
+        {
+          "x": -80,
+          "y": 1880
+        },
+        {
+          "x": 440,
+          "y": 1740
+        },
+        {
+          "x": 760,
+          "y": 1880
+        },
+        {
+          "x": 1080,
+          "y": 1980
+        }
+      ],
+      "tags": [
+        "stadium",
+        "fast",
+        "east-west"
+      ]
+    },
+    {
+      "id": "anel-castelao",
+      "label": "Anel do Castelão",
+      "districtId": "castelao",
+      "kind": "ring",
+      "roadTone": "avenue",
+      "laneCount": 2,
+      "width": 15,
+      "speedLimitKmh": 40,
+      "bidirectional": true,
+      "surface": "asphalt",
+      "points": [
+        {
+          "x": 440,
+          "y": 1740
+        },
+        {
+          "x": 620,
+          "y": 1660
+        },
+        {
+          "x": 880,
+          "y": 1720
+        },
+        {
+          "x": 960,
+          "y": 1900
+        },
+        {
+          "x": 760,
+          "y": 1880
+        },
+        {
+          "x": 560,
+          "y": 1960
+        },
+        {
+          "x": 440,
+          "y": 1740
+        }
+      ],
+      "tags": [
+        "loop",
+        "stadium",
+        "curved"
+      ]
+    },
+    {
+      "id": "rua-estadio-service-1",
+      "label": "Rua Serviço Estádio 01",
+      "districtId": "castelao",
+      "kind": "service",
+      "roadTone": "corridor",
+      "laneCount": 1,
+      "width": 8,
+      "speedLimitKmh": 20,
+      "bidirectional": true,
+      "surface": "asphalt",
+      "points": [
+        {
+          "x": 760,
+          "y": 1880
+        },
+        {
+          "x": 820,
+          "y": 1780
+        },
+        {
+          "x": 880,
+          "y": 1720
+        }
+      ],
+      "tags": [
+        "service",
+        "short",
+        "stadium"
+      ]
+    },
+    {
+      "id": "rua-estadio-service-2",
+      "label": "Rua Serviço Estádio 02",
+      "districtId": "castelao",
+      "kind": "service",
+      "roadTone": "corridor",
+      "laneCount": 1,
+      "width": 8,
+      "speedLimitKmh": 20,
+      "bidirectional": true,
+      "surface": "asphalt",
+      "points": [
+        {
+          "x": 760,
+          "y": 1880
+        },
+        {
+          "x": 900,
+          "y": 2040
+        },
+        {
+          "x": 1080,
+          "y": 1980
+        }
+      ],
+      "tags": [
+        "service",
+        "short",
+        "stadium"
+      ]
+    },
+    {
+      "id": "corredor-parangaba",
+      "label": "Corredor Parangaba",
+      "districtId": "benfica",
+      "kind": "avenue",
+      "roadTone": "corridor",
+      "laneCount": 3,
+      "width": 18,
+      "speedLimitKmh": 50,
+      "bidirectional": true,
+      "surface": "asphalt",
+      "points": [
+        {
+          "x": -620,
+          "y": 1840
+        },
+        {
+          "x": -920,
+          "y": 2200
+        },
+        {
+          "x": -180,
+          "y": 2220
+        }
+      ],
+      "tags": [
+        "south",
+        "connector",
+        "crooked"
+      ]
+    },
+    {
+      "id": "rua-campus-loop",
+      "label": "Circuito Campus",
+      "districtId": "benfica",
+      "kind": "street",
+      "roadTone": "corridor",
+      "laneCount": 2,
+      "width": 12,
+      "speedLimitKmh": 25,
+      "bidirectional": true,
+      "surface": "asphalt",
+      "points": [
+        {
+          "x": -260,
+          "y": 1520
+        },
+        {
+          "x": -420,
+          "y": 1440
+        },
+        {
+          "x": -520,
+          "y": 1600
+        },
+        {
+          "x": -360,
+          "y": 1720
+        },
+        {
+          "x": -260,
+          "y": 1520
+        }
+      ],
+      "tags": [
+        "loop",
+        "academic",
+        "slow"
+      ]
+    },
+    {
+      "id": "via-coco-papicu",
+      "label": "Via Cocó / Papicu",
+      "districtId": "aldeota",
+      "kind": "avenue",
+      "roadTone": "boulevard",
+      "laneCount": 3,
+      "width": 18,
+      "speedLimitKmh": 50,
+      "bidirectional": true,
+      "surface": "asphalt",
+      "points": [
+        {
+          "x": 920,
+          "y": 640
+        },
+        {
+          "x": 700,
+          "y": 1100
+        },
+        {
+          "x": 440,
+          "y": 1740
+        }
+      ],
+      "tags": [
+        "park",
+        "diagonal",
+        "curved"
+      ]
+    },
+    {
+      "id": "rua-varjota-1",
+      "label": "Rua Varjota 01",
+      "districtId": "aldeota",
+      "kind": "street",
+      "roadTone": "corridor",
+      "laneCount": 2,
+      "width": 10,
+      "speedLimitKmh": 30,
+      "bidirectional": true,
+      "surface": "asphalt",
+      "points": [
+        {
+          "x": 560,
+          "y": -260
+        },
+        {
+          "x": 720,
+          "y": 120
+        },
+        {
+          "x": 920,
+          "y": 640
+        }
+      ],
+      "tags": [
+        "coast-access",
+        "residential",
+        "curved"
+      ]
+    },
+    {
+      "id": "rua-varjota-2",
+      "label": "Rua Varjota 02",
+      "districtId": "aldeota",
+      "kind": "street",
+      "roadTone": "corridor",
+      "laneCount": 2,
+      "width": 10,
+      "speedLimitKmh": 30,
+      "bidirectional": true,
+      "surface": "asphalt",
+      "points": [
+        {
+          "x": 460,
+          "y": 160
+        },
+        {
+          "x": 720,
+          "y": 120
+        },
+        {
+          "x": 920,
+          "y": 320
+        }
+      ],
+      "tags": [
+        "parallel",
+        "residential",
+        "short"
+      ]
+    },
+    {
+      "id": "via-sul-radial",
+      "label": "Via Sul Radial",
+      "districtId": "castelao",
+      "kind": "avenue",
+      "roadTone": "avenue",
+      "laneCount": 4,
+      "width": 22,
+      "speedLimitKmh": 60,
+      "bidirectional": true,
+      "surface": "asphalt",
+      "points": [
+        {
+          "x": -180,
+          "y": 2220
+        },
+        {
+          "x": 640,
+          "y": 2260
+        },
+        {
+          "x": 1080,
+          "y": 1980
+        }
+      ],
+      "tags": [
+        "south",
+        "fast",
+        "connector"
+      ]
+    },
+    {
+      "id": "rua-leste-random-1",
+      "label": "Rua Leste 01",
+      "districtId": "aldeota",
+      "kind": "street",
+      "roadTone": "corridor",
+      "laneCount": 2,
+      "width": 9,
+      "speedLimitKmh": 30,
+      "bidirectional": true,
+      "surface": "asphalt",
+      "points": [
+        {
+          "x": 700,
+          "y": 1100
+        },
+        {
+          "x": 880,
+          "y": 1280
+        },
+        {
+          "x": 760,
+          "y": 1880
+        }
+      ],
+      "tags": [
+        "random",
+        "curved",
+        "secondary"
+      ]
+    },
+    {
+      "id": "rua-leste-random-2",
+      "label": "Rua Leste 02",
+      "districtId": "aldeota",
+      "kind": "street",
+      "roadTone": "corridor",
+      "laneCount": 2,
+      "width": 9,
+      "speedLimitKmh": 30,
+      "bidirectional": true,
+      "surface": "asphalt",
+      "points": [
+        {
+          "x": 920,
+          "y": 640
+        },
+        {
+          "x": 1080,
+          "y": 960
+        },
+        {
+          "x": 1080,
+          "y": 1980
+        }
+      ],
+      "tags": [
+        "random",
+        "outer",
+        "secondary"
+      ]
+    },
+    {
+      "id": "rua-oeste-random-1",
+      "label": "Rua Oeste 01",
+      "districtId": "centro",
+      "kind": "street",
+      "roadTone": "urban-core",
+      "laneCount": 2,
+      "width": 9,
+      "speedLimitKmh": 30,
+      "bidirectional": true,
+      "surface": "asphalt",
+      "points": [
+        {
+          "x": -900,
+          "y": 560
+        },
+        {
+          "x": -1080,
+          "y": 980
+        },
+        {
+          "x": -920,
+          "y": 2200
+        }
+      ],
+      "tags": [
+        "random",
+        "outer",
+        "crooked"
+      ]
+    },
+    {
+      "id": "rua-oeste-random-2",
+      "label": "Rua Oeste 02",
+      "districtId": "centro",
+      "kind": "street",
+      "roadTone": "urban-core",
+      "laneCount": 2,
+      "width": 9,
+      "speedLimitKmh": 30,
+      "bidirectional": true,
+      "surface": "asphalt",
+      "points": [
+        {
+          "x": -760,
+          "y": 1120
+        },
+        {
+          "x": -980,
+          "y": 1480
+        },
+        {
+          "x": -620,
+          "y": 1840
+        }
+      ],
+      "tags": [
+        "random",
+        "secondary",
+        "crooked"
+      ]
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "landmark-beira-mar",
+      "label": "Beira Mar",
+      "districtId": "meireles",
+      "position": {
+        "x": 0,
+        "y": -360
+      },
+      "kind": "coast",
+      "radius": 90
+    },
+    {
+      "id": "landmark-dragao-mar",
+      "label": "Dragão do Mar",
+      "districtId": "praia-de-iracema",
+      "position": {
+        "x": -660,
+        "y": 70
+      },
+      "kind": "culture",
+      "radius": 70
+    },
+    {
+      "id": "landmark-centro",
+      "label": "Centro",
+      "districtId": "centro",
+      "position": {
+        "x": -520,
+        "y": 620
+      },
+      "kind": "downtown",
+      "radius": 100
+    },
+    {
+      "id": "landmark-benfica",
+      "label": "Benfica",
+      "districtId": "benfica",
+      "position": {
+        "x": -220,
+        "y": 1180
+      },
+      "kind": "academic",
+      "radius": 90
+    },
+    {
+      "id": "landmark-coco",
+      "label": "Cocó",
+      "districtId": "aldeota",
+      "position": {
+        "x": 700,
+        "y": 1100
+      },
+      "kind": "park",
+      "radius": 110
+    },
+    {
+      "id": "landmark-castelao",
+      "label": "Castelão",
+      "districtId": "castelao",
+      "position": {
+        "x": 760,
+        "y": 1880
+      },
+      "kind": "stadium",
+      "radius": 130
+    }
+  ],
+  "gameplay": {
+    "snapToRoad": true,
+    "snapDistanceMeters": 26,
+    "intersectionRadiusMeters": 36,
+    "offRoadAllowed": false,
+    "defaultRoadGrip": 0.88,
+    "turning": {
+      "minTurnSpeedKmh": 5,
+      "maxTurnRateDegPerSecond": 92,
+      "steeringReturnRate": 4.2
+    },
+    "camera": {
+      "visibleDistanceMeters": 520,
+      "sideVisibilityMeters": 220,
+      "projectionMode": "cockpit-2-5d"
+    }
+  }
+}

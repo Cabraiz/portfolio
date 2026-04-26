@@ -4,12 +4,14 @@ import {
   HOME_DRIVE_CAMERA_DEBUG_STORAGE_KEY,
   roundNumber,
 } from "./domain/homeDriveCamera.tokens";
+import type { HomeDriveRuntimeState } from "./domain/homeDrive.types";
 import useHomeDriveViewportProfile, {
   type HomeDriveViewportProfile,
 } from "../../../../hooks/useHomeDriveViewportProfile";
 
 export type HomeDriveDebugOverlayProps = Readonly<{
   profile?: HomeDriveViewportProfile;
+  runtime?: HomeDriveRuntimeState;
   enabled?: boolean;
   className?: string;
 }>;
@@ -35,14 +37,46 @@ function formatBool(value: boolean): string {
   return value ? "yes" : "no";
 }
 
+function formatNumber(value: number | undefined, digits = 2): string {
+  if (!Number.isFinite(value)) {
+    return "0";
+  }
+
+  return Number(value).toFixed(digits);
+}
+
+function formatMeters(value: number | undefined): string {
+  if (!Number.isFinite(value)) {
+    return "0 m";
+  }
+
+  return `${Number(value).toFixed(1)} m`;
+}
+
+function formatDeg(value: number | undefined): string {
+  if (!Number.isFinite(value)) {
+    return "0.0°";
+  }
+
+  return `${Number(value).toFixed(1)}°`;
+}
+
+function formatText(value: string | undefined): string {
+  if (!value || value.trim().length === 0) {
+    return "none";
+  }
+
+  return value;
+}
+
 function buildRootStyle(): CSSProperties {
   return {
     position: "absolute",
     left: 10,
     bottom: 10,
     zIndex: 9999,
-    width: "min(320px, calc(100% - 20px))",
-    maxHeight: "min(62vh, 440px)",
+    width: "min(340px, calc(100% - 20px))",
+    maxHeight: "min(68vh, 500px)",
     overflow: "auto",
     borderRadius: 14,
     border: "1px solid rgba(255, 255, 255, 0.16)",
@@ -179,6 +213,7 @@ function DebugSection({
 
 export default function HomeDriveDebugOverlay({
   profile,
+  runtime,
   enabled,
   className,
 }: HomeDriveDebugOverlayProps) {
@@ -223,17 +258,112 @@ export default function HomeDriveDebugOverlay({
       style={rootStyle}
     >
       <header style={headerStyle}>
-        <h2 style={titleStyle}>Drive camera</h2>
+        <h2 style={titleStyle}>Drive debug</h2>
         <span style={badgeStyle}>{flags.kind}</span>
       </header>
 
       <div style={buildGridStyle()}>
-        <DebugRow label="stage" value={`${formatPx(values.stageWidth)} × ${formatPx(values.stageHeight)}`} />
-        <DebugRow label="visual" value={`${formatPx(values.visualWidth)} × ${formatPx(values.visualHeight)}`} />
-        <DebugRow label="layout" value={`${formatPx(snapshot.layoutWidth)} × ${formatPx(snapshot.layoutHeight)}`} />
+        <DebugRow
+          label="stage"
+          value={`${formatPx(values.stageWidth)} × ${formatPx(
+            values.stageHeight,
+          )}`}
+        />
+        <DebugRow
+          label="visual"
+          value={`${formatPx(values.visualWidth)} × ${formatPx(
+            values.visualHeight,
+          )}`}
+        />
+        <DebugRow
+          label="layout"
+          value={`${formatPx(snapshot.layoutWidth)} × ${formatPx(
+            snapshot.layoutHeight,
+          )}`}
+        />
         <DebugRow label="aspect" value={roundNumber(values.aspectRatio, 3)} />
         <DebugRow label="dpr" value={snapshot.devicePixelRatio} />
       </div>
+
+      {runtime ? (
+        <>
+          <DebugSection title="world">
+            <DebugRow label="phase" value={runtime.phase} />
+            <DebugRow label="speed" value={`${formatNumber(runtime.speedKmh, 1)} km/h`} />
+            <DebugRow label="rpm" value={runtime.rpm} />
+            <DebugRow label="gear" value={runtime.gearLabel} />
+            <DebugRow label="world x" value={formatNumber(runtime.worldX, 2)} />
+            <DebugRow label="world y" value={formatNumber(runtime.worldY, 2)} />
+            <DebugRow label="heading" value={formatDeg(runtime.headingDeg)} />
+            <DebugRow label="steering" value={formatNumber(runtime.steering, 3)} />
+          </DebugSection>
+
+          <DebugSection title="road">
+            <DebugRow label="road id" value={formatText(runtime.currentRoadId)} />
+            <DebugRow
+              label="road label"
+              value={formatText(runtime.currentRoadLabel)}
+            />
+            <DebugRow
+              label="district id"
+              value={formatText(runtime.currentDistrictId)}
+            />
+            <DebugRow
+              label="district"
+              value={formatText(runtime.currentDistrictLabel ?? runtime.districtLabel)}
+            />
+            <DebugRow
+              label="nearest road"
+              value={formatMeters(runtime.nearestRoadDistanceMeters)}
+            />
+            <DebugRow
+              label="visible roads"
+              value={runtime.visibleWorldRoads.length}
+            />
+            <DebugRow
+              label="intersections"
+              value={runtime.intersectionsAhead.length}
+            />
+          </DebugSection>
+
+          <DebugSection title="camera runtime">
+            <DebugRow label="road drift" value={formatPx(runtime.roadDriftPx)} />
+            <DebugRow label="camera roll" value={formatDeg(runtime.cameraRollDeg)} />
+            <DebugRow
+              label="horizon shift"
+              value={formatPx(runtime.horizonShiftPx)}
+            />
+            <DebugRow label="parallax" value={formatPx(runtime.parallaxPx)} />
+            <DebugRow label="yaw" value={formatDeg(runtime.cameraYaw)} />
+            <DebugRow label="pitch" value={formatDeg(runtime.cameraPitch)} />
+            <DebugRow
+              label="intensity"
+              value={formatNumber(runtime.steeringIntensity, 3)}
+            />
+          </DebugSection>
+
+          {runtime.intersectionAhead ? (
+            <DebugSection title="intersection ahead">
+              <DebugRow
+                label="target"
+                value={runtime.intersectionAhead.targetRoadLabel}
+              />
+              <DebugRow
+                label="side"
+                value={runtime.intersectionAhead.turnSide}
+              />
+              <DebugRow
+                label="distance"
+                value={formatMeters(runtime.intersectionAhead.distanceMeters)}
+              />
+              <DebugRow
+                label="angle"
+                value={formatDeg(runtime.intersectionAhead.angleDeg)}
+              />
+            </DebugSection>
+          ) : null}
+        </>
+      ) : null}
 
       <DebugSection title="flags">
         <DebugRow label="narrow" value={formatBool(flags.isNarrow)} />
@@ -241,17 +371,35 @@ export default function HomeDriveDebugOverlay({
         <DebugRow label="short" value={formatBool(flags.isShort)} />
         <DebugRow label="very short" value={formatBool(flags.isVeryShort)} />
         <DebugRow label="tall" value={formatBool(flags.isTall)} />
-        <DebugRow label="reduced viewport" value={formatBool(flags.hasReducedVisualViewport)} />
-        <DebugRow label="bottom inset risk" value={formatBool(flags.hasSystemBottomInsetRisk)} />
+        <DebugRow
+          label="reduced viewport"
+          value={formatBool(flags.hasReducedVisualViewport)}
+        />
+        <DebugRow
+          label="bottom inset risk"
+          value={formatBool(flags.hasSystemBottomInsetRisk)}
+        />
       </DebugSection>
 
       <DebugSection title="system">
         <DebugRow label="visual offset top" value={formatPx(snapshot.visualOffsetTop)} />
-        <DebugRow label="visual offset left" value={formatPx(snapshot.visualOffsetLeft)} />
-        <DebugRow label="visual bottom gap" value={formatPx(snapshot.visualViewportBottomGap)} />
-        <DebugRow label="reduced viewport" value={formatPx(snapshot.reducedVisualViewportPx)} />
+        <DebugRow
+          label="visual offset left"
+          value={formatPx(snapshot.visualOffsetLeft)}
+        />
+        <DebugRow
+          label="visual bottom gap"
+          value={formatPx(snapshot.visualViewportBottomGap)}
+        />
+        <DebugRow
+          label="reduced viewport"
+          value={formatPx(snapshot.reducedVisualViewportPx)}
+        />
         <DebugRow label="bottom safe zone" value={formatPx(values.bottomSafeZonePx)} />
-        <DebugRow label="system bottom inset" value={formatPx(values.systemBottomInsetPx)} />
+        <DebugRow
+          label="system bottom inset"
+          value={formatPx(values.systemBottomInsetPx)}
+        />
       </DebugSection>
 
       <DebugSection title="cockpit">

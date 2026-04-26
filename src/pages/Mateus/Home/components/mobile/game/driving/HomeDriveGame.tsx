@@ -1,32 +1,35 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+import homeDriveWorldMapJson from "./domain/homeDrive.worldMap.json";
+import {
+  createInitialHomeDriveVehicleDynamics,
+  resolveHomeDriveVehicleDynamics,
+  type HomeDriveVehicleDynamicsState,
+} from "./domain/homeDriveVehicleDynamics";
+import {
+  createInitialHomeDriveWorldCarState,
+} from "./domain/homeDrive.worldNavigation";
+import {
+  resetHomeDriveWorldCarToSpawn,
+  resolveHomeDriveWorldPhysics,
+} from "./domain/homeDrive.worldPhysics";
+import {
+  createInitialHomeDriveWorldCameraState,
+  resolveHomeDriveWorldCamera,
+} from "./domain/homeDrive.worldCamera";
+import { projectHomeDriveWorldRoads } from "./domain/homeDrive.worldProjection";
+import type {
+  HomeDriveLandmark,
+  HomeDrivePhase,
+  HomeDriveRuntimeState,
+} from "./domain/homeDrive.types";
+import type {
+  HomeDriveWorldCameraState,
+  HomeDriveWorldCarState,
+  HomeDriveWorldMap,
+  HomeDriveWorldProjectionResult,
+} from "./domain/homeDrive.worldTypes";
 import HomeDriveViewport from "./HomeDriveViewport";
-
-export type HomeDriveLandmark = Readonly<{
-  id: string;
-  label: string;
-  district: string;
-  atMeter: number;
-  color: string;
-}>;
-
-export type HomeDriveRuntimeState = Readonly<{
-  phase: "ready" | "playing" | "paused";
-  speedKmh: number;
-  rpm: number;
-  gearLabel: string;
-  routeProgress: number;
-  traveledMeters: number;
-  routeLengthMeters: number;
-  steering: number;
-  laneOffset: number;
-  cameraYaw: number;
-  cameraPitch: number;
-  elapsedSeconds: number;
-  districtLabel: string;
-  currentLandmark?: HomeDriveLandmark;
-  nextLandmark?: HomeDriveLandmark;
-}>;
 
 export type HomeDriveGameProps = Readonly<{
   onClose?: () => void;
@@ -39,9 +42,15 @@ type InputState = {
   brake: number;
 };
 
+const HOME_DRIVE_WORLD_MAP = homeDriveWorldMapJson as HomeDriveWorldMap;
+
 const ROUTE_LENGTH_METERS = 6_400;
-const MAX_SPEED_KMH = 96;
-const MIN_SPEED_KMH = 0;
+
+/*
+  Mantido por compatibilidade com RPM, HUD e camadas visuais antigas.
+  A velocidade real agora vem de resolveHomeDriveWorldPhysics().
+*/
+const MAX_SPEED_KMH = 66;
 const MAX_STEER = 1;
 
 const LANDMARKS: readonly HomeDriveLandmark[] = [
@@ -90,24 +99,22 @@ const LANDMARKS: readonly HomeDriveLandmark[] = [
 ] as const;
 
 function clamp(value: number, min: number, max: number): number {
+  if (!Number.isFinite(value)) {
+    return min;
+  }
+
   return Math.min(max, Math.max(min, value));
 }
 
-function lerp(current: number, target: number, amount: number): number {
-  return current + (target - current) * amount;
-}
-
-function toMetersPerSecond(speedKmh: number): number {
-  return speedKmh / 3.6;
-}
-
 function getGearLabel(speedKmh: number): string {
-  if (speedKmh < 4) return "N";
-  if (speedKmh < 18) return "1";
-  if (speedKmh < 34) return "2";
-  if (speedKmh < 50) return "3";
-  if (speedKmh < 68) return "4";
-  return "5";
+  /*
+    Fusca clássico: 4 marchas.
+  */
+  if (speedKmh < 3) return "N";
+  if (speedKmh < 16) return "1";
+  if (speedKmh < 31) return "2";
+  if (speedKmh < 49) return "3";
+  return "4";
 }
 
 function getDistrictLabel(progressMeters: number): string {
@@ -117,7 +124,9 @@ function getDistrictLabel(progressMeters: number): string {
   return landmark?.district ?? "Orla de Fortaleza";
 }
 
-function getCurrentLandmark(progressMeters: number): HomeDriveLandmark | undefined {
+function getCurrentLandmark(
+  progressMeters: number,
+): HomeDriveLandmark | undefined {
   return [...LANDMARKS]
     .reverse()
     .find((item) => progressMeters >= item.atMeter);
@@ -127,14 +136,90 @@ function getNextLandmark(progressMeters: number): HomeDriveLandmark | undefined 
   return LANDMARKS.find((item) => item.atMeter > progressMeters);
 }
 
+function getRealisticRpm(
+  speedKmh: number,
+  steering: number,
+  input: InputState,
+): number {
+  const gearLabel = getGearLabel(speedKmh);
+  const throttleLoad = input.throttle > 0 ? 220 : 0;
+  const brakeLoad = input.brake > 0 ? -120 : 0;
+  const steeringLoad = Math.abs(steering) * 120;
+
+  let baseRpm: number;
+
+  switch (gearLabel) {
+    case "1":
+      baseRpm = 1050 + speedKmh * 92;
+      break;
+
+    case "2":
+      baseRpm = 1150 + speedKmh * 62;
+      break;
+
+    case "3":
+      baseRpm = 1250 + speedKmh * 42;
+      break;
+
+    case "4":
+      baseRpm = 1450 + speedKmh * 27;
+      break;
+
+    default:
+      baseRpm = 860 + throttleLoad;
+      break;
+  }
+
+  return Math.round(
+    clamp(
+      baseRpm + throttleLoad + brakeLoad + steeringLoad,
+      780,
+      Math.max(4200, MAX_SPEED_KMH * 70),
+    ),
+  );
+}
+
+function createInitialWorldProjection(
+  car: HomeDriveWorldCarState,
+): HomeDriveWorldProjectionResult {
+  return projectHomeDriveWorldRoads({
+    map: HOME_DRIVE_WORLD_MAP,
+    car,
+  });
+}
+
 export default function HomeDriveGame({
   onClose,
   className,
 }: HomeDriveGameProps) {
-  const [phase, setPhase] = useState<"ready" | "playing" | "paused">("ready");
-  const [speedKmh, setSpeedKmh] = useState(0);
-  const [steering, setSteering] = useState(0);
-  const [laneOffset, setLaneOffset] = useState(0);
+  const initialWorldCar = useMemo<HomeDriveWorldCarState>(() => {
+    return createInitialHomeDriveWorldCarState(HOME_DRIVE_WORLD_MAP);
+  }, []);
+
+  const initialWorldProjection = useMemo<HomeDriveWorldProjectionResult>(() => {
+    return createInitialWorldProjection(initialWorldCar);
+  }, [initialWorldCar]);
+
+  const [phase, setPhase] = useState<HomeDrivePhase>("ready");
+  const [speedKmh, setSpeedKmh] = useState(initialWorldCar.speedKmh);
+  const [steering, setSteering] = useState(initialWorldCar.steering);
+  const [worldCar, setWorldCar] =
+    useState<HomeDriveWorldCarState>(initialWorldCar);
+  const [worldProjection, setWorldProjection] =
+    useState<HomeDriveWorldProjectionResult>(initialWorldProjection);
+  const [worldCamera, setWorldCamera] = useState<HomeDriveWorldCameraState>(() => {
+    return createInitialHomeDriveWorldCameraState();
+  });
+
+  const [vehicleDynamics, setVehicleDynamics] =
+    useState<HomeDriveVehicleDynamicsState>(() => {
+      return createInitialHomeDriveVehicleDynamics();
+    });
+
+  /*
+    traveledMeters continua existindo como camada de compatibilidade.
+    Agora ele deriva do odômetro do mundo aberto.
+  */
   const [traveledMeters, setTraveledMeters] = useState(0);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
 
@@ -144,23 +229,53 @@ export default function HomeDriveGame({
     brake: 0,
   });
 
+  const speedRef = useRef(initialWorldCar.speedKmh);
+  const steeringRef = useRef(initialWorldCar.steering);
+  const worldCarRef = useRef<HomeDriveWorldCarState>(initialWorldCar);
+  const worldCameraRef = useRef<HomeDriveWorldCameraState>(
+    createInitialHomeDriveWorldCameraState(),
+  );
+  const vehicleDynamicsRef = useRef<HomeDriveVehicleDynamicsState>(
+    createInitialHomeDriveVehicleDynamics(),
+  );
+
   const rafRef = useRef<number | null>(null);
   const lastFrameRef = useRef<number | null>(null);
 
   const resetDrive = useCallback(() => {
+    const initialDynamics = createInitialHomeDriveVehicleDynamics();
+    const nextWorldCar = resetHomeDriveWorldCarToSpawn(HOME_DRIVE_WORLD_MAP);
+    const nextProjection = projectHomeDriveWorldRoads({
+      map: HOME_DRIVE_WORLD_MAP,
+      car: nextWorldCar,
+    });
+    const nextCamera = createInitialHomeDriveWorldCameraState();
+
     setPhase("ready");
-    setSpeedKmh(0);
-    setSteering(0);
-    setLaneOffset(0);
+    setSpeedKmh(nextWorldCar.speedKmh);
+    setSteering(nextWorldCar.steering);
+    setWorldCar(nextWorldCar);
+    setWorldProjection(nextProjection);
+    setWorldCamera(nextCamera);
+    setVehicleDynamics(initialDynamics);
     setTraveledMeters(0);
     setElapsedSeconds(0);
+
+    speedRef.current = nextWorldCar.speedKmh;
+    steeringRef.current = nextWorldCar.steering;
+    worldCarRef.current = nextWorldCar;
+    worldCameraRef.current = nextCamera;
+    vehicleDynamicsRef.current = initialDynamics;
 
     inputRef.current.steer = 0;
     inputRef.current.throttle = 0;
     inputRef.current.brake = 0;
+
+    lastFrameRef.current = null;
   }, []);
 
   const startDrive = useCallback(() => {
+    inputRef.current.throttle = 1;
     setPhase("playing");
   }, []);
 
@@ -200,6 +315,7 @@ export default function HomeDriveGame({
 
       if (event.key === "ArrowUp" || event.key.toLowerCase() === "w") {
         setThrottle(true);
+
         if (phase === "ready") {
           setPhase("playing");
         }
@@ -263,34 +379,64 @@ export default function HomeDriveGame({
       lastFrameRef.current = timestamp;
 
       if (phase === "playing") {
-        const { steer, throttle, brake } = inputRef.current;
+        const input = inputRef.current;
 
-        setSpeedKmh((current) => {
-          const acceleration = throttle > 0 ? 38 : 0;
-          const braking = brake > 0 ? 62 : 0;
-          const drag = current > 0 ? 11 : 0;
-          const next =
-            current + acceleration * deltaSeconds - braking * deltaSeconds - drag * deltaSeconds;
-
-          return clamp(next, MIN_SPEED_KMH, MAX_SPEED_KMH);
+        const nextWorldCar = resolveHomeDriveWorldPhysics({
+          previous: worldCarRef.current,
+          input: {
+            steer: input.steer,
+            throttle: input.throttle,
+            brake: input.brake,
+          },
+          deltaSeconds,
+          map: HOME_DRIVE_WORLD_MAP,
         });
 
-        setSteering((current) => {
-          const easing = speedKmh > 56 ? 0.14 : 0.18;
-          return clamp(lerp(current, steer, easing), -1, 1);
+        worldCarRef.current = nextWorldCar;
+        setWorldCar(nextWorldCar);
+
+        speedRef.current = nextWorldCar.speedKmh;
+        setSpeedKmh(nextWorldCar.speedKmh);
+
+        steeringRef.current = nextWorldCar.steering;
+        setSteering(nextWorldCar.steering);
+
+        const nextProjection = projectHomeDriveWorldRoads({
+          map: HOME_DRIVE_WORLD_MAP,
+          car: nextWorldCar,
         });
 
-        setLaneOffset((current) => {
-          const lateralVelocity = steer * (0.9 + speedKmh / 140) * deltaSeconds;
-          const recenter = steer === 0 ? current * 1.6 * deltaSeconds : 0;
-          const next = current + lateralVelocity - recenter;
-          return clamp(next, -1, 1);
-        });
+        setWorldProjection(nextProjection);
 
-        setTraveledMeters((current) => {
-          const next = current + toMetersPerSecond(speedKmh) * deltaSeconds;
-          return next >= ROUTE_LENGTH_METERS ? next - ROUTE_LENGTH_METERS : next;
-        });
+        const nextWorldCamera = resolveHomeDriveWorldCamera(
+          {
+            car: nextWorldCar,
+            nearestRoad: nextProjection.nearestRoad,
+            deltaSeconds,
+          },
+          worldCameraRef.current,
+        );
+
+        worldCameraRef.current = nextWorldCamera;
+        setWorldCamera(nextWorldCamera);
+
+        const nextVehicleDynamics = resolveHomeDriveVehicleDynamics(
+          vehicleDynamicsRef.current,
+          {
+            steering: nextWorldCar.steering,
+            throttle: input.throttle > 0,
+            brake: input.brake > 0,
+            laneOffset: vehicleDynamicsRef.current.laneOffset,
+            deltaMs: deltaSeconds * 1000,
+          },
+        );
+
+        vehicleDynamicsRef.current = nextVehicleDynamics;
+        setVehicleDynamics(nextVehicleDynamics);
+
+        setTraveledMeters(
+          nextWorldCar.odometerMeters % ROUTE_LENGTH_METERS,
+        );
 
         setElapsedSeconds((current) => current + deltaSeconds);
       }
@@ -304,21 +450,46 @@ export default function HomeDriveGame({
       if (rafRef.current !== null) {
         window.cancelAnimationFrame(rafRef.current);
       }
+
       rafRef.current = null;
       lastFrameRef.current = null;
     };
-  }, [phase, speedKmh]);
+  }, [phase]);
 
   const runtime = useMemo<HomeDriveRuntimeState>(() => {
     const progress = traveledMeters / ROUTE_LENGTH_METERS;
     const currentLandmark = getCurrentLandmark(traveledMeters);
     const nextLandmark = getNextLandmark(traveledMeters);
     const gearLabel = getGearLabel(speedKmh);
-    const rpm =
-      900 +
-      speedKmh * 42 +
-      Math.abs(steering) * 420 +
-      (inputRef.current.throttle > 0 ? 550 : 0);
+    const rpm = getRealisticRpm(speedKmh, steering, inputRef.current);
+
+    const currentRoad = worldProjection.currentRoad;
+    const currentDistrict = worldProjection.currentDistrict;
+    const nearestRoadDistanceMeters =
+      worldProjection.nearestRoad?.distanceMeters;
+    const intersectionAhead = worldProjection.intersectionsAhead[0];
+
+    const districtLabel =
+      currentDistrict?.label ??
+      currentRoad?.districtId ??
+      getDistrictLabel(traveledMeters);
+
+    /*
+      Mantém a dinâmica antiga como base para as camadas existentes,
+      mas soma a câmera nova do mundo aberto para dar sensação real de curva.
+    */
+    const roadDriftPx =
+      vehicleDynamics.roadDriftPx + worldCamera.roadDriftPx;
+    const cameraRollDeg =
+      vehicleDynamics.cameraRollDeg + worldCamera.cameraRollDeg;
+    const horizonShiftPx =
+      vehicleDynamics.horizonShiftPx + worldCamera.horizonShiftPx;
+    const parallaxPx =
+      vehicleDynamics.parallaxPx + worldCamera.parallaxPx;
+    const steeringIntensity = Math.max(
+      vehicleDynamics.steeringIntensity,
+      worldCamera.steeringIntensity,
+    );
 
     return {
       phase,
@@ -328,16 +499,51 @@ export default function HomeDriveGame({
       routeProgress: progress,
       traveledMeters,
       routeLengthMeters: ROUTE_LENGTH_METERS,
+
+      worldX: worldCar.x,
+      worldY: worldCar.y,
+      headingDeg: worldCar.headingDeg,
+      currentRoadId: currentRoad?.id ?? worldCar.currentRoadId,
+      currentRoadLabel: currentRoad?.label,
+      currentDistrictId: currentDistrict?.id ?? worldCar.currentDistrictId,
+      currentDistrictLabel: currentDistrict?.label,
+      nearestRoadDistanceMeters,
+      visibleWorldRoads: worldProjection.projectedRoads,
+      intersectionsAhead: worldProjection.intersectionsAhead,
+      intersectionAhead,
+
       steering,
-      laneOffset,
-      cameraYaw: laneOffset * 9 + steering * 4,
-      cameraPitch: 1.5 + speedKmh * 0.025,
+      laneOffset: vehicleDynamics.laneOffset,
+      lateralVelocity: vehicleDynamics.lateralVelocity,
+
+      roadDriftPx,
+      cameraRollDeg,
+      horizonShiftPx,
+      parallaxPx,
+      steeringIntensity,
+
+      cameraYaw:
+        worldCamera.cameraYaw +
+        vehicleDynamics.laneOffset * 4.8 +
+        steering * 1.6 +
+        roadDriftPx * 0.025,
+      cameraPitch: worldCamera.cameraPitch + speedKmh * 0.008,
       elapsedSeconds,
-      districtLabel: getDistrictLabel(traveledMeters),
+      districtLabel,
       currentLandmark,
       nextLandmark,
     };
-  }, [elapsedSeconds, laneOffset, phase, speedKmh, steering, traveledMeters]);
+  }, [
+    elapsedSeconds,
+    phase,
+    speedKmh,
+    steering,
+    traveledMeters,
+    vehicleDynamics,
+    worldCamera,
+    worldCar,
+    worldProjection,
+  ]);
 
   return (
     <HomeDriveViewport

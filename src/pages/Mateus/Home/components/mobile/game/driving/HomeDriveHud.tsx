@@ -1,16 +1,7 @@
 import React, { useMemo } from "react";
 
-import type { HomeDriveRuntimeState } from "./HomeDriveGame";
+import type { HomeDriveRuntimeState } from "./domain/homeDrive.types";
 import styles from "./HomeDriveHud.module.css";
-
-export type HomeDriveHudProps = Readonly<{
-  runtime: HomeDriveRuntimeState & Partial<HomeDriveRuntimeAssistExtras>;
-  onPauseToggle: () => void;
-  onReset: () => void;
-  onClose?: () => void;
-  onStart?: () => void;
-  className?: string;
-}>;
 
 type HomeDriveRuntimeAssistExtras = Readonly<{
   driveFlow: number;
@@ -21,6 +12,15 @@ type HomeDriveRuntimeAssistExtras = Readonly<{
   stability: number;
   targetSpeedKmh: number;
   maxSafeSpeedKmh: number;
+}>;
+
+export type HomeDriveHudProps = Readonly<{
+  runtime: HomeDriveRuntimeState & Partial<HomeDriveRuntimeAssistExtras>;
+  onPauseToggle: () => void;
+  onReset: () => void;
+  onClose?: () => void;
+  onStart?: () => void;
+  className?: string;
 }>;
 
 type SpeedometerLabel = Readonly<{
@@ -61,6 +61,14 @@ function formatDistance(meters: number): string {
   return `${Math.round(meters)} m`;
 }
 
+function formatWorldCoordinate(value: number | undefined): string {
+  if (!Number.isFinite(value)) {
+    return "0";
+  }
+
+  return Math.round(Number(value)).toString();
+}
+
 function getPhaseLabel(phase: HomeDriveRuntimeState["phase"]): string {
   if (phase === "ready") {
     return "Ready";
@@ -70,7 +78,7 @@ function getPhaseLabel(phase: HomeDriveRuntimeState["phase"]): string {
     return "Paused";
   }
 
-  return "Auto";
+  return "Drive";
 }
 
 function getAssistLabel(
@@ -92,7 +100,7 @@ function getAssistLabel(
     return "Paused";
   }
 
-  return "Auto drive";
+  return "Open world";
 }
 
 function getAssistStatusClassName(
@@ -115,6 +123,60 @@ function getAssistStatusClassName(
   }
 
   return styles.assistAuto;
+}
+
+function getHeadingCompassLabel(headingDeg: number | undefined): string {
+  const heading = clampNumber(Number(headingDeg ?? 0), 0, 360);
+  const normalized = ((heading % 360) + 360) % 360;
+
+  if (normalized >= 337.5 || normalized < 22.5) return "N";
+  if (normalized < 67.5) return "NE";
+  if (normalized < 112.5) return "L";
+  if (normalized < 157.5) return "SE";
+  if (normalized < 202.5) return "S";
+  if (normalized < 247.5) return "SO";
+  if (normalized < 292.5) return "O";
+
+  return "NO";
+}
+
+function getRoadLabel(runtime: HomeDriveRuntimeState): string {
+  return (
+    runtime.currentRoadLabel ??
+    runtime.currentRoadId ??
+    runtime.districtLabel ??
+    "Rua livre"
+  );
+}
+
+function getDistrictLabel(runtime: HomeDriveRuntimeState): string {
+  return (
+    runtime.currentDistrictLabel ??
+    runtime.currentDistrictId ??
+    runtime.districtLabel ??
+    "Fortaleza"
+  );
+}
+
+function getNextIntersectionLabel(runtime: HomeDriveRuntimeState): string {
+  const intersection = runtime.intersectionAhead;
+
+  if (!intersection) {
+    return "sem cruzamento";
+  }
+
+  const sideLabel =
+    intersection.turnSide === "left"
+      ? "↰"
+      : intersection.turnSide === "right"
+        ? "↱"
+        : intersection.turnSide === "behind"
+          ? "↶"
+          : "↑";
+
+  return `${sideLabel} ${intersection.targetRoadLabel} · ${formatDistance(
+    intersection.distanceMeters,
+  )}`;
 }
 
 function polarToCartesian(
@@ -262,6 +324,28 @@ export default function HomeDriveHud({
     );
   }, [progressEndAngle]);
 
+  const roadLabel = useMemo(() => {
+    return getRoadLabel(runtime);
+  }, [runtime]);
+
+  const districtLabel = useMemo(() => {
+    return getDistrictLabel(runtime);
+  }, [runtime]);
+
+  const nextIntersectionLabel = useMemo(() => {
+    return getNextIntersectionLabel(runtime);
+  }, [runtime]);
+
+  const headingLabel = useMemo(() => {
+    return getHeadingCompassLabel(runtime.headingDeg);
+  }, [runtime.headingDeg]);
+
+  const worldPositionLabel = useMemo(() => {
+    return `${formatWorldCoordinate(runtime.worldX)}, ${formatWorldCoordinate(
+      runtime.worldY,
+    )}`;
+  }, [runtime.worldX, runtime.worldY]);
+
   const needleAngle = -135 + speedRatio * 270;
   const shouldShowStart = runtime.phase === "ready" && onStart;
   const pauseLabel = runtime.phase === "paused" ? "Resume" : "Pause";
@@ -297,10 +381,20 @@ export default function HomeDriveHud({
 
           <div className={styles.summaryFooter}>
             <span>
-              Distrito: <strong>{runtime.districtLabel}</strong>
+              Bairro: <strong>{districtLabel}</strong>
             </span>
             <span>
-              Próximo:{" "}
+              Rua: <strong>{roadLabel}</strong>
+            </span>
+            <span>
+              Próximo: <strong>{nextIntersectionLabel}</strong>
+            </span>
+            <span>
+              Dir: <strong>{headingLabel}</strong> · Pos:{" "}
+              <strong>{worldPositionLabel}</strong>
+            </span>
+            <span>
+              Marco:{" "}
               <strong>{runtime.nextLandmark?.label ?? "Trecho livre"}</strong>{" "}
               · {nextLandmarkDistance}
             </span>

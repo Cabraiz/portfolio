@@ -65,81 +65,41 @@ type ProjectedRoadShadow = Readonly<{
   opacity: number;
 }>;
 
-/**
- * Mais fatias = afunilamento mais suave e sensação melhor de profundidade.
- */
 const ROAD_SLICE_COUNT = 96;
-
-/**
- * Offset global da rua.
- *
- * Negativo = rua inteira para a esquerda.
- * Positivo = rua inteira para a direita.
- *
- * Mantido em -14 para preservar a posição anterior.
- */
 const ROAD_GLOBAL_LEFT_OFFSET_X = -14;
 
-/**
- * Expansão assimétrica base da pista.
- *
- * A borda esquerda NÃO muda.
- * Apenas a borda direita é puxada para a direita.
- */
 const RIGHT_SIDE_ROAD_TOP_EXPANSION_X = 3.8;
 const RIGHT_SIDE_ROAD_BOTTOM_EXPANSION_X = 11.5;
 const RIGHT_SIDE_ROAD_EXPANSION_POWER = 1.16;
 
-/**
- * Puxa BEM MAIS somente a região direita inferior.
- *
- * Este extra tem power alto para quase não afetar o topo
- * e aparecer com força apenas quando a pista chega perto da câmera.
- *
- * Aumente RIGHT_BOTTOM_EDGE_EXTRA_PULL_X para puxar mais.
- */
 const RIGHT_BOTTOM_EDGE_EXTRA_PULL_X = 18.5;
 const RIGHT_BOTTOM_EDGE_EXTRA_PULL_POWER = 4.8;
 
-/**
- * Sobe somente a direita inferior da pista.
- *
- * Não move a pista.
- * Não altera a esquerda.
- * Não altera o topo de forma perceptível.
- *
- * Maior valor = direita inferior sobe mais.
- */
 const RIGHT_BOTTOM_EDGE_LIFT_Y = 4.6;
 const RIGHT_BOTTOM_EDGE_LIFT_POWER = 2.85;
 
-/**
- * Curva visual do tracejado central.
- *
- * Negativo = tracejado curva para a esquerda.
- * Positivo = tracejado curva para a direita.
- */
 const LANE_MARK_NEAR_LEFT_CURVE_STRENGTH = -4.2;
 const LANE_MARK_NEAR_LEFT_CURVE_POWER = 2.45;
 
-/**
- * Cores da calçada/concreto.
- *
- * Não usa mais sideFar/sideNear/sideAlt da paleta coast,
- * porque essas cores puxavam para amarelo/areia.
- */
 const SIDEWALK_FILL_A = "#8f918a";
 const SIDEWALK_FILL_B = "#a2a39a";
 const SIDEWALK_FILL_FAR = "#b7b7ad";
 
-/**
- * Traços preto/branco na calçada.
- *
- * Eles são desenhados como fatias finas em perspectiva nas laterais,
- * antes da rua e dos rumbles, para ajudar a enganar a profundidade.
- */
 const SIDEWALK_MARK_BLACK = "rgba(16, 17, 16, 0.82)";
 const SIDEWALK_MARK_WHITE = "rgba(246, 246, 232, 0.78)";
+
+/*
+  Antes os multiplicadores eram:
+  - side fill: texturePhase * 6
+  - sidewalk fill: texturePhase * 10
+  - sidewalk visibility: texturePhase * 12
+
+  Isso fazia a calçada "tickar" rápido demais.
+  Agora o phase é mais lento e ainda acompanha a velocidade do carro.
+*/
+const SIDEWALK_SIDE_FILL_PHASE_MULTIPLIER = 1.35;
+const SIDEWALK_MARK_FILL_PHASE_MULTIPLIER = 1.85;
+const SIDEWALK_MARK_VISIBILITY_PHASE_MULTIPLIER = 2.05;
 
 function clampNumber(value: number, min: number, max: number): number {
   if (!Number.isFinite(value)) {
@@ -193,24 +153,12 @@ function quadPoints(
   ].join(" ");
 }
 
-/**
- * Curva de largura da rua.
- *
- * Exponent maior que 1 = rua demora mais para abrir,
- * criando a sensação de Z longo/infinito.
- */
 function getRoadWidthPerspective(value: number, exponent: number): number {
   const t = clampNumber(value, 0, 1);
 
   return Math.pow(t, exponent);
 }
 
-/**
- * Expansão lateral base apenas para o lado direito.
- *
- * Não desloca a pista inteira.
- * A borda esquerda continua fixa.
- */
 function getRightSideRoadExpansion(t: number): number {
   const clampedT = clampNumber(t, 0, 1);
   const depth = Math.pow(clampedT, RIGHT_SIDE_ROAD_EXPANSION_POWER);
@@ -222,11 +170,6 @@ function getRightSideRoadExpansion(t: number): number {
   );
 }
 
-/**
- * Extra horizontal somente para a direita inferior.
- *
- * Power alto = quase zero no topo, forte embaixo.
- */
 function getRightBottomExtraPull(t: number): number {
   const clampedT = clampNumber(t, 0, 1);
 
@@ -236,11 +179,6 @@ function getRightBottomExtraPull(t: number): number {
   );
 }
 
-/**
- * Levanta somente a aresta direita conforme aproxima da câmera.
- *
- * Em SVG, menor Y = mais para cima.
- */
 function getRightBottomEdgeLift(t: number): number {
   const clampedT = clampNumber(t, 0, 1);
 
@@ -250,17 +188,36 @@ function getRightBottomEdgeLift(t: number): number {
   );
 }
 
-/**
- * Offset próprio do tracejado central.
- *
- * Não mexe na rua inteira. Só desloca a faixa central.
- */
 function getLaneMarkCurveOffset(t: number): number {
   const clampedT = clampNumber(t, 0, 1);
 
   return (
     LANE_MARK_NEAR_LEFT_CURVE_STRENGTH *
     Math.pow(clampedT, LANE_MARK_NEAR_LEFT_CURVE_POWER)
+  );
+}
+
+function getSidewalkMotionFactor(runtime: HomeDriveRuntimeState): number {
+  /*
+    0 km/h  -> quase parado
+    66 km/h -> movimento máximo calibrado
+
+    Mesmo no máximo, o padrão não usa mais os multiplicadores antigos.
+  */
+  const speedFactor = clampNumber(runtime.speedKmh / 66, 0, 1);
+
+  return lerp(0.22, 1, Math.pow(speedFactor, 0.86));
+}
+
+function getSidewalkPhase(
+  roadCurveState: HomeDriveRoadCurveState,
+  runtime: HomeDriveRuntimeState,
+  multiplier: number,
+): number {
+  return (
+    roadCurveState.texturePhase *
+    multiplier *
+    getSidewalkMotionFactor(runtime)
   );
 }
 
@@ -275,13 +232,28 @@ function getSliceCenterX(
 
   const nearPull = Math.pow(t, 1.62) * roadCurveState.centerDrift * 100;
 
+  /*
+    Mundo aberto:
+    antes a direção mexia pouco na geometria da pista. Isso passava a sensação
+    de volante girando sem o carro realmente dobrar. A pista agora responde
+    mais forte ao yaw/steering, principalmente do meio para perto do cockpit.
+  */
   const steeringPull =
-    clampNumber(runtime.steering, -1, 1) * Math.pow(t, 2.04) * -2.4;
+    clampNumber(runtime.steering, -1, 1) * Math.pow(t, 1.42) * -13.6;
+
+  const yawPull =
+    clampNumber(runtime.cameraYaw, -18, 18) * Math.pow(t, 1.08) * -0.42;
 
   const lanePull =
-    clampNumber(runtime.laneOffset, -1, 1) * Math.pow(t, 2) * -4.8;
+    clampNumber(runtime.laneOffset, -1, 1) * Math.pow(t, 1.7) * -6.8;
 
-  const bankPull = roadCurveState.bank * Math.pow(t, 1.2) * -6;
+  const roadDriftPull =
+    clampNumber(runtime.roadDriftPx, -56, 56) * Math.pow(t, 1.18) * 0.16;
+
+  const parallaxPull =
+    clampNumber(runtime.parallaxPx, -56, 56) * Math.pow(t, 0.86) * 0.055;
+
+  const bankPull = roadCurveState.bank * Math.pow(t, 1.2) * -7.8;
 
   const driverLaneBias =
     -tuning.driverLaneBiasPct *
@@ -295,6 +267,9 @@ function getSliceCenterX(
     nearPull +
     steeringPull +
     lanePull +
+    yawPull +
+    roadDriftPull +
+    parallaxPull +
     bankPull
   );
 }
@@ -447,9 +422,17 @@ function getRoadFill(
 function getSideFill(
   index: number,
   roadCurveState: HomeDriveRoadCurveState,
+  runtime: HomeDriveRuntimeState,
 ): string {
   const depth = index / ROAD_SLICE_COUNT;
-  const wave = Math.floor(index * 0.72 + roadCurveState.texturePhase * 6);
+  const wave = Math.floor(
+    index * 0.72 +
+      getSidewalkPhase(
+        roadCurveState,
+        runtime,
+        SIDEWALK_SIDE_FILL_PHASE_MULTIPLIER,
+      ),
+  );
   const isAlt = wave % 2 === 0;
 
   if (depth < 0.22) {
@@ -462,8 +445,16 @@ function getSideFill(
 function getSidewalkMarkFill(
   index: number,
   roadCurveState: HomeDriveRoadCurveState,
+  runtime: HomeDriveRuntimeState,
 ): string {
-  const wave = Math.floor(index * 1.08 + roadCurveState.texturePhase * 10);
+  const wave = Math.floor(
+    index * 1.08 +
+      getSidewalkPhase(
+        roadCurveState,
+        runtime,
+        SIDEWALK_MARK_FILL_PHASE_MULTIPLIER,
+      ),
+  );
 
   return wave % 2 === 0 ? SIDEWALK_MARK_WHITE : SIDEWALK_MARK_BLACK;
 }
@@ -477,31 +468,22 @@ function getSidewalkMarkOpacity(index: number): number {
 function shouldShowSidewalkMark(
   index: number,
   roadCurveState: HomeDriveRoadCurveState,
+  runtime: HomeDriveRuntimeState,
 ): boolean {
   const depth = index / ROAD_SLICE_COUNT;
 
-  /**
-   * Libera os traços mais cedo no horizonte.
-   * Antes era 0.07, o que removia muitos traços distantes.
-   */
   if (depth < 0.025) {
     return false;
   }
 
-  /**
-   * Mais densidade.
-   *
-   * Antes:
-   *   index * 0.62
-   *   wave % 4 === 0
-   *
-   * Agora:
-   *   index * 1.18
-   *   wave % 2 === 0
-   *
-   * Resultado: bem mais blocos preto/branco na calçada.
-   */
-  const wave = Math.floor(index * 1.18 + roadCurveState.texturePhase * 12);
+  const wave = Math.floor(
+    index * 1.18 +
+      getSidewalkPhase(
+        roadCurveState,
+        runtime,
+        SIDEWALK_MARK_VISIBILITY_PHASE_MULTIPLIER,
+      ),
+  );
 
   return wave % 2 === 0;
 }
@@ -575,13 +557,6 @@ function buildRoadSlices(
     const rightLiftTop = getRightBottomEdgeLift(tTop);
     const rightLiftBottom = getRightBottomEdgeLift(tBottom);
 
-    /**
-     * Borda esquerda ancorada.
-     *
-     * A pista não é movida.
-     * A esquerda não sobe.
-     * Apenas a direita recebe expansão X e elevação Y.
-     */
     const leftTop = centerTop - roadWidthTop / 2;
     const leftBottom = centerBottom - roadWidthBottom / 2;
 
@@ -589,11 +564,6 @@ function buildRoadSlices(
     const rightBottom =
       centerBottom + roadWidthBottom / 2 + rightExpansionBottom;
 
-    /**
-     * Menor Y = mais para cima no SVG.
-     *
-     * Isso afeta apenas a aresta direita.
-     */
     const rightTopY = yTop - rightLiftTop;
     const rightBottomY = yBottom - rightLiftBottom;
 
@@ -643,8 +613,8 @@ function buildRoadSlices(
       laneLeftBottom,
       laneRightBottom,
       roadFill: getRoadFill(index, roadProfile, roadCurveState),
-      sideFill: getSideFill(index, roadCurveState),
-      sidewalkMarkFill: getSidewalkMarkFill(index, roadCurveState),
+      sideFill: getSideFill(index, roadCurveState, runtime),
+      sidewalkMarkFill: getSidewalkMarkFill(index, roadCurveState, runtime),
       sidewalkMarkOpacity: getSidewalkMarkOpacity(index),
       rumbleFill: getRumbleFill(index, roadProfile, roadCurveState),
       laneFill,
@@ -658,18 +628,16 @@ function buildRoadSlices(
         laneMarkerTranslateY,
         roadCurveState,
       ),
-      showSidewalkMark: shouldShowSidewalkMark(index, roadCurveState),
+      showSidewalkMark: shouldShowSidewalkMark(
+        index,
+        roadCurveState,
+        runtime,
+      ),
       showTextureLine: index % 3 === 0,
     };
   });
 }
 
-/**
- * A camada da rua não deve pintar um fundo amarelo.
- *
- * O céu precisa continuar aparecendo acima da estrada.
- * A calçada é desenhada separadamente apenas nas laterais.
- */
 function getSurfaceBackground(): string {
   return "transparent";
 }
@@ -691,13 +659,19 @@ function getProjectedRoadShadow(
 
   const farY = clampNumber(nearY - projectedLength, 60, 82);
 
-  const centerNearX = 50 - laneOffset * 1.8 - steering * 0.9;
+  const dynamicDrift = clampNumber(runtime.roadDriftPx, -42, 42) * 0.045;
+
+  const centerNearX =
+    50 - laneOffset * 2.1 - steering * 4.2 + dynamicDrift;
+
   const centerFarX =
     centerNearX -
-    steering * 3.2 -
-    laneOffset * 2.1 +
-    roadCurveState.bank * 2.8 +
-    roadCurveState.curve * 4.1;
+    steering * 9.6 -
+    laneOffset * 2.2 +
+    roadCurveState.bank * 3.4 +
+    roadCurveState.curve * 5.2 +
+    runtime.cameraYaw * -0.34 +
+    runtime.horizonShiftPx * 0.046;
 
   const nearWidth = lerp(
     tuning.shadowNearWidthMin,
@@ -728,11 +702,23 @@ function getProjectedRoadShadow(
 }
 
 function getContainerStyle(
+  runtime: HomeDriveRuntimeState,
   roadCurveState: HomeDriveRoadCurveState,
   tuning: RoadTuning,
 ): CSSProperties {
-  const bankDeg = clampNumber(roadCurveState.bank * -5.4, -3.4, 3.4);
+  const bankDeg = clampNumber(
+    roadCurveState.bank * -5.4 +
+      runtime.cameraRollDeg * 0.32 +
+      runtime.steering * -1.6,
+    -6.2,
+    6.2,
+  );
   const sideBleed = `${tuning.viewportSideBleedPct}%`;
+  const dynamicRoadShift = clampNumber(
+    runtime.roadDriftPx * 0.11 + runtime.cameraYaw * -0.18,
+    -8.5,
+    8.5,
+  );
 
   return {
     position: "absolute",
@@ -744,7 +730,7 @@ function getContainerStyle(
     overflow: "hidden",
     pointerEvents: "none",
     background: getSurfaceBackground(),
-    transform: `skewX(${bankDeg}deg)`,
+    transform: `translateX(${dynamicRoadShift}px) skewX(${bankDeg}deg)`,
     transformOrigin: "center bottom",
   };
 }
@@ -803,8 +789,8 @@ export default function HomeDriveRoadSurface({
   }, [runtime, resolvedRoadCurveState, tuning]);
 
   const containerStyle = useMemo(() => {
-    return getContainerStyle(resolvedRoadCurveState, tuning);
-  }, [resolvedRoadCurveState, tuning]);
+    return getContainerStyle(runtime, resolvedRoadCurveState, tuning);
+  }, [runtime, resolvedRoadCurveState, tuning]);
 
   return (
     <div
@@ -812,6 +798,9 @@ export default function HomeDriveRoadSurface({
       data-home-drive-road="arcade-pseudo-3d"
       data-home-drive-road-segment={resolvedRoadCurveState.segment.id}
       data-home-drive-road-kind={resolvedRoadCurveState.segment.kind}
+      data-home-drive-road-steering={runtime.steering.toFixed(3)}
+      data-home-drive-road-lane-offset={runtime.laneOffset.toFixed(3)}
+      data-home-drive-road-drift={runtime.roadDriftPx.toFixed(2)}
       style={containerStyle}
     >
       <svg
