@@ -191,7 +191,7 @@ export const HOME_DRIVE_CAMERA_TOKENS: HomeDriveCameraTokens = {
 
     bottomHeightRatio: 0.14,
     bottomMinPx: 100,
-    bottomMaxPx: 150,
+    bottomMaxPx: 120,
     bottomSafeOffsetPx: 78,
   },
 } as const;
