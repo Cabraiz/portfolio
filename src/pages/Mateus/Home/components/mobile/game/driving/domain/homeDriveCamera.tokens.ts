@@ -37,10 +37,9 @@ export type HomeDriveCameraTokens = Readonly<{
     aspectRatio: number;
 
     /*
-      O cockpit deve escalar pela largura, não pela altura.
-
-      Essa é a correção principal para evitar zoom-in/zoom-out
-      diferente entre celulares.
+      O cockpit escala pela largura, não pela altura.
+      Isso evita zoom diferente entre celulares altos, baixos,
+      com barra de navegador ou com navegação Android por botões.
     */
     widthMultiplier: number;
     widthMultiplierNarrowBonus: number;
@@ -73,18 +72,48 @@ export type HomeDriveCameraTokens = Readonly<{
   }>;
 
   speedometer: Readonly<{
+    /*
+      Tamanho responsivo do velocímetro.
+
+      sizeWidthRatio é a referência principal.
+      sizeHeightRatio fica como limite auxiliar para não ficar
+      grande demais em aparelhos muito baixos.
+    */
     sizeWidthRatio: number;
     sizeHeightRatio: number;
     minSizePx: number;
     maxSizePx: number;
 
+    /*
+      Horizontal.
+
+      Maior = mais para a esquerda.
+      Menor = mais para a direita.
+    */
     leftShiftWidthRatio: number;
     leftShiftMinPx: number;
     leftShiftMaxPx: number;
 
-    bottomHeightRatio: number;
-    bottomMinPx: number;
-    bottomMaxPx: number;
+    /*
+      Vertical ancorado no cockpit.
+
+      O velocímetro pertence visualmente ao dashboard/cockpit,
+      então ele deve seguir a geometria do cockpit, não apenas
+      viewportHeight.
+
+      cockpitAnchorRatio maior = mais para cima.
+      cockpitAnchorRatio menor = mais para baixo.
+    */
+    cockpitAnchorRatio: number;
+    cockpitAnchorOffsetPx: number;
+    cockpitAnchorMinPx: number;
+    cockpitAnchorMaxPx: number;
+
+    /*
+      Safe area inferior.
+
+      Só impede colisão com barra inferior/botões do sistema.
+    */
     bottomSafeOffsetPx: number;
   }>;
 }>;
@@ -118,20 +147,7 @@ export const HOME_DRIVE_CAMERA_TOKENS: HomeDriveCameraTokens = {
     aspectRatio: 16 / 9,
 
     /*
-      Controle principal do zoom do cockpit.
-
-      Antes:
-      widthMultiplier: 2.48
-      maxWidthPx: 1120
-
-      Ajustado:
-      widthMultiplier: 2.78
-      maxWidthPx: 1320
-
-      Resultado:
-      - cockpit realmente mais expandido;
-      - câmera continua estável entre celulares;
-      - escala continua baseada em largura, não em altura.
+      Mantido como você calibrou, porque o cockpit está correto.
     */
     widthMultiplier: 5.5,
     widthMultiplierNarrowBonus: 0.04,
@@ -142,12 +158,10 @@ export const HOME_DRIVE_CAMERA_TOKENS: HomeDriveCameraTokens = {
     maxWidthPx: 3000,
 
     /*
-      bottom em px negativo.
-
       Menos negativo = cockpit sobe.
       Mais negativo = cockpit desce.
 
-      Mantido moderado para não deslocar junto com o aumento.
+      O hook transforma esse valor em bottom negativo.
     */
     bottomRatio: 0.18,
     bottomMinPx: 48,
@@ -163,10 +177,6 @@ export const HOME_DRIVE_CAMERA_TOKENS: HomeDriveCameraTokens = {
     minWidthPx: 576,
     maxWidthPx: 692,
 
-    /*
-      Mantém compatibilidade visual com o antigo bottom em %,
-      mas agora convertido para px pela câmera.
-    */
     bottomHeightRatio: 0.225,
     bottomMinPx: 150,
     bottomMaxPx: 205,
@@ -176,23 +186,45 @@ export const HOME_DRIVE_CAMERA_TOKENS: HomeDriveCameraTokens = {
   },
 
   speedometer: {
-    sizeWidthRatio: 0.245,
-    sizeHeightRatio: 0.138,
-    minSizePx: 84,
-    maxSizePx: 112,
+    /*
+      Tamanho.
+    */
+    sizeWidthRatio: 0.225,
+    sizeHeightRatio: 0.124,
+    minSizePx: 74,
+    maxSizePx: 100,
 
     /*
-      Menor shift = velocímetro mais para a direita.
-      Maior shift = velocímetro mais para a esquerda.
+      Horizontal.
     */
-    leftShiftWidthRatio: 0.11,
+    leftShiftWidthRatio: 0.105,
     leftShiftMinPx: 26,
     leftShiftMaxPx: 50,
 
-    bottomHeightRatio: 0.14,
-    bottomMinPx: 100,
-    bottomMaxPx: 120,
-    bottomSafeOffsetPx: 78,
+    /*
+      Vertical.
+
+      Agora o velocímetro acompanha o cockpit.
+
+      Se precisar subir em todos:
+      cockpitAnchorRatio: 0.425
+
+      Se precisar descer em todos:
+      cockpitAnchorRatio: 0.405
+
+      Para ajuste fino sem mexer na escala:
+      cockpitAnchorOffsetPx: 4 sobe
+      cockpitAnchorOffsetPx: -4 desce
+    */
+    cockpitAnchorRatio: 0.415,
+    cockpitAnchorOffsetPx: 3,
+    cockpitAnchorMinPx: 84,
+    cockpitAnchorMaxPx: 160,
+
+    /*
+      Safe area.
+    */
+    bottomSafeOffsetPx: 44,
   },
 } as const;
 

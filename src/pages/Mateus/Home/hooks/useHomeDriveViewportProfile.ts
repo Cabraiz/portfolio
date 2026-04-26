@@ -111,7 +111,16 @@ export type UseHomeDriveViewportProfileOptions = Readonly<{
 }>;
 
 function canUseDOM(): boolean {
-  return typeof window !== "undefined" && typeof document !== "undefined";
+  return typeof globalThis.window !== "undefined" &&
+    typeof globalThis.document !== "undefined";
+}
+
+function getBrowserWindow(): Window | null {
+  if (!canUseDOM()) {
+    return null;
+  }
+
+  return globalThis.window;
 }
 
 function getInitialSnapshot(): HomeDriveViewportSnapshot {
@@ -160,14 +169,16 @@ function readStageRect(stageElement?: HTMLElement | null): {
 function readViewportSnapshot(
   stageElement?: HTMLElement | null,
 ): HomeDriveViewportSnapshot {
-  if (!canUseDOM()) {
+  const browserWindow = getBrowserWindow();
+
+  if (!browserWindow) {
     return getInitialSnapshot();
   }
 
-  const visualViewport = window.visualViewport ?? null;
+  const visualViewport = browserWindow.visualViewport ?? null;
 
-  const layoutWidth = Math.max(1, window.innerWidth || 1);
-  const layoutHeight = Math.max(1, window.innerHeight || 1);
+  const layoutWidth = Math.max(1, browserWindow.innerWidth || 1);
+  const layoutHeight = Math.max(1, browserWindow.innerHeight || 1);
 
   const visualWidth = Math.max(1, visualViewport?.width ?? layoutWidth);
   const visualHeight = Math.max(1, visualViewport?.height ?? layoutHeight);
@@ -178,9 +189,12 @@ function readViewportSnapshot(
   const stageWidth = stageRect.width > 0 ? stageRect.width : visualWidth;
   const stageHeight = stageRect.height > 0 ? stageRect.height : visualHeight;
 
-  const screenWidth = Math.max(1, window.screen?.width ?? layoutWidth);
-  const screenHeight = Math.max(1, window.screen?.height ?? layoutHeight);
-  const devicePixelRatio = Math.max(1, window.devicePixelRatio || 1);
+  const screenWidth = Math.max(1, browserWindow.screen?.width ?? layoutWidth);
+  const screenHeight = Math.max(
+    1,
+    browserWindow.screen?.height ?? layoutHeight,
+  );
+  const devicePixelRatio = Math.max(1, browserWindow.devicePixelRatio || 1);
 
   const visualViewportBottomGap = clampNumber(
     layoutHeight - (visualOffsetTop + visualHeight),
@@ -331,6 +345,13 @@ function buildCameraValues(
     (flags.isShort ? tokens.steering.bottomShortDropPx : 0) -
     steeringSystemDropPx;
 
+  /*
+    Speedometer:
+    - X usa largura;
+    - tamanho usa largura com limite por altura;
+    - Y ancora no cockpit/dashboard;
+    - safe area só impede colisão com navegação inferior.
+  */
   const speedometerSizePx = clampNumber(
     Math.min(
       viewportWidth * tokens.speedometer.sizeWidthRatio,
@@ -348,13 +369,20 @@ function buildCameraValues(
 
   const speedometerXpx = viewportWidth / 2 - speedometerLeftShiftPx;
 
+  const speedometerCockpitBottomPx = clampNumber(
+    cockpitBottomPx +
+      cockpitHeightPx * tokens.speedometer.cockpitAnchorRatio +
+      tokens.speedometer.cockpitAnchorOffsetPx,
+    tokens.speedometer.cockpitAnchorMinPx,
+    tokens.speedometer.cockpitAnchorMaxPx,
+  );
+
+  const speedometerSafeBottomPx =
+    bottomSafeZonePx + tokens.speedometer.bottomSafeOffsetPx;
+
   const speedometerYpx = Math.max(
-    clampNumber(
-      viewportHeight * tokens.speedometer.bottomHeightRatio,
-      tokens.speedometer.bottomMinPx,
-      tokens.speedometer.bottomMaxPx,
-    ),
-    bottomSafeZonePx + tokens.speedometer.bottomSafeOffsetPx,
+    speedometerCockpitBottomPx,
+    speedometerSafeBottomPx,
   );
 
   return {
@@ -433,7 +461,9 @@ export function useHomeDriveViewportProfile(
   });
 
   useEffect(() => {
-    if (!canUseDOM()) {
+    const browserWindow = getBrowserWindow();
+
+    if (!browserWindow) {
       return undefined;
     }
 
@@ -441,33 +471,35 @@ export function useHomeDriveViewportProfile(
     let resizeObserver: ResizeObserver | undefined;
 
     const measure = () => {
-      window.cancelAnimationFrame(animationFrame);
+      browserWindow.cancelAnimationFrame(animationFrame);
 
-      animationFrame = window.requestAnimationFrame(() => {
+      animationFrame = browserWindow.requestAnimationFrame(() => {
         setSnapshot(readViewportSnapshot(stageRef?.current ?? null));
       });
     };
 
     measure();
 
-    window.addEventListener("resize", measure, { passive: true });
-    window.addEventListener("orientationchange", measure, { passive: true });
+    browserWindow.addEventListener("resize", measure, { passive: true });
+    browserWindow.addEventListener("orientationchange", measure, {
+      passive: true,
+    });
 
-    const visualViewport = window.visualViewport ?? null;
+    const visualViewport = browserWindow.visualViewport ?? null;
 
     visualViewport?.addEventListener("resize", measure, { passive: true });
     visualViewport?.addEventListener("scroll", measure, { passive: true });
 
-    if (typeof ResizeObserver !== "undefined" && stageRef?.current) {
-      resizeObserver = new ResizeObserver(measure);
+    if (globalThis.ResizeObserver !== undefined && stageRef?.current) {
+      resizeObserver = new globalThis.ResizeObserver(measure);
       resizeObserver.observe(stageRef.current);
     }
 
     return () => {
-      window.cancelAnimationFrame(animationFrame);
+      browserWindow.cancelAnimationFrame(animationFrame);
 
-      window.removeEventListener("resize", measure);
-      window.removeEventListener("orientationchange", measure);
+      browserWindow.removeEventListener("resize", measure);
+      browserWindow.removeEventListener("orientationchange", measure);
 
       visualViewport?.removeEventListener("resize", measure);
       visualViewport?.removeEventListener("scroll", measure);
