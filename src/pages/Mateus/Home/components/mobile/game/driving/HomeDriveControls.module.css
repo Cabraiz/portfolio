@@ -29,9 +29,9 @@
 }
 
 /**
- * O controle agora é uma superfície gestual.
+ * O controle é uma superfície gestual invisível.
  *
- * Não existem mais botões aparentes de acelerar/frear.
+ * Não existem botões aparentes de acelerar/frear.
  * A pessoa toca/arrasta na região inferior:
  * - esquerda/direita = volante;
  * - cima = boost/intenção de aceleração;
@@ -55,132 +55,42 @@
   cursor: grabbing;
 }
 
+/*
+  Feedback visual removido.
+
+  Antes esta camada criava brilho/bolha/indicador visual ao tocar.
+  Agora fica invisível para não aparecer a bolinha cinza sobre o volante.
+ */
 .gestureSurface::before {
-  content: "";
-  position: absolute;
-  inset-inline:
-    max(22px, env(safe-area-inset-left))
-    max(22px, env(safe-area-inset-right));
-  bottom: var(--home-drive-controls-bottom-safe-zone);
-  height: 118px;
-  border-radius: 999px;
-  opacity: 0;
-  pointer-events: none;
-  background:
-    radial-gradient(
-      circle at 50% 50%,
-      rgba(255, 255, 255, 0.07),
-      rgba(255, 255, 255, 0.018) 36%,
-      rgba(0, 0, 0, 0) 72%
-    );
-  transform: translateY(12px) scale(0.96);
-  transition:
-    opacity 180ms ease,
-    transform 180ms ease,
-    background 180ms ease;
+  display: none !important;
+  content: none !important;
 }
 
-.gestureSurfaceActive::before {
-  opacity: 1;
-  transform: translateY(0) scale(1);
-}
-
-.gestureSurfaceBoost::before {
-  background:
-    radial-gradient(
-      circle at 50% 46%,
-      rgba(255, 216, 143, 0.14),
-      rgba(255, 216, 143, 0.035) 38%,
-      rgba(0, 0, 0, 0) 74%
-    );
-}
-
-.gestureSurfaceControl::before {
-  background:
-    radial-gradient(
-      circle at 50% 58%,
-      rgba(125, 201, 255, 0.15),
-      rgba(125, 201, 255, 0.035) 38%,
-      rgba(0, 0, 0, 0) 74%
-    );
-}
-
+.gestureSurfaceActive::before,
+.gestureSurfaceBoost::before,
+.gestureSurfaceControl::before,
 .gestureSurfaceSteer::before {
-  background:
-    radial-gradient(
-      circle at 50% 50%,
-      rgba(255, 255, 255, 0.1),
-      rgba(255, 255, 255, 0.025) 36%,
-      rgba(0, 0, 0, 0) 72%
-    );
+  display: none !important;
+  content: none !important;
 }
 
-.gestureVisual {
-  position: absolute;
-  left: 50%;
-  bottom: var(--home-drive-controls-visual-bottom);
-  width: 118px;
-  height: 118px;
-  opacity: 0;
-  pointer-events: none;
-  transform: translate3d(-50%, 10px, 0) scale(0.92);
-  transition:
-    opacity 180ms ease,
-    transform 180ms ease;
-}
-
-.gestureSurfaceActive .gestureVisual {
-  opacity: 0.9;
-  transform: translate3d(-50%, 0, 0) scale(1);
-}
-
-.gestureRing {
-  position: absolute;
-  inset: 22px;
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  border-radius: 999px;
-  box-shadow:
-    0 0 0 1px rgba(0, 0, 0, 0.24),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08);
-}
-
-.gestureDot {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 13px;
-  height: 13px;
-  border-radius: 999px;
-  background:
-    radial-gradient(
-      circle at 36% 28%,
-      rgba(255, 255, 255, 0.9),
-      rgba(230, 218, 190, 0.72) 38%,
-      rgba(70, 70, 65, 0.72) 100%
-    );
-  box-shadow:
-    0 6px 14px rgba(0, 0, 0, 0.34),
-    0 0 18px rgba(255, 255, 255, 0.08);
-  transform: translate(-50%, -50%);
-}
-
+/*
+  Remove o conjunto visual cinza do gesto:
+  - bolinha central;
+  - anel;
+  - linhas vertical/horizontal.
+  
+  A lógica de toque continua funcionando porque ela está em .gestureSurface.
+ */
+.gestureVisual,
+.gestureRing,
+.gestureDot,
 .gestureVerticalLine,
 .gestureHorizontalLine {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  background: rgba(255, 255, 255, 0.14);
-  transform: translate(-50%, -50%);
-}
-
-.gestureVerticalLine {
-  width: 1px;
-  height: 78px;
-}
-
-.gestureHorizontalLine {
-  width: 78px;
-  height: 1px;
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
 }
 
 /**
@@ -213,27 +123,19 @@
 
 @media (max-width: 390px) {
   .gestureSurface::before {
-    inset-inline:
-      max(16px, env(safe-area-inset-left))
-      max(16px, env(safe-area-inset-right));
-    height: 108px;
+    display: none !important;
+    content: none !important;
   }
 
-  .gestureVisual {
-    width: 108px;
-    height: 108px;
-  }
-
-  .gestureRing {
-    inset: 20px;
-  }
-
-  .gestureVerticalLine {
-    height: 70px;
-  }
-
+  .gestureVisual,
+  .gestureRing,
+  .gestureDot,
+  .gestureVerticalLine,
   .gestureHorizontalLine {
-    width: 70px;
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
   }
 }
 
