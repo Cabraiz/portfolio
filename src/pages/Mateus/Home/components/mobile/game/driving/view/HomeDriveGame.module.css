@@ -1,0 +1,66 @@
+/* src/pages/Mateus/Home/components/mobile/game/driving/view/HomeDriveGame.module.css */
+
+.root {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483000;
+  width: 100vw;
+  height: 100dvh;
+  min-height: 100dvh;
+  overflow: hidden;
+  isolation: isolate;
+  background: #9fc2c9;
+  color: #f5f0df;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none;
+}
+
+/*
+  Camada de tratamento visual acima do Canvas 3D,
+  mas abaixo da bússola e do volante.
+*/
+.root::after {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  pointer-events: none;
+  content: "";
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.025),
+      transparent 18%,
+      transparent 76%,
+      rgba(0, 0, 0, 0.12)
+    ),
+    radial-gradient(
+      circle at 50% 58%,
+      transparent 0%,
+      transparent 64%,
+      rgba(0, 0, 0, 0.14) 100%
+    );
+  mix-blend-mode: multiply;
+}
+
+/*
+  Classe passada diretamente para o HomeDriveCompass.
+  Mantém a bússola abaixo de navbar/sticky header.
+*/
+.compass {
+  --free-drive-compass-top: max(
+    76px,
+    calc(env(safe-area-inset-top) + 64px)
+  );
+}
+
+@media (max-width: 380px) {
+  .compass {
+    --free-drive-compass-top: max(
+      68px,
+      calc(env(safe-area-inset-top) + 56px)
+    );
+  }
+}

@@ -1,0 +1,223 @@
+/* src/pages/Mateus/Home/components/mobile/game/driving/HomeDrive/view/HomeDriveCompass.module.css */
+
+.root {
+  position: fixed;
+  top: var(
+    --free-drive-compass-top,
+    max(64px, calc(env(safe-area-inset-top) + 52px))
+  );
+  left: 50%;
+  z-index: 2147483647;
+  width: min(88vw, 440px);
+  height: 58px;
+  transform: translate3d(-50%, 0, 0);
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.frame {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 999px;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(5, 10, 16, 0.1),
+      rgba(5, 10, 16, 0.22)
+    );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.28);
+}
+
+.rail {
+  position: absolute;
+  top: 29px;
+  left: 5%;
+  right: 5%;
+  height: 1px;
+  opacity: 0.96;
+  background:
+    linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(244, 237, 214, 0.28) 8%,
+      rgba(244, 237, 214, 0.92) 50%,
+      rgba(244, 237, 214, 0.28) 92%,
+      transparent 100%
+    );
+  box-shadow:
+    0 1px 0 rgba(0, 0, 0, 0.64),
+    0 0 12px rgba(255, 246, 216, 0.16);
+}
+
+.edgeFade {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  background:
+    linear-gradient(
+      90deg,
+      rgba(3, 7, 13, 0.76) 0%,
+      transparent 15%,
+      transparent 85%,
+      rgba(3, 7, 13, 0.76) 100%
+    );
+}
+
+.markLayer {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+}
+
+.mark {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 48px;
+  opacity: var(--free-drive-compass-opacity);
+  transform:
+    translate3d(-50%, -50%, 0)
+    translateX(var(--free-drive-compass-x));
+  transition:
+    opacity 90ms linear,
+    transform 90ms linear;
+  will-change: transform, opacity;
+}
+
+.tick {
+  display: block;
+  width: 1px;
+  border-radius: 999px;
+  background: rgba(245, 238, 216, 0.86);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.62);
+}
+
+.mark-minor .tick {
+  height: 7px;
+  opacity: 0.7;
+}
+
+.mark-medium .tick {
+  width: 1.5px;
+  height: 13px;
+  opacity: 0.92;
+}
+
+.mark-major {
+  width: 50px;
+}
+
+.cardinal {
+  top: 18px;
+}
+
+.label {
+  display: block;
+  min-width: 28px;
+  text-align: center;
+  font-family:
+    "Cinzel",
+    "Trajan Pro",
+    "Times New Roman",
+    serif;
+  font-size: clamp(0.84rem, 3.25vw, 1.04rem);
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: 0.16em;
+  color: rgba(255, 249, 224, 0.99);
+  text-shadow:
+    0 1px 1px rgba(0, 0, 0, 0.98),
+    0 0 10px rgba(255, 245, 210, 0.2);
+}
+
+.centerNeedle {
+  position: absolute;
+  top: 7px;
+  left: 50%;
+  z-index: 5;
+  width: 26px;
+  height: 40px;
+  transform: translateX(-50%);
+}
+
+.centerNotch {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 0;
+  height: 0;
+  transform: translateX(-50%);
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 9px solid rgba(255, 244, 210, 0.98);
+  filter:
+    drop-shadow(0 1px 1px rgba(0, 0, 0, 0.8))
+    drop-shadow(0 0 5px rgba(255, 237, 184, 0.2));
+}
+
+.centerNotch::after {
+  position: absolute;
+  top: -8px;
+  left: -1px;
+  width: 2px;
+  height: 34px;
+  content: "";
+  border-radius: 999px;
+  background: rgba(255, 244, 210, 0.76);
+  transform: translateY(8px);
+}
+
+.centerGlow {
+  position: absolute;
+  top: 25px;
+  left: 50%;
+  width: 52px;
+  height: 1px;
+  opacity: 0.5;
+  transform: translateX(-50%);
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 244, 210, 0.72),
+      transparent
+    );
+}
+
+@media (max-width: 380px) {
+  .root {
+    top: var(
+      --free-drive-compass-top,
+      max(58px, calc(env(safe-area-inset-top) + 46px))
+    );
+    width: 91vw;
+    height: 52px;
+  }
+
+  .label {
+    font-size: 0.78rem;
+  }
+
+  .mark {
+    width: 30px;
+  }
+
+  .mark-major {
+    width: 42px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mark {
+    transition: none;
+  }
+}
