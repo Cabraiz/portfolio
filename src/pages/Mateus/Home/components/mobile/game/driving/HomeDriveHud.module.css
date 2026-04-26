@@ -6,47 +6,55 @@
   pointer-events: none;
 
   /*
-    Agora o velocímetro é comandado pela câmera do HomeDriveViewport.
+    O velocímetro agora é controlado pelo HomeDriveViewport:
 
-    Fallbacks abaixo só existem para o caso de o hook não estar montado.
+    --home-drive-speedometer-x
+    --home-drive-speedometer-y
+    --home-drive-speedometer-size
+
+    Não declare aqui:
+    --home-drive-speedometer-left
+    --home-drive-speedometer-bottom
+    --home-drive-speedometer-left-shift
+    --home-drive-speedometer-fluid-size
+    --home-drive-speedometer-size
+
+    Se declarar aqui, o HUD sobrescreve a câmera central.
   */
-  --home-drive-speedometer-size: 96px;
-  --home-drive-speedometer-x: calc(50% - 28px);
-  --home-drive-speedometer-y: 142px;
 
   --home-drive-speedometer-number-size: clamp(
     6.6px,
-    calc(var(--home-drive-speedometer-size) * 0.08),
+    calc(var(--home-drive-speedometer-size, 96px) * 0.08),
     8.8px
   );
 
   --home-drive-speedometer-number-stroke: clamp(
     1.35px,
-    calc(var(--home-drive-speedometer-size) * 0.019),
+    calc(var(--home-drive-speedometer-size, 96px) * 0.019),
     2px
   );
 
   --home-drive-speedometer-ring-stroke: clamp(
     6.4px,
-    calc(var(--home-drive-speedometer-size) * 0.078),
+    calc(var(--home-drive-speedometer-size, 96px) * 0.078),
     8.3px
   );
 
   --home-drive-speedometer-needle-shadow-stroke: clamp(
     2.8px,
-    calc(var(--home-drive-speedometer-size) * 0.04),
+    calc(var(--home-drive-speedometer-size, 96px) * 0.04),
     4px
   );
 
   --home-drive-speedometer-needle-stroke: clamp(
     1.9px,
-    calc(var(--home-drive-speedometer-size) * 0.026),
+    calc(var(--home-drive-speedometer-size, 96px) * 0.026),
     2.6px
   );
 
   --home-drive-speedometer-hub-stroke: clamp(
     1px,
-    calc(var(--home-drive-speedometer-size) * 0.015),
+    calc(var(--home-drive-speedometer-size, 96px) * 0.015),
     1.5px
   );
 }
@@ -291,8 +299,8 @@
 
 .speedometerDock {
   position: absolute;
-  left: var(--home-drive-speedometer-x);
-  bottom: var(--home-drive-speedometer-y);
+  left: var(--home-drive-speedometer-x, calc(50% - 28px));
+  bottom: var(--home-drive-speedometer-y, 142px);
   transform: translateX(-50%);
   z-index: 24;
   pointer-events: none;
@@ -300,8 +308,8 @@
 
 .speedometerCard {
   position: relative;
-  width: var(--home-drive-speedometer-size);
-  height: var(--home-drive-speedometer-size);
+  width: var(--home-drive-speedometer-size, 96px);
+  height: var(--home-drive-speedometer-size, 96px);
   border-radius: 999px;
   background:
     radial-gradient(

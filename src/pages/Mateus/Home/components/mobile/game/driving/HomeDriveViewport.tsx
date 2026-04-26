@@ -45,6 +45,14 @@ function buildViewportClassName(className?: string): string {
   return [styles.root, className].filter(Boolean).join(" ");
 }
 
+function toCssPx(value: number): string {
+  if (!Number.isFinite(value)) {
+    return "0px";
+  }
+
+  return `${Math.round(value)}px`;
+}
+
 export default function HomeDriveViewport({
   runtime,
   landmarks,
@@ -71,8 +79,40 @@ export default function HomeDriveViewport({
   const shouldShowDrivingScene = runtime.phase !== "ready";
 
   const viewportStyle = useMemo<ViewportCssVars>(() => {
+    const { values } = viewportProfile;
+
     return {
+      /*
+        Primeiro espalha tudo que vem do hook.
+      */
       ...viewportProfile.cssVars,
+
+      /*
+        Depois força explicitamente as variáveis críticas.
+        Isso garante que cockpit, volante e velocímetro recebam
+        valores mesmo se alguma versão do hook/cssVars estiver defasada.
+      */
+      "--home-drive-camera-width-px": toCssPx(values.viewportWidth),
+      "--home-drive-camera-height-px": toCssPx(values.viewportHeight),
+      "--home-drive-visual-width-px": toCssPx(values.visualWidth),
+      "--home-drive-visual-height-px": toCssPx(values.visualHeight),
+      "--home-drive-stage-width-px": toCssPx(values.stageWidth),
+      "--home-drive-stage-height-px": toCssPx(values.stageHeight),
+
+      "--home-drive-bottom-safe-zone": toCssPx(values.bottomSafeZonePx),
+      "--home-drive-system-bottom-inset": toCssPx(values.systemBottomInsetPx),
+
+      "--home-drive-cockpit-width": toCssPx(values.cockpitWidthPx),
+      "--home-drive-cockpit-height": toCssPx(values.cockpitHeightPx),
+      "--home-drive-cockpit-bottom": toCssPx(values.cockpitBottomPx),
+
+      "--home-drive-steering-width": toCssPx(values.steeringWidthPx),
+      "--home-drive-steering-bottom": toCssPx(values.steeringBottomPx),
+
+      "--home-drive-speedometer-size": toCssPx(values.speedometerSizePx),
+      "--home-drive-speedometer-x": toCssPx(values.speedometerXpx),
+      "--home-drive-speedometer-y": toCssPx(values.speedometerYpx),
+
       "--home-drive-atmosphere-sky-glow": scene.scenePreset.skyGlow,
       "--home-drive-atmosphere-haze": scene.scenePreset.haze,
       "--home-drive-noise-opacity": Math.min(
@@ -84,7 +124,7 @@ export default function HomeDriveViewport({
     scene.scenePreset.ambientNoiseOpacity,
     scene.scenePreset.haze,
     scene.scenePreset.skyGlow,
-    viewportProfile.cssVars,
+    viewportProfile,
   ]);
 
   return (
@@ -95,12 +135,30 @@ export default function HomeDriveViewport({
       data-home-drive-scene={scene.scenePreset.id}
       data-home-drive-phase={runtime.phase}
       data-home-drive-camera-kind={viewportProfile.flags.kind}
-      data-home-drive-camera-short={viewportProfile.flags.isShort ? "true" : "false"}
-      data-home-drive-camera-narrow={viewportProfile.flags.isNarrow ? "true" : "false"}
-      data-home-drive-camera-tall={viewportProfile.flags.isTall ? "true" : "false"}
+      data-home-drive-camera-short={
+        viewportProfile.flags.isShort ? "true" : "false"
+      }
+      data-home-drive-camera-narrow={
+        viewportProfile.flags.isNarrow ? "true" : "false"
+      }
+      data-home-drive-camera-tall={
+        viewportProfile.flags.isTall ? "true" : "false"
+      }
       data-home-drive-bottom-inset-risk={
         viewportProfile.flags.hasSystemBottomInsetRisk ? "true" : "false"
       }
+      data-home-drive-stage-width={viewportProfile.values.stageWidth}
+      data-home-drive-stage-height={viewportProfile.values.stageHeight}
+      data-home-drive-speedometer-x={viewportProfile.values.speedometerXpx}
+      data-home-drive-speedometer-y={viewportProfile.values.speedometerYpx}
+      data-home-drive-speedometer-size={
+        viewportProfile.values.speedometerSizePx
+      }
+      data-home-drive-cockpit-width={viewportProfile.values.cockpitWidthPx}
+      data-home-drive-cockpit-height={viewportProfile.values.cockpitHeightPx}
+      data-home-drive-cockpit-bottom={viewportProfile.values.cockpitBottomPx}
+      data-home-drive-steering-width={viewportProfile.values.steeringWidthPx}
+      data-home-drive-steering-bottom={viewportProfile.values.steeringBottomPx}
       style={viewportStyle}
     >
       <HomeDrivePixelSky

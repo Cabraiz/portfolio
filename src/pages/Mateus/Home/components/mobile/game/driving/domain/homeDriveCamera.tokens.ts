@@ -185,12 +185,12 @@ export const HOME_DRIVE_CAMERA_TOKENS: HomeDriveCameraTokens = {
       Menor shift = velocímetro mais para a direita.
       Maior shift = velocímetro mais para a esquerda.
     */
-    leftShiftWidthRatio: 0.09,
+    leftShiftWidthRatio: 0.11,
     leftShiftMinPx: 26,
     leftShiftMaxPx: 50,
 
-    bottomHeightRatio: 0.18,
-    bottomMinPx: 112,
+    bottomHeightRatio: 0.14,
+    bottomMinPx: 100,
     bottomMaxPx: 150,
     bottomSafeOffsetPx: 78,
   },
