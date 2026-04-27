@@ -1,6 +1,6 @@
 // src/pages/Mateus/Home/components/mobile/game/driving/three/HomeDriveThreeScene.tsx
 
-import React, { Suspense, useMemo, type MutableRefObject } from "react";
+import React, { Suspense, useMemo } from "react";
 import { Canvas } from "@react-three/fiber";
 
 import type {
@@ -8,6 +8,7 @@ import type {
   HomeDriveRuntimeState,
   HomeDriveViewportMetrics,
 } from "../domain/homeDrive.types";
+import HomeDriveThreeBuildings from "./HomeDriveThreeBuildings";
 import HomeDriveThreeCameraRig from "./HomeDriveThreeCameraRig";
 import HomeDriveThreeGround from "./HomeDriveThreeGround";
 import HomeDriveThreeRoadNetwork from "./HomeDriveThreeRoadNetwork";
@@ -16,16 +17,20 @@ import HomeDriveThreeWorldObjects from "./HomeDriveThreeWorldObjects";
 import { HOME_DRIVE_THREE_COLORS } from "./homeDriveThree.materials";
 import styles from "./HomeDriveThreeScene.module.css";
 
+type HomeDriveMutableRuntimeRef<T> = {
+  current: T;
+};
+
 export type HomeDriveThreeSceneProps = Readonly<{
-  runtimeRef: MutableRefObject<HomeDriveRuntimeState>;
-  inputRef: MutableRefObject<HomeDriveInputState>;
+  runtimeRef: HomeDriveMutableRuntimeRef<HomeDriveRuntimeState>;
+  inputRef: HomeDriveMutableRuntimeRef<HomeDriveInputState>;
   viewport: HomeDriveViewportMetrics;
   publishRuntimeSnapshot?: () => void;
 }>;
 
 type HomeDriveThreeWorldProps = Readonly<{
-  runtimeRef: MutableRefObject<HomeDriveRuntimeState>;
-  inputRef: MutableRefObject<HomeDriveInputState>;
+  runtimeRef: HomeDriveMutableRuntimeRef<HomeDriveRuntimeState>;
+  inputRef: HomeDriveMutableRuntimeRef<HomeDriveInputState>;
   publishRuntimeSnapshot?: () => void;
 }>;
 
@@ -47,20 +52,21 @@ function HomeDriveThreeWorld({
 
       <fog attach="fog" args={[HOME_DRIVE_THREE_COLORS.fog, 260, 1650]} />
 
-      <ambientLight intensity={1.65} />
+      <ambientLight intensity={1.55} />
 
       <hemisphereLight
         args={[
           HOME_DRIVE_THREE_COLORS.sky,
           HOME_DRIVE_THREE_COLORS.grassDark,
-          1.45,
+          1.42,
         ]}
       />
 
-      <directionalLight position={[260, 520, -320]} intensity={1.75} />
+      <directionalLight position={[260, 520, -320]} intensity={1.82} />
 
       <HomeDriveThreeGround />
       <HomeDriveThreeRoadNetwork />
+      <HomeDriveThreeBuildings />
       <HomeDriveThreeWorldObjects runtimeRef={runtimeRef} />
     </>
   );
