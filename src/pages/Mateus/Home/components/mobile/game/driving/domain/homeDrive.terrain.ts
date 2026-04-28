@@ -4,7 +4,6 @@ import {
   FREE_DRIVE_TERRAIN_CELL_SIZE_METERS,
   FREE_DRIVE_TERRAIN_OBJECT_RADIUS_METERS,
   FREE_DRIVE_TERRAIN_TILE_SIZE_METERS,
-  FREE_DRIVE_WORLD_HALF_SIZE_METERS,
 } from "./homeDrive.constants";
 import { clamp, hashVector } from "./homeDrive.math";
 import { isHomeDrivePositionBlockedByRoad } from "./homeDrive.roadExclusion";
@@ -22,6 +21,7 @@ import type { HomeDriveWorldPosition } from "./homeDrive.worldMap.types";
 
 const ROAD_VISIBILITY_RADIUS_METERS = 760;
 const ROAD_MAX_VISIBLE_SEGMENTS = 128;
+const WORLD_EDGE_OBJECT_INSET_METERS = 8;
 
 function getObjectType(seed: number): HomeDriveTerrainObjectType {
   if (seed > 0.86) {
@@ -73,16 +73,16 @@ function getObjectRoadRadiusMeters(
 function clampWorldX(value: number): number {
   return clamp(
     value,
-    HOME_DRIVE_WORLD_BOUNDS.minX + 8,
-    HOME_DRIVE_WORLD_BOUNDS.maxX - 8,
+    HOME_DRIVE_WORLD_BOUNDS.minX + WORLD_EDGE_OBJECT_INSET_METERS,
+    HOME_DRIVE_WORLD_BOUNDS.maxX - WORLD_EDGE_OBJECT_INSET_METERS,
   );
 }
 
 function clampWorldZ(value: number): number {
   return clamp(
     value,
-    HOME_DRIVE_WORLD_BOUNDS.minY + 8,
-    HOME_DRIVE_WORLD_BOUNDS.maxY - 8,
+    HOME_DRIVE_WORLD_BOUNDS.minY + WORLD_EDGE_OBJECT_INSET_METERS,
+    HOME_DRIVE_WORLD_BOUNDS.maxY - WORLD_EDGE_OBJECT_INSET_METERS,
   );
 }
 
@@ -95,15 +95,20 @@ function isInsideWorldBounds(position: HomeDriveVector2): boolean {
   );
 }
 
-/**
- * Fallback para compatibilidade com o primeiro protótipo 1000x1000.
- * Se algum trecho antigo ainda usa mundo simétrico, isso evita objeto fora
- * do cenário quando o JSON não estiver sendo usado em algum teste.
- */
-function isInsideLegacySquareWorld(position: HomeDriveVector2): boolean {
+function doesTileIntersectWorldBounds(
+  tileOrigin: HomeDriveVector2,
+  tileSizeMeters: number,
+): boolean {
+  const tileMinX = tileOrigin.x;
+  const tileMaxX = tileOrigin.x + tileSizeMeters;
+  const tileMinZ = tileOrigin.z;
+  const tileMaxZ = tileOrigin.z + tileSizeMeters;
+
   return (
-    Math.abs(position.x) <= FREE_DRIVE_WORLD_HALF_SIZE_METERS &&
-    Math.abs(position.z) <= FREE_DRIVE_WORLD_HALF_SIZE_METERS
+    tileMaxX >= HOME_DRIVE_WORLD_BOUNDS.minX &&
+    tileMinX <= HOME_DRIVE_WORLD_BOUNDS.maxX &&
+    tileMaxZ >= HOME_DRIVE_WORLD_BOUNDS.minY &&
+    tileMinZ <= HOME_DRIVE_WORLD_BOUNDS.maxY
   );
 }
 
@@ -134,7 +139,7 @@ export function getHomeDriveTerrainTiles(
         z: originZ,
       };
 
-      if (!isInsideWorldBounds(origin) && !isInsideLegacySquareWorld(origin)) {
+      if (!doesTileIntersectWorldBounds(origin, tileSize)) {
         continue;
       }
 
@@ -186,6 +191,10 @@ export function getHomeDriveReferenceObjects(
           cellZ * cellSize + (offsetZSeed - 0.5) * cellSize * 0.72,
         ),
       };
+
+      if (!isInsideWorldBounds(position)) {
+        continue;
+      }
 
       const distanceX = position.x - carPosition.x;
       const distanceZ = position.z - carPosition.z;

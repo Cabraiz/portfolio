@@ -5,10 +5,10 @@
     "y": "forward city axis; negative = litoral/orla, positive = cidade/interior"
   },
   "worldBounds": {
-    "minX": -1250,
-    "maxX": 1250,
-    "minY": -450,
-    "maxY": 2350
+    "minX": -1360,
+    "maxX": 1360,
+    "minY": -560,
+    "maxY": 2460
   },
   "spawn": {
     "roadId": "av-beira-mar",
@@ -155,9 +155,15 @@
       "steeringReturnRate": 4.2
     },
     "camera": {
-      "visibleDistanceMeters": 900,
-      "sideVisibilityMeters": 360,
+      "visibleDistanceMeters": 980,
+      "sideVisibilityMeters": 420,
       "projectionMode": "three-perspective"
+    },
+    "worldBoundary": {
+      "policy": "worldBounds is the single source of truth for playable area; physics clamps the car inside these bounds and visual mountains are generated outside the perimeter.",
+      "collision": "car is blocked before leaving worldBounds; boundary mountains are visual only and should not be used for mesh collision.",
+      "visualBarrier": "mountain rows are generated procedurally around north, south, east and west boundaries using HOME_DRIVE_WORLD_BOUNDS.",
+      "safeMarginMeters": 110
     },
     "roadGraphNotes": {
       "endcapPolicy": "terminal road points are inset from world edges and stadium gates to avoid visual cap overlap",
@@ -165,11 +171,12 @@
       "renderingPolicy": "3D road geometry should use butt/inset caps instead of extending visual quads through junctions",
       "junctionRenderPolicy": "major roads remain continuous; secondary roads stop at the dominant road edge; pads are used only for ambiguous/equivalent intersections",
       "dominancePolicy": "road priority is derived at render time from width, laneCount, kind, roadTone and tags",
-      "deadEndPolicy": "v5 avoids dead-end roads by connecting local streets to west/east perimeters and north/south arterials.",
+      "deadEndPolicy": "v6 avoids dead-end roads by connecting local streets to west/east perimeters and north/south arterials.",
       "graphValidation": "validated by endpoint degree and connected-component tests over the road point graph.",
       "perimeterPolicy": "west/east perimeters close the ends of east-west corridors.",
       "campusPolicy": "campus loop is connected to the grid by two service roads.",
-      "stadiumPolicy": "stadium ring is closed and connected by west/east service approaches."
+      "stadiumPolicy": "stadium ring is closed and connected by west/east service approaches.",
+      "boundaryPolicy": "roads remain inset from worldBounds so the player has off-road shoulder space before reaching the mountain barrier."
     },
     "roadGraphValidation": {
       "roads": 27,
@@ -181,9 +188,9 @@
       "largestComponentNodes": 86
     }
   },
-  "id": "pseudo-fortaleza-open-world-v5-looped-road-network",
-  "label": "Pseudo Fortaleza Open World - Looped Road Network",
-  "version": 5,
+  "id": "pseudo-fortaleza-open-world-v6-bounded-mountain-perimeter",
+  "label": "Pseudo Fortaleza Open World - Bounded Mountain Perimeter",
+  "version": 6,
   "nodes": [
     {
       "id": "n-m960-m300",

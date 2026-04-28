@@ -5,6 +5,7 @@ import { DoubleSide, MeshBasicMaterial, MeshStandardMaterial } from "three";
 export const HOME_DRIVE_THREE_COLORS = Object.freeze({
   sky: "#9fc2c9",
   fog: "#b5c9be",
+  sun: "#fff4d6",
 
   grassBase: "#476946",
   grassDark: "#28452f",
@@ -22,6 +23,11 @@ export const HOME_DRIVE_THREE_COLORS = Object.freeze({
   bush: "#496d38",
   rock: "#77786c",
   marker: "#c38a43",
+
+  mountainNear: "#3f513d",
+  mountainMid: "#59644f",
+  mountainFar: "#6f7865",
+  mountainShadow: "#2f3d32",
 
   houseWarm: "#b88b62",
   houseCool: "#8e9a8d",
@@ -136,6 +142,38 @@ export const HOME_DRIVE_THREE_MATERIALS = Object.freeze({
     color: HOME_DRIVE_THREE_COLORS.marker,
     roughness: 0.78,
     metalness: 0.03,
+    side: DoubleSide,
+  }),
+
+  mountainNear: new MeshStandardMaterial({
+    color: HOME_DRIVE_THREE_COLORS.mountainNear,
+    roughness: 0.97,
+    metalness: 0,
+    flatShading: true,
+    side: DoubleSide,
+  }),
+
+  mountainMid: new MeshStandardMaterial({
+    color: HOME_DRIVE_THREE_COLORS.mountainMid,
+    roughness: 0.98,
+    metalness: 0,
+    flatShading: true,
+    side: DoubleSide,
+  }),
+
+  mountainFar: new MeshStandardMaterial({
+    color: HOME_DRIVE_THREE_COLORS.mountainFar,
+    roughness: 0.99,
+    metalness: 0,
+    flatShading: true,
+    side: DoubleSide,
+  }),
+
+  mountainShadow: new MeshStandardMaterial({
+    color: HOME_DRIVE_THREE_COLORS.mountainShadow,
+    roughness: 1,
+    metalness: 0,
+    flatShading: true,
     side: DoubleSide,
   }),
 

@@ -128,6 +128,10 @@ function getRoadTagScore(road: HomeDriveGeneratedRoadSegment): number {
     score -= 140;
   }
 
+  if (tags.includes("safe-endcap")) {
+    score -= 260;
+  }
+
   return score;
 }
 
@@ -258,7 +262,8 @@ function projectPointOnRoadSegment(
   }
 
   const rawT =
-    ((point.x - road.from.x) * segmentX + (point.z - road.from.z) * segmentZ) /
+    ((point.x - road.from.x) * segmentX +
+      (point.z - road.from.z) * segmentZ) /
     segmentLengthSquared;
 
   const t = Math.max(0, Math.min(1, rawT));
@@ -308,42 +313,46 @@ function findThroughRoadsAtEndpoint(
     });
   }
 
-  return throughRoads.sort((first, second) =>
+  throughRoads.sort((first, second) =>
     compareHomeDriveThreeRoadPriority(first.road, second.road),
   );
+
+  return throughRoads;
 }
 
 function getUniqueRoads(
   endpoints: readonly HomeDriveThreeRoadEndpointRef[],
   throughRoads: readonly HomeDriveThreeRoadThroughRef[],
-): readonly HomeDriveGeneratedRoadSegment[] {
+): HomeDriveGeneratedRoadSegment[] {
   const roadById = new Map<string, HomeDriveGeneratedRoadSegment>();
 
-  endpoints.forEach((endpoint) => {
+  for (const endpoint of endpoints) {
     roadById.set(endpoint.road.id, endpoint.road);
-  });
+  }
 
-  throughRoads.forEach((throughRoad) => {
+  for (const throughRoad of throughRoads) {
     roadById.set(throughRoad.road.id, throughRoad.road);
-  });
+  }
 
-  return Array.from(roadById.values()).sort(compareHomeDriveThreeRoadPriority);
+  const roads = Array.from(roadById.values());
+  roads.sort(compareHomeDriveThreeRoadPriority);
+
+  return roads;
 }
 
 function getDominantRoad(
   roads: readonly HomeDriveGeneratedRoadSegment[],
 ): HomeDriveGeneratedRoadSegment | null {
-  return roads.length > 0 ? roads[0] : null;
+  return roads[0] ?? null;
 }
 
 function getMaxRoadWidth(
   roads: readonly HomeDriveGeneratedRoadSegment[],
 ): number {
-  if (roads.length === 0) {
-    return 0;
-  }
-
-  return Math.max(...roads.map((road) => road.width));
+  return roads.reduce<number>(
+    (maxWidth, road) => Math.max(maxWidth, road.width),
+    0,
+  );
 }
 
 function classifyJunction(
@@ -367,9 +376,16 @@ function classifyJunction(
   }
 
   if (endpoints.length === 2) {
+    const firstEndpoint = endpoints[0];
+    const secondEndpoint = endpoints[1];
+
+    if (!firstEndpoint || !secondEndpoint) {
+      return "complex";
+    }
+
     const dot = getHomeDriveThreeRoadNormalizedDot(
-      endpoints[0].directionAwayFromJunction,
-      endpoints[1].directionAwayFromJunction,
+      firstEndpoint.directionAwayFromJunction,
+      secondEndpoint.directionAwayFromJunction,
     );
 
     return Math.abs(dot) >= CONTINUATION_ABS_DOT_THRESHOLD
@@ -446,6 +462,52 @@ export function isHomeDriveThreeSubordinateRoadAtJunction(
   return roadPriority.score < dominantPriority.score;
 }
 
+function appendEndpointToKey(
+  endpointsByKey: Map<string, HomeDriveThreeRoadEndpointRef[]>,
+  key: string,
+  endpoint: HomeDriveThreeRoadEndpointRef,
+): void {
+  const currentEndpoints = endpointsByKey.get(key);
+
+  if (!currentEndpoints) {
+    endpointsByKey.set(key, [endpoint]);
+    return;
+  }
+
+  currentEndpoints.push(endpoint);
+}
+
+function getUniqueThroughRoads(
+  throughRoads: readonly HomeDriveThreeRoadThroughRef[],
+): HomeDriveThreeRoadThroughRef[] {
+  const throughRoadById = new Map<string, HomeDriveThreeRoadThroughRef>();
+
+  for (const throughRoad of throughRoads) {
+    const currentThroughRoad = throughRoadById.get(throughRoad.road.id);
+
+    if (!currentThroughRoad) {
+      throughRoadById.set(throughRoad.road.id, throughRoad);
+      continue;
+    }
+
+    if (throughRoad.distanceMeters < currentThroughRoad.distanceMeters) {
+      throughRoadById.set(throughRoad.road.id, throughRoad);
+    }
+  }
+
+  const uniqueThroughRoads = Array.from(throughRoadById.values());
+
+  uniqueThroughRoads.sort((first, second) => {
+    if (first.distanceMeters !== second.distanceMeters) {
+      return first.distanceMeters - second.distanceMeters;
+    }
+
+    return compareHomeDriveThreeRoadPriority(first.road, second.road);
+  });
+
+  return uniqueThroughRoads;
+}
+
 export function buildHomeDriveThreeRoadTopology(
   roads: readonly HomeDriveGeneratedRoadSegment[],
 ): HomeDriveThreeRoadTopology {
@@ -455,15 +517,8 @@ export function buildHomeDriveThreeRoadTopology(
     const fromEndpoint = createEndpointRef(road, "from");
     const toEndpoint = createEndpointRef(road, "to");
 
-    endpointsByKey.set(fromEndpoint.key, [
-      ...(endpointsByKey.get(fromEndpoint.key) ?? []),
-      fromEndpoint,
-    ]);
-
-    endpointsByKey.set(toEndpoint.key, [
-      ...(endpointsByKey.get(toEndpoint.key) ?? []),
-      toEndpoint,
-    ]);
+    appendEndpointToKey(endpointsByKey, fromEndpoint.key, fromEndpoint);
+    appendEndpointToKey(endpointsByKey, toEndpoint.key, toEndpoint);
   }
 
   const junctionsByKey = new Map<string, HomeDriveThreeRoadJunction>();
@@ -477,10 +532,7 @@ export function buildHomeDriveThreeRoadTopology(
       findThroughRoadsAtEndpoint(endpoint, roads),
     );
 
-    const uniqueThroughRoads = Array.from(
-      new Map(throughRoads.map((throughRoad) => [throughRoad.road.id, throughRoad])).values(),
-    );
-
+    const uniqueThroughRoads = getUniqueThroughRoads(throughRoads);
     const junction = createJunction(key, endpoints, uniqueThroughRoads);
 
     if (junction.type === "terminal") {
@@ -489,12 +541,12 @@ export function buildHomeDriveThreeRoadTopology(
 
     junctionsByKey.set(key, junction);
 
-    endpoints.forEach((endpoint) => {
+    for (const endpoint of endpoints) {
       endpointJunctionsByCutKey.set(
         getHomeDriveThreeRoadEndpointCutKey(endpoint.road, endpoint.side),
         junction,
       );
-    });
+    }
   }
 
   return {
