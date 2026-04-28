@@ -1,3 +1,5 @@
+// src/pages/Mateus/Home/variants/HomeMobile.tsx
+
 import {
   useCallback,
   useEffect,
@@ -48,6 +50,33 @@ const MOBILE_HERO_BACKGROUND = `
   )
 `;
 
+const HOME_DRIVE_ENGINE_AUDIO_SOURCE =
+  "/audio/home-drive/engine/engine-idle-loop.mp3";
+
+type HomeDriveAudioDebugWindow = Window &
+  typeof globalThis & {
+    __homeDriveDirigirRawAudio?: HTMLAudioElement;
+  };
+
+function stopDebugEngineAudio(): void {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  const debugWindow = window as HomeDriveAudioDebugWindow;
+  const previousAudio = debugWindow.__homeDriveDirigirRawAudio;
+
+  if (!previousAudio) {
+    return;
+  }
+
+  previousAudio.pause();
+  previousAudio.removeAttribute("src");
+  previousAudio.load();
+
+  debugWindow.__homeDriveDirigirRawAudio = undefined;
+}
+
 function HomeMobile() {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -67,6 +96,109 @@ function HomeMobile() {
   const playAriaLabel = useMemo(() => {
     return isPT ? "Abrir driving game" : "Open driving game";
   }, [isPT]);
+
+  const testRawEngineAudioBeforeOpen = useCallback(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    stopDebugEngineAudio();
+
+    const audio = new Audio(HOME_DRIVE_ENGINE_AUDIO_SOURCE);
+
+    audio.loop = true;
+    audio.volume = 1;
+    audio.muted = false;
+    audio.preload = "auto";
+
+    (window as HomeDriveAudioDebugWindow).__homeDriveDirigirRawAudio = audio;
+
+    console.log("[DIRIGIR_RAW_AUDIO_TEST] created", {
+      src: audio.src,
+      volume: audio.volume,
+      muted: audio.muted,
+      paused: audio.paused,
+      readyState: audio.readyState,
+      networkState: audio.networkState,
+    });
+
+    audio.addEventListener("loadstart", () => {
+      console.log("[DIRIGIR_RAW_AUDIO_TEST] loadstart", {
+        src: audio.currentSrc || audio.src,
+        readyState: audio.readyState,
+        networkState: audio.networkState,
+      });
+    });
+
+    audio.addEventListener("canplay", () => {
+      console.log("[DIRIGIR_RAW_AUDIO_TEST] canplay", {
+        src: audio.currentSrc || audio.src,
+        readyState: audio.readyState,
+        networkState: audio.networkState,
+        duration: audio.duration,
+      });
+    });
+
+    audio.addEventListener("canplaythrough", () => {
+      console.log("[DIRIGIR_RAW_AUDIO_TEST] canplaythrough", {
+        src: audio.currentSrc || audio.src,
+        readyState: audio.readyState,
+        networkState: audio.networkState,
+        duration: audio.duration,
+      });
+    });
+
+    audio.addEventListener("playing", () => {
+      console.log("[DIRIGIR_RAW_AUDIO_TEST] playing", {
+        src: audio.currentSrc || audio.src,
+        paused: audio.paused,
+        muted: audio.muted,
+        volume: audio.volume,
+        currentTime: audio.currentTime,
+        duration: audio.duration,
+        readyState: audio.readyState,
+        networkState: audio.networkState,
+      });
+    });
+
+    audio.addEventListener("pause", () => {
+      console.log("[DIRIGIR_RAW_AUDIO_TEST] pause", {
+        src: audio.currentSrc || audio.src,
+        paused: audio.paused,
+        currentTime: audio.currentTime,
+      });
+    });
+
+    audio.addEventListener("error", () => {
+      console.error("[DIRIGIR_RAW_AUDIO_TEST] media error", {
+        src: audio.currentSrc || audio.src,
+        readyState: audio.readyState,
+        networkState: audio.networkState,
+        error: audio.error,
+      });
+    });
+
+    void audio.play().then(
+      () => {
+        console.log("[DIRIGIR_RAW_AUDIO_TEST] play resolved", {
+          src: audio.currentSrc || audio.src,
+          paused: audio.paused,
+          muted: audio.muted,
+          volume: audio.volume,
+          readyState: audio.readyState,
+          networkState: audio.networkState,
+        });
+      },
+      (error) => {
+        console.error("[DIRIGIR_RAW_AUDIO_TEST] play rejected", {
+          src: audio.currentSrc || audio.src,
+          readyState: audio.readyState,
+          networkState: audio.networkState,
+          error,
+        });
+      },
+    );
+  }, []);
 
   const socialIconImageStyle = useMemo<CSSProperties>(() => {
     return {
@@ -240,10 +372,18 @@ function HomeMobile() {
   }, []);
 
   const handleOpenDrive = useCallback(() => {
+    /*
+      Diagnóstico/fallback:
+      Este play() acontece exatamente dentro do clique em "Dirigir".
+      Se isso tocar, o MP3 está correto e o problema fica no controller do jogo.
+      Se isso não tocar, veja o console [DIRIGIR_RAW_AUDIO_TEST].
+    */
+    testRawEngineAudioBeforeOpen();
     setIsGameOpen(true);
-  }, []);
+  }, [testRawEngineAudioBeforeOpen]);
 
   const handleCloseDrive = useCallback(() => {
+    stopDebugEngineAudio();
     setIsGameOpen(false);
   }, []);
 
@@ -290,6 +430,12 @@ function HomeMobile() {
       document.body.style.touchAction = previousBodyTouchAction;
     };
   }, [isGameOpen]);
+
+  useEffect(() => {
+    return () => {
+      stopDebugEngineAudio();
+    };
+  }, []);
 
   useLayoutEffect(() => {
     const container = containerRef.current;
