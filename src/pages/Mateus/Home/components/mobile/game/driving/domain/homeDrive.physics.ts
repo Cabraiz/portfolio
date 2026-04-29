@@ -12,6 +12,12 @@ import {
   FREE_DRIVE_WHEEL_BASE_METERS,
 } from "./homeDrive.constants";
 import {
+  applyHomeDriveImpactToCar,
+  getHomeDriveImpactControlFactor,
+  normalizeHomeDriveImpactState,
+  tickHomeDriveImpact,
+} from "./homeDrive.impact";
+import {
   clamp,
   degToRad,
   lerp,
@@ -28,6 +34,7 @@ import {
 } from "./homeDrive.worldBoundary";
 
 const BOUNDARY_COLLISION_SPEED_RETENTION = 0.12;
+const FREE_DRIVE_MAX_REVERSE_SPEED_MPS = 22;
 
 export function tickHomeDrivePhysics(
   current: HomeDriveRuntimeState,
@@ -40,8 +47,11 @@ export function tickHomeDrivePhysics(
     FREE_DRIVE_LOOP_MAX_DELTA_SECONDS,
   );
 
-  const normalizedSteering = clamp(input.steering, -1, 1);
-  const normalizedThrottle = clamp(input.throttle, 0, 1);
+  const currentImpact = normalizeHomeDriveImpactState(current.impact);
+  const controlFactor = getHomeDriveImpactControlFactor(currentImpact);
+
+  const normalizedSteering = clamp(input.steering, -1, 1) * controlFactor;
+  const normalizedThrottle = clamp(input.throttle, 0, 1) * controlFactor;
   const normalizedBrake = clamp(input.brake, 0, 1);
 
   const targetSteerAngleRad =
@@ -57,7 +67,7 @@ export function tickHomeDrivePhysics(
   const accelerationBudget =
     FREE_DRIVE_ACCELERATION_MPS2 *
     deltaSeconds *
-    Math.max(normalizedThrottle, 0.32);
+    Math.max(normalizedThrottle, 0.32 * controlFactor);
 
   let speedMps = moveTowards(
     current.car.speedMps,
@@ -68,11 +78,17 @@ export function tickHomeDrivePhysics(
   speedMps -=
     FREE_DRIVE_NATURAL_DRAG_MPS2 * deltaSeconds * (1 - normalizedThrottle);
   speedMps -= FREE_DRIVE_BRAKE_MPS2 * deltaSeconds * normalizedBrake;
-  speedMps = clamp(speedMps, 0, FREE_DRIVE_MAX_SPEED_MPS);
+  speedMps = clamp(
+    speedMps,
+    -FREE_DRIVE_MAX_REVERSE_SPEED_MPS,
+    FREE_DRIVE_MAX_SPEED_MPS,
+  );
 
-  const speedForTurning = Math.max(speedMps, 0.1);
+  const speedForTurning = Math.max(Math.abs(speedMps), 0.1);
+  const turnDirection = speedMps >= 0 ? 1 : -1;
   const turnRateRad =
-    (Math.tan(steerAngleRad) * speedForTurning) / FREE_DRIVE_WHEEL_BASE_METERS;
+    (Math.tan(steerAngleRad) * speedForTurning * turnDirection) /
+    FREE_DRIVE_WHEEL_BASE_METERS;
 
   const headingRad = wrapAngleRad(
     current.car.headingRad + turnRateRad * deltaSeconds,
@@ -81,14 +97,28 @@ export function tickHomeDrivePhysics(
   const forwardX = Math.sin(headingRad);
   const forwardZ = Math.cos(headingRad);
 
-  const proposedPosition = {
-    x: current.car.position.x + forwardX * speedMps * deltaSeconds,
-    z: current.car.position.z + forwardZ * speedMps * deltaSeconds,
-  };
+  const proposedCar = applyHomeDriveImpactToCar(
+    {
+      position: {
+        x: current.car.position.x + forwardX * speedMps * deltaSeconds,
+        z: current.car.position.z + forwardZ * speedMps * deltaSeconds,
+      },
+      headingRad,
+      speedMps,
+      steerAngleRad,
+    },
+    currentImpact,
+    deltaSeconds,
+    {
+      allowReverseKick: true,
+      maxRecoilSpeedMps: 48,
+      maxSpinVelocityRadps: 38,
+    },
+  );
 
   const boundaryResolution = resolveHomeDriveBoundaryCollision(
-    current.car,
-    proposedPosition,
+    proposedCar,
+    proposedCar.position,
     {
       collisionSpeedRetention: BOUNDARY_COLLISION_SPEED_RETENTION,
     },
@@ -98,15 +128,22 @@ export function tickHomeDrivePhysics(
     boundaryResolution.position,
   );
 
+  const nextSpeedMps = boundaryResolution.didCollide
+    ? boundaryResolution.speedMps
+    : boundaryResolution.speedMps * boundaryDragMultiplier;
+
   return {
     elapsedSeconds: current.elapsedSeconds + deltaSeconds,
+    impact: tickHomeDriveImpact(currentImpact, deltaSeconds),
     car: {
       position: boundaryResolution.position,
-      headingRad,
-      speedMps: boundaryResolution.didCollide
-        ? boundaryResolution.speedMps
-        : boundaryResolution.speedMps * boundaryDragMultiplier,
-      steerAngleRad,
+      headingRad: proposedCar.headingRad,
+      speedMps: clamp(
+        nextSpeedMps,
+        -FREE_DRIVE_MAX_REVERSE_SPEED_MPS,
+        FREE_DRIVE_MAX_SPEED_MPS,
+      ),
+      steerAngleRad: proposedCar.steerAngleRad,
     },
   };
 }

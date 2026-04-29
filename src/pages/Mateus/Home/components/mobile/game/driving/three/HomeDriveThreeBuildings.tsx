@@ -5,7 +5,6 @@ import {
   BoxGeometry,
   BufferGeometry,
   InstancedMesh,
-  Matrix4,
   Object3D,
   PlaneGeometry,
   type Material,
@@ -19,10 +18,15 @@ import type {
   HomeDriveBuildingMaterialKey,
   HomeDriveBuildingRoofStyle,
 } from "../domain/homeDrive.building.types";
+import { getHomeDriveStableStringSeed } from "../domain/homeDrive.commerceNames";
 import { HOME_DRIVE_THREE_MATERIALS } from "./homeDriveThree.materials";
+import {
+  createHomeDriveThreeBuildingFacadeTransform,
+  getHomeDriveThreeBuildingStreetFacadeLocalZ,
+} from "./homeDriveThree.buildingFacadeFrame";
 
-const MAX_BUILDINGS = 260;
-const MAX_FACADE_DETAILS = 5200;
+const MAX_BUILDINGS = 16384;
+const MAX_FACADE_DETAILS = 327680;
 const FACADE_SURFACE_OFFSET_METERS = 0.085;
 
 type BuildingBatch = Readonly<{
@@ -40,9 +44,22 @@ type BuildingInstance = Readonly<{
 type FacadeDetailKind =
   | "window"
   | "window-dark"
+  | "window-glass"
+  | "window-glass-bright"
+  | "window-wood"
+  | "window-open"
+  | "window-frame"
+  | "window-grille"
   | "door"
   | "shop-glass"
   | "awning"
+  | "awning-striped"
+  | "awning-fabric"
+  | "awning-metal"
+  | "air-conditioner"
+  | "air-conditioner-shadow"
+  | "sign-board"
+  | "metal-frame"
   | "trim"
   | "shadow-trim"
   | "roof";
@@ -83,13 +100,30 @@ const FACADE_DETAIL_MATERIALS: Readonly<Record<FacadeDetailKind, Material>> =
   Object.freeze({
     window: HOME_DRIVE_THREE_MATERIALS.buildingWindow,
     "window-dark": HOME_DRIVE_THREE_MATERIALS.buildingWindowDark,
+    "window-glass": HOME_DRIVE_THREE_MATERIALS.buildingWindowGlass,
+    "window-glass-bright": HOME_DRIVE_THREE_MATERIALS.buildingWindowGlassBright,
+    "window-wood": HOME_DRIVE_THREE_MATERIALS.buildingWindowWood,
+    "window-open": HOME_DRIVE_THREE_MATERIALS.buildingWindowOpen,
+    "window-frame": HOME_DRIVE_THREE_MATERIALS.buildingWindowFrame,
+    "window-grille": HOME_DRIVE_THREE_MATERIALS.buildingWindowGrille,
     door: HOME_DRIVE_THREE_MATERIALS.buildingDoor,
     "shop-glass": HOME_DRIVE_THREE_MATERIALS.buildingShopGlass,
     awning: HOME_DRIVE_THREE_MATERIALS.buildingAwning,
+    "awning-striped": HOME_DRIVE_THREE_MATERIALS.buildingAwningStriped,
+    "awning-fabric": HOME_DRIVE_THREE_MATERIALS.buildingAwningFabric,
+    "awning-metal": HOME_DRIVE_THREE_MATERIALS.buildingAwningMetal,
+    "air-conditioner": HOME_DRIVE_THREE_MATERIALS.buildingAirConditioner,
+    "air-conditioner-shadow": HOME_DRIVE_THREE_MATERIALS.buildingAirConditionerShadow,
+    "sign-board": HOME_DRIVE_THREE_MATERIALS.buildingSignBoard,
+    "metal-frame": HOME_DRIVE_THREE_MATERIALS.buildingMetalFrame,
     trim: HOME_DRIVE_THREE_MATERIALS.buildingTrim,
     "shadow-trim": HOME_DRIVE_THREE_MATERIALS.buildingShadowTrim,
     roof: HOME_DRIVE_THREE_MATERIALS.buildingRoof,
   });
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.max(min, Math.min(max, value));
+}
 
 function groupBuildingsByMaterial(
   buildings: readonly HomeDriveBuilding[],
@@ -179,19 +213,19 @@ function getDerivedFacadeProfile(
       return {
         style,
         roofStyle,
-        windowColumns: Math.max(2, Math.min(4, Math.floor(building.widthMeters / 5))),
-        windowRows: Math.max(1, Math.min(3, building.floors - 1)),
+        windowColumns: Math.max(2, Math.min(5, Math.floor(building.widthMeters / 4.3))),
+        windowRows: Math.max(1, Math.min(4, building.floors - 1)),
         hasDoor: true,
         hasShopfront: true,
-        hasAwning: true,
+        hasAwning: building.awningStyle !== "none",
       };
 
     case "office-glass":
       return {
         style,
         roofStyle,
-        windowColumns: Math.max(3, Math.min(7, Math.floor(building.widthMeters / 4.2))),
-        windowRows: Math.max(3, Math.min(11, building.floors)),
+        windowColumns: Math.max(3, Math.min(8, Math.floor(building.widthMeters / 3.9))),
+        windowRows: Math.max(3, Math.min(12, building.floors)),
         hasDoor: true,
         hasShopfront: false,
         hasAwning: false,
@@ -201,7 +235,7 @@ function getDerivedFacadeProfile(
       return {
         style,
         roofStyle,
-        windowColumns: Math.max(2, Math.min(4, Math.floor(building.widthMeters / 9))),
+        windowColumns: Math.max(2, Math.min(5, Math.floor(building.widthMeters / 8.4))),
         windowRows: 1,
         hasDoor: true,
         hasShopfront: false,
@@ -213,8 +247,8 @@ function getDerivedFacadeProfile(
       return {
         style,
         roofStyle,
-        windowColumns: Math.max(2, Math.min(5, Math.floor(building.widthMeters / 4.6))),
-        windowRows: Math.max(2, Math.min(10, building.floors)),
+        windowColumns: Math.max(2, Math.min(6, Math.floor(building.widthMeters / 4.2))),
+        windowRows: Math.max(2, Math.min(11, building.floors)),
         hasDoor: true,
         hasShopfront: false,
         hasAwning: false,
@@ -222,28 +256,22 @@ function getDerivedFacadeProfile(
   }
 }
 
-function localToWorld(
-  building: HomeDriveBuilding,
-  localX: number,
-  localY: number,
-  localZ: number,
-): readonly [number, number, number] {
-  const cos = Math.cos(building.rotationYRad);
-  const sin = Math.sin(building.rotationYRad);
-
-  return [
-    building.position.x + localX * cos + localZ * sin,
-    localY,
-    building.position.z - localX * sin + localZ * cos,
-  ];
-}
-
 function getFrontLocalZ(building: HomeDriveBuilding): number {
-  return -building.side * (building.depthMeters / 2 + FACADE_SURFACE_OFFSET_METERS);
+  return getHomeDriveThreeBuildingStreetFacadeLocalZ(
+    building,
+    FACADE_SURFACE_OFFSET_METERS,
+  );
 }
 
-function getFacadeRotationY(building: HomeDriveBuilding): number {
-  return building.rotationYRad + (building.side === 1 ? Math.PI : 0);
+function getStableFacadeSeed(
+  building: HomeDriveBuilding,
+  key: string,
+  fallbackSalt: number,
+): number {
+  return getHomeDriveStableStringSeed(
+    `${building.id}:${key}:${building.variant}:${building.facadeSeed ?? 0}`,
+    fallbackSalt,
+  );
 }
 
 function createFacadeDetail(
@@ -258,17 +286,88 @@ function createFacadeDetail(
   height: number,
   depth = 1,
 ): FacadeDetail {
+  const transform = createHomeDriveThreeBuildingFacadeTransform(building, {
+    localX,
+    localY,
+    localZ,
+    width,
+    height,
+    depth,
+    geometryKind,
+    surfaceOffsetMeters: FACADE_SURFACE_OFFSET_METERS,
+  });
+
   return {
     id,
     kind,
     geometryKind,
-    position: localToWorld(building, localX, localY, localZ),
-    rotationYRad: getFacadeRotationY(building),
-    scale:
-      geometryKind === "plane"
-        ? [width, height, 1]
-        : [width, height, depth],
+    position: transform.position,
+    rotationYRad: transform.rotationYRad,
+    scale: transform.scale,
   };
+}
+
+function getWindowKind(
+  building: HomeDriveBuilding,
+  row: number,
+  column: number,
+  preferred: "house" | "grid" | "shop" | "warehouse",
+): FacadeDetailKind {
+  const seed = getStableFacadeSeed(building, `window-${preferred}-${row}-${column}`, 151);
+  const style = building.windowStyle ?? "mixed";
+
+  if (style === "glass") {
+    return seed > 0.28 ? "window-glass" : "window-glass-bright";
+  }
+
+  if (style === "wood") {
+    return seed > 0.22 ? "window-wood" : "window";
+  }
+
+  if (style === "open") {
+    return seed > 0.48 ? "window-open" : "window-wood";
+  }
+
+  if (style === "gridded") {
+    return seed > 0.34 ? "window-dark" : "window-glass";
+  }
+
+  if (style === "dark") {
+    return seed > 0.18 ? "window-dark" : "window";
+  }
+
+  if (preferred === "warehouse") {
+    return seed > 0.52 ? "window-dark" : "window-glass";
+  }
+
+  if (preferred === "shop") {
+    if (seed > 0.72) return "window-wood";
+    if (seed > 0.42) return "window-glass";
+    return "window";
+  }
+
+  if (seed > 0.78) return "window-open";
+  if (seed > 0.58) return "window-wood";
+  if (seed > 0.32) return "window-glass";
+  if (seed > 0.16) return "window-dark";
+
+  return "window";
+}
+
+function getAwningKind(building: HomeDriveBuilding): FacadeDetailKind | null {
+  switch (building.awningStyle) {
+    case "striped":
+      return "awning-striped";
+    case "fabric":
+      return "awning-fabric";
+    case "metal":
+      return "awning-metal";
+    case "flat":
+      return "awning";
+    case "none":
+    default:
+      return null;
+  }
 }
 
 function pushRoofDetail(
@@ -321,6 +420,170 @@ function pushDoorDetail(
       height,
     ),
   );
+}
+
+function pushWindowDetail(
+  details: FacadeDetail[],
+  building: HomeDriveBuilding,
+  id: string,
+  kind: FacadeDetailKind,
+  localX: number,
+  localY: number,
+  width: number,
+  height: number,
+  options: Readonly<{
+    frame?: boolean;
+    grille?: boolean;
+    airConditioner?: boolean;
+  }> = {},
+): void {
+  const frontZ = getFrontLocalZ(building);
+
+  if (options.frame) {
+    details.push(
+      createFacadeDetail(
+        building,
+        `${id}::frame`,
+        kind === "window-wood" ? "window-frame" : "metal-frame",
+        "plane",
+        localX,
+        localY,
+        frontZ,
+        width + 0.22,
+        height + 0.22,
+      ),
+    );
+  }
+
+  details.push(
+    createFacadeDetail(
+      building,
+      id,
+      kind,
+      "plane",
+      localX,
+      localY,
+      frontZ,
+      width,
+      height,
+    ),
+  );
+
+  if (options.grille) {
+    details.push(
+      createFacadeDetail(
+        building,
+        `${id}::grille-horizontal`,
+        "window-grille",
+        "plane",
+        localX,
+        localY,
+        frontZ,
+        width * 0.94,
+        Math.max(0.035, height * 0.05),
+      ),
+    );
+
+    details.push(
+      createFacadeDetail(
+        building,
+        `${id}::grille-vertical`,
+        "window-grille",
+        "plane",
+        localX,
+        localY,
+        frontZ,
+        Math.max(0.035, width * 0.045),
+        height * 0.92,
+      ),
+    );
+  }
+
+  if (options.airConditioner) {
+    const acWidth = clamp(width * 0.58, 0.55, 1.1);
+    const acHeight = clamp(height * 0.28, 0.22, 0.38);
+
+    details.push(
+      createFacadeDetail(
+        building,
+        `${id}::ac-shadow`,
+        "air-conditioner-shadow",
+        "plane",
+        localX + width * 0.16,
+        localY - height * 0.68,
+        frontZ,
+        acWidth * 1.08,
+        acHeight * 1.18,
+      ),
+    );
+
+    details.push(
+      createFacadeDetail(
+        building,
+        `${id}::ac-box`,
+        "air-conditioner",
+        "box",
+        localX + width * 0.16,
+        localY - height * 0.68,
+        frontZ,
+        acWidth,
+        acHeight,
+        0.28,
+      ),
+    );
+  }
+}
+
+function shouldWindowHaveAirConditioner(
+  building: HomeDriveBuilding,
+  row: number,
+  column: number,
+): boolean {
+  if (!building.hasAirConditioners) {
+    return false;
+  }
+
+  if (row <= 0 && building.kind !== "house") {
+    return false;
+  }
+
+  const seed = getStableFacadeSeed(building, `ac-${row}-${column}`, 163);
+
+  switch (building.kind) {
+    case "office":
+      return seed > 0.66;
+    case "apartment":
+      return seed > 0.54;
+    case "commerce":
+      return seed > 0.72;
+    case "house":
+      return seed > 0.82;
+    case "warehouse":
+    default:
+      return seed > 0.9;
+  }
+}
+
+function shouldWindowHaveGrille(
+  building: HomeDriveBuilding,
+  row: number,
+  column: number,
+): boolean {
+  if (building.windowStyle === "gridded") {
+    return true;
+  }
+
+  const seed = getStableFacadeSeed(building, `grille-${row}-${column}`, 167);
+
+  if (building.kind === "house") {
+    return seed > 0.58;
+  }
+
+  if (building.kind === "commerce") {
+    return seed > 0.78;
+  }
+
+  return seed > 0.9;
 }
 
 function pushFacadeTrim(
@@ -377,18 +640,20 @@ function pushHouseFacade(
       continue;
     }
 
-    details.push(
-      createFacadeDetail(
-        building,
-        `${building.id}::window-house-${column}`,
-        column % 2 === 0 ? "window" : "window-dark",
-        "plane",
-        localX,
-        windowY,
-        getFrontLocalZ(building),
-        1.15,
-        0.95,
-      ),
+    pushWindowDetail(
+      details,
+      building,
+      `${building.id}::window-house-${column}`,
+      getWindowKind(building, 0, column, "house"),
+      localX,
+      windowY,
+      1.15,
+      0.95,
+      {
+        frame: true,
+        grille: shouldWindowHaveGrille(building, 0, column),
+        airConditioner: shouldWindowHaveAirConditioner(building, 0, column),
+      },
     );
   }
 
@@ -397,17 +662,95 @@ function pushHouseFacade(
       const localX =
         -usableWidth / 2 + (column + 0.5) * (usableWidth / columns);
 
+      pushWindowDetail(
+        details,
+        building,
+        `${building.id}::window-house-upper-${column}`,
+        getWindowKind(building, 1, column, "house"),
+        localX,
+        4.9,
+        1.05,
+        0.9,
+        {
+          frame: true,
+          grille: shouldWindowHaveGrille(building, 1, column),
+          airConditioner: shouldWindowHaveAirConditioner(building, 1, column),
+        },
+      );
+    }
+  }
+}
+
+function pushShopfrontSignBoard(details: FacadeDetail[], building: HomeDriveBuilding): void {
+  if (!building.commerceName) {
+    return;
+  }
+
+  details.push(
+    createFacadeDetail(
+      building,
+      `${building.id}::instanced-sign-board`,
+      "sign-board",
+      "plane",
+      0,
+      3.72,
+      getFrontLocalZ(building),
+      clamp(building.widthMeters * 0.68, 4.6, 12.8),
+      clamp(building.heightMeters * 0.09, 0.78, 1.35),
+    ),
+  );
+}
+
+function pushAwningDetail(
+  details: FacadeDetail[],
+  building: HomeDriveBuilding,
+  localY: number,
+  widthFactor = 0.78,
+): void {
+  const awningKind = getAwningKind(building);
+
+  if (!awningKind) {
+    return;
+  }
+
+  const frontZ = getFrontLocalZ(building);
+  const width = building.widthMeters * widthFactor;
+
+  details.push(
+    createFacadeDetail(
+      building,
+      `${building.id}::awning-main`,
+      awningKind,
+      "plane",
+      0,
+      localY,
+      frontZ,
+      width,
+      0.48,
+    ),
+  );
+
+  if (building.awningStyle === "striped") {
+    const stripeCount = Math.max(3, Math.min(7, Math.floor(width / 1.35)));
+
+    for (let stripe = 0; stripe < stripeCount; stripe += 1) {
+      if (stripe % 2 !== 0) {
+        continue;
+      }
+
+      const localX = -width / 2 + (stripe + 0.5) * (width / stripeCount);
+
       details.push(
         createFacadeDetail(
           building,
-          `${building.id}::window-house-upper-${column}`,
-          "window",
+          `${building.id}::awning-stripe-${stripe}`,
+          "awning-fabric",
           "plane",
           localX,
-          4.9,
-          getFrontLocalZ(building),
-          1.05,
-          0.9,
+          localY,
+          frontZ,
+          width / stripeCount,
+          0.5,
         ),
       );
     }
@@ -449,25 +792,40 @@ function pushShopfrontFacade(
     ),
   );
 
+  details.push(
+    createFacadeDetail(
+      building,
+      `${building.id}::shop-metal-frame-left`,
+      "metal-frame",
+      "plane",
+      -building.widthMeters * 0.22,
+      1.85,
+      frontZ,
+      0.08,
+      2.58,
+    ),
+  );
+
+  details.push(
+    createFacadeDetail(
+      building,
+      `${building.id}::shop-metal-frame-right`,
+      "metal-frame",
+      "plane",
+      building.widthMeters * 0.22,
+      1.85,
+      frontZ,
+      0.08,
+      2.58,
+    ),
+  );
+
   if (profile.hasDoor) {
     pushDoorDetail(details, building, 0, 1.35, 2.45);
   }
 
-  if (profile.hasAwning) {
-    details.push(
-      createFacadeDetail(
-        building,
-        `${building.id}::awning`,
-        "awning",
-        "plane",
-        0,
-        3.25,
-        frontZ,
-        building.widthMeters * 0.78,
-        0.42,
-      ),
-    );
-  }
+  pushShopfrontSignBoard(details, building);
+  pushAwningDetail(details, building, 3.22, 0.82);
 
   const rows = profile.windowRows;
   const columns = Math.max(2, profile.windowColumns);
@@ -483,18 +841,20 @@ function pushShopfrontFacade(
         continue;
       }
 
-      details.push(
-        createFacadeDetail(
-          building,
-          `${building.id}::shop-upper-${row}-${column}`,
-          "window",
-          "plane",
-          localX,
-          localY,
-          frontZ,
-          1.25,
-          0.92,
-        ),
+      pushWindowDetail(
+        details,
+        building,
+        `${building.id}::shop-upper-${row}-${column}`,
+        getWindowKind(building, row, column, "shop"),
+        localX,
+        localY,
+        1.25,
+        0.92,
+        {
+          frame: true,
+          grille: shouldWindowHaveGrille(building, row, column),
+          airConditioner: shouldWindowHaveAirConditioner(building, row, column),
+        },
       );
     }
   }
@@ -505,7 +865,6 @@ function pushGridFacade(
   building: HomeDriveBuilding,
   profile: HomeDriveBuildingFacadeProfile,
 ): void {
-  const frontZ = getFrontLocalZ(building);
   const rows = Math.max(2, profile.windowRows);
   const columns = Math.max(2, profile.windowColumns);
   const usableWidth = building.widthMeters * 0.72;
@@ -517,6 +876,10 @@ function pushGridFacade(
     pushDoorDetail(details, building, 0, 1.55, 2.55);
   }
 
+  if (building.commerceName && building.kind === "apartment") {
+    pushShopfrontSignBoard(details, building);
+  }
+
   for (let row = 0; row < rows; row += 1) {
     const localY = bottom + (row + 0.5) * (usableHeight / rows);
 
@@ -524,22 +887,25 @@ function pushGridFacade(
       const localX =
         -usableWidth / 2 + (column + 0.5) * (usableWidth / columns);
 
+      const kind = getWindowKind(building, row, column, "grid");
       const isDarkVariant =
-        (row + column + building.variant) % (profile.style === "office-glass" ? 3 : 4) ===
+        (row + column + building.variant) % (profile.style === "office-glass" ? 5 : 6) ===
         0;
 
-      details.push(
-        createFacadeDetail(
-          building,
-          `${building.id}::grid-window-${row}-${column}`,
-          isDarkVariant ? "window-dark" : "window",
-          "plane",
-          localX,
-          localY,
-          frontZ,
-          profile.style === "office-glass" ? 1.45 : 1.15,
-          profile.style === "office-glass" ? 1.25 : 0.92,
-        ),
+      pushWindowDetail(
+        details,
+        building,
+        `${building.id}::grid-window-${row}-${column}`,
+        isDarkVariant && kind === "window" ? "window-dark" : kind,
+        localX,
+        localY,
+        profile.style === "office-glass" ? 1.45 : 1.15,
+        profile.style === "office-glass" ? 1.25 : 0.92,
+        {
+          frame: profile.style !== "office-glass" || column % 2 === 0,
+          grille: shouldWindowHaveGrille(building, row, column),
+          airConditioner: shouldWindowHaveAirConditioner(building, row, column),
+        },
       );
     }
   }
@@ -570,6 +936,22 @@ function pushWarehouseFacade(
     );
   }
 
+  if (building.commerceName) {
+    details.push(
+      createFacadeDetail(
+        building,
+        `${building.id}::warehouse-sign-board`,
+        "sign-board",
+        "plane",
+        building.widthMeters * 0.12,
+        clamp(building.heightMeters * 0.58, 3.4, building.heightMeters - 1.1),
+        frontZ,
+        clamp(building.widthMeters * 0.44, 5.4, 13.5),
+        clamp(building.heightMeters * 0.12, 1.2, 2.6),
+      ),
+    );
+  }
+
   const columns = Math.max(2, profile.windowColumns);
   const usableWidth = building.widthMeters * 0.62;
 
@@ -577,18 +959,20 @@ function pushWarehouseFacade(
     const localX =
       -usableWidth / 2 + (column + 0.5) * (usableWidth / columns);
 
-    details.push(
-      createFacadeDetail(
-        building,
-        `${building.id}::warehouse-window-${column}`,
-        "window-dark",
-        "plane",
-        localX,
-        building.heightMeters * 0.68,
-        frontZ,
-        1.6,
-        0.72,
-      ),
+    pushWindowDetail(
+      details,
+      building,
+      `${building.id}::warehouse-window-${column}`,
+      getWindowKind(building, 0, column, "warehouse"),
+      localX,
+      building.heightMeters * 0.68,
+      1.6,
+      0.72,
+      {
+        frame: true,
+        grille: true,
+        airConditioner: shouldWindowHaveAirConditioner(building, 0, column),
+      },
     );
   }
 
@@ -656,6 +1040,28 @@ function createBodyInstances(
   }));
 }
 
+function getFacadeDetailRenderOrder(kind: FacadeDetailKind): number {
+  switch (kind) {
+    case "roof":
+      return 13;
+    case "air-conditioner":
+      return 22;
+    case "sign-board":
+      return 24;
+    case "awning":
+    case "awning-striped":
+    case "awning-fabric":
+    case "awning-metal":
+      return 23;
+    case "window-frame":
+    case "window-grille":
+    case "metal-frame":
+      return 21;
+    default:
+      return 18;
+  }
+}
+
 function createFacadeDetailBatches(
   buildings: readonly HomeDriveBuilding[],
 ): readonly FacadeDetailBatch[] {
@@ -701,7 +1107,7 @@ function createFacadeDetailBatches(
       geometryKind,
       details: batchDetails,
       material: FACADE_DETAIL_MATERIALS[kind],
-      renderOrder: kind === "roof" ? 13 : 18,
+      renderOrder: getFacadeDetailRenderOrder(kind),
     };
   });
 }

@@ -1,3 +1,5 @@
+// src/pages/Mateus/Home/components/mobile/game/driving/three/HomeDriveThreeTraffic.tsx
+
 import { useFrame } from "@react-three/fiber";
 import React, { memo, useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import {
@@ -56,7 +58,19 @@ type TrafficPart =
   | "frontLeftRim"
   | "frontRightRim"
   | "rearLeftRim"
-  | "rearRightRim";
+  | "rearRightRim"
+  | "frontGrille"
+  | "lowerFrontLip"
+  | "sportFrontSplitter"
+  | "suvBullBarLeft"
+  | "suvBullBarRight"
+  | "hoodScoop"
+  | "taxiSign"
+  | "policeLightBarLeft"
+  | "policeLightBarRight"
+  | "deliveryCargoBox"
+  | "truckCargoBox"
+  | "microbusRoofBand";
 
 type VehiclePartTransform = Readonly<{
   offset: readonly [number, number, number];
@@ -138,6 +152,56 @@ const TRAFFIC_MATERIALS: Readonly<
     roughness: 0.56,
     metalness: 0.14,
   }),
+  orange: new MeshStandardMaterial({
+    color: "#c46a2d",
+    roughness: 0.48,
+    metalness: 0.18,
+  }),
+  purple: new MeshStandardMaterial({
+    color: "#604574",
+    roughness: 0.48,
+    metalness: 0.22,
+  }),
+  brown: new MeshStandardMaterial({
+    color: "#6a4b35",
+    roughness: 0.58,
+    metalness: 0.12,
+  }),
+  beige: new MeshStandardMaterial({
+    color: "#b7a47a",
+    roughness: 0.58,
+    metalness: 0.12,
+  }),
+  cyan: new MeshStandardMaterial({
+    color: "#3c8791",
+    roughness: 0.5,
+    metalness: 0.2,
+  }),
+  darkRed: new MeshStandardMaterial({
+    color: "#702922",
+    roughness: 0.46,
+    metalness: 0.22,
+  }),
+  darkBlue: new MeshStandardMaterial({
+    color: "#243f6a",
+    roughness: 0.46,
+    metalness: 0.24,
+  }),
+  lime: new MeshStandardMaterial({
+    color: "#7d9941",
+    roughness: 0.54,
+    metalness: 0.14,
+  }),
+  cream: new MeshStandardMaterial({
+    color: "#d8ceb0",
+    roughness: 0.56,
+    metalness: 0.12,
+  }),
+  charcoal: new MeshStandardMaterial({
+    color: "#272b2d",
+    roughness: 0.42,
+    metalness: 0.3,
+  }),
 });
 
 const TRAFFIC_GLASS_MATERIAL = new MeshStandardMaterial({
@@ -152,6 +216,24 @@ const TRAFFIC_DARK_TRIM_MATERIAL = new MeshStandardMaterial({
   color: "#171a1d",
   roughness: 0.7,
   metalness: 0.18,
+});
+
+const TRAFFIC_FRONT_GRILLE_MATERIAL = new MeshStandardMaterial({
+  color: "#0f1214",
+  roughness: 0.78,
+  metalness: 0.16,
+});
+
+const TRAFFIC_FRONT_SPLITTER_MATERIAL = new MeshStandardMaterial({
+  color: "#101214",
+  roughness: 0.5,
+  metalness: 0.34,
+});
+
+const TRAFFIC_CHROME_TRIM_MATERIAL = new MeshStandardMaterial({
+  color: "#b7c0bd",
+  roughness: 0.3,
+  metalness: 0.62,
 });
 
 const TRAFFIC_TIRE_MATERIAL = new MeshStandardMaterial({
@@ -180,6 +262,48 @@ const TRAFFIC_TAIL_LIGHT_MATERIAL = new MeshStandardMaterial({
   emissiveIntensity: 0.28,
   roughness: 0.34,
   metalness: 0.08,
+});
+
+const TRAFFIC_TAXI_SIGN_MATERIAL = new MeshStandardMaterial({
+  color: "#f6d04d",
+  emissive: "#c28a18",
+  emissiveIntensity: 0.22,
+  roughness: 0.42,
+  metalness: 0.1,
+});
+
+const TRAFFIC_POLICE_LIGHT_BLUE_MATERIAL = new MeshStandardMaterial({
+  color: "#2a74ff",
+  emissive: "#174ac4",
+  emissiveIntensity: 0.48,
+  roughness: 0.22,
+  metalness: 0.18,
+});
+
+const TRAFFIC_POLICE_LIGHT_RED_MATERIAL = new MeshStandardMaterial({
+  color: "#d63229",
+  emissive: "#9f1511",
+  emissiveIntensity: 0.42,
+  roughness: 0.24,
+  metalness: 0.16,
+});
+
+const TRAFFIC_DELIVERY_BOX_MATERIAL = new MeshStandardMaterial({
+  color: "#e3e0d0",
+  roughness: 0.62,
+  metalness: 0.12,
+});
+
+const TRAFFIC_TRUCK_CARGO_MATERIAL = new MeshStandardMaterial({
+  color: "#9fa5a2",
+  roughness: 0.7,
+  metalness: 0.18,
+});
+
+const TRAFFIC_MICROBUS_BAND_MATERIAL = new MeshStandardMaterial({
+  color: "#d7d1b5",
+  roughness: 0.48,
+  metalness: 0.12,
 });
 
 const SHARED_PART_CONFIGS: readonly SharedPartConfig[] = [
@@ -218,6 +342,42 @@ const SHARED_PART_CONFIGS: readonly SharedPartConfig[] = [
     geometryKind: "box",
     material: TRAFFIC_DARK_TRIM_MATERIAL,
     renderOrder: 17,
+  },
+  {
+    part: "frontGrille",
+    geometryKind: "box",
+    material: TRAFFIC_FRONT_GRILLE_MATERIAL,
+    renderOrder: 22,
+  },
+  {
+    part: "lowerFrontLip",
+    geometryKind: "box",
+    material: TRAFFIC_FRONT_SPLITTER_MATERIAL,
+    renderOrder: 22,
+  },
+  {
+    part: "sportFrontSplitter",
+    geometryKind: "box",
+    material: TRAFFIC_FRONT_SPLITTER_MATERIAL,
+    renderOrder: 23,
+  },
+  {
+    part: "suvBullBarLeft",
+    geometryKind: "box",
+    material: TRAFFIC_CHROME_TRIM_MATERIAL,
+    renderOrder: 23,
+  },
+  {
+    part: "suvBullBarRight",
+    geometryKind: "box",
+    material: TRAFFIC_CHROME_TRIM_MATERIAL,
+    renderOrder: 23,
+  },
+  {
+    part: "hoodScoop",
+    geometryKind: "box",
+    material: TRAFFIC_FRONT_GRILLE_MATERIAL,
+    renderOrder: 23,
   },
   {
     part: "leftMirror",
@@ -303,6 +463,42 @@ const SHARED_PART_CONFIGS: readonly SharedPartConfig[] = [
     material: TRAFFIC_RIM_MATERIAL,
     renderOrder: 21,
   },
+  {
+    part: "taxiSign",
+    geometryKind: "box",
+    material: TRAFFIC_TAXI_SIGN_MATERIAL,
+    renderOrder: 23,
+  },
+  {
+    part: "policeLightBarLeft",
+    geometryKind: "box",
+    material: TRAFFIC_POLICE_LIGHT_BLUE_MATERIAL,
+    renderOrder: 24,
+  },
+  {
+    part: "policeLightBarRight",
+    geometryKind: "box",
+    material: TRAFFIC_POLICE_LIGHT_RED_MATERIAL,
+    renderOrder: 24,
+  },
+  {
+    part: "deliveryCargoBox",
+    geometryKind: "box",
+    material: TRAFFIC_DELIVERY_BOX_MATERIAL,
+    renderOrder: 15,
+  },
+  {
+    part: "truckCargoBox",
+    geometryKind: "box",
+    material: TRAFFIC_TRUCK_CARGO_MATERIAL,
+    renderOrder: 15,
+  },
+  {
+    part: "microbusRoofBand",
+    geometryKind: "box",
+    material: TRAFFIC_MICROBUS_BAND_MATERIAL,
+    renderOrder: 23,
+  },
 ];
 
 function groupTrafficByColor(
@@ -361,6 +557,63 @@ function getVehicleShapeProfile(
         rearWheelZFactor: 0.34,
       };
 
+    case "microbus":
+      return {
+        bodyHeightFactor: 0.58,
+        bodyLengthFactor: 0.98,
+        hoodLengthFactor: 0.1,
+        hoodZFactor: 0.4,
+        trunkLengthFactor: 0.1,
+        trunkZFactor: -0.42,
+        cabinWidthFactor: 0.84,
+        cabinHeightFactor: 0.38,
+        cabinLengthFactor: 0.74,
+        cabinZFactor: -0.02,
+        glassHeightFactor: 0.19,
+        wheelRadiusFactor: 0.19,
+        wheelWidthFactor: 0.16,
+        frontWheelZFactor: 0.33,
+        rearWheelZFactor: 0.33,
+      };
+
+    case "truck":
+      return {
+        bodyHeightFactor: 0.46,
+        bodyLengthFactor: 0.92,
+        hoodLengthFactor: 0.2,
+        hoodZFactor: 0.38,
+        trunkLengthFactor: 0.5,
+        trunkZFactor: -0.18,
+        cabinWidthFactor: 0.72,
+        cabinHeightFactor: 0.38,
+        cabinLengthFactor: 0.28,
+        cabinZFactor: 0.26,
+        glassHeightFactor: 0.17,
+        wheelRadiusFactor: 0.22,
+        wheelWidthFactor: 0.18,
+        frontWheelZFactor: 0.36,
+        rearWheelZFactor: 0.31,
+      };
+
+    case "delivery":
+      return {
+        bodyHeightFactor: 0.48,
+        bodyLengthFactor: 0.94,
+        hoodLengthFactor: 0.2,
+        hoodZFactor: 0.34,
+        trunkLengthFactor: 0.42,
+        trunkZFactor: -0.2,
+        cabinWidthFactor: 0.72,
+        cabinHeightFactor: 0.36,
+        cabinLengthFactor: 0.32,
+        cabinZFactor: 0.22,
+        glassHeightFactor: 0.17,
+        wheelRadiusFactor: 0.2,
+        wheelWidthFactor: 0.17,
+        frontWheelZFactor: 0.33,
+        rearWheelZFactor: 0.32,
+      };
+
     case "van":
       return {
         bodyHeightFactor: 0.56,
@@ -397,6 +650,102 @@ function getVehicleShapeProfile(
         wheelWidthFactor: 0.18,
         frontWheelZFactor: 0.34,
         rearWheelZFactor: 0.33,
+      };
+
+    case "suv":
+      return {
+        bodyHeightFactor: 0.52,
+        bodyLengthFactor: 0.97,
+        hoodLengthFactor: 0.28,
+        hoodZFactor: 0.31,
+        trunkLengthFactor: 0.22,
+        trunkZFactor: -0.33,
+        cabinWidthFactor: 0.74,
+        cabinHeightFactor: 0.4,
+        cabinLengthFactor: 0.48,
+        cabinZFactor: -0.04,
+        glassHeightFactor: 0.18,
+        wheelRadiusFactor: 0.21,
+        wheelWidthFactor: 0.18,
+        frontWheelZFactor: 0.33,
+        rearWheelZFactor: 0.33,
+      };
+
+    case "police":
+    case "taxi":
+      return {
+        bodyHeightFactor: 0.46,
+        bodyLengthFactor: 0.98,
+        hoodLengthFactor: 0.3,
+        hoodZFactor: 0.29,
+        trunkLengthFactor: 0.25,
+        trunkZFactor: -0.31,
+        cabinWidthFactor: 0.7,
+        cabinHeightFactor: 0.36,
+        cabinLengthFactor: 0.42,
+        cabinZFactor: -0.03,
+        glassHeightFactor: 0.17,
+        wheelRadiusFactor: 0.2,
+        wheelWidthFactor: 0.16,
+        frontWheelZFactor: 0.32,
+        rearWheelZFactor: 0.32,
+      };
+
+    case "sport":
+      return {
+        bodyHeightFactor: 0.42,
+        bodyLengthFactor: 0.98,
+        hoodLengthFactor: 0.34,
+        hoodZFactor: 0.28,
+        trunkLengthFactor: 0.22,
+        trunkZFactor: -0.34,
+        cabinWidthFactor: 0.68,
+        cabinHeightFactor: 0.3,
+        cabinLengthFactor: 0.36,
+        cabinZFactor: -0.06,
+        glassHeightFactor: 0.14,
+        wheelRadiusFactor: 0.22,
+        wheelWidthFactor: 0.17,
+        frontWheelZFactor: 0.33,
+        rearWheelZFactor: 0.33,
+      };
+
+    case "wagon":
+      return {
+        bodyHeightFactor: 0.47,
+        bodyLengthFactor: 0.99,
+        hoodLengthFactor: 0.28,
+        hoodZFactor: 0.3,
+        trunkLengthFactor: 0.34,
+        trunkZFactor: -0.26,
+        cabinWidthFactor: 0.72,
+        cabinHeightFactor: 0.37,
+        cabinLengthFactor: 0.5,
+        cabinZFactor: -0.08,
+        glassHeightFactor: 0.17,
+        wheelRadiusFactor: 0.2,
+        wheelWidthFactor: 0.16,
+        frontWheelZFactor: 0.32,
+        rearWheelZFactor: 0.34,
+      };
+
+    case "hatch":
+      return {
+        bodyHeightFactor: 0.49,
+        bodyLengthFactor: 0.96,
+        hoodLengthFactor: 0.24,
+        hoodZFactor: 0.3,
+        trunkLengthFactor: 0.14,
+        trunkZFactor: -0.36,
+        cabinWidthFactor: 0.72,
+        cabinHeightFactor: 0.39,
+        cabinLengthFactor: 0.48,
+        cabinZFactor: -0.02,
+        glassHeightFactor: 0.18,
+        wheelRadiusFactor: 0.2,
+        wheelWidthFactor: 0.16,
+        frontWheelZFactor: 0.31,
+        rearWheelZFactor: 0.32,
       };
 
     case "sedan":
@@ -443,7 +792,10 @@ function getVehicleShapeProfile(
 function getWheelRadiusMeters(vehicle: HomeDriveTrafficVehicle): number {
   const profile = getVehicleShapeProfile(vehicle);
 
-  return Math.max(0.34, Math.min(0.68, vehicle.heightMeters * profile.wheelRadiusFactor));
+  return Math.max(
+    0.34,
+    Math.min(0.68, vehicle.heightMeters * profile.wheelRadiusFactor),
+  );
 }
 
 function getWheelWidthMeters(vehicle: HomeDriveTrafficVehicle): number {
@@ -620,16 +972,58 @@ function getBumperTransform(
   vehicle: HomeDriveTrafficVehicle,
   frontSign: -1 | 1,
 ): VehiclePartTransform {
+  const isFront = frontSign > 0;
+
+  const heightFactor = (() => {
+    if (!isFront) return 0.11;
+
+    switch (vehicle.kind) {
+      case "truck":
+      case "delivery":
+        return 0.16;
+      case "suv":
+      case "pickup":
+        return 0.14;
+      case "sport":
+        return 0.085;
+      case "bus":
+      case "microbus":
+        return 0.13;
+      default:
+        return 0.11;
+    }
+  })();
+
+  const widthFactor = (() => {
+    if (!isFront) return 0.84;
+
+    switch (vehicle.kind) {
+      case "sport":
+        return 0.94;
+      case "truck":
+      case "delivery":
+        return 0.72;
+      case "bus":
+      case "microbus":
+        return 0.9;
+      case "suv":
+      case "pickup":
+        return 0.88;
+      default:
+        return 0.84;
+    }
+  })();
+
   return {
     offset: [
       0,
-      vehicle.heightMeters * 0.22,
+      vehicle.heightMeters * (isFront ? 0.23 : 0.22),
       frontSign * vehicle.lengthMeters * 0.51,
     ],
     scale: [
-      vehicle.widthMeters * 0.84,
-      vehicle.heightMeters * 0.11,
-      vehicle.lengthMeters * 0.045,
+      vehicle.widthMeters * widthFactor,
+      vehicle.heightMeters * heightFactor,
+      vehicle.lengthMeters * (isFront && vehicle.kind === "sport" ? 0.032 : 0.045),
     ],
     localRotation: [0, 0, 0],
   };
@@ -642,18 +1036,76 @@ function getLightTransform(
 ): VehiclePartTransform {
   const isFront = frontSign > 0;
 
+  const widthFactor = (() => {
+    if (!isFront) return 0.16;
+
+    switch (vehicle.kind) {
+      case "sport":
+        return 0.28;
+      case "suv":
+      case "pickup":
+        return 0.22;
+      case "truck":
+      case "delivery":
+        return 0.13;
+      case "bus":
+      case "microbus":
+        return 0.14;
+      case "hatch":
+      case "compact":
+        return 0.2;
+      default:
+        return 0.19;
+    }
+  })();
+
+  const heightFactor = (() => {
+    if (!isFront) return 0.07;
+
+    switch (vehicle.kind) {
+      case "sport":
+        return 0.045;
+      case "truck":
+      case "delivery":
+      case "bus":
+      case "microbus":
+        return 0.09;
+      case "suv":
+      case "pickup":
+        return 0.078;
+      default:
+        return 0.07;
+    }
+  })();
+
+  const sideFactor = (() => {
+    if (!isFront) return 0.27;
+
+    switch (vehicle.kind) {
+      case "truck":
+      case "delivery":
+      case "bus":
+      case "microbus":
+        return 0.22;
+      case "sport":
+        return 0.31;
+      default:
+        return 0.27;
+    }
+  })();
+
   return {
     offset: [
-      sideSign * vehicle.widthMeters * 0.27,
+      sideSign * vehicle.widthMeters * sideFactor,
       vehicle.heightMeters * (isFront ? 0.36 : 0.34),
       frontSign * vehicle.lengthMeters * 0.535,
     ],
     scale: [
-      vehicle.widthMeters * 0.19,
-      vehicle.heightMeters * 0.07,
-      vehicle.lengthMeters * 0.024,
+      vehicle.widthMeters * widthFactor,
+      vehicle.heightMeters * heightFactor,
+      vehicle.lengthMeters * (isFront && vehicle.kind === "sport" ? 0.018 : 0.024),
     ],
-    localRotation: [0, 0, 0],
+    localRotation: [0, 0, isFront && vehicle.kind === "sport" ? sideSign * 0.06 : 0],
   };
 }
 
@@ -710,6 +1162,276 @@ function getWheelTransform(
   };
 }
 
+function shouldRenderTrafficPart(
+  vehicle: HomeDriveTrafficVehicle,
+  part: TrafficPart,
+): boolean {
+  switch (part) {
+    case "taxiSign":
+      return vehicle.kind === "taxi";
+
+    case "policeLightBarLeft":
+    case "policeLightBarRight":
+      return vehicle.kind === "police";
+
+    case "deliveryCargoBox":
+      return vehicle.kind === "delivery";
+
+    case "truckCargoBox":
+      return vehicle.kind === "truck";
+
+    case "microbusRoofBand":
+      return vehicle.kind === "microbus";
+
+    case "frontGrille":
+      return true;
+
+    case "lowerFrontLip":
+      return (
+        vehicle.kind !== "bus" &&
+        vehicle.kind !== "microbus" &&
+        vehicle.kind !== "truck" &&
+        vehicle.kind !== "delivery"
+      );
+
+    case "sportFrontSplitter":
+      return vehicle.kind === "sport" || vehicle.kind === "police";
+
+    case "suvBullBarLeft":
+    case "suvBullBarRight":
+      return (
+        vehicle.kind === "suv" ||
+        vehicle.kind === "pickup" ||
+        vehicle.kind === "truck" ||
+        vehicle.kind === "delivery"
+      );
+
+    case "hoodScoop":
+      return vehicle.kind === "sport" || vehicle.kind === "pickup";
+
+    default:
+      return true;
+  }
+}
+
+function hideTrafficPartMatrix(dummy: Object3D): void {
+  dummy.position.set(0, -9999, 0);
+  dummy.rotation.set(0, 0, 0);
+  dummy.scale.set(0.0001, 0.0001, 0.0001);
+  dummy.updateMatrix();
+}
+
+function getRoofAccessoryTransform(
+  vehicle: HomeDriveTrafficVehicle,
+  part: TrafficPart,
+): VehiclePartTransform {
+  const profile = getVehicleShapeProfile(vehicle);
+  const bodyHeight = vehicle.heightMeters * profile.bodyHeightFactor;
+  const cabinHeight = vehicle.heightMeters * profile.cabinHeightFactor;
+  const cabinLength = vehicle.lengthMeters * profile.cabinLengthFactor;
+  const cabinTopY = bodyHeight + cabinHeight;
+
+  if (part === "taxiSign") {
+    return {
+      offset: [
+        0,
+        cabinTopY + vehicle.heightMeters * 0.045,
+        vehicle.lengthMeters * profile.cabinZFactor + cabinLength * 0.02,
+      ],
+      scale: [
+        vehicle.widthMeters * 0.34,
+        vehicle.heightMeters * 0.09,
+        vehicle.lengthMeters * 0.08,
+      ],
+      localRotation: [0, 0, 0],
+    };
+  }
+
+  if (part === "policeLightBarLeft" || part === "policeLightBarRight") {
+    const sideSign = part === "policeLightBarLeft" ? -1 : 1;
+
+    return {
+      offset: [
+        sideSign * vehicle.widthMeters * 0.11,
+        cabinTopY + vehicle.heightMeters * 0.045,
+        vehicle.lengthMeters * profile.cabinZFactor + cabinLength * 0.02,
+      ],
+      scale: [
+        vehicle.widthMeters * 0.2,
+        vehicle.heightMeters * 0.075,
+        vehicle.lengthMeters * 0.06,
+      ],
+      localRotation: [0, 0, 0],
+    };
+  }
+
+  return {
+    offset: [
+      0,
+      bodyHeight + cabinHeight + vehicle.heightMeters * 0.035,
+      vehicle.lengthMeters * profile.cabinZFactor,
+    ],
+    scale: [
+      vehicle.widthMeters * 0.8,
+      vehicle.heightMeters * 0.055,
+      vehicle.lengthMeters * 0.64,
+    ],
+    localRotation: [0, 0, 0],
+  };
+}
+
+function getCargoBoxTransform(
+  vehicle: HomeDriveTrafficVehicle,
+  part: "deliveryCargoBox" | "truckCargoBox",
+): VehiclePartTransform {
+  const isTruck = part === "truckCargoBox";
+  const profile = getVehicleShapeProfile(vehicle);
+  const bodyHeight = vehicle.heightMeters * profile.bodyHeightFactor;
+  const cargoHeight = vehicle.heightMeters * (isTruck ? 0.66 : 0.58);
+  const cargoLength = vehicle.lengthMeters * (isTruck ? 0.56 : 0.5);
+
+  return {
+    offset: [
+      0,
+      bodyHeight + cargoHeight * 0.5,
+      -vehicle.lengthMeters * (isTruck ? 0.13 : 0.14),
+    ],
+    scale: [
+      vehicle.widthMeters * (isTruck ? 0.92 : 0.88),
+      cargoHeight,
+      cargoLength,
+    ],
+    localRotation: [0, 0, 0],
+  };
+}
+
+function getFrontGrilleTransform(vehicle: HomeDriveTrafficVehicle): VehiclePartTransform {
+  const isHeavy =
+    vehicle.kind === "truck" ||
+    vehicle.kind === "delivery" ||
+    vehicle.kind === "bus" ||
+    vehicle.kind === "microbus";
+
+  const widthFactor = (() => {
+    switch (vehicle.kind) {
+      case "truck":
+      case "delivery":
+        return 0.52;
+      case "bus":
+      case "microbus":
+        return 0.62;
+      case "sport":
+        return 0.68;
+      case "suv":
+      case "pickup":
+        return 0.58;
+      default:
+        return 0.48;
+    }
+  })();
+
+  const heightFactor = (() => {
+    switch (vehicle.kind) {
+      case "truck":
+      case "delivery":
+      case "bus":
+      case "microbus":
+        return 0.18;
+      case "suv":
+      case "pickup":
+        return 0.12;
+      case "sport":
+        return 0.065;
+      default:
+        return 0.09;
+    }
+  })();
+
+  return {
+    offset: [
+      0,
+      vehicle.heightMeters * (isHeavy ? 0.42 : 0.35),
+      vehicle.lengthMeters * 0.542,
+    ],
+    scale: [
+      vehicle.widthMeters * widthFactor,
+      vehicle.heightMeters * heightFactor,
+      vehicle.lengthMeters * 0.026,
+    ],
+    localRotation: [0, 0, 0],
+  };
+}
+
+function getLowerFrontLipTransform(vehicle: HomeDriveTrafficVehicle): VehiclePartTransform {
+  return {
+    offset: [
+      0,
+      vehicle.heightMeters * 0.12,
+      vehicle.lengthMeters * 0.548,
+    ],
+    scale: [
+      vehicle.widthMeters * (vehicle.kind === "sport" ? 0.96 : 0.74),
+      vehicle.heightMeters * (vehicle.kind === "sport" ? 0.052 : 0.04),
+      vehicle.lengthMeters * 0.035,
+    ],
+    localRotation: [0, 0, 0],
+  };
+}
+
+function getSportFrontSplitterTransform(vehicle: HomeDriveTrafficVehicle): VehiclePartTransform {
+  return {
+    offset: [
+      0,
+      vehicle.heightMeters * 0.08,
+      vehicle.lengthMeters * 0.57,
+    ],
+    scale: [
+      vehicle.widthMeters * 1.02,
+      vehicle.heightMeters * 0.035,
+      vehicle.lengthMeters * 0.08,
+    ],
+    localRotation: [0.02, 0, 0],
+  };
+}
+
+function getBullBarTransform(
+  vehicle: HomeDriveTrafficVehicle,
+  sideSign: -1 | 1,
+): VehiclePartTransform {
+  return {
+    offset: [
+      sideSign * vehicle.widthMeters * 0.19,
+      vehicle.heightMeters * 0.32,
+      vehicle.lengthMeters * 0.57,
+    ],
+    scale: [
+      vehicle.widthMeters * 0.08,
+      vehicle.heightMeters * 0.34,
+      vehicle.lengthMeters * 0.034,
+    ],
+    localRotation: [0, 0, sideSign * 0.04],
+  };
+}
+
+function getHoodScoopTransform(vehicle: HomeDriveTrafficVehicle): VehiclePartTransform {
+  const profile = getVehicleShapeProfile(vehicle);
+  const bodyHeight = vehicle.heightMeters * profile.bodyHeightFactor;
+
+  return {
+    offset: [
+      0,
+      bodyHeight + vehicle.heightMeters * 0.19,
+      vehicle.lengthMeters * 0.26,
+    ],
+    scale: [
+      vehicle.widthMeters * (vehicle.kind === "sport" ? 0.24 : 0.18),
+      vehicle.heightMeters * 0.07,
+      vehicle.lengthMeters * 0.16,
+    ],
+    localRotation: [-0.02, 0, 0],
+  };
+}
+
 function getVehiclePartTransform(
   vehicle: HomeDriveTrafficVehicle,
   part: TrafficPart,
@@ -754,6 +1476,30 @@ function getVehiclePartTransform(
     return getBumperTransform(vehicle, -1);
   }
 
+  if (part === "frontGrille") {
+    return getFrontGrilleTransform(vehicle);
+  }
+
+  if (part === "lowerFrontLip") {
+    return getLowerFrontLipTransform(vehicle);
+  }
+
+  if (part === "sportFrontSplitter") {
+    return getSportFrontSplitterTransform(vehicle);
+  }
+
+  if (part === "suvBullBarLeft") {
+    return getBullBarTransform(vehicle, -1);
+  }
+
+  if (part === "suvBullBarRight") {
+    return getBullBarTransform(vehicle, 1);
+  }
+
+  if (part === "hoodScoop") {
+    return getHoodScoopTransform(vehicle);
+  }
+
   if (part === "frontLeftHeadlight") {
     return getLightTransform(vehicle, 1, -1);
   }
@@ -787,6 +1533,19 @@ function getVehiclePartTransform(
     return getWheelTransform(vehicle, part, true);
   }
 
+  if (
+    part === "taxiSign" ||
+    part === "policeLightBarLeft" ||
+    part === "policeLightBarRight" ||
+    part === "microbusRoofBand"
+  ) {
+    return getRoofAccessoryTransform(vehicle, part);
+  }
+
+  if (part === "deliveryCargoBox" || part === "truckCargoBox") {
+    return getCargoBoxTransform(vehicle, part);
+  }
+
   return getWheelTransform(vehicle, part, false);
 }
 
@@ -795,6 +1554,11 @@ function setVehiclePartMatrix(
   vehicle: HomeDriveTrafficVehicle,
   part: TrafficPart,
 ): void {
+  if (!shouldRenderTrafficPart(vehicle, part)) {
+    hideTrafficPartMatrix(dummy);
+    return;
+  }
+
   const transform = getVehiclePartTransform(vehicle, part);
   const [localX, localY, localZ] = transform.offset;
   const [scaleX, scaleY, scaleZ] = transform.scale;
@@ -813,9 +1577,9 @@ function setVehiclePartMatrix(
   );
 
   dummy.rotation.set(
-    vehicle.visualRollRad + localRotX,
-    vehicle.headingRad + localRotY,
-    vehicle.damage * 0.08 + localRotZ,
+    vehicle.visualPitchRad + localRotX,
+    vehicle.headingRad + vehicle.visualYawOffsetRad + localRotY,
+    vehicle.visualRollRad + vehicle.damage * 0.08 + localRotZ,
   );
 
   dummy.scale.set(scaleX, scaleY, scaleZ);

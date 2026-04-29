@@ -42,6 +42,45 @@ export type HomeDriveWorldNode = Readonly<{
   y: number;
 }>;
 
+export type HomeDriveWorldPedestrianRoadSettings = Readonly<{
+  /**
+   * false desativa calçada/pessoas nessa rua inteira.
+   * Também pode ser controlado por tag: "no-pedestrians".
+   */
+  enabled?: boolean;
+
+  /**
+   * Multiplicador local de densidade.
+   * 1 = normal. 0.3 = quase vazio. 1.5 = bem movimentado.
+   */
+  density?: number;
+
+  /**
+   * Espaço entre a borda da pista e o centro útil da calçada.
+   */
+  sidewalkGapMeters?: number;
+
+  /**
+   * Largura única aplicada nos dois lados quando os lados não forem especificados.
+   */
+  sidewalkWidthMeters?: number;
+
+  /**
+   * Largura específica da calçada esquerda no referencial do segmento.
+   */
+  sidewalkLeftWidthMeters?: number;
+
+  /**
+   * Largura específica da calçada direita no referencial do segmento.
+   */
+  sidewalkRightWidthMeters?: number;
+
+  /**
+   * Tom semântico opcional para render/debug futuro.
+   */
+  zoneTone?: string;
+}>;
+
 export type HomeDriveWorldRoad = Readonly<{
   id: string;
   label: string;
@@ -55,6 +94,13 @@ export type HomeDriveWorldRoad = Readonly<{
   surface: string;
   points: readonly HomeDriveWorldPoint[];
   tags: readonly string[];
+
+  /**
+   * Metadados opcionais para sistemas urbanos que nascem da rua,
+   * como pedestres nas calçadas. O mapa atual não precisa preencher isso;
+   * os sistemas usam fallback por kind/tags.
+   */
+  pedestrians?: HomeDriveWorldPedestrianRoadSettings;
 }>;
 
 export type HomeDriveWorldMap = Readonly<{
@@ -105,6 +151,19 @@ export type HomeDriveGeneratedRoadSegment = Readonly<{
   angleRad: number;
   bounds: HomeDriveRoadBounds;
   sourceRoad: HomeDriveWorldRoad;
+
+  /**
+   * Campos opcionais derivados de sourceRoad.pedestrians/tags.
+   * Mantidos no segmento para evitar que sistemas como pedestres precisem
+   * reabrir o JSON cru do mapa.
+   */
+  pedestrianAllowed?: boolean;
+  pedestrianDensity?: number;
+  pedestrianZoneTone?: string;
+  sidewalkGapMeters?: number;
+  sidewalkWidthMeters?: number;
+  sidewalkLeftWidthMeters?: number;
+  sidewalkRightWidthMeters?: number;
 }>;
 
 export type HomeDriveVisibleRoadSegment = HomeDriveGeneratedRoadSegment &
@@ -132,4 +191,10 @@ export type HomeDriveRoadVisibilityOptions = Readonly<{
   radiusMeters?: number;
   maxSegments?: number;
   includeBehindCar?: boolean;
+}>;
+
+export type HomeDrivePedestrianRoadSegmentQueryOptions = Readonly<{
+  minLengthMeters?: number;
+  maxSegments?: number;
+  includeServiceRoads?: boolean;
 }>;

@@ -1,3 +1,10 @@
+// src/pages/Mateus/Home/components/mobile/game/driving/domain/homeDrive.collision.ts
+
+import {
+  createHomeDriveImpactFromCollision,
+  mergeHomeDriveImpactStates,
+  type HomeDriveRuntimeImpactState,
+} from "./homeDrive.impact";
 import type {
   HomeDriveCarState,
   HomeDriveVector2,
@@ -12,6 +19,7 @@ export type HomeDriveTrafficCollisionOptions = Readonly<{
   playerRadiusMeters?: number;
   cooldownSeconds?: number;
   minImpactSpeedMps?: number;
+  brutality?: number;
 }>;
 
 export type HomeDriveTrafficCollisionResolution = Readonly<{
@@ -20,17 +28,24 @@ export type HomeDriveTrafficCollisionResolution = Readonly<{
   events: readonly HomeDriveTrafficCollisionEvent[];
   cameraShake: number;
   collisionImpulse: number;
+  impact: HomeDriveRuntimeImpactState | null;
 }>;
 
 const DEFAULT_PLAYER_RADIUS_METERS = 1.62;
-const DEFAULT_COLLISION_COOLDOWN_SECONDS = 0.42;
-const DEFAULT_MIN_IMPACT_SPEED_MPS = 1.4;
+const DEFAULT_COLLISION_COOLDOWN_SECONDS = 0.34;
+const DEFAULT_MIN_IMPACT_SPEED_MPS = 0.85;
+const DEFAULT_COLLISION_BRUTALITY = 1.55;
 
-const MAX_VEHICLE_IMPACT_OFFSET_METERS = 3.2;
-const MAX_VEHICLE_IMPACT_VELOCITY_MPS = 18;
+const MAX_VEHICLE_IMPACT_OFFSET_METERS = 4.8;
+const MAX_VEHICLE_IMPACT_VELOCITY_MPS = 30;
+const MAX_VEHICLE_ANGULAR_VELOCITY_RADPS = 11;
 
 function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value));
+}
+
+function clampAbs(value: number, maxAbs: number): number {
+  return clamp(value, -maxAbs, maxAbs);
 }
 
 function getDistance(
@@ -80,11 +95,41 @@ function getSafeNormal(
   };
 }
 
+function getHeadingForwardVector(headingRad: number): Readonly<{
+  x: number;
+  z: number;
+}> {
+  return {
+    x: Math.sin(headingRad),
+    z: Math.cos(headingRad),
+  };
+}
+
+function getHeadingRightVector(headingRad: number): Readonly<{
+  x: number;
+  z: number;
+}> {
+  return {
+    x: Math.cos(headingRad),
+    z: -Math.sin(headingRad),
+  };
+}
+
+function dot(
+  first: Readonly<{ x: number; z: number }>,
+  second: Readonly<{ x: number; z: number }>,
+): number {
+  return first.x * second.x + first.z * second.z;
+}
+
 function getRelativeImpactSpeedMps(
   car: HomeDriveCarState,
   vehicle: HomeDriveTrafficVehicle,
 ): number {
-  return Math.abs(car.speedMps - vehicle.speedMps);
+  const playerSpeed = Math.abs(car.speedMps);
+  const npcSpeed = Math.abs(vehicle.speedMps);
+
+  return Math.max(Math.abs(car.speedMps - vehicle.speedMps), playerSpeed * 0.85, npcSpeed * 0.32);
 }
 
 function createCollisionEvent(
@@ -114,14 +159,20 @@ function resolveVehicleImpact(
   impulse: number,
   occurredAt: number,
 ): HomeDriveTrafficVehicle {
+  const right = getHeadingRightVector(vehicle.headingRad);
+  const forward = getHeadingForwardVector(vehicle.headingRad);
+  const sideDot = dot(normalFromVehicleToPlayer, right);
+  const frontDot = dot(normalFromVehicleToPlayer, forward);
+  const spinSign = Math.abs(sideDot) > 0.08 ? Math.sign(sideDot) : Math.sign(normalFromVehicleToPlayer.x + normalFromVehicleToPlayer.z) || 1;
+
   const nextImpactOffset = clampVectorMagnitude(
     {
       x:
         vehicle.impactOffset.x -
-        normalFromVehicleToPlayer.x * impulse * 0.14,
+        normalFromVehicleToPlayer.x * impulse * 0.22,
       z:
         vehicle.impactOffset.z -
-        normalFromVehicleToPlayer.z * impulse * 0.14,
+        normalFromVehicleToPlayer.z * impulse * 0.22,
     },
     MAX_VEHICLE_IMPACT_OFFSET_METERS,
   );
@@ -130,10 +181,10 @@ function resolveVehicleImpact(
     {
       x:
         vehicle.impactVelocity.x -
-        normalFromVehicleToPlayer.x * impulse * 2.4,
+        normalFromVehicleToPlayer.x * impulse * 3.7,
       z:
         vehicle.impactVelocity.z -
-        normalFromVehicleToPlayer.z * impulse * 2.4,
+        normalFromVehicleToPlayer.z * impulse * 3.7,
     },
     MAX_VEHICLE_IMPACT_VELOCITY_MPS,
   );
@@ -142,16 +193,21 @@ function resolveVehicleImpact(
     ...vehicle,
 
     /*
-      Intencional: colisão não reduz speedMps nem cruiseSpeedMps.
+      Intencional: colisão não reduz cruiseSpeedMps.
       O bug dos NPCs parados vinha daqui: cada encostada degradava
       a velocidade real usada pelo roteador.
     */
-    damage: clamp(vehicle.damage + impulse * 0.12, 0, 1),
+    damage: clamp(vehicle.damage + impulse * 0.16, 0, 1),
+    speedMps: Math.max(vehicle.speedMps * 0.72, vehicle.cruiseSpeedMps * 0.48),
     impactOffset: nextImpactOffset,
     impactVelocity: nextImpactVelocity,
-    visualRollRad:
-      -Math.sign(normalFromVehicleToPlayer.x + normalFromVehicleToPlayer.z) *
-      Math.min(0.22, impulse * 0.025),
+    visualRollRad: clampAbs(vehicle.visualRollRad - spinSign * impulse * 0.06, 0.78),
+    visualPitchRad: clampAbs(vehicle.visualPitchRad - frontDot * impulse * 0.045, 0.46),
+    visualYawOffsetRad: clampAbs(vehicle.visualYawOffsetRad + spinSign * impulse * 0.035, 0.42),
+    impactAngularVelocityRadps: clampAbs(
+      vehicle.impactAngularVelocityRadps + spinSign * impulse * 0.9,
+      MAX_VEHICLE_ANGULAR_VELOCITY_RADPS,
+    ),
     lastCollisionAt: occurredAt,
   };
 }
@@ -162,7 +218,8 @@ function resolvePlayerImpact(
   overlapMeters: number,
   impulse: number,
 ): HomeDriveCarState {
-  const pushDistance = Math.min(3.8, overlapMeters * 0.72 + impulse * 0.08);
+  const pushDistance = Math.min(5.2, overlapMeters * 0.86 + impulse * 0.14);
+  const reverseKick = Math.min(14, Math.max(3.2, Math.abs(car.speedMps) * 0.38 + impulse * 0.44));
 
   return {
     ...car,
@@ -170,11 +227,8 @@ function resolvePlayerImpact(
       x: car.position.x + normalFromVehicleToPlayer.x * pushDistance,
       z: car.position.z + normalFromVehicleToPlayer.z * pushDistance,
     },
-    speedMps:
-      car.speedMps > 0
-        ? -Math.min(5.8, Math.max(1.8, car.speedMps * 0.24))
-        : car.speedMps * 0.35,
-    steerAngleRad: car.steerAngleRad * 0.32,
+    speedMps: car.speedMps >= 0 ? -reverseKick : car.speedMps * 0.42,
+    steerAngleRad: car.steerAngleRad * 0.18,
   };
 }
 
@@ -190,9 +244,11 @@ export function resolveHomeDriveTrafficCollisions(
     options.cooldownSeconds ?? DEFAULT_COLLISION_COOLDOWN_SECONDS;
   const minImpactSpeedMps =
     options.minImpactSpeedMps ?? DEFAULT_MIN_IMPACT_SPEED_MPS;
+  const brutality = options.brutality ?? DEFAULT_COLLISION_BRUTALITY;
 
   let resolvedCar = car;
   let maxImpulse = 0;
+  let mergedImpact: HomeDriveRuntimeImpactState | null = null;
   const events: HomeDriveTrafficCollisionEvent[] = [];
 
   const resolvedVehicles = traffic.vehicles.map((vehicle) => {
@@ -225,9 +281,9 @@ export function resolveHomeDriveTrafficCollisions(
     );
 
     const impulse = clamp(
-      overlapMeters * 1.2 + relativeSpeedMps * 0.32,
-      0.65,
-      9.5,
+      overlapMeters * 1.55 + relativeSpeedMps * 0.46,
+      0.85,
+      18.5,
     );
 
     maxImpulse = Math.max(maxImpulse, impulse);
@@ -241,6 +297,18 @@ export function resolveHomeDriveTrafficCollisions(
     );
 
     events.push(event);
+
+    mergedImpact = mergeHomeDriveImpactStates(
+      mergedImpact,
+      createHomeDriveImpactFromCollision({
+        car: resolvedCar,
+        normal,
+        relativeSpeedMps,
+        impulse,
+        occurredAt: nowSeconds,
+        brutality,
+      }),
+    );
 
     resolvedCar = resolvePlayerImpact(
       resolvedCar,
@@ -263,8 +331,9 @@ export function resolveHomeDriveTrafficCollisions(
     car: resolvedCar,
     traffic: nextTraffic,
     events,
-    cameraShake: clamp(maxImpulse * 0.12, 0, 1.15),
+    cameraShake: clamp(maxImpulse * 0.17, 0, 1.75),
     collisionImpulse: maxImpulse,
+    impact: mergedImpact,
   };
 }
 

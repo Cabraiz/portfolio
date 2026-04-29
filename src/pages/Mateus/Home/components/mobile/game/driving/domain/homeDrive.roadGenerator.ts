@@ -11,8 +11,10 @@ import type {
   HomeDriveCameraRoadPoint,
   HomeDriveCameraRoadProjection,
   HomeDriveGeneratedRoadSegment,
+  HomeDrivePedestrianRoadSegmentQueryOptions,
   HomeDriveRoadVisibilityOptions,
   HomeDriveVisibleRoadSegment,
+  HomeDriveWorldPedestrianRoadSettings,
   HomeDriveWorldPosition,
   HomeDriveWorldRoad,
 } from "./homeDrive.worldMap.types";
@@ -23,6 +25,84 @@ const DEFAULT_MAX_VISIBLE_ROAD_SEGMENTS = 96;
 let cachedRoadSource: readonly HomeDriveWorldRoad[] | undefined;
 let cachedGeneratedSegments: readonly HomeDriveGeneratedRoadSegment[] | undefined;
 
+function getRoadTags(road: Readonly<{ tags?: readonly string[] }>): readonly string[] {
+  return Array.isArray(road.tags) ? road.tags : [];
+}
+
+function getRoadPedestrianSettings(
+  road: HomeDriveWorldRoad,
+): HomeDriveWorldPedestrianRoadSettings | undefined {
+  return road.pedestrians;
+}
+
+function inferPedestrianAllowed(segment: HomeDriveGeneratedRoadSegment): boolean {
+  const tags = getRoadTags(segment);
+  const settings = getRoadPedestrianSettings(segment.sourceRoad);
+
+  if (settings?.enabled === false) {
+    return false;
+  }
+
+  if (tags.includes("no-pedestrians") || tags.includes("safe-endcap")) {
+    return false;
+  }
+
+  if (segment.surface === "water") {
+    return false;
+  }
+
+  if (segment.kind === "service" && segment.length < 92) {
+    return false;
+  }
+
+  return true;
+}
+
+function inferPedestrianDensity(segment: HomeDriveGeneratedRoadSegment): number | undefined {
+  const settings = getRoadPedestrianSettings(segment.sourceRoad);
+
+  if (typeof settings?.density === "number") {
+    return settings.density;
+  }
+
+  if (segment.kind === "commercial") {
+    return 1.12;
+  }
+
+  if (segment.kind === "coastal") {
+    return 1.08;
+  }
+
+  if (segment.kind === "avenue") {
+    return 0.82;
+  }
+
+  if (segment.kind === "service") {
+    return 0.34;
+  }
+
+  return undefined;
+}
+
+function enrichRoadSegmentForUrbanSystems(
+  segment: HomeDriveGeneratedRoadSegment,
+): HomeDriveGeneratedRoadSegment {
+  const settings = getRoadPedestrianSettings(segment.sourceRoad);
+
+  return {
+    ...segment,
+    pedestrianAllowed: inferPedestrianAllowed(segment),
+    pedestrianDensity: inferPedestrianDensity(segment),
+    pedestrianZoneTone: settings?.zoneTone,
+    sidewalkGapMeters: settings?.sidewalkGapMeters,
+    sidewalkWidthMeters: settings?.sidewalkWidthMeters,
+    sidewalkLeftWidthMeters:
+      settings?.sidewalkLeftWidthMeters ?? settings?.sidewalkWidthMeters,
+    sidewalkRightWidthMeters:
+      settings?.sidewalkRightWidthMeters ?? settings?.sidewalkWidthMeters,
+  };
+}
+
 export function generateHomeDriveRoadSegments(
   roads: readonly HomeDriveWorldRoad[] = HOME_DRIVE_WORLD_ROADS,
 ): readonly HomeDriveGeneratedRoadSegment[] {
@@ -31,7 +111,9 @@ export function generateHomeDriveRoadSegments(
   }
 
   cachedRoadSource = roads;
-  cachedGeneratedSegments = buildHomeDriveRoadSegments(roads);
+  cachedGeneratedSegments = buildHomeDriveRoadSegments(roads).map(
+    enrichRoadSegmentForUrbanSystems,
+  );
 
   return cachedGeneratedSegments;
 }
@@ -74,6 +156,42 @@ export function getNearestHomeDriveRoadSegment(
   }
 
   return nearest;
+}
+
+export function getHomeDriveRoadSegmentsForPedestrians(
+  options: HomeDrivePedestrianRoadSegmentQueryOptions = {},
+): readonly HomeDriveGeneratedRoadSegment[] {
+  const minLengthMeters = options.minLengthMeters ?? 56;
+  const maxSegments = options.maxSegments ?? Number.POSITIVE_INFINITY;
+  const includeServiceRoads = options.includeServiceRoads ?? false;
+
+  return generateHomeDriveRoadSegments()
+    .filter((segment) => {
+      if (segment.pedestrianAllowed === false) {
+        return false;
+      }
+
+      if (segment.length < minLengthMeters) {
+        return false;
+      }
+
+      if (!includeServiceRoads && segment.kind === "service") {
+        return segment.length >= Math.max(92, minLengthMeters);
+      }
+
+      return true;
+    })
+    .sort((first, second) => {
+      const densityDiff =
+        (second.pedestrianDensity ?? 1) - (first.pedestrianDensity ?? 1);
+
+      if (Math.abs(densityDiff) > 0.0001) {
+        return densityDiff;
+      }
+
+      return second.length - first.length;
+    })
+    .slice(0, maxSegments);
 }
 
 function projectWorldPointToCarCamera(

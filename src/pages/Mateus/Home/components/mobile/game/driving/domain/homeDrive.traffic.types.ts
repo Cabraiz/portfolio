@@ -1,10 +1,22 @@
+// src/pages/Mateus/Home/components/mobile/game/driving/domain/homeDrive.traffic.types.ts
+
 import type { HomeDriveVector2 } from "./homeDrive.types";
+import type { HomeDriveTrafficDirectionSign } from "./homeDrive.trafficLanes";
 
 export type HomeDriveTrafficVehicleKind =
   | "compact"
+  | "hatch"
   | "sedan"
+  | "sport"
+  | "wagon"
+  | "suv"
+  | "taxi"
+  | "police"
   | "van"
   | "pickup"
+  | "delivery"
+  | "truck"
+  | "microbus"
   | "bus";
 
 export type HomeDriveTrafficVehicleColorKey =
@@ -14,7 +26,17 @@ export type HomeDriveTrafficVehicleColorKey =
   | "blue"
   | "yellow"
   | "black"
-  | "green";
+  | "green"
+  | "orange"
+  | "purple"
+  | "brown"
+  | "beige"
+  | "cyan"
+  | "darkRed"
+  | "darkBlue"
+  | "lime"
+  | "cream"
+  | "charcoal";
 
 export type HomeDriveTrafficVector2 = Readonly<{
   x: number;
@@ -58,8 +80,18 @@ export type HomeDriveTrafficVehicle = Readonly<{
    * 1 anda no sentido do segmento.
    * -1 anda no sentido contrário.
    */
-  directionSign: 1 | -1;
+  directionSign: HomeDriveTrafficDirectionSign;
 
+  /**
+   * Índice da faixa dentro do conjunto de faixas disponíveis para o sentido.
+   * Em rua bidirecional, cada sentido usa apenas o seu lado da via.
+   */
+  laneIndex: number;
+
+  /**
+   * Offset lateral final, em metros, no eixo road.normal.
+   * Esse valor é derivado de directionSign + laneIndex.
+   */
   laneOffsetMeters: number;
 
   position: HomeDriveVector2;
@@ -91,12 +123,20 @@ export type HomeDriveTrafficVehicle = Readonly<{
   damage: number;
 
   /**
-   * Pequeno deslocamento visual temporário ao bater.
-   * O carro continua preso à rua, mas pode dar uma "escapada" curta no impacto.
+   * Pequeno deslocamento temporário ao bater.
+   * No tick atual ele também entra em position, então renderizadores devem evitar somar duas vezes.
    */
   impactOffset: HomeDriveTrafficVector2;
   impactVelocity: HomeDriveTrafficVector2;
+
+  /**
+   * Rotação visual temporária para a pancada parecer grotesca.
+   */
   visualRollRad: number;
+  visualPitchRad: number;
+  visualYawOffsetRad: number;
+  impactAngularVelocityRadps: number;
+
   lastCollisionAt: number;
 }>;
 

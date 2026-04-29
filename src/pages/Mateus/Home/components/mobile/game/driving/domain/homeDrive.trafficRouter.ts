@@ -9,6 +9,17 @@ import {
   type HomeDriveRoadTopology,
   type HomeDriveRoadTopologyConnection,
 } from "./homeDrive.roadTopology";
+import {
+  canHomeDriveTrafficUseRoadDirection,
+  resolveHomeDriveTrafficSafeDirectionSign,
+} from "./homeDrive.trafficDirection";
+import {
+  getHomeDriveTrafficHeadingRadians,
+  getHomeDriveTrafficLanePositionAtProgress,
+  normalizeHomeDriveTrafficLaneIndex,
+  resolveHomeDriveTrafficLane,
+  type HomeDriveTrafficDirectionSign,
+} from "./homeDrive.trafficLanes";
 import type {
   HomeDriveGeneratedRoadSegment,
   HomeDriveWorldPosition,
@@ -22,6 +33,7 @@ export type HomeDriveTrafficRoutableVehicle = Pick<
   | "segmentIndex"
   | "t"
   | "directionSign"
+  | "laneIndex"
   | "laneOffsetMeters"
 > &
   Readonly<{
@@ -46,7 +58,8 @@ export type HomeDriveTrafficRoadStep = Readonly<{
   segmentIndex: number;
   previousSegmentId: string | null;
   t: number;
-  directionSign: 1 | -1;
+  directionSign: HomeDriveTrafficDirectionSign;
+  laneIndex: number;
   laneOffsetMeters: number;
   routed: boolean;
 }>;
@@ -102,7 +115,7 @@ function getExitEndpointSide(nextT: number): HomeDriveRoadEndpointSide | null {
 
 function getFallbackDirectionFromEndpoint(
   endpointSide: HomeDriveRoadEndpointSide,
-): 1 | -1 {
+): HomeDriveTrafficDirectionSign {
   return endpointSide === "to" ? -1 : 1;
 }
 
@@ -143,11 +156,10 @@ function isReverseConnectionToPreviousSegment(
 function isConnectionDirectionAllowed(
   connection: HomeDriveRoadTopologyConnection,
 ): boolean {
-  if (connection.toDirectionSign === 1) {
-    return true;
-  }
-
-  return connection.toRoad.bidirectional;
+  return canHomeDriveTrafficUseRoadDirection(
+    connection.toRoad,
+    connection.toDirectionSign,
+  );
 }
 
 function getConnectionSelectionScore(
@@ -211,14 +223,58 @@ function chooseTrafficConnection(
   return rankedConnections[0]?.connection ?? null;
 }
 
-function clampLaneOffsetToRoad(
-  laneOffsetMeters: number,
+function getResolvedLaneForRoad(
   road: HomeDriveGeneratedRoadSegment,
-): number {
-  const halfRoadWidth = road.width / 2;
-  const safeHalfWidth = Math.max(0.45, halfRoadWidth - 1.05);
+  directionSign: HomeDriveTrafficDirectionSign,
+  laneIndex: number,
+): Readonly<{
+  laneIndex: number;
+  laneOffsetMeters: number;
+}> {
+  const safeDirectionSign = resolveHomeDriveTrafficSafeDirectionSign(
+    road,
+    directionSign,
+  );
 
-  return clamp(laneOffsetMeters, -safeHalfWidth, safeHalfWidth);
+  const normalizedLaneIndex = normalizeHomeDriveTrafficLaneIndex(
+    road,
+    safeDirectionSign,
+    laneIndex,
+  );
+
+  const lane = resolveHomeDriveTrafficLane(
+    road,
+    safeDirectionSign,
+    normalizedLaneIndex,
+  );
+
+  return {
+    laneIndex: lane.laneIndex,
+    laneOffsetMeters: lane.laneOffsetMeters,
+  };
+}
+
+function getNormalizedTrafficRoadStep(
+  step: HomeDriveTrafficRoadStep,
+): HomeDriveTrafficRoadStep {
+  const safeDirectionSign = resolveHomeDriveTrafficSafeDirectionSign(
+    step.road,
+    step.directionSign,
+  );
+
+  const lane = getResolvedLaneForRoad(
+    step.road,
+    safeDirectionSign,
+    step.laneIndex,
+  );
+
+  return {
+    ...step,
+    t: clamp01(step.t),
+    directionSign: safeDirectionSign,
+    laneIndex: lane.laneIndex,
+    laneOffsetMeters: lane.laneOffsetMeters,
+  };
 }
 
 function getSameRoadFallbackStep(
@@ -227,7 +283,11 @@ function getSameRoadFallbackStep(
   endpointSide: HomeDriveRoadEndpointSide,
   overshootMeters: number,
 ): HomeDriveTrafficRoadStep {
-  const directionSign = getFallbackDirectionFromEndpoint(endpointSide);
+  const directionSign = resolveHomeDriveTrafficSafeDirectionSign(
+    road,
+    getFallbackDirectionFromEndpoint(endpointSide),
+  );
+
   const entryT = getEndpointT(endpointSide);
 
   const overshootT =
@@ -235,7 +295,11 @@ function getSameRoadFallbackStep(
       ? 0
       : Math.min(overshootMeters / road.length, 0.12);
 
-  const t = clamp01(entryT + directionSign * overshootT);
+  const lane = getResolvedLaneForRoad(
+    road,
+    directionSign,
+    vehicle.laneIndex,
+  );
 
   return {
     road,
@@ -243,9 +307,10 @@ function getSameRoadFallbackStep(
     segmentId: road.id,
     segmentIndex: road.segmentIndex,
     previousSegmentId: vehicle.segmentId,
-    t,
+    t: clamp01(entryT + directionSign * overshootT),
     directionSign,
-    laneOffsetMeters: clampLaneOffsetToRoad(vehicle.laneOffsetMeters, road),
+    laneIndex: lane.laneIndex,
+    laneOffsetMeters: lane.laneOffsetMeters,
     routed: true,
   };
 }
@@ -255,6 +320,17 @@ function getInitialCurrentStep(
   road: HomeDriveGeneratedRoadSegment,
   nextT: number,
 ): HomeDriveTrafficRoadStep {
+  const directionSign = resolveHomeDriveTrafficSafeDirectionSign(
+    road,
+    vehicle.directionSign,
+  );
+
+  const lane = getResolvedLaneForRoad(
+    road,
+    directionSign,
+    vehicle.laneIndex,
+  );
+
   return {
     road,
     roadId: road.roadId,
@@ -262,8 +338,9 @@ function getInitialCurrentStep(
     segmentIndex: road.segmentIndex,
     previousSegmentId: vehicle.previousSegmentId ?? null,
     t: clamp01(nextT),
-    directionSign: vehicle.directionSign,
-    laneOffsetMeters: clampLaneOffsetToRoad(vehicle.laneOffsetMeters, road),
+    directionSign,
+    laneIndex: lane.laneIndex,
+    laneOffsetMeters: lane.laneOffsetMeters,
     routed: false,
   };
 }
@@ -274,11 +351,15 @@ function getStepFromConnection(
   overshootMeters: number,
 ): HomeDriveTrafficRoadStep {
   const road = connection.toRoad;
+  const directionSign = resolveHomeDriveTrafficSafeDirectionSign(
+    road,
+    connection.toDirectionSign,
+  );
 
   const overshootT =
     road.length <= MIN_SEGMENT_LENGTH_METERS ? 0 : overshootMeters / road.length;
 
-  let nextT = connection.toT + connection.toDirectionSign * overshootT;
+  let nextT = connection.toT + directionSign * overshootT;
 
   if (connection.toEndpointSide === "from") {
     nextT = Math.max(nextT, ENDPOINT_ENTRY_T_PADDING);
@@ -288,6 +369,12 @@ function getStepFromConnection(
     nextT = Math.min(nextT, 1 - ENDPOINT_ENTRY_T_PADDING);
   }
 
+  const lane = getResolvedLaneForRoad(
+    road,
+    directionSign,
+    vehicle.laneIndex,
+  );
+
   return {
     road,
     roadId: road.roadId,
@@ -295,8 +382,9 @@ function getStepFromConnection(
     segmentIndex: road.segmentIndex,
     previousSegmentId: vehicle.segmentId,
     t: nextT,
-    directionSign: connection.toDirectionSign,
-    laneOffsetMeters: clampLaneOffsetToRoad(vehicle.laneOffsetMeters, road),
+    directionSign,
+    laneIndex: lane.laneIndex,
+    laneOffsetMeters: lane.laneOffsetMeters,
     routed: true,
   };
 }
@@ -348,14 +436,7 @@ export function resolveHomeDriveTrafficRoadStep(
     const endpointSide = getExitEndpointSide(step.t);
 
     if (!endpointSide) {
-      return {
-        ...step,
-        t: clamp01(step.t),
-        laneOffsetMeters: clampLaneOffsetToRoad(
-          step.laneOffsetMeters,
-          step.road,
-        ),
-      };
+      return getNormalizedTrafficRoadStep(step);
     }
 
     step = resolveOneTrafficRoadStep(
@@ -373,6 +454,7 @@ export function resolveHomeDriveTrafficRoadStep(
           previousSegmentId: step.previousSegmentId,
           t: step.t,
           directionSign: step.directionSign,
+          laneIndex: step.laneIndex,
           laneOffsetMeters: step.laneOffsetMeters,
           routeSeed: input.vehicle.routeSeed,
           speedMps: input.vehicle.speedMps,
@@ -382,11 +464,7 @@ export function resolveHomeDriveTrafficRoadStep(
     );
   }
 
-  return {
-    ...step,
-    t: clamp01(step.t),
-    laneOffsetMeters: clampLaneOffsetToRoad(step.laneOffsetMeters, step.road),
-  };
+  return getNormalizedTrafficRoadStep(step);
 }
 
 export function getHomeDriveTrafficPositionOnRoad(
@@ -394,26 +472,18 @@ export function getHomeDriveTrafficPositionOnRoad(
   t: number,
   laneOffsetMeters: number,
 ): HomeDriveWorldPosition {
-  const clampedT = clamp01(t);
-  const clampedLaneOffset = clampLaneOffsetToRoad(laneOffsetMeters, road);
-
-  return {
-    x:
-      road.from.x +
-      (road.to.x - road.from.x) * clampedT +
-      road.normal.x * clampedLaneOffset,
-    z:
-      road.from.z +
-      (road.to.z - road.from.z) * clampedT +
-      road.normal.z * clampedLaneOffset,
-  };
+  return getHomeDriveTrafficLanePositionAtProgress(
+    road,
+    clamp01(t),
+    laneOffsetMeters,
+  );
 }
 
 export function getHomeDriveTrafficHeadingOnRoad(
   road: HomeDriveGeneratedRoadSegment,
-  directionSign: 1 | -1,
+  directionSign: HomeDriveTrafficDirectionSign,
 ): number {
-  return road.angleRad + (directionSign === -1 ? Math.PI : 0);
+  return getHomeDriveTrafficHeadingRadians(road, directionSign);
 }
 
 export function hasHomeDriveTrafficRouteFromEndpoint(

@@ -4,6 +4,7 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useMemo, useRef } from "react";
 import { PerspectiveCamera, Vector3 } from "three";
 
+import { normalizeHomeDriveImpactState } from "../domain/homeDrive.impact";
 import type { HomeDriveRuntimeState } from "../domain/homeDrive.types";
 import type { HomeDriveThreeCameraConfig } from "./homeDriveThree.types";
 
@@ -11,43 +12,30 @@ type HomeDriveMutableRef<T> = {
   current: T;
 };
 
-type HomeDriveRuntimeImpactState = Readonly<{
-  cameraShake: number;
-  collisionImpulse: number;
-  lastCollisionAt: number;
-}>;
-
-type HomeDriveRuntimeWithImpact = HomeDriveRuntimeState & {
-  impact?: HomeDriveRuntimeImpactState;
-};
-
 export type HomeDriveThreeCameraRigProps = Readonly<{
   runtimeRef: HomeDriveMutableRef<HomeDriveRuntimeState>;
   config?: Partial<HomeDriveThreeCameraConfig>;
 }>;
 
+/*
+  Camera baixa, mais próxima de carro comum.
+
+  Antes:
+  - heightMeters: 4.2
+  - lookAheadMeters: 72
+  - pitchOffsetMeters: -3.8
+  - fov: 62
+
+  Isso dava sensação de veículo alto/ônibus.
+*/
 const DEFAULT_CAMERA_CONFIG: HomeDriveThreeCameraConfig = {
-  heightMeters: 4.2,
-  lookAheadMeters: 72,
-  pitchOffsetMeters: -3.8,
-  fov: 62,
+  heightMeters: 2.65,
+  lookAheadMeters: 64,
+  pitchOffsetMeters: -2.45,
+  fov: 66,
   near: 0.1,
   far: 3600,
 };
-
-function getRuntimeImpact(
-  runtime: HomeDriveRuntimeState,
-): HomeDriveRuntimeImpactState {
-  const runtimeWithImpact = runtime as HomeDriveRuntimeWithImpact;
-
-  return (
-    runtimeWithImpact.impact ?? {
-      cameraShake: 0,
-      collisionImpulse: 0,
-      lastCollisionAt: -999,
-    }
-  );
-}
 
 export default function HomeDriveThreeCameraRig({
   runtimeRef,
@@ -84,28 +72,43 @@ export default function HomeDriveThreeCameraRig({
   useFrame(() => {
     const runtime = runtimeRef.current;
     const { car } = runtime;
-    const impact = getRuntimeImpact(runtime);
+    const impact = normalizeHomeDriveImpactState(runtime.impact);
 
     const sin = Math.sin(car.headingRad);
     const cos = Math.cos(car.headingRad);
 
     const speedFactor = Math.min(Math.abs(car.speedMps) / 32, 1);
-    const shake = Math.min(1.15, Math.max(0, impact.cameraShake));
-    const impulse = Math.min(9.5, Math.max(0, impact.collisionImpulse));
+    const shake = Math.min(2.15, Math.max(0, impact.cameraShake));
+    const impulse = Math.min(18.5, Math.max(0, impact.collisionImpulse));
 
+    /*
+      Bob menor porque a câmera agora está mais baixa.
+      Se deixar alto demais, parece que o carro está pulando.
+    */
     const bobOffset =
-      Math.sin(runtime.elapsedSeconds * 6.4) * speedFactor * 0.035;
+      Math.sin(runtime.elapsedSeconds * 6.4) * speedFactor * 0.025;
 
     const shakeX =
-      Math.sin(runtime.elapsedSeconds * 63.0) * shake * (0.16 + impulse * 0.012);
-    const shakeY =
-      Math.cos(runtime.elapsedSeconds * 57.0) * shake * (0.1 + impulse * 0.008);
-    const shakeZ =
-      Math.sin(runtime.elapsedSeconds * 49.0) * shake * (0.12 + impulse * 0.008);
+      Math.sin(runtime.elapsedSeconds * 78.0) *
+      shake *
+      (0.14 + impulse * 0.011);
 
-    const rollOffset =
-      -car.steerAngleRad * 0.18 +
-      Math.sin(runtime.elapsedSeconds * 41.0) * shake * 0.035;
+    const shakeY =
+      Math.cos(runtime.elapsedSeconds * 67.0) *
+      shake *
+      (0.08 + impulse * 0.007);
+
+    const shakeZ =
+      Math.sin(runtime.elapsedSeconds * 91.0) *
+      shake *
+      (0.13 + impulse * 0.01);
+
+    const crashLean =
+      impact.visualRollRad * 0.18 +
+      Math.sin(runtime.elapsedSeconds * 47.0) * shake * 0.052;
+
+    const rollOffset = -car.steerAngleRad * 0.18 + crashLean;
+    const pitchKick = impact.visualPitchRad * 0.34 - shake * 0.025;
 
     const cameraPosition = cameraPositionRef.current;
     const lookTarget = lookTargetRef.current;
@@ -118,11 +121,18 @@ export default function HomeDriveThreeCameraRig({
 
     lookTarget.set(
       car.position.x + sin * resolvedConfig.lookAheadMeters,
-      resolvedConfig.heightMeters + resolvedConfig.pitchOffsetMeters + shakeY * 0.35,
+      resolvedConfig.heightMeters +
+        resolvedConfig.pitchOffsetMeters +
+        shakeY * 0.3 +
+        pitchKick,
       car.position.z + cos * resolvedConfig.lookAheadMeters,
     );
 
-    camera.position.lerp(cameraPosition, 0.5);
+    /*
+      Lerp um pouco mais firme para a câmera baixa não atrasar demais.
+      Se ficar dura, volte para 0.5.
+    */
+    camera.position.lerp(cameraPosition, 0.58);
     camera.lookAt(lookTarget);
 
     /*

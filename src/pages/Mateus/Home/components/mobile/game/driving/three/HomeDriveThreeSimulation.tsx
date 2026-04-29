@@ -1,10 +1,17 @@
+// src/pages/Mateus/Home/components/mobile/game/driving/three/HomeDriveThreeSimulation.tsx
+
 import { useFrame } from "@react-three/fiber";
 import { useRef } from "react";
 
 import { resolveHomeDriveTrafficCollisions } from "../domain/homeDrive.collision";
+import { mergeHomeDriveImpactStates } from "../domain/homeDrive.impact";
 import { tickHomeDrivePhysics } from "../domain/homeDrive.physics";
 import { tickHomeDriveTraffic } from "../domain/homeDrive.traffic";
 import type { HomeDriveTrafficRuntimeState } from "../domain/homeDrive.traffic.types";
+import {
+  tickHomeDrivePedestrians,
+  type HomeDrivePedestrianRuntimeState,
+} from "../domain/pedestrians";
 import type {
   HomeDriveInputState,
   HomeDriveRuntimeState,
@@ -14,20 +21,11 @@ type HomeDriveMutableRef<T> = {
   current: T;
 };
 
-type HomeDriveRuntimeImpactState = Readonly<{
-  cameraShake: number;
-  collisionImpulse: number;
-  lastCollisionAt: number;
-}>;
-
-type HomeDriveRuntimeWithImpact = HomeDriveRuntimeState & {
-  impact?: HomeDriveRuntimeImpactState;
-};
-
 export type HomeDriveThreeSimulationProps = Readonly<{
   runtimeRef: HomeDriveMutableRef<HomeDriveRuntimeState>;
   inputRef: HomeDriveMutableRef<HomeDriveInputState>;
   trafficRef?: HomeDriveMutableRef<HomeDriveTrafficRuntimeState>;
+  pedestriansRef?: HomeDriveMutableRef<HomeDrivePedestrianRuntimeState>;
   enabled?: boolean;
 
   /**
@@ -48,9 +46,6 @@ const MAX_ACCUMULATED_SECONDS = 0.12;
 const MAX_STEPS_PER_FRAME = 5;
 const DEFAULT_SNAPSHOT_HZ = 10;
 
-const IMPACT_SHAKE_DECAY_PER_SECOND = 4.8;
-const IMPACT_IMPULSE_DECAY_PER_SECOND = 6.2;
-
 function sanitizeDeltaSeconds(deltaSeconds: number): number {
   if (!Number.isFinite(deltaSeconds) || deltaSeconds <= 0) {
     return 0;
@@ -59,75 +54,28 @@ function sanitizeDeltaSeconds(deltaSeconds: number): number {
   return Math.min(deltaSeconds, MAX_ACCUMULATED_SECONDS);
 }
 
-function getRuntimeImpact(
-  runtime: HomeDriveRuntimeState,
-): HomeDriveRuntimeImpactState {
-  const runtimeWithImpact = runtime as HomeDriveRuntimeWithImpact;
+function tickPedestriansStep(
+  pedestriansRef: HomeDriveMutableRef<HomeDrivePedestrianRuntimeState> | undefined,
+): void {
+  if (!pedestriansRef) {
+    return;
+  }
 
-  return (
-    runtimeWithImpact.impact ?? {
-      cameraShake: 0,
-      collisionImpulse: 0,
-      lastCollisionAt: -999,
-    }
+  pedestriansRef.current = tickHomeDrivePedestrians(
+    pedestriansRef.current,
+    FIXED_STEP_SECONDS,
+    {
+      maxDeltaSeconds: FIXED_STEP_SECONDS,
+    },
   );
 }
 
-function decayValue(
-  value: number,
-  decayPerSecond: number,
-  deltaSeconds: number,
-): number {
-  if (value <= 0) {
-    return 0;
-  }
-
-  const nextValue = value * Math.exp(-decayPerSecond * deltaSeconds);
-
-  return nextValue < 0.0001 ? 0 : nextValue;
-}
-
-function withRuntimeImpact(
-  runtime: HomeDriveRuntimeState,
-  impact: HomeDriveRuntimeImpactState,
-): HomeDriveRuntimeState {
-  return {
-    ...runtime,
-    impact,
-  } as HomeDriveRuntimeState;
-}
-
-function tickRuntimeImpact(
-  runtime: HomeDriveRuntimeState,
-  deltaSeconds: number,
-): HomeDriveRuntimeImpactState {
-  const impact = getRuntimeImpact(runtime);
-
-  return {
-    cameraShake: decayValue(
-      impact.cameraShake,
-      IMPACT_SHAKE_DECAY_PER_SECOND,
-      deltaSeconds,
-    ),
-    collisionImpulse: decayValue(
-      impact.collisionImpulse,
-      IMPACT_IMPULSE_DECAY_PER_SECOND,
-      deltaSeconds,
-    ),
-    lastCollisionAt: impact.lastCollisionAt,
-  };
-}
-
-function tickSimulationStep(
-  runtime: HomeDriveRuntimeState,
-  input: HomeDriveInputState,
+function tickTrafficAndCollisionsStep(
+  nextRuntime: HomeDriveRuntimeState,
   trafficRef: HomeDriveMutableRef<HomeDriveTrafficRuntimeState> | undefined,
 ): HomeDriveRuntimeState {
-  const nextRuntime = tickHomeDrivePhysics(runtime, input, FIXED_STEP_SECONDS);
-  const decayedImpact = tickRuntimeImpact(nextRuntime, FIXED_STEP_SECONDS);
-
   if (!trafficRef) {
-    return withRuntimeImpact(nextRuntime, decayedImpact);
+    return nextRuntime;
   }
 
   const nextTraffic = tickHomeDriveTraffic(
@@ -139,37 +87,46 @@ function tickSimulationStep(
     nextRuntime.car,
     nextTraffic,
     nextRuntime.elapsedSeconds,
+    {
+      brutality: 1.62,
+    },
   );
 
   trafficRef.current = collisionResolution.traffic;
 
-  if (collisionResolution.events.length <= 0) {
-    return withRuntimeImpact(nextRuntime, decayedImpact);
+  if (collisionResolution.events.length <= 0 || !collisionResolution.impact) {
+    return nextRuntime;
   }
 
-  return withRuntimeImpact(
-    {
-      ...nextRuntime,
-      car: collisionResolution.car,
-    },
-    {
-      cameraShake: Math.max(
-        decayedImpact.cameraShake,
-        collisionResolution.cameraShake,
-      ),
-      collisionImpulse: Math.max(
-        decayedImpact.collisionImpulse,
-        collisionResolution.collisionImpulse,
-      ),
-      lastCollisionAt: nextRuntime.elapsedSeconds,
-    },
-  );
+  return {
+    ...nextRuntime,
+    car: collisionResolution.car,
+    impact: mergeHomeDriveImpactStates(
+      nextRuntime.impact,
+      collisionResolution.impact,
+    ),
+  };
+}
+
+function tickSimulationStep(
+  runtime: HomeDriveRuntimeState,
+  input: HomeDriveInputState,
+  trafficRef: HomeDriveMutableRef<HomeDriveTrafficRuntimeState> | undefined,
+  pedestriansRef: HomeDriveMutableRef<HomeDrivePedestrianRuntimeState> | undefined,
+): HomeDriveRuntimeState {
+  const physicsRuntime = tickHomeDrivePhysics(runtime, input, FIXED_STEP_SECONDS);
+  const trafficRuntime = tickTrafficAndCollisionsStep(physicsRuntime, trafficRef);
+
+  tickPedestriansStep(pedestriansRef);
+
+  return trafficRuntime;
 }
 
 export default function HomeDriveThreeSimulation({
   runtimeRef,
   inputRef,
   trafficRef,
+  pedestriansRef,
   enabled = true,
   publishRuntimeSnapshot,
   snapshotHz = DEFAULT_SNAPSHOT_HZ,
@@ -205,6 +162,7 @@ export default function HomeDriveThreeSimulation({
         runtimeRef.current,
         inputRef.current,
         trafficRef,
+        pedestriansRef,
       );
 
       accumulatorRef.current -= FIXED_STEP_SECONDS;

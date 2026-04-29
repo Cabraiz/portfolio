@@ -40,13 +40,42 @@ export const HOME_DRIVE_THREE_COLORS = Object.freeze({
 
   buildingWindow: "#253642",
   buildingWindowDark: "#172129",
+  buildingWindowGlass: "#4f7480",
+  buildingWindowGlassBright: "#6f9dad",
+  buildingWindowWood: "#5c3925",
+  buildingWindowOpen: "#0e171c",
+  buildingWindowFrame: "#d3c59d",
+  buildingWindowGrille: "#23272a",
   buildingShopGlass: "#496d76",
   buildingDoor: "#513724",
   buildingAwning: "#a66b3c",
+  buildingAwningStriped: "#d6b05f",
+  buildingAwningFabric: "#8f493d",
+  buildingAwningMetal: "#8f9188",
   buildingRoof: "#585b55",
   buildingTrim: "#d8cfad",
   buildingShadowTrim: "#645e50",
+  buildingAirConditioner: "#d7d5c8",
+  buildingAirConditionerShadow: "#60645f",
+  buildingSignBoard: "#2f3840",
+  buildingMetalFrame: "#31363a",
 });
+
+function createFacadePlaneMaterial(
+  color: string,
+  opacity = 1,
+): MeshBasicMaterial {
+  return new MeshBasicMaterial({
+    color,
+    side: DoubleSide,
+    transparent: opacity < 1,
+    opacity,
+    depthWrite: false,
+    polygonOffset: true,
+    polygonOffsetFactor: -2,
+    polygonOffsetUnits: -2,
+  });
+}
 
 export const HOME_DRIVE_THREE_MATERIALS = Object.freeze({
   ground: new MeshStandardMaterial({
@@ -233,56 +262,90 @@ export const HOME_DRIVE_THREE_MATERIALS = Object.freeze({
     side: DoubleSide,
   }),
 
-  buildingWindow: new MeshBasicMaterial({
-    color: HOME_DRIVE_THREE_COLORS.buildingWindow,
+  buildingWindow: createFacadePlaneMaterial(
+    HOME_DRIVE_THREE_COLORS.buildingWindow,
+    0.88,
+  ),
+
+  buildingWindowDark: createFacadePlaneMaterial(
+    HOME_DRIVE_THREE_COLORS.buildingWindowDark,
+    0.9,
+  ),
+
+  buildingWindowGlass: createFacadePlaneMaterial(
+    HOME_DRIVE_THREE_COLORS.buildingWindowGlass,
+    0.82,
+  ),
+
+  buildingWindowGlassBright: createFacadePlaneMaterial(
+    HOME_DRIVE_THREE_COLORS.buildingWindowGlassBright,
+    0.72,
+  ),
+
+  buildingWindowWood: createFacadePlaneMaterial(
+    HOME_DRIVE_THREE_COLORS.buildingWindowWood,
+    1,
+  ),
+
+  buildingWindowOpen: createFacadePlaneMaterial(
+    HOME_DRIVE_THREE_COLORS.buildingWindowOpen,
+    0.94,
+  ),
+
+  buildingWindowFrame: createFacadePlaneMaterial(
+    HOME_DRIVE_THREE_COLORS.buildingWindowFrame,
+    0.9,
+  ),
+
+  buildingWindowGrille: createFacadePlaneMaterial(
+    HOME_DRIVE_THREE_COLORS.buildingWindowGrille,
+    0.88,
+  ),
+
+  buildingShopGlass: createFacadePlaneMaterial(
+    HOME_DRIVE_THREE_COLORS.buildingShopGlass,
+    0.82,
+  ),
+
+  buildingDoor: createFacadePlaneMaterial(HOME_DRIVE_THREE_COLORS.buildingDoor),
+
+  buildingAwning: createFacadePlaneMaterial(
+    HOME_DRIVE_THREE_COLORS.buildingAwning,
+  ),
+
+  buildingAwningStriped: createFacadePlaneMaterial(
+    HOME_DRIVE_THREE_COLORS.buildingAwningStriped,
+  ),
+
+  buildingAwningFabric: createFacadePlaneMaterial(
+    HOME_DRIVE_THREE_COLORS.buildingAwningFabric,
+  ),
+
+  buildingAwningMetal: createFacadePlaneMaterial(
+    HOME_DRIVE_THREE_COLORS.buildingAwningMetal,
+  ),
+
+  buildingAirConditioner: new MeshStandardMaterial({
+    color: HOME_DRIVE_THREE_COLORS.buildingAirConditioner,
+    roughness: 0.7,
+    metalness: 0.12,
     side: DoubleSide,
-    transparent: true,
-    opacity: 0.88,
-    depthWrite: false,
-    polygonOffset: true,
-    polygonOffsetFactor: -2,
-    polygonOffsetUnits: -2,
   }),
 
-  buildingWindowDark: new MeshBasicMaterial({
-    color: HOME_DRIVE_THREE_COLORS.buildingWindowDark,
-    side: DoubleSide,
-    transparent: true,
-    opacity: 0.9,
-    depthWrite: false,
-    polygonOffset: true,
-    polygonOffsetFactor: -2,
-    polygonOffsetUnits: -2,
-  }),
+  buildingAirConditionerShadow: createFacadePlaneMaterial(
+    HOME_DRIVE_THREE_COLORS.buildingAirConditionerShadow,
+    0.72,
+  ),
 
-  buildingShopGlass: new MeshBasicMaterial({
-    color: HOME_DRIVE_THREE_COLORS.buildingShopGlass,
-    side: DoubleSide,
-    transparent: true,
-    opacity: 0.82,
-    depthWrite: false,
-    polygonOffset: true,
-    polygonOffsetFactor: -2,
-    polygonOffsetUnits: -2,
-  }),
+  buildingSignBoard: createFacadePlaneMaterial(
+    HOME_DRIVE_THREE_COLORS.buildingSignBoard,
+    0.92,
+  ),
 
-  buildingDoor: new MeshBasicMaterial({
-    color: HOME_DRIVE_THREE_COLORS.buildingDoor,
-    side: DoubleSide,
-    depthWrite: false,
-    polygonOffset: true,
-    polygonOffsetFactor: -2,
-    polygonOffsetUnits: -2,
-  }),
-
-  buildingAwning: new MeshBasicMaterial({
-    color: HOME_DRIVE_THREE_COLORS.buildingAwning,
-    side: DoubleSide,
-    depthWrite: false,
-    polygonOffset: true,
-    polygonOffsetFactor: -2,
-    polygonOffsetUnits: -2,
-  }),
+  buildingMetalFrame: createFacadePlaneMaterial(
+    HOME_DRIVE_THREE_COLORS.buildingMetalFrame,
+    0.9,
+  ),
 
   buildingRoof: new MeshStandardMaterial({
     color: HOME_DRIVE_THREE_COLORS.buildingRoof,
@@ -291,25 +354,13 @@ export const HOME_DRIVE_THREE_MATERIALS = Object.freeze({
     side: DoubleSide,
   }),
 
-  buildingTrim: new MeshBasicMaterial({
-    color: HOME_DRIVE_THREE_COLORS.buildingTrim,
-    side: DoubleSide,
-    transparent: true,
-    opacity: 0.72,
-    depthWrite: false,
-    polygonOffset: true,
-    polygonOffsetFactor: -2,
-    polygonOffsetUnits: -2,
-  }),
+  buildingTrim: createFacadePlaneMaterial(
+    HOME_DRIVE_THREE_COLORS.buildingTrim,
+    0.72,
+  ),
 
-  buildingShadowTrim: new MeshBasicMaterial({
-    color: HOME_DRIVE_THREE_COLORS.buildingShadowTrim,
-    side: DoubleSide,
-    transparent: true,
-    opacity: 0.52,
-    depthWrite: false,
-    polygonOffset: true,
-    polygonOffsetFactor: -2,
-    polygonOffsetUnits: -2,
-  }),
+  buildingShadowTrim: createFacadePlaneMaterial(
+    HOME_DRIVE_THREE_COLORS.buildingShadowTrim,
+    0.52,
+  ),
 });

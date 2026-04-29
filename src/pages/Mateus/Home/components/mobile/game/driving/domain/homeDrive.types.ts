@@ -1,5 +1,6 @@
 // src/pages/Mateus/Home/components/mobile/game/driving/domain/homeDrive.types.ts
 
+import type { HomeDriveRuntimeImpactState } from "./homeDrive.impact";
 import type {
   HomeDriveCameraRoadProjection,
   HomeDriveVisibleRoadSegment as WorldMapVisibleRoadSegment,
@@ -27,6 +28,12 @@ export type HomeDriveInputState = Readonly<{
 export type HomeDriveRuntimeState = Readonly<{
   car: HomeDriveCarState;
   elapsedSeconds: number;
+
+  /**
+   * Estado transitório de colisão/impacto.
+   * Opcional para manter compatibilidade com initial states antigos.
+   */
+  impact?: HomeDriveRuntimeImpactState;
 }>;
 
 export type HomeDriveViewportMetrics = Readonly<{

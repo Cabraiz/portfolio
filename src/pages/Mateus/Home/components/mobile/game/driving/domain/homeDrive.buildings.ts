@@ -1,5 +1,10 @@
 // src/pages/Mateus/Home/components/mobile/game/driving/domain/homeDrive.buildings.ts
 
+import {
+  getHomeDriveCommerceDescriptor,
+  getHomeDriveStableStringSeed,
+  shouldHomeDriveBuildingHaveCommerceSign,
+} from "./homeDrive.commerceNames";
 import { hashVector } from "./homeDrive.math";
 import { isHomeDrivePositionBlockedByRoad } from "./homeDrive.roadExclusion";
 import { generateHomeDriveRoadSegments } from "./homeDrive.roadGenerator";
@@ -12,14 +17,104 @@ import type {
   HomeDriveBuildingLotCandidate,
   HomeDriveBuildingMaterialKey,
   HomeDriveBuildingSide,
+  HomeDriveBuildingWindowStyle,
 } from "./homeDrive.building.types";
 
-const DEFAULT_MAX_BUILDINGS = 260;
-const DEFAULT_MIN_SEGMENT_LENGTH_METERS = 72;
+const DEFAULT_MAX_BUILDINGS = 16384;
+const DEFAULT_MIN_SEGMENT_LENGTH_METERS = 42;
 
-const LOT_ENDPOINT_PADDING_RATIO = 0.18;
-const BUILDING_ROAD_COLLISION_SAMPLE_RADIUS_METERS = 0.85;
-const BUILDING_MIN_DISTANCE_METERS = 12;
+/**
+ * Multiplicador real de slots por rua.
+ *
+ * Como a geração tenta os dois lados da rua:
+ * 4 slots * 2 lados = até 8x mais tentativas de prédios.
+ */
+const BUILDING_SLOT_DENSITY_MULTIPLIER = 4;
+
+/**
+ * Aumenta a chance de cada slot virar prédio.
+ */
+const BUILDING_DEVELOPMENT_CHANCE_MULTIPLIER = 1.24;
+
+/**
+ * Clearance real entre footprints.
+ * Este valor é mais importante que o multiplicador antigo de distância circular.
+ */
+const BUILDING_FOOTPRINT_CLEARANCE_METERS = 3.2;
+
+/**
+ * No mesmo segmento e mesmo lado, pode ficar mais compacto,
+ * mas ainda sem interpenetrar.
+ */
+const BUILDING_SAME_STREET_SIDE_CLEARANCE_METERS = 1.65;
+
+/**
+ * Se estiver em lados opostos da mesma rua, não precisa bloquear tanto,
+ * porque a via/calçada já separa os footprints.
+ */
+const BUILDING_OPPOSITE_SIDE_CLEARANCE_METERS = 1.25;
+
+const LOT_ENDPOINT_PADDING_RATIO = 0.08;
+const LOT_POSITION_JITTER_RATIO = 0.28;
+const LOT_SIDE_OFFSET_RANDOM_METERS = 9.2;
+
+const BUILDING_ROAD_COLLISION_SAMPLE_RADIUS_METERS = 0.58;
+
+/**
+ * Índice espacial para evitar O(n²) pesado quando a cidade passa de milhares de prédios.
+ */
+const BUILDING_SPATIAL_GRID_CELL_METERS = 64;
+const BUILDING_SPATIAL_SEARCH_RADIUS_CELLS = 2;
+
+type BuildingSpatialIndex = Map<string, HomeDriveBuilding[]>;
+
+type BuildingFootprint = Readonly<{
+  position: HomeDriveVector2;
+  widthMeters: number;
+  depthMeters: number;
+  rotationYRad: number;
+  segmentId: string;
+  side: HomeDriveBuildingSide;
+}>;
+
+type BuildingAxis = Readonly<{
+  x: number;
+  z: number;
+}>;
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.max(min, Math.min(max, value));
+}
+
+function clamp01(value: number): number {
+  return clamp(value, 0, 1);
+}
+
+function smoothstep01(value: number): number {
+  const x = clamp01(value);
+
+  return x * x * (3 - 2 * x);
+}
+
+function dot(first: BuildingAxis, second: BuildingAxis): number {
+  return first.x * second.x + first.z * second.z;
+}
+
+function normalizeVector2(vector: HomeDriveVector2): HomeDriveVector2 {
+  const length = Math.hypot(vector.x, vector.z);
+
+  if (!Number.isFinite(length) || length <= 0.000001) {
+    return {
+      x: 1,
+      z: 0,
+    };
+  }
+
+  return {
+    x: vector.x / length,
+    z: vector.z / length,
+  };
+}
 
 function getStableRoadSeed(road: HomeDriveGeneratedRoadSegment): number {
   let hash = 17;
@@ -35,20 +130,30 @@ function getRoadTags(road: HomeDriveGeneratedRoadSegment): readonly string[] {
   return Array.isArray(road.tags) ? road.tags : [];
 }
 
+function getSideSalt(side: HomeDriveBuildingSide): number {
+  return side === 1 ? 0 : 10_000;
+}
+
 function getSidewalkWidthMeters(road: HomeDriveGeneratedRoadSegment): number {
   switch (road.kind) {
     case "coastal":
       return 9.2;
+
     case "avenue":
       return 6.4;
+
     case "commercial":
       return 5.8;
+
     case "ring":
       return 5.2;
+
     case "service":
       return 2.8;
+
     case "street":
       return 3.6;
+
     default:
       if (road.roadTone === "boulevard") {
         return 7.4;
@@ -69,47 +174,55 @@ function getCurbWidthMeters(road: HomeDriveGeneratedRoadSegment): number {
 function getRoadDevelopmentChance(road: HomeDriveGeneratedRoadSegment): number {
   const tags = getRoadTags(road);
 
+  let baseChance = 0.72;
+
   if (tags.includes("closed-loop")) {
-    return 0.3;
+    baseChance = 0.58;
+  } else if (tags.includes("service") || road.kind === "service") {
+    baseChance = 0.72;
+  } else if (road.kind === "coastal") {
+    baseChance = 0.78;
+  } else if (road.kind === "avenue") {
+    baseChance = 0.9;
+  } else if (road.kind === "commercial") {
+    baseChance = 0.94;
+  } else if (road.kind === "street") {
+    baseChance = 0.86;
+  } else if (road.kind === "ring") {
+    baseChance = 0.76;
   }
 
-  if (tags.includes("service") || road.kind === "service") {
-    return 0.42;
+  if (tags.includes("main") || tags.includes("fast")) {
+    baseChance += 0.08;
   }
 
-  if (road.kind === "coastal") {
-    return 0.58;
-  }
-
-  if (road.kind === "avenue") {
-    return 0.68;
-  }
-
-  if (road.kind === "commercial") {
-    return 0.74;
-  }
-
-  if (road.kind === "street") {
-    return 0.64;
-  }
-
-  return 0.56;
+  return clamp(baseChance * BUILDING_DEVELOPMENT_CHANCE_MULTIPLIER, 0, 0.98);
 }
 
 function getLotSpacingMeters(road: HomeDriveGeneratedRoadSegment): number {
+  /*
+    Mantém a escala original do lote.
+    A multiplicação real vem de BUILDING_SLOT_DENSITY_MULTIPLIER.
+  */
   switch (road.kind) {
     case "coastal":
       return 86;
+
     case "avenue":
       return 72;
+
     case "commercial":
       return 54;
+
     case "ring":
       return 88;
+
     case "service":
       return 76;
+
     case "street":
       return 48;
+
     default:
       return 64;
   }
@@ -119,14 +232,19 @@ function getLotSetbackMeters(road: HomeDriveGeneratedRoadSegment): number {
   switch (road.kind) {
     case "coastal":
       return 10;
+
     case "avenue":
       return 7;
+
     case "commercial":
       return 4.8;
+
     case "service":
       return 5.2;
+
     case "street":
       return 4.2;
+
     default:
       return 5.8;
   }
@@ -140,6 +258,26 @@ function getPointOnRoad(
     x: road.from.x + (road.to.x - road.from.x) * t,
     z: road.from.z + (road.to.z - road.from.z) * t,
   };
+}
+
+function getPaddedSlotT(
+  roadSeed: number,
+  slotIndex: number,
+  slotCount: number,
+  side: HomeDriveBuildingSide,
+  salt: number,
+): number {
+  const safeSlotCount = Math.max(1, slotCount);
+  const rawSlotT = (slotIndex + 0.5) / safeSlotCount;
+  const slotWidth = 1 / safeSlotCount;
+  const jitterSeed = hashVector(roadSeed, slotIndex, salt + getSideSalt(side));
+  const jitter = (jitterSeed - 0.5) * slotWidth * LOT_POSITION_JITTER_RATIO;
+  const shapedT = clamp01(rawSlotT + jitter);
+
+  return (
+    LOT_ENDPOINT_PADDING_RATIO +
+    shapedT * (1 - LOT_ENDPOINT_PADDING_RATIO * 2)
+  );
 }
 
 function getRotationYForRoad(road: HomeDriveGeneratedRoadSegment): number {
@@ -156,65 +294,90 @@ function pickBuildingKind(
 ): HomeDriveBuildingKind {
   const districtId = road.districtId;
   const tags = getRoadTags(road);
+  const shapedSeed = smoothstep01(seed);
 
   if (road.kind === "service" || tags.includes("service")) {
-    return seed > 0.52 ? "warehouse" : "commerce";
-  }
-
-  if (districtId === "castelao") {
-    if (seed > 0.72) {
-      return "commerce";
+    if (shapedSeed > 0.64) {
+      return "warehouse";
     }
 
-    if (seed > 0.42) {
-      return "warehouse";
+    if (shapedSeed > 0.28) {
+      return "commerce";
     }
 
     return "house";
   }
 
+  if (districtId === "castelao") {
+    if (shapedSeed > 0.78) {
+      return "commerce";
+    }
+
+    if (shapedSeed > 0.48) {
+      return "warehouse";
+    }
+
+    if (shapedSeed > 0.18) {
+      return "house";
+    }
+
+    return "commerce";
+  }
+
   if (districtId === "centro") {
-    if (seed > 0.66) {
+    if (shapedSeed > 0.72) {
       return "office";
     }
 
-    if (seed > 0.32) {
+    if (shapedSeed > 0.42) {
+      return "apartment";
+    }
+
+    if (shapedSeed > 0.16) {
+      return "commerce";
+    }
+
+    return "office";
+  }
+
+  if (districtId === "aldeota" || districtId === "meireles") {
+    if (shapedSeed > 0.76) {
+      return "office";
+    }
+
+    if (shapedSeed > 0.42) {
+      return "apartment";
+    }
+
+    if (shapedSeed > 0.18) {
       return "commerce";
     }
 
     return "apartment";
   }
 
-  if (districtId === "aldeota" || districtId === "meireles") {
-    if (seed > 0.72) {
-      return "office";
-    }
-
-    if (seed > 0.42) {
-      return "apartment";
-    }
-
-    return "commerce";
-  }
-
   if (districtId === "benfica") {
-    if (seed > 0.72) {
+    if (shapedSeed > 0.74) {
       return "apartment";
     }
 
-    if (seed > 0.42) {
+    if (shapedSeed > 0.42) {
       return "commerce";
     }
 
-    return "house";
+    if (shapedSeed > 0.16) {
+      return "house";
+    }
+
+    return "apartment";
   }
 
   if (districtId === "praia-de-iracema") {
-    if (seed > 0.52) {
+    if (shapedSeed > 0.62) {
       return "commerce";
     }
 
-    if (seed > 0.24) {
+    if (shapedSeed > 0.28) {
       return "apartment";
     }
 
@@ -222,14 +385,42 @@ function pickBuildingKind(
   }
 
   if (road.kind === "commercial") {
-    return seed > 0.36 ? "commerce" : "office";
+    if (shapedSeed > 0.72) {
+      return "office";
+    }
+
+    if (shapedSeed > 0.22) {
+      return "commerce";
+    }
+
+    return "apartment";
   }
 
   if (road.kind === "avenue") {
-    return seed > 0.52 ? "apartment" : "commerce";
+    if (shapedSeed > 0.72) {
+      return "office";
+    }
+
+    if (shapedSeed > 0.36) {
+      return "apartment";
+    }
+
+    return "commerce";
   }
 
-  return seed > 0.58 ? "commerce" : "house";
+  if (road.kind === "coastal") {
+    if (shapedSeed > 0.64) {
+      return "apartment";
+    }
+
+    if (shapedSeed > 0.24) {
+      return "commerce";
+    }
+
+    return "house";
+  }
+
+  return shapedSeed > 0.58 ? "commerce" : "house";
 }
 
 function getBuildingMaterialKey(
@@ -239,15 +430,19 @@ function getBuildingMaterialKey(
   switch (kind) {
     case "house":
       return seed > 0.5 ? "house-warm" : "house-cool";
+
     case "commerce":
       return seed > 0.56 ? "commerce-night" : "commerce-warm";
+
     case "apartment":
       return seed > 0.5 ? "apartment-concrete" : "apartment-light";
+
     case "office":
-      return "office-blue";
+      return seed > 0.32 ? "office-blue" : "apartment-concrete";
+
     case "warehouse":
     default:
-      return "warehouse-metal";
+      return seed > 0.28 ? "warehouse-metal" : "commerce-night";
   }
 }
 
@@ -264,45 +459,46 @@ function getBuildingDimensions(
 }> {
   switch (kind) {
     case "house": {
-      const floors = seedC > 0.72 ? 2 : 1;
+      const floors = seedC > 0.66 ? 2 : 1;
 
       return {
-        widthMeters: 9 + seedA * 7,
-        depthMeters: 9 + seedB * 6,
-        heightMeters: floors * 3.2 + 1.2,
+        widthMeters: 7.5 + seedA * 7.4,
+        depthMeters: 8 + seedB * 5.8,
+        heightMeters: floors * 3.2 + 1.2 + seedA * 0.7,
         floors,
       };
     }
 
     case "commerce": {
-      const floors = seedC > 0.82 ? 3 : seedC > 0.5 ? 2 : 1;
+      const floors =
+        seedC > 0.86 ? 4 : seedC > 0.58 ? 3 : seedC > 0.24 ? 2 : 1;
 
       return {
-        widthMeters: 12 + seedA * 12,
-        depthMeters: 10 + seedB * 9,
-        heightMeters: floors * 3.6 + 1.4,
+        widthMeters: 9.5 + seedA * 12.8,
+        depthMeters: 8.8 + seedB * 8.6,
+        heightMeters: floors * 3.6 + 1.4 + seedB * 0.9,
         floors,
       };
     }
 
     case "apartment": {
-      const floors = 4 + Math.floor(seedC * 7);
+      const floors = 3 + Math.floor(seedC * 9);
 
       return {
-        widthMeters: 14 + seedA * 12,
-        depthMeters: 12 + seedB * 10,
-        heightMeters: floors * 3.05 + 2.2,
+        widthMeters: 11 + seedA * 13.8,
+        depthMeters: 10.5 + seedB * 10.2,
+        heightMeters: floors * 3.05 + 2.2 + seedA * 1.1,
         floors,
       };
     }
 
     case "office": {
-      const floors = 5 + Math.floor(seedC * 9);
+      const floors = 4 + Math.floor(seedC * 12);
 
       return {
-        widthMeters: 16 + seedA * 14,
-        depthMeters: 14 + seedB * 12,
-        heightMeters: floors * 3.25 + 2.4,
+        widthMeters: 12.5 + seedA * 15.2,
+        depthMeters: 12 + seedB * 11.4,
+        heightMeters: floors * 3.25 + 2.4 + seedB * 1.4,
         floors,
       };
     }
@@ -310,9 +506,9 @@ function getBuildingDimensions(
     case "warehouse":
     default: {
       return {
-        widthMeters: 22 + seedA * 18,
-        depthMeters: 18 + seedB * 16,
-        heightMeters: 7 + seedC * 7,
+        widthMeters: 15 + seedA * 17.8,
+        depthMeters: 13.5 + seedB * 14.5,
+        heightMeters: 6 + seedC * 8.2,
         floors: 1,
       };
     }
@@ -336,6 +532,10 @@ function getBuildingFootprintSamples(
     { x: halfWidth, z: -halfDepth },
     { x: halfWidth, z: halfDepth },
     { x: -halfWidth, z: halfDepth },
+    { x: 0, z: -halfDepth },
+    { x: 0, z: halfDepth },
+    { x: -halfWidth, z: 0 },
+    { x: halfWidth, z: 0 },
   ];
 
   return localPoints.map((point) => {
@@ -367,27 +567,147 @@ function isBuildingFootprintBlockedByRoad(
   );
 }
 
-function isTooCloseToPlacedBuilding(
+function getSpatialCellCoordinate(value: number): number {
+  return Math.floor(value / BUILDING_SPATIAL_GRID_CELL_METERS);
+}
+
+function getSpatialCellKey(x: number, z: number): string {
+  return `${getSpatialCellCoordinate(x)}:${getSpatialCellCoordinate(z)}`;
+}
+
+function getNearbyPlacedBuildings(
   position: HomeDriveVector2,
-  widthMeters: number,
-  depthMeters: number,
-  placedBuildings: readonly HomeDriveBuilding[],
+  spatialIndex: BuildingSpatialIndex,
+): readonly HomeDriveBuilding[] {
+  const centerX = getSpatialCellCoordinate(position.x);
+  const centerZ = getSpatialCellCoordinate(position.z);
+  const nearby: HomeDriveBuilding[] = [];
+
+  for (
+    let cellX = centerX - BUILDING_SPATIAL_SEARCH_RADIUS_CELLS;
+    cellX <= centerX + BUILDING_SPATIAL_SEARCH_RADIUS_CELLS;
+    cellX += 1
+  ) {
+    for (
+      let cellZ = centerZ - BUILDING_SPATIAL_SEARCH_RADIUS_CELLS;
+      cellZ <= centerZ + BUILDING_SPATIAL_SEARCH_RADIUS_CELLS;
+      cellZ += 1
+    ) {
+      const cellBuildings = spatialIndex.get(`${cellX}:${cellZ}`);
+
+      if (cellBuildings) {
+        nearby.push(...cellBuildings);
+      }
+    }
+  }
+
+  return nearby;
+}
+
+function addBuildingToSpatialIndex(
+  building: HomeDriveBuilding,
+  spatialIndex: BuildingSpatialIndex,
+): void {
+  const key = getSpatialCellKey(building.position.x, building.position.z);
+  const current = spatialIndex.get(key);
+
+  if (current) {
+    current.push(building);
+    return;
+  }
+
+  spatialIndex.set(key, [building]);
+}
+
+function getBuildingLocalXAxis(rotationYRad: number): BuildingAxis {
+  return {
+    x: Math.cos(rotationYRad),
+    z: -Math.sin(rotationYRad),
+  };
+}
+
+function getBuildingLocalZAxis(rotationYRad: number): BuildingAxis {
+  return {
+    x: Math.sin(rotationYRad),
+    z: Math.cos(rotationYRad),
+  };
+}
+
+function getProjectionRadiusOnAxis(
+  footprint: Pick<
+    BuildingFootprint,
+    "widthMeters" | "depthMeters" | "rotationYRad"
+  >,
+  axis: BuildingAxis,
+): number {
+  const localXAxis = getBuildingLocalXAxis(footprint.rotationYRad);
+  const localZAxis = getBuildingLocalZAxis(footprint.rotationYRad);
+
+  return (
+    (footprint.widthMeters / 2) * Math.abs(dot(localXAxis, axis)) +
+    (footprint.depthMeters / 2) * Math.abs(dot(localZAxis, axis))
+  );
+}
+
+function getFootprintClearanceMeters(
+  candidate: Pick<BuildingFootprint, "segmentId" | "side">,
+  existing: Pick<HomeDriveBuilding, "segmentId" | "side">,
+): number {
+  if (candidate.segmentId === existing.segmentId) {
+    return candidate.side === existing.side
+      ? BUILDING_SAME_STREET_SIDE_CLEARANCE_METERS
+      : BUILDING_OPPOSITE_SIDE_CLEARANCE_METERS;
+  }
+
+  return BUILDING_FOOTPRINT_CLEARANCE_METERS;
+}
+
+function areBuildingFootprintsOverlapping(
+  candidate: BuildingFootprint,
+  existing: HomeDriveBuilding,
 ): boolean {
-  const candidateRadius = Math.max(widthMeters, depthMeters) * 0.58;
+  const candidateAxes = [
+    getBuildingLocalXAxis(candidate.rotationYRad),
+    getBuildingLocalZAxis(candidate.rotationYRad),
+  ];
 
-  return placedBuildings.some((building) => {
-    const existingRadius =
-      Math.max(building.widthMeters, building.depthMeters) * 0.58;
-    const minDistance =
-      candidateRadius + existingRadius + BUILDING_MIN_DISTANCE_METERS;
+  const existingAxes = [
+    getBuildingLocalXAxis(existing.rotationYRad),
+    getBuildingLocalZAxis(existing.rotationYRad),
+  ];
 
-    return (
-      Math.hypot(
-        position.x - building.position.x,
-        position.z - building.position.z,
-      ) < minDistance
-    );
-  });
+  const axes = [...candidateAxes, ...existingAxes];
+  const centerDelta = {
+    x: candidate.position.x - existing.position.x,
+    z: candidate.position.z - existing.position.z,
+  };
+  const clearance = getFootprintClearanceMeters(candidate, existing);
+
+  for (const axis of axes) {
+    const candidateRadius = getProjectionRadiusOnAxis(candidate, axis);
+    const existingRadius = getProjectionRadiusOnAxis(existing, axis);
+    const centerDistance = Math.abs(dot(centerDelta, axis));
+
+    if (centerDistance >= candidateRadius + existingRadius + clearance) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+function isTooCloseToPlacedBuilding(
+  candidate: BuildingFootprint,
+  spatialIndex: BuildingSpatialIndex,
+): boolean {
+  const nearbyBuildings = getNearbyPlacedBuildings(
+    candidate.position,
+    spatialIndex,
+  );
+
+  return nearbyBuildings.some((building) =>
+    areBuildingFootprintsOverlapping(candidate, building),
+  );
 }
 
 function createLotCandidate(
@@ -395,16 +715,14 @@ function createLotCandidate(
   slotIndex: number,
   slotCount: number,
   roadSeed: number,
+  side: HomeDriveBuildingSide,
 ): HomeDriveBuildingLotCandidate {
-  const sideSeed = hashVector(roadSeed, slotIndex, 211);
-  const offsetSeed = hashVector(roadSeed, slotIndex, 223);
-  const side: HomeDriveBuildingSide = sideSeed > 0.5 ? 1 : -1;
-
-  const paddedT =
-    LOT_ENDPOINT_PADDING_RATIO +
-    ((slotIndex + 0.5) / slotCount) * (1 - LOT_ENDPOINT_PADDING_RATIO * 2);
-
-  const pointOnRoad = getPointOnRoad(road, paddedT);
+  const sideSalt = getSideSalt(side);
+  const offsetSeed = hashVector(roadSeed, slotIndex, 223 + sideSalt);
+  const pointOnRoad = getPointOnRoad(
+    road,
+    getPaddedSlotT(roadSeed, slotIndex, slotCount, side, 233),
+  );
 
   const shallowPreviewDepth = 14;
   const offsetMeters =
@@ -413,34 +731,130 @@ function createLotCandidate(
     getCurbWidthMeters(road) +
     getLotSetbackMeters(road) +
     shallowPreviewDepth / 2 +
-    offsetSeed * 5;
+    offsetSeed * LOT_SIDE_OFFSET_RANDOM_METERS;
+
+  const roadDirection = normalizeVector2(road.direction);
+  const roadNormal = normalizeVector2(road.normal);
 
   return {
     roadId: road.roadId,
     segmentId: road.id,
     districtId: road.districtId,
     position: {
-      x: pointOnRoad.x + road.normal.x * side * offsetMeters,
-      z: pointOnRoad.z + road.normal.z * side * offsetMeters,
+      x: pointOnRoad.x + roadNormal.x * side * offsetMeters,
+      z: pointOnRoad.z + roadNormal.z * side * offsetMeters,
     },
-    roadDirection: road.direction,
+    roadDirection,
+    roadNormal,
     side,
-    seed: hashVector(roadSeed, slotIndex, 229),
+    streetFacingSide: side,
+    seed: hashVector(roadSeed, slotIndex, 229 + sideSalt),
   };
+}
+
+function pickWindowStyle(
+  kind: HomeDriveBuildingKind,
+  buildingId: string,
+  variant: number,
+): HomeDriveBuildingWindowStyle {
+  const seed = getHomeDriveStableStringSeed(
+    `${buildingId}:window-style:${variant}`,
+    113,
+  );
+
+  if (kind === "office") {
+    return seed > 0.24 ? "glass" : "mixed";
+  }
+
+  if (kind === "warehouse") {
+    return seed > 0.58 ? "gridded" : "dark";
+  }
+
+  if (kind === "house") {
+    if (seed > 0.72) {
+      return "open";
+    }
+
+    if (seed > 0.38) {
+      return "wood";
+    }
+
+    return "mixed";
+  }
+
+  if (kind === "commerce") {
+    if (seed > 0.72) {
+      return "glass";
+    }
+
+    if (seed > 0.46) {
+      return "mixed";
+    }
+
+    if (seed > 0.22) {
+      return "wood";
+    }
+
+    return "dark";
+  }
+
+  if (seed > 0.72) {
+    return "gridded";
+  }
+
+  if (seed > 0.46) {
+    return "glass";
+  }
+
+  if (seed > 0.22) {
+    return "mixed";
+  }
+
+  return "dark";
+}
+
+function pickAirConditionerPresence(
+  kind: HomeDriveBuildingKind,
+  buildingId: string,
+  variant: number,
+): boolean {
+  const seed = getHomeDriveStableStringSeed(
+    `${buildingId}:air-conditioners:${variant}`,
+    127,
+  );
+
+  switch (kind) {
+    case "office":
+    case "apartment":
+      return seed > 0.24;
+
+    case "commerce":
+      return seed > 0.42;
+
+    case "house":
+      return seed > 0.68;
+
+    case "warehouse":
+    default:
+      return seed > 0.82;
+  }
 }
 
 function createBuildingFromCandidate(
   candidate: HomeDriveBuildingLotCandidate,
   road: HomeDriveGeneratedRoadSegment,
   slotIndex: number,
+  slotCount: number,
   roadSeed: number,
 ): HomeDriveBuilding | null {
-  const kindSeed = hashVector(roadSeed, slotIndex, 301);
-  const materialSeed = hashVector(roadSeed, slotIndex, 307);
-  const widthSeed = hashVector(roadSeed, slotIndex, 311);
-  const depthSeed = hashVector(roadSeed, slotIndex, 313);
-  const heightSeed = hashVector(roadSeed, slotIndex, 317);
-  const variantSeed = hashVector(roadSeed, slotIndex, 331);
+  const sideSalt = getSideSalt(candidate.side);
+  const kindSeed = hashVector(roadSeed, slotIndex, 301 + sideSalt);
+  const materialSeed = hashVector(roadSeed, slotIndex, 307 + sideSalt);
+  const widthSeed = hashVector(roadSeed, slotIndex, 311 + sideSalt);
+  const depthSeed = hashVector(roadSeed, slotIndex, 313 + sideSalt);
+  const heightSeed = hashVector(roadSeed, slotIndex, 317 + sideSalt);
+  const variantSeed = hashVector(roadSeed, slotIndex, 331 + sideSalt);
+  const offsetSeed = hashVector(roadSeed, slotIndex, 337 + sideSalt);
 
   const kind = pickBuildingKind(road, kindSeed);
   const dimensions = getBuildingDimensions(
@@ -457,19 +871,17 @@ function createBuildingFromCandidate(
     getCurbWidthMeters(road) +
     getLotSetbackMeters(road) +
     dimensions.depthMeters / 2 +
-    hashVector(roadSeed, slotIndex, 337) * 5;
+    offsetSeed * LOT_SIDE_OFFSET_RANDOM_METERS;
 
   const pointOnRoad = getPointOnRoad(
     road,
-    LOT_ENDPOINT_PADDING_RATIO +
-      ((slotIndex + 0.5) /
-        Math.max(1, Math.floor(road.length / getLotSpacingMeters(road)))) *
-        (1 - LOT_ENDPOINT_PADDING_RATIO * 2),
+    getPaddedSlotT(roadSeed, slotIndex, slotCount, candidate.side, 347),
   );
 
+  const roadNormal = normalizeVector2(candidate.roadNormal);
   const position = {
-    x: pointOnRoad.x + road.normal.x * candidate.side * exactOffsetMeters,
-    z: pointOnRoad.z + road.normal.z * candidate.side * exactOffsetMeters,
+    x: pointOnRoad.x + roadNormal.x * candidate.side * exactOffsetMeters,
+    z: pointOnRoad.z + roadNormal.z * candidate.side * exactOffsetMeters,
   };
 
   if (
@@ -483,21 +895,49 @@ function createBuildingFromCandidate(
     return null;
   }
 
-  return {
-    id: `building-${road.id}-${slotIndex}-${candidate.side}`,
+  const variant = Math.floor(variantSeed * 11);
+  const materialKey = getBuildingMaterialKey(kind, materialSeed);
+  const id = `building-${road.id}-${slotIndex}-${candidate.side}`;
+
+  const commerceInput = {
+    id,
     kind,
-    materialKey: getBuildingMaterialKey(kind, materialSeed),
+    materialKey,
+    variant,
+    roadId: road.roadId,
+    segmentId: road.id,
+    districtId: road.districtId,
+  };
+
+  const commerceDescriptor = getHomeDriveCommerceDescriptor(commerceInput);
+  const hasCommerceSign = shouldHomeDriveBuildingHaveCommerceSign(commerceInput);
+  const facadeSeed = getHomeDriveStableStringSeed(`${id}:facade`, 139);
+
+  return {
+    id,
+    kind,
+    materialKey,
     position,
     widthMeters: dimensions.widthMeters,
     depthMeters: dimensions.depthMeters,
     heightMeters: dimensions.heightMeters,
     rotationYRad,
     floors: dimensions.floors,
-    variant: Math.floor(variantSeed * 5),
+    variant,
     side: candidate.side,
     roadId: road.roadId,
     segmentId: road.id,
     districtId: road.districtId,
+    roadDirection: normalizeVector2(candidate.roadDirection),
+    roadNormal,
+    streetFacingSide: candidate.streetFacingSide,
+    commerceName: hasCommerceSign ? commerceDescriptor.name : undefined,
+    commerceCategory: commerceDescriptor.category,
+    signStyle: hasCommerceSign ? commerceDescriptor.signStyle : undefined,
+    awningStyle: commerceDescriptor.awningStyle,
+    windowStyle: pickWindowStyle(kind, id, variant),
+    hasAirConditioners: pickAirConditionerPresence(kind, id, variant),
+    facadeSeed,
   };
 }
 
@@ -509,6 +949,7 @@ export function getHomeDriveBuildings(
     options.minSegmentLengthMeters ?? DEFAULT_MIN_SEGMENT_LENGTH_METERS;
 
   const buildings: HomeDriveBuilding[] = [];
+  const spatialIndex: BuildingSpatialIndex = new Map();
   const roads = generateHomeDriveRoadSegments();
 
   for (const road of roads) {
@@ -522,44 +963,70 @@ export function getHomeDriveBuildings(
 
     const roadSeed = getStableRoadSeed(road);
     const spacing = getLotSpacingMeters(road);
-    const slotCount = Math.max(1, Math.floor(road.length / spacing));
+    const baseSlotCount = Math.max(1, Math.floor(road.length / spacing));
+    const slotCount = Math.max(
+      1,
+      Math.floor(baseSlotCount * BUILDING_SLOT_DENSITY_MULTIPLIER),
+    );
     const developmentChance = getRoadDevelopmentChance(road);
+    const sides: readonly HomeDriveBuildingSide[] = [-1, 1];
 
     for (let slotIndex = 0; slotIndex < slotCount; slotIndex += 1) {
       if (buildings.length >= maxBuildings) {
         break;
       }
 
-      const occupancySeed = hashVector(roadSeed, slotIndex, 199);
+      for (const side of sides) {
+        if (buildings.length >= maxBuildings) {
+          break;
+        }
 
-      if (occupancySeed > developmentChance) {
-        continue;
+        const sideSalt = getSideSalt(side);
+        const occupancySeed = hashVector(roadSeed, slotIndex, 199 + sideSalt);
+
+        if (occupancySeed > developmentChance) {
+          continue;
+        }
+
+        const candidate = createLotCandidate(
+          road,
+          slotIndex,
+          slotCount,
+          roadSeed,
+          side,
+        );
+
+        const building = createBuildingFromCandidate(
+          candidate,
+          road,
+          slotIndex,
+          slotCount,
+          roadSeed,
+        );
+
+        if (!building) {
+          continue;
+        }
+
+        if (
+          isTooCloseToPlacedBuilding(
+            {
+              position: building.position,
+              widthMeters: building.widthMeters,
+              depthMeters: building.depthMeters,
+              rotationYRad: building.rotationYRad,
+              segmentId: building.segmentId,
+              side: building.side,
+            },
+            spatialIndex,
+          )
+        ) {
+          continue;
+        }
+
+        buildings.push(building);
+        addBuildingToSpatialIndex(building, spatialIndex);
       }
-
-      const candidate = createLotCandidate(road, slotIndex, slotCount, roadSeed);
-      const building = createBuildingFromCandidate(
-        candidate,
-        road,
-        slotIndex,
-        roadSeed,
-      );
-
-      if (!building) {
-        continue;
-      }
-
-      if (
-        isTooCloseToPlacedBuilding(
-          building.position,
-          building.widthMeters,
-          building.depthMeters,
-          buildings,
-        )
-      ) {
-        continue;
-      }
-
-      buildings.push(building);
     }
   }
 
