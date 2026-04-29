@@ -602,7 +602,19 @@ function getVehicleCollisionRadiusMeters(
   widthMeters: number,
   lengthMeters: number,
 ): number {
-  return Math.max(widthMeters, lengthMeters) * 0.54;
+  /*
+    Hitbox de gameplay, não raio físico perfeito.
+
+    O cálculo antigo usava o maior lado do carro * 0.54.
+    Como os carros são compridos, isso criava uma bolha circular grande
+    e fazia a colisão acontecer antes do contato visual.
+
+    Este cálculo considera mais a largura e menos o comprimento,
+    deixando a colisão lateral mais justa sem matar colisões frontais.
+  */
+  const gameplayRadius = Math.hypot(widthMeters * 0.46, lengthMeters * 0.24);
+
+  return Math.max(1.08, Math.min(3.15, gameplayRadius));
 }
 
 function getTrafficVehicleCruiseSpeedMps(

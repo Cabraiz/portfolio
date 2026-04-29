@@ -60,8 +60,21 @@ export type HomeDriveThreeRoadTopology = Readonly<{
 }>;
 
 const POINT_KEY_PRECISION = 100;
-const ENDPOINT_TO_SEGMENT_SNAP_DISTANCE_METERS = 2.6;
+
+const ENDPOINT_TO_SEGMENT_BASE_SNAP_DISTANCE_METERS = 3;
+const ENDPOINT_TO_SEGMENT_EXTRA_MARGIN_METERS = 3.2;
+const ENDPOINT_TO_SEGMENT_MAX_SNAP_DISTANCE_METERS = 20;
+
+const ENDPOINT_TO_SEGMENT_PARALLEL_REJECTION_ABS_DOT = 0.992;
 const CONTINUATION_ABS_DOT_THRESHOLD = 0.965;
+
+const DOMINANT_CONTINUATION_ABS_DOT_THRESHOLD = 0.94;
+const DOMINANT_CONTINUATION_PRIORITY_DELTA = 260;
+const DOMINANT_CONTINUATION_MIN_WIDTH_RATIO = 0.68;
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.max(min, Math.min(max, value));
+}
 
 function getRoadTags(road: HomeDriveGeneratedRoadSegment): readonly string[] {
   const maybeRoadWithTags = road as HomeDriveGeneratedRoadSegment & {
@@ -75,18 +88,25 @@ function getRoadKindScore(road: HomeDriveGeneratedRoadSegment): number {
   switch (road.kind) {
     case "coastal":
       return 900;
+
     case "boulevard":
       return 860;
+
     case "avenue":
       return 820;
+
     case "commercial":
       return 620;
+
     case "ring":
       return 560;
+
     case "street":
       return 360;
+
     case "service":
       return 120;
+
     default:
       return 280;
   }
@@ -266,7 +286,7 @@ function projectPointOnRoadSegment(
       (point.z - road.from.z) * segmentZ) /
     segmentLengthSquared;
 
-  const t = Math.max(0, Math.min(1, rawT));
+  const t = clamp(rawT, 0, 1);
 
   const nearestPoint = {
     x: road.from.x + segmentX * t,
@@ -281,7 +301,37 @@ function projectPointOnRoadSegment(
 }
 
 function isInteriorProjection(t: number): boolean {
-  return t > 0.035 && t < 0.965;
+  return t > 0.02 && t < 0.98;
+}
+
+function getEndpointToSegmentSnapDistanceMeters(
+  endpoint: HomeDriveThreeRoadEndpointRef,
+  throughRoad: HomeDriveGeneratedRoadSegment,
+): number {
+  const endpointHalfWidth = Math.max(1.5, endpoint.road.width / 2);
+  const throughHalfWidth = Math.max(1.5, throughRoad.width / 2);
+
+  return clamp(
+    endpointHalfWidth +
+      throughHalfWidth +
+      ENDPOINT_TO_SEGMENT_EXTRA_MARGIN_METERS,
+    ENDPOINT_TO_SEGMENT_BASE_SNAP_DISTANCE_METERS,
+    ENDPOINT_TO_SEGMENT_MAX_SNAP_DISTANCE_METERS,
+  );
+}
+
+function isEndpointToSegmentDirectionPlausible(
+  endpoint: HomeDriveThreeRoadEndpointRef,
+  throughRoad: HomeDriveGeneratedRoadSegment,
+): boolean {
+  const absDot = Math.abs(
+    getHomeDriveThreeRoadNormalizedDot(
+      endpoint.road.direction,
+      throughRoad.direction,
+    ),
+  );
+
+  return absDot < ENDPOINT_TO_SEGMENT_PARALLEL_REJECTION_ABS_DOT;
 }
 
 function findThroughRoadsAtEndpoint(
@@ -295,17 +345,24 @@ function findThroughRoadsAtEndpoint(
       continue;
     }
 
+    if (!isEndpointToSegmentDirectionPlausible(endpoint, road)) {
+      continue;
+    }
+
     const projection = projectPointOnRoadSegment(endpoint.position, road);
 
-    if (
-      projection.distanceMeters > ENDPOINT_TO_SEGMENT_SNAP_DISTANCE_METERS ||
-      !isInteriorProjection(projection.t)
-    ) {
+    if (!isInteriorProjection(projection.t)) {
+      continue;
+    }
+
+    const snapDistance = getEndpointToSegmentSnapDistanceMeters(endpoint, road);
+
+    if (projection.distanceMeters > snapDistance) {
       continue;
     }
 
     throughRoads.push({
-      key: endpoint.key,
+      key: getHomeDriveThreeRoadPointKey(projection.nearestPoint),
       road,
       nearestPoint: projection.nearestPoint,
       distanceMeters: projection.distanceMeters,
@@ -313,9 +370,13 @@ function findThroughRoadsAtEndpoint(
     });
   }
 
-  throughRoads.sort((first, second) =>
-    compareHomeDriveThreeRoadPriority(first.road, second.road),
-  );
+  throughRoads.sort((first, second) => {
+    if (first.distanceMeters !== second.distanceMeters) {
+      return first.distanceMeters - second.distanceMeters;
+    }
+
+    return compareHomeDriveThreeRoadPriority(first.road, second.road);
+  });
 
   return throughRoads;
 }
@@ -396,6 +457,46 @@ function classifyJunction(
   return "complex";
 }
 
+function getAverageEndpointPosition(
+  endpoints: readonly HomeDriveThreeRoadEndpointRef[],
+): HomeDriveWorldPosition {
+  if (endpoints.length === 0) {
+    return {
+      x: 0,
+      z: 0,
+    };
+  }
+
+  const total = endpoints.reduce(
+    (acc, endpoint) => ({
+      x: acc.x + endpoint.position.x,
+      z: acc.z + endpoint.position.z,
+    }),
+    {
+      x: 0,
+      z: 0,
+    },
+  );
+
+  return {
+    x: total.x / endpoints.length,
+    z: total.z / endpoints.length,
+  };
+}
+
+function getJunctionPosition(
+  endpoints: readonly HomeDriveThreeRoadEndpointRef[],
+  throughRoads: readonly HomeDriveThreeRoadThroughRef[],
+): HomeDriveWorldPosition {
+  const firstThroughRoad = throughRoads[0];
+
+  if (firstThroughRoad) {
+    return firstThroughRoad.nearestPoint;
+  }
+
+  return getAverageEndpointPosition(endpoints);
+}
+
 function createJunction(
   key: string,
   endpoints: readonly HomeDriveThreeRoadEndpointRef[],
@@ -408,16 +509,9 @@ function createJunction(
     : null;
   const maxRoadWidth = getMaxRoadWidth(roads);
 
-  const position =
-    endpoints[0]?.position ??
-    throughRoads[0]?.nearestPoint ?? {
-      x: 0,
-      z: 0,
-    };
-
   return {
     key,
-    position,
+    position: getJunctionPosition(endpoints, throughRoads),
     endpoints,
     throughRoads,
     roads,
@@ -425,8 +519,47 @@ function createJunction(
     dominantRoad,
     dominantPriority,
     maxRoadWidth,
-    operationalHalfWidth: Math.max(6, maxRoadWidth / 2),
+    operationalHalfWidth: Math.max(6, maxRoadWidth / 2 + 1.5),
   };
+}
+
+function isSameLogicalRoad(
+  first: HomeDriveGeneratedRoadSegment,
+  second: HomeDriveGeneratedRoadSegment,
+): boolean {
+  return first.id === second.id || first.roadId === second.roadId;
+}
+
+function isDominantContinuationCandidate(
+  road: HomeDriveGeneratedRoadSegment,
+  dominantRoad: HomeDriveGeneratedRoadSegment,
+): boolean {
+  if (isSameLogicalRoad(road, dominantRoad)) {
+    return true;
+  }
+
+  const absDot = Math.abs(
+    getHomeDriveThreeRoadNormalizedDot(road.direction, dominantRoad.direction),
+  );
+
+  if (absDot < DOMINANT_CONTINUATION_ABS_DOT_THRESHOLD) {
+    return false;
+  }
+
+  const roadPriority = getHomeDriveThreeRoadPriority(road);
+  const dominantPriority = getHomeDriveThreeRoadPriority(dominantRoad);
+
+  if (
+    Math.abs(roadPriority.score - dominantPriority.score) >
+    DOMINANT_CONTINUATION_PRIORITY_DELTA
+  ) {
+    return false;
+  }
+
+  const minWidth = Math.min(road.width, dominantRoad.width);
+  const maxWidth = Math.max(road.width, dominantRoad.width);
+
+  return minWidth / Math.max(0.001, maxWidth) >= DOMINANT_CONTINUATION_MIN_WIDTH_RATIO;
 }
 
 export function isHomeDriveThreeDominantRoadAtJunction(
@@ -437,7 +570,7 @@ export function isHomeDriveThreeDominantRoadAtJunction(
     return false;
   }
 
-  return junction.dominantRoad.id === road.id;
+  return isDominantContinuationCandidate(road, junction.dominantRoad);
 }
 
 export function isHomeDriveThreeSubordinateRoadAtJunction(
@@ -448,7 +581,7 @@ export function isHomeDriveThreeSubordinateRoadAtJunction(
     return false;
   }
 
-  if (junction.dominantRoad.id === road.id) {
+  if (isHomeDriveThreeDominantRoadAtJunction(road, junction)) {
     return false;
   }
 

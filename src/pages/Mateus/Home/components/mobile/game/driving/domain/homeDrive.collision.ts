@@ -22,7 +22,7 @@ export type HomeDriveTrafficCollisionResolution = Readonly<{
   collisionImpulse: number;
 }>;
 
-const DEFAULT_PLAYER_RADIUS_METERS = 2.35;
+const DEFAULT_PLAYER_RADIUS_METERS = 1.62;
 const DEFAULT_COLLISION_COOLDOWN_SECONDS = 0.42;
 const DEFAULT_MIN_IMPACT_SPEED_MPS = 1.4;
 

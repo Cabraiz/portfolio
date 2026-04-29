@@ -5,20 +5,18 @@ import type {
   HomeDriveWorldPosition,
 } from "../domain/homeDrive.worldMap.types";
 import { HOME_DRIVE_THREE_MATERIALS } from "./homeDriveThree.materials";
-import type {
-  HomeDriveThreeRoadBand,
-  HomeDriveThreeRoadBandKind,
-  HomeDriveThreeVector3Tuple,
-} from "./homeDriveThree.types";
-import {
-  buildHomeDriveThreeRoadTopology,
-  type HomeDriveThreeRoadJunction,
-} from "./homeDriveThree.roadTopology";
 import {
   createHomeDriveThreeRoadEndpointCutIndex,
   getHomeDriveThreeRoadEndpointCutFromIndex,
   type HomeDriveThreeRoadCutIndex,
 } from "./homeDriveThree.roadJunctions";
+import { createHomeDriveThreeRoadJunctionTileBands } from "./homeDriveThree.roadJunctionTiles";
+import { buildHomeDriveThreeRoadTopology } from "./homeDriveThree.roadTopology";
+import type {
+  HomeDriveThreeRoadBand,
+  HomeDriveThreeRoadBandKind,
+  HomeDriveThreeVector3Tuple,
+} from "./homeDriveThree.types";
 
 export type HomeDriveThreeRoadRenderModel = Readonly<{
   asphalt: readonly HomeDriveThreeRoadBand[];
@@ -31,7 +29,6 @@ const ROAD_Y = 0.045;
 const SIDEWALK_Y = 0.06;
 const CURB_Y = 0.082;
 const LANE_MARK_Y = 0.095;
-const INTERSECTION_PAD_Y = 0.19;
 
 const MIN_RENDERABLE_SEGMENT_LENGTH_METERS = 3.4;
 
@@ -42,10 +39,13 @@ function getBandMaterial(
     case "sidewalk-left":
     case "sidewalk-right":
       return HOME_DRIVE_THREE_MATERIALS.sidewalk as HomeDriveThreeRoadBand["material"];
+
     case "curb":
       return HOME_DRIVE_THREE_MATERIALS.curb as HomeDriveThreeRoadBand["material"];
+
     case "lane-mark":
       return HOME_DRIVE_THREE_MATERIALS.laneMark as HomeDriveThreeRoadBand["material"];
+
     case "asphalt":
     default:
       return HOME_DRIVE_THREE_MATERIALS.asphalt as HomeDriveThreeRoadBand["material"];
@@ -56,16 +56,22 @@ function getRoadSidewalkWidthMeters(road: HomeDriveGeneratedRoadSegment): number
   switch (road.kind) {
     case "coastal":
       return 9.2;
+
     case "avenue":
       return 6.4;
+
     case "commercial":
       return 5.8;
+
     case "ring":
       return 5.2;
+
     case "service":
       return 2.8;
+
     case "street":
       return 3.6;
+
     default:
       if (road.roadTone === "boulevard") {
         return 7.4;
@@ -130,7 +136,11 @@ function createRoadBandWithCuts(
     "from",
   );
 
-  const toCut = getHomeDriveThreeRoadEndpointCutFromIndex(cutIndex, road, "to");
+  const toCut = getHomeDriveThreeRoadEndpointCutFromIndex(
+    cutIndex,
+    road,
+    "to",
+  );
 
   const startTrim = Math.max(0, fromCut?.trimMeters ?? 0);
   const endTrim = Math.max(0, toCut?.trimMeters ?? 0);
@@ -202,38 +212,23 @@ function createLaneMarkBands(
   return bands;
 }
 
-function shouldCreateIntersectionPad(junction: HomeDriveThreeRoadJunction): boolean {
-  if (junction.type === "t-junction") {
-    return false;
+function sortRoadBands(
+  first: HomeDriveThreeRoadBand,
+  second: HomeDriveThreeRoadBand,
+): number {
+  if (first.renderOrder !== second.renderOrder) {
+    return first.renderOrder - second.renderOrder;
   }
 
-  if (junction.type === "continuation") {
-    return false;
+  if (first.roadId !== second.roadId) {
+    return first.roadId.localeCompare(second.roadId);
   }
 
-  return junction.roads.length >= 3;
-}
+  if (first.segmentIndex !== second.segmentIndex) {
+    return first.segmentIndex - second.segmentIndex;
+  }
 
-function createIntersectionPadBand(
-  junction: HomeDriveThreeRoadJunction,
-): HomeDriveThreeRoadBand {
-  const half = Math.max(24, junction.maxRoadWidth * 0.88 + 10);
-  const { x, z } = junction.position;
-
-  return {
-    id: `junction-pad::${junction.key}`,
-    kind: "asphalt",
-    roadId: `junction-pad::${junction.key}`,
-    segmentIndex: -1,
-    material: HOME_DRIVE_THREE_MATERIALS.asphalt as HomeDriveThreeRoadBand["material"],
-    renderOrder: 9,
-    points: [
-      [x - half, INTERSECTION_PAD_Y, z - half],
-      [x + half, INTERSECTION_PAD_Y, z - half],
-      [x + half, INTERSECTION_PAD_Y, z + half],
-      [x - half, INTERSECTION_PAD_Y, z + half],
-    ],
-  };
+  return first.id.localeCompare(second.id);
 }
 
 export function createHomeDriveThreeRoadRenderModel(
@@ -359,11 +354,21 @@ export function createHomeDriveThreeRoadRenderModel(
     laneMarks.push(...createLaneMarkBands(road, laneMarkCutIndex));
   }
 
-  for (const junction of topology.junctionsByKey.values()) {
-    if (shouldCreateIntersectionPad(junction)) {
-      asphalt.push(createIntersectionPadBand(junction));
-    }
-  }
+  /*
+    Modelo novo:
+    - asfalto normal fica inteiro;
+    - tiles resolvem T/+ por cima;
+    - roadMouths e roadAttachments ficam desativados neste render principal.
+
+    Isso elimina a dependência frágil de trim/overlap que estava expondo
+    grama no encontro entre ruas.
+  */
+  asphalt.push(...createHomeDriveThreeRoadJunctionTileBands(topology));
+
+  asphalt.sort(sortRoadBands);
+  sidewalks.sort(sortRoadBands);
+  curbs.sort(sortRoadBands);
+  laneMarks.sort(sortRoadBands);
 
   return {
     asphalt,
