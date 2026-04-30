@@ -6,8 +6,8 @@
 
   /*
     Unidade visual única.
-    Todo tamanho/posição do cockpit e do volante deriva daqui
-    + multiplicadores centralizados em homeDriveCockpit.tokens.ts.
+    Não usar 100dvh seco aqui, porque o jogo já injeta a altura real medida
+    pelo useHomeDriveViewport em --home-drive-vh.
   */
   --home-drive-cockpit-unit: min(
     var(--home-drive-vw, 100vw),
@@ -17,13 +17,26 @@
   position: fixed;
   inset: 0;
   z-index: 2147483000;
-  width: 100vw;
-  height: 100dvh;
-  min-height: 100dvh;
+
+  /*
+    Usa viewport medido pelo hook, não 100dvh direto.
+    Isso evita sobrar conteúdo embaixo quando o browser muda barra/endereço
+    ou quando o jogo roda dentro do layout mobile.
+  */
+  width: var(--home-drive-vw, 100vw);
+  height: var(--home-drive-vh, 100dvh);
+  min-width: var(--home-drive-vw, 100vw);
+  min-height: var(--home-drive-vh, 100dvh);
+  max-width: var(--home-drive-vw, 100vw);
+  max-height: var(--home-drive-vh, 100dvh);
+
   overflow: hidden;
   isolation: isolate;
+  box-sizing: border-box;
+
   background: #9fc2c9;
   color: #f5f0df;
+
   touch-action: none;
   user-select: none;
   -webkit-user-select: none;
@@ -32,8 +45,22 @@
 }
 
 /*
+  Garante que qualquer canvas/camada 3D dentro do root não fique com altura
+  automática nem deixe espaço morto no fim da tela.
+*/
+.root canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+/*
   Camada de tratamento visual acima do Canvas 3D,
-  mas abaixo da bússola, cockpit e volante.
+  mas abaixo da bússola, cockpit, velocímetro e volante.
 */
 .root::after {
   position: absolute;
@@ -68,17 +95,17 @@
   left: 50%;
   bottom: calc(
     var(--home-drive-safe-bottom) +
-    var(--home-drive-cockpit-unit) *
-    var(--home-drive-cockpit-bottom-ratio, -0.43)
+      var(--home-drive-cockpit-unit) *
+      var(--home-drive-cockpit-bottom-ratio, -0.35)
   );
   z-index: 42;
   width: clamp(
-    calc(var(--home-drive-cockpit-min-width-px, 760) * 1px),
+    calc(var(--home-drive-cockpit-min-width-px, 1020) * 1px),
     calc(
       var(--home-drive-cockpit-unit) *
-      var(--home-drive-cockpit-scale, 3.25)
+        var(--home-drive-cockpit-scale, 5.15)
     ),
-    calc(var(--home-drive-cockpit-max-width-px, 1360) * 1px)
+    calc(var(--home-drive-cockpit-max-width-px, 2700) * 1px)
   );
   aspect-ratio: 16 / 9;
   pointer-events: none;
@@ -86,8 +113,8 @@
     translate3d(
       calc(
         -50% +
-        var(--home-drive-cockpit-offset-x, 0px) +
-        var(--home-drive-cockpit-lean-offset, 0px)
+          var(--home-drive-cockpit-offset-x, 0px) +
+          var(--home-drive-cockpit-lean-offset, 0px)
       ),
       var(--home-drive-cockpit-bob-offset, 0px),
       0
@@ -147,34 +174,15 @@
 }
 
 /*
-  Classe passada diretamente para o HomeDriveCompass.
-  A bússola continua separada da lógica do cockpit/volante.
+  Bússola sem @media.
+  Usa clamp + unidade do cockpit para adaptar entre telas menores/maiores.
 */
 .compass {
-  --free-drive-compass-top: max(
-    92px,
-    calc(env(safe-area-inset-top) + 80px)
+  --free-drive-compass-top: clamp(
+    78px,
+    calc(var(--home-drive-safe-top) + var(--home-drive-cockpit-unit) * 0.14),
+    104px
   );
   --free-drive-compass-width: min(88vw, 440px);
-  --free-drive-compass-height: 58px;
-}
-
-@media (max-width: 380px) {
-  .compass {
-    --free-drive-compass-top: max(
-      84px,
-      calc(env(safe-area-inset-top) + 72px)
-    );
-    --free-drive-compass-width: 91vw;
-    --free-drive-compass-height: 52px;
-  }
-}
-
-@media (max-height: 680px) {
-  .compass {
-    --free-drive-compass-top: max(
-      78px,
-      calc(env(safe-area-inset-top) + 66px)
-    );
-  }
+  --free-drive-compass-height: clamp(52px, 7.2vh, 58px);
 }

@@ -78,6 +78,12 @@ const INITIAL_CAMERA_FOV = 66;
 const INITIAL_CAMERA_NEAR = 0.1;
 const INITIAL_CAMERA_FAR = 4200;
 
+const TRAFFIC_MAX_VEHICLES_PORTRAIT = 472;
+const TRAFFIC_MAX_VEHICLES_LANDSCAPE = 704;
+const TRAFFIC_DENSITY_PORTRAIT = 3.4;
+const TRAFFIC_DENSITY_LANDSCAPE = 4;
+const TRAFFIC_MIN_ROAD_LENGTH_METERS = 64;
+
 const THREE_CLOCK_DEPRECATION_WARNING =
   "THREE.Clock: This module has been deprecated. Please use THREE.Timer instead.";
 
@@ -298,12 +304,19 @@ export default function HomeDriveThreeScene({
     return getHomeDrivePedestrianPerformanceProfile(viewport.isPortrait);
   }, [viewport.isPortrait]);
 
-  const trafficRef = useRef<HomeDriveTrafficRuntimeState>(
-    createInitialHomeDriveTrafficState({
-      maxVehicles: viewport.isPortrait ? 118 : 176,
-      density: viewport.isPortrait ? 1.18 : 1.68,
-    }),
-  );
+  const initialTrafficState = useMemo(() => {
+    return createInitialHomeDriveTrafficState({
+      maxVehicles: viewport.isPortrait
+        ? TRAFFIC_MAX_VEHICLES_PORTRAIT
+        : TRAFFIC_MAX_VEHICLES_LANDSCAPE,
+      density: viewport.isPortrait
+        ? TRAFFIC_DENSITY_PORTRAIT
+        : TRAFFIC_DENSITY_LANDSCAPE,
+      minRoadLengthMeters: TRAFFIC_MIN_ROAD_LENGTH_METERS,
+    });
+  }, [viewport.isPortrait]);
+
+  const trafficRef = useRef<HomeDriveTrafficRuntimeState>(initialTrafficState);
 
   const parkedVehiclesRef = useRef<HomeDriveParkedVehicleRuntimeState>(
     createInitialHomeDriveParkedVehicleState({
@@ -339,7 +352,10 @@ export default function HomeDriveThreeScene({
   );
 
   const dpr = useMemo(() => {
-    return Math.min(Math.max(viewport.dpr || 1, 1), 1.25);
+    /*
+      4x carros aumenta draw/update. Mantive DPR máximo em 1.2 para mobile.
+    */
+    return Math.min(Math.max(viewport.dpr || 1, 1), 1.2);
   }, [viewport.dpr]);
 
   const initialCameraPosition = useMemo<[number, number, number]>(() => {

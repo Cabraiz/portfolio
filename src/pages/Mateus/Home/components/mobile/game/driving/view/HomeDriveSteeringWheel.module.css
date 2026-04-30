@@ -11,42 +11,31 @@
   bottom: calc(
     env(safe-area-inset-bottom, 0px) +
       var(--home-drive-cockpit-unit, min(100vw, 100dvh)) *
-      var(--home-drive-steering-wheel-bottom-ratio, 0.025)
+      var(--home-drive-steering-wheel-bottom-ratio, -0.4)
   );
   z-index: 55;
   width: clamp(
-    calc(var(--home-drive-steering-wheel-min-px, 204) * 1px),
+    calc(var(--home-drive-steering-wheel-min-px, 310) * 1px),
     calc(
       var(--home-drive-cockpit-unit, min(100vw, 100dvh)) *
-      var(--home-drive-steering-wheel-scale, 0.86)
+        var(--home-drive-steering-wheel-scale, 1.2)
     ),
-    calc(var(--home-drive-steering-wheel-max-px, 320) * 1px)
+    calc(var(--home-drive-steering-wheel-max-px, 560) * 1px)
   );
   aspect-ratio: 1;
   transform: translateX(-50%);
   pointer-events: auto;
   touch-action: none;
-
-  /*
-    Não use contain: paint aqui.
-    O volante tem borda circular, sombra e área de toque maior que o visual.
-    contain: paint corta qualquer coisa que ultrapasse o root.
-  */
   contain: layout style;
   overflow: visible;
 }
 
 .touchTarget {
   position: absolute;
-
-  /*
-    Mantém a área de toque maior sem obrigar o volante visual a crescer junto.
-  */
   inset: calc(
     var(--home-drive-steering-wheel-touch-inset-ratio, 0.2) *
       -100%
   );
-
   display: grid;
   place-items: center;
   border-radius: 999px;
@@ -66,13 +55,6 @@
 
 .wheel {
   position: relative;
-
-  /*
-    O touchTarget é maior que o root.
-    Por isso o volante visual precisa ser menor que 100% do touchTarget.
-    Com touchInsetRatio 0.2, o touchTarget vira 140% do root.
-    72% de 140% ≈ 100.8% do root.
-  */
   width: var(--home-drive-steering-wheel-visual-size, 72%);
   aspect-ratio: 1;
   transform: rotate(var(--free-drive-wheel-rotation));

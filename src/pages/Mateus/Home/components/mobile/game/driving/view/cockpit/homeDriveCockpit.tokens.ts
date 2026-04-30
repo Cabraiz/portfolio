@@ -24,28 +24,23 @@ export const HOME_DRIVE_COCKPIT_LAYOUT_TOKENS = Object.freeze({
   cockpitGlassOpacity: 0.14,
 
   /**
-   * Velocímetro analógico.
+   * Velocímetro.
+   *
+   * Usa tamanho proporcional ao frame projetado do cockpit.
    */
   speedometerSizeRatio: 0.055,
   speedometerMinPx: 76,
   speedometerMaxPx: 146,
-
   speedometerAnchorXRatio: 0.005,
   speedometerAnchorYRatio: 0.295,
-
   speedometerOffsetXPx: -5,
   speedometerOffsetYPx: 5,
-
   speedometerNeedleTransitionMs: 90,
   speedometerOpacity: 1,
   speedometerZIndex: 120,
 
   /**
    * Volante.
-   *
-   * Para mover horizontalmente:
-   * - positivo = direita
-   * - negativo = esquerda
    */
   steeringWheelScale: 1.2,
   steeringWheelMinPx: 310,

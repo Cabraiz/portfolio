@@ -2,15 +2,15 @@
 
 .root {
   --home-drive-speedometer-cockpit-width: clamp(
-    calc(var(--home-drive-cockpit-min-width-px, 840) * 1px),
+    calc(var(--home-drive-cockpit-min-width-px, 1020) * 1px),
     calc(
       var(
           --home-drive-cockpit-unit,
           min(var(--home-drive-vw, 100vw), var(--home-drive-vh, 100vh))
         ) *
-        var(--home-drive-cockpit-scale, 4.2)
+        var(--home-drive-cockpit-scale, 5.15)
     ),
-    calc(var(--home-drive-cockpit-max-width-px, 2100) * 1px)
+    calc(var(--home-drive-cockpit-max-width-px, 2700) * 1px)
   );
 
   --home-drive-speedometer-cockpit-height: calc(
@@ -21,7 +21,7 @@
     calc(var(--home-drive-speedometer-min-px, 76) * 1px),
     calc(
       var(--home-drive-speedometer-cockpit-width) *
-        var(--home-drive-speedometer-size-ratio, 0.07)
+        var(--home-drive-speedometer-size-ratio, 0.055)
     ),
     calc(var(--home-drive-speedometer-max-px, 146) * 1px)
   );
@@ -66,14 +66,8 @@
   aspect-ratio: 1;
   pointer-events: none;
   opacity: var(--home-drive-speedometer-opacity, 1);
-
-  /*
-    A âncora agora é o centro visual do velocímetro.
-    Isso impede o tamanho do instrumento de alterar a percepção vertical.
-  */
   transform: translate(-50%, 50%);
   transform-origin: 50% 50%;
-
   filter:
     drop-shadow(
       0

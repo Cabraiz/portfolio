@@ -6,6 +6,12 @@ export type HomeDriveSpeedometerTick = Readonly<{
   isDanger?: boolean;
 }>;
 
+/**
+ * Escala de carro antigo/esportivo.
+ *
+ * A física atual chega por volta de 151 km/h; 220 km/h deixa margem visual
+ * sem o ponteiro ficar colado no final.
+ */
 export const HOME_DRIVE_SPEEDOMETER_MAX_SPEED_KMH = 220;
 
 export const HOME_DRIVE_SPEEDOMETER_MIN_SWEEP_DEG = -132;

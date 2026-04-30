@@ -41,9 +41,22 @@ import type {
   HomeDriveTrafficVector2,
 } from "./homeDrive.traffic.types";
 
-const DEFAULT_MAX_TRAFFIC_VEHICLES = 176;
-const DEFAULT_MIN_ROAD_LENGTH_METERS = 90;
-const DEFAULT_TRAFFIC_DENSITY = 1.68;
+/**
+ * 4x do teto antigo:
+ * antes: 176
+ * agora: 704
+ */
+const DEFAULT_MAX_TRAFFIC_VEHICLES = 704;
+
+/**
+ * Permite popular ruas um pouco menores.
+ */
+const DEFAULT_MIN_ROAD_LENGTH_METERS = 64;
+
+/**
+ * Densidade alta, mas ainda controlada pelo roadChance e pelo espaçamento.
+ */
+const DEFAULT_TRAFFIC_DENSITY = 4;
 
 /**
  * Aumenta o tamanho visual dos carros.
@@ -56,10 +69,12 @@ const DEFAULT_TRAFFIC_DENSITY = 1.68;
 const TRAFFIC_VEHICLE_SIZE_MULTIPLIER = 1.25;
 
 /**
- * Espaçamento acompanha parte do tamanho visual para evitar carros grandes
- * nascendo um em cima do outro.
+ * Antes estava alto demais para 4x tráfego.
+ *
+ * Quanto menor, mais slots por rua.
+ * 0.42 deixa a rua bem mais populada sem ficar 100% congestionada.
  */
-const TRAFFIC_VEHICLE_SPACING_MULTIPLIER = 1.28;
+const TRAFFIC_VEHICLE_SPACING_MULTIPLIER = 0.42;
 
 /**
  * A colisão já cresce porque usa width/length escalados.

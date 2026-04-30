@@ -17,22 +17,11 @@ export type HomeDriveThreeCameraRigProps = Readonly<{
   config?: Partial<HomeDriveThreeCameraConfig>;
 }>;
 
-/*
-  Camera baixa, mais próxima de carro comum.
-
-  Antes:
-  - heightMeters: 4.2
-  - lookAheadMeters: 72
-  - pitchOffsetMeters: -3.8
-  - fov: 62
-
-  Isso dava sensação de veículo alto/ônibus.
-*/
 const DEFAULT_CAMERA_CONFIG: HomeDriveThreeCameraConfig = {
-  heightMeters: 2.65,
-  lookAheadMeters: 64,
-  pitchOffsetMeters: -2.45,
-  fov: 66,
+  heightMeters: 2.48,
+  lookAheadMeters: 72,
+  pitchOffsetMeters: -2.38,
+  fov: 68,
   near: 0.1,
   far: 3600,
 };
@@ -62,12 +51,7 @@ export default function HomeDriveThreeCameraRig({
     camera.near = resolvedConfig.near;
     camera.far = resolvedConfig.far;
     camera.updateProjectionMatrix();
-  }, [
-    camera,
-    resolvedConfig.far,
-    resolvedConfig.fov,
-    resolvedConfig.near,
-  ]);
+  }, [camera, resolvedConfig.far, resolvedConfig.fov, resolvedConfig.near]);
 
   useFrame(() => {
     const runtime = runtimeRef.current;
@@ -77,68 +61,61 @@ export default function HomeDriveThreeCameraRig({
     const sin = Math.sin(car.headingRad);
     const cos = Math.cos(car.headingRad);
 
-    const speedFactor = Math.min(Math.abs(car.speedMps) / 32, 1);
+    const speedRatio = Math.min(Math.abs(car.speedMps) / 42, 1);
+    const speedEase = speedRatio * speedRatio * (3 - 2 * speedRatio);
+
     const shake = Math.min(2.15, Math.max(0, impact.cameraShake));
     const impulse = Math.min(18.5, Math.max(0, impact.collisionImpulse));
 
-    /*
-      Bob menor porque a câmera agora está mais baixa.
-      Se deixar alto demais, parece que o carro está pulando.
-    */
     const bobOffset =
-      Math.sin(runtime.elapsedSeconds * 6.4) * speedFactor * 0.025;
+      Math.sin(runtime.elapsedSeconds * 6.8) * speedEase * 0.032;
+
+    const speedLowering = speedEase * 0.08;
+    const dynamicLookAhead = resolvedConfig.lookAheadMeters + speedEase * 14;
 
     const shakeX =
       Math.sin(runtime.elapsedSeconds * 78.0) *
       shake *
-      (0.14 + impulse * 0.011);
+      (0.13 + impulse * 0.01);
 
     const shakeY =
       Math.cos(runtime.elapsedSeconds * 67.0) *
       shake *
-      (0.08 + impulse * 0.007);
+      (0.07 + impulse * 0.006);
 
     const shakeZ =
       Math.sin(runtime.elapsedSeconds * 91.0) *
       shake *
-      (0.13 + impulse * 0.01);
+      (0.12 + impulse * 0.009);
 
     const crashLean =
       impact.visualRollRad * 0.18 +
-      Math.sin(runtime.elapsedSeconds * 47.0) * shake * 0.052;
+      Math.sin(runtime.elapsedSeconds * 47.0) * shake * 0.05;
 
-    const rollOffset = -car.steerAngleRad * 0.18 + crashLean;
-    const pitchKick = impact.visualPitchRad * 0.34 - shake * 0.025;
+    const rollOffset = -car.steerAngleRad * 0.16 + crashLean;
+    const pitchKick = impact.visualPitchRad * 0.32 - shake * 0.023;
 
     const cameraPosition = cameraPositionRef.current;
     const lookTarget = lookTargetRef.current;
 
     cameraPosition.set(
       car.position.x + shakeX,
-      resolvedConfig.heightMeters + bobOffset + shakeY,
+      resolvedConfig.heightMeters - speedLowering + bobOffset + shakeY,
       car.position.z + shakeZ,
     );
 
     lookTarget.set(
-      car.position.x + sin * resolvedConfig.lookAheadMeters,
+      car.position.x + sin * dynamicLookAhead,
       resolvedConfig.heightMeters +
         resolvedConfig.pitchOffsetMeters +
-        shakeY * 0.3 +
+        speedEase * 0.18 +
+        shakeY * 0.28 +
         pitchKick,
-      car.position.z + cos * resolvedConfig.lookAheadMeters,
+      car.position.z + cos * dynamicLookAhead,
     );
 
-    /*
-      Lerp um pouco mais firme para a câmera baixa não atrasar demais.
-      Se ficar dura, volte para 0.5.
-    */
-    camera.position.lerp(cameraPosition, 0.58);
+    camera.position.lerp(cameraPosition, 0.56);
     camera.lookAt(lookTarget);
-
-    /*
-      lookAt recalcula a rotação; o roll precisa ser aplicado depois.
-      O impacto adiciona uma vibração curta sem depender de React state.
-    */
     camera.rotation.z += rollOffset;
   });
 
