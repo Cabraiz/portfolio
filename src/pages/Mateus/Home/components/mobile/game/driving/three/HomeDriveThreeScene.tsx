@@ -9,7 +9,6 @@ import {
   Fog,
   HemisphereLight,
   type ColorRepresentation,
-  type Fog as ThreeFog,
   type Scene,
 } from "three";
 
@@ -70,6 +69,7 @@ type HomeDriveThreeWorldProps = Readonly<{
   pedestriansRef: HomeDriveMutableRef<HomeDrivePedestrianRuntimeState>;
   crosswalksRef: HomeDriveMutableRef<HomeDriveCrosswalkRuntimeState>;
   pedestrianPerformance: HomeDrivePedestrianPerformanceProfile;
+  isPortrait: boolean;
   publishRuntimeSnapshot?: () => void;
 }>;
 
@@ -83,6 +83,19 @@ const TRAFFIC_MAX_VEHICLES_LANDSCAPE = 704;
 const TRAFFIC_DENSITY_PORTRAIT = 3.4;
 const TRAFFIC_DENSITY_LANDSCAPE = 4;
 const TRAFFIC_MIN_ROAD_LENGTH_METERS = 64;
+
+const PARKED_MAX_VEHICLES_PORTRAIT = 126;
+const PARKED_MAX_VEHICLES_LANDSCAPE = 220;
+const PARKED_DENSITY_PORTRAIT = 0.92;
+const PARKED_DENSITY_LANDSCAPE = 1.24;
+const PARKED_MAX_ROADS_PORTRAIT = 96;
+const PARKED_MAX_ROADS_LANDSCAPE = 172;
+const PARKED_MIN_ROAD_LENGTH_METERS = 68;
+
+const PARKED_VISIBLE_RADIUS_PORTRAIT = 540;
+const PARKED_VISIBLE_RADIUS_LANDSCAPE = 660;
+const PARKED_MAX_VISIBLE_PORTRAIT = 96;
+const PARKED_MAX_VISIBLE_LANDSCAPE = 148;
 
 const THREE_CLOCK_DEPRECATION_WARNING =
   "THREE.Clock: This module has been deprecated. Please use THREE.Timer instead.";
@@ -147,7 +160,7 @@ function applySceneBackgroundAndFog(
   scene: Scene,
 ): Readonly<{
   previousBackground: Scene["background"];
-  previousFog: ThreeFog | null;
+  previousFog: Scene["fog"];
 }> {
   const previousBackground = scene.background;
   const previousFog = scene.fog;
@@ -222,6 +235,7 @@ function HomeDriveThreeWorld({
   pedestriansRef,
   crosswalksRef,
   pedestrianPerformance,
+  isPortrait,
   publishRuntimeSnapshot,
 }: HomeDriveThreeWorldProps) {
   return (
@@ -230,6 +244,7 @@ function HomeDriveThreeWorld({
         runtimeRef={runtimeRef}
         inputRef={inputRef}
         trafficRef={trafficRef}
+        parkedVehiclesRef={parkedVehiclesRef}
         pedestriansRef={pedestriansRef}
         crosswalksRef={crosswalksRef}
         pedestrianPerformance={pedestrianPerformance}
@@ -256,10 +271,14 @@ function HomeDriveThreeWorld({
       <HomeDriveThreeParkedVehicles
         parkedVehiclesRef={parkedVehiclesRef}
         runtimeRef={runtimeRef}
-        visibleRadiusMeters={viewportSafeVisibleRadiusMeters(
-          pedestrianPerformance.visibleRadiusMeters,
-        )}
-        maxVisibleVehicles={pedestrianPerformance.maxVisiblePedestrians}
+        visibleRadiusMeters={
+          isPortrait
+            ? PARKED_VISIBLE_RADIUS_PORTRAIT
+            : PARKED_VISIBLE_RADIUS_LANDSCAPE
+        }
+        maxVisibleVehicles={
+          isPortrait ? PARKED_MAX_VISIBLE_PORTRAIT : PARKED_MAX_VISIBLE_LANDSCAPE
+        }
       />
 
       <HomeDriveThreeBuildings />
@@ -280,10 +299,6 @@ function HomeDriveThreeWorld({
       <HomeDriveThreeWorldObjects runtimeRef={runtimeRef} />
     </>
   );
-}
-
-function viewportSafeVisibleRadiusMeters(baseRadiusMeters: number): number {
-  return Math.max(420, Math.min(680, baseRadiusMeters + 160));
 }
 
 export default function HomeDriveThreeScene({
@@ -318,14 +333,24 @@ export default function HomeDriveThreeScene({
 
   const trafficRef = useRef<HomeDriveTrafficRuntimeState>(initialTrafficState);
 
-  const parkedVehiclesRef = useRef<HomeDriveParkedVehicleRuntimeState>(
-    createInitialHomeDriveParkedVehicleState({
-      maxVehicles: viewport.isPortrait ? 82 : 156,
-      density: viewport.isPortrait ? 0.68 : 1,
-      maxRoads: viewport.isPortrait ? 86 : 146,
-      minRoadLengthMeters: 74,
+  const initialParkedVehicleState = useMemo(() => {
+    return createInitialHomeDriveParkedVehicleState({
+      maxVehicles: viewport.isPortrait
+        ? PARKED_MAX_VEHICLES_PORTRAIT
+        : PARKED_MAX_VEHICLES_LANDSCAPE,
+      density: viewport.isPortrait
+        ? PARKED_DENSITY_PORTRAIT
+        : PARKED_DENSITY_LANDSCAPE,
+      maxRoads: viewport.isPortrait
+        ? PARKED_MAX_ROADS_PORTRAIT
+        : PARKED_MAX_ROADS_LANDSCAPE,
+      minRoadLengthMeters: PARKED_MIN_ROAD_LENGTH_METERS,
       seed: 6617,
-    }),
+    });
+  }, [viewport.isPortrait]);
+
+  const parkedVehiclesRef = useRef<HomeDriveParkedVehicleRuntimeState>(
+    initialParkedVehicleState,
   );
 
   const crosswalksRef = useRef<HomeDriveCrosswalkRuntimeState>(
@@ -352,9 +377,6 @@ export default function HomeDriveThreeScene({
   );
 
   const dpr = useMemo(() => {
-    /*
-      4x carros aumenta draw/update. Mantive DPR máximo em 1.2 para mobile.
-    */
     return Math.min(Math.max(viewport.dpr || 1, 1), 1.2);
   }, [viewport.dpr]);
 
@@ -402,6 +424,7 @@ export default function HomeDriveThreeScene({
             pedestriansRef={pedestriansRef}
             crosswalksRef={crosswalksRef}
             pedestrianPerformance={pedestrianPerformance}
+            isPortrait={viewport.isPortrait}
             publishRuntimeSnapshot={publishRuntimeSnapshot}
           />
         </Suspense>

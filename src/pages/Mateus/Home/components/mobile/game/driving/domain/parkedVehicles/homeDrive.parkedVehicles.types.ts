@@ -35,6 +35,48 @@ export type HomeDriveParkedVehicle = Readonly<{
   lengthMeters: number;
   heightMeters: number;
 
+  /**
+   * Hitbox circular de gameplay.
+   * Não precisa ser igual à geometria visual; deve ser estável e previsível.
+   */
+  collisionRadiusMeters: number;
+
+  /**
+   * Massa aproximada para colisão.
+   * Usado para calcular quanto o carro parado se move ao ser atingido.
+   */
+  massKg: number;
+
+  /**
+   * 0 = intacto
+   * 1 = muito danificado
+   */
+  damage: number;
+
+  /**
+   * Deslocamento transitório aplicado após colisão.
+   * A posição base continua sendo a vaga original.
+   */
+  impactOffset: HomeDriveVector2;
+
+  /**
+   * Velocidade transitória do impacto.
+   */
+  impactVelocity: HomeDriveVector2;
+
+  /**
+   * Rotação visual transitória.
+   */
+  visualRollRad: number;
+  visualPitchRad: number;
+  visualYawOffsetRad: number;
+  impactAngularVelocityRadps: number;
+
+  /**
+   * Usado para cooldown de colisão.
+   */
+  lastCollisionAt: number;
+
   t: number;
   seed: number;
 }>;

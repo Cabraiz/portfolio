@@ -11,9 +11,15 @@
   bottom: calc(
     env(safe-area-inset-bottom, 0px) +
       var(--home-drive-cockpit-unit, min(100vw, 100dvh)) *
-      var(--home-drive-steering-wheel-bottom-ratio, -0.4)
+      var(--home-drive-steering-wheel-bottom-ratio, -0.43)
   );
-  z-index: 55;
+
+  /*
+    Volante acima do velocímetro.
+    O velocímetro está em 120; aqui fica 170 por token.
+  */
+  z-index: var(--home-drive-steering-wheel-z-index, 170);
+
   width: clamp(
     calc(var(--home-drive-steering-wheel-min-px, 310) * 1px),
     calc(

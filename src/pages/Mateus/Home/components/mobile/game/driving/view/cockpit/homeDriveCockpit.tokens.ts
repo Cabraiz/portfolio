@@ -15,7 +15,7 @@ export const HOME_DRIVE_COCKPIT_LAYOUT_TOKENS = Object.freeze({
   cockpitScale: 5.15,
   cockpitMinWidthPx: 1020,
   cockpitMaxWidthPx: 2700,
-  cockpitBottomRatio: -0.35,
+  cockpitBottomRatio: -0.45,
   cockpitOffsetXPx: 10,
   cockpitAspectRatio: "16 / 9",
   cockpitLeanMaxPx: 7,
@@ -27,6 +27,7 @@ export const HOME_DRIVE_COCKPIT_LAYOUT_TOKENS = Object.freeze({
    * Velocímetro.
    *
    * Usa tamanho proporcional ao frame projetado do cockpit.
+   * Deve ficar abaixo do volante.
    */
   speedometerSizeRatio: 0.055,
   speedometerMinPx: 76,
@@ -41,12 +42,16 @@ export const HOME_DRIVE_COCKPIT_LAYOUT_TOKENS = Object.freeze({
 
   /**
    * Volante.
+   *
+   * steeringWheelZIndex precisa ser maior que speedometerZIndex
+   * para o volante aparecer por cima do velocímetro.
    */
   steeringWheelScale: 1.2,
   steeringWheelMinPx: 310,
   steeringWheelMaxPx: 560,
-  steeringWheelBottomRatio: -0.4,
+  steeringWheelBottomRatio: -0.43,
   steeringWheelOffsetXPx: 10,
+  steeringWheelZIndex: 170,
   steeringWheelTouchInsetRatio: 0.2,
   steeringWheelTransitionMs: 120,
   steeringWheelShadowOpacity: 0.38,
@@ -80,6 +85,7 @@ export const HOME_DRIVE_COCKPIT_CSS_VARS = Object.freeze({
   steeringWheelScale: "--home-drive-steering-wheel-scale",
   steeringWheelBottomRatio: "--home-drive-steering-wheel-bottom-ratio",
   steeringWheelOffsetX: "--home-drive-steering-wheel-offset-x",
+  steeringWheelZIndex: "--home-drive-steering-wheel-z-index",
   steeringWheelMinPx: "--home-drive-steering-wheel-min-px",
   steeringWheelMaxPx: "--home-drive-steering-wheel-max-px",
   steeringWheelTouchInsetRatio: "--home-drive-steering-wheel-touch-inset-ratio",
@@ -187,6 +193,7 @@ export function buildHomeDriveCockpitCssVariables({
     [vars.steeringWheelOffsetX]: formatHomeDriveCockpitCssPx(
       tokens.steeringWheelOffsetXPx,
     ),
+    [vars.steeringWheelZIndex]: String(tokens.steeringWheelZIndex),
     [vars.steeringWheelMinPx]: String(tokens.steeringWheelMinPx),
     [vars.steeringWheelMaxPx]: String(tokens.steeringWheelMaxPx),
     [vars.steeringWheelTouchInsetRatio]: formatHomeDriveCockpitCssNumber(

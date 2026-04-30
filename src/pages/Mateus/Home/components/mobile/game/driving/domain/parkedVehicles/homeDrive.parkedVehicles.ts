@@ -33,6 +33,10 @@ type ParkedVehicleCandidate = Readonly<{
 }>;
 
 function clamp(value: number, min: number, max: number): number {
+  if (!Number.isFinite(value)) {
+    return min;
+  }
+
   return Math.max(min, Math.min(max, value));
 }
 
@@ -92,7 +96,9 @@ function getRoadParkingChance(road: HomeDriveGeneratedRoadSegment): number {
   return 0.44;
 }
 
-function getParkingSlotSpacingMeters(road: HomeDriveGeneratedRoadSegment): number {
+function getParkingSlotSpacingMeters(
+  road: HomeDriveGeneratedRoadSegment,
+): number {
   switch (road.kind) {
     case "commercial":
       return 38;
@@ -117,7 +123,9 @@ function getParkingSlotSpacingMeters(road: HomeDriveGeneratedRoadSegment): numbe
   }
 }
 
-function getRoadSidewalkWidthMeters(road: HomeDriveGeneratedRoadSegment): number {
+function getRoadSidewalkWidthMeters(
+  road: HomeDriveGeneratedRoadSegment,
+): number {
   switch (road.kind) {
     case "coastal":
       return 7.4;
@@ -280,6 +288,28 @@ function shouldParkOnRoadSide(
   return seed > 0.08;
 }
 
+function getParkedVehicleCollisionRadiusMeters(params: {
+  widthMeters: number;
+  lengthMeters: number;
+}): number {
+  return clamp(
+    Math.hypot(params.widthMeters * 0.46, params.lengthMeters * 0.28),
+    1.25,
+    3.65,
+  );
+}
+
+function getParkedVehicleMassKg(params: {
+  widthMeters: number;
+  lengthMeters: number;
+  heightMeters: number;
+}): number {
+  const footprint = Math.max(1, params.widthMeters * params.lengthMeters);
+  const heightFactor = clamp(params.heightMeters / 1.7, 0.78, 1.45);
+
+  return clamp(780 + footprint * 58 * heightFactor, 860, 2450);
+}
+
 function createParkedVehicleCandidate(
   road: HomeDriveGeneratedRoadSegment,
   slotIndex: number,
@@ -358,6 +388,29 @@ function createParkedVehicleCandidate(
     widthMeters: model.dimensions.widthMeters,
     lengthMeters: model.dimensions.lengthMeters,
     heightMeters: model.dimensions.heightMeters,
+    collisionRadiusMeters: getParkedVehicleCollisionRadiusMeters({
+      widthMeters: model.dimensions.widthMeters,
+      lengthMeters: model.dimensions.lengthMeters,
+    }),
+    massKg: getParkedVehicleMassKg({
+      widthMeters: model.dimensions.widthMeters,
+      lengthMeters: model.dimensions.lengthMeters,
+      heightMeters: model.dimensions.heightMeters,
+    }),
+    damage: 0,
+    impactOffset: {
+      x: 0,
+      z: 0,
+    },
+    impactVelocity: {
+      x: 0,
+      z: 0,
+    },
+    visualRollRad: 0,
+    visualPitchRad: 0,
+    visualYawOffsetRad: 0,
+    impactAngularVelocityRadps: 0,
+    lastCollisionAt: -999,
     t,
     seed: hashVector(roadSeed, slotIndex, 787 + sideSalt + globalSeed),
   };
@@ -386,7 +439,9 @@ export function createInitialHomeDriveParkedVehicleState(
   const minRoadLengthMeters =
     options.minRoadLengthMeters ?? DEFAULT_MIN_ROAD_LENGTH_METERS;
   const maxRoads = options.maxRoads ?? Number.POSITIVE_INFINITY;
-  const globalSeed = Math.floor((options.seed ?? DEFAULT_PARKED_VEHICLE_SEED) % 10_000);
+  const globalSeed = Math.floor(
+    (options.seed ?? DEFAULT_PARKED_VEHICLE_SEED) % 10_000,
+  );
 
   const roads = generateHomeDriveRoadSegments()
     .filter((road) => {
@@ -397,7 +452,8 @@ export function createInitialHomeDriveParkedVehicleState(
       );
     })
     .sort((first, second) => {
-      const chanceDiff = getRoadParkingChance(second) - getRoadParkingChance(first);
+      const chanceDiff =
+        getRoadParkingChance(second) - getRoadParkingChance(first);
 
       if (Math.abs(chanceDiff) > 0.0001) {
         return chanceDiff;
@@ -466,8 +522,12 @@ export function getHomeDriveParkedVehiclesNearPosition(
 
   return state.vehicles
     .map((vehicle) => {
-      const dx = vehicle.position.x - position.x;
-      const dz = vehicle.position.z - position.z;
+      const renderedPosition = {
+        x: vehicle.position.x + vehicle.impactOffset.x,
+        z: vehicle.position.z + vehicle.impactOffset.z,
+      };
+      const dx = renderedPosition.x - position.x;
+      const dz = renderedPosition.z - position.z;
       const distanceSquared = dx * dx + dz * dz;
 
       return {

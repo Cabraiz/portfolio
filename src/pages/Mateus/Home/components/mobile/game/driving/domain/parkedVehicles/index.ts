@@ -2,3 +2,5 @@
 
 export * from "./homeDrive.parkedVehicles";
 export * from "./homeDrive.parkedVehicles.types";
+export * from "./homeDrive.parkedVehicleCollision";
+export * from "./homeDrive.parkedVehicleImpact";

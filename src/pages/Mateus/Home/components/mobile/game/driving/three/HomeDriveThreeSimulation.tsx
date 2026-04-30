@@ -8,22 +8,26 @@ import {
   tickHomeDriveCrosswalks,
   type HomeDriveCrosswalkRuntimeState,
 } from "../domain/crosswalks";
-
 import { resolveHomeDriveTrafficCollisions } from "../domain/homeDrive.collision";
 import { mergeHomeDriveImpactStates } from "../domain/homeDrive.impact";
 import { tickHomeDrivePhysics } from "../domain/homeDrive.physics";
 import { tickHomeDriveTraffic } from "../domain/homeDrive.traffic";
 import type { HomeDriveTrafficRuntimeState } from "../domain/homeDrive.traffic.types";
+import type {
+  HomeDriveInputState,
+  HomeDriveRuntimeState,
+} from "../domain/homeDrive.types";
+import {
+  resolveHomeDriveParkedVehicleCollisions,
+  tickHomeDriveParkedVehicleImpactState,
+  type HomeDriveParkedVehicleRuntimeState,
+} from "../domain/parkedVehicles";
 import {
   tickHomeDrivePedestrians,
   type HomeDrivePedestrianRuntimeState,
 } from "../domain/pedestrians";
 import type { HomeDrivePedestrianPerformanceProfile } from "../domain/pedestrians/homeDrive.pedestrianPerformance";
 import { getHomeDrivePedestrianSimulationStepSeconds } from "../domain/pedestrians/homeDrive.pedestrianPerformance";
-import type {
-  HomeDriveInputState,
-  HomeDriveRuntimeState,
-} from "../domain/homeDrive.types";
 
 type HomeDriveMutableRef<T> = {
   current: T;
@@ -33,6 +37,7 @@ export type HomeDriveThreeSimulationProps = Readonly<{
   runtimeRef: HomeDriveMutableRef<HomeDriveRuntimeState>;
   inputRef: HomeDriveMutableRef<HomeDriveInputState>;
   trafficRef?: HomeDriveMutableRef<HomeDriveTrafficRuntimeState>;
+  parkedVehiclesRef?: HomeDriveMutableRef<HomeDriveParkedVehicleRuntimeState>;
   pedestriansRef?: HomeDriveMutableRef<HomeDrivePedestrianRuntimeState>;
   crosswalksRef?: HomeDriveMutableRef<HomeDriveCrosswalkRuntimeState>;
   pedestrianPerformance?: HomeDrivePedestrianPerformanceProfile;
@@ -65,8 +70,12 @@ function sanitizeDeltaSeconds(deltaSeconds: number): number {
 }
 
 function tickPedestriansStep(
-  pedestriansRef: HomeDriveMutableRef<HomeDrivePedestrianRuntimeState> | undefined,
-  crosswalksRef: HomeDriveMutableRef<HomeDriveCrosswalkRuntimeState> | undefined,
+  pedestriansRef:
+    | HomeDriveMutableRef<HomeDrivePedestrianRuntimeState>
+    | undefined,
+  crosswalksRef:
+    | HomeDriveMutableRef<HomeDriveCrosswalkRuntimeState>
+    | undefined,
   runtime: HomeDriveRuntimeState,
   deltaSeconds: number,
   tickIndex: number,
@@ -102,7 +111,9 @@ function tickPedestriansStep(
 function tickTrafficAndCollisionsStep(
   nextRuntime: HomeDriveRuntimeState,
   trafficRef: HomeDriveMutableRef<HomeDriveTrafficRuntimeState> | undefined,
-  crosswalksRef: HomeDriveMutableRef<HomeDriveCrosswalkRuntimeState> | undefined,
+  crosswalksRef:
+    | HomeDriveMutableRef<HomeDriveCrosswalkRuntimeState>
+    | undefined,
 ): HomeDriveRuntimeState {
   if (!trafficRef) {
     return nextRuntime;
@@ -141,11 +152,60 @@ function tickTrafficAndCollisionsStep(
   };
 }
 
+function tickParkedVehiclesAndCollisionsStep(
+  nextRuntime: HomeDriveRuntimeState,
+  parkedVehiclesRef:
+    | HomeDriveMutableRef<HomeDriveParkedVehicleRuntimeState>
+    | undefined,
+): HomeDriveRuntimeState {
+  if (!parkedVehiclesRef) {
+    return nextRuntime;
+  }
+
+  const impactedParkedVehicles = tickHomeDriveParkedVehicleImpactState(
+    parkedVehiclesRef.current,
+    FIXED_STEP_SECONDS,
+  );
+
+  const collisionResolution = resolveHomeDriveParkedVehicleCollisions(
+    nextRuntime.car,
+    impactedParkedVehicles,
+    nextRuntime.elapsedSeconds,
+    {
+      brutality: 1.42,
+      playerRadiusMeters: 1.58,
+      parkedVehiclePushMultiplier: 0.72,
+      playerPushMultiplier: 0.78,
+      playerReverseKickMultiplier: 0.32,
+    },
+  );
+
+  parkedVehiclesRef.current = collisionResolution.parkedVehicles;
+
+  if (collisionResolution.events.length <= 0 || !collisionResolution.impact) {
+    return nextRuntime;
+  }
+
+  return {
+    ...nextRuntime,
+    car: collisionResolution.car,
+    impact: mergeHomeDriveImpactStates(
+      nextRuntime.impact,
+      collisionResolution.impact,
+    ),
+  };
+}
+
 function tickSimulationStep(
   runtime: HomeDriveRuntimeState,
   input: HomeDriveInputState,
   trafficRef: HomeDriveMutableRef<HomeDriveTrafficRuntimeState> | undefined,
-  crosswalksRef: HomeDriveMutableRef<HomeDriveCrosswalkRuntimeState> | undefined,
+  parkedVehiclesRef:
+    | HomeDriveMutableRef<HomeDriveParkedVehicleRuntimeState>
+    | undefined,
+  crosswalksRef:
+    | HomeDriveMutableRef<HomeDriveCrosswalkRuntimeState>
+    | undefined,
 ): HomeDriveRuntimeState {
   if (crosswalksRef) {
     crosswalksRef.current = tickHomeDriveCrosswalks(
@@ -156,10 +216,15 @@ function tickSimulationStep(
 
   const physicsRuntime = tickHomeDrivePhysics(runtime, input, FIXED_STEP_SECONDS);
 
-  return tickTrafficAndCollisionsStep(
+  const runtimeAfterTraffic = tickTrafficAndCollisionsStep(
     physicsRuntime,
     trafficRef,
     crosswalksRef,
+  );
+
+  return tickParkedVehiclesAndCollisionsStep(
+    runtimeAfterTraffic,
+    parkedVehiclesRef,
   );
 }
 
@@ -167,6 +232,7 @@ export default function HomeDriveThreeSimulation({
   runtimeRef,
   inputRef,
   trafficRef,
+  parkedVehiclesRef,
   pedestriansRef,
   crosswalksRef,
   pedestrianPerformance,
@@ -208,6 +274,7 @@ export default function HomeDriveThreeSimulation({
         runtimeRef.current,
         inputRef.current,
         trafficRef,
+        parkedVehiclesRef,
         crosswalksRef,
       );
 
@@ -236,11 +303,6 @@ export default function HomeDriveThreeSimulation({
       steps += 1;
     }
 
-    /*
-      Se o browser travou muito e acumulou mais que o limite,
-      descartamos o excedente. Isso evita o efeito "teleportar"
-      ou o jogo tentar simular atraso demais de uma vez.
-    */
     if (steps >= MAX_STEPS_PER_FRAME) {
       accumulatorRef.current = 0;
       pedestrianAccumulatorRef.current = 0;
