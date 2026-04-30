@@ -10,97 +10,50 @@ export type HomeDriveCockpitCssVariableOptions = Readonly<{
 }>;
 
 export const HOME_DRIVE_COCKPIT_LAYOUT_TOKENS = Object.freeze({
-  /**
-   * Unidade visual base.
-   *
-   * No CSS, isso continua vindo de:
-   * min(var(--home-drive-vw), var(--home-drive-vh))
-   *
-   * Assim o layout escala pelo menor lado útil da tela, mantendo a proporção
-   * visual mais parecida entre celulares diferentes.
-   */
   cockpitUnitCssVar: "--home-drive-cockpit-unit",
 
-  /**
-   * Cockpit principal.
-   *
-   * Para aumentar/diminuir a cabine, mexa principalmente em:
-   * - cockpitScale
-   * - cockpitMinWidthPx
-   * - cockpitMaxWidthPx
-   */
-cockpitScale: 4.2,
-cockpitMinWidthPx: 840,
-cockpitMaxWidthPx: 2100,
-
-    cockpitBottomRatio: -0.35,
-
-  /**
-   * Deslocamento horizontal fixo da cabine.
-   *
-   * positivo = move para direita
-   * negativo = move para esquerda
-   *
-   * Ajuste fino:
-   * 12 = pouco
-   * 24 = moderado
-   * 40 = bastante
-   */
+  cockpitScale: 5.15,
+  cockpitMinWidthPx: 1020,
+  cockpitMaxWidthPx: 2700,
+  cockpitBottomRatio: -0.35,
   cockpitOffsetXPx: 10,
-
-  /**
-   * Proporção da arte do cockpit.
-   * Mude apenas se a imagem cockpit.png não for 16:9.
-   */
   cockpitAspectRatio: "16 / 9",
-
-  /**
-   * Inclinação lateral visual do cockpit quando esterça.
-   * Não altera física. Só dá sensação de cabine reagindo ao volante.
-   */
   cockpitLeanMaxPx: 7,
-
-  /**
-   * Bob vertical opcional da cabine.
-   * Mantido zerado para o cockpit não ficar tremendo.
-   */
   cockpitBobMaxPx: 0,
-
-  /**
-   * Camadas visuais leves sobre o cockpit.
-   */
   cockpitShadeOpacity: 0.38,
   cockpitGlassOpacity: 0.14,
 
   /**
+   * Velocímetro analógico.
+   */
+  speedometerSizeRatio: 0.055,
+  speedometerMinPx: 76,
+  speedometerMaxPx: 146,
+
+  speedometerAnchorXRatio: 0.005,
+  speedometerAnchorYRatio: 0.295,
+
+  speedometerOffsetXPx: -5,
+  speedometerOffsetYPx: 5,
+
+  speedometerNeedleTransitionMs: 90,
+  speedometerOpacity: 1,
+  speedometerZIndex: 120,
+
+  /**
    * Volante.
    *
-   * Para ajustar o volante, mexa principalmente em:
-   * - steeringWheelScale
-   * - steeringWheelBottomRatio
-   * - steeringWheelMinPx
-   * - steeringWheelMaxPx
+   * Para mover horizontalmente:
+   * - positivo = direita
+   * - negativo = esquerda
    */
-    steeringWheelScale: 1.35,
-    steeringWheelMinPx: 310,
-    steeringWheelMaxPx: 560,
-
-    steeringWheelBottomRatio: -0.5,
-
-  /**
-   * Área invisível de toque ao redor do volante.
-   * 0.2 = 20% para fora do tamanho visual.
-   */
+  steeringWheelScale: 1.2,
+  steeringWheelMinPx: 310,
+  steeringWheelMaxPx: 560,
+  steeringWheelBottomRatio: -0.4,
+  steeringWheelOffsetXPx: 10,
   steeringWheelTouchInsetRatio: 0.2,
-
-  /**
-   * Transição visual do retorno/rotação do volante.
-   */
   steeringWheelTransitionMs: 120,
-
-  /**
-   * Sombra do volante.
-   */
   steeringWheelShadowOpacity: 0.38,
 } as const);
 
@@ -117,8 +70,21 @@ export const HOME_DRIVE_COCKPIT_CSS_VARS = Object.freeze({
   cockpitShadeOpacity: "--home-drive-cockpit-shade-opacity",
   cockpitGlassOpacity: "--home-drive-cockpit-glass-opacity",
 
+  speedometerSizeRatio: "--home-drive-speedometer-size-ratio",
+  speedometerMinPx: "--home-drive-speedometer-min-px",
+  speedometerMaxPx: "--home-drive-speedometer-max-px",
+  speedometerAnchorXRatio: "--home-drive-speedometer-anchor-x-ratio",
+  speedometerAnchorYRatio: "--home-drive-speedometer-anchor-y-ratio",
+  speedometerOffsetX: "--home-drive-speedometer-offset-x",
+  speedometerOffsetY: "--home-drive-speedometer-offset-y",
+  speedometerNeedleTransitionMs:
+    "--home-drive-speedometer-needle-transition-ms",
+  speedometerOpacity: "--home-drive-speedometer-opacity",
+  speedometerZIndex: "--home-drive-speedometer-z-index",
+
   steeringWheelScale: "--home-drive-steering-wheel-scale",
   steeringWheelBottomRatio: "--home-drive-steering-wheel-bottom-ratio",
+  steeringWheelOffsetX: "--home-drive-steering-wheel-offset-x",
   steeringWheelMinPx: "--home-drive-steering-wheel-min-px",
   steeringWheelMaxPx: "--home-drive-steering-wheel-max-px",
   steeringWheelTouchInsetRatio: "--home-drive-steering-wheel-touch-inset-ratio",
@@ -152,6 +118,10 @@ function formatHomeDriveCockpitCssNumber(value: number, decimals = 4): string {
   return Object.is(rounded, -0) ? "0" : String(rounded);
 }
 
+function formatHomeDriveCockpitCssPx(value: number): string {
+  return `${formatHomeDriveCockpitCssNumber(value)}px`;
+}
+
 export function buildHomeDriveCockpitCssVariables({
   steering = 0,
   bobRatio = 0,
@@ -163,21 +133,24 @@ export function buildHomeDriveCockpitCssVariables({
   const safeBobRatio = clampHomeDriveCockpitNumber(bobRatio, -1, 1);
 
   return {
+    [vars.unit]:
+      "min(var(--home-drive-vw, 100vw), var(--home-drive-vh, 100vh))",
+
     [vars.cockpitScale]: formatHomeDriveCockpitCssNumber(tokens.cockpitScale),
     [vars.cockpitBottomRatio]: formatHomeDriveCockpitCssNumber(
       tokens.cockpitBottomRatio,
     ),
     [vars.cockpitMinWidthPx]: String(tokens.cockpitMinWidthPx),
     [vars.cockpitMaxWidthPx]: String(tokens.cockpitMaxWidthPx),
-    [vars.cockpitOffsetX]: `${formatHomeDriveCockpitCssNumber(
+    [vars.cockpitOffsetX]: formatHomeDriveCockpitCssPx(
       tokens.cockpitOffsetXPx,
-    )}px`,
-    [vars.cockpitLeanOffset]: `${formatHomeDriveCockpitCssNumber(
+    ),
+    [vars.cockpitLeanOffset]: formatHomeDriveCockpitCssPx(
       safeSteering * tokens.cockpitLeanMaxPx,
-    )}px`,
-    [vars.cockpitBobOffset]: `${formatHomeDriveCockpitCssNumber(
+    ),
+    [vars.cockpitBobOffset]: formatHomeDriveCockpitCssPx(
       safeBobRatio * tokens.cockpitBobMaxPx,
-    )}px`,
+    ),
     [vars.cockpitShadeOpacity]: formatHomeDriveCockpitCssNumber(
       tokens.cockpitShadeOpacity,
     ),
@@ -185,11 +158,39 @@ export function buildHomeDriveCockpitCssVariables({
       tokens.cockpitGlassOpacity,
     ),
 
+    [vars.speedometerSizeRatio]: formatHomeDriveCockpitCssNumber(
+      tokens.speedometerSizeRatio,
+    ),
+    [vars.speedometerMinPx]: String(tokens.speedometerMinPx),
+    [vars.speedometerMaxPx]: String(tokens.speedometerMaxPx),
+    [vars.speedometerAnchorXRatio]: formatHomeDriveCockpitCssNumber(
+      tokens.speedometerAnchorXRatio,
+    ),
+    [vars.speedometerAnchorYRatio]: formatHomeDriveCockpitCssNumber(
+      tokens.speedometerAnchorYRatio,
+    ),
+    [vars.speedometerOffsetX]: formatHomeDriveCockpitCssPx(
+      tokens.speedometerOffsetXPx,
+    ),
+    [vars.speedometerOffsetY]: formatHomeDriveCockpitCssPx(
+      tokens.speedometerOffsetYPx,
+    ),
+    [vars.speedometerNeedleTransitionMs]: String(
+      tokens.speedometerNeedleTransitionMs,
+    ),
+    [vars.speedometerOpacity]: formatHomeDriveCockpitCssNumber(
+      tokens.speedometerOpacity,
+    ),
+    [vars.speedometerZIndex]: String(tokens.speedometerZIndex),
+
     [vars.steeringWheelScale]: formatHomeDriveCockpitCssNumber(
       tokens.steeringWheelScale,
     ),
     [vars.steeringWheelBottomRatio]: formatHomeDriveCockpitCssNumber(
       tokens.steeringWheelBottomRatio,
+    ),
+    [vars.steeringWheelOffsetX]: formatHomeDriveCockpitCssPx(
+      tokens.steeringWheelOffsetXPx,
     ),
     [vars.steeringWheelMinPx]: String(tokens.steeringWheelMinPx),
     [vars.steeringWheelMaxPx]: String(tokens.steeringWheelMaxPx),

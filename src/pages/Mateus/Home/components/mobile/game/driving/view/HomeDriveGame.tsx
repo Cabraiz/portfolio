@@ -19,6 +19,7 @@ import {
 } from "./cockpit";
 import HomeDriveCompass from "./HomeDriveCompass";
 import styles from "./HomeDriveGame.module.css";
+import HomeDriveSpeedometer from "./HomeDriveSpeedometer";
 import HomeDriveSteeringWheel from "./HomeDriveSteeringWheel";
 
 export type HomeDriveGameProps = Readonly<{
@@ -363,6 +364,8 @@ export default function HomeDriveGame({ onClose }: HomeDriveGameProps) {
         <span className={styles.cockpitShade} />
         <span className={styles.cockpitGlass} />
       </div>
+
+      <HomeDriveSpeedometer speedMps={runtimeSnapshot.car.speedMps} />
 
       <HomeDriveCompass
         className={styles.compass}

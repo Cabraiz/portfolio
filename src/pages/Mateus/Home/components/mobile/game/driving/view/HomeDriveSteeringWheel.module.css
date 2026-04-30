@@ -2,11 +2,16 @@
 
 .root {
   position: absolute;
-  left: 50%;
+  left: calc(
+    50% +
+      var(--home-drive-cockpit-offset-x, 0px) +
+      var(--home-drive-cockpit-lean-offset, 0px) +
+      var(--home-drive-steering-wheel-offset-x, 0px)
+  );
   bottom: calc(
     env(safe-area-inset-bottom, 0px) +
-    var(--home-drive-cockpit-unit, min(100vw, 100dvh)) *
-    var(--home-drive-steering-wheel-bottom-ratio, 0.025)
+      var(--home-drive-cockpit-unit, min(100vw, 100dvh)) *
+      var(--home-drive-steering-wheel-bottom-ratio, 0.025)
   );
   z-index: 55;
   width: clamp(
@@ -39,7 +44,7 @@
   */
   inset: calc(
     var(--home-drive-steering-wheel-touch-inset-ratio, 0.2) *
-    -100%
+      -100%
   );
 
   display: grid;
