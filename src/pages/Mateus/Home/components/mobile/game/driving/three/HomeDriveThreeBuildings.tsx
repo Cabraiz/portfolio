@@ -38,6 +38,7 @@ type BuildingInstance = Readonly<{
   id: string;
   position: readonly [number, number, number];
   rotationYRad: number;
+  rotationZRad?: number;
   scale: readonly [number, number, number];
 }>;
 
@@ -51,6 +52,30 @@ type FacadeDetailKind =
   | "window-frame"
   | "window-grille"
   | "door"
+  | "door-wood"
+  | "door-metal"
+  | "door-glass"
+  | "door-painted"
+  | "door-dark"
+  | "door-rolling-steel"
+  | "door-broken"
+  | "door-frame"
+  | "door-handle"
+  | "door-crack"
+  | "door-board"
+  | "door-divider"
+  | "portaria-glass"
+  | "portaria-pillar"
+  | "intercom"
+  | "canopy-slab"
+  | "canopy-metal"
+  | "canopy-glass"
+  | "canopy-fabric"
+  | "no-parking-sign"
+  | "no-parking-bar"
+  | "private-sign"
+  | "service-sign"
+  | "garage-marking"
   | "shop-glass"
   | "awning"
   | "awning-striped"
@@ -72,6 +97,7 @@ type FacadeDetail = Readonly<{
   geometryKind: FacadeDetailGeometryKind;
   position: readonly [number, number, number];
   rotationYRad: number;
+  rotationZRad?: number;
   scale: readonly [number, number, number];
 }>;
 
@@ -107,6 +133,30 @@ const FACADE_DETAIL_MATERIALS: Readonly<Record<FacadeDetailKind, Material>> =
     "window-frame": HOME_DRIVE_THREE_MATERIALS.buildingWindowFrame,
     "window-grille": HOME_DRIVE_THREE_MATERIALS.buildingWindowGrille,
     door: HOME_DRIVE_THREE_MATERIALS.buildingDoor,
+    "door-wood": HOME_DRIVE_THREE_MATERIALS.buildingDoorWood,
+    "door-metal": HOME_DRIVE_THREE_MATERIALS.buildingDoorMetal,
+    "door-glass": HOME_DRIVE_THREE_MATERIALS.buildingDoorGlass,
+    "door-painted": HOME_DRIVE_THREE_MATERIALS.buildingDoorPainted,
+    "door-dark": HOME_DRIVE_THREE_MATERIALS.buildingDoorDark,
+    "door-rolling-steel": HOME_DRIVE_THREE_MATERIALS.buildingDoorRollingSteel,
+    "door-broken": HOME_DRIVE_THREE_MATERIALS.buildingDoorBroken,
+    "door-frame": HOME_DRIVE_THREE_MATERIALS.buildingDoorFrame,
+    "door-handle": HOME_DRIVE_THREE_MATERIALS.buildingDoorHandle,
+    "door-crack": HOME_DRIVE_THREE_MATERIALS.buildingDoorCrack,
+    "door-board": HOME_DRIVE_THREE_MATERIALS.buildingDoorBoard,
+    "door-divider": HOME_DRIVE_THREE_MATERIALS.buildingMetalFrame,
+    "portaria-glass": HOME_DRIVE_THREE_MATERIALS.buildingPortariaGlass,
+    "portaria-pillar": HOME_DRIVE_THREE_MATERIALS.buildingEntrancePillar,
+    intercom: HOME_DRIVE_THREE_MATERIALS.buildingIntercom,
+    "canopy-slab": HOME_DRIVE_THREE_MATERIALS.buildingCanopySlab,
+    "canopy-metal": HOME_DRIVE_THREE_MATERIALS.buildingCanopyMetal,
+    "canopy-glass": HOME_DRIVE_THREE_MATERIALS.buildingCanopyGlass,
+    "canopy-fabric": HOME_DRIVE_THREE_MATERIALS.buildingCanopyFabric,
+    "no-parking-sign": HOME_DRIVE_THREE_MATERIALS.buildingNoParkingSign,
+    "no-parking-bar": HOME_DRIVE_THREE_MATERIALS.buildingNoParkingBar,
+    "private-sign": HOME_DRIVE_THREE_MATERIALS.buildingPrivateSign,
+    "service-sign": HOME_DRIVE_THREE_MATERIALS.buildingServiceSign,
+    "garage-marking": HOME_DRIVE_THREE_MATERIALS.buildingGarageMarking,
     "shop-glass": HOME_DRIVE_THREE_MATERIALS.buildingShopGlass,
     awning: HOME_DRIVE_THREE_MATERIALS.buildingAwning,
     "awning-striped": HOME_DRIVE_THREE_MATERIALS.buildingAwningStriped,
@@ -285,6 +335,7 @@ function createFacadeDetail(
   width: number,
   height: number,
   depth = 1,
+  rotationZRad = 0,
 ): FacadeDetail {
   const transform = createHomeDriveThreeBuildingFacadeTransform(building, {
     localX,
@@ -303,6 +354,7 @@ function createFacadeDetail(
     geometryKind,
     position: transform.position,
     rotationYRad: transform.rotationYRad,
+    rotationZRad,
     scale: transform.scale,
   };
 }
@@ -400,26 +452,619 @@ function pushRoofDetail(
   });
 }
 
-function pushDoorDetail(
+function getEntranceDoorKind(building: HomeDriveBuilding): FacadeDetailKind {
+  const entrance = building.entranceProfile;
+
+  if (!entrance) {
+    return "door";
+  }
+
+  if (entrance.damageLevel >= 2 || entrance.condition === "broken") {
+    return "door-broken";
+  }
+
+  switch (entrance.material) {
+    case "wood":
+      return "door-wood";
+    case "metal":
+      return "door-metal";
+    case "glass":
+      return entrance.kind === "portaria" ? "portaria-glass" : "door-glass";
+    case "painted":
+      return "door-painted";
+    case "dark":
+      return "door-dark";
+    case "rolling-steel":
+      return "door-rolling-steel";
+    default:
+      return "door";
+  }
+}
+
+function getEntranceCanopyKind(building: HomeDriveBuilding): FacadeDetailKind | null {
+  switch (building.entranceProfile?.canopyKind) {
+    case "flat-slab":
+      return "canopy-slab";
+    case "thin-metal":
+      return "canopy-metal";
+    case "glass":
+      return "canopy-glass";
+    case "fabric":
+      return "canopy-fabric";
+    case "none":
+    default:
+      return null;
+  }
+}
+
+function getEntranceSignKind(building: HomeDriveBuilding): FacadeDetailKind | null {
+  switch (building.entranceProfile?.signKind) {
+    case "no-parking":
+      return "no-parking-sign";
+    case "private-property":
+    case "reception":
+    case "garage":
+      return "private-sign";
+    case "service":
+      return "service-sign";
+    case "none":
+    default:
+      return null;
+  }
+}
+
+function pushEntranceFrameDetails(
   details: FacadeDetail[],
   building: HomeDriveBuilding,
+  idPrefix: string,
   localX: number,
+  baseY: number,
   width: number,
   height: number,
 ): void {
+  const frontZ = getFrontLocalZ(building);
+  const frameThickness = clamp(width * 0.045, 0.055, 0.12);
+
   details.push(
     createFacadeDetail(
       building,
-      `${building.id}::door`,
-      "door",
+      `${idPrefix}::frame-top`,
+      "door-frame",
       "plane",
       localX,
-      height / 2,
+      baseY + height + frameThickness * 0.5,
+      frontZ,
+      width + frameThickness * 2.4,
+      frameThickness,
+    ),
+  );
+
+  details.push(
+    createFacadeDetail(
+      building,
+      `${idPrefix}::frame-left`,
+      "door-frame",
+      "plane",
+      localX - width * 0.5 - frameThickness * 0.5,
+      baseY + height * 0.5,
+      frontZ,
+      frameThickness,
+      height + frameThickness * 1.7,
+    ),
+  );
+
+  details.push(
+    createFacadeDetail(
+      building,
+      `${idPrefix}::frame-right`,
+      "door-frame",
+      "plane",
+      localX + width * 0.5 + frameThickness * 0.5,
+      baseY + height * 0.5,
+      frontZ,
+      frameThickness,
+      height + frameThickness * 1.7,
+    ),
+  );
+}
+
+function pushEntranceHandleDetails(
+  details: FacadeDetail[],
+  building: HomeDriveBuilding,
+  idPrefix: string,
+  localX: number,
+  baseY: number,
+  width: number,
+  height: number,
+): void {
+  const frontZ = getFrontLocalZ(building);
+  const entrance = building.entranceProfile;
+  const handleY = baseY + clamp(height * 0.47, 0.92, 1.42);
+  const handleWidth = clamp(width * 0.045, 0.055, 0.1);
+  const handleHeight = clamp(height * 0.12, 0.18, 0.34);
+
+  if (entrance?.hasCenterDivider) {
+    const offset = clamp(width * 0.09, 0.12, 0.22);
+
+    details.push(
+      createFacadeDetail(
+        building,
+        `${idPrefix}::handle-left`,
+        "door-handle",
+        "plane",
+        localX - offset,
+        handleY,
+        frontZ,
+        handleWidth,
+        handleHeight,
+      ),
+    );
+
+    details.push(
+      createFacadeDetail(
+        building,
+        `${idPrefix}::handle-right`,
+        "door-handle",
+        "plane",
+        localX + offset,
+        handleY,
+        frontZ,
+        handleWidth,
+        handleHeight,
+      ),
+    );
+
+    return;
+  }
+
+  details.push(
+    createFacadeDetail(
+      building,
+      `${idPrefix}::handle`,
+      "door-handle",
+      "plane",
+      localX + width * 0.32,
+      handleY,
+      frontZ,
+      handleWidth,
+      handleHeight,
+    ),
+  );
+}
+
+function pushEntranceDividerDetails(
+  details: FacadeDetail[],
+  building: HomeDriveBuilding,
+  idPrefix: string,
+  localX: number,
+  baseY: number,
+  width: number,
+  height: number,
+): void {
+  const entrance = building.entranceProfile;
+
+  if (!entrance?.hasCenterDivider) {
+    return;
+  }
+
+  details.push(
+    createFacadeDetail(
+      building,
+      `${idPrefix}::divider`,
+      "door-divider",
+      "plane",
+      localX,
+      baseY + height * 0.5,
       getFrontLocalZ(building),
+      clamp(width * 0.035, 0.045, 0.12),
+      height * 0.96,
+    ),
+  );
+}
+
+function pushEntranceGlassHighlights(
+  details: FacadeDetail[],
+  building: HomeDriveBuilding,
+  idPrefix: string,
+  localX: number,
+  baseY: number,
+  width: number,
+  height: number,
+): void {
+  const entrance = building.entranceProfile;
+
+  if (!entrance?.hasGlassHighlights) {
+    return;
+  }
+
+  const frontZ = getFrontLocalZ(building);
+  const highlightKind: FacadeDetailKind =
+    entrance.kind === "portaria" ? "portaria-glass" : "door-glass";
+
+  details.push(
+    createFacadeDetail(
+      building,
+      `${idPrefix}::glass-highlight-left`,
+      highlightKind,
+      "plane",
+      localX - width * 0.18,
+      baseY + height * 0.62,
+      frontZ,
+      width * 0.18,
+      height * 0.46,
+    ),
+  );
+
+  if (entrance.hasCenterDivider || width > 1.9) {
+    details.push(
+      createFacadeDetail(
+        building,
+        `${idPrefix}::glass-highlight-right`,
+        highlightKind,
+        "plane",
+        localX + width * 0.18,
+        baseY + height * 0.62,
+        frontZ,
+        width * 0.18,
+        height * 0.46,
+      ),
+    );
+  }
+}
+
+function pushEntrancePillars(
+  details: FacadeDetail[],
+  building: HomeDriveBuilding,
+  idPrefix: string,
+  localX: number,
+  baseY: number,
+  width: number,
+  height: number,
+): void {
+  const entrance = building.entranceProfile;
+
+  if (!entrance?.hasSidePillars) {
+    return;
+  }
+
+  const pillarWidth = clamp(width * 0.11, 0.16, 0.36);
+  const pillarHeight = height + clamp(height * 0.14, 0.22, 0.58);
+  const frontZ = getFrontLocalZ(building);
+
+  details.push(
+    createFacadeDetail(
+      building,
+      `${idPrefix}::pillar-left`,
+      "portaria-pillar",
+      "plane",
+      localX - width * 0.5 - pillarWidth * 0.68,
+      baseY + pillarHeight * 0.5,
+      frontZ,
+      pillarWidth,
+      pillarHeight,
+    ),
+  );
+
+  details.push(
+    createFacadeDetail(
+      building,
+      `${idPrefix}::pillar-right`,
+      "portaria-pillar",
+      "plane",
+      localX + width * 0.5 + pillarWidth * 0.68,
+      baseY + pillarHeight * 0.5,
+      frontZ,
+      pillarWidth,
+      pillarHeight,
+    ),
+  );
+}
+
+function pushEntranceCanopy(
+  details: FacadeDetail[],
+  building: HomeDriveBuilding,
+  idPrefix: string,
+  localX: number,
+  baseY: number,
+  width: number,
+  height: number,
+): void {
+  const canopyKind = getEntranceCanopyKind(building);
+
+  if (!canopyKind) {
+    return;
+  }
+
+  details.push(
+    createFacadeDetail(
+      building,
+      `${idPrefix}::canopy`,
+      canopyKind,
+      "plane",
+      localX,
+      baseY + height + clamp(height * 0.13, 0.24, 0.58),
+      getFrontLocalZ(building),
+      width * 1.38,
+      clamp(height * 0.15, 0.28, 0.62),
+    ),
+  );
+}
+
+function pushEntranceSign(
+  details: FacadeDetail[],
+  building: HomeDriveBuilding,
+  idPrefix: string,
+  localX: number,
+  baseY: number,
+  width: number,
+  height: number,
+): void {
+  const signKind = getEntranceSignKind(building);
+
+  if (!signKind) {
+    return;
+  }
+
+  const frontZ = getFrontLocalZ(building);
+  const signWidth = signKind === "no-parking-sign" ? 0.62 : 0.86;
+  const signHeight = signKind === "no-parking-sign" ? 0.62 : 0.34;
+  const signX = clamp(
+    localX + width * 0.5 + signWidth * 0.72,
+    -building.widthMeters * 0.44,
+    building.widthMeters * 0.44,
+  );
+  const signY = baseY + clamp(height * 0.66, 1.15, 2.3);
+
+  details.push(
+    createFacadeDetail(
+      building,
+      `${idPrefix}::sign`,
+      signKind,
+      "plane",
+      signX,
+      signY,
+      frontZ,
+      signWidth,
+      signHeight,
+    ),
+  );
+
+  if (signKind === "no-parking-sign") {
+    details.push(
+      createFacadeDetail(
+        building,
+        `${idPrefix}::sign-red-bar-a`,
+        "no-parking-bar",
+        "plane",
+        signX,
+        signY,
+        frontZ,
+        signWidth * 0.82,
+        0.075,
+        1,
+        -0.72,
+      ),
+    );
+
+    details.push(
+      createFacadeDetail(
+        building,
+        `${idPrefix}::sign-red-bar-b`,
+        "no-parking-bar",
+        "plane",
+        signX,
+        signY,
+        frontZ,
+        signWidth * 0.82,
+        0.075,
+        1,
+        0.72,
+      ),
+    );
+  }
+}
+
+function pushEntranceIntercom(
+  details: FacadeDetail[],
+  building: HomeDriveBuilding,
+  idPrefix: string,
+  localX: number,
+  baseY: number,
+  width: number,
+  height: number,
+): void {
+  const entrance = building.entranceProfile;
+
+  if (!entrance?.hasIntercom) {
+    return;
+  }
+
+  details.push(
+    createFacadeDetail(
+      building,
+      `${idPrefix}::intercom`,
+      "intercom",
+      "plane",
+      clamp(
+        localX + width * 0.5 + 0.28,
+        -building.widthMeters * 0.43,
+        building.widthMeters * 0.43,
+      ),
+      baseY + clamp(height * 0.46, 1.02, 1.62),
+      getFrontLocalZ(building),
+      0.16,
+      0.32,
+    ),
+  );
+}
+
+function pushEntranceDamage(
+  details: FacadeDetail[],
+  building: HomeDriveBuilding,
+  idPrefix: string,
+  localX: number,
+  baseY: number,
+  width: number,
+  height: number,
+): void {
+  const entrance = building.entranceProfile;
+
+  if (!entrance || entrance.damageLevel <= 0) {
+    return;
+  }
+
+  const frontZ = getFrontLocalZ(building);
+  const seed = entrance.detailSeed;
+  const crackX = localX + (seed - 0.5) * width * 0.32;
+  const crackY = baseY + height * (0.46 + seed * 0.2);
+
+  details.push(
+    createFacadeDetail(
+      building,
+      `${idPrefix}::crack-main`,
+      "door-crack",
+      "plane",
+      crackX,
+      crackY,
+      frontZ,
+      clamp(width * 0.04, 0.035, 0.08),
+      height * 0.46,
+      1,
+      seed > 0.5 ? -0.32 : 0.32,
+    ),
+  );
+
+  if (entrance.damageLevel >= 2) {
+    details.push(
+      createFacadeDetail(
+        building,
+        `${idPrefix}::broken-board-a`,
+        "door-board",
+        "plane",
+        localX - width * 0.08,
+        baseY + height * 0.54,
+        frontZ,
+        width * 0.78,
+        clamp(height * 0.08, 0.13, 0.24),
+        1,
+        -0.48,
+      ),
+    );
+  }
+
+  if (entrance.damageLevel >= 3) {
+    details.push(
+      createFacadeDetail(
+        building,
+        `${idPrefix}::broken-board-b`,
+        "door-board",
+        "plane",
+        localX + width * 0.12,
+        baseY + height * 0.34,
+        frontZ,
+        width * 0.64,
+        clamp(height * 0.075, 0.12, 0.22),
+        1,
+        0.38,
+      ),
+    );
+  }
+}
+
+function pushGarageMarkings(
+  details: FacadeDetail[],
+  building: HomeDriveBuilding,
+  idPrefix: string,
+  localX: number,
+  baseY: number,
+  width: number,
+  height: number,
+): void {
+  const entrance = building.entranceProfile;
+
+  if (entrance?.kind !== "garage-door" && entrance?.material !== "rolling-steel") {
+    return;
+  }
+
+  const frontZ = getFrontLocalZ(building);
+  const stripeCount = 4;
+
+  for (let stripe = 1; stripe <= stripeCount; stripe += 1) {
+    details.push(
+      createFacadeDetail(
+        building,
+        `${idPrefix}::garage-stripe-${stripe}`,
+        "garage-marking",
+        "plane",
+        localX,
+        baseY + (height / (stripeCount + 1)) * stripe,
+        frontZ,
+        width * 0.92,
+        0.045,
+      ),
+    );
+  }
+}
+
+function pushDoorDetail(
+  details: FacadeDetail[],
+  building: HomeDriveBuilding,
+  fallbackLocalX: number,
+  fallbackWidth: number,
+  fallbackHeight: number,
+): void {
+  const entrance = building.entranceProfile;
+  const localX = clamp(
+    entrance?.localX ?? fallbackLocalX,
+    -building.widthMeters * 0.43,
+    building.widthMeters * 0.43,
+  );
+  const width = clamp(
+    entrance?.widthMeters ?? fallbackWidth,
+    0.75,
+    Math.max(0.9, building.widthMeters * 0.48),
+  );
+  const height = clamp(
+    entrance?.heightMeters ?? fallbackHeight,
+    1.75,
+    Math.max(2.1, building.heightMeters * 0.72),
+  );
+  const baseY = entrance?.baseYOffsetMeters ?? 0;
+  const idPrefix = `${building.id}::entrance`;
+  const frontZ = getFrontLocalZ(building);
+
+  pushEntrancePillars(details, building, idPrefix, localX, baseY, width, height);
+
+  if (entrance?.hasFrame ?? true) {
+    pushEntranceFrameDetails(details, building, idPrefix, localX, baseY, width, height);
+  }
+
+  details.push(
+    createFacadeDetail(
+      building,
+      `${idPrefix}::main`,
+      getEntranceDoorKind(building),
+      "plane",
+      localX,
+      baseY + height * 0.5,
+      frontZ,
       width,
       height,
     ),
   );
+
+  pushEntranceGlassHighlights(details, building, idPrefix, localX, baseY, width, height);
+  pushEntranceDividerDetails(details, building, idPrefix, localX, baseY, width, height);
+  pushGarageMarkings(details, building, idPrefix, localX, baseY, width, height);
+
+  if (entrance?.hasHandle ?? true) {
+    pushEntranceHandleDetails(details, building, idPrefix, localX, baseY, width, height);
+  }
+
+  pushEntranceIntercom(details, building, idPrefix, localX, baseY, width, height);
+  pushEntranceSign(details, building, idPrefix, localX, baseY, width, height);
+  pushEntranceCanopy(details, building, idPrefix, localX, baseY, width, height);
+  pushEntranceDamage(details, building, idPrefix, localX, baseY, width, height);
 }
 
 function pushWindowDetail(
@@ -921,18 +1566,12 @@ function pushWarehouseFacade(
   const frontZ = getFrontLocalZ(building);
 
   if (profile.hasDoor) {
-    details.push(
-      createFacadeDetail(
-        building,
-        `${building.id}::warehouse-door`,
-        "door",
-        "plane",
-        -building.widthMeters * 0.18,
-        2.2,
-        frontZ,
-        Math.min(5.4, building.widthMeters * 0.24),
-        4.2,
-      ),
+    pushDoorDetail(
+      details,
+      building,
+      -building.widthMeters * 0.18,
+      Math.min(5.4, building.widthMeters * 0.24),
+      4.2,
     );
   }
 
@@ -1047,7 +1686,17 @@ function getFacadeDetailRenderOrder(kind: FacadeDetailKind): number {
     case "air-conditioner":
       return 22;
     case "sign-board":
+    case "no-parking-sign":
+    case "no-parking-bar":
+    case "private-sign":
+    case "service-sign":
       return 24;
+    case "intercom":
+    case "door-handle":
+    case "door-crack":
+    case "door-board":
+    case "garage-marking":
+      return 25;
     case "awning":
     case "awning-striped":
     case "awning-fabric":
@@ -1056,6 +1705,9 @@ function getFacadeDetailRenderOrder(kind: FacadeDetailKind): number {
     case "window-frame":
     case "window-grille":
     case "metal-frame":
+    case "door-frame":
+    case "door-divider":
+    case "portaria-pillar":
       return 21;
     default:
       return 18;
@@ -1183,7 +1835,7 @@ function HomeDriveThreeFacadeDetailBatch({
 
     batch.details.forEach((detail, index) => {
       dummy.position.set(...detail.position);
-      dummy.rotation.set(0, detail.rotationYRad, 0);
+      dummy.rotation.set(0, detail.rotationYRad, detail.rotationZRad ?? 0);
       dummy.scale.set(...detail.scale);
       dummy.updateMatrix();
 

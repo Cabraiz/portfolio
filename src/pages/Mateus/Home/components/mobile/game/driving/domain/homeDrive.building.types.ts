@@ -1,6 +1,7 @@
 // src/pages/Mateus/Home/components/mobile/game/driving/domain/homeDrive.building.types.ts
 
 import type { HomeDriveVector2 } from "./homeDrive.types";
+import type { HomeDriveBuildingEntranceProfile } from "./buildingEntrances";
 import type {
   HomeDriveCommerceAwningStyle,
   HomeDriveCommerceCategory,
@@ -91,6 +92,15 @@ export type HomeDriveBuilding = Readonly<{
   windowStyle?: HomeDriveBuildingWindowStyle;
   hasAirConditioners?: boolean;
   facadeSeed?: number;
+
+  /**
+   * Perfil determinístico da entrada principal da fachada.
+   *
+   * O renderer 3D usa este dado para variar porta comum, porta dupla,
+   * portaria, garagem, placa de proibido estacionar, interfone e avarias
+   * sem usar Math.random no render.
+   */
+  entranceProfile?: HomeDriveBuildingEntranceProfile;
 
   /**
    * Opcional para não quebrar o gerador atual.

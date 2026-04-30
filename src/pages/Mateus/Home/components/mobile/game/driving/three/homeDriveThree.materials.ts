@@ -48,6 +48,29 @@ export const HOME_DRIVE_THREE_COLORS = Object.freeze({
   buildingWindowGrille: "#23272a",
   buildingShopGlass: "#496d76",
   buildingDoor: "#513724",
+  buildingDoorWood: "#5b3824",
+  buildingDoorMetal: "#394044",
+  buildingDoorGlass: "#5f8791",
+  buildingDoorPainted: "#765946",
+  buildingDoorDark: "#1f2629",
+  buildingDoorRollingSteel: "#777b78",
+  buildingDoorBroken: "#2b211c",
+  buildingDoorFrame: "#d3c59d",
+  buildingDoorHandle: "#d9c37b",
+  buildingDoorCrack: "#100d0b",
+  buildingDoorBoard: "#6b472f",
+  buildingEntrancePillar: "#c7bea1",
+  buildingPortariaGlass: "#6f9daa",
+  buildingIntercom: "#20272b",
+  buildingCanopySlab: "#b9b39d",
+  buildingCanopyMetal: "#8f9188",
+  buildingCanopyGlass: "#89aeb7",
+  buildingCanopyFabric: "#8f493d",
+  buildingNoParkingSign: "#efe9d0",
+  buildingNoParkingBar: "#b63b32",
+  buildingPrivateSign: "#3f464b",
+  buildingServiceSign: "#d4c27b",
+  buildingGarageMarking: "#d6d0b0",
   buildingAwning: "#a66b3c",
   buildingAwningStriped: "#d6b05f",
   buildingAwningFabric: "#8f493d",
@@ -308,6 +331,117 @@ export const HOME_DRIVE_THREE_MATERIALS = Object.freeze({
   ),
 
   buildingDoor: createFacadePlaneMaterial(HOME_DRIVE_THREE_COLORS.buildingDoor),
+
+  buildingDoorWood: createFacadePlaneMaterial(
+    HOME_DRIVE_THREE_COLORS.buildingDoorWood,
+  ),
+
+  buildingDoorMetal: createFacadePlaneMaterial(
+    HOME_DRIVE_THREE_COLORS.buildingDoorMetal,
+  ),
+
+  buildingDoorGlass: createFacadePlaneMaterial(
+    HOME_DRIVE_THREE_COLORS.buildingDoorGlass,
+    0.82,
+  ),
+
+  buildingDoorPainted: createFacadePlaneMaterial(
+    HOME_DRIVE_THREE_COLORS.buildingDoorPainted,
+  ),
+
+  buildingDoorDark: createFacadePlaneMaterial(
+    HOME_DRIVE_THREE_COLORS.buildingDoorDark,
+    0.96,
+  ),
+
+  buildingDoorRollingSteel: createFacadePlaneMaterial(
+    HOME_DRIVE_THREE_COLORS.buildingDoorRollingSteel,
+    0.94,
+  ),
+
+  buildingDoorBroken: createFacadePlaneMaterial(
+    HOME_DRIVE_THREE_COLORS.buildingDoorBroken,
+  ),
+
+  buildingDoorFrame: createFacadePlaneMaterial(
+    HOME_DRIVE_THREE_COLORS.buildingDoorFrame,
+    0.92,
+  ),
+
+  buildingDoorHandle: createFacadePlaneMaterial(
+    HOME_DRIVE_THREE_COLORS.buildingDoorHandle,
+    0.96,
+  ),
+
+  buildingDoorCrack: createFacadePlaneMaterial(
+    HOME_DRIVE_THREE_COLORS.buildingDoorCrack,
+    0.88,
+  ),
+
+  buildingDoorBoard: createFacadePlaneMaterial(
+    HOME_DRIVE_THREE_COLORS.buildingDoorBoard,
+    0.96,
+  ),
+
+  buildingEntrancePillar: createFacadePlaneMaterial(
+    HOME_DRIVE_THREE_COLORS.buildingEntrancePillar,
+    0.94,
+  ),
+
+  buildingPortariaGlass: createFacadePlaneMaterial(
+    HOME_DRIVE_THREE_COLORS.buildingPortariaGlass,
+    0.66,
+  ),
+
+  buildingIntercom: createFacadePlaneMaterial(
+    HOME_DRIVE_THREE_COLORS.buildingIntercom,
+    0.96,
+  ),
+
+  buildingCanopySlab: createFacadePlaneMaterial(
+    HOME_DRIVE_THREE_COLORS.buildingCanopySlab,
+    0.94,
+  ),
+
+  buildingCanopyMetal: createFacadePlaneMaterial(
+    HOME_DRIVE_THREE_COLORS.buildingCanopyMetal,
+    0.92,
+  ),
+
+  buildingCanopyGlass: createFacadePlaneMaterial(
+    HOME_DRIVE_THREE_COLORS.buildingCanopyGlass,
+    0.58,
+  ),
+
+  buildingCanopyFabric: createFacadePlaneMaterial(
+    HOME_DRIVE_THREE_COLORS.buildingCanopyFabric,
+    0.94,
+  ),
+
+  buildingNoParkingSign: createFacadePlaneMaterial(
+    HOME_DRIVE_THREE_COLORS.buildingNoParkingSign,
+    0.96,
+  ),
+
+  buildingNoParkingBar: createFacadePlaneMaterial(
+    HOME_DRIVE_THREE_COLORS.buildingNoParkingBar,
+    0.98,
+  ),
+
+  buildingPrivateSign: createFacadePlaneMaterial(
+    HOME_DRIVE_THREE_COLORS.buildingPrivateSign,
+    0.94,
+  ),
+
+  buildingServiceSign: createFacadePlaneMaterial(
+    HOME_DRIVE_THREE_COLORS.buildingServiceSign,
+    0.96,
+  ),
+
+  buildingGarageMarking: createFacadePlaneMaterial(
+    HOME_DRIVE_THREE_COLORS.buildingGarageMarking,
+    0.86,
+  ),
 
   buildingAwning: createFacadePlaneMaterial(
     HOME_DRIVE_THREE_COLORS.buildingAwning,

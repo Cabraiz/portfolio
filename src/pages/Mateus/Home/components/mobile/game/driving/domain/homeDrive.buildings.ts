@@ -1,5 +1,6 @@
 // src/pages/Mateus/Home/components/mobile/game/driving/domain/homeDrive.buildings.ts
 
+import { createHomeDriveBuildingEntranceProfile } from "./buildingEntrances";
 import {
   getHomeDriveCommerceDescriptor,
   getHomeDriveStableStringSeed,
@@ -973,6 +974,38 @@ function createBuildingFromCandidate(
   const commerceDescriptor = getHomeDriveCommerceDescriptor(commerceInput);
   const hasCommerceSign = shouldHomeDriveBuildingHaveCommerceSign(commerceInput);
   const facadeSeed = getHomeDriveStableStringSeed(`${id}:facade`, 139);
+  const roadTags = getRoadTags(road);
+  const entranceProfile = createHomeDriveBuildingEntranceProfile({
+    buildingId: id,
+    kind,
+    materialKey,
+    widthMeters: dimensions.widthMeters,
+    heightMeters: dimensions.heightMeters,
+    floors: dimensions.floors,
+    variant,
+    districtId: road.districtId,
+    roadId: road.roadId,
+    roadKind: road.kind,
+    facadeSeed,
+    commercialBias:
+      road.kind === "commercial" ||
+      road.roadTone === "urban-core" ||
+      roadTags.includes("main") ||
+      roadTags.includes("fast"),
+    premiumBias:
+      road.districtId === "aldeota" ||
+      road.districtId === "meireles" ||
+      road.districtId === "praia-de-iracema" ||
+      materialKey === "office-blue",
+    agedBias:
+      road.districtId === "centro" ||
+      road.districtId === "benfica" ||
+      materialKey === "commerce-night",
+    serviceBias:
+      road.kind === "service" ||
+      roadTags.includes("service") ||
+      kind === "warehouse",
+  });
 
   return {
     id,
@@ -999,6 +1032,7 @@ function createBuildingFromCandidate(
     windowStyle: pickWindowStyle(kind, id, variant),
     hasAirConditioners: pickAirConditionerPresence(kind, id, variant),
     facadeSeed,
+    entranceProfile,
   };
 }
 
