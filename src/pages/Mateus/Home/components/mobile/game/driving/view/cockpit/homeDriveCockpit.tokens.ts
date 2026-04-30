@@ -29,10 +29,11 @@ export const HOME_DRIVE_COCKPIT_LAYOUT_TOKENS = Object.freeze({
    * - cockpitMinWidthPx
    * - cockpitMaxWidthPx
    */
-  cockpitScale: 5.55,
-  cockpitBottomRatio: -0.9,
-  cockpitMinWidthPx: 1160,
-  cockpitMaxWidthPx: 3050,
+cockpitScale: 4.2,
+cockpitMinWidthPx: 840,
+cockpitMaxWidthPx: 2100,
+
+    cockpitBottomRatio: -0.35,
 
   /**
    * Deslocamento horizontal fixo da cabine.
@@ -45,7 +46,7 @@ export const HOME_DRIVE_COCKPIT_LAYOUT_TOKENS = Object.freeze({
    * 24 = moderado
    * 40 = bastante
    */
-  cockpitOffsetXPx: 40,
+  cockpitOffsetXPx: 10,
 
   /**
    * Proporção da arte do cockpit.
@@ -84,7 +85,7 @@ export const HOME_DRIVE_COCKPIT_LAYOUT_TOKENS = Object.freeze({
     steeringWheelMinPx: 310,
     steeringWheelMaxPx: 560,
 
-    steeringWheelBottomRatio: -0.45,
+    steeringWheelBottomRatio: -0.5,
 
   /**
    * Área invisível de toque ao redor do volante.
