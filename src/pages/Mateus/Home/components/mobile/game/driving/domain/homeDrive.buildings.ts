@@ -56,7 +56,44 @@ const BUILDING_OPPOSITE_SIDE_CLEARANCE_METERS = 1.25;
 
 const LOT_ENDPOINT_PADDING_RATIO = 0.08;
 const LOT_POSITION_JITTER_RATIO = 0.28;
-const LOT_SIDE_OFFSET_RANDOM_METERS = 9.2;
+
+/**
+ * Gap visual inicial entre o fim externo da calçada e a fachada.
+ *
+ * A ideia é nascer praticamente colado na calçada, mas sem forçar
+ * interseção com o filtro de exclusão de rua.
+ */
+const LOT_FRONT_GAP_TO_SIDEWALK_METERS = 0.18;
+
+/**
+ * Fallbacks progressivos.
+ *
+ * Antes, quando a posição colada batia no filtro de colisão,
+ * o prédio era removido com `return null`.
+ *
+ * Agora:
+ * - tenta colado primeiro;
+ * - se bloquear, afasta pouco;
+ * - só remove se todos os offsets falharem.
+ */
+const LOT_FRONT_GAP_FALLBACKS_METERS: readonly number[] = Object.freeze([
+  0.18,
+  0.35,
+  0.55,
+  0.8,
+  1.15,
+  1.6,
+  2.25,
+  3.1,
+  4.25,
+  5.8,
+  7.6,
+]);
+
+/**
+ * Não usar variação lateral randômica para empurrar prédio para longe da calçada.
+ */
+const LOT_SIDE_OFFSET_RANDOM_METERS = 0;
 
 const BUILDING_ROAD_COLLISION_SAMPLE_RADIUS_METERS = 0.58;
 
@@ -137,33 +174,33 @@ function getSideSalt(side: HomeDriveBuildingSide): number {
 function getSidewalkWidthMeters(road: HomeDriveGeneratedRoadSegment): number {
   switch (road.kind) {
     case "coastal":
-      return 9.2;
+      return 7.4;
 
     case "avenue":
-      return 6.4;
+      return 5;
 
     case "commercial":
-      return 5.8;
+      return 4.6;
 
     case "ring":
-      return 5.2;
+      return 4.2;
 
     case "service":
-      return 2.8;
+      return 2.4;
 
     case "street":
-      return 3.6;
+      return 3;
 
     default:
       if (road.roadTone === "boulevard") {
-        return 7.4;
+        return 6.2;
       }
 
       if (road.roadTone === "urban-core") {
-        return 4.8;
+        return 4.1;
       }
 
-      return 4.4;
+      return 3.7;
   }
 }
 
@@ -228,26 +265,8 @@ function getLotSpacingMeters(road: HomeDriveGeneratedRoadSegment): number {
   }
 }
 
-function getLotSetbackMeters(road: HomeDriveGeneratedRoadSegment): number {
-  switch (road.kind) {
-    case "coastal":
-      return 10;
-
-    case "avenue":
-      return 7;
-
-    case "commercial":
-      return 4.8;
-
-    case "service":
-      return 5.2;
-
-    case "street":
-      return 4.2;
-
-    default:
-      return 5.8;
-  }
+function getLotSetbackMeters(_road: HomeDriveGeneratedRoadSegment): number {
+  return 0;
 }
 
 function getPointOnRoad(
@@ -710,6 +729,34 @@ function isTooCloseToPlacedBuilding(
   );
 }
 
+function getBuildingCenterOffsetFromRoad(
+  road: HomeDriveGeneratedRoadSegment,
+  buildingDepthMeters: number,
+  frontGapMeters: number,
+): number {
+  return (
+    road.width / 2 +
+    getCurbWidthMeters(road) +
+    getSidewalkWidthMeters(road) +
+    getLotSetbackMeters(road) +
+    frontGapMeters +
+    buildingDepthMeters / 2 +
+    LOT_SIDE_OFFSET_RANDOM_METERS
+  );
+}
+
+function getBuildingPositionFromRoadOffset(
+  pointOnRoad: HomeDriveVector2,
+  roadNormal: HomeDriveVector2,
+  side: HomeDriveBuildingSide,
+  offsetMeters: number,
+): HomeDriveVector2 {
+  return {
+    x: pointOnRoad.x + roadNormal.x * side * offsetMeters,
+    z: pointOnRoad.z + roadNormal.z * side * offsetMeters,
+  };
+}
+
 function createLotCandidate(
   road: HomeDriveGeneratedRoadSegment,
   slotIndex: number,
@@ -718,20 +765,22 @@ function createLotCandidate(
   side: HomeDriveBuildingSide,
 ): HomeDriveBuildingLotCandidate {
   const sideSalt = getSideSalt(side);
-  const offsetSeed = hashVector(roadSeed, slotIndex, 223 + sideSalt);
   const pointOnRoad = getPointOnRoad(
     road,
     getPaddedSlotT(roadSeed, slotIndex, slotCount, side, 233),
   );
 
-  const shallowPreviewDepth = 14;
-  const offsetMeters =
-    road.width / 2 +
-    getSidewalkWidthMeters(road) +
-    getCurbWidthMeters(road) +
-    getLotSetbackMeters(road) +
-    shallowPreviewDepth / 2 +
-    offsetSeed * LOT_SIDE_OFFSET_RANDOM_METERS;
+  /*
+    Prévia para o lote.
+    O posicionamento definitivo é feito em createBuildingFromCandidate,
+    já com a profundidade real do prédio e fallback de colisão.
+  */
+  const shallowPreviewDepth = 10;
+  const offsetMeters = getBuildingCenterOffsetFromRoad(
+    road,
+    shallowPreviewDepth,
+    LOT_FRONT_GAP_TO_SIDEWALK_METERS,
+  );
 
   const roadDirection = normalizeVector2(road.direction);
   const roadNormal = normalizeVector2(road.normal);
@@ -740,10 +789,12 @@ function createLotCandidate(
     roadId: road.roadId,
     segmentId: road.id,
     districtId: road.districtId,
-    position: {
-      x: pointOnRoad.x + roadNormal.x * side * offsetMeters,
-      z: pointOnRoad.z + roadNormal.z * side * offsetMeters,
-    },
+    position: getBuildingPositionFromRoadOffset(
+      pointOnRoad,
+      roadNormal,
+      side,
+      offsetMeters,
+    ),
     roadDirection,
     roadNormal,
     side,
@@ -854,7 +905,6 @@ function createBuildingFromCandidate(
   const depthSeed = hashVector(roadSeed, slotIndex, 313 + sideSalt);
   const heightSeed = hashVector(roadSeed, slotIndex, 317 + sideSalt);
   const variantSeed = hashVector(roadSeed, slotIndex, 331 + sideSalt);
-  const offsetSeed = hashVector(roadSeed, slotIndex, 337 + sideSalt);
 
   const kind = pickBuildingKind(road, kindSeed);
   const dimensions = getBuildingDimensions(
@@ -865,13 +915,6 @@ function createBuildingFromCandidate(
   );
 
   const rotationYRad = getRotationYForRoad(road);
-  const exactOffsetMeters =
-    road.width / 2 +
-    getSidewalkWidthMeters(road) +
-    getCurbWidthMeters(road) +
-    getLotSetbackMeters(road) +
-    dimensions.depthMeters / 2 +
-    offsetSeed * LOT_SIDE_OFFSET_RANDOM_METERS;
 
   const pointOnRoad = getPointOnRoad(
     road,
@@ -879,19 +922,37 @@ function createBuildingFromCandidate(
   );
 
   const roadNormal = normalizeVector2(candidate.roadNormal);
-  const position = {
-    x: pointOnRoad.x + roadNormal.x * candidate.side * exactOffsetMeters,
-    z: pointOnRoad.z + roadNormal.z * candidate.side * exactOffsetMeters,
-  };
 
-  if (
-    isBuildingFootprintBlockedByRoad(
-      position,
+  let position: HomeDriveVector2 | null = null;
+
+  for (const frontGapMeters of LOT_FRONT_GAP_FALLBACKS_METERS) {
+    const exactOffsetMeters = getBuildingCenterOffsetFromRoad(
+      road,
+      dimensions.depthMeters,
+      frontGapMeters,
+    );
+
+    const candidatePosition = getBuildingPositionFromRoadOffset(
+      pointOnRoad,
+      roadNormal,
+      candidate.side,
+      exactOffsetMeters,
+    );
+
+    const blockedByRoad = isBuildingFootprintBlockedByRoad(
+      candidatePosition,
       dimensions.widthMeters,
       dimensions.depthMeters,
       rotationYRad,
-    )
-  ) {
+    );
+
+    if (!blockedByRoad) {
+      position = candidatePosition;
+      break;
+    }
+  }
+
+  if (!position) {
     return null;
   }
 

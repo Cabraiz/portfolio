@@ -55,33 +55,33 @@ function getBandMaterial(
 function getRoadSidewalkWidthMeters(road: HomeDriveGeneratedRoadSegment): number {
   switch (road.kind) {
     case "coastal":
-      return 9.2;
+      return 7.4;
 
     case "avenue":
-      return 6.4;
+      return 5;
 
     case "commercial":
-      return 5.8;
+      return 4.6;
 
     case "ring":
-      return 5.2;
+      return 4.2;
 
     case "service":
-      return 2.8;
+      return 2.4;
 
     case "street":
-      return 3.6;
+      return 3;
 
     default:
       if (road.roadTone === "boulevard") {
-        return 7.4;
+        return 6.2;
       }
 
       if (road.roadTone === "urban-core") {
-        return 4.8;
+        return 4.1;
       }
 
-      return 4.4;
+      return 3.7;
   }
 }
 

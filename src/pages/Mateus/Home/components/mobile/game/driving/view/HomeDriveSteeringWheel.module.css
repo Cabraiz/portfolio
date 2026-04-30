@@ -1,24 +1,54 @@
+/* src/pages/Mateus/Home/components/mobile/game/driving/view/HomeDriveSteeringWheel.module.css */
+
 .root {
   position: absolute;
   left: 50%;
-  bottom: max(16px, env(safe-area-inset-bottom));
-  z-index: 50;
-  width: clamp(138px, 42vw, 198px);
+  bottom: calc(
+    env(safe-area-inset-bottom, 0px) +
+    var(--home-drive-cockpit-unit, min(100vw, 100dvh)) *
+    var(--home-drive-steering-wheel-bottom-ratio, 0.025)
+  );
+  z-index: 55;
+  width: clamp(
+    calc(var(--home-drive-steering-wheel-min-px, 204) * 1px),
+    calc(
+      var(--home-drive-cockpit-unit, min(100vw, 100dvh)) *
+      var(--home-drive-steering-wheel-scale, 0.86)
+    ),
+    calc(var(--home-drive-steering-wheel-max-px, 320) * 1px)
+  );
   aspect-ratio: 1;
   transform: translateX(-50%);
   pointer-events: auto;
   touch-action: none;
+
+  /*
+    Não use contain: paint aqui.
+    O volante tem borda circular, sombra e área de toque maior que o visual.
+    contain: paint corta qualquer coisa que ultrapasse o root.
+  */
+  contain: layout style;
+  overflow: visible;
 }
 
 .touchTarget {
   position: absolute;
-  inset: -14%;
+
+  /*
+    Mantém a área de toque maior sem obrigar o volante visual a crescer junto.
+  */
+  inset: calc(
+    var(--home-drive-steering-wheel-touch-inset-ratio, 0.2) *
+    -100%
+  );
+
   display: grid;
   place-items: center;
   border-radius: 999px;
   touch-action: none;
   outline: none;
   cursor: grab;
+  overflow: visible;
 }
 
 .touchTarget:focus-visible {
@@ -31,105 +61,52 @@
 
 .wheel {
   position: relative;
-  width: 78%;
+
+  /*
+    O touchTarget é maior que o root.
+    Por isso o volante visual precisa ser menor que 100% do touchTarget.
+    Com touchInsetRatio 0.2, o touchTarget vira 140% do root.
+    72% de 140% ≈ 100.8% do root.
+  */
+  width: var(--home-drive-steering-wheel-visual-size, 72%);
   aspect-ratio: 1;
   transform: rotate(var(--free-drive-wheel-rotation));
   transform-origin: 50% 50%;
-  transition: transform 180ms cubic-bezier(0.2, 0.8, 0.25, 1);
+  transition:
+    transform
+    calc(var(--home-drive-steering-wheel-transition-ms, 120) * 1ms)
+    cubic-bezier(0.2, 0.8, 0.25, 1);
   filter:
-    drop-shadow(0 20px 18px rgba(0, 0, 0, 0.42))
-    drop-shadow(0 4px 2px rgba(255, 255, 255, 0.08));
+    drop-shadow(
+      0
+      18px
+      16px
+      rgba(
+        0,
+        0,
+        0,
+        var(--home-drive-steering-wheel-shadow-opacity, 0.38)
+      )
+    );
   will-change: transform;
+  overflow: visible;
 }
 
 .dragging .wheel {
   transition: none;
 }
 
-.wheelImage,
-.fallbackWheel {
+.wheelImage {
   position: absolute;
   inset: 0;
+  z-index: 2;
+  display: block;
   width: 100%;
   height: 100%;
+  object-fit: contain;
+  object-position: 50% 50%;
   user-select: none;
   -webkit-user-select: none;
-}
-
-.wheelImage {
-  z-index: 2;
-  display: block;
-  object-fit: contain;
   pointer-events: none;
-}
-
-.fallbackWheel {
-  z-index: 1;
-  border-radius: 999px;
-  background:
-    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.14) 0 9%, transparent 10%),
-    radial-gradient(circle at 50% 50%, transparent 0 47%, #151515 48% 62%, transparent 63%),
-    linear-gradient(135deg, #2d2d2d, #090909 48%, #303030);
-}
-
-.fallbackWheel::before {
-  position: absolute;
-  inset: 5.5%;
-  border: 10px solid #171717;
-  border-top-color: #383838;
-  border-bottom-color: #070707;
-  border-radius: 999px;
-  content: "";
-  box-shadow:
-    inset 0 0 0 2px rgba(255, 255, 255, 0.08),
-    inset 0 -12px 18px rgba(0, 0, 0, 0.48);
-}
-
-.fallbackGrip,
-.fallbackHub,
-.fallbackSpokeTop,
-.fallbackSpokeLeft,
-.fallbackSpokeRight {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  display: block;
-  background: linear-gradient(180deg, #464646, #0e0e0e);
-  transform-origin: 50% 50%;
-}
-
-.fallbackHub {
-  z-index: 3;
-  width: 27%;
-  aspect-ratio: 1;
-  border-radius: 999px;
-  transform: translate(-50%, -50%);
-  box-shadow:
-    inset 0 2px 4px rgba(255, 255, 255, 0.2),
-    inset 0 -5px 8px rgba(0, 0, 0, 0.52);
-}
-
-.fallbackSpokeTop,
-.fallbackSpokeLeft,
-.fallbackSpokeRight {
-  z-index: 2;
-  width: 9%;
-  height: 35%;
-  border-radius: 999px;
-}
-
-.fallbackSpokeTop {
-  transform: translate(-50%, -87%);
-}
-
-.fallbackSpokeLeft {
-  transform: translate(-82%, -30%) rotate(122deg);
-}
-
-.fallbackSpokeRight {
-  transform: translate(-18%, -30%) rotate(-122deg);
-}
-
-.fallbackGrip {
-  display: none;
+  transform: translateZ(0);
 }

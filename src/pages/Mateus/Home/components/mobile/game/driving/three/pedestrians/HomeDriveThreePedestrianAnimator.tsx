@@ -28,7 +28,11 @@ function clamp(value: number, min: number, max: number): number {
 }
 
 function getMovingFactor(agent: HomeDrivePedestrianAgent): number {
-  return clamp(Math.abs(agent.speedMps) / Math.max(0.32, agent.baseSpeedMps), 0, 1.35);
+  return clamp(
+    Math.abs(agent.speedMps) / Math.max(0.32, agent.baseSpeedMps),
+    0,
+    1.35,
+  );
 }
 
 function getIdleSway(agent: HomeDrivePedestrianAgent): number {
@@ -38,15 +42,20 @@ function getIdleSway(agent: HomeDrivePedestrianAgent): number {
 export function getHomeDriveThreePedestrianPose(
   agent: HomeDrivePedestrianAgent,
 ): HomeDriveThreePedestrianPose {
-  const animationRuntime = getHomeDriveThreePedestrianAnimationRuntime(agent.animationKey);
-  const movingFactor = getMovingFactor(agent) * animationRuntime.baseSpeedMultiplier;
+  const animationRuntime = getHomeDriveThreePedestrianAnimationRuntime(
+    agent.animationKey,
+  );
+  const movingFactor =
+    getMovingFactor(agent) * animationRuntime.baseSpeedMultiplier;
   const phase = agent.animationPhase;
   const walkSin = Math.sin(phase);
   const walkCos = Math.cos(phase);
   const idleSway = getIdleSway(agent);
 
-  let leftArmPitchRad = -walkSin * animationRuntime.armSwingAmplitude * movingFactor;
-  let rightArmPitchRad = walkSin * animationRuntime.armSwingAmplitude * movingFactor;
+  let leftArmPitchRad =
+    -walkSin * animationRuntime.armSwingAmplitude * movingFactor;
+  let rightArmPitchRad =
+    walkSin * animationRuntime.armSwingAmplitude * movingFactor;
   let leftArmSideRad = 0.12 + idleSway * 0.025;
   let rightArmSideRad = -0.12 - idleSway * 0.025;
   let leftForearmPitchRad = 0.08;
@@ -99,7 +108,9 @@ export function getHomeDriveThreePedestrianPose(
   }
 
   return {
-    bobY: Math.abs(walkSin) * animationRuntime.bobAmplitude * movingFactor + Math.sin(phase * 0.18) * 0.006,
+    bobY:
+      Math.abs(walkSin) * animationRuntime.bobAmplitude * movingFactor +
+      Math.sin(phase * 0.18) * 0.006,
     torsoPitchRad,
     torsoRollRad,
     headYawRad,
@@ -120,7 +131,14 @@ export function getHomeDriveThreePedestrianPose(
 export function useHomeDriveThreePedestrianPose(
   agent: HomeDrivePedestrianAgent,
 ): HomeDriveThreePedestrianPose {
-  return useMemo(() => getHomeDriveThreePedestrianPose(agent), [agent]);
+  return useMemo(() => getHomeDriveThreePedestrianPose(agent), [
+    agent.animationKey,
+    agent.animationPhase,
+    agent.baseSpeedMps,
+    agent.idleLookYawRad,
+    agent.seed,
+    agent.speedMps,
+  ]);
 }
 
 export default function HomeDriveThreePedestrianAnimator() {

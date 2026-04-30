@@ -13,6 +13,10 @@ import { useHomeDriveRuntimeRefs } from "../hooks/useHomeDriveRuntimeRefs";
 import { useHomeDriveSteeringWheel } from "../hooks/useHomeDriveSteeringWheel";
 import { useHomeDriveViewport } from "../hooks/useHomeDriveViewport";
 import HomeDriveThreeScene from "../three/HomeDriveThreeScene";
+import {
+  buildHomeDriveCockpitCssVariables,
+  HOME_DRIVE_COCKPIT_ASSETS,
+} from "./cockpit";
 import HomeDriveCompass from "./HomeDriveCompass";
 import styles from "./HomeDriveGame.module.css";
 import HomeDriveSteeringWheel from "./HomeDriveSteeringWheel";
@@ -298,8 +302,11 @@ export default function HomeDriveGame({ onClose }: HomeDriveGameProps) {
       "--home-drive-vh": `${viewport.height}px`,
       "--free-drive-vw": `${viewport.width}px`,
       "--free-drive-vh": `${viewport.height}px`,
+      ...buildHomeDriveCockpitCssVariables({
+        steering: steeringWheel.steering,
+      }),
     } as CSSProperties;
-  }, [viewport.height, viewport.width]);
+  }, [steeringWheel.steering, viewport.height, viewport.width]);
 
   return (
     <div
@@ -345,6 +352,17 @@ export default function HomeDriveGame({ onClose }: HomeDriveGameProps) {
         viewport={viewport}
         publishRuntimeSnapshot={publishRuntimeSnapshot}
       />
+
+      <div className={styles.cockpitLayer} aria-hidden="true">
+        <img
+          className={styles.cockpitImage}
+          src={HOME_DRIVE_COCKPIT_ASSETS.cockpitSrc}
+          alt=""
+          draggable={false}
+        />
+        <span className={styles.cockpitShade} />
+        <span className={styles.cockpitGlass} />
+      </div>
 
       <HomeDriveCompass
         className={styles.compass}

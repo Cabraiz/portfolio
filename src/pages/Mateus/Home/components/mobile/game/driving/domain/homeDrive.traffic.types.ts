@@ -1,7 +1,9 @@
 // src/pages/Mateus/Home/components/mobile/game/driving/domain/homeDrive.traffic.types.ts
 
 import type { HomeDriveVector2 } from "./homeDrive.types";
+import type { HomeDriveCrosswalkRuntimeState } from "./crosswalks";
 import type { HomeDriveTrafficDirectionSign } from "./homeDrive.trafficLanes";
+import type { HomeDriveVehicleModelKey } from "./vehicles";
 
 export type HomeDriveTrafficVehicleKind =
   | "compact"
@@ -45,7 +47,23 @@ export type HomeDriveTrafficVector2 = Readonly<{
 
 export type HomeDriveTrafficVehicle = Readonly<{
   id: string;
+
+  /**
+   * Modelo realista novo.
+   *
+   * Usado para sortear proporções brasileiras:
+   * hatch popular, sedan compacto, SUV compacto, picape leve, van etc.
+   */
+  modelKey: HomeDriveVehicleModelKey;
+
+  /**
+   * Tipo visual legado usado pelo renderer atual.
+   *
+   * O renderer `HomeDriveThreeTraffic.tsx` já sabe desenhar por kind.
+   * O modelKey é convertido para kind para manter compatibilidade.
+   */
   kind: HomeDriveTrafficVehicleKind;
+
   colorKey: HomeDriveTrafficVehicleColorKey;
 
   roadId: string;
@@ -137,6 +155,12 @@ export type HomeDriveTrafficVehicle = Readonly<{
   visualYawOffsetRad: number;
   impactAngularVelocityRadps: number;
 
+  /**
+   * Faixa que está fazendo o veículo reduzir/parar temporariamente.
+   */
+  yieldingToCrosswalkId: string | null;
+  yieldTimerSeconds: number;
+
   lastCollisionAt: number;
 }>;
 
@@ -154,6 +178,7 @@ export type HomeDriveTrafficGenerationOptions = Readonly<{
 
 export type HomeDriveTrafficTickOptions = Readonly<{
   enabled?: boolean;
+  crosswalks?: HomeDriveCrosswalkRuntimeState;
 }>;
 
 export type HomeDriveTrafficCollisionEvent = Readonly<{

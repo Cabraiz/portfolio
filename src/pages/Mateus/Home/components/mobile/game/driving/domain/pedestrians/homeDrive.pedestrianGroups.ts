@@ -21,19 +21,19 @@ function getGroupKind(
   zone: HomeDrivePedestrianSidewalkZone,
   seed: number,
 ): HomeDrivePedestrianGroupKind {
-  const commercialBias = zone.roadKind === "commercial" ? 0.18 : 0;
-  const coastalBias = zone.roadKind === "coastal" ? 0.08 : 0;
-  const servicePenalty = zone.roadKind === "service" ? -0.08 : 0;
+  const commercialBias = zone.roadKind === "commercial" ? 0.08 : 0;
+  const coastalBias = zone.roadKind === "coastal" ? 0.04 : 0;
+  const servicePenalty = zone.roadKind === "service" ? -0.04 : 0;
 
   return pickFromWeightedOptions<HomeDrivePedestrianGroupKind>(
     [
-      { value: "solo", weight: 0.48 + servicePenalty },
-      { value: "shopper", weight: 0.12 + commercialBias },
-      { value: "smoker", weight: 0.08 + commercialBias * 0.25 },
-      { value: "couple", weight: 0.1 + coastalBias },
-      { value: "adult-child", weight: 0.09 },
-      { value: "chat-pair", weight: 0.08 + commercialBias * 0.4 },
-      { value: "worker", weight: 0.05 },
+      { value: "solo", weight: 0.66 + servicePenalty },
+      { value: "shopper", weight: 0.1 + commercialBias },
+      { value: "smoker", weight: 0.055 + commercialBias * 0.18 },
+      { value: "couple", weight: 0.055 + coastalBias },
+      { value: "adult-child", weight: 0.035 },
+      { value: "chat-pair", weight: 0.04 + commercialBias * 0.25 },
+      { value: "worker", weight: 0.055 },
     ],
     seed,
     601,
@@ -82,20 +82,20 @@ function getMembersForGroup(
 
     case "couple":
       return [
-        member("adult", "walk", [], -0.28, side * 0.38),
-        member("adult", "walk", [], 0.24, -side * 0.38),
+        member("adult", "walk", [], -0.24, side * 0.34),
+        member("adult", "walk", [], 0.2, -side * 0.34),
       ];
 
     case "adult-child":
       return [
-        member("parent", "hold-child-hand", ["child-hand-link"], 0, side * 0.28, 1),
-        member("child", "hold-child-hand", ["child-hand-link"], 0.16, -side * 0.34, 0),
+        member("parent", "hold-child-hand", ["child-hand-link"], 0, side * 0.24, 1),
+        member("child", "hold-child-hand", ["child-hand-link"], 0.14, -side * 0.3, 0),
       ];
 
     case "chat-pair":
       return [
-        member("adult", "talk", [], -0.2, side * 0.48),
-        member("adult", "talk", [], 0.2, -side * 0.48),
+        member("adult", "talk", [], -0.18, side * 0.42),
+        member("adult", "talk", [], 0.18, -side * 0.42),
       ];
 
     case "worker":
@@ -107,23 +107,32 @@ function getMembersForGroup(
   }
 }
 
-function getGroupBaseSpeedMps(kind: HomeDrivePedestrianGroupKind, seed: number): number {
+function getGroupBaseSpeedMps(
+  kind: HomeDrivePedestrianGroupKind,
+  seed: number,
+): number {
   switch (kind) {
     case "smoker":
-      return seededRange(seed, 613, 0.0, 0.18);
+      return seededRange(seed, 613, 0.0, 0.14);
+
     case "shopper":
-      return seededRange(seed, 617, 0.48, 0.86);
+      return seededRange(seed, 617, 0.48, 0.82);
+
     case "adult-child":
-      return seededRange(seed, 619, 0.42, 0.76);
+      return seededRange(seed, 619, 0.42, 0.72);
+
     case "chat-pair":
-      return seededRange(seed, 631, 0.0, 0.12);
+      return seededRange(seed, 631, 0.0, 0.1);
+
     case "couple":
-      return seededRange(seed, 641, 0.62, 1.0);
+      return seededRange(seed, 641, 0.62, 0.94);
+
     case "worker":
-      return seededRange(seed, 643, 0.92, 1.34);
+      return seededRange(seed, 643, 0.92, 1.26);
+
     case "solo":
     default:
-      return seededRange(seed, 647, 0.68, 1.22);
+      return seededRange(seed, 647, 0.68, 1.16);
   }
 }
 
@@ -143,7 +152,7 @@ export function createHomeDrivePedestrianGroupDraft(
     slotCount,
   );
   const kind = getGroupKind(input.zone, groupSeed);
-  const progressJitter = seededRange(groupSeed, 653, -0.28, 0.28);
+  const progressJitter = seededRange(groupSeed, 653, -0.22, 0.22);
   const progress = clamp01((input.slotIndex + 0.5 + progressJitter) / slotCount);
   const directionSign = seededSign(groupSeed, 659);
 
@@ -169,6 +178,7 @@ export function getHomeDrivePedestrianGroupMaxMemberCount(
     case "adult-child":
     case "chat-pair":
       return 2;
+
     case "solo":
     case "shopper":
     case "smoker":

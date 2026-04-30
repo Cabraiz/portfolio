@@ -1,6 +1,8 @@
 // src/pages/Mateus/Home/components/mobile/game/driving/domain/homeDrive.traffic.ts
 
 import { hashVector } from "./homeDrive.math";
+import { shouldHomeDriveTrafficYieldAtCrosswalk } from "./crosswalks";
+import type { HomeDriveCrosswalkRuntimeState } from "./crosswalks";
 import {
   buildHomeDriveRoadTopology,
   type HomeDriveRoadTopology,
@@ -22,6 +24,13 @@ import type {
   HomeDriveGeneratedRoadSegment,
   HomeDriveWorldPosition,
 } from "./homeDrive.worldMap.types";
+import {
+  getHomeDriveVehicleModelDescriptor,
+  pickHomeDriveVehicleModelKey,
+  pickHomeDriveVehiclePaintKey,
+  type HomeDriveVehicleModelKey,
+  type HomeDriveVehiclePaintKey,
+} from "./vehicles";
 import type {
   HomeDriveTrafficGenerationOptions,
   HomeDriveTrafficRuntimeState,
@@ -70,6 +79,14 @@ const MAX_TRAFFIC_CRUISE_SPEED_MPS = 26;
 const JUNCTION_COOLDOWN_SECONDS = 0.34;
 const MIN_ROAD_LENGTH_METERS = 0.000001;
 
+const TRAFFIC_CROSSWALK_LOOKAHEAD_METERS = 58;
+const TRAFFIC_CROSSWALK_STOP_DISTANCE_METERS = 9.5;
+
+type CrosswalkYieldResolution = Readonly<{
+  speedFactor: number;
+  crosswalkId: string | null;
+}>;
+
 type TrafficSpeedProfile = Readonly<{
   minFactor: number;
   maxFactor: number;
@@ -78,11 +95,6 @@ type TrafficSpeedProfile = Readonly<{
   accelerationMinMps2: number;
   accelerationMaxMps2: number;
   jitterMps: number;
-}>;
-
-type TrafficKindThreshold = Readonly<{
-  minSeed: number;
-  kind: HomeDriveTrafficVehicleKind;
 }>;
 
 type TrafficVehicleCandidate = Readonly<{
@@ -95,77 +107,6 @@ type TrafficVehicleDimensions = Readonly<{
   lengthMeters: number;
   heightMeters: number;
 }>;
-
-function defineTrafficKindDistribution(
-  distribution: readonly TrafficKindThreshold[],
-): readonly TrafficKindThreshold[] {
-  return distribution;
-}
-
-const DEFAULT_TRAFFIC_KIND_DISTRIBUTION = defineTrafficKindDistribution([
-  { minSeed: 0.94, kind: "suv" },
-  { minSeed: 0.88, kind: "sport" },
-  { minSeed: 0.8, kind: "pickup" },
-  { minSeed: 0.68, kind: "taxi" },
-  { minSeed: 0.56, kind: "wagon" },
-  { minSeed: 0.42, kind: "sedan" },
-  { minSeed: 0.2, kind: "hatch" },
-  { minSeed: 0, kind: "compact" },
-]);
-
-const TRAFFIC_KIND_DISTRIBUTIONS: Readonly<
-  Record<string, readonly TrafficKindThreshold[]>
-> = {
-  service: defineTrafficKindDistribution([
-    { minSeed: 0.86, kind: "delivery" },
-    { minSeed: 0.68, kind: "truck" },
-    { minSeed: 0.46, kind: "pickup" },
-    { minSeed: 0, kind: "van" },
-  ]),
-
-  coastal: defineTrafficKindDistribution([
-    { minSeed: 0.92, kind: "sport" },
-    { minSeed: 0.82, kind: "suv" },
-    { minSeed: 0.68, kind: "van" },
-    { minSeed: 0.52, kind: "sedan" },
-    { minSeed: 0.22, kind: "hatch" },
-    { minSeed: 0, kind: "compact" },
-  ]),
-
-  avenue: defineTrafficKindDistribution([
-    { minSeed: 0.94, kind: "bus" },
-    { minSeed: 0.86, kind: "microbus" },
-    { minSeed: 0.76, kind: "van" },
-    { minSeed: 0.66, kind: "delivery" },
-    { minSeed: 0.56, kind: "taxi" },
-    { minSeed: 0.5, kind: "police" },
-    { minSeed: 0.4, kind: "suv" },
-    { minSeed: 0.26, kind: "sedan" },
-    { minSeed: 0.12, kind: "hatch" },
-    { minSeed: 0, kind: "compact" },
-  ]),
-
-  ring: defineTrafficKindDistribution([
-    { minSeed: 0.9, kind: "truck" },
-    { minSeed: 0.8, kind: "sport" },
-    { minSeed: 0.68, kind: "suv" },
-    { minSeed: 0.58, kind: "police" },
-    { minSeed: 0.46, kind: "pickup" },
-    { minSeed: 0.3, kind: "wagon" },
-    { minSeed: 0.14, kind: "sedan" },
-    { minSeed: 0, kind: "compact" },
-  ]),
-
-  commercial: defineTrafficKindDistribution([
-    { minSeed: 0.86, kind: "delivery" },
-    { minSeed: 0.74, kind: "taxi" },
-    { minSeed: 0.62, kind: "van" },
-    { minSeed: 0.48, kind: "suv" },
-    { minSeed: 0.34, kind: "sedan" },
-    { minSeed: 0.16, kind: "hatch" },
-    { minSeed: 0, kind: "compact" },
-  ]),
-};
 
 let cachedTrafficRoadSegments: readonly HomeDriveGeneratedRoadSegment[] | null =
   null;
@@ -309,16 +250,22 @@ function getTrafficSlotSpacingMeters(
     switch (road.kind) {
       case "coastal":
         return 150;
+
       case "avenue":
         return 138;
+
       case "commercial":
         return 128;
+
       case "ring":
         return 142;
+
       case "street":
         return 122;
+
       case "service":
         return 165;
+
       default:
         return 142;
     }
@@ -410,174 +357,83 @@ function getTrafficSpeedProfile(
   }
 }
 
-function pickTrafficVehicleKind(
-  seed: number,
-  distribution: readonly TrafficKindThreshold[],
+function getTrafficVehicleModelKind(
+  modelKey: HomeDriveVehicleModelKey,
 ): HomeDriveTrafficVehicleKind {
-  const safeSeed = clamp01(seed);
+  switch (modelKey) {
+    case "compact-hatch":
+      return "compact";
 
-  for (const threshold of distribution) {
-    if (safeSeed >= threshold.minSeed) {
-      return threshold.kind;
-    }
+    case "popular-hatch":
+      return "hatch";
+
+    case "small-sedan":
+    case "mid-sedan":
+    case "app-driver-sedan":
+      return "sedan";
+
+    case "compact-suv":
+    case "mid-suv":
+      return "suv";
+
+    case "light-pickup":
+      return "pickup";
+
+    case "delivery-van":
+      return "delivery";
+
+    case "taxi-sedan":
+      return "taxi";
+
+    default:
+      return "compact";
   }
-
-  return distribution[distribution.length - 1]?.kind ?? "compact";
 }
 
-function getTrafficVehicleKind(
-  road: HomeDriveGeneratedRoadSegment,
-  seed: number,
-): HomeDriveTrafficVehicleKind {
-  const distribution =
-    TRAFFIC_KIND_DISTRIBUTIONS[road.kind] ?? DEFAULT_TRAFFIC_KIND_DISTRIBUTION;
+function getTrafficVehicleModelDimensions(
+  modelKey: HomeDriveVehicleModelKey,
+): TrafficVehicleDimensions {
+  const model = getHomeDriveVehicleModelDescriptor(modelKey);
 
-  return pickTrafficVehicleKind(seed, distribution);
+  return scaleTrafficVehicleDimensions({
+    widthMeters: model.dimensions.widthMeters,
+    lengthMeters: model.dimensions.lengthMeters,
+    heightMeters: model.dimensions.heightMeters,
+  });
 }
 
-function getTrafficVehicleColor(
-  kind: HomeDriveTrafficVehicleKind,
-  seed: number,
+function getTrafficVehicleColorFromPaint(
+  paintKey: HomeDriveVehiclePaintKey,
 ): HomeDriveTrafficVehicleColorKey {
-  const toneSeed = clamp01(seed);
+  switch (paintKey) {
+    case "white":
+    case "delivery-white":
+      return "white";
 
-  switch (kind) {
-    case "bus":
-      if (toneSeed > 0.78) return "cream";
-      if (toneSeed > 0.54) return "yellow";
-      if (toneSeed > 0.28) return "green";
-      return "blue";
+    case "silver":
+      return "silver";
 
-    case "microbus":
-      if (toneSeed > 0.72) return "green";
-      if (toneSeed > 0.48) return "cream";
-      if (toneSeed > 0.24) return "silver";
-      return "beige";
+    case "black":
+      return "black";
 
-    case "truck":
-      if (toneSeed > 0.82) return "darkBlue";
-      if (toneSeed > 0.62) return "blue";
-      if (toneSeed > 0.42) return "white";
-      if (toneSeed > 0.22) return "orange";
+    case "graphite":
+    case "utility-gray":
       return "charcoal";
 
-    case "delivery":
-      if (toneSeed > 0.84) return "orange";
-      if (toneSeed > 0.64) return "cyan";
-      if (toneSeed > 0.42) return "white";
-      if (toneSeed > 0.22) return "cream";
-      return "silver";
+    case "red":
+      return "red";
 
-    case "police":
-      if (toneSeed > 0.72) return "white";
-      if (toneSeed > 0.44) return "black";
-      if (toneSeed > 0.22) return "darkBlue";
-      return "silver";
+    case "blue":
+      return "blue";
 
-    case "taxi":
-      if (toneSeed > 0.82) return "cream";
-      if (toneSeed > 0.16) return "yellow";
-      return "white";
+    case "beige":
+      return "beige";
 
-    case "sport":
-      if (toneSeed > 0.86) return "orange";
-      if (toneSeed > 0.68) return "darkRed";
-      if (toneSeed > 0.5) return "purple";
-      if (toneSeed > 0.32) return "blue";
-      if (toneSeed > 0.14) return "red";
-      return "black";
+    case "taxi-yellow":
+      return "yellow";
 
-    case "suv":
-      if (toneSeed > 0.82) return "darkBlue";
-      if (toneSeed > 0.64) return "brown";
-      if (toneSeed > 0.46) return "black";
-      if (toneSeed > 0.28) return "silver";
-      if (toneSeed > 0.12) return "beige";
-      return "white";
-
-    case "pickup":
-      if (toneSeed > 0.8) return "orange";
-      if (toneSeed > 0.62) return "charcoal";
-      if (toneSeed > 0.44) return "black";
-      if (toneSeed > 0.26) return "silver";
-      return "brown";
-
-    case "van":
-      if (toneSeed > 0.78) return "cyan";
-      if (toneSeed > 0.58) return "white";
-      if (toneSeed > 0.38) return "cream";
-      if (toneSeed > 0.18) return "silver";
-      return "green";
-
-    case "wagon":
-      if (toneSeed > 0.76) return "lime";
-      if (toneSeed > 0.56) return "darkBlue";
-      if (toneSeed > 0.36) return "blue";
-      if (toneSeed > 0.18) return "beige";
-      return "white";
-
-    case "hatch":
-      if (toneSeed > 0.84) return "lime";
-      if (toneSeed > 0.66) return "orange";
-      if (toneSeed > 0.48) return "cyan";
-      if (toneSeed > 0.3) return "red";
-      if (toneSeed > 0.14) return "blue";
-      return "white";
-
-    case "sedan":
-      if (toneSeed > 0.86) return "darkRed";
-      if (toneSeed > 0.7) return "darkBlue";
-      if (toneSeed > 0.54) return "silver";
-      if (toneSeed > 0.38) return "beige";
-      if (toneSeed > 0.2) return "white";
-      return "black";
-
-    case "compact":
     default:
-      if (toneSeed > 0.88) return "lime";
-      if (toneSeed > 0.74) return "cyan";
-      if (toneSeed > 0.58) return "orange";
-      if (toneSeed > 0.42) return "red";
-      if (toneSeed > 0.26) return "blue";
-      if (toneSeed > 0.12) return "white";
-      return "silver";
-  }
-}
-
-function getTrafficVehicleDimensions(
-  kind: HomeDriveTrafficVehicleKind,
-  seed: number,
-): TrafficVehicleDimensions {
-  switch (kind) {
-    case "bus":
-      return scaleTrafficVehicleDimensions({ widthMeters: 3.55, lengthMeters: 14.85 + seed * 1.55, heightMeters: 3.95 });
-    case "microbus":
-      return scaleTrafficVehicleDimensions({ widthMeters: 3.32, lengthMeters: 10.4 + seed * 1.1, heightMeters: 3.58 });
-    case "truck":
-      return scaleTrafficVehicleDimensions({ widthMeters: 3.72, lengthMeters: 12.8 + seed * 1.8, heightMeters: 4.1 });
-    case "delivery":
-      return scaleTrafficVehicleDimensions({ widthMeters: 3.18, lengthMeters: 8.28 + seed * 0.88, heightMeters: 3.18 });
-    case "van":
-      return scaleTrafficVehicleDimensions({ widthMeters: 3.05, lengthMeters: 7.42 + seed * 0.95, heightMeters: 3.05 });
-    case "pickup":
-      return scaleTrafficVehicleDimensions({ widthMeters: 2.92, lengthMeters: 7.28 + seed * 0.82, heightMeters: 2.52 });
-    case "suv":
-      return scaleTrafficVehicleDimensions({ widthMeters: 3.08, lengthMeters: 7.12 + seed * 0.72, heightMeters: 2.62 });
-    case "police":
-      return scaleTrafficVehicleDimensions({ widthMeters: 2.86, lengthMeters: 6.44 + seed * 0.58, heightMeters: 2.18 });
-    case "taxi":
-      return scaleTrafficVehicleDimensions({ widthMeters: 2.74, lengthMeters: 6.32 + seed * 0.52, heightMeters: 2.12 });
-    case "sport":
-      return scaleTrafficVehicleDimensions({ widthMeters: 2.78, lengthMeters: 6.08 + seed * 0.56, heightMeters: 1.72 });
-    case "wagon":
-      return scaleTrafficVehicleDimensions({ widthMeters: 2.78, lengthMeters: 6.72 + seed * 0.56, heightMeters: 2.08 });
-    case "hatch":
-      return scaleTrafficVehicleDimensions({ widthMeters: 2.62, lengthMeters: 5.72 + seed * 0.48, heightMeters: 2.02 });
-    case "sedan":
-      return scaleTrafficVehicleDimensions({ widthMeters: 2.72, lengthMeters: 6.22 + seed * 0.58, heightMeters: 2.08 });
-    case "compact":
-    default:
-      return scaleTrafficVehicleDimensions({ widthMeters: 2.54, lengthMeters: 5.42 + seed * 0.52, heightMeters: 1.98 });
+      return "white";
   }
 }
 
@@ -585,19 +441,45 @@ function getVehicleSpeedMultiplier(
   kind: HomeDriveTrafficVehicleKind,
 ): number {
   switch (kind) {
-    case "truck": return 0.66;
-    case "microbus": return 0.74;
-    case "bus": return 0.82;
-    case "delivery": return 0.82;
-    case "van": return 0.92;
-    case "suv": return 0.96;
-    case "pickup": return 1;
-    case "wagon": return 1.04;
-    case "sedan": return 1.06;
-    case "taxi": return 1.08;
-    case "hatch": return 1.12;
-    case "police": return 1.16;
-    case "sport": return 1.22;
+    case "truck":
+      return 0.66;
+
+    case "microbus":
+      return 0.74;
+
+    case "bus":
+      return 0.82;
+
+    case "delivery":
+      return 0.82;
+
+    case "van":
+      return 0.92;
+
+    case "suv":
+      return 0.96;
+
+    case "pickup":
+      return 1;
+
+    case "wagon":
+      return 1.04;
+
+    case "sedan":
+      return 1.06;
+
+    case "taxi":
+      return 1.08;
+
+    case "hatch":
+      return 1.12;
+
+    case "police":
+      return 1.16;
+
+    case "sport":
+      return 1.22;
+
     case "compact":
     default:
       return 1.1;
@@ -608,19 +490,45 @@ function getVehicleAccelerationMultiplier(
   kind: HomeDriveTrafficVehicleKind,
 ): number {
   switch (kind) {
-    case "truck": return 0.52;
-    case "microbus": return 0.64;
-    case "bus": return 0.68;
-    case "delivery": return 0.78;
-    case "van": return 0.82;
-    case "pickup": return 0.92;
-    case "suv": return 0.92;
-    case "wagon": return 1.02;
-    case "sedan": return 1.08;
-    case "taxi": return 1.08;
-    case "hatch": return 1.12;
-    case "police": return 1.18;
-    case "sport": return 1.32;
+    case "truck":
+      return 0.52;
+
+    case "microbus":
+      return 0.64;
+
+    case "bus":
+      return 0.68;
+
+    case "delivery":
+      return 0.78;
+
+    case "van":
+      return 0.82;
+
+    case "pickup":
+      return 0.92;
+
+    case "suv":
+      return 0.92;
+
+    case "wagon":
+      return 1.02;
+
+    case "sedan":
+      return 1.08;
+
+    case "taxi":
+      return 1.08;
+
+    case "hatch":
+      return 1.12;
+
+    case "police":
+      return 1.18;
+
+    case "sport":
+      return 1.32;
+
     case "compact":
     default:
       return 1.18;
@@ -652,13 +560,6 @@ function getVehicleCollisionRadiusMeters(
   widthMeters: number,
   lengthMeters: number,
 ): number {
-  /*
-    Hitbox de gameplay, não raio físico perfeito.
-
-    Como os carros agora podem ser aumentados por TRAFFIC_VEHICLE_SIZE_MULTIPLIER,
-    o teto da colisão também acompanha a escala. Sem isso, o carro ficaria grande
-    visualmente, mas com bolha de colisão pequena.
-  */
   const gameplayRadius =
     Math.hypot(widthMeters * 0.46, lengthMeters * 0.24) *
     TRAFFIC_VEHICLE_COLLISION_RADIUS_MULTIPLIER;
@@ -764,9 +665,8 @@ function createTrafficVehicle(
   const lane = resolveHomeDriveTrafficLane(road, directionSign, laneIndex);
 
   const tSeed = hashVector(roadSeed, slotIndex, 509);
-  const kindSeed = hashVector(roadSeed, slotIndex, 521);
-  const colorSeed = hashVector(roadSeed, slotIndex, 523);
-  const dimensionSeed = hashVector(roadSeed, slotIndex, 541);
+  const modelSeed = hashVector(roadSeed, slotIndex, 521);
+  const paintSeed = hashVector(roadSeed, slotIndex, 523);
   const speedSeed = hashVector(roadSeed, slotIndex, 547);
   const variantSeed = hashVector(roadSeed, slotIndex, 557);
   const speedJitterSeed = hashVector(roadSeed, slotIndex, 569);
@@ -778,14 +678,17 @@ function createTrafficVehicle(
       ? 0.5
       : clamp01((slotIndex + 0.18 + tSeed * 0.64) / slotCount);
 
-  const kind = getTrafficVehicleKind(road, kindSeed);
-  const dimensions = getTrafficVehicleDimensions(kind, dimensionSeed);
+  const modelKey = pickHomeDriveVehicleModelKey(modelSeed, {
+    roadKind: road.kind,
+    parked: false,
+    commercialBias: road.kind === "commercial",
+    serviceBias: road.kind === "service",
+  });
+  const paintKey = pickHomeDriveVehiclePaintKey(paintSeed, modelKey);
+  const kind = getTrafficVehicleModelKind(modelKey);
+  const dimensions = getTrafficVehicleModelDimensions(modelKey);
 
-  const position = getPositionOnTrafficRoad(
-    road,
-    t,
-    lane.laneOffsetMeters,
-  );
+  const position = getPositionOnTrafficRoad(road, t, lane.laneOffsetMeters);
 
   const cruiseSpeedMps = getTrafficVehicleCruiseSpeedMps(
     road,
@@ -802,8 +705,9 @@ function createTrafficVehicle(
 
   return {
     id: `traffic-${road.id}-${slotIndex}-${directionSign}-${lane.laneIndex}`,
+    modelKey,
     kind,
-    colorKey: getTrafficVehicleColor(kind, colorSeed),
+    colorKey: getTrafficVehicleColorFromPaint(paintKey),
 
     roadId: road.roadId,
     segmentId: road.id,
@@ -846,6 +750,10 @@ function createTrafficVehicle(
     visualPitchRad: 0,
     visualYawOffsetRad: 0,
     impactAngularVelocityRadps: 0,
+
+    yieldingToCrosswalkId: null,
+    yieldTimerSeconds: 0,
+
     lastCollisionAt: -999,
   };
 }
@@ -902,11 +810,7 @@ function getRecoveryForVehicleOnRoad(
 ): number {
   const accelerationSeed = hashVector(vehicle.routeSeed, road.segmentIndex, 751);
 
-  return getTrafficVehicleRecoveryMps2(
-    road,
-    vehicle.kind,
-    accelerationSeed,
-  );
+  return getTrafficVehicleRecoveryMps2(road, vehicle.kind, accelerationSeed);
 }
 
 function getSafeVehicleCruiseSpeedMps(
@@ -937,6 +841,92 @@ function getSafeVehicleSpeedRecoveryMps2(
   }
 
   return DEFAULT_TRAFFIC_SPEED_RECOVERY_MPS2;
+}
+
+function hasCrosswalkOccupancy(
+  crosswalks: HomeDriveCrosswalkRuntimeState,
+  crosswalkId: string,
+): boolean {
+  return crosswalks.occupancies.some((occupancy) => {
+    return occupancy.crosswalkId === crosswalkId;
+  });
+}
+
+function resolveCrosswalkYieldForVehicle(
+  vehicle: HomeDriveTrafficVehicle,
+  road: HomeDriveGeneratedRoadSegment,
+  crosswalks: HomeDriveCrosswalkRuntimeState | undefined,
+): CrosswalkYieldResolution {
+  if (!crosswalks || road.length <= MIN_ROAD_LENGTH_METERS) {
+    return {
+      speedFactor: 1,
+      crosswalkId: null,
+    };
+  }
+
+  let bestDistanceMeters = Number.POSITIVE_INFINITY;
+  let bestCrosswalkId: string | null = null;
+  let shouldYield = false;
+
+  for (const crosswalk of crosswalks.crosswalks) {
+    if (crosswalk.segmentId !== vehicle.segmentId) {
+      continue;
+    }
+
+    const deltaT = (crosswalk.t - vehicle.t) * vehicle.directionSign;
+
+    if (deltaT <= 0) {
+      continue;
+    }
+
+    const distanceMeters = deltaT * road.length;
+
+    if (distanceMeters > TRAFFIC_CROSSWALK_LOOKAHEAD_METERS) {
+      continue;
+    }
+
+    const occupied = hasCrosswalkOccupancy(crosswalks, crosswalk.id);
+    const yieldNow = shouldHomeDriveTrafficYieldAtCrosswalk(
+      crosswalk,
+      crosswalks.elapsedSeconds,
+      occupied,
+    );
+
+    if (!yieldNow) {
+      continue;
+    }
+
+    if (distanceMeters < bestDistanceMeters) {
+      bestDistanceMeters = distanceMeters;
+      bestCrosswalkId = crosswalk.id;
+      shouldYield = true;
+    }
+  }
+
+  if (!shouldYield || !bestCrosswalkId) {
+    return {
+      speedFactor: 1,
+      crosswalkId: null,
+    };
+  }
+
+  if (bestDistanceMeters <= TRAFFIC_CROSSWALK_STOP_DISTANCE_METERS) {
+    return {
+      speedFactor: 0,
+      crosswalkId: bestCrosswalkId,
+    };
+  }
+
+  return {
+    speedFactor: clamp(
+      (bestDistanceMeters - TRAFFIC_CROSSWALK_STOP_DISTANCE_METERS) /
+        (TRAFFIC_CROSSWALK_LOOKAHEAD_METERS -
+          TRAFFIC_CROSSWALK_STOP_DISTANCE_METERS),
+      0.08,
+      0.86,
+    ),
+    crosswalkId: bestCrosswalkId,
+  };
 }
 
 function getRecoveredVehicleSpeedMps(
@@ -1006,16 +996,23 @@ function tickTrafficVehicle(
   roads: readonly HomeDriveGeneratedRoadSegment[],
   topology: HomeDriveRoadTopology,
   deltaSeconds: number,
+  crosswalks?: HomeDriveCrosswalkRuntimeState,
 ): HomeDriveTrafficVehicle {
   if (road.length <= MIN_ROAD_LENGTH_METERS) {
     return vehicle;
   }
 
-  const recoveredSpeedMps = getRecoveredVehicleSpeedMps(
+  const baseRecoveredSpeedMps = getRecoveredVehicleSpeedMps(
     vehicle,
     road,
     deltaSeconds,
   );
+  const crosswalkYield = resolveCrosswalkYieldForVehicle(
+    vehicle,
+    road,
+    crosswalks,
+  );
+  const recoveredSpeedMps = baseRecoveredSpeedMps * crosswalkYield.speedFactor;
 
   const rawNextT = getNextVehicleT(
     vehicle,
@@ -1135,6 +1132,10 @@ function tickTrafficVehicle(
     visualPitchRad: decayedVisualPitchRad,
     visualYawOffsetRad: decayedVisualYawOffsetRad,
     impactAngularVelocityRadps: decayedAngularVelocityRadps,
+    yieldingToCrosswalkId: crosswalkYield.crosswalkId,
+    yieldTimerSeconds: crosswalkYield.crosswalkId
+      ? vehicle.yieldTimerSeconds + deltaSeconds
+      : Math.max(0, vehicle.yieldTimerSeconds - deltaSeconds * 2),
   };
 }
 
@@ -1243,7 +1244,14 @@ export function tickHomeDriveTraffic(
         return vehicle;
       }
 
-      return tickTrafficVehicle(vehicle, road, roads, topology, deltaSeconds);
+      return tickTrafficVehicle(
+        vehicle,
+        road,
+        roads,
+        topology,
+        deltaSeconds,
+        options.crosswalks,
+      );
     }),
   };
 }

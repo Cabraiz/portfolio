@@ -3,6 +3,12 @@
 import { useFrame } from "@react-three/fiber";
 import { useRef } from "react";
 
+import {
+  syncHomeDriveCrosswalkOccupanciesFromPedestrians,
+  tickHomeDriveCrosswalks,
+  type HomeDriveCrosswalkRuntimeState,
+} from "../domain/crosswalks";
+
 import { resolveHomeDriveTrafficCollisions } from "../domain/homeDrive.collision";
 import { mergeHomeDriveImpactStates } from "../domain/homeDrive.impact";
 import { tickHomeDrivePhysics } from "../domain/homeDrive.physics";
@@ -12,6 +18,8 @@ import {
   tickHomeDrivePedestrians,
   type HomeDrivePedestrianRuntimeState,
 } from "../domain/pedestrians";
+import type { HomeDrivePedestrianPerformanceProfile } from "../domain/pedestrians/homeDrive.pedestrianPerformance";
+import { getHomeDrivePedestrianSimulationStepSeconds } from "../domain/pedestrians/homeDrive.pedestrianPerformance";
 import type {
   HomeDriveInputState,
   HomeDriveRuntimeState,
@@ -26,6 +34,8 @@ export type HomeDriveThreeSimulationProps = Readonly<{
   inputRef: HomeDriveMutableRef<HomeDriveInputState>;
   trafficRef?: HomeDriveMutableRef<HomeDriveTrafficRuntimeState>;
   pedestriansRef?: HomeDriveMutableRef<HomeDrivePedestrianRuntimeState>;
+  crosswalksRef?: HomeDriveMutableRef<HomeDriveCrosswalkRuntimeState>;
+  pedestrianPerformance?: HomeDrivePedestrianPerformanceProfile;
   enabled?: boolean;
 
   /**
@@ -56,6 +66,11 @@ function sanitizeDeltaSeconds(deltaSeconds: number): number {
 
 function tickPedestriansStep(
   pedestriansRef: HomeDriveMutableRef<HomeDrivePedestrianRuntimeState> | undefined,
+  crosswalksRef: HomeDriveMutableRef<HomeDriveCrosswalkRuntimeState> | undefined,
+  runtime: HomeDriveRuntimeState,
+  deltaSeconds: number,
+  tickIndex: number,
+  pedestrianPerformance?: HomeDrivePedestrianPerformanceProfile,
 ): void {
   if (!pedestriansRef) {
     return;
@@ -63,16 +78,31 @@ function tickPedestriansStep(
 
   pedestriansRef.current = tickHomeDrivePedestrians(
     pedestriansRef.current,
-    FIXED_STEP_SECONDS,
+    deltaSeconds,
     {
-      maxDeltaSeconds: FIXED_STEP_SECONDS,
+      maxDeltaSeconds: deltaSeconds,
+      crosswalks: crosswalksRef?.current,
+      activeCenter: runtime.car.position,
+      activeRadiusMeters: pedestrianPerformance?.activeSimulationRadiusMeters,
+      warmRadiusMeters: pedestrianPerformance?.warmSimulationRadiusMeters,
+      warmTickModulo: pedestrianPerformance?.warmTickModulo,
+      coldTickModulo: pedestrianPerformance?.coldTickModulo,
+      tickIndex,
     },
   );
+
+  if (crosswalksRef) {
+    crosswalksRef.current = syncHomeDriveCrosswalkOccupanciesFromPedestrians(
+      crosswalksRef.current,
+      pedestriansRef.current.agents,
+    );
+  }
 }
 
 function tickTrafficAndCollisionsStep(
   nextRuntime: HomeDriveRuntimeState,
   trafficRef: HomeDriveMutableRef<HomeDriveTrafficRuntimeState> | undefined,
+  crosswalksRef: HomeDriveMutableRef<HomeDriveCrosswalkRuntimeState> | undefined,
 ): HomeDriveRuntimeState {
   if (!trafficRef) {
     return nextRuntime;
@@ -81,6 +111,9 @@ function tickTrafficAndCollisionsStep(
   const nextTraffic = tickHomeDriveTraffic(
     trafficRef.current,
     FIXED_STEP_SECONDS,
+    {
+      crosswalks: crosswalksRef?.current,
+    },
   );
 
   const collisionResolution = resolveHomeDriveTrafficCollisions(
@@ -112,14 +145,22 @@ function tickSimulationStep(
   runtime: HomeDriveRuntimeState,
   input: HomeDriveInputState,
   trafficRef: HomeDriveMutableRef<HomeDriveTrafficRuntimeState> | undefined,
-  pedestriansRef: HomeDriveMutableRef<HomeDrivePedestrianRuntimeState> | undefined,
+  crosswalksRef: HomeDriveMutableRef<HomeDriveCrosswalkRuntimeState> | undefined,
 ): HomeDriveRuntimeState {
+  if (crosswalksRef) {
+    crosswalksRef.current = tickHomeDriveCrosswalks(
+      crosswalksRef.current,
+      FIXED_STEP_SECONDS,
+    );
+  }
+
   const physicsRuntime = tickHomeDrivePhysics(runtime, input, FIXED_STEP_SECONDS);
-  const trafficRuntime = tickTrafficAndCollisionsStep(physicsRuntime, trafficRef);
 
-  tickPedestriansStep(pedestriansRef);
-
-  return trafficRuntime;
+  return tickTrafficAndCollisionsStep(
+    physicsRuntime,
+    trafficRef,
+    crosswalksRef,
+  );
 }
 
 export default function HomeDriveThreeSimulation({
@@ -127,17 +168,22 @@ export default function HomeDriveThreeSimulation({
   inputRef,
   trafficRef,
   pedestriansRef,
+  crosswalksRef,
+  pedestrianPerformance,
   enabled = true,
   publishRuntimeSnapshot,
   snapshotHz = DEFAULT_SNAPSHOT_HZ,
 }: HomeDriveThreeSimulationProps) {
   const accumulatorRef = useRef(0);
   const snapshotAccumulatorRef = useRef(0);
+  const pedestrianAccumulatorRef = useRef(0);
+  const pedestrianTickIndexRef = useRef(0);
 
   useFrame((_, rawDeltaSeconds) => {
     if (!enabled) {
       accumulatorRef.current = 0;
       snapshotAccumulatorRef.current = 0;
+      pedestrianAccumulatorRef.current = 0;
       return;
     }
 
@@ -162,8 +208,29 @@ export default function HomeDriveThreeSimulation({
         runtimeRef.current,
         inputRef.current,
         trafficRef,
-        pedestriansRef,
+        crosswalksRef,
       );
+
+      const pedestrianStepSeconds = pedestrianPerformance
+        ? getHomeDrivePedestrianSimulationStepSeconds(pedestrianPerformance)
+        : FIXED_STEP_SECONDS;
+
+      pedestrianAccumulatorRef.current += FIXED_STEP_SECONDS;
+
+      while (pedestrianAccumulatorRef.current >= pedestrianStepSeconds) {
+        pedestrianTickIndexRef.current += 1;
+
+        tickPedestriansStep(
+          pedestriansRef,
+          crosswalksRef,
+          runtimeRef.current,
+          pedestrianStepSeconds,
+          pedestrianTickIndexRef.current,
+          pedestrianPerformance,
+        );
+
+        pedestrianAccumulatorRef.current -= pedestrianStepSeconds;
+      }
 
       accumulatorRef.current -= FIXED_STEP_SECONDS;
       steps += 1;
@@ -176,6 +243,7 @@ export default function HomeDriveThreeSimulation({
     */
     if (steps >= MAX_STEPS_PER_FRAME) {
       accumulatorRef.current = 0;
+      pedestrianAccumulatorRef.current = 0;
     }
 
     if (!publishRuntimeSnapshot) {

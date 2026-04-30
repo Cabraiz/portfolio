@@ -1,20 +1,21 @@
-/* src/pages/Mateus/Home/components/mobile/game/driving/HomeDrive/view/HomeDriveCompass.module.css */
+/* src/pages/Mateus/Home/components/mobile/game/driving/view/HomeDriveCompass.module.css */
 
 .root {
   position: fixed;
   top: var(
     --free-drive-compass-top,
-    max(64px, calc(env(safe-area-inset-top) + 52px))
+    max(78px, calc(env(safe-area-inset-top) + 66px))
   );
   left: 50%;
   z-index: 2147483647;
-  width: min(88vw, 440px);
-  height: 58px;
+  width: var(--free-drive-compass-width, min(88vw, 440px));
+  height: var(--free-drive-compass-height, 58px);
   transform: translate3d(-50%, 0, 0);
   pointer-events: none;
   user-select: none;
   -webkit-user-select: none;
   -webkit-tap-highlight-color: transparent;
+  contain: layout paint style;
 }
 
 .frame {
@@ -22,57 +23,129 @@
   width: 100%;
   height: 100%;
   overflow: hidden;
+  border: 1px solid rgba(255, 245, 210, 0.13);
   border-radius: 999px;
   background:
     linear-gradient(
       180deg,
-      rgba(5, 10, 16, 0.1),
-      rgba(5, 10, 16, 0.22)
+      rgba(255, 255, 255, 0.09) 0%,
+      rgba(255, 255, 255, 0.032) 35%,
+      rgba(0, 0, 0, 0.14) 100%
+    ),
+    linear-gradient(
+      90deg,
+      rgba(2, 7, 13, 0.74) 0%,
+      rgba(13, 22, 30, 0.54) 30%,
+      rgba(28, 35, 39, 0.42) 50%,
+      rgba(13, 22, 30, 0.54) 70%,
+      rgba(2, 7, 13, 0.74) 100%
     );
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.06),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.28);
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.32),
+    0 8px 22px rgba(0, 0, 0, 0.18);
+  contain: layout paint style;
 }
 
-.rail {
+.frame::before {
   position: absolute;
-  top: 29px;
-  left: 5%;
-  right: 5%;
-  height: 1px;
-  opacity: 0.96;
+  inset: 1px 12px auto;
+  z-index: 1;
+  height: 40%;
+  content: "";
+  border-radius: 999px;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.13),
+      rgba(255, 255, 255, 0.03) 58%,
+      transparent 100%
+    );
+  opacity: 0.54;
+  pointer-events: none;
+}
+
+.frame::after {
+  position: absolute;
+  inset: auto 12px 2px;
+  z-index: 1;
+  height: 28%;
+  content: "";
+  border-radius: 999px;
+  background:
+    linear-gradient(
+      180deg,
+      transparent,
+      rgba(0, 0, 0, 0.18)
+    );
+  opacity: 0.68;
+  pointer-events: none;
+}
+
+/*
+  Mantido leve.
+  Removi mix-blend-mode e textura radial pesada.
+*/
+.materialNoise {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  opacity: 0.08;
+  pointer-events: none;
   background:
     linear-gradient(
       90deg,
       transparent 0%,
-      rgba(244, 237, 214, 0.28) 8%,
-      rgba(244, 237, 214, 0.92) 50%,
-      rgba(244, 237, 214, 0.28) 92%,
+      rgba(255, 255, 255, 0.045) 48%,
       transparent 100%
     );
-  box-shadow:
-    0 1px 0 rgba(0, 0, 0, 0.64),
-    0 0 12px rgba(255, 246, 216, 0.16);
+}
+
+.rail {
+  position: absolute;
+  top: 50%;
+  left: 6.25%;
+  right: 6.25%;
+  z-index: 3;
+  height: 1px;
+  opacity: 0.92;
+  transform: translateY(-50%);
+  background:
+    linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(244, 237, 214, 0.16) 8%,
+      rgba(244, 237, 214, 0.66) 26%,
+      rgba(255, 250, 231, 0.86) 50%,
+      rgba(244, 237, 214, 0.66) 74%,
+      rgba(244, 237, 214, 0.16) 92%,
+      transparent 100%
+    );
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.64);
 }
 
 .edgeFade {
   position: absolute;
   inset: 0;
-  z-index: 4;
+  z-index: 8;
+  pointer-events: none;
   background:
     linear-gradient(
       90deg,
-      rgba(3, 7, 13, 0.76) 0%,
-      transparent 15%,
-      transparent 85%,
-      rgba(3, 7, 13, 0.76) 100%
+      rgba(2, 6, 11, 0.9) 0%,
+      rgba(2, 6, 11, 0.56) 7%,
+      transparent 18%,
+      transparent 82%,
+      rgba(2, 6, 11, 0.56) 93%,
+      rgba(2, 6, 11, 0.9) 100%
     );
 }
 
 .markLayer {
   position: absolute;
   inset: 0;
-  z-index: 2;
+  z-index: 4;
+  contain: layout paint style;
 }
 
 .mark {
@@ -86,67 +159,87 @@
   opacity: var(--free-drive-compass-opacity);
   transform:
     translate3d(-50%, -50%, 0)
-    translateX(var(--free-drive-compass-x));
-  transition:
-    opacity 90ms linear,
-    transform 90ms linear;
-  will-change: transform, opacity;
+    translate3d(var(--free-drive-compass-x), 0, 0);
+
+  /*
+    Importante para framerate:
+    sem transition aqui.
+    A direção muda quase todo frame; transition acumulando deixa a bússola travada/engasgando.
+  */
+  transition: none;
+  will-change: transform;
 }
 
 .tick {
   display: block;
   width: 1px;
   border-radius: 999px;
-  background: rgba(245, 238, 216, 0.86);
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 252, 235, 0.88),
+      rgba(225, 208, 168, 0.66)
+    );
   box-shadow: 0 1px 0 rgba(0, 0, 0, 0.62);
 }
 
 .mark-minor .tick {
+  width: 1px;
   height: 7px;
-  opacity: 0.7;
+  opacity: calc(0.5 + var(--free-drive-compass-emphasis) * 0.2);
 }
 
 .mark-medium .tick {
-  width: 1.5px;
+  width: 1px;
   height: 13px;
-  opacity: 0.92;
+  opacity: calc(0.68 + var(--free-drive-compass-emphasis) * 0.18);
 }
 
 .mark-major {
-  width: 50px;
+  width: 52px;
+}
+
+.mark-major .tick {
+  width: 2px;
+  height: 18px;
 }
 
 .cardinal {
-  top: 18px;
+  top: 48%;
 }
 
 .label {
   display: block;
-  min-width: 28px;
+  min-width: 30px;
   text-align: center;
   font-family:
-    "Cinzel",
-    "Trajan Pro",
-    "Times New Roman",
-    serif;
-  font-size: clamp(0.84rem, 3.25vw, 1.04rem);
-  font-weight: 900;
+    "Saira Condensed",
+    "Barlow Condensed",
+    "Inter Tight",
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+  font-size: clamp(0.84rem, 3.12vw, 1.08rem);
+  font-weight: 800;
   line-height: 1;
-  letter-spacing: 0.16em;
-  color: rgba(255, 249, 224, 0.99);
-  text-shadow:
-    0 1px 1px rgba(0, 0, 0, 0.98),
-    0 0 10px rgba(255, 245, 210, 0.2);
+  letter-spacing: 0.18em;
+  color: rgba(255, 250, 228, 0.98);
+  text-transform: uppercase;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.9);
+  transform: translateX(0.06em);
 }
 
 .centerNeedle {
   position: absolute;
-  top: 7px;
+  top: 6px;
   left: 50%;
-  z-index: 5;
-  width: 26px;
-  height: 40px;
+  z-index: 9;
+  width: 30px;
+  height: 46px;
   transform: translateX(-50%);
+  contain: layout paint style;
 }
 
 .centerNotch {
@@ -156,39 +249,78 @@
   width: 0;
   height: 0;
   transform: translateX(-50%);
-  border-left: 5px solid transparent;
   border-right: 5px solid transparent;
-  border-top: 9px solid rgba(255, 244, 210, 0.98);
-  filter:
-    drop-shadow(0 1px 1px rgba(0, 0, 0, 0.8))
-    drop-shadow(0 0 5px rgba(255, 237, 184, 0.2));
+  border-left: 5px solid transparent;
+  border-top: 10px solid rgba(255, 246, 216, 0.98);
 }
 
-.centerNotch::after {
+.centerNotch::before {
   position: absolute;
-  top: -8px;
-  left: -1px;
-  width: 2px;
-  height: 34px;
+  top: -10px;
+  left: -3px;
+  width: 6px;
+  height: 2px;
   content: "";
   border-radius: 999px;
-  background: rgba(255, 244, 210, 0.76);
-  transform: translateY(8px);
+  background: rgba(255, 255, 255, 0.42);
+  opacity: 0.58;
+}
+
+.centerStem {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  width: 2px;
+  height: 25px;
+  content: "";
+  border-radius: 999px;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 248, 222, 0.86),
+      rgba(213, 190, 138, 0.58)
+    );
+  box-shadow:
+    1px 0 0 rgba(255, 255, 255, 0.12),
+    -1px 0 0 rgba(0, 0, 0, 0.24),
+    0 1px 1px rgba(0, 0, 0, 0.62);
+  transform: translateX(-50%);
+}
+
+.centerBase {
+  position: absolute;
+  bottom: 5px;
+  left: 50%;
+  width: 14px;
+  height: 4px;
+  content: "";
+  border: 1px solid rgba(255, 244, 210, 0.32);
+  border-radius: 999px;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 248, 222, 0.32),
+      rgba(0, 0, 0, 0.16)
+    );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    0 1px 1px rgba(0, 0, 0, 0.54);
+  transform: translateX(-50%);
 }
 
 .centerGlow {
   position: absolute;
-  top: 25px;
+  top: 24px;
   left: 50%;
-  width: 52px;
+  width: 46px;
   height: 1px;
-  opacity: 0.5;
+  opacity: 0.26;
   transform: translateX(-50%);
   background:
     linear-gradient(
       90deg,
       transparent,
-      rgba(255, 244, 210, 0.72),
+      rgba(255, 244, 210, 0.48),
       transparent
     );
 }
@@ -197,14 +329,15 @@
   .root {
     top: var(
       --free-drive-compass-top,
-      max(58px, calc(env(safe-area-inset-top) + 46px))
+      max(74px, calc(env(safe-area-inset-top) + 62px))
     );
-    width: 91vw;
-    height: 52px;
+    width: var(--free-drive-compass-width, 91vw);
+    height: var(--free-drive-compass-height, 52px);
   }
 
   .label {
     font-size: 0.78rem;
+    letter-spacing: 0.15em;
   }
 
   .mark {
@@ -212,7 +345,16 @@
   }
 
   .mark-major {
-    width: 42px;
+    width: 44px;
+  }
+
+  .centerNeedle {
+    top: 5px;
+    height: 42px;
+  }
+
+  .centerStem {
+    height: 22px;
   }
 }
 

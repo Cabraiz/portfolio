@@ -14,6 +14,7 @@ import type {
   HomeDrivePedestrianRoadSegmentQueryOptions,
   HomeDriveRoadVisibilityOptions,
   HomeDriveVisibleRoadSegment,
+  HomeDriveWorldCrosswalkRoadSettings,
   HomeDriveWorldPedestrianRoadSettings,
   HomeDriveWorldPosition,
   HomeDriveWorldRoad,
@@ -33,6 +34,80 @@ function getRoadPedestrianSettings(
   road: HomeDriveWorldRoad,
 ): HomeDriveWorldPedestrianRoadSettings | undefined {
   return road.pedestrians;
+}
+
+
+function getRoadCrosswalkSettings(
+  road: HomeDriveWorldRoad,
+): HomeDriveWorldCrosswalkRoadSettings | undefined {
+  return road.crosswalks;
+}
+
+function inferCrosswalkAllowed(segment: HomeDriveGeneratedRoadSegment): boolean {
+  const tags = getRoadTags(segment);
+  const settings = getRoadCrosswalkSettings(segment.sourceRoad);
+
+  if (settings?.enabled === false) {
+    return false;
+  }
+
+  if (
+    tags.includes("no-crosswalks") ||
+    tags.includes("safe-endcap") ||
+    tags.includes("no-pedestrians")
+  ) {
+    return false;
+  }
+
+  if (segment.surface === "water") {
+    return false;
+  }
+
+  if (segment.kind === "service" && segment.length < 120) {
+    return false;
+  }
+
+  return true;
+}
+
+function inferCrosswalkDensity(segment: HomeDriveGeneratedRoadSegment): number | undefined {
+  const settings = getRoadCrosswalkSettings(segment.sourceRoad);
+
+  if (typeof settings?.density === "number") {
+    return settings.density;
+  }
+
+  if (segment.kind === "commercial") {
+    return 1.2;
+  }
+
+  if (segment.kind === "avenue") {
+    return 1;
+  }
+
+  if (segment.kind === "coastal") {
+    return 0.84;
+  }
+
+  if (segment.kind === "street") {
+    return 0.72;
+  }
+
+  if (segment.kind === "service") {
+    return 0.24;
+  }
+
+  return undefined;
+}
+
+function inferCrosswalkYieldControl(segment: HomeDriveGeneratedRoadSegment): boolean | undefined {
+  const settings = getRoadCrosswalkSettings(segment.sourceRoad);
+
+  if (typeof settings?.yieldControl === "boolean") {
+    return settings.yieldControl;
+  }
+
+  return segment.kind !== "service";
 }
 
 function inferPedestrianAllowed(segment: HomeDriveGeneratedRoadSegment): boolean {
@@ -100,6 +175,10 @@ function enrichRoadSegmentForUrbanSystems(
       settings?.sidewalkLeftWidthMeters ?? settings?.sidewalkWidthMeters,
     sidewalkRightWidthMeters:
       settings?.sidewalkRightWidthMeters ?? settings?.sidewalkWidthMeters,
+    crosswalkAllowed: inferCrosswalkAllowed(segment),
+    crosswalkDensity: inferCrosswalkDensity(segment),
+    crosswalkZoneTone: getRoadCrosswalkSettings(segment.sourceRoad)?.zoneTone,
+    crosswalkYieldControl: inferCrosswalkYieldControl(segment),
   };
 }
 

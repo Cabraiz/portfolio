@@ -16,17 +16,19 @@ export type HomeDrivePedestrianSidewalkBuildOptions = Readonly<{
   density?: number;
 }>;
 
-const DEFAULT_MIN_ROAD_LENGTH_METERS = 56;
+const DEFAULT_MIN_ROAD_LENGTH_METERS = 42;
 const DEFAULT_SIDEWALK_GAP_METERS = 1.35;
 const DEFAULT_SIDEWALK_WIDTH_METERS = 2.85;
 const MIN_ZONE_LENGTH_METERS = 0.000001;
 
 let cachedSidewalkZonesKey = "";
-let cachedSidewalkZones: readonly HomeDrivePedestrianSidewalkZone[] | null = null;
+let cachedSidewalkZones: readonly HomeDrivePedestrianSidewalkZone[] | null =
+  null;
 
 function getCacheKey(options: HomeDrivePedestrianSidewalkBuildOptions): string {
   return JSON.stringify({
-    minRoadLengthMeters: options.minRoadLengthMeters ?? DEFAULT_MIN_ROAD_LENGTH_METERS,
+    minRoadLengthMeters:
+      options.minRoadLengthMeters ?? DEFAULT_MIN_ROAD_LENGTH_METERS,
     maxRoads: options.maxRoads ?? null,
     density: options.density ?? 1,
   });
@@ -50,7 +52,7 @@ function isRoadEligibleForPedestrians(
     return false;
   }
 
-  if (road.kind === "service" && road.length < 92) {
+  if (road.kind === "service" && road.length < 58) {
     return false;
   }
 
@@ -67,14 +69,19 @@ function getSidewalkWidthMeters(road: HomeDriveGeneratedRoadSegment): number {
   switch (road.kind) {
     case "avenue":
       return 3.75;
+
     case "commercial":
       return 3.45;
+
     case "street":
       return 2.65;
+
     case "ring":
       return 2.5;
+
     case "service":
       return 2.15;
+
     default:
       return DEFAULT_SIDEWALK_WIDTH_METERS;
   }
@@ -82,41 +89,47 @@ function getSidewalkWidthMeters(road: HomeDriveGeneratedRoadSegment): number {
 
 function getSidewalkDensity(road: HomeDriveGeneratedRoadSegment): number {
   const tags = getRoadTags(road);
-  let density = 0.42;
+  let density = 0.38;
 
   switch (road.kind) {
     case "coastal":
-      density = 0.88;
+      density = 0.78;
       break;
+
     case "commercial":
-      density = 0.82;
+      density = 0.76;
       break;
+
     case "avenue":
-      density = 0.64;
+      density = 0.58;
       break;
+
     case "street":
-      density = 0.46;
+      density = 0.42;
       break;
+
     case "ring":
-      density = 0.24;
+      density = 0.2;
       break;
+
     case "service":
-      density = 0.18;
+      density = 0.14;
       break;
+
     default:
-      density = 0.36;
+      density = 0.32;
       break;
   }
 
   if (tags.includes("main")) {
-    density += 0.16;
+    density += 0.12;
   }
 
   if (tags.includes("fast")) {
-    density -= 0.18;
+    density -= 0.14;
   }
 
-  return clamp(density, 0.08, 1.15);
+  return clamp(density, 0.06, 1.12);
 }
 
 function getSideNormal(
@@ -149,7 +162,8 @@ function getZoneForRoadSide(
 ): HomeDrivePedestrianSidewalkZone {
   const widthMeters = getSidewalkWidthMeters(road);
   const normal = getSideNormal(road, side);
-  const offsetFromRoadCenterMeters = road.width / 2 + DEFAULT_SIDEWALK_GAP_METERS + widthMeters / 2;
+  const offsetFromRoadCenterMeters =
+    road.width / 2 + DEFAULT_SIDEWALK_GAP_METERS + widthMeters / 2;
   const from = offsetPoint(road.from, normal, offsetFromRoadCenterMeters);
   const to = offsetPoint(road.to, normal, offsetFromRoadCenterMeters);
 
@@ -173,7 +187,7 @@ function getZoneForRoadSide(
     lengthMeters: road.length,
     widthMeters,
     offsetFromRoadCenterMeters,
-    density: clamp(getSidewalkDensity(road) * globalDensity, 0, 1.6),
+    density: clamp(getSidewalkDensity(road) * globalDensity, 0, 1.45),
     tags: getRoadTags(road),
     road,
   };
@@ -188,7 +202,8 @@ export function buildHomeDrivePedestrianSidewalkZones(
     return cachedSidewalkZones;
   }
 
-  const minRoadLengthMeters = options.minRoadLengthMeters ?? DEFAULT_MIN_ROAD_LENGTH_METERS;
+  const minRoadLengthMeters =
+    options.minRoadLengthMeters ?? DEFAULT_MIN_ROAD_LENGTH_METERS;
   const globalDensity = options.density ?? 1;
   const maxRoads = options.maxRoads ?? Number.POSITIVE_INFINITY;
 
@@ -263,7 +278,8 @@ export function resolveHomeDrivePedestrianSidewalkProgressAfterDistance(
     };
   }
 
-  const nextProgress = progress + (distanceMeters / zone.lengthMeters) * directionSign;
+  const nextProgress =
+    progress + (distanceMeters / zone.lengthMeters) * directionSign;
 
   if (nextProgress > 0.975) {
     return {
@@ -295,12 +311,67 @@ export function getHomeDrivePedestrianZoneById(
   return zones.find((zone) => zone.id === zoneId);
 }
 
+function getPedestrianSlotSpacingMeters(
+  zone: HomeDrivePedestrianSidewalkZone,
+): number {
+  switch (zone.roadKind) {
+    case "commercial":
+      return 28;
+
+    case "coastal":
+      return 30;
+
+    case "avenue":
+      return 34;
+
+    case "street":
+      return 42;
+
+    case "ring":
+      return 58;
+
+    case "service":
+      return 72;
+
+    default:
+      return 48;
+  }
+}
+
 export function getHomeDrivePedestrianSidewalkSlotCount(
   zone: HomeDrivePedestrianSidewalkZone,
   density: number,
 ): number {
-  const spacingMeters = zone.roadKind === "commercial" || zone.roadKind === "coastal" ? 28 : 38;
-  const rawCount = Math.floor((zone.lengthMeters / spacingMeters) * zone.density * density);
+  const spacingMeters = getPedestrianSlotSpacingMeters(zone);
+  const rawCount = Math.floor(
+    (zone.lengthMeters / spacingMeters) * zone.density * density,
+  );
+
+  if (zone.density > 0.48 && zone.lengthMeters >= 48) {
+    return Math.max(1, rawCount);
+  }
 
   return Math.max(0, rawCount);
+}
+
+export function getHomeDrivePedestrianOppositeSidewalkSide(
+  side: HomeDrivePedestrianSidewalkSide,
+): HomeDrivePedestrianSidewalkSide {
+  return side === "left" ? "right" : "left";
+}
+
+export function getHomeDrivePedestrianZoneBySegmentAndSide(
+  zones: readonly HomeDrivePedestrianSidewalkZone[],
+  segmentId: string,
+  side: HomeDrivePedestrianSidewalkSide,
+): HomeDrivePedestrianSidewalkZone | undefined {
+  return zones.find((zone) => {
+    return zone.segmentId === segmentId && zone.side === side;
+  });
+}
+
+export function getHomeDrivePedestrianSideForCrosswalkSide(
+  side: -1 | 1,
+): HomeDrivePedestrianSidewalkSide {
+  return side === 1 ? "left" : "right";
 }

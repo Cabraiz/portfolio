@@ -81,6 +81,31 @@ export type HomeDriveWorldPedestrianRoadSettings = Readonly<{
   zoneTone?: string;
 }>;
 
+
+export type HomeDriveWorldCrosswalkRoadSettings = Readonly<{
+  /**
+   * false desativa faixas de pedestre nessa rua inteira.
+   * Também pode ser controlado por tag: "no-crosswalks".
+   */
+  enabled?: boolean;
+
+  /**
+   * Multiplicador local de densidade de faixas.
+   * 1 = normal. 0.4 = poucas. 1.5 = mais frequente.
+   */
+  density?: number;
+
+  /**
+   * Define se a faixa deve ter controle de preferência/sinal.
+   */
+  yieldControl?: boolean;
+
+  /**
+   * Tom semântico opcional para render/debug futuro.
+   */
+  zoneTone?: string;
+}>;
+
 export type HomeDriveWorldRoad = Readonly<{
   id: string;
   label: string;
@@ -101,6 +126,12 @@ export type HomeDriveWorldRoad = Readonly<{
    * os sistemas usam fallback por kind/tags.
    */
   pedestrians?: HomeDriveWorldPedestrianRoadSettings;
+
+  /**
+   * Metadados opcionais para faixas de pedestre.
+   * O mapa atual não precisa preencher isso; os sistemas usam fallback por kind/tags.
+   */
+  crosswalks?: HomeDriveWorldCrosswalkRoadSettings;
 }>;
 
 export type HomeDriveWorldMap = Readonly<{
@@ -164,6 +195,14 @@ export type HomeDriveGeneratedRoadSegment = Readonly<{
   sidewalkWidthMeters?: number;
   sidewalkLeftWidthMeters?: number;
   sidewalkRightWidthMeters?: number;
+
+  /**
+   * Campos opcionais derivados de sourceRoad.crosswalks/tags.
+   */
+  crosswalkAllowed?: boolean;
+  crosswalkDensity?: number;
+  crosswalkZoneTone?: string;
+  crosswalkYieldControl?: boolean;
 }>;
 
 export type HomeDriveVisibleRoadSegment = HomeDriveGeneratedRoadSegment &

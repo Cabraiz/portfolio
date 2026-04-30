@@ -13,12 +13,24 @@ import {
   type Scene,
 } from "three";
 
+import {
+  createInitialHomeDriveCrosswalkState,
+  type HomeDriveCrosswalkRuntimeState,
+} from "../domain/crosswalks";
 import { createInitialHomeDriveTrafficState } from "../domain/homeDrive.traffic";
 import type { HomeDriveTrafficRuntimeState } from "../domain/homeDrive.traffic.types";
+import {
+  createInitialHomeDriveParkedVehicleState,
+  type HomeDriveParkedVehicleRuntimeState,
+} from "../domain/parkedVehicles";
 import {
   createInitialHomeDrivePedestrianState,
   type HomeDrivePedestrianRuntimeState,
 } from "../domain/pedestrians";
+import {
+  getHomeDrivePedestrianPerformanceProfile,
+  type HomeDrivePedestrianPerformanceProfile,
+} from "../domain/pedestrians/homeDrive.pedestrianPerformance";
 import type {
   HomeDriveInputState,
   HomeDriveRuntimeState,
@@ -28,7 +40,9 @@ import HomeDriveThreeBoundaryMountains from "./HomeDriveThreeBoundaryMountains";
 import HomeDriveThreeBuildings from "./HomeDriveThreeBuildings";
 import HomeDriveThreeBuildingSigns from "./HomeDriveThreeBuildingSigns";
 import HomeDriveThreeCameraRig from "./HomeDriveThreeCameraRig";
+import { HomeDriveThreeCrosswalks } from "./crosswalks";
 import HomeDriveThreeGround from "./HomeDriveThreeGround";
+import { HomeDriveThreeParkedVehicles } from "./parkedVehicles";
 import { HomeDriveThreePedestrians } from "./pedestrians";
 import HomeDriveThreeRoadNetwork from "./HomeDriveThreeRoadNetwork";
 import HomeDriveThreeSimulation from "./HomeDriveThreeSimulation";
@@ -52,7 +66,10 @@ type HomeDriveThreeWorldProps = Readonly<{
   runtimeRef: HomeDriveMutableRef<HomeDriveRuntimeState>;
   inputRef: HomeDriveMutableRef<HomeDriveInputState>;
   trafficRef: HomeDriveMutableRef<HomeDriveTrafficRuntimeState>;
+  parkedVehiclesRef: HomeDriveMutableRef<HomeDriveParkedVehicleRuntimeState>;
   pedestriansRef: HomeDriveMutableRef<HomeDrivePedestrianRuntimeState>;
+  crosswalksRef: HomeDriveMutableRef<HomeDriveCrosswalkRuntimeState>;
+  pedestrianPerformance: HomeDrivePedestrianPerformanceProfile;
   publishRuntimeSnapshot?: () => void;
 }>;
 
@@ -195,7 +212,10 @@ function HomeDriveThreeWorld({
   runtimeRef,
   inputRef,
   trafficRef,
+  parkedVehiclesRef,
   pedestriansRef,
+  crosswalksRef,
+  pedestrianPerformance,
   publishRuntimeSnapshot,
 }: HomeDriveThreeWorldProps) {
   return (
@@ -205,6 +225,8 @@ function HomeDriveThreeWorld({
         inputRef={inputRef}
         trafficRef={trafficRef}
         pedestriansRef={pedestriansRef}
+        crosswalksRef={crosswalksRef}
+        pedestrianPerformance={pedestrianPerformance}
         publishRuntimeSnapshot={publishRuntimeSnapshot}
         snapshotHz={10}
       />
@@ -216,20 +238,46 @@ function HomeDriveThreeWorld({
       <HomeDriveThreeGround />
       <HomeDriveThreeBoundaryMountains />
       <HomeDriveThreeRoadNetwork />
+
+      <HomeDriveThreeCrosswalks
+        crosswalksRef={crosswalksRef}
+        runtimeRef={runtimeRef}
+        visibleRadiusMeters={760}
+        maxVisibleCrosswalks={96}
+        showSignals
+      />
+
+      <HomeDriveThreeParkedVehicles
+        parkedVehiclesRef={parkedVehiclesRef}
+        runtimeRef={runtimeRef}
+        visibleRadiusMeters={viewportSafeVisibleRadiusMeters(
+          pedestrianPerformance.visibleRadiusMeters,
+        )}
+        maxVisibleVehicles={pedestrianPerformance.maxVisiblePedestrians}
+      />
+
       <HomeDriveThreeBuildings />
       <HomeDriveThreeBuildingSigns runtimeRef={runtimeRef} />
       <HomeDriveThreeTraffic trafficRef={trafficRef} />
+
       <HomeDriveThreePedestrians
         pedestriansRef={pedestriansRef}
         runtimeRef={runtimeRef}
-        visibleRadiusMeters={300}
-        maxVisiblePedestrians={96}
-        snapshotHz={18}
+        visibleRadiusMeters={pedestrianPerformance.visibleRadiusMeters}
+        maxVisiblePedestrians={pedestrianPerformance.maxVisiblePedestrians}
+        fullDetailRadiusMeters={pedestrianPerformance.fullDetailRadiusMeters}
+        mediumDetailRadiusMeters={pedestrianPerformance.mediumDetailRadiusMeters}
+        snapshotHz={pedestrianPerformance.snapshotHz}
         debug={false}
       />
+
       <HomeDriveThreeWorldObjects runtimeRef={runtimeRef} />
     </>
   );
+}
+
+function viewportSafeVisibleRadiusMeters(baseRadiusMeters: number): number {
+  return Math.max(420, Math.min(680, baseRadiusMeters + 160));
 }
 
 export default function HomeDriveThreeScene({
@@ -246,22 +294,45 @@ export default function HomeDriveThreeScene({
     return installThreeClockDeprecationWarningFilter();
   }, []);
 
+  const pedestrianPerformance = useMemo(() => {
+    return getHomeDrivePedestrianPerformanceProfile(viewport.isPortrait);
+  }, [viewport.isPortrait]);
+
   const trafficRef = useRef<HomeDriveTrafficRuntimeState>(
     createInitialHomeDriveTrafficState({
-      maxVehicles: 176,
-      density: 1.68,
+      maxVehicles: viewport.isPortrait ? 118 : 176,
+      density: viewport.isPortrait ? 1.18 : 1.68,
+    }),
+  );
+
+  const parkedVehiclesRef = useRef<HomeDriveParkedVehicleRuntimeState>(
+    createInitialHomeDriveParkedVehicleState({
+      maxVehicles: viewport.isPortrait ? 82 : 156,
+      density: viewport.isPortrait ? 0.68 : 1,
+      maxRoads: viewport.isPortrait ? 86 : 146,
+      minRoadLengthMeters: 74,
+      seed: 6617,
+    }),
+  );
+
+  const crosswalksRef = useRef<HomeDriveCrosswalkRuntimeState>(
+    createInitialHomeDriveCrosswalkState({
+      maxCrosswalks: viewport.isPortrait ? 72 : 96,
+      density: viewport.isPortrait ? 0.86 : 1.08,
+      minRoadLengthMeters: 82,
+      seed: 9841,
     }),
   );
 
   const initialPedestrianState = useMemo(() => {
     return createInitialHomeDrivePedestrianState({
-      maxPedestrians: viewport.isPortrait ? 108 : 132,
-      density: viewport.isPortrait ? 0.62 : 0.76,
-      maxRoads: 72,
-      minRoadLengthMeters: 58,
+      maxPedestrians: pedestrianPerformance.maxPedestrians,
+      density: pedestrianPerformance.density,
+      maxRoads: pedestrianPerformance.maxRoads,
+      minRoadLengthMeters: pedestrianPerformance.minRoadLengthMeters,
       seed: 7429,
     });
-  }, [viewport.isPortrait]);
+  }, [pedestrianPerformance]);
 
   const pedestriansRef = useRef<HomeDrivePedestrianRuntimeState>(
     initialPedestrianState,
@@ -311,7 +382,10 @@ export default function HomeDriveThreeScene({
             runtimeRef={runtimeRef}
             inputRef={inputRef}
             trafficRef={trafficRef}
+            parkedVehiclesRef={parkedVehiclesRef}
             pedestriansRef={pedestriansRef}
+            crosswalksRef={crosswalksRef}
+            pedestrianPerformance={pedestrianPerformance}
             publishRuntimeSnapshot={publishRuntimeSnapshot}
           />
         </Suspense>

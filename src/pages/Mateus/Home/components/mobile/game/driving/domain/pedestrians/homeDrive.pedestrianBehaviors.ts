@@ -79,6 +79,12 @@ function getBehaviorAnimationKey(
       return "carry-bags";
     case "hold-child-hand":
       return role === "child" ? "child-walk" : "slow-walk";
+    case "cross-walk":
+      return role === "runner" ? "fast-walk" : role === "child" ? "child-walk" : "walk";
+    case "cross-run":
+    case "cross-panic":
+      return "fast-walk";
+    case "cross-wait":
     case "wait-crossing":
     case "idle":
       return "idle";
@@ -107,7 +113,14 @@ function getBehaviorSpeedMultiplier(behavior: HomeDrivePedestrianBehavior): numb
     case "phone":
     case "talk":
     case "wait-crossing":
+    case "cross-wait":
       return 0;
+    case "cross-walk":
+      return 1.08;
+    case "cross-run":
+      return 1.42;
+    case "cross-panic":
+      return 1.74;
     case "shop-walk":
       return 0.72;
     case "hold-child-hand":
@@ -130,7 +143,12 @@ function getBehaviorDurationSeconds(
     case "talk":
       return seededRange(seed, 317, 4.8, 12.5);
     case "wait-crossing":
+    case "cross-wait":
       return seededRange(seed, 331, 2.6, 7.5);
+    case "cross-walk":
+    case "cross-run":
+    case "cross-panic":
+      return seededRange(seed, 333, 3.4, 7.8);
     case "idle":
       return seededRange(seed, 337, 1.8, 6.2);
     case "shop-walk":
@@ -294,6 +312,9 @@ export function shouldHomeDrivePedestrianMove(
   return (
     behavior === "walk" ||
     behavior === "shop-walk" ||
-    behavior === "hold-child-hand"
+    behavior === "hold-child-hand" ||
+    behavior === "cross-walk" ||
+    behavior === "cross-run" ||
+    behavior === "cross-panic"
   );
 }

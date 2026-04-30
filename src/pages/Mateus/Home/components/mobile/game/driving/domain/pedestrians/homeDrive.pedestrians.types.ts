@@ -1,6 +1,7 @@
 // src/pages/Mateus/Home/components/mobile/game/driving/domain/pedestrians/homeDrive.pedestrians.types.ts
 
 import type { HomeDriveVector2 } from "../homeDrive.types";
+import type { HomeDriveCrosswalkRuntimeState } from "../crosswalks";
 import type { HomeDriveGeneratedRoadSegment } from "../homeDrive.worldMap.types";
 
 export type HomeDrivePedestrianRole =
@@ -21,7 +22,11 @@ export type HomeDrivePedestrianBehavior =
   | "talk"
   | "shop-walk"
   | "hold-child-hand"
-  | "wait-crossing";
+  | "wait-crossing"
+  | "cross-wait"
+  | "cross-walk"
+  | "cross-run"
+  | "cross-panic";
 
 export type HomeDrivePedestrianAnimationKey =
   | "idle"
@@ -171,6 +176,14 @@ export type HomeDrivePedestrianAgent = Readonly<{
   animationPhase: number;
   idleLookYawRad: number;
 
+  crosswalkId?: string | null;
+  crossingDirection?: 1 | -1;
+  crossingProgress?: number;
+  crossingStartedAtSeconds?: number;
+  crossingDurationSeconds?: number;
+  crossingStart?: HomeDriveVector2;
+  crossingEnd?: HomeDriveVector2;
+
   seed: number;
 }>;
 
@@ -193,6 +206,7 @@ export type HomeDrivePedestrianGenerationOptions = Readonly<{
 export type HomeDrivePedestrianTickOptions = Readonly<{
   enabled?: boolean;
   maxDeltaSeconds?: number;
+  crosswalks?: HomeDriveCrosswalkRuntimeState;
 }>;
 
 export type HomeDrivePedestrianBehaviorAssignment = Readonly<{
