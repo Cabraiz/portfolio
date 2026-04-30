@@ -5,7 +5,7 @@ import {
   useMemo,
   useRef,
   useSyncExternalStore,
-  type MutableRefObject,
+  type RefObject,
 } from "react";
 
 import type {
@@ -23,8 +23,8 @@ export type HomeDriveInputRefUpdater = (
 ) => HomeDriveInputState;
 
 export type UseHomeDriveRuntimeRefsResult = Readonly<{
-  runtimeRef: MutableRefObject<HomeDriveRuntimeState>;
-  inputRef: MutableRefObject<HomeDriveInputState>;
+  runtimeRef: RefObject<HomeDriveRuntimeState>;
+  inputRef: RefObject<HomeDriveInputState>;
 
   /**
    * Snapshot lento para UI React.
@@ -33,15 +33,11 @@ export type UseHomeDriveRuntimeRefsResult = Readonly<{
   runtimeSnapshot: HomeDriveRuntimeState;
 
   setRuntimeRef: (
-    next:
-      | HomeDriveRuntimeState
-      | HomeDriveRuntimeRefUpdater,
+    next: HomeDriveRuntimeState | HomeDriveRuntimeRefUpdater,
   ) => void;
 
   setInputRef: (
-    next:
-      | HomeDriveInputState
-      | HomeDriveInputRefUpdater,
+    next: HomeDriveInputState | HomeDriveInputRefUpdater,
   ) => void;
 
   patchInputRef: (patch: Partial<HomeDriveInputState>) => void;
@@ -73,15 +69,49 @@ function isInputUpdater(
   return typeof next === "function";
 }
 
+function areNumbersEquivalent(
+  first: number,
+  second: number,
+  epsilon = 0.0001,
+): boolean {
+  return Math.abs(first - second) <= epsilon;
+}
+
+function areInputStatesEquivalent(
+  first: HomeDriveInputState,
+  second: HomeDriveInputState,
+): boolean {
+  return (
+    areNumbersEquivalent(first.steering, second.steering) &&
+    areNumbersEquivalent(first.throttle, second.throttle) &&
+    areNumbersEquivalent(first.brake, second.brake)
+  );
+}
+
+function patchHomeDriveInputState(
+  current: HomeDriveInputState,
+  patch: Partial<HomeDriveInputState>,
+): HomeDriveInputState {
+  const next: HomeDriveInputState = {
+    steering: patch.steering ?? current.steering,
+    throttle: patch.throttle ?? current.throttle,
+    brake: patch.brake ?? current.brake,
+  };
+
+  return areInputStatesEquivalent(current, next) ? current : next;
+}
+
 export function useHomeDriveRuntimeRefs(): UseHomeDriveRuntimeRefsResult {
   const runtimeRef = useRef<HomeDriveRuntimeState>(
     createInitialHomeDriveRuntimeState(),
   );
 
-  const inputRef = useRef<HomeDriveInputState>(DEFAULT_INPUT_STATE);
+  const inputRef = useRef<HomeDriveInputState>({
+    ...DEFAULT_INPUT_STATE,
+  });
 
   const snapshotRef = useRef<HomeDriveRuntimeState>(runtimeRef.current);
-  const listenersRef = useRef(new Set<() => void>());
+  const listenersRef = useRef<Set<() => void>>(new Set());
 
   const subscribe = useCallback((listener: () => void) => {
     listenersRef.current.add(listener);
@@ -102,6 +132,10 @@ export function useHomeDriveRuntimeRefs(): UseHomeDriveRuntimeRefsResult {
   );
 
   const publishRuntimeSnapshot = useCallback(() => {
+    if (snapshotRef.current === runtimeRef.current) {
+      return;
+    }
+
     snapshotRef.current = runtimeRef.current;
 
     listenersRef.current.forEach((listener) => {
@@ -111,31 +145,50 @@ export function useHomeDriveRuntimeRefs(): UseHomeDriveRuntimeRefsResult {
 
   const setRuntimeRef = useCallback(
     (next: HomeDriveRuntimeState | HomeDriveRuntimeRefUpdater) => {
-      runtimeRef.current = isRuntimeUpdater(next)
+      const nextRuntime = isRuntimeUpdater(next)
         ? next(runtimeRef.current)
         : next;
+
+      if (nextRuntime === runtimeRef.current) {
+        return;
+      }
+
+      runtimeRef.current = nextRuntime;
     },
     [],
   );
 
   const setInputRef = useCallback(
     (next: HomeDriveInputState | HomeDriveInputRefUpdater) => {
-      inputRef.current = isInputUpdater(next) ? next(inputRef.current) : next;
+      const nextInput = isInputUpdater(next) ? next(inputRef.current) : next;
+
+      if (areInputStatesEquivalent(inputRef.current, nextInput)) {
+        return;
+      }
+
+      inputRef.current = nextInput;
     },
     [],
   );
 
   const patchInputRef = useCallback((patch: Partial<HomeDriveInputState>) => {
-    inputRef.current = {
-      ...inputRef.current,
-      ...patch,
-    };
+    const nextInput = patchHomeDriveInputState(inputRef.current, patch);
+
+    if (nextInput === inputRef.current) {
+      return;
+    }
+
+    inputRef.current = nextInput;
   }, []);
 
   const resetRuntimeRef = useCallback(() => {
     runtimeRef.current = createInitialHomeDriveRuntimeState();
-    publishRuntimeSnapshot();
-  }, [publishRuntimeSnapshot]);
+    snapshotRef.current = runtimeRef.current;
+
+    listenersRef.current.forEach((listener) => {
+      listener();
+    });
+  }, []);
 
   return useMemo(
     () => ({
@@ -149,11 +202,9 @@ export function useHomeDriveRuntimeRefs(): UseHomeDriveRuntimeRefsResult {
       publishRuntimeSnapshot,
     }),
     [
-      inputRef,
       patchInputRef,
       publishRuntimeSnapshot,
       resetRuntimeRef,
-      runtimeRef,
       runtimeSnapshot,
       setInputRef,
       setRuntimeRef,

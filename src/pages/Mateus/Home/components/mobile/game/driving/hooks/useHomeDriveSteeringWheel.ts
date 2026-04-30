@@ -21,6 +21,11 @@ type ActivePointerState = Readonly<{
   startRotationDeg: number;
 }>;
 
+type SteeringWheelViewState = Readonly<{
+  wheelRotationDeg: number;
+  isDragging: boolean;
+}>;
+
 export type HomeDriveSteeringWheelController = Readonly<{
   wheelRef: RefObject<HTMLDivElement | null>;
   steering: number;
@@ -34,6 +39,9 @@ export type HomeDriveSteeringWheelController = Readonly<{
     onLostPointerCapture: (event: ReactPointerEvent<HTMLDivElement>) => void;
   }>;
 }>;
+
+const ROTATION_EPSILON_DEG = 0.08;
+const STEERING_EPSILON = 0.001;
 
 function getPointerAngleDeg(
   element: HTMLElement,
@@ -86,30 +94,143 @@ function releasePointerCaptureSafely(
   }
 }
 
+function clampWheelRotationDeg(rotationDeg: number): number {
+  return clamp(
+    rotationDeg,
+    -HOME_DRIVE_WHEEL_VISUAL_MAX_ROTATION_DEG,
+    HOME_DRIVE_WHEEL_VISUAL_MAX_ROTATION_DEG,
+  );
+}
+
+function areRotationsEquivalent(first: number, second: number): boolean {
+  return Math.abs(first - second) <= ROTATION_EPSILON_DEG;
+}
+
+function getSteeringFromRotationDeg(rotationDeg: number): number {
+  if (HOME_DRIVE_WHEEL_VISUAL_MAX_ROTATION_DEG <= 0) {
+    return 0;
+  }
+
+  /*
+    Correção do volante invertido:
+    - wheelRotationDeg fica visualmente natural.
+    - steering é invertido para casar com a física/câmera do mundo 3D.
+  */
+  const steering = -clamp(
+    rotationDeg / HOME_DRIVE_WHEEL_VISUAL_MAX_ROTATION_DEG,
+    -1,
+    1,
+  );
+
+  return Math.abs(steering) <= STEERING_EPSILON ? 0 : steering;
+}
+
 export function useHomeDriveSteeringWheel(): HomeDriveSteeringWheelController {
   const wheelRef = useRef<HTMLDivElement | null>(null);
   const activePointerRef = useRef<ActivePointerState | null>(null);
   const rotationRef = useRef(0);
+  const pendingRotationRef = useRef<number | null>(null);
+  const rafRef = useRef<number | null>(null);
 
-  const [wheelRotationDeg, setWheelRotationDeg] = useState(0);
-  const [isDragging, setIsDragging] = useState(false);
+  const [viewState, setViewState] = useState<SteeringWheelViewState>({
+    wheelRotationDeg: 0,
+    isDragging: false,
+  });
 
-  const syncRotation = useCallback((nextRotationDeg: number) => {
-    const clampedRotation = clamp(
-      nextRotationDeg,
-      -HOME_DRIVE_WHEEL_VISUAL_MAX_ROTATION_DEG,
-      HOME_DRIVE_WHEEL_VISUAL_MAX_ROTATION_DEG,
-    );
+  const commitRotation = useCallback((nextRotationDeg: number) => {
+    const clampedRotation = clampWheelRotationDeg(nextRotationDeg);
+
+    if (areRotationsEquivalent(rotationRef.current, clampedRotation)) {
+      rotationRef.current = clampedRotation;
+      return;
+    }
 
     rotationRef.current = clampedRotation;
-    setWheelRotationDeg(clampedRotation);
+
+    setViewState((current) => {
+      if (areRotationsEquivalent(current.wheelRotationDeg, clampedRotation)) {
+        return current;
+      }
+
+      return {
+        ...current,
+        wheelRotationDeg: clampedRotation,
+      };
+    });
+  }, []);
+
+  const cancelPendingFrame = useCallback(() => {
+    if (rafRef.current === null) {
+      return;
+    }
+
+    window.cancelAnimationFrame(rafRef.current);
+    rafRef.current = null;
+  }, []);
+
+  const flushPendingRotation = useCallback(() => {
+    rafRef.current = null;
+
+    const nextRotationDeg = pendingRotationRef.current;
+
+    if (nextRotationDeg === null) {
+      return;
+    }
+
+    pendingRotationRef.current = null;
+    commitRotation(nextRotationDeg);
+  }, [commitRotation]);
+
+  const scheduleRotation = useCallback(
+    (nextRotationDeg: number) => {
+      pendingRotationRef.current = nextRotationDeg;
+
+      if (rafRef.current !== null) {
+        return;
+      }
+
+      rafRef.current = window.requestAnimationFrame(flushPendingRotation);
+    },
+    [flushPendingRotation],
+  );
+
+  const setDraggingSafely = useCallback((isDragging: boolean) => {
+    setViewState((current) => {
+      if (current.isDragging === isDragging) {
+        return current;
+      }
+
+      return {
+        ...current,
+        isDragging,
+      };
+    });
   }, []);
 
   const resetRotation = useCallback(() => {
     activePointerRef.current = null;
-    setIsDragging(false);
-    syncRotation(0);
-  }, [syncRotation]);
+    pendingRotationRef.current = null;
+    cancelPendingFrame();
+
+    setViewState((current) => {
+      const nextRotationDeg = 0;
+      const isSameRotation = areRotationsEquivalent(
+        current.wheelRotationDeg,
+        nextRotationDeg,
+      );
+
+      rotationRef.current = nextRotationDeg;
+
+      if (!current.isDragging && isSameRotation) {
+        return current;
+      }
+
+      return {
+        wheelRotationDeg: nextRotationDeg,
+        isDragging: false,
+      };
+    });
+  }, [cancelPendingFrame]);
 
   const handlePointerDown = useCallback(
     (event: ReactPointerEvent<HTMLDivElement>) => {
@@ -134,9 +255,9 @@ export function useHomeDriveSteeringWheel(): HomeDriveSteeringWheelController {
         startRotationDeg: rotationRef.current,
       };
 
-      setIsDragging(true);
+      setDraggingSafely(true);
     },
-    [],
+    [setDraggingSafely],
   );
 
   const handlePointerMove = useCallback(
@@ -170,9 +291,9 @@ export function useHomeDriveSteeringWheel(): HomeDriveSteeringWheelController {
         dedo gira horário -> volante gira horário.
         A inversão fica somente no steering enviado para a física.
       */
-      syncRotation(activePointer.startRotationDeg + deltaDeg);
+      scheduleRotation(activePointer.startRotationDeg + deltaDeg);
     },
-    [syncRotation],
+    [scheduleRotation],
   );
 
   const handlePointerUp = useCallback(
@@ -230,7 +351,7 @@ export function useHomeDriveSteeringWheel(): HomeDriveSteeringWheelController {
 
       event.preventDefault();
 
-      syncRotation(
+      commitRotation(
         event.key === "ArrowLeft"
           ? -HOME_DRIVE_WHEEL_VISUAL_MAX_ROTATION_DEG * 0.72
           : HOME_DRIVE_WHEEL_VISUAL_MAX_ROTATION_DEG * 0.72,
@@ -253,24 +374,17 @@ export function useHomeDriveSteeringWheel(): HomeDriveSteeringWheelController {
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);
     };
-  }, [resetRotation, syncRotation]);
+  }, [commitRotation, resetRotation]);
+
+  useEffect(() => {
+    return () => {
+      cancelPendingFrame();
+    };
+  }, [cancelPendingFrame]);
 
   const steering = useMemo(() => {
-    if (HOME_DRIVE_WHEEL_VISUAL_MAX_ROTATION_DEG <= 0) {
-      return 0;
-    }
-
-    /*
-      Correção do volante invertido:
-      - wheelRotationDeg fica visualmente natural.
-      - steering é invertido para casar com a física/câmera do mundo 3D.
-    */
-    return -clamp(
-      wheelRotationDeg / HOME_DRIVE_WHEEL_VISUAL_MAX_ROTATION_DEG,
-      -1,
-      1,
-    );
-  }, [wheelRotationDeg]);
+    return getSteeringFromRotationDeg(viewState.wheelRotationDeg);
+  }, [viewState.wheelRotationDeg]);
 
   const handlers = useMemo(
     () => ({
@@ -289,11 +403,19 @@ export function useHomeDriveSteeringWheel(): HomeDriveSteeringWheelController {
     ],
   );
 
-  return {
-    wheelRef,
-    steering,
-    wheelRotationDeg,
-    isDragging,
-    handlers,
-  };
+  return useMemo(
+    () => ({
+      wheelRef,
+      steering,
+      wheelRotationDeg: viewState.wheelRotationDeg,
+      isDragging: viewState.isDragging,
+      handlers,
+    }),
+    [
+      handlers,
+      steering,
+      viewState.isDragging,
+      viewState.wheelRotationDeg,
+    ],
+  );
 }

@@ -5,10 +5,18 @@ import React, {
   useEffect,
   useMemo,
   useRef,
+  useState,
   type CSSProperties,
 } from "react";
 
 import useHomeDriveEngineAudio from "../audio/useHomeDriveEngineAudio";
+import {
+  createInitialHomeDriveMissionRuntimeState,
+  getHomeDriveMissionDestinations,
+  resolveHomeDriveMissionCompassTarget,
+  tickHomeDriveMissionRuntime,
+  type HomeDriveMissionRuntimeState,
+} from "../domain/missions";
 import { useHomeDriveRuntimeRefs } from "../hooks/useHomeDriveRuntimeRefs";
 import { useHomeDriveSteeringWheel } from "../hooks/useHomeDriveSteeringWheel";
 import { useHomeDriveViewport } from "../hooks/useHomeDriveViewport";
@@ -59,6 +67,18 @@ export default function HomeDriveGame({ onClose }: HomeDriveGameProps) {
     publishRuntimeSnapshot,
   } = useHomeDriveRuntimeRefs();
 
+  const missionDestinations = useMemo(() => {
+    return getHomeDriveMissionDestinations();
+  }, []);
+
+  const [missionRuntime, setMissionRuntime] =
+    useState<HomeDriveMissionRuntimeState>(() =>
+      createInitialHomeDriveMissionRuntimeState({
+        destinations: missionDestinations,
+        startedAtSeconds: runtimeRef.current.elapsedSeconds,
+      }),
+    );
+
   const closeTapRef = useRef<HiddenCloseTapState>({
     count: 0,
     lastTapAt: 0,
@@ -94,6 +114,38 @@ export default function HomeDriveGame({ onClose }: HomeDriveGameProps) {
       brake: 0,
     });
   }, [patchInputRef, steeringWheel.steering]);
+
+  useEffect(() => {
+    setMissionRuntime((currentRuntime) => {
+      const result = tickHomeDriveMissionRuntime({
+        runtime: currentRuntime,
+        carPosition: runtimeSnapshot.car.position,
+        elapsedSeconds: runtimeSnapshot.elapsedSeconds,
+        destinations: missionDestinations,
+      });
+
+      return result.runtime;
+    });
+  }, [
+    missionDestinations,
+    runtimeSnapshot.car.position.x,
+    runtimeSnapshot.car.position.z,
+    runtimeSnapshot.elapsedSeconds,
+  ]);
+
+  const missionCompassTarget = useMemo(() => {
+    return resolveHomeDriveMissionCompassTarget({
+      runtime: missionRuntime,
+      carPosition: runtimeSnapshot.car.position,
+      carHeadingRad: runtimeSnapshot.car.headingRad,
+      destinations: missionDestinations,
+    });
+  }, [
+    missionDestinations,
+    missionRuntime,
+    runtimeSnapshot.car.headingRad,
+    runtimeSnapshot.car.position,
+  ]);
 
   const startEngineAudioFromGesture = useCallback(() => {
     engineAudio.startFromGesture();
@@ -208,6 +260,7 @@ export default function HomeDriveGame({ onClose }: HomeDriveGameProps) {
       <HomeDriveCompass
         className={styles.compass}
         headingRad={runtimeSnapshot.car.headingRad}
+        target={missionCompassTarget}
       />
 
       <HomeDriveSteeringWheel controller={steeringWheel} />

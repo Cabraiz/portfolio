@@ -1,0 +1,86 @@
+[
+  {
+    "id": "beira-mar",
+    "label": "Beira Mar",
+    "districtId": "meireles",
+    "roadId": "av-beira-mar",
+    "kind": "coast",
+    "position": {
+      "x": 0,
+      "y": -360
+    },
+    "radiusMeters": 85,
+    "imageSrc": "/images/fortaleza/intro/fortaleza-drive-01.png",
+    "description": "Check-in na orla da Beira Mar."
+  },
+  {
+    "id": "dragao-do-mar",
+    "label": "Dragão do Mar",
+    "districtId": "praia-de-iracema",
+    "roadId": "av-monsenhor-tabosa-pseudo",
+    "kind": "culture",
+    "position": {
+      "x": -760,
+      "y": 100
+    },
+    "radiusMeters": 75,
+    "imageSrc": "/images/fortaleza/intro/fortaleza-drive-02.png",
+    "description": "Check-in cultural no Dragão do Mar."
+  },
+  {
+    "id": "centro-de-eventos",
+    "label": "Centro de Eventos",
+    "districtId": "aldeota",
+    "roadId": "av-santos-dumont-pseudo",
+    "kind": "events",
+    "position": {
+      "x": 760,
+      "y": 600
+    },
+    "radiusMeters": 90,
+    "imageSrc": "/images/fortaleza/intro/fortaleza-drive-03.png",
+    "description": "Check-in no polo de eventos."
+  },
+  {
+    "id": "castelao",
+    "label": "Arena Castelão",
+    "districtId": "castelao",
+    "roadId": "anel-castelao",
+    "kind": "stadium",
+    "position": {
+      "x": 760,
+      "y": 1880
+    },
+    "radiusMeters": 120,
+    "imageSrc": "/images/fortaleza/intro/fortaleza-drive-04.png",
+    "description": "Check-in no entorno da Arena Castelão."
+  },
+  {
+    "id": "aldeota",
+    "label": "Noitada na Aldeota",
+    "districtId": "aldeota",
+    "roadId": "av-santos-dumont-pseudo",
+    "kind": "nightlife",
+    "position": {
+      "x": 420,
+      "y": 600
+    },
+    "radiusMeters": 85,
+    "imageSrc": "/images/fortaleza/intro/fortaleza-drive-05.png",
+    "description": "Check-in noturno na Aldeota."
+  },
+  {
+    "id": "beach-park",
+    "label": "Beach Park",
+    "districtId": "meireles",
+    "roadId": "av-beira-mar",
+    "kind": "resort",
+    "position": {
+      "x": 960,
+      "y": -300
+    },
+    "radiusMeters": 105,
+    "imageSrc": "/images/fortaleza/intro/fortaleza-drive-06.png",
+    "description": "Check-in na saída leste/litoral rumo ao Beach Park."
+  }
+]

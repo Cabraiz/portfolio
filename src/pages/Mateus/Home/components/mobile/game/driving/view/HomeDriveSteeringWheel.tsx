@@ -1,6 +1,7 @@
 // src/pages/Mateus/Home/components/mobile/game/driving/view/HomeDriveSteeringWheel.tsx
 
 import React, {
+  memo,
   useCallback,
   useMemo,
   useState,
@@ -15,7 +16,7 @@ export type HomeDriveSteeringWheelProps = Readonly<{
   controller: HomeDriveSteeringWheelController;
 }>;
 
-export default function HomeDriveSteeringWheel({
+function HomeDriveSteeringWheel({
   controller,
 }: HomeDriveSteeringWheelProps) {
   const [imageFailed, setImageFailed] = useState(false);
@@ -28,12 +29,24 @@ export default function HomeDriveSteeringWheel({
 
   const wheelStyle = useMemo<CSSProperties>(() => {
     return {
-      "--free-drive-wheel-rotation": `${controller.wheelRotationDeg}deg`,
+      "--free-drive-wheel-rotation": `${controller.wheelRotationDeg.toFixed(
+        3,
+      )}deg`,
     } as CSSProperties;
   }, [controller.wheelRotationDeg]);
 
+  const ariaValueNow = useMemo(() => {
+    return Number(controller.steering.toFixed(2));
+  }, [controller.steering]);
+
   const handleImageError = useCallback(() => {
-    setImageFailed(true);
+    setImageFailed((current) => {
+      if (current) {
+        return current;
+      }
+
+      return true;
+    });
   }, []);
 
   return (
@@ -46,7 +59,7 @@ export default function HomeDriveSteeringWheel({
         role="slider"
         aria-valuemin={-1}
         aria-valuemax={1}
-        aria-valuenow={Number(controller.steering.toFixed(2))}
+        aria-valuenow={ariaValueNow}
         tabIndex={0}
         {...controller.handlers}
       >
@@ -66,3 +79,5 @@ export default function HomeDriveSteeringWheel({
     </div>
   );
 }
+
+export default memo(HomeDriveSteeringWheel);
