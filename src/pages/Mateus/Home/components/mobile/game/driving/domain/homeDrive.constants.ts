@@ -10,72 +10,88 @@ export const FREE_DRIVE_START_HEADING_RAD = 0;
 
 export const FREE_DRIVE_WHEEL_BASE_METERS = 2.72;
 
-/**
- * Começa quase parado. A sensação de velocidade vem da aceleração progressiva,
- * câmera, áudio e velocímetro, não de nascer já embalado.
- */
 export const FREE_DRIVE_START_SPEED_MPS = 0.6;
 
 /**
- * Velocidade alvo com throttle cheio.
- *
  * 38.8 m/s ≈ 139.7 km/h.
  */
 export const FREE_DRIVE_CRUISE_SPEED_MPS = 38.8;
 
 /**
- * Teto físico absoluto.
- *
  * 42 m/s ≈ 151.2 km/h.
  */
 export const FREE_DRIVE_MAX_SPEED_MPS = 42;
 
-/**
- * Aceleração baixa para o carro ganhar velocidade aos poucos.
- */
 export const FREE_DRIVE_ACCELERATION_MPS2 = 1.58;
-
-/**
- * Freio forte, mas sem parecer arcade demais.
- */
 export const FREE_DRIVE_BRAKE_MPS2 = 12.2;
-
-/**
- * Arrasto natural baixo para o carro manter velocidade quando embalado.
- */
 export const FREE_DRIVE_NATURAL_DRAG_MPS2 = 0.46;
 
-/**
- * Perda de velocidade em curva.
- */
 export const FREE_DRIVE_CORNERING_DRAG_MPS2 = 2.15;
-
-/**
- * Mínimo preservado quando já está em movimento e entra em curva.
- *
- * 5.2 m/s ≈ 18.7 km/h.
- */
 export const FREE_DRIVE_CORNERING_MIN_RETAINED_SPEED_MPS = 5.2;
-
-/**
- * Quanto maior, mais a perda aparece só quando esterça bastante.
- */
 export const FREE_DRIVE_CORNERING_STEER_EXPONENT = 1.92;
-
-/**
- * Quanto maior, mais a perda pesa em velocidade alta.
- */
 export const FREE_DRIVE_CORNERING_SPEED_EXPONENT = 1.18;
 
 /**
- * Suavização do esterço. Valor menor deixa mais pesado/progressivo.
+ * Multiplicador aplicado quando o carro está voltando de velocidade negativa
+ * após colisão.
+ *
+ * Menor = demora mais para voltar a andar para frente.
  */
-export const FREE_DRIVE_STEER_SMOOTHING = 7.8;
+export const FREE_DRIVE_REVERSE_RECOVERY_ACCELERATION_MULTIPLIER = 0.12;
 
 /**
- * Limite físico de esterço. Reduzido levemente para evitar curvas impossíveis
- * em velocidade alta.
+ * Multiplicador extra enquanto ainda existe impacto/controlFactor baixo.
+ *
+ * Menor = recuperação física mais pesada após pancada.
  */
+export const FREE_DRIVE_IMPACT_RECOVERY_ACCELERATION_MULTIPLIER = 0.18;
+
+/**
+ * Tempo em que a recuperação pós-impacto ainda limita drivetrain.
+ *
+ * Isso resolve o problema do carro bater, cair velocidade e voltar quase
+ * instantaneamente ao cruise.
+ */
+export const FREE_DRIVE_POST_IMPACT_RECOVERY_SECONDS = 3.6;
+
+/**
+ * Janela curta de corte quase total do acelerador após impacto.
+ */
+export const FREE_DRIVE_POST_IMPACT_FULL_LOCK_SECONDS = 0.46;
+
+/**
+ * Menor throttle efetivo durante recuperação.
+ */
+export const FREE_DRIVE_POST_IMPACT_MIN_THROTTLE_FACTOR = 0.025;
+
+/**
+ * Menor aceleração efetiva durante recuperação.
+ */
+export const FREE_DRIVE_POST_IMPACT_MIN_ACCELERATION_FACTOR = 0.055;
+
+/**
+ * Velocidade máxima permitida logo após pancada forte.
+ * 3.6 m/s ≈ 13 km/h.
+ */
+export const FREE_DRIVE_POST_IMPACT_MIN_SPEED_CAP_MPS = 3.6;
+
+/**
+ * Velocidade máxima ainda limitada no fim da recuperação.
+ * 13.5 m/s ≈ 48.6 km/h.
+ */
+export const FREE_DRIVE_POST_IMPACT_MAX_SPEED_CAP_MPS = 13.5;
+
+/**
+ * Arrasto extra para impedir a velocidade de "colar" de volta no cruise.
+ */
+export const FREE_DRIVE_POST_IMPACT_DRAG_MPS2 = 3.4;
+
+/**
+ * Freio artificial curto pós-impacto.
+ */
+export const FREE_DRIVE_POST_IMPACT_BRAKE_MPS2 = 7.8;
+
+export const FREE_DRIVE_STEER_SMOOTHING = 7.8;
 export const FREE_DRIVE_MAX_STEER_ANGLE_DEG = 33;
 
 export const FREE_DRIVE_WHEEL_VISUAL_MAX_ROTATION_DEG = 118;

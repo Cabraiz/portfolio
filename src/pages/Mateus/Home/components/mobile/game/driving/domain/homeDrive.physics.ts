@@ -8,18 +8,30 @@ import {
   FREE_DRIVE_CORNERING_SPEED_EXPONENT,
   FREE_DRIVE_CORNERING_STEER_EXPONENT,
   FREE_DRIVE_CRUISE_SPEED_MPS,
+  FREE_DRIVE_IMPACT_RECOVERY_ACCELERATION_MULTIPLIER,
   FREE_DRIVE_LOOP_MAX_DELTA_SECONDS,
   FREE_DRIVE_MAX_SPEED_MPS,
   FREE_DRIVE_MAX_STEER_ANGLE_DEG,
   FREE_DRIVE_NATURAL_DRAG_MPS2,
+  FREE_DRIVE_POST_IMPACT_BRAKE_MPS2,
+  FREE_DRIVE_POST_IMPACT_DRAG_MPS2,
+  FREE_DRIVE_POST_IMPACT_FULL_LOCK_SECONDS,
+  FREE_DRIVE_POST_IMPACT_MAX_SPEED_CAP_MPS,
+  FREE_DRIVE_POST_IMPACT_MIN_ACCELERATION_FACTOR,
+  FREE_DRIVE_POST_IMPACT_MIN_SPEED_CAP_MPS,
+  FREE_DRIVE_POST_IMPACT_MIN_THROTTLE_FACTOR,
+  FREE_DRIVE_POST_IMPACT_RECOVERY_SECONDS,
+  FREE_DRIVE_REVERSE_RECOVERY_ACCELERATION_MULTIPLIER,
   FREE_DRIVE_STEER_SMOOTHING,
   FREE_DRIVE_WHEEL_BASE_METERS,
 } from "./homeDrive.constants";
 import {
   applyHomeDriveImpactToCar,
   getHomeDriveImpactControlFactor,
+  getHomeDriveImpactIntensity,
   normalizeHomeDriveImpactState,
   tickHomeDriveImpact,
+  type HomeDriveRuntimeImpactState,
 } from "./homeDrive.impact";
 import {
   clamp,
@@ -40,38 +52,153 @@ import {
 const BOUNDARY_COLLISION_SPEED_RETENTION = 0.12;
 const FREE_DRIVE_MAX_REVERSE_SPEED_MPS = 8.5;
 
+type HomeDrivePostImpactDriveRecovery = Readonly<{
+  recoveryRatio: number;
+  throttleFactor: number;
+  accelerationFactor: number;
+  speedCapMps: number;
+  extraDragMps2: number;
+  extraBrakeMps2: number;
+}>;
+
+function getHomeDrivePostImpactDriveRecovery(
+  impact: HomeDriveRuntimeImpactState,
+): HomeDrivePostImpactDriveRecovery {
+  const hasValidImpactAge =
+    Number.isFinite(impact.elapsedSinceImpactSeconds) &&
+    impact.elapsedSinceImpactSeconds >= 0;
+
+  const impactAgeRatio = hasValidImpactAge
+    ? clamp(
+        1 -
+          impact.elapsedSinceImpactSeconds /
+            FREE_DRIVE_POST_IMPACT_RECOVERY_SECONDS,
+        0,
+        1,
+      )
+    : 0;
+
+  const lockRatio =
+    impact.controlLockSeconds > 0
+      ? clamp(
+          impact.controlLockSeconds / FREE_DRIVE_POST_IMPACT_FULL_LOCK_SECONDS,
+          0,
+          1,
+        )
+      : 0;
+
+  const impactIntensity = getHomeDriveImpactIntensity(impact);
+
+  const recoveryRatio = clamp(
+    Math.max(
+      lockRatio,
+      impactAgeRatio * (0.48 + impactIntensity * 0.52),
+    ),
+    0,
+    1,
+  );
+
+  if (recoveryRatio <= 0.001) {
+    return {
+      recoveryRatio: 0,
+      throttleFactor: 1,
+      accelerationFactor: 1,
+      speedCapMps: FREE_DRIVE_MAX_SPEED_MPS,
+      extraDragMps2: 0,
+      extraBrakeMps2: 0,
+    };
+  }
+
+  const shapedRecovery = Math.pow(recoveryRatio, 0.72);
+  const isFullLock =
+    hasValidImpactAge &&
+    impact.elapsedSinceImpactSeconds <=
+      FREE_DRIVE_POST_IMPACT_FULL_LOCK_SECONDS &&
+    impactIntensity >= 0.08;
+
+  const throttleFactor = isFullLock
+    ? 0
+    : lerp(1, FREE_DRIVE_POST_IMPACT_MIN_THROTTLE_FACTOR, shapedRecovery);
+
+  const accelerationFactor = isFullLock
+    ? 0
+    : lerp(
+        1,
+        FREE_DRIVE_POST_IMPACT_MIN_ACCELERATION_FACTOR,
+        shapedRecovery,
+      );
+
+  const speedCapMps = isFullLock
+    ? 0
+    : lerp(
+        FREE_DRIVE_POST_IMPACT_MAX_SPEED_CAP_MPS,
+        FREE_DRIVE_POST_IMPACT_MIN_SPEED_CAP_MPS,
+        shapedRecovery,
+      );
+
+  return {
+    recoveryRatio,
+    throttleFactor,
+    accelerationFactor,
+    speedCapMps,
+    extraDragMps2: FREE_DRIVE_POST_IMPACT_DRAG_MPS2 * shapedRecovery,
+    extraBrakeMps2: FREE_DRIVE_POST_IMPACT_BRAKE_MPS2 * shapedRecovery,
+  };
+}
+
 function getHomeDriveThrottleAccelerationBudget(params: {
   throttle: number;
   controlFactor: number;
+  accelerationFactor: number;
   currentSpeedMps: number;
   targetSpeedMps: number;
   deltaSeconds: number;
 }): number {
   const normalizedThrottle = clamp(params.throttle, 0, 1);
   const controlFactor = clamp(params.controlFactor, 0, 1);
+  const accelerationFactor = clamp(params.accelerationFactor, 0, 1);
 
-  if (controlFactor <= 0) {
+  if (controlFactor <= 0 || accelerationFactor <= 0) {
     return 0;
   }
 
-  const throttleFloor = 0.2 * controlFactor;
+  /**
+   * Importante:
+   * antes havia floor mesmo quando throttle efetivo era 0.
+   * Isso fazia o carro acelerar mesmo durante lock de colisão.
+   */
+  const throttleFloor =
+    normalizedThrottle > 0.005 ? 0.2 * controlFactor : 0;
   const throttleForce = Math.max(normalizedThrottle, throttleFloor);
+
+  if (throttleForce <= 0) {
+    return 0;
+  }
 
   const currentAbsSpeed = Math.abs(params.currentSpeedMps);
   const targetAbsSpeed = Math.max(Math.abs(params.targetSpeedMps), 0.001);
   const speedRatio = clamp(currentAbsSpeed / targetAbsSpeed, 0, 1);
-
-  /*
-    O carro acelera melhor no começo e perde força perto do alvo,
-    como carro comum, não como movimento linear de jogo.
-  */
   const highSpeedEase = lerp(1, 0.48, Math.pow(speedRatio, 1.15));
+
+  const reverseRecoveryMultiplier =
+    params.currentSpeedMps < -0.15 && params.targetSpeedMps > 0
+      ? FREE_DRIVE_REVERSE_RECOVERY_ACCELERATION_MULTIPLIER
+      : 1;
+
+  const impactRecoveryMultiplier = lerp(
+    FREE_DRIVE_IMPACT_RECOVERY_ACCELERATION_MULTIPLIER,
+    1,
+    controlFactor,
+  );
 
   return (
     FREE_DRIVE_ACCELERATION_MPS2 *
     params.deltaSeconds *
     throttleForce *
-    highSpeedEase
+    highSpeedEase *
+    reverseRecoveryMultiplier *
+    impactRecoveryMultiplier *
+    accelerationFactor
   );
 }
 
@@ -103,6 +230,36 @@ function applyHomeDriveNaturalDrag(params: {
     } else if (speedMps < 0) {
       speedMps = Math.min(0, speedMps + brakeAmount);
     }
+  }
+
+  return speedMps;
+}
+
+function applyHomeDrivePostImpactDrag(params: {
+  speedMps: number;
+  recovery: HomeDrivePostImpactDriveRecovery;
+  deltaSeconds: number;
+}): number {
+  if (params.recovery.recoveryRatio <= 0) {
+    return params.speedMps;
+  }
+
+  let speedMps = params.speedMps;
+
+  const extraBrakeAmount =
+    (params.recovery.extraDragMps2 + params.recovery.extraBrakeMps2) *
+    params.deltaSeconds;
+
+  if (speedMps > params.recovery.speedCapMps) {
+    speedMps = moveTowards(
+      speedMps,
+      params.recovery.speedCapMps,
+      extraBrakeAmount,
+    );
+  }
+
+  if (Math.abs(speedMps) > 0.001) {
+    speedMps = moveTowards(speedMps, 0, extraBrakeAmount * 0.42);
   }
 
   return speedMps;
@@ -172,9 +329,13 @@ export function tickHomeDrivePhysics(
 
   const currentImpact = normalizeHomeDriveImpactState(current.impact);
   const controlFactor = getHomeDriveImpactControlFactor(currentImpact);
+  const postImpactRecovery =
+    getHomeDrivePostImpactDriveRecovery(currentImpact);
 
   const normalizedSteering = clamp(input.steering, -1, 1) * controlFactor;
-  const normalizedThrottle = clamp(input.throttle, 0, 1) * controlFactor;
+  const rawThrottle = clamp(input.throttle, 0, 1);
+  const normalizedThrottle =
+    rawThrottle * controlFactor * postImpactRecovery.throttleFactor;
   const normalizedBrake = clamp(input.brake, 0, 1);
 
   const targetSteerAngleRad =
@@ -186,11 +347,15 @@ export function tickHomeDrivePhysics(
     1 - Math.exp(-FREE_DRIVE_STEER_SMOOTHING * deltaSeconds),
   );
 
-  const cruiseTargetSpeed = FREE_DRIVE_CRUISE_SPEED_MPS * normalizedThrottle;
+  const cruiseTargetSpeed = Math.min(
+    FREE_DRIVE_CRUISE_SPEED_MPS * normalizedThrottle,
+    postImpactRecovery.speedCapMps,
+  );
 
   const accelerationBudget = getHomeDriveThrottleAccelerationBudget({
     throttle: normalizedThrottle,
     controlFactor,
+    accelerationFactor: postImpactRecovery.accelerationFactor,
     currentSpeedMps: current.car.speedMps,
     targetSpeedMps: cruiseTargetSpeed,
     deltaSeconds,
@@ -206,6 +371,12 @@ export function tickHomeDrivePhysics(
     speedMps,
     throttle: normalizedThrottle,
     brake: normalizedBrake,
+    deltaSeconds,
+  });
+
+  speedMps = applyHomeDrivePostImpactDrag({
+    speedMps,
+    recovery: postImpactRecovery,
     deltaSeconds,
   });
 

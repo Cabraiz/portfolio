@@ -42,24 +42,19 @@ export type HomeDriveThreeSimulationProps = Readonly<{
   crosswalksRef?: HomeDriveMutableRef<HomeDriveCrosswalkRuntimeState>;
   pedestrianPerformance?: HomeDrivePedestrianPerformanceProfile;
   enabled?: boolean;
-
-  /**
-   * Usado apenas para atualizar overlays React em baixa frequência.
-   * Não deve ser chamado a cada frame.
-   */
   publishRuntimeSnapshot?: () => void;
-
-  /**
-   * Frequência de sincronização React para UI.
-   * 8-12 Hz é suficiente para bússola sem causar stutter.
-   */
   snapshotHz?: number;
+}>;
+
+type SimulationStepResult = Readonly<{
+  runtime: HomeDriveRuntimeState;
+  hadCollision: boolean;
 }>;
 
 const FIXED_STEP_SECONDS = 1 / 60;
 const MAX_ACCUMULATED_SECONDS = 0.12;
 const MAX_STEPS_PER_FRAME = 5;
-const DEFAULT_SNAPSHOT_HZ = 10;
+const DEFAULT_SNAPSHOT_HZ = 20;
 
 function sanitizeDeltaSeconds(deltaSeconds: number): number {
   if (!Number.isFinite(deltaSeconds) || deltaSeconds <= 0) {
@@ -114,9 +109,12 @@ function tickTrafficAndCollisionsStep(
   crosswalksRef:
     | HomeDriveMutableRef<HomeDriveCrosswalkRuntimeState>
     | undefined,
-): HomeDriveRuntimeState {
+): SimulationStepResult {
   if (!trafficRef) {
-    return nextRuntime;
+    return {
+      runtime: nextRuntime,
+      hadCollision: false,
+    };
   }
 
   const nextTraffic = tickHomeDriveTraffic(
@@ -139,16 +137,22 @@ function tickTrafficAndCollisionsStep(
   trafficRef.current = collisionResolution.traffic;
 
   if (collisionResolution.events.length <= 0 || !collisionResolution.impact) {
-    return nextRuntime;
+    return {
+      runtime: nextRuntime,
+      hadCollision: false,
+    };
   }
 
   return {
-    ...nextRuntime,
-    car: collisionResolution.car,
-    impact: mergeHomeDriveImpactStates(
-      nextRuntime.impact,
-      collisionResolution.impact,
-    ),
+    runtime: {
+      ...nextRuntime,
+      car: collisionResolution.car,
+      impact: mergeHomeDriveImpactStates(
+        nextRuntime.impact,
+        collisionResolution.impact,
+      ),
+    },
+    hadCollision: true,
   };
 }
 
@@ -157,9 +161,12 @@ function tickParkedVehiclesAndCollisionsStep(
   parkedVehiclesRef:
     | HomeDriveMutableRef<HomeDriveParkedVehicleRuntimeState>
     | undefined,
-): HomeDriveRuntimeState {
+): SimulationStepResult {
   if (!parkedVehiclesRef) {
-    return nextRuntime;
+    return {
+      runtime: nextRuntime,
+      hadCollision: false,
+    };
   }
 
   const impactedParkedVehicles = tickHomeDriveParkedVehicleImpactState(
@@ -172,27 +179,35 @@ function tickParkedVehiclesAndCollisionsStep(
     impactedParkedVehicles,
     nextRuntime.elapsedSeconds,
     {
-      brutality: 1.42,
-      playerRadiusMeters: 1.58,
-      parkedVehiclePushMultiplier: 0.72,
-      playerPushMultiplier: 0.78,
-      playerReverseKickMultiplier: 0.32,
+      brutality: 1.72,
+      playerRadiusMeters: 1.64,
+      parkedVehiclePushMultiplier: 0.9,
+      playerPushMultiplier: 0.92,
+      playerReverseKickMultiplier: 0.52,
+      minImpactSpeedMps: 0.72,
+      maxDamagePerHit: 0.42,
     },
   );
 
   parkedVehiclesRef.current = collisionResolution.parkedVehicles;
 
   if (collisionResolution.events.length <= 0 || !collisionResolution.impact) {
-    return nextRuntime;
+    return {
+      runtime: nextRuntime,
+      hadCollision: false,
+    };
   }
 
   return {
-    ...nextRuntime,
-    car: collisionResolution.car,
-    impact: mergeHomeDriveImpactStates(
-      nextRuntime.impact,
-      collisionResolution.impact,
-    ),
+    runtime: {
+      ...nextRuntime,
+      car: collisionResolution.car,
+      impact: mergeHomeDriveImpactStates(
+        nextRuntime.impact,
+        collisionResolution.impact,
+      ),
+    },
+    hadCollision: true,
   };
 }
 
@@ -206,7 +221,7 @@ function tickSimulationStep(
   crosswalksRef:
     | HomeDriveMutableRef<HomeDriveCrosswalkRuntimeState>
     | undefined,
-): HomeDriveRuntimeState {
+): SimulationStepResult {
   if (crosswalksRef) {
     crosswalksRef.current = tickHomeDriveCrosswalks(
       crosswalksRef.current,
@@ -216,16 +231,27 @@ function tickSimulationStep(
 
   const physicsRuntime = tickHomeDrivePhysics(runtime, input, FIXED_STEP_SECONDS);
 
-  const runtimeAfterTraffic = tickTrafficAndCollisionsStep(
+  const trafficResult = tickTrafficAndCollisionsStep(
     physicsRuntime,
     trafficRef,
     crosswalksRef,
   );
 
-  return tickParkedVehiclesAndCollisionsStep(
-    runtimeAfterTraffic,
+  const parkedResult = tickParkedVehiclesAndCollisionsStep(
+    trafficResult.runtime,
     parkedVehiclesRef,
   );
+
+  return {
+    runtime: parkedResult.runtime,
+    hadCollision: trafficResult.hadCollision || parkedResult.hadCollision,
+  };
+}
+
+function getImpactSerial(runtime: HomeDriveRuntimeState): number | null {
+  const serial = runtime.impact?.serial;
+
+  return typeof serial === "number" && Number.isFinite(serial) ? serial : null;
 }
 
 export default function HomeDriveThreeSimulation({
@@ -244,6 +270,7 @@ export default function HomeDriveThreeSimulation({
   const snapshotAccumulatorRef = useRef(0);
   const pedestrianAccumulatorRef = useRef(0);
   const pedestrianTickIndexRef = useRef(0);
+  const lastPublishedImpactSerialRef = useRef<number | null>(null);
 
   useFrame((_, rawDeltaSeconds) => {
     if (!enabled) {
@@ -265,18 +292,22 @@ export default function HomeDriveThreeSimulation({
     );
 
     let steps = 0;
+    let hadCollisionThisFrame = false;
 
     while (
       accumulatorRef.current >= FIXED_STEP_SECONDS &&
       steps < MAX_STEPS_PER_FRAME
     ) {
-      runtimeRef.current = tickSimulationStep(
+      const stepResult = tickSimulationStep(
         runtimeRef.current,
         inputRef.current,
         trafficRef,
         parkedVehiclesRef,
         crosswalksRef,
       );
+
+      runtimeRef.current = stepResult.runtime;
+      hadCollisionThisFrame = hadCollisionThisFrame || stepResult.hadCollision;
 
       const pedestrianStepSeconds = pedestrianPerformance
         ? getHomeDrivePedestrianSimulationStepSeconds(pedestrianPerformance)
@@ -312,7 +343,19 @@ export default function HomeDriveThreeSimulation({
       return;
     }
 
-    const safeSnapshotHz = Math.max(1, Math.min(snapshotHz, 20));
+    const currentImpactSerial = getImpactSerial(runtimeRef.current);
+    const hasNewImpactSerial =
+      currentImpactSerial !== null &&
+      currentImpactSerial !== lastPublishedImpactSerialRef.current;
+
+    if (hadCollisionThisFrame || hasNewImpactSerial) {
+      lastPublishedImpactSerialRef.current = currentImpactSerial;
+      snapshotAccumulatorRef.current = 0;
+      publishRuntimeSnapshot();
+      return;
+    }
+
+    const safeSnapshotHz = Math.max(1, Math.min(snapshotHz, 30));
     const snapshotIntervalSeconds = 1 / safeSnapshotHz;
 
     snapshotAccumulatorRef.current += deltaSeconds;
@@ -322,6 +365,7 @@ export default function HomeDriveThreeSimulation({
     }
 
     snapshotAccumulatorRef.current = 0;
+    lastPublishedImpactSerialRef.current = currentImpactSerial;
     publishRuntimeSnapshot();
   });
 

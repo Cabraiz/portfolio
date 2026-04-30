@@ -240,17 +240,17 @@ function HomeDriveThreeWorld({
 }: HomeDriveThreeWorldProps) {
   return (
     <>
-      <HomeDriveThreeSimulation
-        runtimeRef={runtimeRef}
-        inputRef={inputRef}
-        trafficRef={trafficRef}
-        parkedVehiclesRef={parkedVehiclesRef}
-        pedestriansRef={pedestriansRef}
-        crosswalksRef={crosswalksRef}
-        pedestrianPerformance={pedestrianPerformance}
-        publishRuntimeSnapshot={publishRuntimeSnapshot}
-        snapshotHz={10}
-      />
+    <HomeDriveThreeSimulation
+      runtimeRef={runtimeRef}
+      inputRef={inputRef}
+      trafficRef={trafficRef}
+      parkedVehiclesRef={parkedVehiclesRef}
+      pedestriansRef={pedestriansRef}
+      crosswalksRef={crosswalksRef}
+      pedestrianPerformance={pedestrianPerformance}
+      publishRuntimeSnapshot={publishRuntimeSnapshot}
+      snapshotHz={20}
+    />
 
       <HomeDriveThreeCameraRig runtimeRef={runtimeRef} />
 

@@ -6,133 +6,38 @@ import type {
 } from "./homeDrive.types";
 
 export type HomeDriveRuntimeImpactState = Readonly<{
-  /**
-   * Velocidade residual que empurra o player depois da batida.
-   * É aplicada no domínio/física, não no render.
-   */
   recoilVelocity: HomeDriveVector2;
-
-  /**
-   * Velocidade angular residual do carro do player.
-   * Valor alto = carro rodando grotescamente após impacto.
-   */
   spinVelocityRadps: number;
-
-  /**
-   * Inclinação lateral visual do player.
-   * Pode ser usada depois no rig/cockpit/modelo do carro.
-   */
   visualRollRad: number;
-
-  /**
-   * Inclinação longitudinal visual do player.
-   * Pode ser usada em câmera/carro para dar sensação de tranco.
-   */
   visualPitchRad: number;
-
-  /**
-   * Intensidade de shake para a câmera.
-   */
   cameraShake: number;
-
-  /**
-   * Força consolidada da pancada.
-   */
   collisionImpulse: number;
-
-  /**
-   * Tempo restante em que input do player deve ficar limitado.
-   */
   controlLockSeconds: number;
-
-  /**
-   * Tempo desde a última pancada.
-   */
   elapsedSinceImpactSeconds: number;
-
-  /**
-   * Timestamp do último impacto dentro do runtime do jogo.
-   */
   lastCollisionAt: number;
-
-  /**
-   * Incrementa a cada nova pancada.
-   * Útil para efeitos visuais detectarem impacto novo sem depender só de timestamp.
-   */
   serial: number;
 }>;
 
 export type HomeDriveImpactCollisionInput = Readonly<{
-  /**
-   * Estado atual do carro do player no momento da pancada.
-   */
   car: HomeDriveCarState;
-
-  /**
-   * Normal da colisão apontando na direção para onde o player deve ser empurrado.
-   */
   normal: HomeDriveVector2;
-
-  /**
-   * Velocidade relativa da colisão.
-   */
   relativeSpeedMps: number;
-
-  /**
-   * Impulso calculado pela colisão.
-   * Se não vier, o módulo estima a partir da velocidade.
-   */
   impulse?: number;
-
-  /**
-   * Instante da pancada no relógio do jogo.
-   */
   occurredAt: number;
-
-  /**
-   * Multiplicador arcade.
-   * 1 = forte.
-   * 1.35+ = grotesco.
-   */
   brutality?: number;
 }>;
 
 export type HomeDriveImpactTickOptions = Readonly<{
-  /**
-   * Quanto maior, mais rápido o recoil perde força.
-   */
   recoilDampingPerSecond?: number;
-
-  /**
-   * Quanto maior, mais rápido o giro perde força.
-   */
   spinDampingPerSecond?: number;
-
-  /**
-   * Quanto maior, mais rápido a câmera para de tremer.
-   */
   cameraShakeDampingPerSecond?: number;
-
-  /**
-   * Quanto maior, mais rápido roll/pitch visual volta ao normal.
-   */
   visualDampingPerSecond?: number;
+  collisionImpulseDampingPerSecond?: number;
 }>;
 
 export type HomeDriveImpactApplicationOptions = Readonly<{
-  /**
-   * Se true, permite o impacto inverter o movimento de maneira mais agressiva.
-   */
   allowReverseKick?: boolean;
-
-  /**
-   * Limite de velocidade linear residual aplicada no player.
-   */
   maxRecoilSpeedMps?: number;
-
-  /**
-   * Limite de giro residual aplicado no player.
-   */
   maxSpinVelocityRadps?: number;
 }>;
 
@@ -140,6 +45,13 @@ const DEFAULT_RECOIL_DAMPING_PER_SECOND = 5.8;
 const DEFAULT_SPIN_DAMPING_PER_SECOND = 4.25;
 const DEFAULT_CAMERA_SHAKE_DAMPING_PER_SECOND = 8.8;
 const DEFAULT_VISUAL_DAMPING_PER_SECOND = 7.2;
+
+/**
+ * Antes o collisionImpulse morria muito rápido.
+ * Agora ele dura mais para a física conseguir usar como sinal de recuperação
+ * pós-impacto.
+ */
+const DEFAULT_COLLISION_IMPULSE_DAMPING_PER_SECOND = 1.05;
 
 const DEFAULT_MAX_RECOIL_SPEED_MPS = 42;
 const DEFAULT_MAX_SPIN_VELOCITY_RADPS = 34;
@@ -150,6 +62,10 @@ const MIN_ACTIVE_SHAKE = 0.003;
 const MIN_ACTIVE_VISUAL_RAD = 0.003;
 
 function clamp(value: number, min: number, max: number): number {
+  if (!Number.isFinite(value)) {
+    return min;
+  }
+
   return Math.max(min, Math.min(max, value));
 }
 
@@ -157,7 +73,11 @@ function clampAbs(value: number, maxAbs: number): number {
   return clamp(value, -maxAbs, maxAbs);
 }
 
-function damp(value: number, dampingPerSecond: number, deltaSeconds: number): number {
+function damp(
+  value: number,
+  dampingPerSecond: number,
+  deltaSeconds: number,
+): number {
   if (Math.abs(value) <= 0.000001) {
     return 0;
   }
@@ -277,37 +197,41 @@ export function normalizeHomeDriveImpactState(
   return {
     recoilVelocity: {
       x: Number.isFinite(impact.recoilVelocity?.x)
-        ? impact.recoilVelocity.x
+        ? Number(impact.recoilVelocity?.x)
         : empty.recoilVelocity.x,
       z: Number.isFinite(impact.recoilVelocity?.z)
-        ? impact.recoilVelocity.z
+        ? Number(impact.recoilVelocity?.z)
         : empty.recoilVelocity.z,
     },
     spinVelocityRadps: Number.isFinite(impact.spinVelocityRadps)
-      ? impact.spinVelocityRadps
+      ? Number(impact.spinVelocityRadps)
       : empty.spinVelocityRadps,
     visualRollRad: Number.isFinite(impact.visualRollRad)
-      ? impact.visualRollRad
+      ? Number(impact.visualRollRad)
       : empty.visualRollRad,
     visualPitchRad: Number.isFinite(impact.visualPitchRad)
-      ? impact.visualPitchRad
+      ? Number(impact.visualPitchRad)
       : empty.visualPitchRad,
     cameraShake: Number.isFinite(impact.cameraShake)
-      ? impact.cameraShake
+      ? Number(impact.cameraShake)
       : empty.cameraShake,
     collisionImpulse: Number.isFinite(impact.collisionImpulse)
-      ? impact.collisionImpulse
+      ? Number(impact.collisionImpulse)
       : empty.collisionImpulse,
     controlLockSeconds: Number.isFinite(impact.controlLockSeconds)
-      ? impact.controlLockSeconds
+      ? Number(impact.controlLockSeconds)
       : empty.controlLockSeconds,
-    elapsedSinceImpactSeconds: Number.isFinite(impact.elapsedSinceImpactSeconds)
-      ? impact.elapsedSinceImpactSeconds
+    elapsedSinceImpactSeconds: Number.isFinite(
+      impact.elapsedSinceImpactSeconds,
+    )
+      ? Number(impact.elapsedSinceImpactSeconds)
       : empty.elapsedSinceImpactSeconds,
     lastCollisionAt: Number.isFinite(impact.lastCollisionAt)
-      ? impact.lastCollisionAt
+      ? Number(impact.lastCollisionAt)
       : empty.lastCollisionAt,
-    serial: Number.isFinite(impact.serial) ? impact.serial : empty.serial,
+    serial: Number.isFinite(impact.serial)
+      ? Number(impact.serial)
+      : empty.serial,
   };
 }
 
@@ -362,6 +286,16 @@ export function createHomeDriveImpactFromCollision({
     0.84,
   );
 
+  /**
+   * Mais longo que antes.
+   * Este lock não é só visual; ele entra na física como corte de drivetrain.
+   */
+  const controlLockSeconds = clamp(
+    (0.34 + impulseWeight * 0.3 + speedWeight * 0.18) * brutality,
+    0.42,
+    1.85,
+  );
+
   return {
     recoilVelocity: clampVectorMagnitude(
       {
@@ -379,11 +313,7 @@ export function createHomeDriveImpactFromCollision({
       2.2,
     ),
     collisionImpulse: resolvedImpulse,
-    controlLockSeconds: clamp(
-      (0.16 + impulseWeight * 0.14 + speedWeight * 0.08) * brutality,
-      0.18,
-      0.86,
-    ),
+    controlLockSeconds,
     elapsedSinceImpactSeconds: 0,
     lastCollisionAt: occurredAt,
     serial: 1,
@@ -428,7 +358,7 @@ export function mergeHomeDriveImpactStates(
       2.6,
     ),
     collisionImpulse: Math.max(
-      currentImpact.collisionImpulse * 0.7,
+      currentImpact.collisionImpulse * 0.84,
       nextImpact.collisionImpulse,
     ),
     controlLockSeconds: Math.max(
@@ -463,6 +393,9 @@ export function tickHomeDriveImpact(
     DEFAULT_CAMERA_SHAKE_DAMPING_PER_SECOND;
   const visualDampingPerSecond =
     options.visualDampingPerSecond ?? DEFAULT_VISUAL_DAMPING_PER_SECOND;
+  const collisionImpulseDampingPerSecond =
+    options.collisionImpulseDampingPerSecond ??
+    DEFAULT_COLLISION_IMPULSE_DAMPING_PER_SECOND;
 
   const recoilVelocity = dampVector(
     impact.recoilVelocity,
@@ -496,7 +429,7 @@ export function tickHomeDriveImpact(
 
   const collisionImpulse = damp(
     impact.collisionImpulse,
-    cameraShakeDampingPerSecond * 0.82,
+    collisionImpulseDampingPerSecond,
     safeDeltaSeconds,
   );
 
@@ -514,7 +447,8 @@ export function tickHomeDriveImpact(
     visualPitchRad:
       Math.abs(visualPitchRad) <= MIN_ACTIVE_VISUAL_RAD ? 0 : visualPitchRad,
     cameraShake: cameraShake <= MIN_ACTIVE_SHAKE ? 0 : cameraShake,
-    collisionImpulse: collisionImpulse <= MIN_ACTIVE_SHAKE ? 0 : collisionImpulse,
+    collisionImpulse:
+      collisionImpulse <= MIN_ACTIVE_SHAKE ? 0 : collisionImpulse,
     controlLockSeconds: Math.max(
       0,
       impact.controlLockSeconds - safeDeltaSeconds,
@@ -579,7 +513,7 @@ export function getHomeDriveImpactControlFactor(
     return 1;
   }
 
-  return clamp(1 - impact.controlLockSeconds * 1.9, 0.12, 1);
+  return clamp(1 - impact.controlLockSeconds * 1.35, 0.04, 1);
 }
 
 export function getHomeDriveImpactIntensity(
@@ -591,8 +525,9 @@ export function getHomeDriveImpactIntensity(
   const spin = clamp(Math.abs(impact.spinVelocityRadps) / 24, 0, 1);
   const shake = clamp(impact.cameraShake / 1.8, 0, 1);
   const impulse = clamp(impact.collisionImpulse / 22, 0, 1);
+  const lock = clamp(impact.controlLockSeconds / 1.85, 0, 1);
 
-  return clamp(Math.max(recoil, spin, shake, impulse), 0, 1);
+  return clamp(Math.max(recoil, spin, shake, impulse, lock), 0, 1);
 }
 
 export function isHomeDriveImpactActive(
@@ -606,6 +541,7 @@ export function isHomeDriveImpactActive(
     impact.cameraShake > MIN_ACTIVE_SHAKE ||
     Math.abs(impact.visualRollRad) > MIN_ACTIVE_VISUAL_RAD ||
     Math.abs(impact.visualPitchRad) > MIN_ACTIVE_VISUAL_RAD ||
+    impact.collisionImpulse > MIN_ACTIVE_SHAKE ||
     impact.controlLockSeconds > 0
   );
 }

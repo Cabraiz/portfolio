@@ -2,3 +2,4 @@
 
 export * from "./homeDriveSpeedometer.math";
 export * from "./homeDriveSpeedometer.tokens";
+export * from "./homeDriveSpeedometerImpact";

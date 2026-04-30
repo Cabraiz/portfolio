@@ -50,13 +50,18 @@ export type HomeDriveParkedVehicleCollisionResolution = Readonly<{
 const DEFAULT_PLAYER_RADIUS_METERS = 1.52;
 const DEFAULT_COLLISION_COOLDOWN_SECONDS = 0.34;
 const DEFAULT_MIN_IMPACT_SPEED_MPS = 1.25;
-const DEFAULT_COLLISION_BRUTALITY = 1.34;
-const DEFAULT_PARKED_PUSH_MULTIPLIER = 0.68;
-const DEFAULT_PLAYER_PUSH_MULTIPLIER = 0.82;
-const DEFAULT_PLAYER_REVERSE_KICK_MULTIPLIER = 0.34;
-const DEFAULT_MAX_PARKED_IMPACT_VELOCITY_MPS = 13.5;
-const DEFAULT_MAX_PARKED_ANGULAR_VELOCITY_RADPS = 7.8;
-const DEFAULT_MAX_DAMAGE_PER_HIT = 0.32;
+const DEFAULT_COLLISION_BRUTALITY = 1.48;
+const DEFAULT_PARKED_PUSH_MULTIPLIER = 0.82;
+const DEFAULT_PLAYER_PUSH_MULTIPLIER = 0.88;
+const DEFAULT_PLAYER_REVERSE_KICK_MULTIPLIER = 0.56;
+const DEFAULT_MAX_PARKED_IMPACT_VELOCITY_MPS = 14.5;
+const DEFAULT_MAX_PARKED_ANGULAR_VELOCITY_RADPS = 8.4;
+const DEFAULT_MAX_DAMAGE_PER_HIT = 0.38;
+
+/**
+ * Maior que antes para a batida realmente derrubar a velocidade física.
+ */
+const MAX_PLAYER_REVERSE_KICK_MPS = 10.5;
 
 function clamp(value: number, min: number, max: number): number {
   if (!Number.isFinite(value)) {
@@ -64,6 +69,10 @@ function clamp(value: number, min: number, max: number): number {
   }
 
   return Math.max(min, Math.min(max, value));
+}
+
+function lerp(start: number, end: number, amount: number): number {
+  return start + (end - start) * clamp(amount, 0, 1);
 }
 
 function clampAbs(value: number, maxAbs: number): number {
@@ -159,11 +168,11 @@ function getCollisionImpulse(params: {
   const massFactor = clamp(params.vehicleMassKg / 1450, 0.72, 1.65);
 
   return clamp(
-    (params.overlapMeters * 1.35 + params.relativeSpeedMps * 0.48) *
+    (params.overlapMeters * 1.45 + params.relativeSpeedMps * 0.56) *
       massFactor *
       params.brutality,
     0.65,
-    22,
+    26,
   );
 }
 
@@ -175,27 +184,53 @@ function resolvePlayerCarImpact(params: {
   playerPushMultiplier: number;
   reverseKickMultiplier: number;
 }): HomeDriveCarState {
+  const impactSeverity = clamp(params.impulse / 26, 0, 1);
+
   const pushDistance = clamp(
-    params.overlapMeters * params.playerPushMultiplier + params.impulse * 0.035,
-    0.15,
-    3.85,
+    params.overlapMeters * params.playerPushMultiplier + params.impulse * 0.045,
+    0.18,
+    4.25,
   );
 
   const reverseKick = clamp(
     Math.abs(params.car.speedMps) * params.reverseKickMultiplier +
-      params.impulse * 0.28,
-    1.8,
-    13.5,
+      params.impulse * 0.34,
+    2.2,
+    MAX_PLAYER_REVERSE_KICK_MPS,
   );
+
+  const forwardSpeedMps = Math.max(0, params.car.speedMps);
+
+  /**
+   * Antes mantinha 18% -> 2% da velocidade frontal.
+   * Agora mantém 8% -> 0%.
+   *
+   * Em colisão forte, a velocidade frontal praticamente some.
+   */
+  const retainedForwardSpeedMps =
+    forwardSpeedMps * lerp(0.08, 0, impactSeverity);
+
+  const nextSpeedMps =
+    params.car.speedMps >= 0
+      ? -reverseKick
+      : Math.min(params.car.speedMps * 0.38, -retainedForwardSpeedMps);
 
   return {
     ...params.car,
     position: {
-      x: params.car.position.x + params.normalFromVehicleToPlayer.x * pushDistance,
-      z: params.car.position.z + params.normalFromVehicleToPlayer.z * pushDistance,
+      x:
+        params.car.position.x +
+        params.normalFromVehicleToPlayer.x * pushDistance,
+      z:
+        params.car.position.z +
+        params.normalFromVehicleToPlayer.z * pushDistance,
     },
-    speedMps: params.car.speedMps >= 0 ? -reverseKick : params.car.speedMps * 0.48,
-    steerAngleRad: params.car.steerAngleRad * 0.24,
+    speedMps: clamp(
+      nextSpeedMps,
+      -MAX_PLAYER_REVERSE_KICK_MPS,
+      retainedForwardSpeedMps,
+    ),
+    steerAngleRad: params.car.steerAngleRad * 0.18,
   };
 }
 
@@ -214,17 +249,13 @@ function applyCollisionToParkedVehicle(params: {
   const massKg = getHomeDriveParkedVehicleMassKg(vehicle);
   const inverseMassFactor = clamp(1450 / massKg, 0.42, 1.42);
 
-  /*
-    normalFromVehicleToPlayer aponta do carro estacionado para o player.
-    O carro estacionado precisa ir no sentido oposto.
-  */
   const pushDirection = {
     x: -params.normalFromVehicleToPlayer.x,
     z: -params.normalFromVehicleToPlayer.z,
   };
 
   const impactVelocityMps = clamp(
-    params.impulse * 0.42 * params.pushMultiplier * inverseMassFactor,
+    params.impulse * 0.48 * params.pushMultiplier * inverseMassFactor,
     0,
     params.maxVelocityMps,
   );
@@ -234,13 +265,13 @@ function applyCollisionToParkedVehicle(params: {
     pushDirection.x * right.x + pushDirection.z * right.z >= 0 ? 1 : -1;
 
   const angularKick = clampAbs(
-    sideHit * params.impulse * 0.24 * inverseMassFactor,
+    sideHit * params.impulse * 0.28 * inverseMassFactor,
     params.maxAngularVelocityRadps,
   );
 
   const damageDelta = clamp(
-    (params.impulse / 22) * (0.35 + params.relativeSpeedMps / 42),
-    0.015,
+    (params.impulse / 26) * (0.38 + params.relativeSpeedMps / 42),
+    0.018,
     params.maxDamagePerHit,
   );
 
@@ -260,12 +291,25 @@ function applyCollisionToParkedVehicle(params: {
       ),
     },
     impactOffset: {
-      x: vehicle.impactOffset.x + pushDirection.x * clamp(params.impulse * 0.018, 0, 0.38),
-      z: vehicle.impactOffset.z + pushDirection.z * clamp(params.impulse * 0.018, 0, 0.38),
+      x:
+        vehicle.impactOffset.x +
+        pushDirection.x * clamp(params.impulse * 0.022, 0, 0.46),
+      z:
+        vehicle.impactOffset.z +
+        pushDirection.z * clamp(params.impulse * 0.022, 0, 0.46),
     },
-    visualRollRad: clampAbs(vehicle.visualRollRad + sideHit * params.impulse * 0.012, 0.42),
-    visualPitchRad: clampAbs(vehicle.visualPitchRad + params.impulse * 0.008, 0.32),
-    visualYawOffsetRad: clampAbs(vehicle.visualYawOffsetRad + angularKick * 0.028, 0.5),
+    visualRollRad: clampAbs(
+      vehicle.visualRollRad + sideHit * params.impulse * 0.014,
+      0.48,
+    ),
+    visualPitchRad: clampAbs(
+      vehicle.visualPitchRad + params.impulse * 0.009,
+      0.36,
+    ),
+    visualYawOffsetRad: clampAbs(
+      vehicle.visualYawOffsetRad + angularKick * 0.032,
+      0.58,
+    ),
     impactAngularVelocityRadps: clampAbs(
       vehicle.impactAngularVelocityRadps + angularKick,
       params.maxAngularVelocityRadps,
@@ -315,7 +359,8 @@ export function resolveHomeDriveParkedVehicleCollisions(
   const playerPushMultiplier =
     options.playerPushMultiplier ?? DEFAULT_PLAYER_PUSH_MULTIPLIER;
   const playerReverseKickMultiplier =
-    options.playerReverseKickMultiplier ?? DEFAULT_PLAYER_REVERSE_KICK_MULTIPLIER;
+    options.playerReverseKickMultiplier ??
+    DEFAULT_PLAYER_REVERSE_KICK_MULTIPLIER;
   const maxParkedImpactVelocityMps =
     options.maxParkedImpactVelocityMps ?? DEFAULT_MAX_PARKED_IMPACT_VELOCITY_MPS;
   const maxParkedAngularVelocityRadps =
@@ -334,17 +379,22 @@ export function resolveHomeDriveParkedVehicleCollisions(
       return vehicle;
     }
 
-    const renderedVehiclePosition = getHomeDriveParkedVehicleRenderedPosition(vehicle);
+    const renderedVehiclePosition =
+      getHomeDriveParkedVehicleRenderedPosition(vehicle);
     const distance = getDistance(resolvedCar.position, renderedVehiclePosition);
     const collisionDistance =
-      playerRadiusMeters + getHomeDriveParkedVehicleCollisionRadiusMeters(vehicle);
+      playerRadiusMeters +
+      getHomeDriveParkedVehicleCollisionRadiusMeters(vehicle);
 
     if (distance >= collisionDistance) {
       return vehicle;
     }
 
     const normalFromVehicleToPlayer =
-      getSafeCollisionNormalFromVehicleToPlayer(renderedVehiclePosition, resolvedCar);
+      getSafeCollisionNormalFromVehicleToPlayer(
+        renderedVehiclePosition,
+        resolvedCar,
+      );
     const relativeSpeedMps = getRelativeImpactSpeedMps(
       resolvedCar,
       vehicle,

@@ -1,20 +1,25 @@
 // src/pages/Mateus/Home/components/mobile/game/driving/view/HomeDriveSpeedometer.tsx
 
-import React, { memo, useMemo, type CSSProperties } from "react";
+import React, { memo, useMemo, useRef, type CSSProperties } from "react";
 
+import type { HomeDriveRuntimeImpactState } from "../domain/homeDrive.impact";
 import {
+  createInitialHomeDriveSpeedometerImpactState,
   getHomeDriveSpeedometerNeedleState,
   getHomeDriveSpeedometerTickDeg,
   HOME_DRIVE_SPEEDOMETER_CSS_VARS,
   HOME_DRIVE_SPEEDOMETER_DEFAULT_LABEL,
   HOME_DRIVE_SPEEDOMETER_MAJOR_TICKS,
   HOME_DRIVE_SPEEDOMETER_MINOR_TICKS,
+  resolveHomeDriveSpeedometerImpactSpeed,
+  type HomeDriveSpeedometerImpactRuntimeState,
   type HomeDriveSpeedometerTick,
 } from "./speedometer";
 import styles from "./HomeDriveSpeedometer.module.css";
 
 export type HomeDriveSpeedometerProps = Readonly<{
   speedMps: number;
+  impact?: HomeDriveRuntimeImpactState | null;
   className?: string;
   label?: string;
 }>;
@@ -29,18 +34,16 @@ function getClassName(className?: string): string {
 function createSpeedometerStyle(params: {
   needleDeg: number;
   progress: number;
+  shockRatio: number;
+  isImpacting: boolean;
 }): SpeedometerCssProperties {
-  /*
-    Só variáveis dinâmicas do ponteiro.
-    Posição, tamanho e responsividade ficam em:
-    - cockpit/homeDriveCockpit.tokens.ts
-    - HomeDriveSpeedometer.module.css
-  */
   return {
     [HOME_DRIVE_SPEEDOMETER_CSS_VARS.needleDeg]: `${params.needleDeg.toFixed(
       3,
     )}deg`,
     [HOME_DRIVE_SPEEDOMETER_CSS_VARS.progress]: params.progress.toFixed(4),
+    "--home-drive-speedometer-impact-ratio": params.shockRatio.toFixed(4),
+    "--home-drive-speedometer-impacting": params.isImpacting ? 1 : 0,
   };
 }
 
@@ -82,14 +85,45 @@ function SpeedometerMajorTick({
   );
 }
 
+function getNowMs(): number {
+  if (typeof performance !== "undefined") {
+    return performance.now();
+  }
+
+  return Date.now();
+}
+
 function HomeDriveSpeedometer({
   speedMps,
+  impact,
   className,
   label = HOME_DRIVE_SPEEDOMETER_DEFAULT_LABEL,
 }: HomeDriveSpeedometerProps) {
+  const impactStateRef = useRef<HomeDriveSpeedometerImpactRuntimeState>(
+    createInitialHomeDriveSpeedometerImpactState(),
+  );
+  const previousRenderAtRef = useRef<number>(getNowMs());
+
+  const nowMs = getNowMs();
+  const deltaSeconds = Math.min(
+    Math.max((nowMs - previousRenderAtRef.current) / 1000, 1 / 120),
+    1 / 8,
+  );
+
+  previousRenderAtRef.current = nowMs;
+
+  const impactResolution = resolveHomeDriveSpeedometerImpactSpeed({
+    speedMps,
+    impact,
+    previousState: impactStateRef.current,
+    deltaSeconds,
+  });
+
+  impactStateRef.current = impactResolution.state;
+
   const needleState = useMemo(
-    () => getHomeDriveSpeedometerNeedleState(speedMps),
-    [speedMps],
+    () => getHomeDriveSpeedometerNeedleState(impactResolution.visualSpeedMps),
+    [impactResolution.visualSpeedMps],
   );
 
   const rootStyle = useMemo(
@@ -97,13 +131,23 @@ function HomeDriveSpeedometer({
       createSpeedometerStyle({
         needleDeg: needleState.needleDeg,
         progress: needleState.progress,
+        shockRatio: impactResolution.shockRatio,
+        isImpacting: impactResolution.isImpacting,
       }),
-    [needleState.needleDeg, needleState.progress],
+    [
+      impactResolution.isImpacting,
+      impactResolution.shockRatio,
+      needleState.needleDeg,
+      needleState.progress,
+    ],
   );
 
   return (
     <aside
       data-home-drive-speedometer="true"
+      data-home-drive-speedometer-impacting={
+        impactResolution.isImpacting ? "true" : "false"
+      }
       aria-label={`Velocímetro analógico: ${needleState.displaySpeedKmh} quilômetros por hora`}
       className={getClassName(className)}
       style={rootStyle}

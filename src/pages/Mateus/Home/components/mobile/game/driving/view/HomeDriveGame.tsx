@@ -200,7 +200,10 @@ export default function HomeDriveGame({ onClose }: HomeDriveGameProps) {
         <span className={styles.cockpitGlass} />
       </div>
 
-      <HomeDriveSpeedometer speedMps={runtimeSnapshot.car.speedMps} />
+      <HomeDriveSpeedometer
+        speedMps={runtimeSnapshot.car.speedMps}
+        impact={runtimeSnapshot.impact}
+      />
 
       <HomeDriveCompass
         className={styles.compass}

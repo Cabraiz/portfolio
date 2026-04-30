@@ -21,57 +21,54 @@ function clampNumber(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value));
 }
 
-function lerpNumber(from: number, to: number, progress: number): number {
-  return from + (to - from) * progress;
+function lerpNumber(start: number, end: number, amount: number): number {
+  return start + (end - start) * clampNumber(amount, 0, 1);
 }
 
-export function getHomeDriveSpeedKmh(speedMps: number): number {
+export function convertHomeDriveSpeedMpsToKmh(speedMps: number): number {
   if (!Number.isFinite(speedMps)) {
     return 0;
   }
 
-  return Math.abs(speedMps) * 3.6;
-}
-
-export function clampHomeDriveSpeedometerKmh(speedKmh: number): number {
-  return clampNumber(speedKmh, 0, HOME_DRIVE_SPEEDOMETER_MAX_SPEED_KMH);
+  /**
+   * Importante:
+   * Não usar Math.abs aqui.
+   *
+   * Quando uma colisão joga o carro para trás, speedMps pode ficar negativo.
+   * Em um velocímetro analógico de cockpit, isso deve derrubar o ponteiro.
+   */
+  return Math.max(0, speedMps) * 3.6;
 }
 
 export function getHomeDriveSpeedometerProgress(speedKmh: number): number {
-  const clampedSpeedKmh = clampHomeDriveSpeedometerKmh(speedKmh);
-
-  return clampNumber(
-    clampedSpeedKmh / HOME_DRIVE_SPEEDOMETER_MAX_SPEED_KMH,
-    0,
-    1,
-  );
+  return clampNumber(speedKmh / HOME_DRIVE_SPEEDOMETER_MAX_SPEED_KMH, 0, 1);
 }
 
-export function getHomeDriveSpeedometerNeedleDeg(speedKmh: number): number {
+export function getHomeDriveSpeedometerTickDeg(valueKmh: number): number {
+  const progress = getHomeDriveSpeedometerProgress(valueKmh);
+
   return lerpNumber(
     HOME_DRIVE_SPEEDOMETER_MIN_SWEEP_DEG,
     HOME_DRIVE_SPEEDOMETER_MAX_SWEEP_DEG,
-    getHomeDriveSpeedometerProgress(speedKmh),
+    progress,
   );
-}
-
-export function getHomeDriveSpeedometerDisplayKmh(speedKmh: number): number {
-  return Math.round(clampHomeDriveSpeedometerKmh(speedKmh));
 }
 
 export function getHomeDriveSpeedometerNeedleState(
   speedMps: number,
 ): HomeDriveSpeedometerNeedleState {
-  const speedKmh = getHomeDriveSpeedKmh(speedMps);
+  const speedKmh = convertHomeDriveSpeedMpsToKmh(speedMps);
+  const progress = getHomeDriveSpeedometerProgress(speedKmh);
+  const needleDeg = lerpNumber(
+    HOME_DRIVE_SPEEDOMETER_MIN_SWEEP_DEG,
+    HOME_DRIVE_SPEEDOMETER_MAX_SWEEP_DEG,
+    progress,
+  );
 
   return {
     speedKmh,
-    displaySpeedKmh: getHomeDriveSpeedometerDisplayKmh(speedKmh),
-    progress: getHomeDriveSpeedometerProgress(speedKmh),
-    needleDeg: getHomeDriveSpeedometerNeedleDeg(speedKmh),
+    displaySpeedKmh: Math.round(speedKmh),
+    progress,
+    needleDeg,
   };
-}
-
-export function getHomeDriveSpeedometerTickDeg(speedKmh: number): number {
-  return getHomeDriveSpeedometerNeedleDeg(speedKmh);
 }
