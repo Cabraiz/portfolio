@@ -8,11 +8,11 @@ import type {
   HomeDriveBuildingRubblePieceKind,
 } from "./homeDrive.buildingCollisionRubble.types";
 
-const DEFAULT_RUBBLE_INTENSITY = 1;
-const DEFAULT_MIN_PIECES_PER_IMPACT = 10;
-const DEFAULT_MAX_PIECES_PER_IMPACT = 78;
-const DEFAULT_MAX_PIECES_PER_BUILDING = 260;
-const DEFAULT_MAX_PIECES_TOTAL = 1400;
+const DEFAULT_RUBBLE_INTENSITY = 1.35;
+const DEFAULT_MIN_PIECES_PER_IMPACT = 26;
+const DEFAULT_MAX_PIECES_PER_IMPACT = 180;
+const DEFAULT_MAX_PIECES_PER_BUILDING = 520;
+const DEFAULT_MAX_PIECES_TOTAL = 2400;
 
 function clamp(value: number, min: number, max: number): number {
   if (!Number.isFinite(value)) {
@@ -75,27 +75,27 @@ function pickRubbleKind(
   severity: number,
   index: number,
 ): HomeDriveBuildingRubblePieceKind {
-  if (severity >= 0.72 && index % 11 === 0) {
+  if (severity >= 0.78 && index % 9 === 0) {
     return "rebar-piece";
   }
 
-  if (severity >= 0.64 && randomValue > 0.82) {
+  if (severity >= 0.68 && randomValue > 0.86) {
     return "concrete-boulder";
   }
 
-  if (randomValue > 0.68) {
+  if (randomValue > 0.7) {
     return "broken-slab";
   }
 
-  if (randomValue > 0.42) {
+  if (randomValue > 0.43) {
     return "concrete-rock";
   }
 
-  if (randomValue > 0.18) {
+  if (randomValue > 0.14) {
     return "small-stone";
   }
 
-  if (randomValue > 0.08) {
+  if (randomValue > 0.055) {
     return "plaster-shard";
   }
 
@@ -116,52 +116,52 @@ function getRubbleSize(params: Readonly<{
   switch (params.kind) {
     case "concrete-boulder":
       return {
-        widthMeters: 0.46 + params.random() * (0.5 + severity * 0.72),
-        heightMeters: 0.26 + params.random() * (0.3 + severity * 0.42),
-        depthMeters: 0.42 + params.random() * (0.42 + severity * 0.62),
+        widthMeters: 0.52 + params.random() * (0.62 + severity * 0.9),
+        heightMeters: 0.3 + params.random() * (0.36 + severity * 0.5),
+        depthMeters: 0.48 + params.random() * (0.5 + severity * 0.76),
       };
 
     case "broken-slab":
       return {
-        widthMeters: 0.62 + params.random() * (0.72 + severity * 0.86),
-        heightMeters: 0.08 + params.random() * (0.11 + severity * 0.08),
-        depthMeters: 0.34 + params.random() * (0.34 + severity * 0.36),
+        widthMeters: 0.7 + params.random() * (0.84 + severity * 1.05),
+        heightMeters: 0.075 + params.random() * (0.12 + severity * 0.09),
+        depthMeters: 0.38 + params.random() * (0.42 + severity * 0.5),
       };
 
     case "concrete-rock":
       return {
-        widthMeters: 0.24 + params.random() * (0.32 + severity * 0.38),
-        heightMeters: 0.16 + params.random() * (0.16 + severity * 0.2),
-        depthMeters: 0.22 + params.random() * (0.3 + severity * 0.35),
+        widthMeters: 0.24 + params.random() * (0.38 + severity * 0.5),
+        heightMeters: 0.16 + params.random() * (0.19 + severity * 0.24),
+        depthMeters: 0.22 + params.random() * (0.34 + severity * 0.42),
       };
 
     case "small-stone":
       return {
-        widthMeters: 0.08 + params.random() * 0.2,
-        heightMeters: 0.05 + params.random() * 0.13,
-        depthMeters: 0.08 + params.random() * 0.18,
+        widthMeters: 0.07 + params.random() * 0.22,
+        heightMeters: 0.045 + params.random() * 0.14,
+        depthMeters: 0.07 + params.random() * 0.2,
       };
 
     case "plaster-shard":
       return {
-        widthMeters: 0.18 + params.random() * 0.32,
-        heightMeters: 0.025 + params.random() * 0.055,
-        depthMeters: 0.12 + params.random() * 0.24,
+        widthMeters: 0.18 + params.random() * 0.36,
+        heightMeters: 0.022 + params.random() * 0.06,
+        depthMeters: 0.12 + params.random() * 0.28,
       };
 
     case "rebar-piece":
       return {
-        widthMeters: 0.035 + params.random() * 0.018,
-        heightMeters: 0.035 + params.random() * 0.018,
-        depthMeters: 0.72 + params.random() * (0.84 + severity * 0.86),
+        widthMeters: 0.032 + params.random() * 0.022,
+        heightMeters: 0.032 + params.random() * 0.022,
+        depthMeters: 0.88 + params.random() * (1.06 + severity * 1.1),
       };
 
     case "dust-mound":
     default:
       return {
-        widthMeters: 0.22 + params.random() * 0.46,
-        heightMeters: 0.022 + params.random() * 0.045,
-        depthMeters: 0.18 + params.random() * 0.42,
+        widthMeters: 0.28 + params.random() * 0.62,
+        heightMeters: 0.018 + params.random() * 0.05,
+        depthMeters: 0.24 + params.random() * 0.56,
       };
   }
 }
@@ -171,16 +171,22 @@ function getRubblePieceCount(
   options: HomeDriveBuildingRubbleCreationOptions,
 ): number {
   const severity = clamp(event.severity, 0, 1);
-  const intensity = clamp(options.rubbleIntensity ?? DEFAULT_RUBBLE_INTENSITY, 0, 3);
-  const minPieces = Math.max(0, options.minRubblePiecesPerImpact ?? DEFAULT_MIN_PIECES_PER_IMPACT);
+  const intensity = clamp(options.rubbleIntensity ?? DEFAULT_RUBBLE_INTENSITY, 0, 3.25);
+  const minPieces = Math.max(
+    0,
+    options.minRubblePiecesPerImpact ?? DEFAULT_MIN_PIECES_PER_IMPACT,
+  );
   const maxPieces = Math.max(
     minPieces,
     options.maxRubblePiecesPerImpact ?? DEFAULT_MAX_PIECES_PER_IMPACT,
   );
 
+  const impulseRatio = clamp(event.impulse / 38, 0, 1);
+  const speedRatio = clamp(event.relativeSpeedMps / 30, 0, 1);
+
   return Math.round(
     clamp(
-      (minPieces + severity * 46 + clamp(event.impulse / 32, 0, 1) * 22) *
+      (minPieces + severity * 72 + impulseRatio * 42 + speedRatio * 28) *
         intensity,
       minPieces,
       maxPieces,
@@ -200,18 +206,23 @@ export function createHomeDriveBuildingRubblePiecesFromEvent(
   const random = createSeededRandom(seed);
   const normal = normalizeVector(event.normal);
   const right = getRightVectorFromNormal(normal);
-  const impactSpread = 1.1 + severity * 4.2;
-  const forwardSpread = 0.72 + severity * 5.6 + clamp(event.relativeSpeedMps / 18, 0, 1) * 2.2;
+  const impactSpread = 1.4 + severity * 5.8;
+  const forwardSpread =
+    0.86 + severity * 7.4 + clamp(event.relativeSpeedMps / 18, 0, 1) * 2.8;
 
   return Array.from({ length: count }, (_, index): HomeDriveBuildingRubblePiece => {
     const kind = pickRubbleKind(random(), severity, index);
     const size = getRubbleSize({ kind, severity, random });
     const sideSign = random() > 0.5 ? 1 : -1;
-    const sideMagnitude = Math.pow(random(), 0.58) * impactSpread;
-    const localSideMeters = sideSign * sideMagnitude * (0.12 + random() * 0.88);
+    const sideMagnitude = Math.pow(random(), 0.54) * impactSpread;
+    const localSideMeters = sideSign * sideMagnitude * (0.1 + random() * 0.94);
     const localForwardMeters =
-      0.35 + Math.pow(random(), 0.47) * forwardSpread * (kind === "dust-mound" ? 0.7 : 1);
-    const uphillJitter = kind === "rebar-piece" ? 0.18 + random() * 0.44 : random() * 0.16;
+      0.28 +
+      Math.pow(random(), kind === "dust-mound" ? 0.4 : 0.46) *
+        forwardSpread *
+        (kind === "dust-mound" ? 0.82 : 1);
+    const uphillJitter =
+      kind === "rebar-piece" ? 0.16 + random() * 0.54 : random() * 0.18;
 
     return {
       id: `${event.buildingId}:rubble:${event.occurredAtSeconds}:${seed}:${index}`,
@@ -235,16 +246,16 @@ export function createHomeDriveBuildingRubblePiecesFromEvent(
       yMeters:
         kind === "rebar-piece"
           ? size.widthMeters * 0.5 + uphillJitter
-          : size.heightMeters * 0.5 + random() * 0.055,
+          : size.heightMeters * 0.5 + random() * 0.06,
       widthMeters: size.widthMeters,
       heightMeters: size.heightMeters,
       depthMeters: size.depthMeters,
-      rotationXRad: (random() - 0.5) * Math.PI * 0.72,
+      rotationXRad: (random() - 0.5) * Math.PI * 0.82,
       rotationYRad:
         Math.atan2(normal.x, normal.z) +
-        (random() - 0.5) * Math.PI * (kind === "rebar-piece" ? 0.58 : 1.75),
-      rotationZRad: (random() - 0.5) * Math.PI * 0.9,
-      opacity: kind === "dust-mound" ? 0.58 + random() * 0.16 : 1,
+        (random() - 0.5) * Math.PI * (kind === "rebar-piece" ? 0.62 : 1.88),
+      rotationZRad: (random() - 0.5) * Math.PI * 1.05,
+      opacity: kind === "dust-mound" ? 0.58 + random() * 0.18 : 1,
       severity,
       createdAtSeconds: event.occurredAtSeconds,
       seed: hashString(`${seed}:${index}:${kind}`),

@@ -53,9 +53,9 @@ type RubbleBatch = Readonly<{
   pieces: readonly HomeDriveBuildingRubblePiece[];
 }>;
 
-const DEFAULT_VISIBLE_RADIUS_METERS = 560;
-const DEFAULT_MAX_VISIBLE_PIECES = 520;
-const DEFAULT_SNAPSHOT_HZ = 8;
+const DEFAULT_VISIBLE_RADIUS_METERS = 720;
+const DEFAULT_MAX_VISIBLE_PIECES = 900;
+const DEFAULT_SNAPSHOT_HZ = 10;
 
 function getDistanceSquaredToRuntime(
   piece: HomeDriveBuildingRubblePiece,

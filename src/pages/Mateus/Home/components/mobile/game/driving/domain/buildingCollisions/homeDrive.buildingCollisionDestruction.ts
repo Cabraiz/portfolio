@@ -3,6 +3,15 @@
 import type { HomeDriveVector2 } from "../homeDrive.types";
 import type { HomeDriveBuildingCollisionEvent } from "./homeDrive.buildingCollision.types";
 import {
+  createHomeDriveBuildingCollisionBreachProfileFromEvent,
+  createHomeDriveBuildingCollisionBreachProfileFromZone,
+  createHomeDriveBuildingCollisionBreachZonePatch,
+} from "./homeDrive.buildingCollisionBreach";
+import type {
+  HomeDriveBuildingCollisionBreachCreationOptions,
+  HomeDriveBuildingCollisionBreachProfile,
+} from "./homeDrive.buildingCollisionBreach.types";
+import {
   createHomeDriveBuildingLeanStateFromEvent,
   mergeHomeDriveBuildingLeanStateFromEvent,
 } from "./homeDrive.buildingCollisionLean";
@@ -19,7 +28,7 @@ import type {
 
 const DEFAULT_MAX_DESTRUCTIONS = 96;
 const DEFAULT_MAX_ZONES_PER_BUILDING = 3;
-const DEFAULT_MERGE_DISTANCE_METERS = 2.75;
+const DEFAULT_MERGE_DISTANCE_METERS = 3.25;
 
 function clamp(value: number, min: number, max: number): number {
   if (!Number.isFinite(value)) {
@@ -27,6 +36,10 @@ function clamp(value: number, min: number, max: number): number {
   }
 
   return Math.max(min, Math.min(max, value));
+}
+
+function clamp01(value: number): number {
+  return clamp(value, 0, 1);
 }
 
 function hashString(value: string): number {
@@ -91,8 +104,9 @@ function createEdgeProfile(
   hitCount = 1,
 ): readonly HomeDriveBuildingDestructionEdgePoint[] {
   const random = createSeededRandom(seed + hitCount * 1009);
-  const count = 18;
-  const roughnessMeters = 0.16 + severity * 0.5 + Math.min(0.32, hitCount * 0.035);
+  const count = 22;
+  const roughnessMeters =
+    0.22 + severity * 0.68 + Math.min(0.44, hitCount * 0.045);
 
   return Array.from({ length: count }, (_, index) => {
     const t = index / count;
@@ -155,13 +169,79 @@ function getEventLocalXMeters(
   return dot(delta, getForwardVector(event.buildingRotationYRad));
 }
 
-function getEventLocalYMeters(
+function getBreachOptions(
   event: HomeDriveBuildingCollisionEvent,
-  options: HomeDriveBuildingCollisionDestructionCreationOptions,
-): number {
-  return typeof options.localYMeters === "number"
-    ? options.localYMeters
-    : event.contactYMeters;
+  hitCount = 1,
+): HomeDriveBuildingCollisionBreachCreationOptions {
+  const severity = clamp01(event.severity);
+  const speedRatio = clamp01(event.relativeSpeedMps / 28);
+  const impulseRatio = clamp01(event.impulse / 42);
+  const violence = clamp01(severity * 0.54 + speedRatio * 0.28 + impulseRatio * 0.18);
+
+  return {
+    minSamples: 10,
+    maxSamples: Math.round(14 + violence * 4 + Math.min(3, hitCount)),
+    minHeightRatio: 0.36 + violence * 0.08,
+    maxHeightRatio: clamp(0.66 + violence * 0.18 + hitCount * 0.018, 0.66, 0.86),
+    minWidthRatio: 0.44 + violence * 0.08,
+    maxWidthRatio: clamp(0.76 + violence * 0.2 + hitCount * 0.018, 0.76, 0.96),
+    minDepthRatio: 0.48 + violence * 0.08,
+    maxDepthRatio: clamp(0.84 + violence * 0.15, 0.84, 0.98),
+    jaggedness: clamp(1.08 + violence * 0.64 + hitCount * 0.035, 1.08, 1.92),
+    anchorToGround: true,
+  };
+}
+
+function createGroundAnchoredBreachFromEvent(params: Readonly<{
+  event: HomeDriveBuildingCollisionEvent;
+  localX: number;
+  idSuffix?: string;
+  hitCount?: number;
+}>): HomeDriveBuildingCollisionBreachProfile {
+  const { event, localX, idSuffix, hitCount = 1 } = params;
+
+  return createHomeDriveBuildingCollisionBreachProfileFromEvent(
+    {
+      event,
+      localX,
+      idSuffix,
+    },
+    getBreachOptions(event, hitCount),
+  );
+}
+
+function createGroundAnchoredBreachFromZone(params: Readonly<{
+  zone: HomeDriveBuildingDestructionZone;
+  hitCount: number;
+  severity: number;
+  localX: number;
+  holeWidthMeters: number;
+  holeHeightMeters: number;
+  holeDepthMeters: number;
+  seed: number;
+}>): HomeDriveBuildingCollisionBreachProfile {
+  const { zone, hitCount, severity, localX, holeWidthMeters, holeHeightMeters, holeDepthMeters, seed } = params;
+  const event = zone.sourceEvent;
+
+  return createHomeDriveBuildingCollisionBreachProfileFromZone(
+    {
+      id: zone.id,
+      buildingId: zone.buildingId,
+      face: zone.face,
+      localX,
+      normal: zone.normal,
+      buildingHeightMeters: event.buildingHeightMeters,
+      buildingWidthMeters: event.buildingWidthMeters,
+      buildingDepthMeters: event.buildingDepthMeters,
+      holeWidthMeters,
+      holeHeightMeters,
+      holeDepthMeters,
+      severity,
+      createdAtSeconds: zone.createdAtSeconds,
+      seed,
+    },
+    getBreachOptions(event, hitCount),
+  );
 }
 
 export function createHomeDriveBuildingDestructionZoneFromEvent(
@@ -173,51 +253,65 @@ export function createHomeDriveBuildingDestructionZoneFromEvent(
   const faceDepthMeters = getFaceDepthMeters(event);
   const localX = getEventLocalXMeters(event, options);
 
-  const holeWidthMeters = clamp(
-    1.55 + severity * 4.1 + clamp(event.relativeSpeedMps / 18, 0, 1) * 1.2,
-    1.2,
-    Math.max(1.25, faceWidthMeters * 0.78),
-  );
-  const holeHeightMeters = clamp(
-    1.15 + severity * 3.35 + clamp(event.impulse / 32, 0, 1) * 1.05,
-    0.95,
-    Math.max(1.1, event.buildingHeightMeters * 0.62),
-  );
-  const holeDepthMeters = clamp(
-    0.7 + severity * 2.65 + clamp(event.relativeSpeedMps / 22, 0, 1) * 1.4,
-    0.58,
-    Math.max(0.64, faceDepthMeters * 0.92),
-  );
-
-  const localY = clamp(
-    getEventLocalYMeters(event, options),
-    holeHeightMeters * 0.5 + 0.18,
-    Math.max(
-      holeHeightMeters * 0.5 + 0.22,
-      event.buildingHeightMeters - holeHeightMeters * 0.5 - 0.16,
-    ),
-  );
-
   const seed = hashString(
     `${event.buildingId}:destruction:${event.face}:${event.occurredAtSeconds}:${event.impulse}`,
   );
+
+  const breachProfile = createGroundAnchoredBreachFromEvent({
+    event,
+    localX,
+    idSuffix: `${seed}`,
+  });
+  const patch = createHomeDriveBuildingCollisionBreachZonePatch(breachProfile);
+
+  const holeWidthMeters = clamp(
+    patch.holeWidthMeters,
+    1.5,
+    Math.max(1.55, faceWidthMeters * 0.96),
+  );
+  const holeDepthMeters = clamp(
+    patch.holeDepthMeters,
+    0.64,
+    Math.max(0.68, faceDepthMeters * 0.98),
+  );
+  const holeBottomMeters = 0;
+  const holeTopMeters = clamp(
+    patch.holeTopMeters,
+    Math.min(2.1, event.buildingHeightMeters),
+    Math.max(2.2, event.buildingHeightMeters * 0.88),
+  );
+  const holeHeightMeters = Math.max(0.4, holeTopMeters - holeBottomMeters);
+  const localY = holeBottomMeters + holeHeightMeters * 0.5;
+
+  const finalBreachProfile = {
+    ...patch.breachProfile,
+    localX: clamp(
+      patch.breachProfile.localX,
+      -faceWidthMeters * 0.5 + holeWidthMeters * 0.32,
+      faceWidthMeters * 0.5 - holeWidthMeters * 0.32,
+    ),
+    bottomMeters: holeBottomMeters,
+    topMeters: holeTopMeters,
+    heightMeters: holeHeightMeters,
+    maxHalfWidthMeters: holeWidthMeters * 0.5,
+    maxDepthMeters: holeDepthMeters,
+  } satisfies HomeDriveBuildingCollisionBreachProfile;
 
   return {
     id: `${event.buildingId}:destruction-zone:${event.face}:${seed}`,
     buildingId: event.buildingId,
     face: event.face,
-    localX: clamp(
-      localX,
-      -faceWidthMeters * 0.5 + holeWidthMeters * 0.5,
-      faceWidthMeters * 0.5 - holeWidthMeters * 0.5,
-    ),
+    localX: finalBreachProfile.localX,
     localY,
     worldPosition: event.position,
     normal: event.normal,
     rotationYRad: event.buildingRotationYRad,
+    holeBottomMeters,
+    holeTopMeters,
     holeWidthMeters,
     holeHeightMeters,
     holeDepthMeters,
+    breachProfile: finalBreachProfile,
     severity,
     accumulatedSeverity: severity,
     hitCount: 1,
@@ -246,33 +340,105 @@ function mergeHomeDriveBuildingDestructionZones(
 ): HomeDriveBuildingDestructionZone {
   const nextHitCount = current.hitCount + 1;
   const accumulatedSeverity = clamp(
-    current.accumulatedSeverity + incoming.severity * 0.92,
+    current.accumulatedSeverity + incoming.severity * 0.94,
     0,
     6,
   );
   const severity = clamp(
     Math.max(current.severity, incoming.severity) +
-      Math.min(0.32, nextHitCount * 0.04),
+      Math.min(0.38, nextHitCount * 0.05),
     0,
     1,
   );
 
-  return {
+  const event = incoming.sourceEvent;
+  const faceWidthMeters = getFaceWidthMeters(event);
+  const faceDepthMeters = getFaceDepthMeters(event);
+
+  const localX = clamp(
+    (current.localX * current.hitCount + incoming.localX) / nextHitCount,
+    -faceWidthMeters * 0.5,
+    faceWidthMeters * 0.5,
+  );
+
+  const holeWidthMeters = clamp(
+    Math.max(current.holeWidthMeters, incoming.holeWidthMeters) +
+      incoming.severity * 0.86 +
+      nextHitCount * 0.08,
+    1.4,
+    Math.max(1.5, faceWidthMeters * 0.98),
+  );
+  const holeHeightMeters = clamp(
+    Math.max(current.holeHeightMeters, incoming.holeHeightMeters) +
+      incoming.severity * 0.68 +
+      nextHitCount * 0.06,
+    1.2,
+    Math.max(1.35, event.buildingHeightMeters * 0.9),
+  );
+  const holeDepthMeters = clamp(
+    Math.max(current.holeDepthMeters, incoming.holeDepthMeters) +
+      incoming.severity * 0.42,
+    0.64,
+    Math.max(0.68, faceDepthMeters * 0.98),
+  );
+
+  const tempZone = {
     ...current,
-    localX: (current.localX * current.hitCount + incoming.localX) / nextHitCount,
-    localY: (current.localY * current.hitCount + incoming.localY) / nextHitCount,
+    localX,
+    localY: holeHeightMeters * 0.5,
     worldPosition: incoming.worldPosition,
     normal: incoming.normal,
     rotationYRad: incoming.rotationYRad,
-    holeWidthMeters:
-      Math.max(current.holeWidthMeters, incoming.holeWidthMeters) +
-      incoming.severity * 0.6,
-    holeHeightMeters:
-      Math.max(current.holeHeightMeters, incoming.holeHeightMeters) +
-      incoming.severity * 0.48,
-    holeDepthMeters:
-      Math.max(current.holeDepthMeters, incoming.holeDepthMeters) +
-      incoming.severity * 0.32,
+    holeBottomMeters: 0,
+    holeTopMeters: holeHeightMeters,
+    holeWidthMeters,
+    holeHeightMeters,
+    holeDepthMeters,
+    severity,
+    accumulatedSeverity,
+    hitCount: nextHitCount,
+    updatedAtSeconds: incoming.updatedAtSeconds,
+    sourceEvent: incoming.sourceEvent,
+  };
+
+  const breachProfile = createGroundAnchoredBreachFromZone({
+    zone: tempZone,
+    hitCount: nextHitCount,
+    severity,
+    localX,
+    holeWidthMeters,
+    holeHeightMeters,
+    holeDepthMeters,
+    seed: current.seed + nextHitCount * 4099,
+  });
+  const patch = createHomeDriveBuildingCollisionBreachZonePatch(breachProfile);
+
+  const holeBottomMeters = 0;
+  const holeTopMeters = clamp(
+    patch.holeTopMeters,
+    Math.min(2.1, event.buildingHeightMeters),
+    Math.max(2.2, event.buildingHeightMeters * 0.9),
+  );
+  const finalHoleHeightMeters = Math.max(0.4, holeTopMeters - holeBottomMeters);
+
+  return {
+    ...current,
+    localX: breachProfile.localX,
+    localY: holeBottomMeters + finalHoleHeightMeters * 0.5,
+    worldPosition: incoming.worldPosition,
+    normal: incoming.normal,
+    rotationYRad: incoming.rotationYRad,
+    holeBottomMeters,
+    holeTopMeters,
+    holeWidthMeters: clamp(patch.holeWidthMeters, 1.4, Math.max(1.5, faceWidthMeters * 0.98)),
+    holeHeightMeters: finalHoleHeightMeters,
+    holeDepthMeters: clamp(patch.holeDepthMeters, 0.64, Math.max(0.68, faceDepthMeters * 0.98)),
+    breachProfile: {
+      ...patch.breachProfile,
+      bottomMeters: holeBottomMeters,
+      topMeters: holeTopMeters,
+      heightMeters: finalHoleHeightMeters,
+    },
     severity,
     accumulatedSeverity,
     hitCount: nextHitCount,
@@ -287,8 +453,16 @@ function createRubbleForZone(
   zone: HomeDriveBuildingDestructionZone,
   options: HomeDriveBuildingCollisionDestructionCreationOptions,
 ) {
+  const rubbleIntensity = Math.max(
+    options.rubbleIntensity ?? 1,
+    1.28 + zone.severity * 1.18 + Math.min(0.5, zone.hitCount * 0.08),
+  );
+
   return createHomeDriveBuildingRubblePiecesFromEvent(zone.sourceEvent, {
     ...options,
+    rubbleIntensity,
+    minRubblePiecesPerImpact: options.minRubblePiecesPerImpact ?? 26,
+    maxRubblePiecesPerImpact: options.maxRubblePiecesPerImpact ?? 180,
     sourceDestructionId: destructionId,
     sourceZoneId: zone.id,
   });

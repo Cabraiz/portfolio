@@ -5,6 +5,7 @@ import type {
   HomeDriveBuildingCollisionEvent,
   HomeDriveBuildingCollisionFace,
 } from "./homeDrive.buildingCollision.types";
+import type { HomeDriveBuildingCollisionBreachProfile } from "./homeDrive.buildingCollisionBreach.types";
 import type {
   HomeDriveBuildingLeanCreationOptions,
   HomeDriveBuildingLeanState,
@@ -17,10 +18,10 @@ import type {
 export type HomeDriveBuildingDestructionFace = HomeDriveBuildingCollisionFace;
 
 export type HomeDriveBuildingDestructionEdgePoint = Readonly<{
-  /** Horizontal offset around the rectangular bite, normalized from -1 to 1. */
+  /** Horizontal offset around the bite, normalized from -1 to 1. */
   x: number;
 
-  /** Vertical offset around the rectangular bite, normalized from -1 to 1. */
+  /** Vertical offset around the bite, normalized from -1 to 1. */
   y: number;
 
   /** Extra irregularity in meters for chipped/ragged edges. */
@@ -33,7 +34,7 @@ export type HomeDriveBuildingDestructionZone = Readonly<{
   face: HomeDriveBuildingDestructionFace;
 
   /**
-   * Horizontal center of the removed block in the impacted face local frame.
+   * Horizontal center of the removed breach in the impacted face local frame.
    * For front/back this maps to local X. For left/right this maps to local Z.
    */
   localX: number;
@@ -45,9 +46,15 @@ export type HomeDriveBuildingDestructionZone = Readonly<{
   normal: HomeDriveVector2;
   rotationYRad: number;
 
+  /** Ground-anchored breach dimensions. */
+  holeBottomMeters: number;
+  holeTopMeters: number;
   holeWidthMeters: number;
   holeHeightMeters: number;
   holeDepthMeters: number;
+
+  /** Irregular vertical breach profile used by the damaged-building renderer. */
+  breachProfile: HomeDriveBuildingCollisionBreachProfile;
 
   severity: number;
   accumulatedSeverity: number;
@@ -57,7 +64,7 @@ export type HomeDriveBuildingDestructionZone = Readonly<{
   updatedAtSeconds: number;
   seed: number;
 
-  /** Deterministic jagged rim profile used by the renderer. */
+  /** Deterministic jagged rim profile kept for legacy marks/rims. */
   edgeProfile: readonly HomeDriveBuildingDestructionEdgePoint[];
 
   /** Last collision event that updated this zone. */

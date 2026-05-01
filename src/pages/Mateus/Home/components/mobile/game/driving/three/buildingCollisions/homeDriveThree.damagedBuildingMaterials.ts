@@ -45,22 +45,22 @@ export function createHomeDriveThreeDamagedBuildingMaterials(): HomeDriveThreeDa
     },
     fallbackBody: createBodyMaterial("#9c988d"),
     interior: new MeshStandardMaterial({
-      color: "#49443d",
+      color: "#38322b",
       roughness: 0.95,
       metalness: 0.02,
     }),
     shadow: new MeshStandardMaterial({
-      color: "#191615",
+      color: "#100d0c",
       roughness: 1,
       metalness: 0,
     }),
     fracture: new MeshStandardMaterial({
-      color: "#6b6255",
+      color: "#61584d",
       roughness: 0.98,
       metalness: 0.02,
     }),
     rim: new MeshStandardMaterial({
-      color: "#82796b",
+      color: "#766d60",
       roughness: 0.96,
       metalness: 0.025,
     }),

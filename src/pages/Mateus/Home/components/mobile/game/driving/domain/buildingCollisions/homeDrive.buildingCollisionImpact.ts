@@ -1,9 +1,6 @@
 // src/pages/Mateus/Home/components/mobile/game/driving/domain/buildingCollisions/homeDrive.buildingCollisionImpact.ts
 
 import {
-  tickHomeDriveBuildingCollisionDeformations,
-} from "./homeDrive.buildingCollisionDeformation";
-import {
   addHomeDriveBuildingCollisionDestructionToList,
   tickHomeDriveBuildingCollisionDestructions,
 } from "./homeDrive.buildingCollisionDestruction";
@@ -17,16 +14,33 @@ import type {
 
 export type HomeDriveBuildingCollisionImpactTickOptions = Readonly<{
   maxMarks?: number;
+
+  /**
+   * Legado: mantido como alias para maxDestructions para não quebrar chamadas antigas.
+   * O sistema novo não usa mais collisionDeformation.
+   */
   maxDeformations?: number;
+
   maxDestructions?: number;
 }>;
 
 export type HomeDriveBuildingCollisionMarkCreationOptions = Readonly<{
   maxMarks?: number;
+
+  /**
+   * Legado: mantido como alias para maxDestructions.
+   */
   maxDeformations?: number;
+
+  /**
+   * Legados do sistema antigo de deformation/debris.
+   * Mantidos só para compatibilidade com chamadas antigas.
+   */
   maxChunksPerImpact?: number;
   maxRebarsPerImpact?: number;
   maxDebrisPiecesPerImpact?: number;
+  deformationLifetimeSeconds?: number;
+
   maxDestructions?: number;
   maxDestructionZonesPerBuilding?: number;
   destructionMergeDistanceMeters?: number;
@@ -42,11 +56,11 @@ export type HomeDriveBuildingCollisionMarkCreationOptions = Readonly<{
   buildingLeanIntensity?: number;
   maxBuildingLeanRad?: number;
   basePivotYOffsetMeters?: number;
+
   crackLifetimeSeconds?: number;
   dustLifetimeSeconds?: number;
   comicLifetimeSeconds?: number;
   heavyDamageLifetimeSeconds?: number;
-  deformationLifetimeSeconds?: number;
 }>;
 
 const DEFAULT_MAX_MARKS = 132;
@@ -308,11 +322,26 @@ function getInitialMarkOpacity(
   }
 }
 
+function resolveMaxDestructions(
+  options: Readonly<{
+    maxDestructions?: number;
+    maxDeformations?: number;
+  }>,
+): number | undefined {
+  return options.maxDestructions ?? options.maxDeformations;
+}
+
 export function createInitialHomeDriveBuildingCollisionState(): HomeDriveBuildingCollisionRuntimeState {
   return {
     serial: 0,
     marks: [],
+
+    /*
+      Campo legado: fica vazio para compatibilidade com o runtime antigo.
+      Não existe mais criação nem tick de collisionDeformation.
+    */
     deformations: [],
+
     destructions: [],
     lastCollisionAtByBuildingId: {},
   };
@@ -332,19 +361,17 @@ export function tickHomeDriveBuildingCollisionState(
   */
   const marks = state.marks.filter((mark) => mark.expiresAtSeconds > nowSeconds);
 
-  const deformations = tickHomeDriveBuildingCollisionDeformations(
-    state.deformations,
-    nowSeconds,
-    {
-      maxDeformations: options.maxDeformations,
-    },
-  );
+  /*
+    Deformations foi removido. Mantemos o array como estava para não quebrar
+    o shape do estado enquanto o restante do código ainda tiver esse campo.
+  */
+  const deformations = state.deformations;
 
   const destructions = tickHomeDriveBuildingCollisionDestructions(
     state.destructions ?? [],
     nowSeconds,
     {
-      maxDestructions: options.maxDestructions ?? options.maxDeformations,
+      maxDestructions: resolveMaxDestructions(options),
     },
   );
 
@@ -394,9 +421,10 @@ export function addHomeDriveBuildingCollisionEventToState(
   });
 
   /*
-    Não geramos mais o dano pesado por `deformations`, porque aquilo era
-    renderizado como planes/chunks/debris sobre o prédio intacto. Para criar
-    buraco real, mantemos `deformations` como legado e alimentamos `destructions`.
+    Dano pesado agora é 100% por `destructions`:
+    - prédio original some do instanced batch;
+    - prédio substituto renderiza buraco volumétrico;
+    - rubble persistente sai da própria destruction.
   */
   const nextDeformations = state.deformations;
 
@@ -404,7 +432,7 @@ export function addHomeDriveBuildingCollisionEventToState(
     state.destructions ?? [],
     event,
     {
-      maxDestructions: options.maxDestructions ?? options.maxDeformations,
+      maxDestructions: resolveMaxDestructions(options),
       maxZonesPerBuilding: options.maxDestructionZonesPerBuilding,
       mergeDistanceMeters: options.destructionMergeDistanceMeters,
       buildingCenter: options.destructionBuildingCenter,

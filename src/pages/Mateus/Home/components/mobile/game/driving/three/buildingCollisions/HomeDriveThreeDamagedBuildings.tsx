@@ -51,9 +51,9 @@ type VisibleDamagedBuilding = Readonly<{
   destruction: HomeDriveBuildingCollisionDestruction;
 }>;
 
-const DEFAULT_VISIBLE_RADIUS_METERS = 620;
-const DEFAULT_MAX_VISIBLE_BUILDINGS = 28;
-const DEFAULT_SNAPSHOT_HZ = 8;
+const DEFAULT_VISIBLE_RADIUS_METERS = 740;
+const DEFAULT_MAX_VISIBLE_BUILDINGS = 42;
+const DEFAULT_SNAPSHOT_HZ = 10;
 
 function getDistanceSquaredToRuntime(
   building: HomeDriveBuilding,
