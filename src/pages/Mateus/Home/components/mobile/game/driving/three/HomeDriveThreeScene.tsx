@@ -1,7 +1,7 @@
 // src/pages/Mateus/Home/components/mobile/game/driving/three/HomeDriveThreeScene.tsx
 
-import React, { Suspense, useEffect, useMemo, useRef } from "react";
-import { Canvas, useThree } from "@react-three/fiber";
+import React, { Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import {
   AmbientLight,
   Color,
@@ -13,11 +13,22 @@ import {
 } from "three";
 
 import {
+  createInitialHomeDriveBuildingCollisionState,
+  type HomeDriveBuildingCollisionRuntimeState,
+} from "../domain/buildingCollisions";
+import {
   createInitialHomeDriveCrosswalkState,
   type HomeDriveCrosswalkRuntimeState,
 } from "../domain/crosswalks";
+import type { HomeDriveBuilding } from "../domain/homeDrive.building.types";
+import { getHomeDriveBuildings } from "../domain/homeDrive.buildings";
 import { createInitialHomeDriveTrafficState } from "../domain/homeDrive.traffic";
 import type { HomeDriveTrafficRuntimeState } from "../domain/homeDrive.traffic.types";
+import type {
+  HomeDriveInputState,
+  HomeDriveRuntimeState,
+  HomeDriveViewportMetrics,
+} from "../domain/homeDrive.types";
 import {
   createInitialHomeDriveParkedVehicleState,
   type HomeDriveParkedVehicleRuntimeState,
@@ -30,11 +41,12 @@ import {
   getHomeDrivePedestrianPerformanceProfile,
   type HomeDrivePedestrianPerformanceProfile,
 } from "../domain/pedestrians/homeDrive.pedestrianPerformance";
-import type {
-  HomeDriveInputState,
-  HomeDriveRuntimeState,
-  HomeDriveViewportMetrics,
-} from "../domain/homeDrive.types";
+import {
+  getHomeDriveDamagedBuildingIdsFromCollisionState,
+  HomeDriveThreeBuildingCollisionMarks,
+  HomeDriveThreeBuildingRubble,
+  HomeDriveThreeDamagedBuildings,
+} from "./buildingCollisions";
 import HomeDriveThreeBoundaryMountains from "./HomeDriveThreeBoundaryMountains";
 import HomeDriveThreeBuildings from "./HomeDriveThreeBuildings";
 import HomeDriveThreeBuildingSigns from "./HomeDriveThreeBuildingSigns";
@@ -66,6 +78,8 @@ type HomeDriveThreeWorldProps = Readonly<{
   inputRef: HomeDriveMutableRef<HomeDriveInputState>;
   trafficRef: HomeDriveMutableRef<HomeDriveTrafficRuntimeState>;
   parkedVehiclesRef: HomeDriveMutableRef<HomeDriveParkedVehicleRuntimeState>;
+  buildingCollisionsRef: HomeDriveMutableRef<HomeDriveBuildingCollisionRuntimeState>;
+  buildings: readonly HomeDriveBuilding[];
   pedestriansRef: HomeDriveMutableRef<HomeDrivePedestrianRuntimeState>;
   crosswalksRef: HomeDriveMutableRef<HomeDriveCrosswalkRuntimeState>;
   pedestrianPerformance: HomeDrivePedestrianPerformanceProfile;
@@ -96,6 +110,21 @@ const PARKED_VISIBLE_RADIUS_PORTRAIT = 540;
 const PARKED_VISIBLE_RADIUS_LANDSCAPE = 660;
 const PARKED_MAX_VISIBLE_PORTRAIT = 96;
 const PARKED_MAX_VISIBLE_LANDSCAPE = 148;
+
+const BUILDING_COLLISION_MARK_VISIBLE_RADIUS_PORTRAIT = 390;
+const BUILDING_COLLISION_MARK_VISIBLE_RADIUS_LANDSCAPE = 520;
+const BUILDING_COLLISION_MARK_MAX_VISIBLE_PORTRAIT = 52;
+const BUILDING_COLLISION_MARK_MAX_VISIBLE_LANDSCAPE = 84;
+
+const DAMAGED_BUILDINGS_VISIBLE_RADIUS_PORTRAIT = 470;
+const DAMAGED_BUILDINGS_VISIBLE_RADIUS_LANDSCAPE = 680;
+const DAMAGED_BUILDINGS_MAX_VISIBLE_PORTRAIT = 18;
+const DAMAGED_BUILDINGS_MAX_VISIBLE_LANDSCAPE = 30;
+
+const BUILDING_RUBBLE_VISIBLE_RADIUS_PORTRAIT = 460;
+const BUILDING_RUBBLE_VISIBLE_RADIUS_LANDSCAPE = 660;
+const BUILDING_RUBBLE_MAX_VISIBLE_PORTRAIT = 260;
+const BUILDING_RUBBLE_MAX_VISIBLE_LANDSCAPE = 560;
 
 const THREE_CLOCK_DEPRECATION_WARNING =
   "THREE.Clock: This module has been deprecated. Please use THREE.Timer instead.";
@@ -195,6 +224,20 @@ function createDirectionalLight(): DirectionalLight {
   return light;
 }
 
+function getSortedStringArray(values: readonly string[]): readonly string[] {
+  return [...values].sort((first, second) => first.localeCompare(second));
+}
+
+function areStringArraysEqual(
+  first: readonly string[],
+  second: readonly string[],
+): boolean {
+  return (
+    first.length === second.length &&
+    first.every((value, index) => value === second[index])
+  );
+}
+
 function HomeDriveThreeEnvironment() {
   const { scene } = useThree();
 
@@ -232,25 +275,71 @@ function HomeDriveThreeWorld({
   inputRef,
   trafficRef,
   parkedVehiclesRef,
+  buildingCollisionsRef,
+  buildings,
   pedestriansRef,
   crosswalksRef,
   pedestrianPerformance,
   isPortrait,
   publishRuntimeSnapshot,
 }: HomeDriveThreeWorldProps) {
+  const [damagedBuildingIds, setDamagedBuildingIds] = useState<
+    readonly string[]
+  >(() =>
+    getSortedStringArray(
+      getHomeDriveDamagedBuildingIdsFromCollisionState(
+        buildingCollisionsRef.current,
+      ),
+    ),
+  );
+  const damagedBuildingIdsAccumulatorRef = useRef(0);
+  const lastDamagedBuildingSerialRef = useRef<number | null>(
+    buildingCollisionsRef.current.serial ?? null,
+  );
+
+  useFrame((_, deltaSeconds) => {
+    const currentSerial = buildingCollisionsRef.current.serial ?? null;
+
+    if (currentSerial === lastDamagedBuildingSerialRef.current) {
+      damagedBuildingIdsAccumulatorRef.current = 0;
+      return;
+    }
+
+    damagedBuildingIdsAccumulatorRef.current += deltaSeconds;
+
+    if (damagedBuildingIdsAccumulatorRef.current < 1 / 12) {
+      return;
+    }
+
+    damagedBuildingIdsAccumulatorRef.current = 0;
+    lastDamagedBuildingSerialRef.current = currentSerial;
+
+    const nextIds = getSortedStringArray(
+      getHomeDriveDamagedBuildingIdsFromCollisionState(
+        buildingCollisionsRef.current,
+      ),
+    );
+
+    setDamagedBuildingIds((currentIds) => {
+      return areStringArraysEqual(currentIds, nextIds) ? currentIds : nextIds;
+    });
+  });
+
   return (
     <>
-    <HomeDriveThreeSimulation
-      runtimeRef={runtimeRef}
-      inputRef={inputRef}
-      trafficRef={trafficRef}
-      parkedVehiclesRef={parkedVehiclesRef}
-      pedestriansRef={pedestriansRef}
-      crosswalksRef={crosswalksRef}
-      pedestrianPerformance={pedestrianPerformance}
-      publishRuntimeSnapshot={publishRuntimeSnapshot}
-      snapshotHz={20}
-    />
+      <HomeDriveThreeSimulation
+        runtimeRef={runtimeRef}
+        inputRef={inputRef}
+        trafficRef={trafficRef}
+        parkedVehiclesRef={parkedVehiclesRef}
+        buildingCollisionsRef={buildingCollisionsRef}
+        buildings={buildings}
+        pedestriansRef={pedestriansRef}
+        crosswalksRef={crosswalksRef}
+        pedestrianPerformance={pedestrianPerformance}
+        publishRuntimeSnapshot={publishRuntimeSnapshot}
+        snapshotHz={8}
+      />
 
       <HomeDriveThreeCameraRig runtimeRef={runtimeRef} />
 
@@ -281,7 +370,60 @@ function HomeDriveThreeWorld({
         }
       />
 
-      <HomeDriveThreeBuildings />
+      <HomeDriveThreeBuildings
+        buildings={buildings}
+        hiddenBuildingIds={damagedBuildingIds}
+      />
+
+      <HomeDriveThreeDamagedBuildings
+        buildings={buildings}
+        buildingCollisionsRef={buildingCollisionsRef}
+        runtimeRef={runtimeRef}
+        visibleRadiusMeters={
+          isPortrait
+            ? DAMAGED_BUILDINGS_VISIBLE_RADIUS_PORTRAIT
+            : DAMAGED_BUILDINGS_VISIBLE_RADIUS_LANDSCAPE
+        }
+        maxVisibleBuildings={
+          isPortrait
+            ? DAMAGED_BUILDINGS_MAX_VISIBLE_PORTRAIT
+            : DAMAGED_BUILDINGS_MAX_VISIBLE_LANDSCAPE
+        }
+        snapshotHz={8}
+      />
+
+      <HomeDriveThreeBuildingRubble
+        buildingCollisionsRef={buildingCollisionsRef}
+        runtimeRef={runtimeRef}
+        visibleRadiusMeters={
+          isPortrait
+            ? BUILDING_RUBBLE_VISIBLE_RADIUS_PORTRAIT
+            : BUILDING_RUBBLE_VISIBLE_RADIUS_LANDSCAPE
+        }
+        maxVisiblePieces={
+          isPortrait
+            ? BUILDING_RUBBLE_MAX_VISIBLE_PORTRAIT
+            : BUILDING_RUBBLE_MAX_VISIBLE_LANDSCAPE
+        }
+        snapshotHz={8}
+      />
+
+      <HomeDriveThreeBuildingCollisionMarks
+        buildingCollisionsRef={buildingCollisionsRef}
+        runtimeRef={runtimeRef}
+        visibleRadiusMeters={
+          isPortrait
+            ? BUILDING_COLLISION_MARK_VISIBLE_RADIUS_PORTRAIT
+            : BUILDING_COLLISION_MARK_VISIBLE_RADIUS_LANDSCAPE
+        }
+        maxVisibleMarks={
+          isPortrait
+            ? BUILDING_COLLISION_MARK_MAX_VISIBLE_PORTRAIT
+            : BUILDING_COLLISION_MARK_MAX_VISIBLE_LANDSCAPE
+        }
+        snapshotHz={12}
+      />
+
       <HomeDriveThreeBuildingSigns runtimeRef={runtimeRef} />
       <HomeDriveThreeTraffic trafficRef={trafficRef} />
 
@@ -313,6 +455,10 @@ export default function HomeDriveThreeScene({
     }
 
     return installThreeClockDeprecationWarningFilter();
+  }, []);
+
+  const buildings = useMemo(() => {
+    return getHomeDriveBuildings();
   }, []);
 
   const pedestrianPerformance = useMemo(() => {
@@ -352,6 +498,11 @@ export default function HomeDriveThreeScene({
   const parkedVehiclesRef = useRef<HomeDriveParkedVehicleRuntimeState>(
     initialParkedVehicleState,
   );
+
+  const buildingCollisionsRef =
+    useRef<HomeDriveBuildingCollisionRuntimeState>(
+      createInitialHomeDriveBuildingCollisionState(),
+    );
 
   const crosswalksRef = useRef<HomeDriveCrosswalkRuntimeState>(
     createInitialHomeDriveCrosswalkState({
@@ -421,6 +572,8 @@ export default function HomeDriveThreeScene({
             inputRef={inputRef}
             trafficRef={trafficRef}
             parkedVehiclesRef={parkedVehiclesRef}
+            buildingCollisionsRef={buildingCollisionsRef}
+            buildings={buildings}
             pedestriansRef={pedestriansRef}
             crosswalksRef={crosswalksRef}
             pedestrianPerformance={pedestrianPerformance}

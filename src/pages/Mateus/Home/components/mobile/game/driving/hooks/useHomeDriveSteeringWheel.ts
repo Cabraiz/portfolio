@@ -22,8 +22,15 @@ type ActivePointerState = Readonly<{
 }>;
 
 type SteeringWheelViewState = Readonly<{
-  wheelRotationDeg: number;
   isDragging: boolean;
+}>;
+
+export type UseHomeDriveSteeringWheelOptions = Readonly<{
+  /**
+   * Callback imperativo para atualizar inputRef sem forçar render React
+   * a cada frame de arraste do volante.
+   */
+  onSteeringChange?: (steering: number) => void;
 }>;
 
 export type HomeDriveSteeringWheelController = Readonly<{
@@ -42,17 +49,36 @@ export type HomeDriveSteeringWheelController = Readonly<{
 
 const ROTATION_EPSILON_DEG = 0.08;
 const STEERING_EPSILON = 0.001;
+const STEERING_CALLBACK_EPSILON = 0.0005;
+
+function isFiniteNumber(value: number): boolean {
+  return Number.isFinite(value);
+}
 
 function getPointerAngleDeg(
   element: HTMLElement,
   clientX: number,
   clientY: number,
-): number {
+): number | null {
   const rect = element.getBoundingClientRect();
+
+  if (
+    rect.width <= 0 ||
+    rect.height <= 0 ||
+    !isFiniteNumber(rect.left) ||
+    !isFiniteNumber(rect.top) ||
+    !isFiniteNumber(clientX) ||
+    !isFiniteNumber(clientY)
+  ) {
+    return null;
+  }
+
   const centerX = rect.left + rect.width / 2;
   const centerY = rect.top + rect.height / 2;
+  const angleDeg =
+    (Math.atan2(clientY - centerY, clientX - centerX) * 180) / Math.PI;
 
-  return (Math.atan2(clientY - centerY, clientX - centerX) * 180) / Math.PI;
+  return isFiniteNumber(angleDeg) ? angleDeg : null;
 }
 
 function setPointerCaptureSafely(
@@ -95,6 +121,10 @@ function releasePointerCaptureSafely(
 }
 
 function clampWheelRotationDeg(rotationDeg: number): number {
+  if (!isFiniteNumber(rotationDeg)) {
+    return 0;
+  }
+
   return clamp(
     rotationDeg,
     -HOME_DRIVE_WHEEL_VISUAL_MAX_ROTATION_DEG,
@@ -103,11 +133,26 @@ function clampWheelRotationDeg(rotationDeg: number): number {
 }
 
 function areRotationsEquivalent(first: number, second: number): boolean {
+  if (!isFiniteNumber(first) || !isFiniteNumber(second)) {
+    return false;
+  }
+
   return Math.abs(first - second) <= ROTATION_EPSILON_DEG;
 }
 
+function areSteeringValuesEquivalent(first: number, second: number): boolean {
+  if (!isFiniteNumber(first) || !isFiniteNumber(second)) {
+    return false;
+  }
+
+  return Math.abs(first - second) <= STEERING_CALLBACK_EPSILON;
+}
+
 function getSteeringFromRotationDeg(rotationDeg: number): number {
-  if (HOME_DRIVE_WHEEL_VISUAL_MAX_ROTATION_DEG <= 0) {
+  if (
+    HOME_DRIVE_WHEEL_VISUAL_MAX_ROTATION_DEG <= 0 ||
+    !isFiniteNumber(rotationDeg)
+  ) {
     return 0;
   }
 
@@ -125,39 +170,96 @@ function getSteeringFromRotationDeg(rotationDeg: number): number {
   return Math.abs(steering) <= STEERING_EPSILON ? 0 : steering;
 }
 
-export function useHomeDriveSteeringWheel(): HomeDriveSteeringWheelController {
+export function useHomeDriveSteeringWheel(
+  options: UseHomeDriveSteeringWheelOptions = {},
+): HomeDriveSteeringWheelController {
   const wheelRef = useRef<HTMLDivElement | null>(null);
   const activePointerRef = useRef<ActivePointerState | null>(null);
   const rotationRef = useRef(0);
+  const steeringRef = useRef(0);
+  const lastPublishedSteeringRef = useRef(0);
   const pendingRotationRef = useRef<number | null>(null);
   const rafRef = useRef<number | null>(null);
+  const mountedRef = useRef(true);
+  const onSteeringChangeRef = useRef<
+    UseHomeDriveSteeringWheelOptions["onSteeringChange"]
+  >(options.onSteeringChange);
 
   const [viewState, setViewState] = useState<SteeringWheelViewState>({
-    wheelRotationDeg: 0,
     isDragging: false,
   });
 
-  const commitRotation = useCallback((nextRotationDeg: number) => {
-    const clampedRotation = clampWheelRotationDeg(nextRotationDeg);
+  useEffect(() => {
+    onSteeringChangeRef.current = options.onSteeringChange;
+  }, [options.onSteeringChange]);
 
-    if (areRotationsEquivalent(rotationRef.current, clampedRotation)) {
-      rotationRef.current = clampedRotation;
+  const applyWheelDomState = useCallback(
+    (nextRotationDeg: number, nextSteering: number) => {
+      const element = wheelRef.current;
+
+      if (!element) {
+        return;
+      }
+
+      element.style.setProperty(
+        "--free-drive-wheel-rotation",
+        `${nextRotationDeg.toFixed(3)}deg`,
+      );
+
+      element.setAttribute("aria-valuenow", nextSteering.toFixed(2));
+    },
+    [],
+  );
+
+  const publishSteeringChange = useCallback((nextSteering: number) => {
+    if (!isFiniteNumber(nextSteering)) {
       return;
     }
 
-    rotationRef.current = clampedRotation;
+    if (
+      areSteeringValuesEquivalent(
+        lastPublishedSteeringRef.current,
+        nextSteering,
+      )
+    ) {
+      return;
+    }
 
-    setViewState((current) => {
-      if (areRotationsEquivalent(current.wheelRotationDeg, clampedRotation)) {
-        return current;
+    lastPublishedSteeringRef.current = nextSteering;
+    onSteeringChangeRef.current?.(nextSteering);
+  }, []);
+
+  const commitRotation = useCallback(
+    (nextRotationDeg: number, options?: Readonly<{ force?: boolean }>) => {
+      if (!mountedRef.current || !isFiniteNumber(nextRotationDeg)) {
+        return;
       }
 
-      return {
-        ...current,
-        wheelRotationDeg: clampedRotation,
-      };
-    });
-  }, []);
+      const clampedRotation = clampWheelRotationDeg(nextRotationDeg);
+      const nextSteering = getSteeringFromRotationDeg(clampedRotation);
+      const force = options?.force === true;
+
+      if (
+        !force &&
+        areRotationsEquivalent(rotationRef.current, clampedRotation)
+      ) {
+        applyWheelDomState(rotationRef.current, steeringRef.current);
+        return;
+      }
+
+      rotationRef.current = clampedRotation;
+      steeringRef.current = nextSteering;
+
+      /*
+        Não usa setState para rotação.
+        Isso elimina o ciclo:
+        pointer/RAF -> setState -> render -> effect -> novo update.
+      */
+      applyWheelDomState(clampedRotation, nextSteering);
+      publishSteeringChange(nextSteering);
+    },
+    [applyWheelDomState, publishSteeringChange],
+  );
 
   const cancelPendingFrame = useCallback(() => {
     if (rafRef.current === null) {
@@ -183,6 +285,10 @@ export function useHomeDriveSteeringWheel(): HomeDriveSteeringWheelController {
 
   const scheduleRotation = useCallback(
     (nextRotationDeg: number) => {
+      if (!isFiniteNumber(nextRotationDeg)) {
+        return;
+      }
+
       pendingRotationRef.current = nextRotationDeg;
 
       if (rafRef.current !== null) {
@@ -201,7 +307,6 @@ export function useHomeDriveSteeringWheel(): HomeDriveSteeringWheelController {
       }
 
       return {
-        ...current,
         isDragging,
       };
     });
@@ -212,31 +317,28 @@ export function useHomeDriveSteeringWheel(): HomeDriveSteeringWheelController {
     pendingRotationRef.current = null;
     cancelPendingFrame();
 
-    setViewState((current) => {
-      const nextRotationDeg = 0;
-      const isSameRotation = areRotationsEquivalent(
-        current.wheelRotationDeg,
-        nextRotationDeg,
-      );
-
-      rotationRef.current = nextRotationDeg;
-
-      if (!current.isDragging && isSameRotation) {
-        return current;
-      }
-
-      return {
-        wheelRotationDeg: nextRotationDeg,
-        isDragging: false,
-      };
+    commitRotation(0, {
+      force: true,
     });
-  }, [cancelPendingFrame]);
+
+    setDraggingSafely(false);
+  }, [cancelPendingFrame, commitRotation, setDraggingSafely]);
 
   const handlePointerDown = useCallback(
     (event: ReactPointerEvent<HTMLDivElement>) => {
       const element = wheelRef.current;
 
       if (!element) {
+        return;
+      }
+
+      const startAngleDeg = getPointerAngleDeg(
+        element,
+        event.clientX,
+        event.clientY,
+      );
+
+      if (startAngleDeg === null) {
         return;
       }
 
@@ -247,17 +349,21 @@ export function useHomeDriveSteeringWheel(): HomeDriveSteeringWheelController {
 
       activePointerRef.current = {
         pointerId: event.pointerId,
-        startAngleDeg: getPointerAngleDeg(
-          element,
-          event.clientX,
-          event.clientY,
-        ),
+        startAngleDeg,
         startRotationDeg: rotationRef.current,
       };
 
+      /*
+        Reaplica o CSS variable caso o React tenha re-renderizado o componente
+        por causa de snapshot de colisão/runtime.
+      */
+      commitRotation(rotationRef.current, {
+        force: true,
+      });
+
       setDraggingSafely(true);
     },
-    [setDraggingSafely],
+    [commitRotation, setDraggingSafely],
   );
 
   const handlePointerMove = useCallback(
@@ -273,18 +379,26 @@ export function useHomeDriveSteeringWheel(): HomeDriveSteeringWheelController {
         return;
       }
 
-      event.preventDefault();
-      event.stopPropagation();
-
       const angleDeg = getPointerAngleDeg(
         element,
         event.clientX,
         event.clientY,
       );
 
+      if (angleDeg === null) {
+        return;
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+
       const deltaDeg = normalizeDeltaDeg(
         angleDeg - activePointer.startAngleDeg,
       );
+
+      if (!isFiniteNumber(deltaDeg)) {
+        return;
+      }
 
       /*
         Mantém o visual natural:
@@ -377,14 +491,19 @@ export function useHomeDriveSteeringWheel(): HomeDriveSteeringWheelController {
   }, [commitRotation, resetRotation]);
 
   useEffect(() => {
+    mountedRef.current = true;
+
+    commitRotation(rotationRef.current, {
+      force: true,
+    });
+
     return () => {
+      mountedRef.current = false;
+      activePointerRef.current = null;
+      pendingRotationRef.current = null;
       cancelPendingFrame();
     };
-  }, [cancelPendingFrame]);
-
-  const steering = useMemo(() => {
-    return getSteeringFromRotationDeg(viewState.wheelRotationDeg);
-  }, [viewState.wheelRotationDeg]);
+  }, [cancelPendingFrame, commitRotation]);
 
   const handlers = useMemo(
     () => ({
@@ -403,19 +522,22 @@ export function useHomeDriveSteeringWheel(): HomeDriveSteeringWheelController {
     ],
   );
 
+  const exposedSteering = steeringRef.current;
+  const exposedWheelRotationDeg = rotationRef.current;
+
   return useMemo(
     () => ({
       wheelRef,
-      steering,
-      wheelRotationDeg: viewState.wheelRotationDeg,
+      steering: exposedSteering,
+      wheelRotationDeg: exposedWheelRotationDeg,
       isDragging: viewState.isDragging,
       handlers,
     }),
     [
+      exposedSteering,
+      exposedWheelRotationDeg,
       handlers,
-      steering,
       viewState.isDragging,
-      viewState.wheelRotationDeg,
     ],
   );
 }

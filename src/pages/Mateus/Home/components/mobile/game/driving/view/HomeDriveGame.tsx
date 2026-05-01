@@ -57,7 +57,6 @@ function isInteractiveOverlayTarget(target: EventTarget | null): boolean {
 
 export default function HomeDriveGame({ onClose }: HomeDriveGameProps) {
   const { rootRef, viewport } = useHomeDriveViewport();
-  const steeringWheel = useHomeDriveSteeringWheel();
 
   const {
     runtimeRef,
@@ -66,6 +65,25 @@ export default function HomeDriveGame({ onClose }: HomeDriveGameProps) {
     patchInputRef,
     publishRuntimeSnapshot,
   } = useHomeDriveRuntimeRefs();
+
+  const handleSteeringChange = useCallback(
+    (steering: number) => {
+      /*
+        A direção agora entra direto no inputRef.
+        Isso evita render React a cada movimento do volante.
+      */
+      patchInputRef({
+        steering,
+        throttle: 1,
+        brake: 0,
+      });
+    },
+    [patchInputRef],
+  );
+
+  const steeringWheel = useHomeDriveSteeringWheel({
+    onSteeringChange: handleSteeringChange,
+  });
 
   const missionDestinations = useMemo(() => {
     return getHomeDriveMissionDestinations();

@@ -4,10 +4,15 @@ import { useFrame } from "@react-three/fiber";
 import { useRef } from "react";
 
 import {
+  resolveHomeDriveBuildingCollisions,
+  type HomeDriveBuildingCollisionRuntimeState,
+} from "../domain/buildingCollisions";
+import {
   syncHomeDriveCrosswalkOccupanciesFromPedestrians,
   tickHomeDriveCrosswalks,
   type HomeDriveCrosswalkRuntimeState,
 } from "../domain/crosswalks";
+import type { HomeDriveBuilding } from "../domain/homeDrive.building.types";
 import { resolveHomeDriveTrafficCollisions } from "../domain/homeDrive.collision";
 import { mergeHomeDriveImpactStates } from "../domain/homeDrive.impact";
 import { tickHomeDrivePhysics } from "../domain/homeDrive.physics";
@@ -38,6 +43,8 @@ export type HomeDriveThreeSimulationProps = Readonly<{
   inputRef: HomeDriveMutableRef<HomeDriveInputState>;
   trafficRef?: HomeDriveMutableRef<HomeDriveTrafficRuntimeState>;
   parkedVehiclesRef?: HomeDriveMutableRef<HomeDriveParkedVehicleRuntimeState>;
+  buildingCollisionsRef?: HomeDriveMutableRef<HomeDriveBuildingCollisionRuntimeState>;
+  buildings?: readonly HomeDriveBuilding[];
   pedestriansRef?: HomeDriveMutableRef<HomeDrivePedestrianRuntimeState>;
   crosswalksRef?: HomeDriveMutableRef<HomeDriveCrosswalkRuntimeState>;
   pedestrianPerformance?: HomeDrivePedestrianPerformanceProfile;
@@ -54,7 +61,7 @@ type SimulationStepResult = Readonly<{
 const FIXED_STEP_SECONDS = 1 / 60;
 const MAX_ACCUMULATED_SECONDS = 0.12;
 const MAX_STEPS_PER_FRAME = 5;
-const DEFAULT_SNAPSHOT_HZ = 20;
+const DEFAULT_SNAPSHOT_HZ = 8;
 
 function sanitizeDeltaSeconds(deltaSeconds: number): number {
   if (!Number.isFinite(deltaSeconds) || deltaSeconds <= 0) {
@@ -211,6 +218,63 @@ function tickParkedVehiclesAndCollisionsStep(
   };
 }
 
+function tickBuildingCollisionsStep(
+  nextRuntime: HomeDriveRuntimeState,
+  buildings: readonly HomeDriveBuilding[] | undefined,
+  buildingCollisionsRef:
+    | HomeDriveMutableRef<HomeDriveBuildingCollisionRuntimeState>
+    | undefined,
+): SimulationStepResult {
+  if (!buildingCollisionsRef || !buildings || buildings.length <= 0) {
+    return {
+      runtime: nextRuntime,
+      hadCollision: false,
+    };
+  }
+
+  const collisionResolution = resolveHomeDriveBuildingCollisions(
+    nextRuntime.car,
+    buildings,
+    buildingCollisionsRef.current,
+    nextRuntime.elapsedSeconds,
+    {
+      brutality: 1.86,
+      playerRadiusMeters: 1.72,
+      playerPushMultiplier: 0.98,
+      reverseKickMultiplier: 0.62,
+      maxReverseKickMps: 13.5,
+      minImpactSpeedMps: 0.68,
+      cooldownSeconds: 0.28,
+      candidateRadiusMeters: 108,
+      maxCandidateBuildings: 36,
+    },
+  );
+
+  buildingCollisionsRef.current = collisionResolution.buildingCollisions;
+
+  if (collisionResolution.events.length <= 0 || !collisionResolution.impact) {
+    return {
+      runtime: {
+        ...nextRuntime,
+        car: collisionResolution.car,
+      },
+      hadCollision: false,
+    };
+  }
+
+  return {
+    runtime: {
+      ...nextRuntime,
+      car: collisionResolution.car,
+      impact: mergeHomeDriveImpactStates(
+        nextRuntime.impact,
+        collisionResolution.impact,
+      ),
+    },
+    hadCollision: true,
+  };
+}
+
 function tickSimulationStep(
   runtime: HomeDriveRuntimeState,
   input: HomeDriveInputState,
@@ -218,6 +282,10 @@ function tickSimulationStep(
   parkedVehiclesRef:
     | HomeDriveMutableRef<HomeDriveParkedVehicleRuntimeState>
     | undefined,
+  buildingCollisionsRef:
+    | HomeDriveMutableRef<HomeDriveBuildingCollisionRuntimeState>
+    | undefined,
+  buildings: readonly HomeDriveBuilding[] | undefined,
   crosswalksRef:
     | HomeDriveMutableRef<HomeDriveCrosswalkRuntimeState>
     | undefined,
@@ -242,9 +310,25 @@ function tickSimulationStep(
     parkedVehiclesRef,
   );
 
+  /**
+   * Prédio entra por último.
+   *
+   * Motivo:
+   * se tráfego/carro parado empurrar o player para dentro da fachada,
+   * o prédio corrige a posição final e gera o impacto visual.
+   */
+  const buildingResult = tickBuildingCollisionsStep(
+    parkedResult.runtime,
+    buildings,
+    buildingCollisionsRef,
+  );
+
   return {
-    runtime: parkedResult.runtime,
-    hadCollision: trafficResult.hadCollision || parkedResult.hadCollision,
+    runtime: buildingResult.runtime,
+    hadCollision:
+      trafficResult.hadCollision ||
+      parkedResult.hadCollision ||
+      buildingResult.hadCollision,
   };
 }
 
@@ -259,6 +343,8 @@ export default function HomeDriveThreeSimulation({
   inputRef,
   trafficRef,
   parkedVehiclesRef,
+  buildingCollisionsRef,
+  buildings,
   pedestriansRef,
   crosswalksRef,
   pedestrianPerformance,
@@ -303,6 +389,8 @@ export default function HomeDriveThreeSimulation({
         inputRef.current,
         trafficRef,
         parkedVehiclesRef,
+        buildingCollisionsRef,
+        buildings,
         crosswalksRef,
       );
 
@@ -355,7 +443,7 @@ export default function HomeDriveThreeSimulation({
       return;
     }
 
-    const safeSnapshotHz = Math.max(1, Math.min(snapshotHz, 30));
+    const safeSnapshotHz = Math.max(1, Math.min(snapshotHz, 8));
     const snapshotIntervalSeconds = 1 / safeSnapshotHz;
 
     snapshotAccumulatorRef.current += deltaSeconds;

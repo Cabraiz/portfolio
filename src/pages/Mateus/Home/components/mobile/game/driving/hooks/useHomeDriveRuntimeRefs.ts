@@ -2,6 +2,7 @@
 
 import {
   useCallback,
+  useEffect,
   useMemo,
   useRef,
   useSyncExternalStore,
@@ -112,6 +113,7 @@ export function useHomeDriveRuntimeRefs(): UseHomeDriveRuntimeRefsResult {
 
   const snapshotRef = useRef<HomeDriveRuntimeState>(runtimeRef.current);
   const listenersRef = useRef<Set<() => void>>(new Set());
+  const notificationFrameRef = useRef<number | null>(null);
 
   const subscribe = useCallback((listener: () => void) => {
     listenersRef.current.add(listener);
@@ -131,6 +133,37 @@ export function useHomeDriveRuntimeRefs(): UseHomeDriveRuntimeRefsResult {
     getSnapshot,
   );
 
+  const notifySnapshotListeners = useCallback(() => {
+    listenersRef.current.forEach((listener) => {
+      listener();
+    });
+  }, []);
+
+  const cancelScheduledNotification = useCallback(() => {
+    if (notificationFrameRef.current === null) {
+      return;
+    }
+
+    window.cancelAnimationFrame(notificationFrameRef.current);
+    notificationFrameRef.current = null;
+  }, []);
+
+  const scheduleSnapshotNotification = useCallback(() => {
+    if (notificationFrameRef.current !== null) {
+      return;
+    }
+
+    if (typeof window === "undefined") {
+      notifySnapshotListeners();
+      return;
+    }
+
+    notificationFrameRef.current = window.requestAnimationFrame(() => {
+      notificationFrameRef.current = null;
+      notifySnapshotListeners();
+    });
+  }, [notifySnapshotListeners]);
+
   const publishRuntimeSnapshot = useCallback(() => {
     if (snapshotRef.current === runtimeRef.current) {
       return;
@@ -138,10 +171,14 @@ export function useHomeDriveRuntimeRefs(): UseHomeDriveRuntimeRefsResult {
 
     snapshotRef.current = runtimeRef.current;
 
-    listenersRef.current.forEach((listener) => {
-      listener();
-    });
-  }, []);
+    /*
+      Importante:
+      colisões podem chamar publishRuntimeSnapshot muitas vezes em sequência.
+      A notificação é agrupada em 1 RAF para impedir cascata de render/update
+      dentro do mesmo ciclo do React.
+    */
+    scheduleSnapshotNotification();
+  }, [scheduleSnapshotNotification]);
 
   const setRuntimeRef = useCallback(
     (next: HomeDriveRuntimeState | HomeDriveRuntimeRefUpdater) => {
@@ -182,13 +219,19 @@ export function useHomeDriveRuntimeRefs(): UseHomeDriveRuntimeRefsResult {
   }, []);
 
   const resetRuntimeRef = useCallback(() => {
+    cancelScheduledNotification();
+
     runtimeRef.current = createInitialHomeDriveRuntimeState();
     snapshotRef.current = runtimeRef.current;
 
-    listenersRef.current.forEach((listener) => {
-      listener();
-    });
-  }, []);
+    notifySnapshotListeners();
+  }, [cancelScheduledNotification, notifySnapshotListeners]);
+
+  useEffect(() => {
+    return () => {
+      cancelScheduledNotification();
+    };
+  }, [cancelScheduledNotification]);
 
   return useMemo(
     () => ({

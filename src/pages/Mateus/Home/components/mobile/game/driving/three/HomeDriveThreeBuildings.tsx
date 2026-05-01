@@ -10,7 +10,6 @@ import {
   type Material,
 } from "three";
 
-import { getHomeDriveBuildings } from "../domain/homeDrive.buildings";
 import type {
   HomeDriveBuilding,
   HomeDriveBuildingFacadeProfile,
@@ -18,12 +17,13 @@ import type {
   HomeDriveBuildingMaterialKey,
   HomeDriveBuildingRoofStyle,
 } from "../domain/homeDrive.building.types";
+import { getHomeDriveBuildings } from "../domain/homeDrive.buildings";
 import { getHomeDriveStableStringSeed } from "../domain/homeDrive.commerceNames";
-import { HOME_DRIVE_THREE_MATERIALS } from "./homeDriveThree.materials";
 import {
   createHomeDriveThreeBuildingFacadeTransform,
   getHomeDriveThreeBuildingStreetFacadeLocalZ,
 } from "./homeDriveThree.buildingFacadeFrame";
+import { HOME_DRIVE_THREE_MATERIALS } from "./homeDriveThree.materials";
 
 const MAX_BUILDINGS = 16384;
 const MAX_FACADE_DETAILS = 327680;
@@ -108,6 +108,34 @@ type FacadeDetailBatch = Readonly<{
   details: readonly FacadeDetail[];
   material: Material;
   renderOrder: number;
+}>;
+
+export type HomeDriveThreeBuildingsProps = Readonly<{
+  /**
+   * Deve vir de HomeDriveThreeScene quando colisão com prédio estiver ativa.
+   *
+   * Isso garante que:
+   * - render dos prédios
+   * - colisão
+   * - marcas/deformações
+   *
+   * usem exatamente o mesmo array.
+   */
+  buildings?: readonly HomeDriveBuilding[];
+
+  /**
+   * IDs que deixam de ser renderizados no batch instanciado perfeito.
+   *
+   * Prédios danificados são desenhados por HomeDriveThreeDamagedBuildings,
+   * com geometria quebrada própria. Sem isso, o bloco retangular original
+   * continuaria aparecendo atrás do buraco.
+   */
+  hiddenBuildingIds?: readonly string[];
+
+  /**
+   * Usado apenas no fallback interno, quando buildings não é passado.
+   */
+  maxBuildings?: number;
 }>;
 
 const BUILDING_BODY_MATERIALS: Readonly<Record<HomeDriveBuildingMaterialKey, Material>> =
@@ -263,7 +291,10 @@ function getDerivedFacadeProfile(
       return {
         style,
         roofStyle,
-        windowColumns: Math.max(2, Math.min(5, Math.floor(building.widthMeters / 4.3))),
+        windowColumns: Math.max(
+          2,
+          Math.min(5, Math.floor(building.widthMeters / 4.3)),
+        ),
         windowRows: Math.max(1, Math.min(4, building.floors - 1)),
         hasDoor: true,
         hasShopfront: true,
@@ -274,7 +305,10 @@ function getDerivedFacadeProfile(
       return {
         style,
         roofStyle,
-        windowColumns: Math.max(3, Math.min(8, Math.floor(building.widthMeters / 3.9))),
+        windowColumns: Math.max(
+          3,
+          Math.min(8, Math.floor(building.widthMeters / 3.9)),
+        ),
         windowRows: Math.max(3, Math.min(12, building.floors)),
         hasDoor: true,
         hasShopfront: false,
@@ -285,7 +319,10 @@ function getDerivedFacadeProfile(
       return {
         style,
         roofStyle,
-        windowColumns: Math.max(2, Math.min(5, Math.floor(building.widthMeters / 8.4))),
+        windowColumns: Math.max(
+          2,
+          Math.min(5, Math.floor(building.widthMeters / 8.4)),
+        ),
         windowRows: 1,
         hasDoor: true,
         hasShopfront: false,
@@ -297,7 +334,10 @@ function getDerivedFacadeProfile(
       return {
         style,
         roofStyle,
-        windowColumns: Math.max(2, Math.min(6, Math.floor(building.widthMeters / 4.2))),
+        windowColumns: Math.max(
+          2,
+          Math.min(6, Math.floor(building.widthMeters / 4.2)),
+        ),
         windowRows: Math.max(2, Math.min(11, building.floors)),
         hasDoor: true,
         hasShopfront: false,
@@ -365,7 +405,11 @@ function getWindowKind(
   column: number,
   preferred: "house" | "grid" | "shop" | "warehouse",
 ): FacadeDetailKind {
-  const seed = getStableFacadeSeed(building, `window-${preferred}-${row}-${column}`, 151);
+  const seed = getStableFacadeSeed(
+    building,
+    `window-${preferred}-${row}-${column}`,
+    151,
+  );
   const style = building.windowStyle ?? "mixed";
 
   if (style === "glass") {
@@ -481,7 +525,9 @@ function getEntranceDoorKind(building: HomeDriveBuilding): FacadeDetailKind {
   }
 }
 
-function getEntranceCanopyKind(building: HomeDriveBuilding): FacadeDetailKind | null {
+function getEntranceCanopyKind(
+  building: HomeDriveBuilding,
+): FacadeDetailKind | null {
   switch (building.entranceProfile?.canopyKind) {
     case "flat-slab":
       return "canopy-slab";
@@ -497,7 +543,9 @@ function getEntranceCanopyKind(building: HomeDriveBuilding): FacadeDetailKind | 
   }
 }
 
-function getEntranceSignKind(building: HomeDriveBuilding): FacadeDetailKind | null {
+function getEntranceSignKind(
+  building: HomeDriveBuilding,
+): FacadeDetailKind | null {
   switch (building.entranceProfile?.signKind) {
     case "no-parking":
       return "no-parking-sign";
@@ -982,7 +1030,10 @@ function pushGarageMarkings(
 ): void {
   const entrance = building.entranceProfile;
 
-  if (entrance?.kind !== "garage-door" && entrance?.material !== "rolling-steel") {
+  if (
+    entrance?.kind !== "garage-door" &&
+    entrance?.material !== "rolling-steel"
+  ) {
     return;
   }
 
@@ -1031,12 +1082,19 @@ function pushDoorDetail(
   );
   const baseY = entrance?.baseYOffsetMeters ?? 0;
   const idPrefix = `${building.id}::entrance`;
-  const frontZ = getFrontLocalZ(building);
 
   pushEntrancePillars(details, building, idPrefix, localX, baseY, width, height);
 
   if (entrance?.hasFrame ?? true) {
-    pushEntranceFrameDetails(details, building, idPrefix, localX, baseY, width, height);
+    pushEntranceFrameDetails(
+      details,
+      building,
+      idPrefix,
+      localX,
+      baseY,
+      width,
+      height,
+    );
   }
 
   details.push(
@@ -1047,7 +1105,7 @@ function pushDoorDetail(
       "plane",
       localX,
       baseY + height * 0.5,
-      frontZ,
+      getFrontLocalZ(building),
       width,
       height,
     ),
@@ -1326,7 +1384,10 @@ function pushHouseFacade(
   }
 }
 
-function pushShopfrontSignBoard(details: FacadeDetail[], building: HomeDriveBuilding): void {
+function pushShopfrontSignBoard(
+  details: FacadeDetail[],
+  building: HomeDriveBuilding,
+): void {
   if (!building.commerceName) {
     return;
   }
@@ -1534,7 +1595,8 @@ function pushGridFacade(
 
       const kind = getWindowKind(building, row, column, "grid");
       const isDarkVariant =
-        (row + column + building.variant) % (profile.style === "office-glass" ? 5 : 6) ===
+        (row + column + building.variant) %
+          (profile.style === "office-glass" ? 5 : 6) ===
         0;
 
       pushWindowDetail(
@@ -1860,12 +1922,34 @@ function HomeDriveThreeFacadeDetailBatch({
   );
 }
 
-function HomeDriveThreeBuildings() {
-  const buildings = useMemo(() => {
+function HomeDriveThreeBuildings({
+  buildings: buildingsFromProps,
+  hiddenBuildingIds = [],
+  maxBuildings = MAX_BUILDINGS,
+}: HomeDriveThreeBuildingsProps) {
+  const sourceBuildings = useMemo(() => {
+    if (buildingsFromProps) {
+      return buildingsFromProps;
+    }
+
     return getHomeDriveBuildings({
-      maxBuildings: MAX_BUILDINGS,
+      maxBuildings,
     });
-  }, []);
+  }, [buildingsFromProps, maxBuildings]);
+
+  const hiddenBuildingIdSet = useMemo(() => {
+    return new Set(hiddenBuildingIds);
+  }, [hiddenBuildingIds]);
+
+  const buildings = useMemo(() => {
+    if (hiddenBuildingIdSet.size <= 0) {
+      return sourceBuildings;
+    }
+
+    return sourceBuildings.filter((building) => {
+      return !hiddenBuildingIdSet.has(building.id);
+    });
+  }, [hiddenBuildingIdSet, sourceBuildings]);
 
   const bodyBatches = useMemo(() => {
     return groupBuildingsByMaterial(buildings);
