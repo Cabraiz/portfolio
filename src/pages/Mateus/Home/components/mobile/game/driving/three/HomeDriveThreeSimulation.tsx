@@ -129,6 +129,29 @@ function tickPedestriansStep(
         pedestrianPerformance?.maxCrosswalkSpawnPerRefresh,
       crosswalkSearchRadiusMeters:
         pedestrianPerformance?.crosswalkSearchRadiusMeters,
+      enablePedestrianWarmRing: pedestrianPerformance?.enablePedestrianWarmRing,
+      pedestrianWarmRingBaseRadiusMeters:
+        pedestrianPerformance?.pedestrianWarmRingBaseRadiusMeters,
+      pedestrianWarmRingFrontBiasMeters:
+        pedestrianPerformance?.pedestrianWarmRingFrontBiasMeters,
+      pedestrianWarmRingSpeedRadiusMultiplier:
+        pedestrianPerformance?.pedestrianWarmRingSpeedRadiusMultiplier,
+      pedestrianWarmRingSideRadiusMeters:
+        pedestrianPerformance?.pedestrianWarmRingSideRadiusMeters,
+      pedestrianWarmRingRearRadiusMeters:
+        pedestrianPerformance?.pedestrianWarmRingRearRadiusMeters,
+      pedestrianWarmRingMaxZoneCount:
+        pedestrianPerformance?.pedestrianWarmRingMaxZoneCount,
+      pedestrianPrewarmEnabled: pedestrianPerformance?.pedestrianPrewarmEnabled,
+      pedestrianPrewarmFrames: pedestrianPerformance?.pedestrianPrewarmFrames,
+      pedestrianPrewarmLeadSeconds:
+        pedestrianPerformance?.pedestrianPrewarmLeadSeconds,
+      pedestrianPrewarmFrontMeters:
+        pedestrianPerformance?.pedestrianPrewarmFrontMeters,
+      pedestrianPrewarmMinReadyPedestrians:
+        pedestrianPerformance?.pedestrianPrewarmMinReadyPedestrians,
+      pedestrianPrewarmSpawnBudgetMultiplier:
+        pedestrianPerformance?.pedestrianPrewarmSpawnBudgetMultiplier,
       populationEnabled: true,
     },
   );

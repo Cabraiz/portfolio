@@ -2,6 +2,8 @@
 
 import type { HomeDriveVector2 } from "../homeDrive.types";
 import { createHomeDriveLocalPedestrianAgents } from "./homeDrive.pedestrianLocalSpawner";
+import { createHomeDrivePedestrianPrewarmPlan } from "./homeDrive.pedestrianPrewarm";
+import { createHomeDrivePedestrianWarmRingSnapshot } from "./homeDrive.pedestrianWarmRing";
 import { dedupeHomeDrivePedestrianAgentsById } from "./homeDrive.pedestrianIdentity";
 import {
   countHomeDrivePedestrianSpatialItemsNear,
@@ -19,21 +21,34 @@ import type {
 } from "./homeDrive.pedestrians.types";
 
 const DEFAULT_POPULATE_RADIUS_METERS = 430;
-const DEFAULT_REPOPULATE_DISTANCE_METERS = 52;
-const DEFAULT_REPOPULATE_COOLDOWN_SECONDS = 0.58;
-const DEFAULT_MIN_PEDESTRIANS_NEAR_PLAYER = 145;
-const DEFAULT_MAX_ACTIVE_PEDESTRIANS = 1780;
-const DEFAULT_MAX_SPAWN_PER_REFRESH = 165;
-const DEFAULT_DENSITY = 5.6;
-const DEFAULT_FRONT_LOOKAHEAD_METERS = 560;
-const DEFAULT_FRONT_LOOKAHEAD_SPEED_MULTIPLIER = 13;
+const DEFAULT_REPOPULATE_DISTANCE_METERS = 24;
+const DEFAULT_REPOPULATE_COOLDOWN_SECONDS = 0.095;
+const DEFAULT_MIN_PEDESTRIANS_NEAR_PLAYER = 210;
+const DEFAULT_MAX_ACTIVE_PEDESTRIANS = 1960;
+const DEFAULT_MAX_SPAWN_PER_REFRESH = 220;
+const DEFAULT_DENSITY = 6.2;
+const DEFAULT_FRONT_LOOKAHEAD_METERS = 840;
+const DEFAULT_FRONT_LOOKAHEAD_SPEED_MULTIPLIER = 36;
 const DEFAULT_MIN_FRONT_PEDESTRIANS = 96;
-const DEFAULT_MIN_FAR_FRONT_PEDESTRIANS = 54;
+const DEFAULT_MIN_FAR_FRONT_PEDESTRIANS = 132;
 const DEFAULT_MIN_SIDE_SECTOR_PEDESTRIANS = 46;
 const DEFAULT_MIN_REAR_BUFFER_PEDESTRIANS = 20;
 const DEFAULT_MIN_CROSSWALK_PEDESTRIANS = 34;
-const DEFAULT_MAX_SPAWN_PER_SECTOR_REFRESH = 54;
-const DEFAULT_MAX_CROSSWALK_SPAWN_PER_REFRESH = 44;
+const DEFAULT_MAX_SPAWN_PER_SECTOR_REFRESH = 86;
+const DEFAULT_MAX_CROSSWALK_SPAWN_PER_REFRESH = 58;
+const DEFAULT_ENABLE_PEDESTRIAN_WARM_RING = true;
+const DEFAULT_WARM_RING_BASE_RADIUS_METERS = 680;
+const DEFAULT_WARM_RING_FRONT_BIAS_METERS = 620;
+const DEFAULT_WARM_RING_SPEED_RADIUS_MULTIPLIER = 34;
+const DEFAULT_WARM_RING_SIDE_RADIUS_METERS = 480;
+const DEFAULT_WARM_RING_REAR_RADIUS_METERS = 180;
+const DEFAULT_WARM_RING_MAX_ZONE_COUNT = 132;
+const DEFAULT_PEDESTRIAN_PREWARM_ENABLED = true;
+const DEFAULT_PEDESTRIAN_PREWARM_FRAMES = 12;
+const DEFAULT_PEDESTRIAN_PREWARM_LEAD_SECONDS = 10.5;
+const DEFAULT_PEDESTRIAN_PREWARM_FRONT_METERS = 2200;
+const DEFAULT_PEDESTRIAN_PREWARM_MIN_READY_PEDESTRIANS = 620;
+const DEFAULT_PEDESTRIAN_PREWARM_SPAWN_BUDGET_MULTIPLIER = 3.15;
 
 function getDistanceSquared(
   first: Readonly<{ x: number; z: number }>,
@@ -66,6 +81,21 @@ function getAngleDeltaRadians(first: number, second: number): number {
   return Math.abs(delta);
 }
 
+function getHighSpeedPopulationIntensity(speedMps: number): number {
+  return clamp((speedMps - 22) / 18, 0, 1);
+}
+
+function hasFrontSectorDeficit(
+  runtime: HomeDrivePedestrianPopulationRuntime,
+): boolean {
+  return runtime.lastSectorCounts.some((item) => {
+    return (
+      (item.sectorKey === "front-near" || item.sectorKey === "front-far") &&
+      item.deficitCount > 0
+    );
+  });
+}
+
 type ResolvedPopulationOptions = Required<
   Pick<
     HomeDrivePedestrianPopulationRuntimeOptions,
@@ -92,6 +122,19 @@ type ResolvedPopulationOptions = Required<
     | "maxSpawnPerSectorRefresh"
     | "maxCrosswalkSpawnPerRefresh"
     | "crosswalkSearchRadiusMeters"
+    | "enablePedestrianWarmRing"
+    | "pedestrianWarmRingBaseRadiusMeters"
+    | "pedestrianWarmRingFrontBiasMeters"
+    | "pedestrianWarmRingSpeedRadiusMultiplier"
+    | "pedestrianWarmRingSideRadiusMeters"
+    | "pedestrianWarmRingRearRadiusMeters"
+    | "pedestrianWarmRingMaxZoneCount"
+    | "pedestrianPrewarmEnabled"
+    | "pedestrianPrewarmFrames"
+    | "pedestrianPrewarmLeadSeconds"
+    | "pedestrianPrewarmFrontMeters"
+    | "pedestrianPrewarmMinReadyPedestrians"
+    | "pedestrianPrewarmSpawnBudgetMultiplier"
   >
 >;
 
@@ -190,6 +233,69 @@ function getResolvedOptions(
       80,
       options.crosswalkSearchRadiusMeters ?? populateRadiusMeters,
     ),
+    enablePedestrianWarmRing:
+      options.enablePedestrianWarmRing ?? DEFAULT_ENABLE_PEDESTRIAN_WARM_RING,
+    pedestrianWarmRingBaseRadiusMeters: Math.max(
+      populateRadiusMeters,
+      options.pedestrianWarmRingBaseRadiusMeters ??
+        DEFAULT_WARM_RING_BASE_RADIUS_METERS,
+    ),
+    pedestrianWarmRingFrontBiasMeters: Math.max(
+      0,
+      options.pedestrianWarmRingFrontBiasMeters ??
+        DEFAULT_WARM_RING_FRONT_BIAS_METERS,
+    ),
+    pedestrianWarmRingSpeedRadiusMultiplier: Math.max(
+      0,
+      options.pedestrianWarmRingSpeedRadiusMultiplier ??
+        DEFAULT_WARM_RING_SPEED_RADIUS_MULTIPLIER,
+    ),
+    pedestrianWarmRingSideRadiusMeters: Math.max(
+      80,
+      options.pedestrianWarmRingSideRadiusMeters ??
+        DEFAULT_WARM_RING_SIDE_RADIUS_METERS,
+    ),
+    pedestrianWarmRingRearRadiusMeters: Math.max(
+      40,
+      options.pedestrianWarmRingRearRadiusMeters ??
+        DEFAULT_WARM_RING_REAR_RADIUS_METERS,
+    ),
+    pedestrianWarmRingMaxZoneCount: Math.max(
+      8,
+      Math.floor(
+        options.pedestrianWarmRingMaxZoneCount ??
+          DEFAULT_WARM_RING_MAX_ZONE_COUNT,
+      ),
+    ),
+    pedestrianPrewarmEnabled:
+      options.pedestrianPrewarmEnabled ?? DEFAULT_PEDESTRIAN_PREWARM_ENABLED,
+    pedestrianPrewarmFrames: Math.max(
+      1,
+      Math.floor(
+        options.pedestrianPrewarmFrames ?? DEFAULT_PEDESTRIAN_PREWARM_FRAMES,
+      ),
+    ),
+    pedestrianPrewarmLeadSeconds: Math.max(
+      0.6,
+      options.pedestrianPrewarmLeadSeconds ??
+        DEFAULT_PEDESTRIAN_PREWARM_LEAD_SECONDS,
+    ),
+    pedestrianPrewarmFrontMeters: Math.max(
+      populateRadiusMeters,
+      options.pedestrianPrewarmFrontMeters ?? DEFAULT_PEDESTRIAN_PREWARM_FRONT_METERS,
+    ),
+    pedestrianPrewarmMinReadyPedestrians: Math.max(
+      0,
+      Math.floor(
+        options.pedestrianPrewarmMinReadyPedestrians ??
+          DEFAULT_PEDESTRIAN_PREWARM_MIN_READY_PEDESTRIANS,
+      ),
+    ),
+    pedestrianPrewarmSpawnBudgetMultiplier: Math.max(
+      1,
+      options.pedestrianPrewarmSpawnBudgetMultiplier ??
+        DEFAULT_PEDESTRIAN_PREWARM_SPAWN_BUDGET_MULTIPLIER,
+    ),
   };
 }
 
@@ -213,6 +319,10 @@ export function createInitialHomeDrivePedestrianPopulationRuntime(
     lastSectorCounts: [],
     lastCrosswalkDemandCount: 0,
     spawnReservoir: undefined,
+    lastWarmRingPlanId: null,
+    lastWarmRingZoneIds: [],
+    lastWarmRingRadiusMeters: 0,
+    warmRingSnapshot: undefined,
   };
 }
 
@@ -267,8 +377,24 @@ function shouldRepopulateHomeDrivePedestrians(params: Readonly<{
   const secondsSinceLastPopulate =
     params.elapsedSeconds - params.runtime.lastPopulateAtSeconds;
 
-  if (secondsSinceLastPopulate < params.options.repopulateCooldownSeconds) {
+  const highSpeedIntensity = getHighSpeedPopulationIntensity(
+    params.activeSpeedMps,
+  );
+  const highSpeedRepopulateCooldownSeconds =
+    params.activeSpeedMps >= 32
+      ? Math.min(params.options.repopulateCooldownSeconds, 0.035)
+      : params.activeSpeedMps >= 22
+        ? Math.min(params.options.repopulateCooldownSeconds, 0.045)
+        : params.activeSpeedMps >= 9.5
+          ? Math.min(params.options.repopulateCooldownSeconds, 0.055)
+          : params.options.repopulateCooldownSeconds;
+
+  if (secondsSinceLastPopulate < highSpeedRepopulateCooldownSeconds) {
     return false;
+  }
+
+  if (params.activeSpeedMps >= 32 && hasFrontSectorDeficit(params.runtime)) {
+    return true;
   }
 
   const distanceFromLastPopulate = getDistanceMeters(
@@ -276,9 +402,15 @@ function shouldRepopulateHomeDrivePedestrians(params: Readonly<{
     params.runtime.lastPopulateCenter,
   );
   const speedBoostedDistanceThreshold =
-    params.activeSpeedMps >= 8
-      ? params.options.repopulateDistanceMeters * 0.42
-      : params.options.repopulateDistanceMeters;
+    params.activeSpeedMps >= 32
+      ? params.options.repopulateDistanceMeters * 0.1
+      : params.activeSpeedMps >= 22
+        ? params.options.repopulateDistanceMeters * (0.14 - highSpeedIntensity * 0.035)
+        : params.activeSpeedMps >= 12
+          ? params.options.repopulateDistanceMeters * 0.16
+          : params.activeSpeedMps >= 8
+            ? params.options.repopulateDistanceMeters * 0.26
+            : params.options.repopulateDistanceMeters;
 
   if (distanceFromLastPopulate >= speedBoostedDistanceThreshold) {
     return true;
@@ -422,6 +554,73 @@ export function repopulateHomeDrivePedestrianPopulationRuntime(
     maxActivePedestrians: options.maxActivePedestrians,
   });
 
+  const warmRingSnapshot = createHomeDrivePedestrianWarmRingSnapshot(input.zones, {
+    enabled: options.enablePedestrianWarmRing,
+    activeCenter,
+    activeHeadingRad,
+    activeSpeedMps,
+    elapsedSeconds: input.elapsedSeconds,
+    baseRadiusMeters: options.pedestrianWarmRingBaseRadiusMeters,
+    frontBiasMeters: options.pedestrianWarmRingFrontBiasMeters,
+    speedRadiusMultiplier: options.pedestrianWarmRingSpeedRadiusMultiplier,
+    sideRadiusMeters: options.pedestrianWarmRingSideRadiusMeters,
+    rearRadiusMeters: options.pedestrianWarmRingRearRadiusMeters,
+    maxZoneCount: options.pedestrianWarmRingMaxZoneCount,
+  });
+  const prewarmPlan = createHomeDrivePedestrianPrewarmPlan({
+    enabled: options.pedestrianPrewarmEnabled,
+    agents: pruned.agents,
+    activeCenter,
+    activeHeadingRad,
+    activeSpeedMps,
+    elapsedSeconds: input.elapsedSeconds,
+    populateRadiusMeters: options.populateRadiusMeters,
+    localZoneSearchRadiusMeters: options.localZoneSearchRadiusMeters,
+    keepAliveRadiusMeters: options.keepAliveRadiusMeters,
+    maxSpawnPerRefresh: options.maxSpawnPerRefresh,
+    minPedestriansNearPlayer: options.minPedestriansNearPlayer,
+    prewarmFrames: options.pedestrianPrewarmFrames,
+    leadSeconds: options.pedestrianPrewarmLeadSeconds,
+    frontMeters: options.pedestrianPrewarmFrontMeters,
+    minReadyPedestrians: options.pedestrianPrewarmMinReadyPedestrians,
+    spawnBudgetMultiplier: options.pedestrianPrewarmSpawnBudgetMultiplier,
+    warmRingSnapshot,
+  });
+  const highSpeedIntensity = getHighSpeedPopulationIntensity(activeSpeedMps);
+  const effectivePopulateRadiusMeters = prewarmPlan.effectivePopulateRadiusMeters;
+  const effectiveLocalZoneSearchRadiusMeters = prewarmPlan.effectiveLocalZoneSearchRadiusMeters;
+  const effectiveKeepAliveRadiusMeters = prewarmPlan.effectiveKeepAliveRadiusMeters;
+  const effectiveMaxSpawnPerRefresh = Math.max(
+    prewarmPlan.effectiveMaxSpawnPerRefresh,
+    Math.ceil(options.maxSpawnPerRefresh * (1 + highSpeedIntensity * 0.42)),
+  );
+  const effectiveMinPedestriansNearPlayer = Math.max(
+    prewarmPlan.effectiveMinPedestriansNearPlayer,
+    Math.ceil(options.minPedestriansNearPlayer * (1 + highSpeedIntensity * 0.18)),
+  );
+  const effectiveFrontLookaheadMeters = Math.max(
+    options.frontLookaheadMeters,
+    prewarmPlan.effectiveFrontLookaheadMeters,
+  );
+  const effectiveFrontFarRadiusMeters = Math.max(
+    options.frontFarRadiusMeters,
+    highSpeedIntensity > 0
+      ? effectiveFrontLookaheadMeters * (0.62 + highSpeedIntensity * 0.12)
+      : options.frontFarRadiusMeters,
+  );
+  const effectiveMinFrontPedestrians = Math.max(
+    options.minFrontPedestrians,
+    Math.ceil(options.minFrontPedestrians * (1 + highSpeedIntensity * 0.2)),
+  );
+  const effectiveMinFarFrontPedestrians = Math.max(
+    options.minFarFrontPedestrians,
+    Math.ceil(options.minFarFrontPedestrians * (1 + highSpeedIntensity * 0.42)),
+  );
+  const effectiveMaxSpawnPerSectorRefresh = Math.max(
+    options.maxSpawnPerSectorRefresh,
+    Math.ceil(options.maxSpawnPerSectorRefresh * (1 + highSpeedIntensity * 0.34)),
+  );
+
   const shouldRepopulate = shouldRepopulateHomeDrivePedestrians({
     agents: pruned.agents,
     runtime: currentRuntime,
@@ -429,8 +628,16 @@ export function repopulateHomeDrivePedestrianPopulationRuntime(
     activeHeadingRad,
     activeSpeedMps,
     elapsedSeconds: input.elapsedSeconds,
-    options,
-    forceRepopulate: input.options?.forceRepopulate,
+    options: {
+      ...options,
+      populateRadiusMeters: effectivePopulateRadiusMeters,
+      localZoneSearchRadiusMeters: effectiveLocalZoneSearchRadiusMeters,
+      keepAliveRadiusMeters: effectiveKeepAliveRadiusMeters,
+      maxSpawnPerRefresh: effectiveMaxSpawnPerRefresh,
+      minPedestriansNearPlayer: effectiveMinPedestriansNearPlayer,
+    },
+    forceRepopulate:
+      input.options?.forceRepopulate || prewarmPlan.shouldForceRepopulate,
   });
 
   if (!shouldRepopulate) {
@@ -441,10 +648,14 @@ export function repopulateHomeDrivePedestrianPopulationRuntime(
         lastNearAgentCount: countAgentsNearCenter(
           pruned.agents,
           activeCenter,
-          options.populateRadiusMeters,
+          effectivePopulateRadiusMeters,
         ),
         lastSpawnedAgentCount: 0,
         lastPrunedAgentCount: pruned.prunedCount,
+        lastWarmRingPlanId: warmRingSnapshot.id,
+        lastWarmRingZoneIds: warmRingSnapshot.warmZoneIds,
+        lastWarmRingRadiusMeters: warmRingSnapshot.radiusMeters,
+        warmRingSnapshot,
       },
       didRepopulate: false,
       didPrune: pruned.prunedCount > 0,
@@ -466,24 +677,25 @@ export function repopulateHomeDrivePedestrianPopulationRuntime(
     lastAgentSerial: currentRuntime.lastAgentSerial,
     spawnReservoir: currentRuntime.spawnReservoir,
     density: options.density,
-    populateRadiusMeters: options.populateRadiusMeters,
-    localZoneSearchRadiusMeters: options.localZoneSearchRadiusMeters,
-    minPedestriansNearPlayer: options.minPedestriansNearPlayer,
-    maxSpawnPerRefresh: options.maxSpawnPerRefresh,
+    populateRadiusMeters: effectivePopulateRadiusMeters,
+    localZoneSearchRadiusMeters: effectiveLocalZoneSearchRadiusMeters,
+    minPedestriansNearPlayer: effectiveMinPedestriansNearPlayer,
+    maxSpawnPerRefresh: effectiveMaxSpawnPerRefresh,
     maxActivePedestrians: options.maxActivePedestrians,
-    frontLookaheadMeters: options.frontLookaheadMeters,
+    frontLookaheadMeters: effectiveFrontLookaheadMeters,
     frontLookaheadSpeedMultiplier: options.frontLookaheadSpeedMultiplier,
-    frontFarRadiusMeters: options.frontFarRadiusMeters,
+    frontFarRadiusMeters: effectiveFrontFarRadiusMeters,
     sideRadiusMeters: options.sideRadiusMeters,
     rearRadiusMeters: options.rearRadiusMeters,
-    minFrontPedestrians: options.minFrontPedestrians,
-    minFarFrontPedestrians: options.minFarFrontPedestrians,
+    minFrontPedestrians: effectiveMinFrontPedestrians,
+    minFarFrontPedestrians: effectiveMinFarFrontPedestrians,
     minSideSectorPedestrians: options.minSideSectorPedestrians,
     minRearBufferPedestrians: options.minRearBufferPedestrians,
     minCrosswalkPedestrians: options.minCrosswalkPedestrians,
-    maxSpawnPerSectorRefresh: options.maxSpawnPerSectorRefresh,
+    maxSpawnPerSectorRefresh: effectiveMaxSpawnPerSectorRefresh,
     maxCrosswalkSpawnPerRefresh: options.maxCrosswalkSpawnPerRefresh,
     crosswalkSearchRadiusMeters: options.crosswalkSearchRadiusMeters,
+    warmRingSnapshot,
   });
 
   const mergedAgentsBeforeDedupe = [...pruned.agents, ...spawned.agents];
@@ -494,7 +706,7 @@ export function repopulateHomeDrivePedestrianPopulationRuntime(
   const limitedAfterSpawn = pruneHomeDrivePedestrianAgents({
     agents: mergedAgents,
     activeCenter,
-    keepAliveRadiusMeters: options.keepAliveRadiusMeters,
+    keepAliveRadiusMeters: effectiveKeepAliveRadiusMeters,
     maxActivePedestrians: options.maxActivePedestrians,
   });
 
@@ -523,6 +735,10 @@ export function repopulateHomeDrivePedestrianPopulationRuntime(
     lastSectorCounts: spawned.streamingSectorCounts,
     lastCrosswalkDemandCount: spawned.crosswalkDemandCount,
     spawnReservoir: spawned.spawnReservoir,
+    lastWarmRingPlanId: warmRingSnapshot.id,
+    lastWarmRingZoneIds: warmRingSnapshot.warmZoneIds,
+    lastWarmRingRadiusMeters: warmRingSnapshot.radiusMeters,
+    warmRingSnapshot,
   };
 
   return {

@@ -746,6 +746,22 @@ export function tickHomeDrivePedestrians(
       maxSpawnPerSectorRefresh: options.maxSpawnPerSectorRefresh,
       maxCrosswalkSpawnPerRefresh: options.maxCrosswalkSpawnPerRefresh,
       crosswalkSearchRadiusMeters: options.crosswalkSearchRadiusMeters,
+      enablePedestrianWarmRing: options.enablePedestrianWarmRing,
+      pedestrianWarmRingBaseRadiusMeters: options.pedestrianWarmRingBaseRadiusMeters,
+      pedestrianWarmRingFrontBiasMeters: options.pedestrianWarmRingFrontBiasMeters,
+      pedestrianWarmRingSpeedRadiusMultiplier:
+        options.pedestrianWarmRingSpeedRadiusMultiplier,
+      pedestrianWarmRingSideRadiusMeters: options.pedestrianWarmRingSideRadiusMeters,
+      pedestrianWarmRingRearRadiusMeters: options.pedestrianWarmRingRearRadiusMeters,
+      pedestrianWarmRingMaxZoneCount: options.pedestrianWarmRingMaxZoneCount,
+      pedestrianPrewarmEnabled: options.pedestrianPrewarmEnabled,
+      pedestrianPrewarmFrames: options.pedestrianPrewarmFrames,
+      pedestrianPrewarmLeadSeconds: options.pedestrianPrewarmLeadSeconds,
+      pedestrianPrewarmFrontMeters: options.pedestrianPrewarmFrontMeters,
+      pedestrianPrewarmMinReadyPedestrians:
+        options.pedestrianPrewarmMinReadyPedestrians,
+      pedestrianPrewarmSpawnBudgetMultiplier:
+        options.pedestrianPrewarmSpawnBudgetMultiplier,
       density: options.density,
       seed: options.seed ?? state.seed,
       forceRepopulate: options.forceRepopulate,

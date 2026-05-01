@@ -18,10 +18,8 @@ function normalizeRole(role: string): HomeDriveThreePedestrianInstancedBucketKey
     case "child":
     case "parent":
     case "smoker":
-      return role;
-
     case "adult":
-      return "adult";
+      return role;
 
     default:
       return "generic";
@@ -64,52 +62,52 @@ export function groupHomeDriveThreePedestrianInstancedEntries(
 export function getHomeDriveThreePedestrianInstancedScale(
   agent: HomeDrivePedestrianAgent,
 ): Readonly<{ x: number; y: number; z: number }> {
+  const bodyScale = Math.max(0.72, Math.min(1.18, agent.appearance.bodyScale));
+
   switch (agent.role) {
     case "child":
-      return { x: 0.72, y: 0.72, z: 0.72 };
+      return { x: 0.72 * bodyScale, y: 0.74 * bodyScale, z: 0.72 * bodyScale };
 
     case "elder":
-      return { x: 0.92, y: 0.9, z: 0.92 };
+      return { x: 0.92 * bodyScale, y: 0.9 * bodyScale, z: 0.92 * bodyScale };
 
     case "runner":
-      return { x: 0.86, y: 1.04, z: 0.86 };
+      return { x: 0.86 * bodyScale, y: 1.04 * bodyScale, z: 0.86 * bodyScale };
 
     case "worker":
-      return { x: 0.98, y: 1.04, z: 0.98 };
+      return { x: 0.98 * bodyScale, y: 1.04 * bodyScale, z: 0.98 * bodyScale };
 
     case "parent":
-      return { x: 1, y: 1.02, z: 1 };
+      return { x: bodyScale, y: 1.02 * bodyScale, z: bodyScale };
 
     default:
-      return { x: 0.94, y: 1, z: 0.94 };
+      return { x: 0.94 * bodyScale, y: bodyScale, z: 0.94 * bodyScale };
   }
 }
 
 export function getHomeDriveThreePedestrianInstancedPalette(
   agent: HomeDrivePedestrianAgent,
 ): HomeDriveThreePedestrianInstancePalette {
-  const skinTone = String(agent.appearance.skinToneKey ?? "");
-  const clothing = String(agent.appearance.clothingPaletteKey ?? "");
-  const accent = String(agent.appearance.walkStyleKey ?? "");
-
   const skinColors: Record<string, ColorRepresentation> = {
-    light: "#d8a17f",
-    medium: "#b87854",
-    tan: "#9b6245",
-    dark: "#6f432e",
+    "tone-1": "#e7bd96",
+    "tone-2": "#d49a73",
+    "tone-3": "#b97857",
+    "tone-4": "#965b40",
+    "tone-5": "#70412f",
+    "tone-6": "#4d2d23",
   };
   const clothingColors: Record<string, ColorRepresentation> = {
-    blue: "#314b6d",
-    green: "#344f3c",
-    red: "#693334",
-    yellow: "#6a5a2c",
-    black: "#25272c",
-    white: "#9a988f",
-    gray: "#4d5256",
+    "coastal-light": "#d9d2bc",
+    "urban-dark": "#30343d",
+    "office-neutral": "#7b776d",
+    "market-colorful": "#9a5145",
+    sport: "#37616c",
+    "casual-blue": "#3d5f83",
+    "casual-earth": "#78624c",
   };
 
   const body =
-    clothingColors[clothing] ??
+    clothingColors[agent.appearance.clothingPaletteKey] ??
     (agent.role === "worker"
       ? "#39485a"
       : agent.role === "shopper"
@@ -119,18 +117,24 @@ export function getHomeDriveThreePedestrianInstancedPalette(
           : "#42464b");
 
   const head =
-    skinColors[skinTone] ??
-    (agent.role === "child" ? "#c89168" : "#a66b4d");
+    skinColors[agent.appearance.skinToneKey] ??
+    (agent.role === "child" ? "#d49a73" : "#b97857");
 
   return {
     body,
     head,
-    accent: accent.includes("fast") ? "#6f7f84" : "#34363a",
+    accent: agent.appearance.walkStyleKey === "hurried" ? "#6f7f84" : "#34363a",
   };
 }
 
 export function filterHomeDriveThreePedestrianInstancedEntries<
-  TEntry extends Readonly<{ agent: HomeDrivePedestrianAgent; detailLevel: string }>,
+  TEntry extends Readonly<{
+    agent: HomeDrivePedestrianAgent;
+    detailLevel: string;
+    distanceSquared?: number;
+    distanceMeters?: number;
+    visibilityRank?: number;
+  }>,
 >(
   entries: readonly TEntry[],
 ): readonly HomeDriveThreePedestrianInstancedEntry[] {
@@ -138,12 +142,24 @@ export function filterHomeDriveThreePedestrianInstancedEntries<
     .filter((entry) => {
       return entry.detailLevel === "medium" || entry.detailLevel === "proxy";
     })
-    .map((entry) => ({
-      agent: entry.agent,
-      detailLevel: entry.detailLevel === "medium" ? "medium" : "proxy",
-      distanceMeters:
-        "distanceMeters" in entry && typeof entry.distanceMeters === "number"
-          ? entry.distanceMeters
-          : undefined,
-    }));
+    .map((entry) => {
+      const distanceSquared =
+        typeof entry.distanceSquared === "number" ? entry.distanceSquared : undefined;
+
+      return {
+        agent: entry.agent,
+        detailLevel: entry.detailLevel === "medium" ? "medium" : "proxy",
+        distanceSquared,
+        distanceMeters:
+          typeof entry.distanceMeters === "number"
+            ? entry.distanceMeters
+            : typeof distanceSquared === "number"
+              ? Math.sqrt(Math.max(0, distanceSquared))
+              : undefined,
+        visibilityRank:
+          typeof entry.visibilityRank === "number"
+            ? entry.visibilityRank
+            : undefined,
+      };
+    });
 }

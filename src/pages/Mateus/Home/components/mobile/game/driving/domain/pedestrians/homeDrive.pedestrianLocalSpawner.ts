@@ -47,8 +47,8 @@ import type {
   HomeDrivePedestrianSidewalkZone,
 } from "./homeDrive.pedestrians.types";
 
-const DEFAULT_MIN_DISTANCE_FROM_EXISTING_AGENT_METERS = 3.5;
-const DEFAULT_MIN_DISTANCE_FROM_ACCEPTED_LOCAL_AGENT_METERS = 3.05;
+const DEFAULT_MIN_DISTANCE_FROM_EXISTING_AGENT_METERS = 4.25;
+const DEFAULT_MIN_DISTANCE_FROM_ACCEPTED_LOCAL_AGENT_METERS = 3.75;
 const DEFAULT_LOCAL_DENSITY = 4.8;
 
 function clamp(value: number, min: number, max: number): number {
@@ -185,7 +185,7 @@ function createLocalPedestrianIdentityInput(params: Readonly<{
 }>) {
   return {
     namespace: "local" as const,
-    generationSerial: params.generationSerial,
+    generationSerial: 0,
     agentSerial: params.group.seed,
     slotIndex: params.slot.slotIndex,
     slotId: params.slot.id,
@@ -400,6 +400,7 @@ function emptySpawnerResult(
     streamingSectorCounts,
     crosswalkDemandCount,
     spawnReservoir,
+    warmRingSnapshot: options.warmRingSnapshot,
   };
 }
 
@@ -422,10 +423,19 @@ export function createHomeDriveLocalPedestrianAgents(
     options.maxActivePedestrians - options.agents.length,
   );
 
+  /**
+   * Seed estável por macro-célula.
+   *
+   * Antes o seed dependia de elapsedSeconds/generationSerial; com carro rápido
+   * isso fazia a mesma calçada gerar IDs novos o tempo todo. Agora a cidade
+   * mantém identidade visual por zona/célula e o render só recicla slots.
+   */
+  const stableCenterTileX = Math.round(options.activeCenter.x / 96);
+  const stableCenterTileZ = Math.round(options.activeCenter.z / 96);
   const localSeed =
     options.seed +
-    options.generationSerial * 7919 +
-    Math.floor(options.elapsedSeconds * 10) * 104729;
+    stableCenterTileX * 73856093 +
+    stableCenterTileZ * 19349663;
 
   const streamingPlan = createHomeDrivePedestrianStreamingPlan({
     agents: options.agents,
@@ -490,6 +500,7 @@ export function createHomeDriveLocalPedestrianAgents(
   const zonesForDistribution = getUniqueZones([
     ...zonesNearPlayer,
     ...streamingSlots.map((slot) => slot.zone),
+    ...(options.warmRingSnapshot?.warmZones.map((warmZone) => warmZone.zone) ?? []),
   ]);
 
   if (zonesForDistribution.length <= 0) {
@@ -503,7 +514,10 @@ export function createHomeDriveLocalPedestrianAgents(
     );
   }
 
-  const distributionMaxPedestrians = Math.max(spawnBudget * 2, spawnBudget + 24);
+  const distributionMaxPedestrians = Math.max(
+    spawnBudget * 2,
+    spawnBudget + 24 + Math.floor(options.warmRingSnapshot?.recommendedSpawnBudgetBoost ?? 0),
+  );
   const distribution = createHomeDrivePedestrianDistributedSlots({
     zones: zonesForDistribution,
     density: Math.max(DEFAULT_LOCAL_DENSITY, options.density),
@@ -513,11 +527,12 @@ export function createHomeDriveLocalPedestrianAgents(
     initialFocusRadiusMeters: Math.max(
       options.populateRadiusMeters,
       options.frontLookaheadMeters ?? options.populateRadiusMeters,
+      options.warmRingSnapshot?.recommendedPopulateRadiusMeters ?? 0,
     ),
     initialFocusPedestrianRatio: 1,
     maxInitialFocusPedestrians: distributionMaxPedestrians,
     streamingSlots,
-    streamingPriorityBoost: 240,
+    streamingPriorityBoost: 240 + Math.floor((options.warmRingSnapshot?.recommendedSpawnBudgetBoost ?? 0) * 2),
     profile: {
       maxPedestrians: distributionMaxPedestrians,
       density: Math.max(DEFAULT_LOCAL_DENSITY, options.density),
@@ -529,11 +544,7 @@ export function createHomeDriveLocalPedestrianAgents(
   const spawnedStreamingSlotIds = new Set<string>();
   const reservedAgentIds = createHomeDrivePedestrianReservedIdSet(options.agents);
   let nextAgentSerial = options.lastAgentSerial;
-  let candidateSlotSerial = 0;
-
   for (const slot of distribution.slots) {
-    const localCandidateSlotSerial = candidateSlotSerial;
-    candidateSlotSerial += 1;
     if (createdAgents.length >= spawnBudget) {
       break;
     }
@@ -561,9 +572,9 @@ export function createHomeDriveLocalPedestrianAgents(
     const streamingSlotId = getSpawnedStreamingSlotId(slot);
     const spawnInstanceId = createHomeDrivePedestrianSpawnInstanceId({
       namespace: "local",
-      generationSerial: options.generationSerial,
-      agentSerial: nextAgentSerial,
-      slotIndex: nextAgentSerial + slot.slotIndex,
+      generationSerial: 0,
+      agentSerial: slot.seed,
+      slotIndex: slot.slotIndex,
       slotId: slot.id,
       zoneId: slot.zoneId,
       segmentId: slot.segmentId,
@@ -572,9 +583,7 @@ export function createHomeDriveLocalPedestrianAgents(
       slotSeed: slot.seed,
       seed: localSeed,
       progress: slot.progress,
-      elapsedSeconds: options.elapsedSeconds,
       salt: [
-        localCandidateSlotSerial,
         streamingSlotId ?? "distributed",
         slot.occupancyCellKey,
         slot.streamingSectorKey ?? "sectorless",
@@ -585,8 +594,8 @@ export function createHomeDriveLocalPedestrianAgents(
     const slotAgents = createAgentsForLocalSlot({
       slot,
       seed: localSeed,
-      generationSerial: options.generationSerial,
-      slotIndex: nextAgentSerial + slot.slotIndex,
+      generationSerial: 0,
+      slotIndex: slot.slotIndex,
       slotCount: Math.max(1, distribution.slots.length),
       spawnInstanceId,
     });
@@ -632,5 +641,6 @@ export function createHomeDriveLocalPedestrianAgents(
     streamingSectorCounts: streamingPlan.sectorCounts,
     crosswalkDemandCount: getCrosswalkDemandCount(streamingSlots),
     spawnReservoir: finalReservoir,
+    warmRingSnapshot: options.warmRingSnapshot,
   };
 }

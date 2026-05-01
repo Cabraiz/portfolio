@@ -7,6 +7,10 @@ export * from "./homeDrive.pedestrianGroups";
 export * from "./homeDrive.pedestrianRandom";
 export * from "./homeDrive.pedestrianSidewalks";
 export * from "./homeDrive.pedestrianPerformance";
+export * from "./homeDrive.pedestrianWarmRing.types";
+export * from "./homeDrive.pedestrianWarmRing";
+export * from "./homeDrive.pedestrianPrewarm.types";
+export * from "./homeDrive.pedestrianPrewarm";
 
 export * from "./homeDrive.pedestrianCrowdTuning";
 export * from "./homeDrive.pedestrianCornerControl";

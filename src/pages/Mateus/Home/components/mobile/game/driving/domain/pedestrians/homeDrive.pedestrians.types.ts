@@ -259,6 +259,21 @@ export type HomeDrivePedestrianTickOptions = Readonly<{
   maxCrosswalkSpawnPerRefresh?: number;
   crosswalkSearchRadiusMeters?: number;
 
+  /** Warm ring e prewarm para preparar pedestres antes de o carro chegar. */
+  enablePedestrianWarmRing?: boolean;
+  pedestrianWarmRingBaseRadiusMeters?: number;
+  pedestrianWarmRingFrontBiasMeters?: number;
+  pedestrianWarmRingSpeedRadiusMultiplier?: number;
+  pedestrianWarmRingSideRadiusMeters?: number;
+  pedestrianWarmRingRearRadiusMeters?: number;
+  pedestrianWarmRingMaxZoneCount?: number;
+  pedestrianPrewarmEnabled?: boolean;
+  pedestrianPrewarmFrames?: number;
+  pedestrianPrewarmLeadSeconds?: number;
+  pedestrianPrewarmFrontMeters?: number;
+  pedestrianPrewarmMinReadyPedestrians?: number;
+  pedestrianPrewarmSpawnBudgetMultiplier?: number;
+
   density?: number;
   seed?: number;
   forceRepopulate?: boolean;

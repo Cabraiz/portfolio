@@ -45,6 +45,10 @@ function clamp01(value: number): number {
   return clamp(value, 0, 1);
 }
 
+function getHighSpeedStreamingIntensity(speedMps: number): number {
+  return clamp((speedMps - 22) / 18, 0, 1);
+}
+
 function normalizeHeading(headingRad = 0): HomeDriveVector2 {
   if (!Number.isFinite(headingRad)) {
     return {
@@ -157,18 +161,19 @@ function createSectors(
   options: HomeDrivePedestrianStreamingOptions,
 ): readonly HomeDrivePedestrianStreamingSector[] {
   const heading = normalizeHeading(activeHeadingRad);
+  const highSpeedIntensity = getHighSpeedStreamingIntensity(activeSpeedMps);
   const speedLookaheadMeters =
     Math.max(0, activeSpeedMps) *
     clamp(
       options.frontLookaheadSpeedMultiplier ??
         DEFAULT_FRONT_LOOKAHEAD_SPEED_MULTIPLIER,
       0,
-      35,
+      52,
     );
   const baseLookahead = clamp(
     options.frontLookaheadMeters ?? DEFAULT_FRONT_LOOKAHEAD_METERS,
     120,
-    1400,
+    highSpeedIntensity > 0 ? 2200 : 1400,
   );
   const frontLookaheadMeters = baseLookahead + speedLookaheadMeters;
   const populateRadiusMeters = clamp(
@@ -180,12 +185,12 @@ function createSectors(
   const frontFarLength = clamp(
     options.frontFarRadiusMeters ?? frontLookaheadMeters,
     frontNearLength + 80,
-    1800,
+    highSpeedIntensity > 0 ? 2800 : 1800,
   );
   const sideRadiusMeters = clamp(
     options.sideRadiusMeters ?? DEFAULT_SIDE_RADIUS_METERS,
     80,
-    900,
+    highSpeedIntensity > 0 ? 1100 : 900,
   );
   const rearRadiusMeters = clamp(
     options.rearRadiusMeters ?? DEFAULT_REAR_RADIUS_METERS,
@@ -203,7 +208,7 @@ function createSectors(
       minAbsSideMeters: 0,
       maxAbsSideMeters: populateRadiusMeters * 0.72,
       sideSign: 0,
-      priority: 1,
+      priority: 1 + highSpeedIntensity * 0.08,
     },
     {
       key: "front-far",
@@ -214,7 +219,7 @@ function createSectors(
       minAbsSideMeters: 0,
       maxAbsSideMeters: populateRadiusMeters * 0.8,
       sideSign: 0,
-      priority: 0.82,
+      priority: 0.86 + highSpeedIntensity * 0.22,
     },
     {
       key: "left-sidewalk",
@@ -247,7 +252,7 @@ function createSectors(
       minAbsSideMeters: 0,
       maxAbsSideMeters: sideRadiusMeters * 0.66,
       sideSign: 0,
-      priority: 0.36,
+      priority: 0.3 - highSpeedIntensity * 0.08,
     },
     {
       key: "crosswalk-demand",
@@ -266,20 +271,35 @@ function createSectors(
 function getSectorTargetCount(
   key: HomeDrivePedestrianStreamingSectorKey,
   options: HomeDrivePedestrianStreamingOptions,
+  activeSpeedMps: number,
 ): number {
+  const highSpeedIntensity = getHighSpeedStreamingIntensity(activeSpeedMps);
+
   switch (key) {
     case "front-near":
-      return Math.max(0, Math.floor(options.minFrontPedestrians ?? 92));
+      return Math.max(
+        0,
+        Math.floor((options.minFrontPedestrians ?? 92) * (1 + highSpeedIntensity * 0.18)),
+      );
 
     case "front-far":
-      return Math.max(0, Math.floor(options.minFarFrontPedestrians ?? 56));
+      return Math.max(
+        0,
+        Math.floor((options.minFarFrontPedestrians ?? 56) * (1 + highSpeedIntensity * 0.58)),
+      );
 
     case "left-sidewalk":
     case "right-sidewalk":
-      return Math.max(0, Math.floor(options.minSideSectorPedestrians ?? 34));
+      return Math.max(
+        0,
+        Math.floor((options.minSideSectorPedestrians ?? 34) * (1 + highSpeedIntensity * 0.08)),
+      );
 
     case "rear-buffer":
-      return Math.max(0, Math.floor(options.minRearBufferPedestrians ?? 18));
+      return Math.max(
+        0,
+        Math.floor((options.minRearBufferPedestrians ?? 18) * (1 - highSpeedIntensity * 0.18)),
+      );
 
     case "crosswalk-demand":
       return Math.max(0, Math.floor(options.minCrosswalkPedestrians ?? 26));
@@ -526,6 +546,7 @@ function createSectorTargets(
   sectors: readonly HomeDrivePedestrianStreamingSector[],
   counts: Readonly<Record<HomeDrivePedestrianStreamingSectorKey, number>>,
   options: HomeDrivePedestrianStreamingOptions,
+  activeSpeedMps: number,
 ): readonly HomeDrivePedestrianStreamingSectorTarget[] {
   const maxSpawnPerSectorRefresh = Math.max(
     0,
@@ -534,17 +555,30 @@ function createSectorTargets(
     ),
   );
 
+  const highSpeedIntensity = getHighSpeedStreamingIntensity(activeSpeedMps);
+
   return sectors.map((sector) => {
-    const targetCount = getSectorTargetCount(sector.key, options);
+    const targetCount = getSectorTargetCount(sector.key, options, activeSpeedMps);
     const currentCount = counts[sector.key] ?? 0;
     const deficitCount = Math.max(0, targetCount - currentCount);
+    const sectorSpawnBoost =
+      sector.key === "front-far"
+        ? 1 + highSpeedIntensity * 0.82
+        : sector.key === "front-near"
+          ? 1 + highSpeedIntensity * 0.45
+          : sector.key === "rear-buffer"
+            ? 1 - highSpeedIntensity * 0.2
+            : 1 + highSpeedIntensity * 0.08;
 
     return {
       sector,
       targetCount,
       currentCount,
       deficitCount,
-      maxSpawnCount: Math.min(deficitCount, maxSpawnPerSectorRefresh),
+      maxSpawnCount: Math.min(
+        deficitCount,
+        Math.max(0, Math.ceil(maxSpawnPerSectorRefresh * sectorSpawnBoost)),
+      ),
     };
   });
 }
@@ -597,7 +631,7 @@ export function createHomeDrivePedestrianStreamingPlan(
     options.activeCenter,
     activeHeadingRad,
   );
-  const sectorTargets = createSectorTargets(sectors, counts, options);
+  const sectorTargets = createSectorTargets(sectors, counts, options, activeSpeedMps);
   const localZoneSearchRadiusMeters = clamp(
     options.localZoneSearchRadiusMeters ??
       DEFAULT_LOCAL_ZONE_SEARCH_RADIUS_METERS,

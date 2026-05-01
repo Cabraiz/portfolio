@@ -10,7 +10,9 @@ export type HomeDriveThreePedestrianInstanceDetailLevel =
 export type HomeDriveThreePedestrianInstancedEntry = Readonly<{
   agent: HomeDrivePedestrianAgent;
   detailLevel: HomeDriveThreePedestrianInstanceDetailLevel;
+  distanceSquared?: number;
   distanceMeters?: number;
+  visibilityRank?: number;
 }>;
 
 export type HomeDriveThreePedestrianInstancedBucketKey =

@@ -243,7 +243,7 @@ function getDistributedLateralOffset(
   const centeredLane = laneCount <= 1 ? 0 : laneIndex / (laneCount - 1) - 0.5;
   const maxOffset = zone.widthMeters * 0.31;
   const laneOffset = centeredLane * maxOffset * 2;
-  const jitter = seededRange(seed, 3203, -0.16, 0.16);
+  const jitter = seededRange(seed, 3203, -0.22, 0.22);
 
   return clamp(laneOffset + jitter, -zone.widthMeters * 0.38, zone.widthMeters * 0.38);
 }
@@ -333,7 +333,8 @@ function createStreamingDistributedSlots(
   return streamingSlots.map((streamingSlot, index) => {
     const progress = clamp(streamingSlot.progress, 0.025, 0.975);
     const lateralOffsetMeters = clamp(
-      streamingSlot.lateralOffsetMeters,
+      streamingSlot.lateralOffsetMeters +
+        seededRange(streamingSlot.seed, 3803, -0.24, 0.24),
       -streamingSlot.zone.widthMeters * 0.42,
       streamingSlot.zone.widthMeters * 0.42,
     );

@@ -32,13 +32,25 @@ export type HomeDriveThreePedestrianVisibilityOptions = Readonly<{
   fullDetailRadiusMeters: number;
   mediumDetailRadiusMeters: number;
   cellSizeMeters?: number;
+
+  /** Consulta extra só para instancing frontal em alta velocidade. */
+  visualPrewarmRadiusMeters?: number;
+  visualPrewarmConeRadians?: number;
+  maxVisualPrewarmPedestrians?: number;
 }>;
 
 type CandidateEntry = HomeDriveThreeVisiblePedestrianEntry &
   Readonly<{
     distanceMeters: number;
     isCornerCandidate: boolean;
+    isVisualPrewarmCandidate: boolean;
   }>;
+
+type CarFrameCoordinates = Readonly<{
+  forwardMeters: number;
+  lateralMeters: number;
+  absoluteLateralMeters: number;
+}>;
 
 function getDistanceSquared(
   first: Readonly<{ x: number; z: number }>,
@@ -105,6 +117,8 @@ function getVisibilityRank(
   distanceSquared: number,
   detailLevel: HomeDriveThreePedestrianDetailLevel,
   isCornerCandidate: boolean,
+  isVisualPrewarmCandidate: boolean,
+  frameCoordinates?: CarFrameCoordinates,
 ): number {
   const detailBonus =
     detailLevel === "full" ? -120000 : detailLevel === "medium" ? -36000 : 0;
@@ -116,13 +130,19 @@ function getVisibilityRank(
       ? 2200
       : 0;
   const cornerPenalty = isCornerCandidate ? 14000 : 0;
+  const visualPrewarmPenalty = isVisualPrewarmCandidate
+    ? 9000 +
+      Math.max(0, frameCoordinates?.forwardMeters ?? 0) * 2.2 +
+      (frameCoordinates?.absoluteLateralMeters ?? 0) * 18
+    : 0;
 
   return (
     distanceSquared +
     detailBonus +
     crosswalkBonus +
     socialPenalty +
-    cornerPenalty
+    cornerPenalty +
+    visualPrewarmPenalty
   );
 }
 
@@ -142,7 +162,7 @@ function isAgentNearCorner(
   );
 }
 
-function getHardCullingRadiusMeters(
+function getBaseRenderRadiusMeters(
   options: HomeDriveThreePedestrianVisibilityOptions,
 ): number {
   const visibleRadiusMeters = Math.max(0, options.visibleRadiusMeters);
@@ -158,10 +178,121 @@ function getHardCullingRadiusMeters(
   return Math.min(visibleRadiusMeters, mediumDetailRadiusMeters);
 }
 
+function getQueryRadiusMeters(
+  options: HomeDriveThreePedestrianVisibilityOptions,
+): number {
+  const baseRenderRadiusMeters = getBaseRenderRadiusMeters(options);
+  const visualPrewarmRadiusMeters = Math.max(
+    0,
+    options.visualPrewarmRadiusMeters ?? 0,
+  );
+
+  return Math.max(baseRenderRadiusMeters, visualPrewarmRadiusMeters);
+}
+
 function shouldRenderDetailLevel(
   detailLevel: HomeDriveThreePedestrianDetailLevel,
 ): detailLevel is Exclude<HomeDriveThreePedestrianDetailLevel, "proxy"> {
   return detailLevel === "full" || detailLevel === "medium";
+}
+
+function getCarFrameCoordinates(
+  agent: HomeDrivePedestrianAgent,
+  runtime: HomeDriveRuntimeState,
+): CarFrameCoordinates {
+  const dx = agent.position.x - runtime.car.position.x;
+  const dz = agent.position.z - runtime.car.position.z;
+  const forwardX = Math.sin(runtime.car.headingRad);
+  const forwardZ = Math.cos(runtime.car.headingRad);
+  const rightX = Math.cos(runtime.car.headingRad);
+  const rightZ = -Math.sin(runtime.car.headingRad);
+  const forwardMeters = dx * forwardX + dz * forwardZ;
+  const lateralMeters = dx * rightX + dz * rightZ;
+
+  return {
+    forwardMeters,
+    lateralMeters,
+    absoluteLateralMeters: Math.abs(lateralMeters),
+  };
+}
+
+function isVisualPrewarmCandidate(params: Readonly<{
+  frame: CarFrameCoordinates;
+  distanceSquared: number;
+  baseRenderRadiusMeters: number;
+  visualPrewarmRadiusMeters: number;
+  visualPrewarmConeRadians: number;
+}>): boolean {
+  if (params.visualPrewarmRadiusMeters <= params.baseRenderRadiusMeters) {
+    return false;
+  }
+
+  if (
+    params.distanceSquared <=
+    params.baseRenderRadiusMeters * params.baseRenderRadiusMeters
+  ) {
+    return false;
+  }
+
+  if (
+    params.distanceSquared >
+    params.visualPrewarmRadiusMeters * params.visualPrewarmRadiusMeters
+  ) {
+    return false;
+  }
+
+  if (params.frame.forwardMeters <= params.baseRenderRadiusMeters * 0.42) {
+    return false;
+  }
+
+  if (params.frame.forwardMeters > params.visualPrewarmRadiusMeters) {
+    return false;
+  }
+
+  const coneHalfRadians = Math.max(
+    0.16,
+    Math.min(Math.PI * 0.48, params.visualPrewarmConeRadians * 0.5),
+  );
+  const coneHalfWidthMeters = Math.max(
+    30,
+    Math.tan(coneHalfRadians) * Math.max(18, params.frame.forwardMeters),
+  );
+
+  return params.frame.absoluteLateralMeters <= coneHalfWidthMeters;
+}
+
+function createCandidateEntry(params: Readonly<{
+  agent: HomeDrivePedestrianAgent;
+  center: Readonly<{ x: number; z: number }>;
+  distanceSquared: number;
+  distanceMeters: number;
+  detailLevel: HomeDriveThreePedestrianDetailLevel;
+  isCornerCandidate: boolean;
+  isVisualPrewarmCandidate: boolean;
+  frameCoordinates?: CarFrameCoordinates;
+  safeCellSizeMeters: number;
+}>): CandidateEntry {
+  return {
+    agent: params.agent,
+    distanceSquared: params.distanceSquared,
+    distanceMeters: params.distanceMeters,
+    detailLevel: params.detailLevel,
+    visibilityCellKey: getVisibilityCellKey(
+      params.agent.position,
+      params.safeCellSizeMeters,
+    ),
+    angularSectorKey: getAngularSectorKey(params.agent.position, params.center),
+    visibilityRank: getVisibilityRank(
+      params.agent,
+      params.distanceSquared,
+      params.detailLevel,
+      params.isCornerCandidate,
+      params.isVisualPrewarmCandidate,
+      params.frameCoordinates,
+    ),
+    isCornerCandidate: params.isCornerCandidate,
+    isVisualPrewarmCandidate: params.isVisualPrewarmCandidate,
+  };
 }
 
 function buildCandidateEntries(
@@ -173,26 +304,27 @@ function buildCandidateEntries(
       HOME_DRIVE_PEDESTRIAN_CROWD_TUNING.visibility.cellSizeMeters,
   );
   const center = options.runtime?.car.position ?? { x: 0, z: 0 };
-  const hardCullingRadiusMeters = getHardCullingRadiusMeters(options);
-  const hardCullingRadiusSquared =
-    hardCullingRadiusMeters * hardCullingRadiusMeters;
+  const baseRenderRadiusMeters = getBaseRenderRadiusMeters(options);
+  const queryRadiusMeters = getQueryRadiusMeters(options);
+  const queryRadiusSquared = queryRadiusMeters * queryRadiusMeters;
 
-  if (hardCullingRadiusMeters <= 0) {
+  if (queryRadiusMeters <= 0) {
     return [];
   }
 
   if (!options.runtime) {
     return options.agents
       .filter((agent) => {
-        return getDistanceSquared(agent.position, center) <= hardCullingRadiusSquared;
+        return getDistanceSquared(agent.position, center) <= queryRadiusSquared;
       })
       .map((agent, index) => {
+        const distanceSquared = getDistanceSquared(agent.position, center);
         const isCornerCandidate = isAgentNearCorner(agent, options.pedestrianState);
 
         return {
           agent,
-          distanceSquared: getDistanceSquared(agent.position, center),
-          distanceMeters: 0,
+          distanceSquared,
+          distanceMeters: Math.sqrt(Math.max(0, distanceSquared)),
           detailLevel: "medium",
           visibilityCellKey: getVisibilityCellKey(
             agent.position,
@@ -201,6 +333,7 @@ function buildCandidateEntries(
           angularSectorKey: getAngularSectorKey(agent.position, center),
           visibilityRank: index + (isCornerCandidate ? 4000 : 0),
           isCornerCandidate,
+          isVisualPrewarmCandidate: false,
         };
       });
   }
@@ -214,9 +347,17 @@ function buildCandidateEntries(
     visibleAgentIndex,
     {
       center: options.runtime.car.position,
-      radiusMeters: hardCullingRadiusMeters,
+      radiusMeters: queryRadiusMeters,
     },
   ).items;
+  const visualPrewarmRadiusMeters = Math.max(
+    baseRenderRadiusMeters,
+    options.visualPrewarmRadiusMeters ?? 0,
+  );
+  const visualPrewarmConeRadians = Math.max(
+    0.28,
+    options.visualPrewarmConeRadians ?? 0.96,
+  );
 
   for (const agent of spatialCandidates) {
     const distanceSquared = getDistanceSquared(
@@ -224,43 +365,46 @@ function buildCandidateEntries(
       options.runtime.car.position,
     );
 
-    if (distanceSquared > hardCullingRadiusSquared) {
+    if (distanceSquared > queryRadiusSquared) {
       continue;
     }
 
+    const frameCoordinates = getCarFrameCoordinates(agent, options.runtime);
     const lod = getHomeDriveThreePedestrianLodForDistance(distanceSquared, {
       fullDetailRadiusMeters: options.fullDetailRadiusMeters,
       mediumDetailRadiusMeters: options.mediumDetailRadiusMeters,
     });
+    const visualPrewarmCandidate =
+      lod.detailLevel === "proxy" &&
+      isVisualPrewarmCandidate({
+        frame: frameCoordinates,
+        distanceSquared,
+        baseRenderRadiusMeters,
+        visualPrewarmRadiusMeters,
+        visualPrewarmConeRadians,
+      });
+    const detailLevel: HomeDriveThreePedestrianDetailLevel =
+      visualPrewarmCandidate ? "medium" : lod.detailLevel;
 
-    if (!shouldRenderDetailLevel(lod.detailLevel)) {
+    if (!shouldRenderDetailLevel(detailLevel)) {
       continue;
     }
 
     const isCornerCandidate = isAgentNearCorner(agent, options.pedestrianState);
-    const visibilityCellKey = getVisibilityCellKey(
-      agent.position,
-      safeCellSizeMeters,
-    );
 
-    candidates.push({
-      agent,
-      distanceSquared,
-      distanceMeters: lod.distanceMeters,
-      detailLevel: lod.detailLevel,
-      visibilityCellKey,
-      angularSectorKey: getAngularSectorKey(
-        agent.position,
-        options.runtime.car.position,
-      ),
-      visibilityRank: getVisibilityRank(
+    candidates.push(
+      createCandidateEntry({
         agent,
+        center: options.runtime.car.position,
         distanceSquared,
-        lod.detailLevel,
+        distanceMeters: lod.distanceMeters,
+        detailLevel,
         isCornerCandidate,
-      ),
-      isCornerCandidate,
-    });
+        isVisualPrewarmCandidate: visualPrewarmCandidate,
+        frameCoordinates,
+        safeCellSizeMeters,
+      }),
+    );
   }
 
   return candidates.sort((first, second) => {
@@ -335,7 +479,12 @@ export function getHomeDriveThreeVisiblePedestrianEntries(
 ): readonly HomeDriveThreeVisiblePedestrianEntry[] {
   const safeMaxVisiblePedestrians = Math.max(
     0,
-    Math.floor(options.maxVisiblePedestrians),
+    Math.floor(
+      Math.max(
+        options.maxVisiblePedestrians,
+        options.maxVisualPrewarmPedestrians ?? 0,
+      ),
+    ),
   );
 
   if (safeMaxVisiblePedestrians <= 0) {
@@ -392,8 +541,11 @@ export function getHomeDriveThreeVisiblePedestrianEntries(
       candidate.detailLevel,
       candidate.isCornerCandidate,
     );
+    const relaxedPrewarmLimit = candidate.isVisualPrewarmCandidate
+      ? Math.max(1, cellLimit)
+      : cellLimit;
 
-    if (cellLimit <= 0 || currentCellCount >= cellLimit) {
+    if (relaxedPrewarmLimit <= 0 || currentCellCount >= relaxedPrewarmLimit) {
       rejected.push(candidate);
       continue;
     }

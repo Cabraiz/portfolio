@@ -10,6 +10,7 @@ import type {
   HomeDrivePedestrianSpawnReservoirSnapshot,
   HomeDrivePedestrianStreamingSectorCount,
 } from "./homeDrive.pedestrianStreaming.types";
+import type { HomeDrivePedestrianWarmRingSnapshot } from "./homeDrive.pedestrianWarmRing.types";
 
 export type HomeDrivePedestrianPopulationRuntime = Readonly<{
   lastPopulateCenter: HomeDriveVector2 | null;
@@ -22,13 +23,19 @@ export type HomeDrivePedestrianPopulationRuntime = Readonly<{
   lastSpawnedAgentCount: number;
   lastPrunedAgentCount: number;
 
-  /** Último plano de streaming direcional executado. */
+  /** Ãltimo plano de streaming direcional executado. */
   lastPopulateHeadingRad: number | null;
   lastPopulateSpeedMps: number;
   lastStreamingPlanId: string | null;
   lastSectorCounts: readonly HomeDrivePedestrianStreamingSectorCount[];
   lastCrosswalkDemandCount: number;
   spawnReservoir?: HomeDrivePedestrianSpawnReservoirSnapshot;
+
+  /** Ãltimo warm ring usado para preparar ruas antes do render. */
+  lastWarmRingPlanId: string | null;
+  lastWarmRingZoneIds: readonly string[];
+  lastWarmRingRadiusMeters: number;
+  warmRingSnapshot?: HomeDrivePedestrianWarmRingSnapshot;
 }>;
 
 export type HomeDrivePedestrianPopulationRuntimeOptions = Readonly<{
@@ -59,6 +66,21 @@ export type HomeDrivePedestrianPopulationRuntimeOptions = Readonly<{
   maxSpawnPerSectorRefresh?: number;
   maxCrosswalkSpawnPerRefresh?: number;
   crosswalkSearchRadiusMeters?: number;
+
+  enablePedestrianWarmRing?: boolean;
+  pedestrianWarmRingBaseRadiusMeters?: number;
+  pedestrianWarmRingFrontBiasMeters?: number;
+  pedestrianWarmRingSpeedRadiusMultiplier?: number;
+  pedestrianWarmRingSideRadiusMeters?: number;
+  pedestrianWarmRingRearRadiusMeters?: number;
+  pedestrianWarmRingMaxZoneCount?: number;
+
+  pedestrianPrewarmEnabled?: boolean;
+  pedestrianPrewarmFrames?: number;
+  pedestrianPrewarmLeadSeconds?: number;
+  pedestrianPrewarmFrontMeters?: number;
+  pedestrianPrewarmMinReadyPedestrians?: number;
+  pedestrianPrewarmSpawnBudgetMultiplier?: number;
 
   density?: number;
   seed?: number;
@@ -117,6 +139,8 @@ export type HomeDriveLocalPedestrianSpawnerOptions = Readonly<{
   maxSpawnPerSectorRefresh?: number;
   maxCrosswalkSpawnPerRefresh?: number;
   crosswalkSearchRadiusMeters?: number;
+
+  warmRingSnapshot?: HomeDrivePedestrianWarmRingSnapshot;
 }>;
 
 export type HomeDriveLocalPedestrianSpawnerResult = Readonly<{
@@ -130,4 +154,5 @@ export type HomeDriveLocalPedestrianSpawnerResult = Readonly<{
   streamingSectorCounts: readonly HomeDrivePedestrianStreamingSectorCount[];
   crosswalkDemandCount: number;
   spawnReservoir?: HomeDrivePedestrianSpawnReservoirSnapshot;
+  warmRingSnapshot?: HomeDrivePedestrianWarmRingSnapshot;
 }>;
