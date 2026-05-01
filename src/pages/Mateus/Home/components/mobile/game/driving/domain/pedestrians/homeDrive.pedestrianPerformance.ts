@@ -10,9 +10,22 @@ export type HomeDrivePedestrianPerformanceProfile = Readonly<{
   maxRoads: number;
   minRoadLengthMeters: number;
 
+  /**
+   * Raio lógico máximo pedido pela cena.
+   *
+   * Observação: a visibilidade agora usa hard-culling acima de
+   * `mediumDetailRadiusMeters`, então `visibleRadiusMeters` fica como
+   * margem de consulta/compatibilidade, mas o corte visual real acontece
+   * em `mediumDetailRadiusMeters`.
+   */
   visibleRadiusMeters: number;
   maxVisiblePedestrians: number;
 
+  /**
+   * 0..fullDetailRadiusMeters: pedestre completo.
+   * fullDetailRadiusMeters..mediumDetailRadiusMeters: pedestre médio.
+   * acima de mediumDetailRadiusMeters: não renderiza nada.
+   */
   fullDetailRadiusMeters: number;
   mediumDetailRadiusMeters: number;
 
@@ -62,11 +75,12 @@ export type HomeDrivePedestrianPerformanceProfile = Readonly<{
 }>;
 
 /**
- * Cidade cheia com controle espacial + streaming local.
+ * Cidade cheia no domínio, mas com render visual agressivamente cortado.
  *
- * O início usa initialFocus*. Depois, a simulação usa populate* +
- * lookahead direcional para garantir civis à frente, nas laterais e próximos
- * das faixas de pedestre enquanto o carro avança rápido.
+ * A população lógica continua alta para evitar calçadas vazias e manter
+ * streaming/crosswalk demand. O custo visual cai porque pedestres acima de
+ * `mediumDetailRadiusMeters` deixam de existir no render, em vez de virarem
+ * proxy preto/instância distante.
  */
 export const HOME_DRIVE_PEDESTRIAN_PERFORMANCE: Readonly<
   Record<
@@ -80,13 +94,13 @@ export const HOME_DRIVE_PEDESTRIAN_PERFORMANCE: Readonly<
     maxRoads: 280,
     minRoadLengthMeters: 18,
 
-    visibleRadiusMeters: 620,
-    maxVisiblePedestrians: 820,
+    visibleRadiusMeters: 260,
+    maxVisiblePedestrians: 260,
 
     fullDetailRadiusMeters: 84,
-    mediumDetailRadiusMeters: 240,
+    mediumDetailRadiusMeters: 190,
 
-    snapshotHz: 7,
+    snapshotHz: 6,
     simulationHz: 5,
 
     activeSimulationRadiusMeters: 178,
@@ -133,13 +147,13 @@ export const HOME_DRIVE_PEDESTRIAN_PERFORMANCE: Readonly<
     maxRoads: 420,
     minRoadLengthMeters: 16,
 
-    visibleRadiusMeters: 820,
-    maxVisiblePedestrians: 1280,
+    visibleRadiusMeters: 340,
+    maxVisiblePedestrians: 360,
 
-    fullDetailRadiusMeters: 118,
-    mediumDetailRadiusMeters: 330,
+    fullDetailRadiusMeters: 112,
+    mediumDetailRadiusMeters: 250,
 
-    snapshotHz: 8,
+    snapshotHz: 7,
     simulationHz: 5,
 
     activeSimulationRadiusMeters: 260,

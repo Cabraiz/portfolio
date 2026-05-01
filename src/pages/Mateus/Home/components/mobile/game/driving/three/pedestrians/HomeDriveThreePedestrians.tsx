@@ -4,14 +4,14 @@ import { useFrame } from "@react-three/fiber";
 import React, { memo, useMemo, useRef, useState } from "react";
 
 import type { HomeDriveRuntimeState } from "../../domain/homeDrive.types";
-import { dedupeHomeDrivePedestrianAgentsById } from "../../domain/pedestrians";
-import type { HomeDrivePedestrianRuntimeState } from "../../domain/pedestrians";
+import {
+  dedupeHomeDrivePedestrianAgentsById,
+  type HomeDrivePedestrianRuntimeState,
+} from "../../domain/pedestrians";
 import HomeDriveThreePedestrianAgent from "./HomeDriveThreePedestrianAgent";
 import HomeDriveThreePedestrianDebug from "./HomeDriveThreePedestrianDebug";
-import HomeDriveThreePedestrianInstancedCrowd from "./HomeDriveThreePedestrianInstancedCrowd";
 import { HomeDriveThreePedestrianHandLinks } from "./HomeDriveThreePedestrianProps";
 import { getHomeDriveThreeVisiblePedestrianEntries } from "./homeDriveThree.pedestrianVisibility";
-import { filterHomeDriveThreePedestrianInstancedEntries } from "./homeDriveThree.pedestrianInstancing";
 
 export type HomeDriveMutableRef<T> = {
   current: T;
@@ -29,11 +29,11 @@ export type HomeDriveThreePedestriansProps = Readonly<{
   snapshotHz?: number;
 }>;
 
-const DEFAULT_VISIBLE_RADIUS_METERS = 620;
-const DEFAULT_MAX_VISIBLE_PEDESTRIANS = 820;
+const DEFAULT_VISIBLE_RADIUS_METERS = 260;
+const DEFAULT_MAX_VISIBLE_PEDESTRIANS = 260;
 const DEFAULT_FULL_DETAIL_RADIUS_METERS = 84;
-const DEFAULT_MEDIUM_DETAIL_RADIUS_METERS = 240;
-const DEFAULT_SNAPSHOT_HZ = 9;
+const DEFAULT_MEDIUM_DETAIL_RADIUS_METERS = 190;
+const DEFAULT_SNAPSHOT_HZ = 6;
 
 type HomeDriveThreeVisiblePedestrianEntry = ReturnType<
   typeof getHomeDriveThreeVisiblePedestrianEntries
@@ -47,6 +47,10 @@ function dedupeHomeDriveThreeVisibleEntriesByAgentId(
 
   entries.forEach((entry) => {
     if (seen.has(entry.agent.id)) {
+      return;
+    }
+
+    if (entry.detailLevel === "proxy") {
       return;
     }
 
@@ -79,7 +83,7 @@ function HomeDriveThreePedestrians({
       return;
     }
 
-    const safeSnapshotHz = Math.max(4, Math.min(snapshotHz, 16));
+    const safeSnapshotHz = Math.max(3, Math.min(snapshotHz, 12));
     const snapshotIntervalSeconds = 1 / safeSnapshotHz;
 
     snapshotAccumulatorRef.current += Math.min(Math.max(deltaSeconds, 0), 0.12);
@@ -98,18 +102,21 @@ function HomeDriveThreePedestrians({
 
   const visibleEntries = useMemo(() => {
     const uniqueAgents = dedupeHomeDrivePedestrianAgentsById(snapshot.agents);
+    const safeFullDetailRadiusMeters = Math.max(12, fullDetailRadiusMeters);
+    const safeMediumDetailRadiusMeters = Math.max(
+      safeFullDetailRadiusMeters,
+      mediumDetailRadiusMeters,
+    );
 
     return dedupeHomeDriveThreeVisibleEntriesByAgentId(
       getHomeDriveThreeVisiblePedestrianEntries({
         agents: uniqueAgents,
         runtime: runtimeRef?.current,
+        pedestrianState: snapshot,
         visibleRadiusMeters: Math.max(24, visibleRadiusMeters),
         maxVisiblePedestrians: Math.max(0, maxVisiblePedestrians),
-        fullDetailRadiusMeters: Math.max(12, fullDetailRadiusMeters),
-        mediumDetailRadiusMeters: Math.max(
-          fullDetailRadiusMeters,
-          mediumDetailRadiusMeters,
-        ),
+        fullDetailRadiusMeters: safeFullDetailRadiusMeters,
+        mediumDetailRadiusMeters: safeMediumDetailRadiusMeters,
       }),
     );
   }, [
@@ -121,17 +128,11 @@ function HomeDriveThreePedestrians({
     visibleRadiusMeters,
   ]);
 
-  const fullDetailEntries = useMemo(() => {
-    return visibleEntries.filter((entry) => entry.detailLevel === "full");
-  }, [visibleEntries]);
-
-  const instancedEntries = useMemo(() => {
-    return filterHomeDriveThreePedestrianInstancedEntries(visibleEntries);
-  }, [visibleEntries]);
-
   const handLinkAgents = useMemo(() => {
-    return fullDetailEntries.map((entry) => entry.agent);
-  }, [fullDetailEntries]);
+    return visibleEntries
+      .filter((entry) => entry.detailLevel === "full")
+      .map((entry) => entry.agent);
+  }, [visibleEntries]);
 
   if (!enabled || visibleEntries.length <= 0) {
     return debug ? (
@@ -143,17 +144,9 @@ function HomeDriveThreePedestrians({
     <group name="home-drive-pedestrians" renderOrder={26}>
       <HomeDriveThreePedestrianDebug pedestrians={snapshot} enabled={debug} />
 
-      <HomeDriveThreePedestrianInstancedCrowd
-        entries={instancedEntries}
-        enabled={instancedEntries.length > 0}
-        elapsedSeconds={snapshot.elapsedSeconds}
-        maxInstances={Math.max(0, maxVisiblePedestrians - fullDetailEntries.length)}
-        renderOrder={25}
-      />
-
       <HomeDriveThreePedestrianHandLinks agents={handLinkAgents} />
 
-      {fullDetailEntries.map((entry) => (
+      {visibleEntries.map((entry) => (
         <HomeDriveThreePedestrianAgent
           key={entry.agent.id}
           agent={entry.agent}

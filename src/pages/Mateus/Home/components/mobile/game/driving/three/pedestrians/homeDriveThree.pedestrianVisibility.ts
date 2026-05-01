@@ -1,17 +1,18 @@
 // src/pages/Mateus/Home/components/mobile/game/driving/three/pedestrians/homeDriveThree.pedestrianVisibility.ts
 
-import { HOME_DRIVE_PEDESTRIAN_CROWD_TUNING } from "../../domain/pedestrians/homeDrive.pedestrianCrowdTuning";
-import {
-  classifyHomeDrivePedestrianCornerSlot,
-} from "../../domain/pedestrians/homeDrive.pedestrianCornerControl";
 import type { HomeDriveRuntimeState } from "../../domain/homeDrive.types";
-import type { HomeDrivePedestrianAgent, HomeDrivePedestrianRuntimeState } from "../../domain/pedestrians";
-import type { HomeDriveThreePedestrianDetailLevel } from "./HomeDriveThreePedestrianAgent";
-import { getHomeDriveThreePedestrianLodForDistance } from "./homeDriveThree.pedestrianLod";
+import { HOME_DRIVE_PEDESTRIAN_CROWD_TUNING } from "../../domain/pedestrians/homeDrive.pedestrianCrowdTuning";
+import { classifyHomeDrivePedestrianCornerSlot } from "../../domain/pedestrians/homeDrive.pedestrianCornerControl";
 import {
   createHomeDrivePedestrianAgentSpatialIndex,
   queryHomeDrivePedestrianSpatialIndex,
 } from "../../domain/pedestrians/homeDrive.pedestrianSpatialIndex";
+import type {
+  HomeDrivePedestrianAgent,
+  HomeDrivePedestrianRuntimeState,
+} from "../../domain/pedestrians";
+import type { HomeDriveThreePedestrianDetailLevel } from "./HomeDriveThreePedestrianAgent";
+import { getHomeDriveThreePedestrianLodForDistance } from "./homeDriveThree.pedestrianLod";
 
 export type HomeDriveThreeVisiblePedestrianEntry = Readonly<{
   agent: HomeDrivePedestrianAgent;
@@ -33,10 +34,11 @@ export type HomeDriveThreePedestrianVisibilityOptions = Readonly<{
   cellSizeMeters?: number;
 }>;
 
-type CandidateEntry = HomeDriveThreeVisiblePedestrianEntry & Readonly<{
-  distanceMeters: number;
-  isCornerCandidate: boolean;
-}>;
+type CandidateEntry = HomeDriveThreeVisiblePedestrianEntry &
+  Readonly<{
+    distanceMeters: number;
+    isCornerCandidate: boolean;
+  }>;
 
 function getDistanceSquared(
   first: Readonly<{ x: number; z: number }>,
@@ -77,6 +79,10 @@ function getCellLimitForDetailLevel(
   detailLevel: HomeDriveThreePedestrianDetailLevel,
   isCornerCandidate: boolean,
 ): number {
+  if (detailLevel === "proxy") {
+    return 0;
+  }
+
   if (isCornerCandidate) {
     return HOME_DRIVE_PEDESTRIAN_CROWD_TUNING.visibility.maxCornerEntriesPerCell;
   }
@@ -90,7 +96,7 @@ function getCellLimitForDetailLevel(
 
     case "proxy":
     default:
-      return HOME_DRIVE_PEDESTRIAN_CROWD_TUNING.visibility.maxProxyDetailPerCell;
+      return 0;
   }
 }
 
@@ -111,7 +117,13 @@ function getVisibilityRank(
       : 0;
   const cornerPenalty = isCornerCandidate ? 14000 : 0;
 
-  return distanceSquared + detailBonus + crosswalkBonus + socialPenalty + cornerPenalty;
+  return (
+    distanceSquared +
+    detailBonus +
+    crosswalkBonus +
+    socialPenalty +
+    cornerPenalty
+  );
 }
 
 function isAgentNearCorner(
@@ -130,6 +142,28 @@ function isAgentNearCorner(
   );
 }
 
+function getHardCullingRadiusMeters(
+  options: HomeDriveThreePedestrianVisibilityOptions,
+): number {
+  const visibleRadiusMeters = Math.max(0, options.visibleRadiusMeters);
+  const mediumDetailRadiusMeters = Math.max(
+    options.fullDetailRadiusMeters,
+    options.mediumDetailRadiusMeters,
+  );
+
+  if (visibleRadiusMeters <= 0) {
+    return 0;
+  }
+
+  return Math.min(visibleRadiusMeters, mediumDetailRadiusMeters);
+}
+
+function shouldRenderDetailLevel(
+  detailLevel: HomeDriveThreePedestrianDetailLevel,
+): detailLevel is Exclude<HomeDriveThreePedestrianDetailLevel, "proxy"> {
+  return detailLevel === "full" || detailLevel === "medium";
+}
+
 function buildCandidateEntries(
   options: HomeDriveThreePedestrianVisibilityOptions,
 ): readonly CandidateEntry[] {
@@ -139,22 +173,36 @@ function buildCandidateEntries(
       HOME_DRIVE_PEDESTRIAN_CROWD_TUNING.visibility.cellSizeMeters,
   );
   const center = options.runtime?.car.position ?? { x: 0, z: 0 };
+  const hardCullingRadiusMeters = getHardCullingRadiusMeters(options);
+  const hardCullingRadiusSquared =
+    hardCullingRadiusMeters * hardCullingRadiusMeters;
+
+  if (hardCullingRadiusMeters <= 0) {
+    return [];
+  }
 
   if (!options.runtime) {
-    return options.agents.map((agent, index) => {
-      const isCornerCandidate = isAgentNearCorner(agent, options.pedestrianState);
+    return options.agents
+      .filter((agent) => {
+        return getDistanceSquared(agent.position, center) <= hardCullingRadiusSquared;
+      })
+      .map((agent, index) => {
+        const isCornerCandidate = isAgentNearCorner(agent, options.pedestrianState);
 
-      return {
-        agent,
-        distanceSquared: 0,
-        distanceMeters: 0,
-        detailLevel: "medium",
-        visibilityCellKey: getVisibilityCellKey(agent.position, safeCellSizeMeters),
-        angularSectorKey: getAngularSectorKey(agent.position, center),
-        visibilityRank: index + (isCornerCandidate ? 4000 : 0),
-        isCornerCandidate,
-      };
-    });
+        return {
+          agent,
+          distanceSquared: getDistanceSquared(agent.position, center),
+          distanceMeters: 0,
+          detailLevel: "medium",
+          visibilityCellKey: getVisibilityCellKey(
+            agent.position,
+            safeCellSizeMeters,
+          ),
+          angularSectorKey: getAngularSectorKey(agent.position, center),
+          visibilityRank: index + (isCornerCandidate ? 4000 : 0),
+          isCornerCandidate,
+        };
+      });
   }
 
   const candidates: CandidateEntry[] = [];
@@ -166,17 +214,29 @@ function buildCandidateEntries(
     visibleAgentIndex,
     {
       center: options.runtime.car.position,
-      radiusMeters: options.visibleRadiusMeters,
+      radiusMeters: hardCullingRadiusMeters,
     },
   ).items;
 
   for (const agent of spatialCandidates) {
-    const distanceSquared = getDistanceSquared(agent.position, options.runtime.car.position);
+    const distanceSquared = getDistanceSquared(
+      agent.position,
+      options.runtime.car.position,
+    );
+
+    if (distanceSquared > hardCullingRadiusSquared) {
+      continue;
+    }
 
     const lod = getHomeDriveThreePedestrianLodForDistance(distanceSquared, {
       fullDetailRadiusMeters: options.fullDetailRadiusMeters,
       mediumDetailRadiusMeters: options.mediumDetailRadiusMeters,
     });
+
+    if (!shouldRenderDetailLevel(lod.detailLevel)) {
+      continue;
+    }
+
     const isCornerCandidate = isAgentNearCorner(agent, options.pedestrianState);
     const visibilityCellKey = getVisibilityCellKey(
       agent.position,
@@ -189,7 +249,10 @@ function buildCandidateEntries(
       distanceMeters: lod.distanceMeters,
       detailLevel: lod.detailLevel,
       visibilityCellKey,
-      angularSectorKey: getAngularSectorKey(agent.position, options.runtime.car.position),
+      angularSectorKey: getAngularSectorKey(
+        agent.position,
+        options.runtime.car.position,
+      ),
       visibilityRank: getVisibilityRank(
         agent,
         distanceSquared,
@@ -230,6 +293,10 @@ function selectSectorSeedEntries(
       break;
     }
 
+    if (candidate.detailLevel === "proxy") {
+      continue;
+    }
+
     if (seenSectors.has(candidate.angularSectorKey)) {
       continue;
     }
@@ -249,6 +316,10 @@ function dedupeCandidateEntriesByAgentId(
 
   entries.forEach((entry) => {
     if (seen.has(entry.agent.id)) {
+      return;
+    }
+
+    if (entry.detailLevel === "proxy") {
       return;
     }
 
@@ -283,9 +354,16 @@ export function getHomeDriveThreeVisiblePedestrianEntries(
   const rejected: CandidateEntry[] = [];
   const selectedKeys = new Set<string>();
   const selectedCountByCell = new Map<string, number>();
-  const sectorSeeds = selectSectorSeedEntries(candidates, safeMaxVisiblePedestrians);
+  const sectorSeeds = selectSectorSeedEntries(
+    candidates,
+    safeMaxVisiblePedestrians,
+  );
 
   for (const candidate of sectorSeeds) {
+    if (candidate.detailLevel === "proxy") {
+      continue;
+    }
+
     selected.push(candidate);
     selectedKeys.add(candidate.agent.id);
     selectedCountByCell.set(
@@ -295,6 +373,10 @@ export function getHomeDriveThreeVisiblePedestrianEntries(
   }
 
   for (const candidate of candidates) {
+    if (candidate.detailLevel === "proxy") {
+      continue;
+    }
+
     if (selected.length >= safeMaxVisiblePedestrians) {
       rejected.push(candidate);
       continue;
@@ -304,13 +386,14 @@ export function getHomeDriveThreeVisiblePedestrianEntries(
       continue;
     }
 
-    const currentCellCount = selectedCountByCell.get(candidate.visibilityCellKey) ?? 0;
+    const currentCellCount =
+      selectedCountByCell.get(candidate.visibilityCellKey) ?? 0;
     const cellLimit = getCellLimitForDetailLevel(
       candidate.detailLevel,
       candidate.isCornerCandidate,
     );
 
-    if (currentCellCount >= cellLimit) {
+    if (cellLimit <= 0 || currentCellCount >= cellLimit) {
       rejected.push(candidate);
       continue;
     }
@@ -332,12 +415,18 @@ export function getHomeDriveThreeVisiblePedestrianEntries(
   if (fallbackSlots > 0) {
     selected.push(
       ...rejected
-        .filter((candidate) => !selectedKeys.has(candidate.agent.id))
+        .filter((candidate) => {
+          return (
+            candidate.detailLevel !== "proxy" &&
+            !selectedKeys.has(candidate.agent.id)
+          );
+        })
         .slice(0, fallbackSlots),
     );
   }
 
   return selected
+    .filter((entry) => entry.detailLevel !== "proxy")
     .sort((first, second) => first.distanceSquared - second.distanceSquared)
     .slice(0, safeMaxVisiblePedestrians)
     .map((entry) => ({
