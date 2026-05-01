@@ -86,8 +86,8 @@ export const HOME_DRIVE_PEDESTRIAN_PERFORMANCE: Readonly<
     fullDetailRadiusMeters: 84,
     mediumDetailRadiusMeters: 240,
 
-    snapshotHz: 8,
-    simulationHz: 6,
+    snapshotHz: 7,
+    simulationHz: 5,
 
     activeSimulationRadiusMeters: 178,
     warmSimulationRadiusMeters: 420,
@@ -110,7 +110,7 @@ export const HOME_DRIVE_PEDESTRIAN_PERFORMANCE: Readonly<
     repopulateCooldownSeconds: 0.55,
     minPedestriansNearPlayer: 145,
     maxActivePedestrians: 1780,
-    maxSpawnPerRefresh: 165,
+    maxSpawnPerRefresh: 125,
 
     frontLookaheadMeters: 560,
     frontLookaheadSpeedMultiplier: 13,
@@ -139,8 +139,8 @@ export const HOME_DRIVE_PEDESTRIAN_PERFORMANCE: Readonly<
     fullDetailRadiusMeters: 118,
     mediumDetailRadiusMeters: 330,
 
-    snapshotHz: 9,
-    simulationHz: 6,
+    snapshotHz: 8,
+    simulationHz: 5,
 
     activeSimulationRadiusMeters: 260,
     warmSimulationRadiusMeters: 620,
@@ -163,7 +163,7 @@ export const HOME_DRIVE_PEDESTRIAN_PERFORMANCE: Readonly<
     repopulateCooldownSeconds: 0.48,
     minPedestriansNearPlayer: 230,
     maxActivePedestrians: 2850,
-    maxSpawnPerRefresh: 245,
+    maxSpawnPerRefresh: 180,
 
     frontLookaheadMeters: 760,
     frontLookaheadSpeedMultiplier: 15,

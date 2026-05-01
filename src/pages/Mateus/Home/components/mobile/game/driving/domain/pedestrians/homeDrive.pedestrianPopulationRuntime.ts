@@ -3,6 +3,10 @@
 import type { HomeDriveVector2 } from "../homeDrive.types";
 import { createHomeDriveLocalPedestrianAgents } from "./homeDrive.pedestrianLocalSpawner";
 import { dedupeHomeDrivePedestrianAgentsById } from "./homeDrive.pedestrianIdentity";
+import {
+  countHomeDrivePedestrianSpatialItemsNear,
+  createHomeDrivePedestrianAgentSpatialIndex,
+} from "./homeDrive.pedestrianSpatialIndex";
 import type {
   HomeDrivePedestrianPopulationRuntime,
   HomeDrivePedestrianPopulationRuntimeInput,
@@ -217,13 +221,15 @@ function countAgentsNearCenter(
   center: HomeDriveVector2,
   radiusMeters: number,
 ): number {
-  const radiusSquared = radiusMeters * radiusMeters;
+  if (agents.length <= 0) {
+    return 0;
+  }
 
-  return agents.reduce((total, agent) => {
-    return getDistanceSquared(agent.position, center) <= radiusSquared
-      ? total + 1
-      : total;
-  }, 0);
+  return countHomeDrivePedestrianSpatialItemsNear(
+    createHomeDrivePedestrianAgentSpatialIndex(agents, 22),
+    center,
+    radiusMeters,
+  );
 }
 
 function shouldRepopulateHomeDrivePedestrians(params: Readonly<{

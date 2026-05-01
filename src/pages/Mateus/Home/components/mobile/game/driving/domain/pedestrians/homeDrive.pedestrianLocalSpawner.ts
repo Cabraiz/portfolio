@@ -22,6 +22,12 @@ import {
   reserveHomeDrivePedestrianAgentId,
 } from "./homeDrive.pedestrianIdentity";
 import {
+  createHomeDrivePedestrianAgentSpatialIndex,
+  hasHomeDrivePedestrianSpatialItemNear,
+  queryHomeDrivePedestrianSpatialIndex,
+  type HomeDrivePedestrianAgentSpatialIndex,
+} from "./homeDrive.pedestrianSpatialIndex";
+import {
   createHomeDrivePedestrianAppearance,
   createHomeDrivePedestrianSeed,
   seededRange,
@@ -146,6 +152,14 @@ function isPositionTooCloseToAgents(
   return agents.some((agent) => {
     return getDistanceSquared(position, agent.position) <= minDistanceSquared;
   });
+}
+
+function isPositionTooCloseToAgentIndex(
+  position: HomeDriveVector2,
+  index: HomeDrivePedestrianAgentSpatialIndex,
+  minDistanceMeters: number,
+): boolean {
+  return hasHomeDrivePedestrianSpatialItemNear(index, position, minDistanceMeters);
 }
 
 function getPreferredGroupKindForLocalSpawn(
@@ -392,11 +406,17 @@ function emptySpawnerResult(
 export function createHomeDriveLocalPedestrianAgents(
   options: HomeDriveLocalPedestrianSpawnerOptions,
 ): HomeDriveLocalPedestrianSpawnerResult {
-  const nearAgents = getHomeDrivePedestrianAgentsNearPosition(
+  const existingAgentSpatialIndex = createHomeDrivePedestrianAgentSpatialIndex(
     options.agents,
-    options.activeCenter,
-    options.populateRadiusMeters,
+    18,
   );
+  const nearAgents = queryHomeDrivePedestrianSpatialIndex(
+    existingAgentSpatialIndex,
+    {
+      center: options.activeCenter,
+      radiusMeters: options.populateRadiusMeters,
+    },
+  ).items;
   const remainingGlobalCapacity = Math.max(
     0,
     options.maxActivePedestrians - options.agents.length,
@@ -519,9 +539,9 @@ export function createHomeDriveLocalPedestrianAgents(
     }
 
     if (
-      isPositionTooCloseToAgents(
+      isPositionTooCloseToAgentIndex(
         slot.worldPosition,
-        options.agents,
+        existingAgentSpatialIndex,
         DEFAULT_MIN_DISTANCE_FROM_EXISTING_AGENT_METERS,
       )
     ) {

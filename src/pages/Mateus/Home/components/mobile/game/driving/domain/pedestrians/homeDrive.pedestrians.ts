@@ -34,6 +34,7 @@ import {
   dedupeHomeDrivePedestrianAgentsById,
   reserveHomeDrivePedestrianAgentId,
 } from "./homeDrive.pedestrianIdentity";
+import { shouldTickHomeDrivePedestrianAgent } from "./homeDrive.pedestrianSimulationScheduler";
 import {
   clamp,
   createHomeDrivePedestrianAppearance,
@@ -80,36 +81,18 @@ function shouldTickAgentForPerformance(
   agent: HomeDrivePedestrianAgent,
   options: HomeDrivePedestrianPerformanceTickOptions,
 ): boolean {
-  if (agent.crosswalkId) {
-    return true;
-  }
-
-  if (!options.activeCenter) {
-    return true;
-  }
-
-  const activeRadiusMeters = Math.max(1, options.activeRadiusMeters ?? 180);
-  const warmRadiusMeters = Math.max(
-    activeRadiusMeters,
-    options.warmRadiusMeters ?? activeRadiusMeters * 1.85,
-  );
-  const distanceSquared = getDistanceSquared(agent.position, options.activeCenter);
-
-  if (distanceSquared <= activeRadiusMeters * activeRadiusMeters) {
-    return true;
-  }
-
-  const tickIndex = Math.max(0, options.tickIndex ?? 0);
-
-  if (distanceSquared <= warmRadiusMeters * warmRadiusMeters) {
-    const modulo = Math.max(1, options.warmTickModulo ?? 3);
-
-    return Math.abs(agent.seed + tickIndex) % modulo === 0;
-  }
-
-  const modulo = Math.max(1, options.coldTickModulo ?? 9);
-
-  return Math.abs(agent.seed + tickIndex) % modulo === 0;
+  return shouldTickHomeDrivePedestrianAgent(agent, {
+    activeCenter: options.activeCenter,
+    tickIndex: options.tickIndex,
+    hotRadiusMeters: options.activeRadiusMeters ?? 180,
+    warmRadiusMeters: options.warmRadiusMeters ?? (options.activeRadiusMeters ?? 180) * 1.85,
+    coldRadiusMeters: options.keepAliveRadiusMeters ?? (options.warmRadiusMeters ?? 360) * 2.15,
+    hotModulo: 1,
+    warmModulo: options.warmTickModulo ?? 4,
+    coldModulo: options.coldTickModulo ?? 13,
+    sleepModulo: Math.max(17, (options.coldTickModulo ?? 13) + 5),
+    alwaysTickCrosswalkAgents: true,
+  });
 }
 
 function createAgentFromGroupMember(

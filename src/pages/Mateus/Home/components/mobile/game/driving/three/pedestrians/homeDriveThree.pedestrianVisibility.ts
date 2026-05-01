@@ -8,6 +8,10 @@ import type { HomeDriveRuntimeState } from "../../domain/homeDrive.types";
 import type { HomeDrivePedestrianAgent, HomeDrivePedestrianRuntimeState } from "../../domain/pedestrians";
 import type { HomeDriveThreePedestrianDetailLevel } from "./HomeDriveThreePedestrianAgent";
 import { getHomeDriveThreePedestrianLodForDistance } from "./homeDriveThree.pedestrianLod";
+import {
+  createHomeDrivePedestrianAgentSpatialIndex,
+  queryHomeDrivePedestrianSpatialIndex,
+} from "../../domain/pedestrians/homeDrive.pedestrianSpatialIndex";
 
 export type HomeDriveThreeVisiblePedestrianEntry = Readonly<{
   agent: HomeDrivePedestrianAgent;
@@ -153,15 +157,21 @@ function buildCandidateEntries(
     });
   }
 
-  const radiusSquared = options.visibleRadiusMeters * options.visibleRadiusMeters;
   const candidates: CandidateEntry[] = [];
+  const visibleAgentIndex = createHomeDrivePedestrianAgentSpatialIndex(
+    options.agents,
+    safeCellSizeMeters,
+  );
+  const spatialCandidates = queryHomeDrivePedestrianSpatialIndex(
+    visibleAgentIndex,
+    {
+      center: options.runtime.car.position,
+      radiusMeters: options.visibleRadiusMeters,
+    },
+  ).items;
 
-  for (const agent of options.agents) {
+  for (const agent of spatialCandidates) {
     const distanceSquared = getDistanceSquared(agent.position, options.runtime.car.position);
-
-    if (distanceSquared > radiusSquared) {
-      continue;
-    }
 
     const lod = getHomeDriveThreePedestrianLodForDistance(distanceSquared, {
       fullDetailRadiusMeters: options.fullDetailRadiusMeters,
@@ -231,6 +241,24 @@ function selectSectorSeedEntries(
   return selected;
 }
 
+function dedupeCandidateEntriesByAgentId(
+  entries: readonly CandidateEntry[],
+): readonly CandidateEntry[] {
+  const seen = new Set<string>();
+  const uniqueEntries: CandidateEntry[] = [];
+
+  entries.forEach((entry) => {
+    if (seen.has(entry.agent.id)) {
+      return;
+    }
+
+    seen.add(entry.agent.id);
+    uniqueEntries.push(entry);
+  });
+
+  return uniqueEntries;
+}
+
 export function getHomeDriveThreeVisiblePedestrianEntries(
   options: HomeDriveThreePedestrianVisibilityOptions,
 ): readonly HomeDriveThreeVisiblePedestrianEntry[] {
@@ -243,7 +271,9 @@ export function getHomeDriveThreeVisiblePedestrianEntries(
     return [];
   }
 
-  const candidates = buildCandidateEntries(options);
+  const candidates = dedupeCandidateEntriesByAgentId(
+    buildCandidateEntries(options),
+  );
 
   if (candidates.length <= safeMaxVisiblePedestrians) {
     return candidates;
