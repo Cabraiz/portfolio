@@ -4,15 +4,12 @@ import { useFrame } from "@react-three/fiber";
 import React, { memo, useMemo, useRef, useState } from "react";
 
 import type { HomeDriveRuntimeState } from "../../domain/homeDrive.types";
-import type {
-  HomeDrivePedestrianAgent,
-  HomeDrivePedestrianRuntimeState,
-} from "../../domain/pedestrians";
-import HomeDriveThreePedestrianAgent, {
-  type HomeDriveThreePedestrianDetailLevel,
-} from "./HomeDriveThreePedestrianAgent";
+import { dedupeHomeDrivePedestrianAgentsById } from "../../domain/pedestrians";
+import type { HomeDrivePedestrianRuntimeState } from "../../domain/pedestrians";
+import HomeDriveThreePedestrianAgent from "./HomeDriveThreePedestrianAgent";
 import HomeDriveThreePedestrianDebug from "./HomeDriveThreePedestrianDebug";
 import { HomeDriveThreePedestrianHandLinks } from "./HomeDriveThreePedestrianProps";
+import { getHomeDriveThreeVisiblePedestrianEntries } from "./homeDriveThree.pedestrianVisibility";
 
 export type HomeDriveMutableRef<T> = {
   current: T;
@@ -30,92 +27,32 @@ export type HomeDriveThreePedestriansProps = Readonly<{
   snapshotHz?: number;
 }>;
 
-type VisiblePedestrianEntry = Readonly<{
-  agent: HomeDrivePedestrianAgent;
-  distanceSquared: number;
-  detailLevel: HomeDriveThreePedestrianDetailLevel;
-}>;
+const DEFAULT_VISIBLE_RADIUS_METERS = 620;
+const DEFAULT_MAX_VISIBLE_PEDESTRIANS = 820;
+const DEFAULT_FULL_DETAIL_RADIUS_METERS = 84;
+const DEFAULT_MEDIUM_DETAIL_RADIUS_METERS = 240;
+const DEFAULT_SNAPSHOT_HZ = 9;
 
-const DEFAULT_VISIBLE_RADIUS_METERS = 280;
-const DEFAULT_MAX_VISIBLE_PEDESTRIANS = 96;
-const DEFAULT_FULL_DETAIL_RADIUS_METERS = 80;
-const DEFAULT_MEDIUM_DETAIL_RADIUS_METERS = 170;
-const DEFAULT_SNAPSHOT_HZ = 10;
+type HomeDriveThreeVisiblePedestrianEntry = ReturnType<
+  typeof getHomeDriveThreeVisiblePedestrianEntries
+>[number];
 
-function getDistanceSquared(
-  first: Readonly<{ x: number; z: number }>,
-  second: Readonly<{ x: number; z: number }>,
-): number {
-  const dx = first.x - second.x;
-  const dz = first.z - second.z;
+function dedupeHomeDriveThreeVisibleEntriesByAgentId(
+  entries: readonly HomeDriveThreeVisiblePedestrianEntry[],
+): readonly HomeDriveThreeVisiblePedestrianEntry[] {
+  const seen = new Set<string>();
+  const uniqueEntries: HomeDriveThreeVisiblePedestrianEntry[] = [];
 
-  return dx * dx + dz * dz;
-}
-
-function getDetailLevelForDistance(
-  distanceSquared: number,
-  fullDetailRadiusMeters: number,
-  mediumDetailRadiusMeters: number,
-): HomeDriveThreePedestrianDetailLevel {
-  if (distanceSquared <= fullDetailRadiusMeters * fullDetailRadiusMeters) {
-    return "full";
-  }
-
-  if (distanceSquared <= mediumDetailRadiusMeters * mediumDetailRadiusMeters) {
-    return "medium";
-  }
-
-  return "proxy";
-}
-
-function getVisibleAgentEntries(
-  agents: readonly HomeDrivePedestrianAgent[],
-  runtime: HomeDriveRuntimeState | undefined,
-  visibleRadiusMeters: number,
-  maxVisiblePedestrians: number,
-  fullDetailRadiusMeters: number,
-  mediumDetailRadiusMeters: number,
-): readonly VisiblePedestrianEntry[] {
-  const safeMaxVisiblePedestrians = Math.max(0, maxVisiblePedestrians);
-
-  if (safeMaxVisiblePedestrians <= 0) {
-    return [];
-  }
-
-  if (!runtime) {
-    return agents.slice(0, safeMaxVisiblePedestrians).map((agent) => ({
-      agent,
-      distanceSquared: 0,
-      detailLevel: "medium",
-    }));
-  }
-
-  const radiusSquared = visibleRadiusMeters * visibleRadiusMeters;
-  const entries: VisiblePedestrianEntry[] = [];
-
-  for (const agent of agents) {
-    const distanceSquared = getDistanceSquared(agent.position, runtime.car.position);
-
-    if (distanceSquared > radiusSquared) {
-      continue;
+  entries.forEach((entry) => {
+    if (seen.has(entry.agent.id)) {
+      return;
     }
 
-    entries.push({
-      agent,
-      distanceSquared,
-      detailLevel: getDetailLevelForDistance(
-        distanceSquared,
-        fullDetailRadiusMeters,
-        mediumDetailRadiusMeters,
-      ),
-    });
-  }
-
-  entries.sort((first, second) => {
-    return first.distanceSquared - second.distanceSquared;
+    seen.add(entry.agent.id);
+    uniqueEntries.push(entry);
   });
 
-  return entries.slice(0, safeMaxVisiblePedestrians);
+  return uniqueEntries;
 }
 
 function HomeDriveThreePedestrians({
@@ -140,7 +77,7 @@ function HomeDriveThreePedestrians({
       return;
     }
 
-    const safeSnapshotHz = Math.max(4, Math.min(snapshotHz, 18));
+    const safeSnapshotHz = Math.max(4, Math.min(snapshotHz, 16));
     const snapshotIntervalSeconds = 1 / safeSnapshotHz;
 
     snapshotAccumulatorRef.current += Math.min(Math.max(deltaSeconds, 0), 0.12);
@@ -158,13 +95,20 @@ function HomeDriveThreePedestrians({
   });
 
   const visibleEntries = useMemo(() => {
-    return getVisibleAgentEntries(
-      snapshot.agents,
-      runtimeRef?.current,
-      Math.max(24, visibleRadiusMeters),
-      Math.max(0, maxVisiblePedestrians),
-      Math.max(12, fullDetailRadiusMeters),
-      Math.max(fullDetailRadiusMeters, mediumDetailRadiusMeters),
+    const uniqueAgents = dedupeHomeDrivePedestrianAgentsById(snapshot.agents);
+
+    return dedupeHomeDriveThreeVisibleEntriesByAgentId(
+      getHomeDriveThreeVisiblePedestrianEntries({
+        agents: uniqueAgents,
+      runtime: runtimeRef?.current,
+      visibleRadiusMeters: Math.max(24, visibleRadiusMeters),
+      maxVisiblePedestrians: Math.max(0, maxVisiblePedestrians),
+      fullDetailRadiusMeters: Math.max(12, fullDetailRadiusMeters),
+        mediumDetailRadiusMeters: Math.max(
+          fullDetailRadiusMeters,
+          mediumDetailRadiusMeters,
+        ),
+      }),
     );
   }, [
     fullDetailRadiusMeters,

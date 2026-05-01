@@ -7,6 +7,12 @@ import {
   getHomeDriveCrosswalkSideForPoint,
 } from "../crosswalks";
 import type { HomeDriveCrosswalk } from "../crosswalks";
+import { createHomeDrivePedestrianDistributedSlots } from "./homeDrive.pedestrianDistribution";
+import type { HomeDrivePedestrianDistributedSlot } from "./homeDrive.pedestrianDistribution.types";
+import {
+  createInitialHomeDrivePedestrianPopulationRuntime,
+  repopulateHomeDrivePedestrianPopulationRuntime,
+} from "./homeDrive.pedestrianPopulationRuntime";
 import type {
   HomeDrivePedestrianAgent,
   HomeDrivePedestrianGenerationOptions,
@@ -22,6 +28,13 @@ import {
 } from "./homeDrive.pedestrianBehaviors";
 import { createHomeDrivePedestrianGroupDraft } from "./homeDrive.pedestrianGroups";
 import {
+  createHomeDriveInitialPedestrianAgentId,
+  createHomeDriveInitialPedestrianGroupId,
+  createHomeDrivePedestrianReservedIdSet,
+  dedupeHomeDrivePedestrianAgentsById,
+  reserveHomeDrivePedestrianAgentId,
+} from "./homeDrive.pedestrianIdentity";
+import {
   clamp,
   createHomeDrivePedestrianAppearance,
   createHomeDrivePedestrianSeed,
@@ -31,7 +44,6 @@ import {
   buildHomeDrivePedestrianSidewalkZones,
   getHomeDrivePedestrianHeadingRadians,
   getHomeDrivePedestrianPointOnSidewalk,
-  getHomeDrivePedestrianSidewalkSlotCount,
   getHomeDrivePedestrianSideForCrosswalkSide,
   getHomeDrivePedestrianZoneById,
   getHomeDrivePedestrianZoneBySegmentAndSide,
@@ -39,21 +51,12 @@ import {
 } from "./homeDrive.pedestrianSidewalks";
 
 const DEFAULT_PEDESTRIAN_SEED = 7429;
-const DEFAULT_MAX_PEDESTRIANS = 220;
-const DEFAULT_PEDESTRIAN_DENSITY = 1.08;
+const DEFAULT_MAX_PEDESTRIANS = 1600;
+const DEFAULT_PEDESTRIAN_DENSITY = 4.8;
 const DEFAULT_MAX_DELTA_SECONDS = 0.12;
 const SPEED_RESPONSE_PER_SECOND = 5.8;
 
-type HomeDrivePedestrianPerformanceTickOptions =
-  HomeDrivePedestrianTickOptions &
-    Readonly<{
-      activeCenter?: Readonly<{ x: number; z: number }>;
-      activeRadiusMeters?: number;
-      warmRadiusMeters?: number;
-      warmTickModulo?: number;
-      coldTickModulo?: number;
-      tickIndex?: number;
-    }>;
+type HomeDrivePedestrianPerformanceTickOptions = HomeDrivePedestrianTickOptions;
 
 function moveTowards(current: number, target: number, maxDelta: number): number {
   if (Math.abs(target - current) <= maxDelta) {
@@ -113,10 +116,28 @@ function createAgentFromGroupMember(
   group: HomeDrivePedestrianGroupDraft,
   zone: HomeDrivePedestrianSidewalkZone,
   memberIndex: number,
+  slot?: HomeDrivePedestrianDistributedSlot,
 ): HomeDrivePedestrianAgent {
   const member = group.members[memberIndex];
+  const identityInput = {
+    namespace: "initial" as const,
+    generationSerial: 0,
+    agentSerial: group.seed,
+    slotIndex: slot?.slotIndex,
+    slotId: slot?.id,
+    zoneId: zone.id,
+    segmentId: zone.segmentId,
+    sidewalkSide: zone.side,
+    groupKind: group.kind,
+    slotSeed: slot?.seed,
+    seed: group.seed,
+    progress: group.progress,
+    groupId: group.id,
+    salt: slot?.occupancyCellKey ?? slot?.cornerCellKey ?? group.id,
+  };
+  const initialGroupId = createHomeDriveInitialPedestrianGroupId(identityInput);
   const memberSeed = createHomeDrivePedestrianSeed(
-    group.id,
+    initialGroupId,
     group.seed,
     memberIndex,
     zone.lengthMeters,
@@ -136,25 +157,33 @@ function createAgentFromGroupMember(
     seed: memberSeed,
     baseSpeedMps,
     existingProps: member.props,
-    behaviorHint: member.behaviorHint,
+    behaviorHint: slot?.preferredBehavior ?? member.behaviorHint,
   });
   const progress = group.progress;
   const lateralOffsetMeters =
-    member.groupSideOffsetMeters + seededRange(memberSeed, 701, -0.18, 0.18);
+    (slot?.lateralOffsetMeters ?? 0) +
+    member.groupSideOffsetMeters +
+    seededRange(memberSeed, 701, -0.12, 0.12);
   const position = getHomeDrivePedestrianPointOnSidewalk(
     zone,
     progress,
     lateralOffsetMeters,
   );
-  const id = `ped-${group.id}-${memberIndex}`;
+  const id = createHomeDriveInitialPedestrianAgentId({
+    ...identityInput,
+    memberIndex,
+  });
   const handHoldTargetId =
     member.handHoldPeerIndex === null
       ? null
-      : `ped-${group.id}-${member.handHoldPeerIndex}`;
+      : createHomeDriveInitialPedestrianAgentId({
+          ...identityInput,
+          memberIndex: member.handHoldPeerIndex,
+        });
 
   return {
     id,
-    groupId: group.id,
+    groupId: initialGroupId,
     groupKind: group.kind,
     groupMemberIndex: memberIndex,
     handHoldTargetId,
@@ -204,9 +233,10 @@ function createAgentFromGroupMember(
 function createAgentsForGroup(
   group: HomeDrivePedestrianGroupDraft,
   zone: HomeDrivePedestrianSidewalkZone,
+  slot?: HomeDrivePedestrianDistributedSlot,
 ): readonly HomeDrivePedestrianAgent[] {
   return group.members.map((_, memberIndex) => {
-    return createAgentFromGroupMember(group, zone, memberIndex);
+    return createAgentFromGroupMember(group, zone, memberIndex, slot);
   });
 }
 
@@ -218,38 +248,59 @@ function createPedestrianAgents(
   const maxPedestrians = options.maxPedestrians ?? DEFAULT_MAX_PEDESTRIANS;
   const seed = options.seed ?? DEFAULT_PEDESTRIAN_SEED;
   const agents: HomeDrivePedestrianAgent[] = [];
+  const reservedAgentIds = createHomeDrivePedestrianReservedIdSet([]);
 
-  for (const zone of zones) {
+  if (maxPedestrians <= 0 || zones.length <= 0) {
+    return agents;
+  }
+
+  const distribution = createHomeDrivePedestrianDistributedSlots({
+    zones,
+    density,
+    maxPedestrians,
+    seed,
+    initialFocusCenter: options.initialFocusCenter,
+    initialFocusRadiusMeters: options.initialFocusRadiusMeters,
+    initialFocusPedestrianRatio: options.initialFocusPedestrianRatio,
+    maxInitialFocusPedestrians: options.maxInitialFocusPedestrians,
+    cornerExclusionMeters: options.cornerExclusionMeters,
+    maxCornerPedestrianRatio: options.maxCornerPedestrianRatio,
+    minGroupDistanceMeters: options.minGroupDistanceMeters,
+    maxAgentsPerDistributionCell: options.maxAgentsPerDistributionCell,
+  });
+
+  for (const slot of distribution.slots) {
     if (agents.length >= maxPedestrians) {
       break;
     }
 
-    const slotCount = getHomeDrivePedestrianSidewalkSlotCount(zone, density);
+    const group = createHomeDrivePedestrianGroupDraft({
+      zone: slot.zone,
+      slotIndex: slot.slotIndex,
+      slotCount: slot.slotCount,
+      seed,
+      progressOverride: slot.progress,
+      directionSignOverride: slot.directionSign,
+      groupKindBias: slot.groupKindBias,
+      forceSolo: slot.forceSolo,
+      crowdPressure: slot.crowdPressure,
+    });
+    const groupAgents = createAgentsForGroup(group, slot.zone, slot);
 
-    for (let slotIndex = 0; slotIndex < slotCount; slotIndex += 1) {
+    for (const agent of groupAgents) {
       if (agents.length >= maxPedestrians) {
         break;
       }
 
-      const group = createHomeDrivePedestrianGroupDraft({
-        zone,
-        slotIndex,
-        slotCount,
-        seed,
-      });
-      const groupAgents = createAgentsForGroup(group, zone);
-
-      for (const agent of groupAgents) {
-        if (agents.length >= maxPedestrians) {
-          break;
-        }
-
-        agents.push(agent);
+      if (!reserveHomeDrivePedestrianAgentId(reservedAgentIds, agent.id)) {
+        continue;
       }
+
+      agents.push(agent);
     }
   }
 
-  return agents;
+  return dedupeHomeDrivePedestrianAgentsById(agents);
 }
 
 export function createInitialHomeDrivePedestrianState(
@@ -261,6 +312,10 @@ export function createInitialHomeDrivePedestrianState(
       zones: [],
       elapsedSeconds: 0,
       seed: options.seed ?? DEFAULT_PEDESTRIAN_SEED,
+      populationRuntime: createInitialHomeDrivePedestrianPopulationRuntime(
+        options.initialFocusCenter ?? null,
+        0,
+      ),
     };
   }
 
@@ -275,6 +330,10 @@ export function createInitialHomeDrivePedestrianState(
     zones,
     elapsedSeconds: 0,
     seed: options.seed ?? DEFAULT_PEDESTRIAN_SEED,
+    populationRuntime: createInitialHomeDrivePedestrianPopulationRuntime(
+      options.initialFocusCenter ?? null,
+      0,
+    ),
   };
 }
 
@@ -573,7 +632,7 @@ function tickAgent(
     const nearestCrosswalk = findNearestHomeDriveCrosswalk(
       crosswalks,
       agent.position,
-      18 + (agent.behavior === "wait-crossing" ? 18 : 0),
+      22 + (agent.behavior === "wait-crossing" ? 42 : 0),
     );
 
     if (
@@ -649,29 +708,73 @@ export function tickHomeDrivePedestrians(
   );
   const elapsedSeconds = state.elapsedSeconds + deltaSeconds;
 
+  const tickedAgents = state.agents.map((agent) => {
+    const zone = getHomeDrivePedestrianZoneById(state.zones, agent.zoneId);
+
+    if (!zone) {
+      return agent;
+    }
+
+    if (!shouldTickAgentForPerformance(agent, options)) {
+      return agent;
+    }
+
+    return tickAgent(
+      agent,
+      zone,
+      state.zones,
+      deltaSeconds,
+      elapsedSeconds,
+      options.crosswalks,
+    );
+  });
+
+  const dedupedTickedAgents = dedupeHomeDrivePedestrianAgentsById(tickedAgents);
+
+  const populationResult = repopulateHomeDrivePedestrianPopulationRuntime({
+    agents: dedupedTickedAgents,
+    zones: state.zones,
+    populationRuntime: state.populationRuntime,
+    elapsedSeconds,
+    seed: state.seed,
+    options: {
+      activeCenter: options.activeCenter,
+      activeHeadingRad: options.activeHeadingRad,
+      activeSpeedMps: options.activeSpeedMps,
+      crosswalks: options.crosswalks,
+      populateRadiusMeters: options.populateRadiusMeters,
+      repopulateDistanceMeters: options.repopulateDistanceMeters,
+      repopulateCooldownSeconds: options.repopulateCooldownSeconds,
+      minPedestriansNearPlayer: options.minPedestriansNearPlayer,
+      maxActivePedestrians: options.maxActivePedestrians,
+      maxSpawnPerRefresh: options.maxSpawnPerRefresh,
+      keepAliveRadiusMeters: options.keepAliveRadiusMeters,
+      localZoneSearchRadiusMeters: options.localZoneSearchRadiusMeters,
+      frontLookaheadMeters: options.frontLookaheadMeters,
+      frontLookaheadSpeedMultiplier: options.frontLookaheadSpeedMultiplier,
+      frontFarRadiusMeters: options.frontFarRadiusMeters,
+      sideRadiusMeters: options.sideRadiusMeters,
+      rearRadiusMeters: options.rearRadiusMeters,
+      minFrontPedestrians: options.minFrontPedestrians,
+      minFarFrontPedestrians: options.minFarFrontPedestrians,
+      minSideSectorPedestrians: options.minSideSectorPedestrians,
+      minRearBufferPedestrians: options.minRearBufferPedestrians,
+      minCrosswalkPedestrians: options.minCrosswalkPedestrians,
+      maxSpawnPerSectorRefresh: options.maxSpawnPerSectorRefresh,
+      maxCrosswalkSpawnPerRefresh: options.maxCrosswalkSpawnPerRefresh,
+      crosswalkSearchRadiusMeters: options.crosswalkSearchRadiusMeters,
+      density: options.density,
+      seed: options.seed ?? state.seed,
+      forceRepopulate: options.forceRepopulate,
+      enabled: options.populationEnabled ?? options.enabled ?? true,
+    },
+  });
+
   return {
     ...state,
     elapsedSeconds,
-    agents: state.agents.map((agent) => {
-      const zone = getHomeDrivePedestrianZoneById(state.zones, agent.zoneId);
-
-      if (!zone) {
-        return agent;
-      }
-
-      if (!shouldTickAgentForPerformance(agent, options)) {
-        return agent;
-      }
-
-      return tickAgent(
-        agent,
-        zone,
-        state.zones,
-        deltaSeconds,
-        elapsedSeconds,
-        options.crosswalks,
-      );
-    }),
+    agents: populationResult.agents,
+    populationRuntime: populationResult.populationRuntime,
   };
 }
 

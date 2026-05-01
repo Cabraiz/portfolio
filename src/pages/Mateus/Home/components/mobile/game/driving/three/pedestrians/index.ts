@@ -13,3 +13,6 @@ export * from "./HomeDriveThreePedestrianProps";
 export * from "./HomeDriveThreePedestrianDebug";
 export * from "./homeDriveThree.pedestrianAssets";
 export * from "./homeDriveThree.pedestrianMaterials";
+export * from "./homeDriveThree.pedestrianLod.types";
+export * from "./homeDriveThree.pedestrianLod";
+export * from "./homeDriveThree.pedestrianVisibility";

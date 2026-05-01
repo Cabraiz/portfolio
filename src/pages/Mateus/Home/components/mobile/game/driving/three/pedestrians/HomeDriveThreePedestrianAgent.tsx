@@ -51,7 +51,7 @@ function HomeDriveThreePedestrianProxy({
 }>) {
   const profile = useMemo(() => {
     return getHomeDriveThreePedestrianProceduralProfile(agent);
-  }, [agent.appearance.bodyVariant, agent.role]);
+  }, [agent.appearance.outfitVariant, agent.role]);
 
   const clothingMaterials = getHomeDriveThreePedestrianClothingMaterials(
     agent.appearance.clothingPaletteKey,
@@ -102,7 +102,7 @@ function HomeDriveThreePedestrianDetailed({
 }>) {
   const profile = useMemo(() => {
     return getHomeDriveThreePedestrianProceduralProfile(agent);
-  }, [agent.appearance.bodyVariant, agent.role]);
+  }, [agent.appearance.outfitVariant, agent.role]);
 
   const pose = useHomeDriveThreePedestrianPose(agent);
   const skinMaterial = getHomeDriveThreePedestrianSkinMaterial(

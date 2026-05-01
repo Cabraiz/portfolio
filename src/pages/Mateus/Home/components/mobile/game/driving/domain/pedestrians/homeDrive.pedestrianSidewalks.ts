@@ -3,6 +3,13 @@
 import { generateHomeDriveRoadSegments } from "../homeDrive.roadGenerator";
 import type { HomeDriveVector2 } from "../homeDrive.types";
 import type { HomeDriveGeneratedRoadSegment } from "../homeDrive.worldMap.types";
+import {
+  HOME_DRIVE_PEDESTRIAN_CROWD_TUNING,
+  clampHomeDrivePedestrianCrowdDensity,
+  getHomeDrivePedestrianRoadDensityCap,
+  getHomeDrivePedestrianRoadKindCrowdTuning,
+  getHomeDrivePedestrianTargetSpacingMeters,
+} from "./homeDrive.pedestrianCrowdTuning";
 import type {
   HomeDrivePedestrianSidewalkSide,
   HomeDrivePedestrianSidewalkZone,
@@ -16,7 +23,7 @@ export type HomeDrivePedestrianSidewalkBuildOptions = Readonly<{
   density?: number;
 }>;
 
-const DEFAULT_MIN_ROAD_LENGTH_METERS = 42;
+const DEFAULT_MIN_ROAD_LENGTH_METERS = 28;
 const DEFAULT_SIDEWALK_GAP_METERS = 1.35;
 const DEFAULT_SIDEWALK_WIDTH_METERS = 2.85;
 const MIN_ZONE_LENGTH_METERS = 0.000001;
@@ -52,7 +59,7 @@ function isRoadEligibleForPedestrians(
     return false;
   }
 
-  if (road.kind === "service" && road.length < 58) {
+  if (road.kind === "service" && road.length < 42) {
     return false;
   }
 
@@ -87,49 +94,51 @@ function getSidewalkWidthMeters(road: HomeDriveGeneratedRoadSegment): number {
   }
 }
 
-function getSidewalkDensity(road: HomeDriveGeneratedRoadSegment): number {
-  const tags = getRoadTags(road);
-  let density = 0.38;
+function getBaseRoadDensity(roadKind: string): number {
+  const cap = getHomeDrivePedestrianRoadDensityCap(roadKind);
 
-  switch (road.kind) {
-    case "coastal":
-      density = 0.78;
-      break;
-
+  switch (roadKind) {
     case "commercial":
-      density = 0.76;
-      break;
+      return cap * 0.78;
+
+    case "coastal":
+      return cap * 0.74;
 
     case "avenue":
-      density = 0.58;
-      break;
+      return cap * 0.68;
 
     case "street":
-      density = 0.42;
-      break;
+      return cap * 0.58;
 
     case "ring":
-      density = 0.2;
-      break;
+      return cap * 0.42;
 
     case "service":
-      density = 0.14;
-      break;
+      return cap * 0.36;
 
     default:
-      density = 0.32;
-      break;
+      return cap * 0.52;
   }
+}
+
+function getSidewalkDensity(road: HomeDriveGeneratedRoadSegment): number {
+  const tags = getRoadTags(road);
+  const densityCap = getHomeDrivePedestrianRoadDensityCap(road.kind);
+  let density = getBaseRoadDensity(road.kind);
 
   if (tags.includes("main")) {
-    density += 0.12;
+    density += 0.22;
   }
 
   if (tags.includes("fast")) {
-    density -= 0.14;
+    density -= 0.12;
   }
 
-  return clamp(density, 0.06, 1.12);
+  return clamp(
+    density,
+    0.08,
+    Math.max(0.08, densityCap),
+  );
 }
 
 function getSideNormal(
@@ -162,10 +171,12 @@ function getZoneForRoadSide(
 ): HomeDrivePedestrianSidewalkZone {
   const widthMeters = getSidewalkWidthMeters(road);
   const normal = getSideNormal(road, side);
+  const roadTuning = getHomeDrivePedestrianRoadKindCrowdTuning(road.kind);
   const offsetFromRoadCenterMeters =
     road.width / 2 + DEFAULT_SIDEWALK_GAP_METERS + widthMeters / 2;
   const from = offsetPoint(road.from, normal, offsetFromRoadCenterMeters);
   const to = offsetPoint(road.to, normal, offsetFromRoadCenterMeters);
+  const safeGlobalDensity = clampHomeDrivePedestrianCrowdDensity(globalDensity);
 
   return {
     id: `${road.id}::sidewalk-${side}`,
@@ -187,7 +198,11 @@ function getZoneForRoadSide(
     lengthMeters: road.length,
     widthMeters,
     offsetFromRoadCenterMeters,
-    density: clamp(getSidewalkDensity(road) * globalDensity, 0, 1.45),
+    density: clamp(
+      getSidewalkDensity(road) * safeGlobalDensity,
+      0.08,
+      roadTuning.densityCap,
+    ),
     tags: getRoadTags(road),
     road,
   };
@@ -204,7 +219,7 @@ export function buildHomeDrivePedestrianSidewalkZones(
 
   const minRoadLengthMeters =
     options.minRoadLengthMeters ?? DEFAULT_MIN_ROAD_LENGTH_METERS;
-  const globalDensity = options.density ?? 1;
+  const globalDensity = options.density ?? HOME_DRIVE_PEDESTRIAN_CROWD_TUNING.generation.defaultDensity;
   const maxRoads = options.maxRoads ?? Number.POSITIVE_INFINITY;
 
   const roads = generateHomeDriveRoadSegments()
@@ -314,28 +329,7 @@ export function getHomeDrivePedestrianZoneById(
 function getPedestrianSlotSpacingMeters(
   zone: HomeDrivePedestrianSidewalkZone,
 ): number {
-  switch (zone.roadKind) {
-    case "commercial":
-      return 28;
-
-    case "coastal":
-      return 30;
-
-    case "avenue":
-      return 34;
-
-    case "street":
-      return 42;
-
-    case "ring":
-      return 58;
-
-    case "service":
-      return 72;
-
-    default:
-      return 48;
-  }
+  return getHomeDrivePedestrianTargetSpacingMeters(zone.roadKind);
 }
 
 export function getHomeDrivePedestrianSidewalkSlotCount(
@@ -343,11 +337,12 @@ export function getHomeDrivePedestrianSidewalkSlotCount(
   density: number,
 ): number {
   const spacingMeters = getPedestrianSlotSpacingMeters(zone);
+  const safeDensity = clampHomeDrivePedestrianCrowdDensity(density);
   const rawCount = Math.floor(
-    (zone.lengthMeters / spacingMeters) * zone.density * density,
+    (zone.lengthMeters / spacingMeters) * zone.density * Math.max(0.35, safeDensity),
   );
 
-  if (zone.density > 0.48 && zone.lengthMeters >= 48) {
+  if (zone.density > 0.12 && zone.lengthMeters >= 24) {
     return Math.max(1, rawCount);
   }
 

@@ -520,8 +520,16 @@ export default function HomeDriveThreeScene({
       maxRoads: pedestrianPerformance.maxRoads,
       minRoadLengthMeters: pedestrianPerformance.minRoadLengthMeters,
       seed: 7429,
+      initialFocusCenter: runtimeRef.current.car.position,
+      initialFocusRadiusMeters: pedestrianPerformance.initialFocusRadiusMeters,
+      initialFocusPedestrianRatio: pedestrianPerformance.initialFocusPedestrianRatio,
+      maxInitialFocusPedestrians: pedestrianPerformance.maxInitialFocusPedestrians,
+      cornerExclusionMeters: pedestrianPerformance.cornerExclusionMeters,
+      maxCornerPedestrianRatio: pedestrianPerformance.maxCornerPedestrianRatio,
+      minGroupDistanceMeters: pedestrianPerformance.minGroupDistanceMeters,
+      maxAgentsPerDistributionCell: pedestrianPerformance.maxAgentsPerDistributionCell,
     });
-  }, [pedestrianPerformance]);
+  }, [pedestrianPerformance, runtimeRef]);
 
   const pedestriansRef = useRef<HomeDrivePedestrianRuntimeState>(
     initialPedestrianState,

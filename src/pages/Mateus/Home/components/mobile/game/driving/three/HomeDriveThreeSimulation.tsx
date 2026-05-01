@@ -94,11 +94,42 @@ function tickPedestriansStep(
       maxDeltaSeconds: deltaSeconds,
       crosswalks: crosswalksRef?.current,
       activeCenter: runtime.car.position,
+      activeHeadingRad: runtime.car.headingRad,
+      activeSpeedMps: runtime.car.speedMps,
       activeRadiusMeters: pedestrianPerformance?.activeSimulationRadiusMeters,
       warmRadiusMeters: pedestrianPerformance?.warmSimulationRadiusMeters,
       warmTickModulo: pedestrianPerformance?.warmTickModulo,
       coldTickModulo: pedestrianPerformance?.coldTickModulo,
       tickIndex,
+      density: pedestrianPerformance?.density,
+      seed: 7429,
+      populateRadiusMeters: pedestrianPerformance?.populateRadiusMeters,
+      localZoneSearchRadiusMeters: pedestrianPerformance?.localZoneSearchRadiusMeters,
+      keepAliveRadiusMeters: pedestrianPerformance?.keepAliveRadiusMeters,
+      repopulateDistanceMeters: pedestrianPerformance?.repopulateDistanceMeters,
+      repopulateCooldownSeconds: pedestrianPerformance?.repopulateCooldownSeconds,
+      minPedestriansNearPlayer: pedestrianPerformance?.minPedestriansNearPlayer,
+      maxActivePedestrians: pedestrianPerformance?.maxActivePedestrians,
+      maxSpawnPerRefresh: pedestrianPerformance?.maxSpawnPerRefresh,
+      frontLookaheadMeters: pedestrianPerformance?.frontLookaheadMeters,
+      frontLookaheadSpeedMultiplier:
+        pedestrianPerformance?.frontLookaheadSpeedMultiplier,
+      frontFarRadiusMeters: pedestrianPerformance?.frontFarRadiusMeters,
+      sideRadiusMeters: pedestrianPerformance?.sideRadiusMeters,
+      rearRadiusMeters: pedestrianPerformance?.rearRadiusMeters,
+      minFrontPedestrians: pedestrianPerformance?.minFrontPedestrians,
+      minFarFrontPedestrians: pedestrianPerformance?.minFarFrontPedestrians,
+      minSideSectorPedestrians:
+        pedestrianPerformance?.minSideSectorPedestrians,
+      minRearBufferPedestrians: pedestrianPerformance?.minRearBufferPedestrians,
+      minCrosswalkPedestrians: pedestrianPerformance?.minCrosswalkPedestrians,
+      maxSpawnPerSectorRefresh:
+        pedestrianPerformance?.maxSpawnPerSectorRefresh,
+      maxCrosswalkSpawnPerRefresh:
+        pedestrianPerformance?.maxCrosswalkSpawnPerRefresh,
+      crosswalkSearchRadiusMeters:
+        pedestrianPerformance?.crosswalkSearchRadiusMeters,
+      populationEnabled: true,
     },
   );
 
