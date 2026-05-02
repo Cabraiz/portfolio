@@ -1,71 +1,32 @@
 // src/pages/Mateus/Home/components/mobile/game/driving/domain/pedestrians/homeDrive.pedestrians.ts
 
 import {
-  canHomeDrivePedestrianEnterCrosswalk,
-  findNearestHomeDriveCrosswalk,
-  getHomeDriveCrosswalkPointAtProgress,
-  getHomeDriveCrosswalkSideForPoint,
-} from "../crosswalks";
-import type { HomeDriveCrosswalk } from "../crosswalks";
-import { createHomeDrivePedestrianDistributedSlots } from "./homeDrive.pedestrianDistribution";
-import type { HomeDrivePedestrianDistributedSlot } from "./homeDrive.pedestrianDistribution.types";
-import {
   createInitialHomeDrivePedestrianPopulationRuntime,
   repopulateHomeDrivePedestrianPopulationRuntime,
 } from "./homeDrive.pedestrianPopulationRuntime";
 import type {
   HomeDrivePedestrianAgent,
   HomeDrivePedestrianGenerationOptions,
-  HomeDrivePedestrianGroupDraft,
   HomeDrivePedestrianRuntimeState,
-  HomeDrivePedestrianSidewalkZone,
   HomeDrivePedestrianTickOptions,
 } from "./homeDrive.pedestrians.types";
 import {
-  createHomeDrivePedestrianBehaviorAssignment,
-  getHomeDrivePedestrianBaseSpeedMps,
   shouldHomeDrivePedestrianMove,
 } from "./homeDrive.pedestrianBehaviors";
-import { createHomeDrivePedestrianGroupDraft } from "./homeDrive.pedestrianGroups";
-import {
-  createHomeDriveInitialPedestrianAgentId,
-  createHomeDriveInitialPedestrianGroupId,
-  createHomeDrivePedestrianReservedIdSet,
-  dedupeHomeDrivePedestrianAgentsById,
-  reserveHomeDrivePedestrianAgentId,
-} from "./homeDrive.pedestrianIdentity";
+import { dedupeHomeDrivePedestrianAgentsById } from "./homeDrive.pedestrianIdentity";
 import { shouldTickHomeDrivePedestrianAgent } from "./homeDrive.pedestrianSimulationScheduler";
-import {
-  clamp,
-  createHomeDrivePedestrianAppearance,
-  createHomeDrivePedestrianSeed,
-  seededRange,
-} from "./homeDrive.pedestrianRandom";
+import { clamp } from "./homeDrive.pedestrianRandom";
 import {
   buildHomeDrivePedestrianSidewalkZones,
   getHomeDrivePedestrianHeadingRadians,
   getHomeDrivePedestrianPointOnSidewalk,
-  getHomeDrivePedestrianSideForCrosswalkSide,
   getHomeDrivePedestrianZoneById,
-  getHomeDrivePedestrianZoneBySegmentAndSide,
   resolveHomeDrivePedestrianSidewalkProgressAfterDistance,
 } from "./homeDrive.pedestrianSidewalks";
 
-const DEFAULT_PEDESTRIAN_SEED = 7429;
-const DEFAULT_MAX_PEDESTRIANS = 1600;
-const DEFAULT_PEDESTRIAN_DENSITY = 4.8;
-const DEFAULT_MAX_DELTA_SECONDS = 0.12;
-const SPEED_RESPONSE_PER_SECOND = 5.8;
-
-type HomeDrivePedestrianPerformanceTickOptions = HomeDrivePedestrianTickOptions;
-
-function moveTowards(current: number, target: number, maxDelta: number): number {
-  if (Math.abs(target - current) <= maxDelta) {
-    return target;
-  }
-
-  return current + Math.sign(target - current) * maxDelta;
-}
+const DEFAULT_SEED = 7429;
+const DEFAULT_MAX_DELTA_SECONDS = 1 / 24;
+const DEFAULT_MIN_ROAD_LENGTH_METERS = 28;
 
 function getDistanceSquared(
   first: Readonly<{ x: number; z: number }>,
@@ -77,242 +38,97 @@ function getDistanceSquared(
   return dx * dx + dz * dz;
 }
 
-function shouldTickAgentForPerformance(
+function tickSidewalkAgent(
   agent: HomeDrivePedestrianAgent,
-  options: HomeDrivePedestrianPerformanceTickOptions,
-): boolean {
-  return shouldTickHomeDrivePedestrianAgent(agent, {
-    activeCenter: options.activeCenter,
-    tickIndex: options.tickIndex,
-    hotRadiusMeters: options.activeRadiusMeters ?? 180,
-    warmRadiusMeters: options.warmRadiusMeters ?? (options.activeRadiusMeters ?? 180) * 1.85,
-    coldRadiusMeters: options.keepAliveRadiusMeters ?? (options.warmRadiusMeters ?? 360) * 2.15,
-    hotModulo: 1,
-    warmModulo: options.warmTickModulo ?? 4,
-    coldModulo: options.coldTickModulo ?? 13,
-    sleepModulo: Math.max(17, (options.coldTickModulo ?? 13) + 5),
-    alwaysTickCrosswalkAgents: true,
-  });
-}
-
-function createAgentFromGroupMember(
-  group: HomeDrivePedestrianGroupDraft,
-  zone: HomeDrivePedestrianSidewalkZone,
-  memberIndex: number,
-  slot?: HomeDrivePedestrianDistributedSlot,
+  pedestrians: HomeDrivePedestrianRuntimeState,
+  deltaSeconds: number,
 ): HomeDrivePedestrianAgent {
-  const member = group.members[memberIndex];
-  const identityInput = {
-    namespace: "initial" as const,
-    generationSerial: 0,
-    agentSerial: group.seed,
-    slotIndex: slot?.slotIndex,
-    slotId: slot?.id,
-    zoneId: zone.id,
-    segmentId: zone.segmentId,
-    sidewalkSide: zone.side,
-    groupKind: group.kind,
-    slotSeed: slot?.seed,
-    seed: group.seed,
-    progress: group.progress,
-    groupId: group.id,
-    salt: slot?.occupancyCellKey ?? slot?.cornerCellKey ?? group.id,
-  };
-  const initialGroupId = createHomeDriveInitialPedestrianGroupId(identityInput);
-  const memberSeed = createHomeDrivePedestrianSeed(
-    initialGroupId,
-    group.seed,
-    memberIndex,
-    zone.lengthMeters,
+  const zone = getHomeDrivePedestrianZoneById(pedestrians.zones, agent.zoneId);
+
+  if (!zone || !shouldHomeDrivePedestrianMove(agent.behavior)) {
+    return {
+      ...agent,
+      behaviorElapsedSeconds:
+        (agent.behaviorElapsedSeconds + deltaSeconds) %
+        Math.max(0.01, agent.behaviorDurationSeconds),
+      animationPhase:
+        (agent.animationPhase + deltaSeconds * Math.max(0.2, agent.speedMps) * 5.4) %
+        (Math.PI * 2),
+    };
+  }
+
+  const speedMps = clamp(
+    agent.speedMps + (agent.targetSpeedMps - agent.speedMps) * 0.08,
+    0,
+    3.2,
   );
-  const appearance = createHomeDrivePedestrianAppearance(member.role, memberSeed);
-  const baseSpeedMps = Math.min(
-    group.baseSpeedMps,
-    getHomeDrivePedestrianBaseSpeedMps(
-      member.role,
-      appearance.walkStyleKey,
-      memberSeed,
-    ),
-  );
-  const behaviorAssignment = createHomeDrivePedestrianBehaviorAssignment({
-    role: member.role,
+  const moved = resolveHomeDrivePedestrianSidewalkProgressAfterDistance(
     zone,
-    seed: memberSeed,
-    baseSpeedMps,
-    existingProps: member.props,
-    behaviorHint: slot?.preferredBehavior ?? member.behaviorHint,
-  });
-  const progress = group.progress;
-  const lateralOffsetMeters =
-    (slot?.lateralOffsetMeters ?? 0) +
-    member.groupSideOffsetMeters +
-    seededRange(memberSeed, 701, -0.12, 0.12);
+    agent.progress,
+    agent.directionSign,
+    speedMps * deltaSeconds,
+  );
   const position = getHomeDrivePedestrianPointOnSidewalk(
     zone,
-    progress,
-    lateralOffsetMeters,
+    moved.progress,
+    agent.lateralOffsetMeters,
   );
-  const id = createHomeDriveInitialPedestrianAgentId({
-    ...identityInput,
-    memberIndex,
-  });
-  const handHoldTargetId =
-    member.handHoldPeerIndex === null
-      ? null
-      : createHomeDriveInitialPedestrianAgentId({
-          ...identityInput,
-          memberIndex: member.handHoldPeerIndex,
-        });
 
   return {
-    id,
-    groupId: initialGroupId,
-    groupKind: group.kind,
-    groupMemberIndex: memberIndex,
-    handHoldTargetId,
-
-    role: member.role,
-    behavior: behaviorAssignment.behavior,
-    animationKey: behaviorAssignment.animationKey,
-    props: behaviorAssignment.props,
-    appearance,
-
-    zoneId: zone.id,
-    segmentId: zone.segmentId,
-    sidewalkSide: zone.side,
-    progress,
-    directionSign: group.directionSign,
+    ...agent,
+    progress: moved.progress,
+    directionSign: moved.directionSign,
     position,
-    headingRad: getHomeDrivePedestrianHeadingRadians(zone, group.directionSign),
-
-    speedMps: behaviorAssignment.targetSpeedMps,
-    baseSpeedMps,
-    targetSpeedMps: behaviorAssignment.targetSpeedMps,
-    lateralOffsetMeters,
-    forwardOffsetMeters: member.groupForwardOffsetMeters,
-
-    behaviorElapsedSeconds: seededRange(
-      memberSeed,
-      709,
-      0,
-      behaviorAssignment.durationSeconds * 0.45,
-    ),
-    behaviorDurationSeconds: behaviorAssignment.durationSeconds,
-    animationPhase: seededRange(memberSeed, 719, 0, Math.PI * 2),
-    idleLookYawRad: seededRange(memberSeed, 727, -0.32, 0.32),
-
-    crosswalkId: null,
-    crossingDirection: undefined,
-    crossingProgress: undefined,
-    crossingStartedAtSeconds: undefined,
-    crossingDurationSeconds: undefined,
-    crossingStart: undefined,
-    crossingEnd: undefined,
-
-    seed: memberSeed,
+    headingRad: getHomeDrivePedestrianHeadingRadians(zone, moved.directionSign),
+    speedMps,
+    behaviorElapsedSeconds:
+      (agent.behaviorElapsedSeconds + deltaSeconds) %
+      Math.max(0.01, agent.behaviorDurationSeconds),
+    animationPhase:
+      (agent.animationPhase + deltaSeconds * Math.max(0.25, speedMps) * 5.4) %
+      (Math.PI * 2),
   };
 }
 
-function createAgentsForGroup(
-  group: HomeDrivePedestrianGroupDraft,
-  zone: HomeDrivePedestrianSidewalkZone,
-  slot?: HomeDrivePedestrianDistributedSlot,
-): readonly HomeDrivePedestrianAgent[] {
-  return group.members.map((_, memberIndex) => {
-    return createAgentFromGroupMember(group, zone, memberIndex, slot);
-  });
-}
-
-function createPedestrianAgents(
-  zones: readonly HomeDrivePedestrianSidewalkZone[],
-  options: HomeDrivePedestrianGenerationOptions,
-): readonly HomeDrivePedestrianAgent[] {
-  const density = options.density ?? DEFAULT_PEDESTRIAN_DENSITY;
-  const maxPedestrians = options.maxPedestrians ?? DEFAULT_MAX_PEDESTRIANS;
-  const seed = options.seed ?? DEFAULT_PEDESTRIAN_SEED;
-  const agents: HomeDrivePedestrianAgent[] = [];
-  const reservedAgentIds = createHomeDrivePedestrianReservedIdSet([]);
-
-  if (maxPedestrians <= 0 || zones.length <= 0) {
-    return agents;
+function tickAgentIfScheduled(
+  agent: HomeDrivePedestrianAgent,
+  pedestrians: HomeDrivePedestrianRuntimeState,
+  deltaSeconds: number,
+  options: HomeDrivePedestrianTickOptions,
+): HomeDrivePedestrianAgent {
+  if (
+    !shouldTickHomeDrivePedestrianAgent({
+      agent,
+      activeCenter: options.activeCenter,
+      activeRadiusMeters: options.activeRadiusMeters,
+      warmRadiusMeters: options.warmRadiusMeters,
+      warmTickModulo: options.warmTickModulo,
+      coldTickModulo: options.coldTickModulo,
+      tickIndex: options.tickIndex,
+    })
+  ) {
+    return agent;
   }
 
-  const distribution = createHomeDrivePedestrianDistributedSlots({
-    zones,
-    density,
-    maxPedestrians,
-    seed,
-    initialFocusCenter: options.initialFocusCenter,
-    initialFocusRadiusMeters: options.initialFocusRadiusMeters,
-    initialFocusPedestrianRatio: options.initialFocusPedestrianRatio,
-    maxInitialFocusPedestrians: options.maxInitialFocusPedestrians,
-    cornerExclusionMeters: options.cornerExclusionMeters,
-    maxCornerPedestrianRatio: options.maxCornerPedestrianRatio,
-    minGroupDistanceMeters: options.minGroupDistanceMeters,
-    maxAgentsPerDistributionCell: options.maxAgentsPerDistributionCell,
-  });
-
-  for (const slot of distribution.slots) {
-    if (agents.length >= maxPedestrians) {
-      break;
-    }
-
-    const group = createHomeDrivePedestrianGroupDraft({
-      zone: slot.zone,
-      slotIndex: slot.slotIndex,
-      slotCount: slot.slotCount,
-      seed,
-      progressOverride: slot.progress,
-      directionSignOverride: slot.directionSign,
-      groupKindBias: slot.groupKindBias,
-      forceSolo: slot.forceSolo,
-      crowdPressure: slot.crowdPressure,
-    });
-    const groupAgents = createAgentsForGroup(group, slot.zone, slot);
-
-    for (const agent of groupAgents) {
-      if (agents.length >= maxPedestrians) {
-        break;
-      }
-
-      if (!reserveHomeDrivePedestrianAgentId(reservedAgentIds, agent.id)) {
-        continue;
-      }
-
-      agents.push(agent);
-    }
-  }
-
-  return dedupeHomeDrivePedestrianAgentsById(agents);
+  return tickSidewalkAgent(agent, pedestrians, deltaSeconds);
 }
 
 export function createInitialHomeDrivePedestrianState(
   options: HomeDrivePedestrianGenerationOptions = {},
 ): HomeDrivePedestrianRuntimeState {
-  if (options.enabled === false) {
-    return {
-      agents: [],
-      zones: [],
-      elapsedSeconds: 0,
-      seed: options.seed ?? DEFAULT_PEDESTRIAN_SEED,
-      populationRuntime: createInitialHomeDrivePedestrianPopulationRuntime(
-        options.initialFocusCenter ?? null,
-        0,
-      ),
-    };
-  }
-
+  const seed = options.seed ?? DEFAULT_SEED;
   const zones = buildHomeDrivePedestrianSidewalkZones({
-    minRoadLengthMeters: options.minRoadLengthMeters,
+    minRoadLengthMeters:
+      options.minRoadLengthMeters ?? DEFAULT_MIN_ROAD_LENGTH_METERS,
     maxRoads: options.maxRoads,
     density: options.density,
   });
 
   return {
-    agents: createPedestrianAgents(zones, options),
+    agents: [],
     zones,
     elapsedSeconds: 0,
-    seed: options.seed ?? DEFAULT_PEDESTRIAN_SEED,
+    seed,
     populationRuntime: createInitialHomeDrivePedestrianPopulationRuntime(
       options.initialFocusCenter ?? null,
       0,
@@ -320,474 +136,58 @@ export function createInitialHomeDrivePedestrianState(
   };
 }
 
-function shouldRefreshBehavior(agent: HomeDrivePedestrianAgent): boolean {
-  return agent.behaviorElapsedSeconds >= agent.behaviorDurationSeconds;
-}
-
-function refreshAgentBehavior(
-  agent: HomeDrivePedestrianAgent,
-  zone: HomeDrivePedestrianSidewalkZone,
-  elapsedSeconds: number,
-): HomeDrivePedestrianAgent {
-  const behaviorSeed = createHomeDrivePedestrianSeed(
-    agent.id,
-    agent.seed,
-    Math.floor(elapsedSeconds * 10),
-  );
-  const behaviorAssignment = createHomeDrivePedestrianBehaviorAssignment({
-    role: agent.role,
-    zone,
-    seed: behaviorSeed,
-    baseSpeedMps: agent.baseSpeedMps,
-    existingProps: agent.props,
-  });
-
-  return {
-    ...agent,
-    behavior: behaviorAssignment.behavior,
-    animationKey: behaviorAssignment.animationKey,
-    props: behaviorAssignment.props,
-    targetSpeedMps: behaviorAssignment.targetSpeedMps,
-    behaviorElapsedSeconds: 0,
-    behaviorDurationSeconds: behaviorAssignment.durationSeconds,
-    idleLookYawRad: seededRange(behaviorSeed, 809, -0.34, 0.34),
-  };
-}
-
-function shouldAgentConsiderCrossing(
-  agent: HomeDrivePedestrianAgent,
-  elapsedSeconds: number,
-): boolean {
-  if (
-    agent.behavior === "smoke" ||
-    agent.behavior === "phone" ||
-    agent.behavior === "talk" ||
-    agent.behavior === "cross-wait" ||
-    agent.behavior === "cross-walk" ||
-    agent.behavior === "cross-run" ||
-    agent.behavior === "cross-panic"
-  ) {
-    return false;
-  }
-
-  if (agent.role === "child" && agent.groupKind !== "adult-child") {
-    return false;
-  }
-
-  const decisionTick = Math.floor(elapsedSeconds * 1.25);
-  const decisionSeed = Math.abs(
-    Math.sin(agent.seed * 97.13 + decisionTick * 12.71),
-  );
-
-  if (agent.behavior === "wait-crossing") {
-    return decisionSeed > 0.2;
-  }
-
-  if (agent.role === "runner") {
-    return decisionSeed > 0.92;
-  }
-
-  return decisionSeed > 0.965;
-}
-
-function getCrossingSpeedMultiplier(agent: HomeDrivePedestrianAgent): number {
-  switch (agent.role) {
-    case "runner":
-      return 1.42;
-
-    case "child":
-      return 0.78;
-
-    case "elder":
-      return 0.66;
-
-    case "shopper":
-      return 0.82;
-
-    case "parent":
-      return 0.74;
-
-    default:
-      return 1;
-  }
-}
-
-function getHeadingBetweenPoints(
-  from: Readonly<{ x: number; z: number }>,
-  to: Readonly<{ x: number; z: number }>,
-): number {
-  return Math.atan2(to.x - from.x, to.z - from.z);
-}
-
-function beginAgentCrosswalk(
-  agent: HomeDrivePedestrianAgent,
-  crosswalk: HomeDriveCrosswalk,
-  elapsedSeconds: number,
-): HomeDrivePedestrianAgent {
-  const currentSide = getHomeDriveCrosswalkSideForPoint(
-    crosswalk,
-    agent.position,
-  );
-  const direction = currentSide === -1 ? 1 : -1;
-  const start = getHomeDriveCrosswalkPointAtProgress(crosswalk, direction, 0);
-  const end = getHomeDriveCrosswalkPointAtProgress(crosswalk, direction, 1);
-  const durationSeconds = clamp(
-    crosswalk.widthMeters /
-      Math.max(0.48, agent.baseSpeedMps * getCrossingSpeedMultiplier(agent)),
-    3.2,
-    12.5,
-  );
-  const panicSeed = Math.abs(Math.sin(agent.seed * 33.17 + elapsedSeconds));
-  const behavior =
-    agent.role === "runner"
-      ? "cross-run"
-      : panicSeed > 0.985
-        ? "cross-panic"
-        : "cross-walk";
-
-  return {
-    ...agent,
-    behavior,
-    animationKey:
-      behavior === "cross-run" || behavior === "cross-panic"
-        ? "fast-walk"
-        : agent.role === "child"
-          ? "child-walk"
-          : "walk",
-    targetSpeedMps: agent.baseSpeedMps * getCrossingSpeedMultiplier(agent),
-    speedMps: Math.max(agent.speedMps, agent.baseSpeedMps * 0.8),
-    crosswalkId: crosswalk.id,
-    crossingDirection: direction,
-    crossingProgress: 0,
-    crossingStartedAtSeconds: elapsedSeconds,
-    crossingDurationSeconds: durationSeconds,
-    crossingStart: start,
-    crossingEnd: end,
-    position: start,
-    headingRad: getHeadingBetweenPoints(start, end),
-    behaviorElapsedSeconds: 0,
-    behaviorDurationSeconds: durationSeconds,
-  };
-}
-
-function finishAgentCrosswalk(
-  agent: HomeDrivePedestrianAgent,
-  zones: readonly HomeDrivePedestrianSidewalkZone[],
-  crosswalk: HomeDriveCrosswalk,
-): HomeDrivePedestrianAgent {
-  const endSide = agent.crossingDirection === 1 ? 1 : -1;
-  const nextSide = getHomeDrivePedestrianSideForCrosswalkSide(endSide);
-  const nextZone = getHomeDrivePedestrianZoneBySegmentAndSide(
-    zones,
-    crosswalk.segmentId,
-    nextSide,
-  );
-
-  if (!nextZone) {
-    return {
-      ...agent,
-      behavior: "walk",
-      crosswalkId: null,
-      crossingProgress: undefined,
-      crossingDirection: undefined,
-      crossingStartedAtSeconds: undefined,
-      crossingDurationSeconds: undefined,
-      crossingStart: undefined,
-      crossingEnd: undefined,
-    };
-  }
-
-  return {
-    ...agent,
-    behavior: "walk",
-    animationKey:
-      agent.role === "runner"
-        ? "fast-walk"
-        : agent.role === "child"
-          ? "child-walk"
-          : "walk",
-    zoneId: nextZone.id,
-    segmentId: nextZone.segmentId,
-    sidewalkSide: nextZone.side,
-    progress: crosswalk.t,
-    position: getHomeDrivePedestrianPointOnSidewalk(
-      nextZone,
-      crosswalk.t,
-      agent.lateralOffsetMeters,
-    ),
-    headingRad: getHomeDrivePedestrianHeadingRadians(
-      nextZone,
-      agent.directionSign,
-    ),
-    targetSpeedMps: agent.baseSpeedMps,
-    crosswalkId: null,
-    crossingProgress: undefined,
-    crossingDirection: undefined,
-    crossingStartedAtSeconds: undefined,
-    crossingDurationSeconds: undefined,
-    crossingStart: undefined,
-    crossingEnd: undefined,
-    behaviorElapsedSeconds: 0,
-    behaviorDurationSeconds: 4.5,
-  };
-}
-
-function tickAgentCrossing(
-  agent: HomeDrivePedestrianAgent,
-  zones: readonly HomeDrivePedestrianSidewalkZone[],
-  elapsedSeconds: number,
-  deltaSeconds: number,
-  crosswalks: NonNullable<HomeDrivePedestrianTickOptions["crosswalks"]>,
-): HomeDrivePedestrianAgent {
-  const crosswalk = crosswalks.crosswalks.find((item) => {
-    return item.id === agent.crosswalkId;
-  });
-
-  if (!crosswalk || !agent.crossingDirection) {
-    return {
-      ...agent,
-      crosswalkId: null,
-      crossingProgress: undefined,
-      crossingDirection: undefined,
-      crossingStartedAtSeconds: undefined,
-      crossingDurationSeconds: undefined,
-    };
-  }
-
-  const currentProgress = agent.crossingProgress ?? 0;
-  const durationSeconds = Math.max(0.1, agent.crossingDurationSeconds ?? 5);
-  const nextProgress = clamp(
-    currentProgress + deltaSeconds / durationSeconds,
-    0,
-    1,
-  );
-  const position = getHomeDriveCrosswalkPointAtProgress(
-    crosswalk,
-    agent.crossingDirection,
-    nextProgress,
-  );
-  const start = getHomeDriveCrosswalkPointAtProgress(
-    crosswalk,
-    agent.crossingDirection,
-    Math.max(0, nextProgress - 0.02),
-  );
-
-  if (nextProgress >= 1) {
-    return finishAgentCrosswalk(agent, zones, crosswalk);
-  }
-
-  return {
-    ...agent,
-    position,
-    headingRad: getHeadingBetweenPoints(start, position),
-    crossingProgress: nextProgress,
-    speedMps: moveTowards(
-      agent.speedMps,
-      agent.targetSpeedMps,
-      SPEED_RESPONSE_PER_SECOND * deltaSeconds,
-    ),
-    behaviorElapsedSeconds: agent.behaviorElapsedSeconds + deltaSeconds,
-    animationPhase:
-      agent.animationPhase +
-      deltaSeconds * clamp(Math.max(0.35, agent.speedMps) * 5.6, 1.2, 10.5),
-  };
-}
-
-function tickAgent(
-  agent: HomeDrivePedestrianAgent,
-  zone: HomeDrivePedestrianSidewalkZone,
-  zones: readonly HomeDrivePedestrianSidewalkZone[],
-  deltaSeconds: number,
-  elapsedSeconds: number,
-  crosswalks?: HomeDrivePedestrianTickOptions["crosswalks"],
-): HomeDrivePedestrianAgent {
-  if (agent.crosswalkId && crosswalks) {
-    return tickAgentCrossing(
-      agent,
-      zones,
-      elapsedSeconds,
-      deltaSeconds,
-      crosswalks,
-    );
-  }
-
-  if (crosswalks && shouldAgentConsiderCrossing(agent, elapsedSeconds)) {
-    const nearestCrosswalk = findNearestHomeDriveCrosswalk(
-      crosswalks,
-      agent.position,
-      22 + (agent.behavior === "wait-crossing" ? 42 : 0),
-    );
-
-    if (
-      nearestCrosswalk &&
-      canHomeDrivePedestrianEnterCrosswalk(
-        nearestCrosswalk.crosswalk,
-        crosswalks.elapsedSeconds,
-      )
-    ) {
-      return beginAgentCrosswalk(
-        agent,
-        nearestCrosswalk.crosswalk,
-        elapsedSeconds,
-      );
-    }
-  }
-
-  const behaviorAgent = shouldRefreshBehavior(agent)
-    ? refreshAgentBehavior(agent, zone, elapsedSeconds)
-    : agent;
-
-  const speedMps = moveTowards(
-    behaviorAgent.speedMps,
-    behaviorAgent.targetSpeedMps,
-    SPEED_RESPONSE_PER_SECOND * deltaSeconds,
-  );
-  const moving = shouldHomeDrivePedestrianMove(behaviorAgent.behavior);
-  const distanceMeters = moving ? speedMps * deltaSeconds : 0;
-  const progressState = resolveHomeDrivePedestrianSidewalkProgressAfterDistance(
-    zone,
-    behaviorAgent.progress,
-    behaviorAgent.directionSign,
-    distanceMeters,
-  );
-  const progress = progressState.progress;
-  const position = getHomeDrivePedestrianPointOnSidewalk(
-    zone,
-    progress,
-    behaviorAgent.lateralOffsetMeters,
-  );
-  const headingRad = moving
-    ? getHomeDrivePedestrianHeadingRadians(zone, progressState.directionSign)
-    : getHomeDrivePedestrianHeadingRadians(zone, behaviorAgent.directionSign) +
-      behaviorAgent.idleLookYawRad;
-
-  return {
-    ...behaviorAgent,
-    progress,
-    directionSign: progressState.directionSign,
-    position,
-    headingRad,
-    speedMps,
-    behaviorElapsedSeconds: behaviorAgent.behaviorElapsedSeconds + deltaSeconds,
-    animationPhase:
-      behaviorAgent.animationPhase +
-      deltaSeconds * clamp(Math.max(0.25, speedMps) * 5.2, 1.1, 9.8),
-  };
-}
-
 export function tickHomeDrivePedestrians(
-  state: HomeDrivePedestrianRuntimeState,
-  rawDeltaSeconds: number,
-  options: HomeDrivePedestrianPerformanceTickOptions = {},
+  pedestrians: HomeDrivePedestrianRuntimeState,
+  deltaSeconds: number,
+  options: HomeDrivePedestrianTickOptions = {},
 ): HomeDrivePedestrianRuntimeState {
-  if (options.enabled === false || rawDeltaSeconds <= 0) {
-    return state;
+  if (options.enabled === false) {
+    return pedestrians;
   }
 
-  const deltaSeconds = clamp(
-    rawDeltaSeconds,
+  const safeDeltaSeconds = clamp(
+    deltaSeconds,
     0,
-    options.maxDeltaSeconds ?? DEFAULT_MAX_DELTA_SECONDS,
+    Math.max(0.001, options.maxDeltaSeconds ?? DEFAULT_MAX_DELTA_SECONDS),
   );
-  const elapsedSeconds = state.elapsedSeconds + deltaSeconds;
-
-  const tickedAgents = state.agents.map((agent) => {
-    const zone = getHomeDrivePedestrianZoneById(state.zones, agent.zoneId);
-
-    if (!zone) {
-      return agent;
-    }
-
-    if (!shouldTickAgentForPerformance(agent, options)) {
-      return agent;
-    }
-
-    return tickAgent(
-      agent,
-      zone,
-      state.zones,
-      deltaSeconds,
-      elapsedSeconds,
-      options.crosswalks,
-    );
-  });
-
-  const dedupedTickedAgents = dedupeHomeDrivePedestrianAgentsById(tickedAgents);
-
+  const elapsedSeconds = pedestrians.elapsedSeconds + safeDeltaSeconds;
+  const tickedAgents = dedupeHomeDrivePedestrianAgentsById(
+    pedestrians.agents.map((agent) => {
+      return tickAgentIfScheduled(agent, pedestrians, safeDeltaSeconds, options);
+    }),
+  );
   const populationResult = repopulateHomeDrivePedestrianPopulationRuntime({
-    agents: dedupedTickedAgents,
-    zones: state.zones,
-    populationRuntime: state.populationRuntime,
+    agents: tickedAgents,
+    zones: pedestrians.zones,
+    seed: options.seed ?? pedestrians.seed,
     elapsedSeconds,
-    seed: state.seed,
+    populationRuntime: pedestrians.populationRuntime,
     options: {
+      ...options,
+      enabled: options.populationEnabled ?? options.enabled ?? true,
       activeCenter: options.activeCenter,
       activeHeadingRad: options.activeHeadingRad,
       activeSpeedMps: options.activeSpeedMps,
-      crosswalks: options.crosswalks,
-      populateRadiusMeters: options.populateRadiusMeters,
-      repopulateDistanceMeters: options.repopulateDistanceMeters,
-      repopulateCooldownSeconds: options.repopulateCooldownSeconds,
-      minPedestriansNearPlayer: options.minPedestriansNearPlayer,
-      maxActivePedestrians: options.maxActivePedestrians,
-      maxSpawnPerRefresh: options.maxSpawnPerRefresh,
-      keepAliveRadiusMeters: options.keepAliveRadiusMeters,
-      localZoneSearchRadiusMeters: options.localZoneSearchRadiusMeters,
-      frontLookaheadMeters: options.frontLookaheadMeters,
-      frontLookaheadSpeedMultiplier: options.frontLookaheadSpeedMultiplier,
-      frontFarRadiusMeters: options.frontFarRadiusMeters,
-      sideRadiusMeters: options.sideRadiusMeters,
-      rearRadiusMeters: options.rearRadiusMeters,
-      minFrontPedestrians: options.minFrontPedestrians,
-      minFarFrontPedestrians: options.minFarFrontPedestrians,
-      minSideSectorPedestrians: options.minSideSectorPedestrians,
-      minRearBufferPedestrians: options.minRearBufferPedestrians,
-      minCrosswalkPedestrians: options.minCrosswalkPedestrians,
-      maxSpawnPerSectorRefresh: options.maxSpawnPerSectorRefresh,
-      maxCrosswalkSpawnPerRefresh: options.maxCrosswalkSpawnPerRefresh,
-      crosswalkSearchRadiusMeters: options.crosswalkSearchRadiusMeters,
-      enablePedestrianWarmRing: options.enablePedestrianWarmRing,
-      pedestrianWarmRingBaseRadiusMeters: options.pedestrianWarmRingBaseRadiusMeters,
-      pedestrianWarmRingFrontBiasMeters: options.pedestrianWarmRingFrontBiasMeters,
-      pedestrianWarmRingSpeedRadiusMultiplier:
-        options.pedestrianWarmRingSpeedRadiusMultiplier,
-      pedestrianWarmRingSideRadiusMeters: options.pedestrianWarmRingSideRadiusMeters,
-      pedestrianWarmRingRearRadiusMeters: options.pedestrianWarmRingRearRadiusMeters,
-      pedestrianWarmRingMaxZoneCount: options.pedestrianWarmRingMaxZoneCount,
-      pedestrianPrewarmEnabled: options.pedestrianPrewarmEnabled,
-      pedestrianPrewarmFrames: options.pedestrianPrewarmFrames,
-      pedestrianPrewarmLeadSeconds: options.pedestrianPrewarmLeadSeconds,
-      pedestrianPrewarmFrontMeters: options.pedestrianPrewarmFrontMeters,
-      pedestrianPrewarmMinReadyPedestrians:
-        options.pedestrianPrewarmMinReadyPedestrians,
-      pedestrianPrewarmSpawnBudgetMultiplier:
-        options.pedestrianPrewarmSpawnBudgetMultiplier,
-      density: options.density,
-      seed: options.seed ?? state.seed,
-      forceRepopulate: options.forceRepopulate,
-      enabled: options.populationEnabled ?? options.enabled ?? true,
+      seed: options.seed ?? pedestrians.seed,
     },
   });
 
   return {
-    ...state,
-    elapsedSeconds,
+    ...pedestrians,
     agents: populationResult.agents,
+    elapsedSeconds,
     populationRuntime: populationResult.populationRuntime,
   };
 }
 
 export function getHomeDrivePedestrianAgentsNearPosition(
-  state: HomeDrivePedestrianRuntimeState,
+  pedestrians: HomeDrivePedestrianRuntimeState,
   position: Readonly<{ x: number; z: number }>,
   radiusMeters: number,
 ): readonly HomeDrivePedestrianAgent[] {
   const radiusSquared = radiusMeters * radiusMeters;
 
-  return state.agents.filter((agent) => {
-    const dx = agent.position.x - position.x;
-    const dz = agent.position.z - position.z;
-
-    return dx * dx + dz * dz <= radiusSquared;
+  return pedestrians.agents.filter((agent) => {
+    return getDistanceSquared(agent.position, position) <= radiusSquared;
   });
 }

@@ -71,6 +71,7 @@ function sanitizeDeltaSeconds(deltaSeconds: number): number {
   return Math.min(deltaSeconds, MAX_ACCUMULATED_SECONDS);
 }
 
+
 function tickPedestriansStep(
   pedestriansRef:
     | HomeDriveMutableRef<HomeDrivePedestrianRuntimeState>
@@ -104,54 +105,70 @@ function tickPedestriansStep(
       density: pedestrianPerformance?.density,
       seed: 7429,
       populateRadiusMeters: pedestrianPerformance?.populateRadiusMeters,
-      localZoneSearchRadiusMeters: pedestrianPerformance?.localZoneSearchRadiusMeters,
-      keepAliveRadiusMeters: pedestrianPerformance?.keepAliveRadiusMeters,
-      repopulateDistanceMeters: pedestrianPerformance?.repopulateDistanceMeters,
-      repopulateCooldownSeconds: pedestrianPerformance?.repopulateCooldownSeconds,
-      minPedestriansNearPlayer: pedestrianPerformance?.minPedestriansNearPlayer,
-      maxActivePedestrians: pedestrianPerformance?.maxActivePedestrians,
-      maxSpawnPerRefresh: pedestrianPerformance?.maxSpawnPerRefresh,
-      frontLookaheadMeters: pedestrianPerformance?.frontLookaheadMeters,
-      frontLookaheadSpeedMultiplier:
-        pedestrianPerformance?.frontLookaheadSpeedMultiplier,
-      frontFarRadiusMeters: pedestrianPerformance?.frontFarRadiusMeters,
-      sideRadiusMeters: pedestrianPerformance?.sideRadiusMeters,
-      rearRadiusMeters: pedestrianPerformance?.rearRadiusMeters,
-      minFrontPedestrians: pedestrianPerformance?.minFrontPedestrians,
-      minFarFrontPedestrians: pedestrianPerformance?.minFarFrontPedestrians,
-      minSideSectorPedestrians:
-        pedestrianPerformance?.minSideSectorPedestrians,
-      minRearBufferPedestrians: pedestrianPerformance?.minRearBufferPedestrians,
-      minCrosswalkPedestrians: pedestrianPerformance?.minCrosswalkPedestrians,
-      maxSpawnPerSectorRefresh:
-        pedestrianPerformance?.maxSpawnPerSectorRefresh,
-      maxCrosswalkSpawnPerRefresh:
-        pedestrianPerformance?.maxCrosswalkSpawnPerRefresh,
-      crosswalkSearchRadiusMeters:
-        pedestrianPerformance?.crosswalkSearchRadiusMeters,
-      enablePedestrianWarmRing: pedestrianPerformance?.enablePedestrianWarmRing,
-      pedestrianWarmRingBaseRadiusMeters:
-        pedestrianPerformance?.pedestrianWarmRingBaseRadiusMeters,
-      pedestrianWarmRingFrontBiasMeters:
-        pedestrianPerformance?.pedestrianWarmRingFrontBiasMeters,
-      pedestrianWarmRingSpeedRadiusMultiplier:
-        pedestrianPerformance?.pedestrianWarmRingSpeedRadiusMultiplier,
-      pedestrianWarmRingSideRadiusMeters:
-        pedestrianPerformance?.pedestrianWarmRingSideRadiusMeters,
-      pedestrianWarmRingRearRadiusMeters:
-        pedestrianPerformance?.pedestrianWarmRingRearRadiusMeters,
-      pedestrianWarmRingMaxZoneCount:
-        pedestrianPerformance?.pedestrianWarmRingMaxZoneCount,
-      pedestrianPrewarmEnabled: pedestrianPerformance?.pedestrianPrewarmEnabled,
-      pedestrianPrewarmFrames: pedestrianPerformance?.pedestrianPrewarmFrames,
-      pedestrianPrewarmLeadSeconds:
-        pedestrianPerformance?.pedestrianPrewarmLeadSeconds,
-      pedestrianPrewarmFrontMeters:
-        pedestrianPerformance?.pedestrianPrewarmFrontMeters,
-      pedestrianPrewarmMinReadyPedestrians:
-        pedestrianPerformance?.pedestrianPrewarmMinReadyPedestrians,
-      pedestrianPrewarmSpawnBudgetMultiplier:
-        pedestrianPerformance?.pedestrianPrewarmSpawnBudgetMultiplier,
+      pedestrianResidentPoolEnabled:
+        pedestrianPerformance?.pedestrianResidentPoolEnabled,
+      pedestrianResidentPoolSize:
+        pedestrianPerformance?.pedestrianResidentPoolSize,
+      pedestrianResidentPoolMinFrontAgents:
+        pedestrianPerformance?.pedestrianResidentPoolMinFrontAgents,
+      pedestrianResidentPoolMinFarAgents:
+        pedestrianPerformance?.pedestrianResidentPoolMinFarAgents,
+      pedestrianResidentPoolTeleportMinForwardMeters:
+        pedestrianPerformance?.pedestrianResidentPoolTeleportMinForwardMeters,
+      pedestrianResidentPoolTeleportMaxForwardMeters:
+        pedestrianPerformance?.pedestrianResidentPoolTeleportMaxForwardMeters,
+      pedestrianResidentPoolTeleportHorizonMaxForwardMeters:
+        pedestrianPerformance?.pedestrianResidentPoolTeleportHorizonMaxForwardMeters,
+      pedestrianResidentPoolRecycleBehindMeters:
+        pedestrianPerformance?.pedestrianResidentPoolRecycleBehindMeters,
+      pedestrianResidentPoolRecycleSideMeters:
+        pedestrianPerformance?.pedestrianResidentPoolRecycleSideMeters,
+      pedestrianResidentPoolMaxTeleportsPerTick:
+        pedestrianPerformance?.pedestrianResidentPoolMaxTeleportsPerTick,
+      pedestrianResidentPoolMaxInitialTeleports:
+        pedestrianPerformance?.pedestrianResidentPoolMaxInitialTeleports,
+      pedestrianResidentPoolProtectVisibleConeMeters:
+        pedestrianPerformance?.pedestrianResidentPoolProtectVisibleConeMeters,
+      pedestrianResidentPoolProtectVisibleConeRadians:
+        pedestrianPerformance?.pedestrianResidentPoolProtectVisibleConeRadians,
+      pedestrianResidentPoolDebug:
+        pedestrianPerformance?.pedestrianResidentPoolDebug,
+      pedestrianResidentPoolViewportOccupancyEnabled:
+        pedestrianPerformance?.pedestrianResidentPoolViewportOccupancyEnabled,
+      pedestrianResidentPoolForceAllAgentsIntoViewport:
+        pedestrianPerformance?.pedestrianResidentPoolForceAllAgentsIntoViewport,
+      pedestrianResidentPoolVisibleNearMinMeters:
+        pedestrianPerformance?.pedestrianResidentPoolVisibleNearMinMeters,
+      pedestrianResidentPoolVisibleNearMaxMeters:
+        pedestrianPerformance?.pedestrianResidentPoolVisibleNearMaxMeters,
+      pedestrianResidentPoolVisibleNearCount:
+        pedestrianPerformance?.pedestrianResidentPoolVisibleNearCount,
+      pedestrianResidentPoolVisibleMidMinMeters:
+        pedestrianPerformance?.pedestrianResidentPoolVisibleMidMinMeters,
+      pedestrianResidentPoolVisibleMidMaxMeters:
+        pedestrianPerformance?.pedestrianResidentPoolVisibleMidMaxMeters,
+      pedestrianResidentPoolVisibleMidCount:
+        pedestrianPerformance?.pedestrianResidentPoolVisibleMidCount,
+      pedestrianResidentPoolVisibleFarMinMeters:
+        pedestrianPerformance?.pedestrianResidentPoolVisibleFarMinMeters,
+      pedestrianResidentPoolVisibleFarMaxMeters:
+        pedestrianPerformance?.pedestrianResidentPoolVisibleFarMaxMeters,
+      pedestrianResidentPoolVisibleFarCount:
+        pedestrianPerformance?.pedestrianResidentPoolVisibleFarCount,
+      pedestrianResidentPoolSideMinForwardMeters:
+        pedestrianPerformance?.pedestrianResidentPoolSideMinForwardMeters,
+      pedestrianResidentPoolSideMaxForwardMeters:
+        pedestrianPerformance?.pedestrianResidentPoolSideMaxForwardMeters,
+      pedestrianResidentPoolSideLateralMinMeters:
+        pedestrianPerformance?.pedestrianResidentPoolSideLateralMinMeters,
+      pedestrianResidentPoolSideLateralMaxMeters:
+        pedestrianPerformance?.pedestrianResidentPoolSideLateralMaxMeters,
+      pedestrianResidentPoolSideCount:
+        pedestrianPerformance?.pedestrianResidentPoolSideCount,
+      pedestrianResidentPoolMaxViewportTeleportsPerTick:
+        pedestrianPerformance?.pedestrianResidentPoolMaxViewportTeleportsPerTick,
+      pedestrianResidentPoolViewportMinSpacingMeters:
+        pedestrianPerformance?.pedestrianResidentPoolViewportMinSpacingMeters,
       populationEnabled: true,
     },
   );
@@ -513,3 +530,4 @@ export default function HomeDriveThreeSimulation({
 
   return null;
 }
+

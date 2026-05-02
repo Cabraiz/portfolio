@@ -1,16 +1,13 @@
 // src/pages/Mateus/Home/components/mobile/game/driving/domain/pedestrians/homeDrive.pedestrianPopulationRuntime.types.ts
 
 import type { HomeDriveVector2 } from "../homeDrive.types";
-import type { HomeDriveCrosswalkRuntimeState } from "../crosswalks";
+import type { HomeDrivePedestrianOrchestratorDiagnostics, HomeDrivePedestrianOrchestratorRuntime } from "./homeDrive.pedestrianOrchestrator.types";
+import type { HomeDrivePedestrianResidentPoolDiagnostics } from "./homeDrive.pedestrianResidentPoolDiagnostics.types";
+import type { HomeDrivePedestrianResidentPoolRuntime } from "./homeDrive.pedestrianResidentPoolRuntime.types";
 import type {
   HomeDrivePedestrianAgent,
   HomeDrivePedestrianSidewalkZone,
 } from "./homeDrive.pedestrians.types";
-import type {
-  HomeDrivePedestrianSpawnReservoirSnapshot,
-  HomeDrivePedestrianStreamingSectorCount,
-} from "./homeDrive.pedestrianStreaming.types";
-import type { HomeDrivePedestrianWarmRingSnapshot } from "./homeDrive.pedestrianWarmRing.types";
 
 export type HomeDrivePedestrianPopulationRuntime = Readonly<{
   lastPopulateCenter: HomeDriveVector2 | null;
@@ -22,78 +19,69 @@ export type HomeDrivePedestrianPopulationRuntime = Readonly<{
   lastNearAgentCount: number;
   lastSpawnedAgentCount: number;
   lastPrunedAgentCount: number;
-
-  /** Ãltimo plano de streaming direcional executado. */
+  lastRelocatedAgentCount: number;
   lastPopulateHeadingRad: number | null;
   lastPopulateSpeedMps: number;
-  lastStreamingPlanId: string | null;
-  lastSectorCounts: readonly HomeDrivePedestrianStreamingSectorCount[];
-  lastCrosswalkDemandCount: number;
-  spawnReservoir?: HomeDrivePedestrianSpawnReservoirSnapshot;
-
-  /** Ãltimo warm ring usado para preparar ruas antes do render. */
-  lastWarmRingPlanId: string | null;
-  lastWarmRingZoneIds: readonly string[];
-  lastWarmRingRadiusMeters: number;
-  warmRingSnapshot?: HomeDrivePedestrianWarmRingSnapshot;
+  residentPoolRuntime?: HomeDrivePedestrianResidentPoolRuntime;
+  residentPoolDiagnostics?: HomeDrivePedestrianResidentPoolDiagnostics;
+  orchestratorRuntime?: HomeDrivePedestrianOrchestratorRuntime;
+  orchestratorDiagnostics?: HomeDrivePedestrianOrchestratorDiagnostics;
 }>;
 
 export type HomeDrivePedestrianPopulationRuntimeOptions = Readonly<{
+  enabled?: boolean;
+  populationEnabled?: boolean;
+  seed?: number;
+  forceRepopulate?: boolean;
+
   activeCenter?: HomeDriveVector2;
   activeHeadingRad?: number;
   activeSpeedMps?: number;
-  crosswalks?: HomeDriveCrosswalkRuntimeState;
 
   populateRadiusMeters?: number;
-  repopulateDistanceMeters?: number;
-  repopulateCooldownSeconds?: number;
-  minPedestriansNearPlayer?: number;
-  maxActivePedestrians?: number;
-  maxSpawnPerRefresh?: number;
-  keepAliveRadiusMeters?: number;
-  localZoneSearchRadiusMeters?: number;
-
-  frontLookaheadMeters?: number;
-  frontLookaheadSpeedMultiplier?: number;
-  frontFarRadiusMeters?: number;
-  sideRadiusMeters?: number;
-  rearRadiusMeters?: number;
-  minFrontPedestrians?: number;
-  minFarFrontPedestrians?: number;
-  minSideSectorPedestrians?: number;
-  minRearBufferPedestrians?: number;
-  minCrosswalkPedestrians?: number;
-  maxSpawnPerSectorRefresh?: number;
-  maxCrosswalkSpawnPerRefresh?: number;
-  crosswalkSearchRadiusMeters?: number;
-
-  enablePedestrianWarmRing?: boolean;
-  pedestrianWarmRingBaseRadiusMeters?: number;
-  pedestrianWarmRingFrontBiasMeters?: number;
-  pedestrianWarmRingSpeedRadiusMultiplier?: number;
-  pedestrianWarmRingSideRadiusMeters?: number;
-  pedestrianWarmRingRearRadiusMeters?: number;
-  pedestrianWarmRingMaxZoneCount?: number;
-
-  pedestrianPrewarmEnabled?: boolean;
-  pedestrianPrewarmFrames?: number;
-  pedestrianPrewarmLeadSeconds?: number;
-  pedestrianPrewarmFrontMeters?: number;
-  pedestrianPrewarmMinReadyPedestrians?: number;
-  pedestrianPrewarmSpawnBudgetMultiplier?: number;
-
   density?: number;
-  seed?: number;
-  forceRepopulate?: boolean;
-  enabled?: boolean;
+
+  pedestrianResidentPoolEnabled?: boolean;
+  pedestrianResidentPoolSize?: number;
+  pedestrianResidentPoolMinFrontAgents?: number;
+  pedestrianResidentPoolMinFarAgents?: number;
+  pedestrianResidentPoolTeleportMinForwardMeters?: number;
+  pedestrianResidentPoolTeleportMaxForwardMeters?: number;
+  pedestrianResidentPoolTeleportHorizonMaxForwardMeters?: number;
+  pedestrianResidentPoolRecycleBehindMeters?: number;
+  pedestrianResidentPoolRecycleSideMeters?: number;
+  pedestrianResidentPoolMaxTeleportsPerTick?: number;
+  pedestrianResidentPoolMaxInitialTeleports?: number;
+  pedestrianResidentPoolProtectVisibleConeMeters?: number;
+  pedestrianResidentPoolProtectVisibleConeRadians?: number;
+  pedestrianResidentPoolDebug?: boolean;
+
+  pedestrianResidentPoolViewportOccupancyEnabled?: boolean;
+  pedestrianResidentPoolForceAllAgentsIntoViewport?: boolean;
+  pedestrianResidentPoolVisibleNearMinMeters?: number;
+  pedestrianResidentPoolVisibleNearMaxMeters?: number;
+  pedestrianResidentPoolVisibleNearCount?: number;
+  pedestrianResidentPoolVisibleMidMinMeters?: number;
+  pedestrianResidentPoolVisibleMidMaxMeters?: number;
+  pedestrianResidentPoolVisibleMidCount?: number;
+  pedestrianResidentPoolVisibleFarMinMeters?: number;
+  pedestrianResidentPoolVisibleFarMaxMeters?: number;
+  pedestrianResidentPoolVisibleFarCount?: number;
+  pedestrianResidentPoolSideMinForwardMeters?: number;
+  pedestrianResidentPoolSideMaxForwardMeters?: number;
+  pedestrianResidentPoolSideLateralMinMeters?: number;
+  pedestrianResidentPoolSideLateralMaxMeters?: number;
+  pedestrianResidentPoolSideCount?: number;
+  pedestrianResidentPoolMaxViewportTeleportsPerTick?: number;
+  pedestrianResidentPoolViewportMinSpacingMeters?: number;
 }>;
 
 export type HomeDrivePedestrianPopulationRuntimeInput = Readonly<{
   agents: readonly HomeDrivePedestrianAgent[];
   zones: readonly HomeDrivePedestrianSidewalkZone[];
-  populationRuntime?: HomeDrivePedestrianPopulationRuntime;
-  elapsedSeconds: number;
   seed: number;
+  elapsedSeconds: number;
+  populationRuntime?: HomeDrivePedestrianPopulationRuntime;
   options?: HomeDrivePedestrianPopulationRuntimeOptions;
 }>;
 
@@ -102,57 +90,4 @@ export type HomeDrivePedestrianPopulationRuntimeResult = Readonly<{
   populationRuntime: HomeDrivePedestrianPopulationRuntime;
   didRepopulate: boolean;
   didPrune: boolean;
-}>;
-
-export type HomeDriveLocalPedestrianSpawnerOptions = Readonly<{
-  agents: readonly HomeDrivePedestrianAgent[];
-  zones: readonly HomeDrivePedestrianSidewalkZone[];
-
-  activeCenter: HomeDriveVector2;
-  activeHeadingRad?: number;
-  activeSpeedMps?: number;
-  crosswalks?: HomeDriveCrosswalkRuntimeState;
-
-  elapsedSeconds: number;
-  seed: number;
-  generationSerial: number;
-  lastAgentSerial: number;
-  spawnReservoir?: HomeDrivePedestrianSpawnReservoirSnapshot;
-
-  density: number;
-  populateRadiusMeters: number;
-  localZoneSearchRadiusMeters: number;
-  minPedestriansNearPlayer: number;
-  maxSpawnPerRefresh: number;
-  maxActivePedestrians: number;
-
-  frontLookaheadMeters?: number;
-  frontLookaheadSpeedMultiplier?: number;
-  frontFarRadiusMeters?: number;
-  sideRadiusMeters?: number;
-  rearRadiusMeters?: number;
-  minFrontPedestrians?: number;
-  minFarFrontPedestrians?: number;
-  minSideSectorPedestrians?: number;
-  minRearBufferPedestrians?: number;
-  minCrosswalkPedestrians?: number;
-  maxSpawnPerSectorRefresh?: number;
-  maxCrosswalkSpawnPerRefresh?: number;
-  crosswalkSearchRadiusMeters?: number;
-
-  warmRingSnapshot?: HomeDrivePedestrianWarmRingSnapshot;
-}>;
-
-export type HomeDriveLocalPedestrianSpawnerResult = Readonly<{
-  agents: readonly HomeDrivePedestrianAgent[];
-  activeZoneIds: readonly string[];
-  nearAgentCount: number;
-  spawnedAgentCount: number;
-  nextAgentSerial: number;
-
-  streamingPlanId: string | null;
-  streamingSectorCounts: readonly HomeDrivePedestrianStreamingSectorCount[];
-  crosswalkDemandCount: number;
-  spawnReservoir?: HomeDrivePedestrianSpawnReservoirSnapshot;
-  warmRingSnapshot?: HomeDrivePedestrianWarmRingSnapshot;
 }>;

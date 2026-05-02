@@ -1,14 +1,12 @@
 // src/pages/Mateus/Home/components/mobile/game/driving/three/pedestrians/homeDriveThree.pedestrianRenderPlan.ts
 
-import type { HomeDriveThreePedestrianInstancedRigEntry } from "./homeDriveThree.pedestrianInstanceBatches.types";
 import type {
   HomeDriveThreePedestrianRenderPlan,
   HomeDriveThreePedestrianRenderPlanOptions,
 } from "./homeDriveThree.pedestrianRenderPlan.types";
 import type { HomeDriveThreeVisiblePedestrianEntry } from "./homeDriveThree.pedestrianVisibility";
 
-const DEFAULT_MAX_FULL_REACT_PEDESTRIANS = 48;
-const DEFAULT_MAX_MEDIUM_REACT_PEDESTRIANS = 0;
+const DEFAULT_MAX_FULL_REACT_PEDESTRIANS = 96;
 
 function hasHandLink(entry: HomeDriveThreeVisiblePedestrianEntry): boolean {
   return (
@@ -18,24 +16,19 @@ function hasHandLink(entry: HomeDriveThreeVisiblePedestrianEntry): boolean {
   );
 }
 
-function shouldPreferFullReact(
-  entry: HomeDriveThreeVisiblePedestrianEntry,
-): boolean {
-  return entry.detailLevel === "full" || hasHandLink(entry);
-}
-
-function createInstancedEntry(
-  entry: HomeDriveThreeVisiblePedestrianEntry,
-): HomeDriveThreePedestrianInstancedRigEntry {
-  return {
-    agent: entry.agent,
-    detailLevel: entry.detailLevel === "proxy" ? "proxy" : "medium",
-    distanceSquared: entry.distanceSquared,
-    distanceMeters: Math.sqrt(Math.max(0, entry.distanceSquared)),
-    visibilityRank: entry.visibilityRank,
-  };
-}
-
+/**
+ * Plano de render sem LOD visual distante.
+ *
+ * Não existe mais:
+ * - mediumReactEntries;
+ * - instancedEntries;
+ * - createInstancedEntry;
+ * - fallback cinza/preto;
+ * - rig simplificado de distância.
+ *
+ * Se couber no orçamento de React, o pedestre entra como full.
+ * Se não couber, ele simplesmente não entra no render daquele snapshot.
+ */
 export function getHomeDriveThreePedestrianRenderPlan(
   entries: readonly HomeDriveThreeVisiblePedestrianEntry[],
   options?: HomeDriveThreePedestrianRenderPlanOptions,
@@ -46,20 +39,18 @@ export function getHomeDriveThreePedestrianRenderPlan(
       options?.maxFullReactPedestrians ?? DEFAULT_MAX_FULL_REACT_PEDESTRIANS,
     ),
   );
-  const maxMediumReactPedestrians = Math.max(
-    0,
-    Math.floor(
-      options?.maxMediumReactPedestrians ??
-        DEFAULT_MAX_MEDIUM_REACT_PEDESTRIANS,
-    ),
-  );
   const forceFullForHandLinks = options?.forceFullForHandLinks ?? true;
   const fullEntries: HomeDriveThreeVisiblePedestrianEntry[] = [];
-  const mediumReactEntries: HomeDriveThreeVisiblePedestrianEntry[] = [];
-  const instancedEntries: HomeDriveThreePedestrianInstancedRigEntry[] = [];
   const selectedFullIds = new Set<string>();
 
   const sortedEntries = [...entries].sort((first, second) => {
+    const firstHasHandLink = hasHandLink(first);
+    const secondHasHandLink = hasHandLink(second);
+
+    if (forceFullForHandLinks && firstHasHandLink !== secondHasHandLink) {
+      return firstHasHandLink ? -1 : 1;
+    }
+
     if (Math.abs(first.distanceSquared - second.distanceSquared) > 0.0001) {
       return first.distanceSquared - second.distanceSquared;
     }
@@ -68,33 +59,16 @@ export function getHomeDriveThreePedestrianRenderPlan(
   });
 
   for (const entry of sortedEntries) {
-    if (entry.detailLevel === "proxy") {
-      instancedEntries.push(createInstancedEntry(entry));
+    if (entry.detailLevel !== "full" && !(forceFullForHandLinks && hasHandLink(entry))) {
       continue;
     }
 
-    const preferredFull = shouldPreferFullReact(entry);
-    const forcedHandLink =
-      forceFullForHandLinks && hasHandLink(entry) && fullEntries.length < maxFullReactPedestrians;
-    const canUseFull =
-      fullEntries.length < maxFullReactPedestrians &&
-      (entry.detailLevel === "full" || preferredFull);
-
-    if (forcedHandLink || canUseFull) {
-      fullEntries.push(entry);
-      selectedFullIds.add(entry.agent.id);
+    if (fullEntries.length >= maxFullReactPedestrians) {
       continue;
     }
 
-    if (
-      entry.detailLevel === "medium" &&
-      mediumReactEntries.length < maxMediumReactPedestrians
-    ) {
-      mediumReactEntries.push(entry);
-      continue;
-    }
-
-    instancedEntries.push(createInstancedEntry(entry));
+    fullEntries.push(entry);
+    selectedFullIds.add(entry.agent.id);
   }
 
   const handLinkAgents = fullEntries
@@ -105,8 +79,6 @@ export function getHomeDriveThreePedestrianRenderPlan(
 
   return {
     fullEntries,
-    mediumReactEntries,
-    instancedEntries,
     handLinkAgents,
     totalVisible: entries.length,
   };

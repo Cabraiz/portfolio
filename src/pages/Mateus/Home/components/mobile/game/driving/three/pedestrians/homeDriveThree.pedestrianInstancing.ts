@@ -140,7 +140,7 @@ export function filterHomeDriveThreePedestrianInstancedEntries<
 ): readonly HomeDriveThreePedestrianInstancedEntry[] {
   return entries
     .filter((entry) => {
-      return entry.detailLevel === "medium" || entry.detailLevel === "proxy";
+      return entry.detailLevel === "medium";
     })
     .map((entry) => {
       const distanceSquared =
@@ -148,7 +148,7 @@ export function filterHomeDriveThreePedestrianInstancedEntries<
 
       return {
         agent: entry.agent,
-        detailLevel: entry.detailLevel === "medium" ? "medium" : "proxy",
+        detailLevel: "medium",
         distanceSquared,
         distanceMeters:
           typeof entry.distanceMeters === "number"
@@ -163,3 +163,5 @@ export function filterHomeDriveThreePedestrianInstancedEntries<
       };
     });
 }
+
+

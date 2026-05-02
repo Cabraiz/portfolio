@@ -3,9 +3,7 @@
 import type { ColorRepresentation, InstancedMesh, Matrix4 } from "three";
 import type { HomeDrivePedestrianAgent } from "../../domain/pedestrians";
 
-export type HomeDriveThreePedestrianInstanceDetailLevel =
-  | "medium"
-  | "proxy";
+export type HomeDriveThreePedestrianInstanceDetailLevel = "medium";
 
 export type HomeDriveThreePedestrianInstancedEntry = Readonly<{
   agent: HomeDrivePedestrianAgent;
@@ -51,3 +49,5 @@ export type HomeDriveThreePedestrianInstancedCrowdProps = Readonly<{
   maxInstances?: number;
   elapsedSeconds?: number;
 }>;
+
+

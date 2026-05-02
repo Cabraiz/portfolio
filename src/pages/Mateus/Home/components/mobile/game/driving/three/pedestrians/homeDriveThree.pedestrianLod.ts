@@ -1,64 +1,40 @@
 // src/pages/Mateus/Home/components/mobile/game/driving/three/pedestrians/homeDriveThree.pedestrianLod.ts
 
-import { HOME_DRIVE_PEDESTRIAN_CROWD_TUNING } from "../../domain/pedestrians/homeDrive.pedestrianCrowdTuning";
-import type {
-  HomeDriveThreePedestrianLodConfig,
-  HomeDriveThreePedestrianLodResult,
-} from "./homeDriveThree.pedestrianLod.types";
+import type { HomeDriveThreePedestrianDetailLevel } from "./HomeDriveThreePedestrianAgent";
 
-function normalizeLodConfig(
-  config: HomeDriveThreePedestrianLodConfig,
-): HomeDriveThreePedestrianLodConfig {
-  const fullDetailRadiusMeters = Math.max(
-    HOME_DRIVE_PEDESTRIAN_CROWD_TUNING.lod.fullDetailRadiusMinMeters,
-    config.fullDetailRadiusMeters,
-  );
-  const mediumDetailRadiusMeters = Math.max(
-    fullDetailRadiusMeters,
-    HOME_DRIVE_PEDESTRIAN_CROWD_TUNING.lod.mediumDetailRadiusMinMeters,
-    config.mediumDetailRadiusMeters,
-  );
+export type HomeDriveThreePedestrianLodOptions = Readonly<{
+  fullDetailRadiusMeters: number;
 
-  return {
-    fullDetailRadiusMeters,
-    mediumDetailRadiusMeters,
-  };
-}
+  /**
+   * Mantido apenas por compatibilidade com chamadas antigas.
+   * Não existe mais LOD medium/instanced.
+   */
+  mediumDetailRadiusMeters: number;
+}>;
 
+/**
+ * LOD final sem representação visual simplificada para distância.
+ *
+ * A regra agora é binária:
+ * - dentro do raio full: renderiza pessoa completa;
+ * - fora do raio full: não renderiza.
+ *
+ * Isso remove da aplicação o conceito de pessoa cinza/preta distante,
+ * placeholder escuro, silhouette, medium LOD e rig instanciado de longe.
+ */
 export function getHomeDriveThreePedestrianLodForDistance(
-  distanceSquared: number,
-  config: HomeDriveThreePedestrianLodConfig,
-): HomeDriveThreePedestrianLodResult {
-  const normalizedConfig = normalizeLodConfig(config);
-  const distanceMeters = Math.sqrt(Math.max(0, distanceSquared));
-
-  if (
-    distanceSquared <=
-    normalizedConfig.fullDetailRadiusMeters *
-      normalizedConfig.fullDetailRadiusMeters
-  ) {
-    return {
-      detailLevel: "full",
-      distanceSquared,
-      distanceMeters,
-    };
+  distanceMeters: number,
+  options: HomeDriveThreePedestrianLodOptions,
+): HomeDriveThreePedestrianDetailLevel | null {
+  if (!Number.isFinite(distanceMeters) || distanceMeters < 0) {
+    return null;
   }
 
-  if (
-    distanceSquared <=
-    normalizedConfig.mediumDetailRadiusMeters *
-      normalizedConfig.mediumDetailRadiusMeters
-  ) {
-    return {
-      detailLevel: "medium",
-      distanceSquared,
-      distanceMeters,
-    };
+  const fullDetailRadiusMeters = Math.max(0, options.fullDetailRadiusMeters);
+
+  if (distanceMeters <= fullDetailRadiusMeters) {
+    return "full";
   }
 
-  return {
-    detailLevel: "proxy",
-    distanceSquared,
-    distanceMeters,
-  };
+  return null;
 }

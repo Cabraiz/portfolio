@@ -129,6 +129,8 @@ const BUILDING_RUBBLE_MAX_VISIBLE_LANDSCAPE = 900;
 const THREE_CLOCK_DEPRECATION_WARNING =
   "THREE.Clock: This module has been deprecated. Please use THREE.Timer instead.";
 
+const HOME_DRIVE_THREE_PEDESTRIAN_SCENE_DEBUG = true;
+
 let previousConsoleWarn: typeof console.warn | null = null;
 let clockWarningFilterInstallCount = 0;
 
@@ -328,7 +330,7 @@ function HomeDriveThreeWorld({
   return (
     <>
       <HomeDriveThreeSimulation
-        runtimeRef={runtimeRef}
+          runtimeRef={runtimeRef}
         inputRef={inputRef}
         trafficRef={trafficRef}
         parkedVehiclesRef={parkedVehiclesRef}
@@ -440,69 +442,6 @@ function HomeDriveThreeWorld({
         maxFullReactPedestrians={pedestrianPerformance.maxFullReactPedestrians}
         maxMediumReactPedestrians={pedestrianPerformance.maxMediumReactPedestrians}
         maxInstancedPedestrians={pedestrianPerformance.maxInstancedPedestrians}
-        visualPoolSize={pedestrianPerformance.pedestrianVisualPoolSize}
-        visualPoolRetainSeconds={
-          pedestrianPerformance.pedestrianVisualPoolRetainSeconds
-        }
-        visualPoolNormalRetainSeconds={
-          pedestrianPerformance.pedestrianVisualPoolNormalRetainSeconds
-        }
-        visualPoolFastRetainSeconds={
-          pedestrianPerformance.pedestrianVisualPoolFastRetainSeconds
-        }
-        frontEmergencyEnabled
-        frontEmergencySpeedMps={
-          pedestrianPerformance.pedestrianVisualPoolFrontEmergencySpeedMps
-        }
-        frontEmergencyStealDistanceMeters={
-          pedestrianPerformance.pedestrianVisualPoolFrontEmergencyStealDistanceMeters
-        }
-        frontEmergencyReserveRatio={
-          pedestrianPerformance.pedestrianVisualPoolFrontEmergencyReserveRatio
-        }
-        maxEmergencyStealsPerFrame={
-          pedestrianPerformance.pedestrianVisualPoolMaxEmergencyStealsPerFrame
-        }
-        allowVisibleTeleport={
-          pedestrianPerformance.pedestrianVisualPoolAllowVisibleTeleport
-        }
-        visibleTeleportBlockMeters={
-          pedestrianPerformance.pedestrianVisualPoolVisibleTeleportBlockMeters
-        }
-        visibleTeleportConeRadians={
-          pedestrianPerformance.pedestrianVisualPoolVisibleTeleportConeRadians
-        }
-        stagingSize={pedestrianPerformance.pedestrianVisualPoolStagingSize}
-        stagingLeadSeconds={
-          pedestrianPerformance.pedestrianVisualPoolStagingLeadSeconds
-        }
-        maxStagingUpdatesPerFrame={
-          pedestrianPerformance.pedestrianVisualPoolMaxStagingUpdatesPerFrame
-        }
-        maxVisibleStealsPerFrame={
-          pedestrianPerformance.pedestrianVisualPoolMaxVisibleStealsPerFrame
-        }
-        allowStagingReplacement={
-          pedestrianPerformance.pedestrianVisualPoolAllowStagingReplacement
-        }
-        stagingReplacementMinScoreDelta={
-          pedestrianPerformance.pedestrianVisualPoolStagingReplacementMinScoreDelta
-        }
-        highSpeedVisualPrewarmEnabled={
-          pedestrianPerformance.pedestrianHighSpeedVisualPrewarmEnabled
-        }
-        highSpeedVisualLeadSeconds={
-          pedestrianPerformance.pedestrianHighSpeedVisualLeadSeconds
-        }
-        highSpeedVisualRadiusCapMeters={
-          pedestrianPerformance.pedestrianHighSpeedVisualRadiusCapMeters
-        }
-        highSpeedVisualConeRadians={
-          pedestrianPerformance.pedestrianHighSpeedVisualConeRadians
-        }
-        highSpeedExtraEntryRatio={
-          pedestrianPerformance.pedestrianHighSpeedExtraEntryRatio
-        }
         instancedAnimationHz={pedestrianPerformance.instancedAnimationHzNear}
         instancedAnimationUpdateStride={
           pedestrianPerformance.instancedMatrixUpdateStride
@@ -602,19 +541,11 @@ export default function HomeDriveThreeScene({
 
   const initialPedestrianState = useMemo(() => {
     return createInitialHomeDrivePedestrianState({
-      maxPedestrians: pedestrianPerformance.maxPedestrians,
       density: pedestrianPerformance.density,
       maxRoads: pedestrianPerformance.maxRoads,
       minRoadLengthMeters: pedestrianPerformance.minRoadLengthMeters,
       seed: 7429,
       initialFocusCenter: runtimeRef.current.car.position,
-      initialFocusRadiusMeters: pedestrianPerformance.initialFocusRadiusMeters,
-      initialFocusPedestrianRatio: pedestrianPerformance.initialFocusPedestrianRatio,
-      maxInitialFocusPedestrians: pedestrianPerformance.maxInitialFocusPedestrians,
-      cornerExclusionMeters: pedestrianPerformance.cornerExclusionMeters,
-      maxCornerPedestrianRatio: pedestrianPerformance.maxCornerPedestrianRatio,
-      minGroupDistanceMeters: pedestrianPerformance.minGroupDistanceMeters,
-      maxAgentsPerDistributionCell: pedestrianPerformance.maxAgentsPerDistributionCell,
     });
   }, [pedestrianPerformance, runtimeRef]);
 

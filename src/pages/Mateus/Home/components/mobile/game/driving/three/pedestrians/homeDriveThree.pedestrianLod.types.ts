@@ -2,16 +2,11 @@
 
 import type { HomeDriveThreePedestrianDetailLevel } from "./HomeDriveThreePedestrianAgent";
 
-export type HomeDriveThreePedestrianLodLevel =
-  HomeDriveThreePedestrianDetailLevel;
+export type HomeDriveThreePedestrianLodLevel = HomeDriveThreePedestrianDetailLevel;
 
 export type HomeDriveThreePedestrianLodConfig = Readonly<{
   fullDetailRadiusMeters: number;
   mediumDetailRadiusMeters: number;
 }>;
 
-export type HomeDriveThreePedestrianLodResult = Readonly<{
-  detailLevel: HomeDriveThreePedestrianLodLevel;
-  distanceSquared: number;
-  distanceMeters: number;
-}>;
+export type HomeDriveThreePedestrianLodResult = HomeDriveThreePedestrianLodLevel | null;

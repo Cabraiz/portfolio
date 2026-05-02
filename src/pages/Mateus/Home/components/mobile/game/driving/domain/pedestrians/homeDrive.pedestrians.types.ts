@@ -123,6 +123,19 @@ export type HomeDrivePedestrianSidewalkZone = Readonly<{
   road: HomeDriveGeneratedRoadSegment;
 }>;
 
+export type HomeDrivePedestrianViewportBand =
+  | "visible"
+  | "far-visible"
+  | "entering-soon"
+  | "offscreen";
+
+export type HomeDrivePedestrianViewportOccupancyBand =
+  | "visible-near"
+  | "visible-mid"
+  | "visible-far"
+  | "side-left"
+  | "side-right";
+
 export type HomeDrivePedestrianGroupMemberDraft = Readonly<{
   role: HomeDrivePedestrianRole;
   behaviorHint: HomeDrivePedestrianBehavior;
@@ -142,6 +155,8 @@ export type HomeDrivePedestrianGroupDraft = Readonly<{
   directionSign: 1 | -1;
   baseSpeedMps: number;
   seed: number;
+  originSource?: "initial" | "resident-pool";
+  activationBand?: "near" | "mid" | "far" | "horizon" | "visible" | "far-visible" | "entering-soon";
   members: readonly HomeDrivePedestrianGroupMemberDraft[];
 }>;
 
@@ -186,6 +201,38 @@ export type HomeDrivePedestrianAgent = Readonly<{
   crossingEnd?: HomeDriveVector2;
 
   seed: number;
+
+  /** Mantido para compatibilidade com snapshots antigos. */
+  lastRelocatedAtSeconds?: number;
+  relocationGeneration?: number;
+  relocationSlotId?: string;
+  relocationForwardMeters?: number;
+  relocationSource?: "resident-pool";
+
+  /** Metadados do resident pool / viewport occupancy. */
+  residentPoolId?: string;
+  residentPoolIndex?: number;
+  residentPoolSlotId?: string;
+  residentPoolTeleportedAtSeconds?: number;
+  residentPoolGeneration?: number;
+  residentViewportBand?: HomeDrivePedestrianViewportOccupancyBand;
+  residentViewportSlotId?: string;
+  lastViewportTeleportAtSeconds?: number;
+  viewportOccupancyGeneration?: number;
+
+  /** Mantido opcional para compatibilidade de render/debug antigo. */
+  viewportStreetId?: string;
+  viewportSlotId?: string;
+  viewportVisibilityBand?: Exclude<HomeDrivePedestrianViewportBand, "offscreen">;
+  lastSeenInViewportAtSeconds?: number;
+  viewportSpawnGeneration?: number;
+  bakedAgentId?: string;
+  bakedSlotId?: string;
+  bakedStreetId?: string;
+  activationBand?: "near" | "mid" | "far" | "horizon";
+  activatedAtSeconds?: number;
+  releasedAtSeconds?: number;
+  teleportGeneration?: number;
 }>;
 
 export type HomeDrivePedestrianRuntimeState = Readonly<{
@@ -193,8 +240,6 @@ export type HomeDrivePedestrianRuntimeState = Readonly<{
   zones: readonly HomeDrivePedestrianSidewalkZone[];
   elapsedSeconds: number;
   seed: number;
-
-  /** Runtime da camada dinâmica que mantém civis próximos do carro. */
   populationRuntime?: HomeDrivePedestrianPopulationRuntime;
 }>;
 
@@ -205,14 +250,10 @@ export type HomeDrivePedestrianGenerationOptions = Readonly<{
   density?: number;
   minRoadLengthMeters?: number;
   maxRoads?: number;
-
-  /** Prioriza pedestres perto do carro/spawn inicial para o jogo não começar vazio. */
   initialFocusCenter?: HomeDriveVector2;
   initialFocusRadiusMeters?: number;
   initialFocusPedestrianRatio?: number;
   maxInitialFocusPedestrians?: number;
-
-  /** Controle de concentração em esquinas e células de distribuição. */
   cornerExclusionMeters?: number;
   maxCornerPedestrianRatio?: number;
   minGroupDistanceMeters?: number;
@@ -224,7 +265,6 @@ export type HomeDrivePedestrianTickOptions = Readonly<{
   maxDeltaSeconds?: number;
   crosswalks?: HomeDriveCrosswalkRuntimeState;
 
-  /** Centro ativo da simulação: normalmente a posição atual do carro. */
   activeCenter?: HomeDriveVector2;
   activeRadiusMeters?: number;
   warmRadiusMeters?: number;
@@ -232,48 +272,44 @@ export type HomeDrivePedestrianTickOptions = Readonly<{
   coldTickModulo?: number;
   tickIndex?: number;
 
-  /** Streaming de população local. */
   activeHeadingRad?: number;
   activeSpeedMps?: number;
+
+  pedestrianResidentPoolEnabled?: boolean;
+  pedestrianResidentPoolSize?: number;
+  pedestrianResidentPoolMinFrontAgents?: number;
+  pedestrianResidentPoolMinFarAgents?: number;
+  pedestrianResidentPoolTeleportMinForwardMeters?: number;
+  pedestrianResidentPoolTeleportMaxForwardMeters?: number;
+  pedestrianResidentPoolTeleportHorizonMaxForwardMeters?: number;
+  pedestrianResidentPoolRecycleBehindMeters?: number;
+  pedestrianResidentPoolRecycleSideMeters?: number;
+  pedestrianResidentPoolMaxTeleportsPerTick?: number;
+  pedestrianResidentPoolMaxInitialTeleports?: number;
+  pedestrianResidentPoolProtectVisibleConeMeters?: number;
+  pedestrianResidentPoolProtectVisibleConeRadians?: number;
+  pedestrianResidentPoolDebug?: boolean;
+
+  pedestrianResidentPoolViewportOccupancyEnabled?: boolean;
+  pedestrianResidentPoolForceAllAgentsIntoViewport?: boolean;
+  pedestrianResidentPoolVisibleNearMinMeters?: number;
+  pedestrianResidentPoolVisibleNearMaxMeters?: number;
+  pedestrianResidentPoolVisibleNearCount?: number;
+  pedestrianResidentPoolVisibleMidMinMeters?: number;
+  pedestrianResidentPoolVisibleMidMaxMeters?: number;
+  pedestrianResidentPoolVisibleMidCount?: number;
+  pedestrianResidentPoolVisibleFarMinMeters?: number;
+  pedestrianResidentPoolVisibleFarMaxMeters?: number;
+  pedestrianResidentPoolVisibleFarCount?: number;
+  pedestrianResidentPoolSideMinForwardMeters?: number;
+  pedestrianResidentPoolSideMaxForwardMeters?: number;
+  pedestrianResidentPoolSideLateralMinMeters?: number;
+  pedestrianResidentPoolSideLateralMaxMeters?: number;
+  pedestrianResidentPoolSideCount?: number;
+  pedestrianResidentPoolMaxViewportTeleportsPerTick?: number;
+  pedestrianResidentPoolViewportMinSpacingMeters?: number;
+
   populateRadiusMeters?: number;
-  localZoneSearchRadiusMeters?: number;
-  keepAliveRadiusMeters?: number;
-  repopulateDistanceMeters?: number;
-  repopulateCooldownSeconds?: number;
-  minPedestriansNearPlayer?: number;
-  maxActivePedestrians?: number;
-  maxSpawnPerRefresh?: number;
-
-  /** Lookahead direcional: mantém calçadas e faixas ocupadas à frente do carro. */
-  frontLookaheadMeters?: number;
-  frontLookaheadSpeedMultiplier?: number;
-  frontFarRadiusMeters?: number;
-  sideRadiusMeters?: number;
-  rearRadiusMeters?: number;
-  minFrontPedestrians?: number;
-  minFarFrontPedestrians?: number;
-  minSideSectorPedestrians?: number;
-  minRearBufferPedestrians?: number;
-  minCrosswalkPedestrians?: number;
-  maxSpawnPerSectorRefresh?: number;
-  maxCrosswalkSpawnPerRefresh?: number;
-  crosswalkSearchRadiusMeters?: number;
-
-  /** Warm ring e prewarm para preparar pedestres antes de o carro chegar. */
-  enablePedestrianWarmRing?: boolean;
-  pedestrianWarmRingBaseRadiusMeters?: number;
-  pedestrianWarmRingFrontBiasMeters?: number;
-  pedestrianWarmRingSpeedRadiusMultiplier?: number;
-  pedestrianWarmRingSideRadiusMeters?: number;
-  pedestrianWarmRingRearRadiusMeters?: number;
-  pedestrianWarmRingMaxZoneCount?: number;
-  pedestrianPrewarmEnabled?: boolean;
-  pedestrianPrewarmFrames?: number;
-  pedestrianPrewarmLeadSeconds?: number;
-  pedestrianPrewarmFrontMeters?: number;
-  pedestrianPrewarmMinReadyPedestrians?: number;
-  pedestrianPrewarmSpawnBudgetMultiplier?: number;
-
   density?: number;
   seed?: number;
   forceRepopulate?: boolean;

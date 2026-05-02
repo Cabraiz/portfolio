@@ -15,10 +15,7 @@ import {
   getHomeDriveThreePedestrianSkinMaterial,
 } from "./homeDriveThree.pedestrianMaterials";
 
-export type HomeDriveThreePedestrianDetailLevel =
-  | "full"
-  | "medium"
-  | "proxy";
+export type HomeDriveThreePedestrianDetailLevel = "full" | "medium";
 
 export type HomeDriveThreePedestrianAgentProps = Readonly<{
   agent: HomeDrivePedestrianAgent;
@@ -98,7 +95,7 @@ function HomeDriveThreePedestrianDetailed({
   detailLevel,
 }: Readonly<{
   agent: HomeDrivePedestrianAgent;
-  detailLevel: Exclude<HomeDriveThreePedestrianDetailLevel, "proxy">;
+  detailLevel: HomeDriveThreePedestrianDetailLevel;
 }>) {
   const profile = useMemo(() => {
     return getHomeDriveThreePedestrianProceduralProfile(agent);
@@ -367,10 +364,6 @@ function HomeDriveThreePedestrianAgent({
 }: HomeDriveThreePedestrianAgentProps) {
   if (!visible) {
     return null;
-  }
-
-  if (detailLevel === "proxy") {
-    return <HomeDriveThreePedestrianProxy agent={agent} />;
   }
 
   return (

@@ -2,18 +2,21 @@
 
 import type { HomeDrivePedestrianAgent } from "../../domain/pedestrians";
 import type { HomeDriveThreeVisiblePedestrianEntry } from "./homeDriveThree.pedestrianVisibility";
-import type { HomeDriveThreePedestrianInstancedRigEntry } from "./homeDriveThree.pedestrianInstanceBatches.types";
 
 export type HomeDriveThreePedestrianRenderPlanOptions = Readonly<{
   maxFullReactPedestrians?: number;
+
+  /**
+   * Campo legado aceito por compatibilidade.
+   * Ignorado pelo render plan atual.
+   */
   maxMediumReactPedestrians?: number;
+
   forceFullForHandLinks?: boolean;
 }>;
 
 export type HomeDriveThreePedestrianRenderPlan = Readonly<{
   fullEntries: readonly HomeDriveThreeVisiblePedestrianEntry[];
-  mediumReactEntries: readonly HomeDriveThreeVisiblePedestrianEntry[];
-  instancedEntries: readonly HomeDriveThreePedestrianInstancedRigEntry[];
   handLinkAgents: readonly HomeDrivePedestrianAgent[];
   totalVisible: number;
 }>;
