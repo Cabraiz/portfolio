@@ -3,8 +3,8 @@ import { useLocation } from "react-router-dom";
 import AppDesktop from "./AppDesktop";
 import AppMobile from "./AppMobile";
 import {
-  isHomeDriveRoutePath,
-  isHomeDriveStandaloneHost,
+  isHomeGameRoutePath,
+  isHomeGameStandaloneHost,
 } from "./appHostRouting";
 
 const DESKTOP_MEDIA_QUERY = "(min-width: 768px)";
@@ -20,14 +20,14 @@ function getIsDesktop(): boolean {
 const App: React.FC = () => {
   const location = useLocation();
 
-  const shouldForceMobileDrive = useMemo(() => {
-    return isHomeDriveStandaloneHost() || isHomeDriveRoutePath(location.pathname);
+  const shouldForceMobileGame = useMemo(() => {
+    return isHomeGameStandaloneHost() || isHomeGameRoutePath(location.pathname);
   }, [location.pathname]);
 
   const [isDesktop, setIsDesktop] = useState<boolean>(() => getIsDesktop());
 
   useEffect(() => {
-    if (shouldForceMobileDrive) {
+    if (shouldForceMobileGame) {
       return undefined;
     }
 
@@ -47,9 +47,9 @@ const App: React.FC = () => {
     return () => {
       mediaQuery.removeEventListener("change", handleChange);
     };
-  }, [shouldForceMobileDrive]);
+  }, [shouldForceMobileGame]);
 
-  if (shouldForceMobileDrive) {
+  if (shouldForceMobileGame) {
     return <AppMobile />;
   }
 

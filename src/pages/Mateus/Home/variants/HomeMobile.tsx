@@ -19,6 +19,7 @@ import gsap from "gsap";
 import HeroMobileStack from "../components/mobile/HeroMobileStack";
 import type { MobileSocialItem } from "../components/mobile/SocialRowMobile";
 import HomeDriveGame from "../components/mobile/game/driving/HomeDriveGame";
+import HomeElevatorGame from "../components/mobile/game/elevator/HomeElevatorGame";
 import { shouldDisableScrollFades } from "../../../../features/scroll/scrollMotionFlags";
 import {
   HOME_MOBILE_SOCIAL_LINKS,
@@ -54,7 +55,9 @@ function HomeMobile() {
   const containerRef = useRef<HTMLDivElement>(null);
 
   const [isImageLoaded, setIsImageLoaded] = useState(false);
-  const [isGameOpen, setIsGameOpen] = useState(false);
+  const [activeGame, setActiveGame] = useState<"drive" | "elevator" | null>(null);
+
+  const isGameOpen = activeGame !== null;
 
   const currentLanguage = i18n.resolvedLanguage ?? i18n.language ?? "pt";
 
@@ -62,12 +65,20 @@ function HomeMobile() {
     return currentLanguage === "pt" || currentLanguage.startsWith("pt");
   }, [currentLanguage]);
 
-  const playLabel = useMemo(() => {
+  const driveLabel = useMemo(() => {
     return isPT ? "Dirigir" : "Drive";
   }, [isPT]);
 
-  const playAriaLabel = useMemo(() => {
-    return isPT ? "Abrir driving game" : "Open driving game";
+  const driveAriaLabel = useMemo(() => {
+    return isPT ? "Abrir jogo de direção" : "Open driving game";
+  }, [isPT]);
+
+  const elevatorLabel = useMemo(() => {
+    return isPT ? "Elevador" : "Elevator";
+  }, [isPT]);
+
+  const elevatorAriaLabel = useMemo(() => {
+    return isPT ? "Abrir jogo do elevador" : "Open elevator game";
   }, [isPT]);
 
   const socialIconImageStyle = useMemo<CSSProperties>(() => {
@@ -157,9 +168,11 @@ function HomeMobile() {
   const playWrapStyle = useMemo<CSSProperties>(() => {
     return {
       width: "100%",
-      display: "flex",
+      display: "grid",
+      gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+      gap: "10px",
       justifyContent: "center",
-      alignItems: "center",
+      alignItems: "stretch",
       boxSizing: "border-box",
     };
   }, []);
@@ -167,13 +180,13 @@ function HomeMobile() {
   const playButtonStyle = useMemo<CSSProperties>(() => {
     return {
       position: "relative",
-      width: homeHeroTokens.mobileAttractMode.launcherWidth,
+      width: "100%",
       minHeight: homeHeroTokens.mobileAttractMode.launcherMinHeight,
       display: "inline-flex",
       alignItems: "center",
       justifyContent: "center",
       gap: "10px",
-      padding: "0 18px",
+      padding: "0 14px",
       borderRadius: "16px",
       border: "1px solid rgba(255, 210, 132, 0.18)",
       background:
@@ -242,34 +255,64 @@ function HomeMobile() {
   }, []);
 
   const handleOpenDrive = useCallback(() => {
-    setIsGameOpen(true);
+    setActiveGame("drive");
   }, []);
 
-  const handleCloseDrive = useCallback(() => {
-    setIsGameOpen(false);
+  const handleOpenElevator = useCallback(() => {
+    setActiveGame("elevator");
   }, []);
+
+  const handleCloseGame = useCallback(() => {
+    setActiveGame(null);
+  }, []);
+
+  const elevatorIconStyle = useMemo<CSSProperties>(() => {
+    return {
+      ...playIconStyle,
+      borderRadius: "4px",
+      background:
+        "linear-gradient(180deg, rgba(171,210,255,1) 0%, rgba(85,146,255,0.96) 58%, rgba(65,115,230,0.9) 100%)",
+      boxShadow:
+        "0 0 14px rgba(96, 152, 255, 0.28), 0 0 0 1px rgba(255,255,255,0.05) inset",
+    };
+  }, [playIconStyle]);
 
   const playLauncher = useMemo(() => {
     return (
       <div style={playWrapStyle}>
         <button
           type="button"
-          aria-label={playAriaLabel}
+          aria-label={driveAriaLabel}
           style={playButtonStyle}
           onClick={handleOpenDrive}
         >
           <span style={playPulseStyle} />
           <span style={playIconStyle} />
-          <span style={playLabelStyle}>{playLabel}</span>
+          <span style={playLabelStyle}>{driveLabel}</span>
+        </button>
+
+        <button
+          type="button"
+          aria-label={elevatorAriaLabel}
+          style={playButtonStyle}
+          onClick={handleOpenElevator}
+        >
+          <span style={playPulseStyle} />
+          <span style={elevatorIconStyle} />
+          <span style={playLabelStyle}>{elevatorLabel}</span>
         </button>
       </div>
     );
   }, [
+    driveAriaLabel,
+    driveLabel,
+    elevatorAriaLabel,
+    elevatorIconStyle,
+    elevatorLabel,
     handleOpenDrive,
-    playAriaLabel,
+    handleOpenElevator,
     playButtonStyle,
     playIconStyle,
-    playLabel,
     playLabelStyle,
     playPulseStyle,
     playWrapStyle,
@@ -358,7 +401,12 @@ function HomeMobile() {
 
       {isGameOpen ? (
         <div style={driveOverlayStyle}>
-          <HomeDriveGame onClose={handleCloseDrive} />
+          {activeGame === "drive" ? (
+            <HomeDriveGame onClose={handleCloseGame} />
+          ) : null}
+          {activeGame === "elevator" ? (
+            <HomeElevatorGame onClose={handleCloseGame} />
+          ) : null}
         </div>
       ) : null}
     </div>
@@ -366,3 +414,5 @@ function HomeMobile() {
 }
 
 export default HomeMobile;
+
+

@@ -14,9 +14,13 @@ import Rosa from "../pages/Rosa/Rosa";
 import Vinho from "../pages/Vinho/Vinho";
 import LandingRouterPage from "../pages/Mateus/LandingPage/LandingRouterPage";
 import HomeDriveStandalonePage from "../pages/Mateus/Home/Drive/HomeDriveStandalonePage";
+import HomeElevatorStandalonePage from "../pages/Mateus/Home/Elevator/HomeElevatorStandalonePage";
 import {
-  getHomeDriveLandingRedirectPath,
+  getHomeGameLandingRedirectPath,
+  HOME_DRIVE_ROUTE_PATH,
+  HOME_ELEVATOR_ROUTE_PATH,
   isHomeDriveStandaloneHost,
+  isHomeElevatorStandaloneHost,
 } from "../App/appHostRouting";
 
 import { PrivateOutlet } from "../redux/shared/utils/PrivateOutlet";
@@ -24,9 +28,10 @@ import { RouteGuard } from "../components/RouteGuard";
 import DigitalCodeUnlock from "../components/DigitalCodeUnlock";
 
 const AppRoutes = () => {
-  const isDriveHost = isHomeDriveStandaloneHost();
-  const landingElement = isDriveHost ? (
-    <Navigate to="/drive" replace />
+  const landingElement = isHomeDriveStandaloneHost() ? (
+    <Navigate to={HOME_DRIVE_ROUTE_PATH} replace />
+  ) : isHomeElevatorStandaloneHost() ? (
+    <Navigate to={HOME_ELEVATOR_ROUTE_PATH} replace />
   ) : (
     <LandingRouterPage />
   );
@@ -35,10 +40,14 @@ const AppRoutes = () => {
     <Routes>
       <Route
         path="/"
-        element={<Navigate to={getHomeDriveLandingRedirectPath()} replace />}
+        element={<Navigate to={getHomeGameLandingRedirectPath()} replace />}
       />
 
-      <Route path="/drive" element={<HomeDriveStandalonePage />} />
+      <Route path={HOME_DRIVE_ROUTE_PATH} element={<HomeDriveStandalonePage />} />
+      <Route
+        path={HOME_ELEVATOR_ROUTE_PATH}
+        element={<HomeElevatorStandalonePage />}
+      />
 
       <Route path="/home" element={landingElement} />
       <Route path="/portfolio" element={landingElement} />
@@ -105,5 +114,3 @@ const AppRoutes = () => {
 };
 
 export default AppRoutes;
-
-

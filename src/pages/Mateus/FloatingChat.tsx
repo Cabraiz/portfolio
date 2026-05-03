@@ -8,8 +8,8 @@ import { useTranslation } from "react-i18next";
 import { useLocation } from "react-router-dom";
 
 import {
-  isHomeDriveRoutePath,
-  isHomeDriveStandaloneHost,
+  isHomeGameRoutePath,
+  isHomeGameStandaloneHost,
 } from "../../App/appHostRouting";
 
 type TriggerAvatarItem =
@@ -26,8 +26,8 @@ type TriggerAvatarItem =
 
 export default function FloatingChat() {
   const location = useLocation();
-  const shouldHideForDrive =
-    isHomeDriveStandaloneHost() || isHomeDriveRoutePath(location.pathname);
+  const shouldHideForStandaloneGame =
+    isHomeGameStandaloneHost() || isHomeGameRoutePath(location.pathname);
 
   const [isOpen, setIsOpen] = useState(false);
   const [inputValue, setInputValue] = useState("");
@@ -127,7 +127,7 @@ export default function FloatingChat() {
     }
   };
 
-  if (shouldHideForDrive) {
+  if (shouldHideForStandaloneGame) {
     return null;
   }
 

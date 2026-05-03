@@ -26,8 +26,8 @@ import type {
   ScrollViewport,
 } from "../features/scroll/lenisScrollProfiles";
 import {
-  isHomeDriveRoutePath,
-  isHomeDriveStandaloneHost,
+  isHomeGameRoutePath,
+  isHomeGameStandaloneHost,
 } from "./appHostRouting";
 
 const APP_LENIS_SCROLL_CLASS = "desktop-lenis-scroll";
@@ -140,16 +140,17 @@ function AppMobile() {
       "/casanova",
       "/hublocal",
       "/drive",
+      "/elevator",
     ],
     [],
   );
 
-  const isDriveStandaloneSurface = useMemo(() => {
-    return isHomeDriveStandaloneHost() || isHomeDriveRoutePath(location.pathname);
+  const isGameStandaloneSurface = useMemo(() => {
+    return isHomeGameStandaloneHost() || isHomeGameRoutePath(location.pathname);
   }, [location.pathname]);
 
   const isNavHidden =
-    isDriveStandaloneSurface || hiddenNavbarRoutes.includes(location.pathname);
+    isGameStandaloneSurface || hiddenNavbarRoutes.includes(location.pathname);
 
   const activeSectionId = useMemo<LandingSectionId | "">(() => {
     return getSectionIdByPath(location.pathname) ?? "";
@@ -268,7 +269,7 @@ function AppMobile() {
       }}
     >
       <div className="app-lenis-content" style={mobileLayoutStyle}>
-        {!isDriveStandaloneSurface ? (
+        {!isGameStandaloneSurface ? (
           <TitleWebsite title1="Bem Vindo! 🤝" title2="Cabraiz" />
         ) : null}
 
