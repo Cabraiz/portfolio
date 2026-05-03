@@ -30,5 +30,13 @@ export type HomeDrivePedestrianResidentPoolDiagnostics = Readonly<{
   missingSlotCount?: number;
   safeEntryGateCount?: number;
   blockedCenterConeCount?: number;
+  bootLocked?: boolean;
+  lockedPoolSize?: number;
+  runtimeSpawnViolationCount?: number;
+  runtimeSpawnBlockedCount?: number;
+  collisionLockedCount?: number;
+  collisionGuardBlockedTeleportCount?: number;
   reason: string;
 }>;
+
+

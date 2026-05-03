@@ -35,6 +35,7 @@ import {
 } from "../domain/parkedVehicles";
 import {
   createInitialHomeDrivePedestrianState,
+  preloadHomeDrivePedestrianBootRuntime,
   type HomeDrivePedestrianRuntimeState,
 } from "../domain/pedestrians";
 import {
@@ -54,7 +55,10 @@ import HomeDriveThreeCameraRig from "./HomeDriveThreeCameraRig";
 import { HomeDriveThreeCrosswalks } from "./crosswalks";
 import HomeDriveThreeGround from "./HomeDriveThreeGround";
 import { HomeDriveThreeParkedVehicles } from "./parkedVehicles";
-import { HomeDriveThreePedestrians } from "./pedestrians";
+import {
+  HomeDriveThreePedestrians,
+  prewarmHomeDriveThreePedestrianAnimationBakeCache,
+} from "./pedestrians";
 import HomeDriveThreeRoadNetwork from "./HomeDriveThreeRoadNetwork";
 import HomeDriveThreeSimulation from "./HomeDriveThreeSimulation";
 import HomeDriveThreeTraffic from "./HomeDriveThreeTraffic";
@@ -540,13 +544,29 @@ export default function HomeDriveThreeScene({
   );
 
   const initialPedestrianState = useMemo(() => {
-    return createInitialHomeDrivePedestrianState({
+    const animationBakePrewarm =
+      prewarmHomeDriveThreePedestrianAnimationBakeCache();
+    const basePedestrians = createInitialHomeDrivePedestrianState({
       density: pedestrianPerformance.density,
       maxRoads: pedestrianPerformance.maxRoads,
       minRoadLengthMeters: pedestrianPerformance.minRoadLengthMeters,
       seed: 7429,
       initialFocusCenter: runtimeRef.current.car.position,
     });
+
+    return preloadHomeDrivePedestrianBootRuntime(basePedestrians, {
+      enabled: pedestrianPerformance.pedestrianBootPreloadEnabled,
+      activeCenter: runtimeRef.current.car.position,
+      activeHeadingRad: runtimeRef.current.car.headingRad,
+      activeSpeedMps: runtimeRef.current.car.speedMps,
+      seed: 7429,
+      profile: pedestrianPerformance,
+      steps: pedestrianPerformance.pedestrianBootPreloadSteps,
+      stepSeconds: pedestrianPerformance.pedestrianBootPreloadStepSeconds,
+      bakeLibraryClipCount: animationBakePrewarm.clipCount,
+      bakeLibrarySampleCount: animationBakePrewarm.sampleCount,
+      debug: HOME_DRIVE_THREE_PEDESTRIAN_SCENE_DEBUG,
+    }).pedestrians;
   }, [pedestrianPerformance, runtimeRef]);
 
   const pedestriansRef = useRef<HomeDrivePedestrianRuntimeState>(
@@ -613,3 +633,4 @@ export default function HomeDriveThreeScene({
     </div>
   );
 }
+

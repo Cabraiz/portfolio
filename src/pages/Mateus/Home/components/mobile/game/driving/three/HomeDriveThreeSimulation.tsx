@@ -1,533 +1,1240 @@
 // src/pages/Mateus/Home/components/mobile/game/driving/three/HomeDriveThreeSimulation.tsx
 
+
 import { useFrame } from "@react-three/fiber";
+
 import { useRef } from "react";
 
+
 import {
+
   resolveHomeDriveBuildingCollisions,
+
   type HomeDriveBuildingCollisionRuntimeState,
+
 } from "../domain/buildingCollisions";
+
 import {
+
   syncHomeDriveCrosswalkOccupanciesFromPedestrians,
+
   tickHomeDriveCrosswalks,
+
   type HomeDriveCrosswalkRuntimeState,
+
 } from "../domain/crosswalks";
+
 import type { HomeDriveBuilding } from "../domain/homeDrive.building.types";
+
 import { resolveHomeDriveTrafficCollisions } from "../domain/homeDrive.collision";
+
 import { mergeHomeDriveImpactStates } from "../domain/homeDrive.impact";
+
 import { tickHomeDrivePhysics } from "../domain/homeDrive.physics";
+
 import { tickHomeDriveTraffic } from "../domain/homeDrive.traffic";
+
 import type { HomeDriveTrafficRuntimeState } from "../domain/homeDrive.traffic.types";
+
 import type {
+
   HomeDriveInputState,
+
   HomeDriveRuntimeState,
+
 } from "../domain/homeDrive.types";
+
 import {
+
   resolveHomeDriveParkedVehicleCollisions,
+
   tickHomeDriveParkedVehicleImpactState,
+
   type HomeDriveParkedVehicleRuntimeState,
+
 } from "../domain/parkedVehicles";
+
 import {
+
+  resolveHomeDrivePedestrianCollisions,
+
+  tickHomeDrivePedestrianImpactAgents,
+
   tickHomeDrivePedestrians,
+
   type HomeDrivePedestrianRuntimeState,
+
 } from "../domain/pedestrians";
+
 import type { HomeDrivePedestrianPerformanceProfile } from "../domain/pedestrians/homeDrive.pedestrianPerformance";
+
 import { getHomeDrivePedestrianSimulationStepSeconds } from "../domain/pedestrians/homeDrive.pedestrianPerformance";
 
+
 type HomeDriveMutableRef<T> = {
+
   current: T;
+
 };
 
+
 export type HomeDriveThreeSimulationProps = Readonly<{
+
   runtimeRef: HomeDriveMutableRef<HomeDriveRuntimeState>;
+
   inputRef: HomeDriveMutableRef<HomeDriveInputState>;
+
   trafficRef?: HomeDriveMutableRef<HomeDriveTrafficRuntimeState>;
+
   parkedVehiclesRef?: HomeDriveMutableRef<HomeDriveParkedVehicleRuntimeState>;
+
   buildingCollisionsRef?: HomeDriveMutableRef<HomeDriveBuildingCollisionRuntimeState>;
+
   buildings?: readonly HomeDriveBuilding[];
+
   pedestriansRef?: HomeDriveMutableRef<HomeDrivePedestrianRuntimeState>;
+
   crosswalksRef?: HomeDriveMutableRef<HomeDriveCrosswalkRuntimeState>;
+
   pedestrianPerformance?: HomeDrivePedestrianPerformanceProfile;
+
   enabled?: boolean;
+
   publishRuntimeSnapshot?: () => void;
+
   snapshotHz?: number;
+
 }>;
+
 
 type SimulationStepResult = Readonly<{
+
   runtime: HomeDriveRuntimeState;
+
   hadCollision: boolean;
+
 }>;
 
+
 const FIXED_STEP_SECONDS = 1 / 60;
+
 const MAX_ACCUMULATED_SECONDS = 0.12;
+
 const MAX_STEPS_PER_FRAME = 5;
+
 const DEFAULT_SNAPSHOT_HZ = 8;
 
-function sanitizeDeltaSeconds(deltaSeconds: number): number {
-  if (!Number.isFinite(deltaSeconds) || deltaSeconds <= 0) {
-    return 0;
+function clampNumber(value: number, min: number, max: number): number {
+  if (!Number.isFinite(value)) {
+    return min;
   }
 
+  return Math.min(Math.max(value, min), max);
+}
+
+
+function sanitizeDeltaSeconds(deltaSeconds: number): number {
+
+  if (!Number.isFinite(deltaSeconds) || deltaSeconds <= 0) {
+
+    return 0;
+
+  }
+
+
   return Math.min(deltaSeconds, MAX_ACCUMULATED_SECONDS);
+
 }
 
 
 function tickPedestriansStep(
+
   pedestriansRef:
+
     | HomeDriveMutableRef<HomeDrivePedestrianRuntimeState>
+
     | undefined,
+
   crosswalksRef:
+
     | HomeDriveMutableRef<HomeDriveCrosswalkRuntimeState>
+
     | undefined,
+
   runtime: HomeDriveRuntimeState,
+
   deltaSeconds: number,
+
   tickIndex: number,
+
   pedestrianPerformance?: HomeDrivePedestrianPerformanceProfile,
+
 ): void {
+
   if (!pedestriansRef) {
+
     return;
+
   }
+
 
   pedestriansRef.current = tickHomeDrivePedestrians(
+
     pedestriansRef.current,
+
     deltaSeconds,
+
     {
+
       maxDeltaSeconds: deltaSeconds,
+
+      simulationTimeSeconds: runtime.elapsedSeconds,
+
       crosswalks: crosswalksRef?.current,
+
       activeCenter: runtime.car.position,
+
       activeHeadingRad: runtime.car.headingRad,
+
       activeSpeedMps: runtime.car.speedMps,
+
       activeRadiusMeters: pedestrianPerformance?.activeSimulationRadiusMeters,
+
       warmRadiusMeters: pedestrianPerformance?.warmSimulationRadiusMeters,
+
       warmTickModulo: pedestrianPerformance?.warmTickModulo,
+
       coldTickModulo: pedestrianPerformance?.coldTickModulo,
+
       tickIndex,
+
       density: pedestrianPerformance?.density,
+
       seed: 7429,
+
       populateRadiusMeters: pedestrianPerformance?.populateRadiusMeters,
+
       pedestrianResidentPoolEnabled:
+
         pedestrianPerformance?.pedestrianResidentPoolEnabled,
+
       pedestrianResidentPoolSize:
+
         pedestrianPerformance?.pedestrianResidentPoolSize,
+
       pedestrianResidentPoolMinFrontAgents:
+
         pedestrianPerformance?.pedestrianResidentPoolMinFrontAgents,
+
       pedestrianResidentPoolMinFarAgents:
+
         pedestrianPerformance?.pedestrianResidentPoolMinFarAgents,
+
       pedestrianResidentPoolTeleportMinForwardMeters:
+
         pedestrianPerformance?.pedestrianResidentPoolTeleportMinForwardMeters,
+
       pedestrianResidentPoolTeleportMaxForwardMeters:
+
         pedestrianPerformance?.pedestrianResidentPoolTeleportMaxForwardMeters,
+
       pedestrianResidentPoolTeleportHorizonMaxForwardMeters:
+
         pedestrianPerformance?.pedestrianResidentPoolTeleportHorizonMaxForwardMeters,
+
       pedestrianResidentPoolRecycleBehindMeters:
+
         pedestrianPerformance?.pedestrianResidentPoolRecycleBehindMeters,
+
       pedestrianResidentPoolRecycleSideMeters:
+
         pedestrianPerformance?.pedestrianResidentPoolRecycleSideMeters,
+
       pedestrianResidentPoolMaxTeleportsPerTick:
+
         pedestrianPerformance?.pedestrianResidentPoolMaxTeleportsPerTick,
+
       pedestrianResidentPoolMaxInitialTeleports:
+
         pedestrianPerformance?.pedestrianResidentPoolMaxInitialTeleports,
+
       pedestrianResidentPoolProtectVisibleConeMeters:
+
         pedestrianPerformance?.pedestrianResidentPoolProtectVisibleConeMeters,
+
       pedestrianResidentPoolProtectVisibleConeRadians:
+
         pedestrianPerformance?.pedestrianResidentPoolProtectVisibleConeRadians,
+
       pedestrianResidentPoolDebug:
+
         pedestrianPerformance?.pedestrianResidentPoolDebug,
+
       pedestrianResidentPoolViewportOccupancyEnabled:
+
         pedestrianPerformance?.pedestrianResidentPoolViewportOccupancyEnabled,
+
       pedestrianResidentPoolForceAllAgentsIntoViewport:
+
         pedestrianPerformance?.pedestrianResidentPoolForceAllAgentsIntoViewport,
+
       pedestrianResidentPoolVisibleNearMinMeters:
+
         pedestrianPerformance?.pedestrianResidentPoolVisibleNearMinMeters,
+
       pedestrianResidentPoolVisibleNearMaxMeters:
+
         pedestrianPerformance?.pedestrianResidentPoolVisibleNearMaxMeters,
+
       pedestrianResidentPoolVisibleNearCount:
+
         pedestrianPerformance?.pedestrianResidentPoolVisibleNearCount,
+
       pedestrianResidentPoolVisibleMidMinMeters:
+
         pedestrianPerformance?.pedestrianResidentPoolVisibleMidMinMeters,
+
       pedestrianResidentPoolVisibleMidMaxMeters:
+
         pedestrianPerformance?.pedestrianResidentPoolVisibleMidMaxMeters,
+
       pedestrianResidentPoolVisibleMidCount:
+
         pedestrianPerformance?.pedestrianResidentPoolVisibleMidCount,
+
       pedestrianResidentPoolVisibleFarMinMeters:
+
         pedestrianPerformance?.pedestrianResidentPoolVisibleFarMinMeters,
+
       pedestrianResidentPoolVisibleFarMaxMeters:
+
         pedestrianPerformance?.pedestrianResidentPoolVisibleFarMaxMeters,
+
       pedestrianResidentPoolVisibleFarCount:
+
         pedestrianPerformance?.pedestrianResidentPoolVisibleFarCount,
+
       pedestrianResidentPoolSideMinForwardMeters:
+
         pedestrianPerformance?.pedestrianResidentPoolSideMinForwardMeters,
+
       pedestrianResidentPoolSideMaxForwardMeters:
+
         pedestrianPerformance?.pedestrianResidentPoolSideMaxForwardMeters,
+
       pedestrianResidentPoolSideLateralMinMeters:
+
         pedestrianPerformance?.pedestrianResidentPoolSideLateralMinMeters,
+
       pedestrianResidentPoolSideLateralMaxMeters:
+
         pedestrianPerformance?.pedestrianResidentPoolSideLateralMaxMeters,
+
       pedestrianResidentPoolSideCount:
+
         pedestrianPerformance?.pedestrianResidentPoolSideCount,
+
       pedestrianResidentPoolMaxViewportTeleportsPerTick:
+
         pedestrianPerformance?.pedestrianResidentPoolMaxViewportTeleportsPerTick,
+
       pedestrianResidentPoolViewportMinSpacingMeters:
+
         pedestrianPerformance?.pedestrianResidentPoolViewportMinSpacingMeters,
+      pedestrianResidentPoolLockAfterBoot:
+
+        pedestrianPerformance?.pedestrianResidentPoolLockAfterBoot,
+      pedestrianResidentPoolAllowRuntimeExpansion:
+
+        pedestrianPerformance?.pedestrianResidentPoolAllowRuntimeExpansion,
+
       populationEnabled: true,
+
     },
+
   );
+
 
   if (crosswalksRef) {
+
     crosswalksRef.current = syncHomeDriveCrosswalkOccupanciesFromPedestrians(
+
       crosswalksRef.current,
+
       pedestriansRef.current.agents,
+
     );
+
   }
+
 }
 
-function tickTrafficAndCollisionsStep(
-  nextRuntime: HomeDriveRuntimeState,
-  trafficRef: HomeDriveMutableRef<HomeDriveTrafficRuntimeState> | undefined,
-  crosswalksRef:
-    | HomeDriveMutableRef<HomeDriveCrosswalkRuntimeState>
+
+function tickPedestrianImpactVisualFrame(
+
+  pedestriansRef:
+
+    | HomeDriveMutableRef<HomeDrivePedestrianRuntimeState>
+
     | undefined,
-): SimulationStepResult {
-  if (!trafficRef) {
-    return {
-      runtime: nextRuntime,
-      hadCollision: false,
-    };
+
+  runtime: HomeDriveRuntimeState,
+
+  frameRemainderSeconds: number,
+
+): void {
+
+  if (!pedestriansRef || pedestriansRef.current.agents.length <= 0) {
+
+    return;
+
   }
 
-  const nextTraffic = tickHomeDriveTraffic(
-    trafficRef.current,
-    FIXED_STEP_SECONDS,
-    {
-      crosswalks: crosswalksRef?.current,
-    },
+  const visualTimeSeconds =
+
+    runtime.elapsedSeconds + clampNumber(frameRemainderSeconds, 0, FIXED_STEP_SECONDS);
+
+  const nextAgents = tickHomeDrivePedestrianImpactAgents(
+
+    pedestriansRef.current.agents,
+
+    visualTimeSeconds,
+
   );
 
-  const collisionResolution = resolveHomeDriveTrafficCollisions(
-    nextRuntime.car,
-    nextTraffic,
+  pedestriansRef.current = {
+
+    ...pedestriansRef.current,
+
+    agents: nextAgents,
+
+    elapsedSeconds: Math.max(
+
+      pedestriansRef.current.elapsedSeconds,
+
+      visualTimeSeconds,
+
+    ),
+
+  };
+
+}
+
+
+function tickPedestrianCollisionsStep(
+
+  nextRuntime: HomeDriveRuntimeState,
+
+  pedestriansRef:
+
+    | HomeDriveMutableRef<HomeDrivePedestrianRuntimeState>
+
+    | undefined,
+
+): SimulationStepResult {
+
+  if (!pedestriansRef) {
+
+    return {
+
+      runtime: nextRuntime,
+
+      hadCollision: false,
+
+    };
+
+  }
+
+
+  const impactTickedAgents = tickHomeDrivePedestrianImpactAgents(
+
+    pedestriansRef.current.agents,
+
     nextRuntime.elapsedSeconds,
-    {
-      brutality: 1.62,
-    },
+
   );
+
+
+  const collisionResolution = resolveHomeDrivePedestrianCollisions(
+
+    nextRuntime.car,
+
+    impactTickedAgents,
+
+    nextRuntime.elapsedSeconds,
+
+    {
+
+      brutality: 1.92,
+
+      playerRadiusMeters: 1.72,
+
+      pedestrianRadiusMeters: 0.52,
+
+      minImpactSpeedMps: 0.72,
+
+      maxCandidateRadiusMeters: 24,
+
+      impactForwardMeters: 5.2,
+
+      lateralPaddingMeters: 1.12,
+
+      speedLookaheadSeconds: 0.38,
+
+      maxImpactForwardMeters: 24,
+
+      speedLossRatio: 0.18,
+
+      minSpeedAfterHitMps: -1.2,
+
+      lockSeconds: 3.85,
+      initialLaunchLeadSeconds: 0.11,
+      zeroCarSpinOnPedestrianImpact: true,
+      preserveCarHeading: true,
+      resetSteeringOnImpact: true,
+      carRecoilMultiplier: 0.58,
+      carCameraShakeMultiplier: 0.6,
+      carVisualPitchMultiplier: 0.28,
+      carControlLockMultiplier: 0.68,
+      carCollisionImpulseMultiplier: 0.78,
+
+    },
+
+  );
+
+
+  pedestriansRef.current = {
+
+    ...pedestriansRef.current,
+
+    agents: collisionResolution.agents,
+
+    elapsedSeconds: Math.max(
+
+      pedestriansRef.current.elapsedSeconds,
+
+      nextRuntime.elapsedSeconds,
+
+    ),
+
+  };
+
+
+  if (collisionResolution.events.length <= 0 || !collisionResolution.impact) {
+
+    return {
+
+      runtime: nextRuntime,
+
+      hadCollision: false,
+
+    };
+
+  }
+
+
+  return {
+
+    runtime: {
+
+      ...nextRuntime,
+
+      car: collisionResolution.car,
+
+      impact: mergeHomeDriveImpactStates(
+
+        nextRuntime.impact,
+
+        collisionResolution.impact,
+
+      ),
+
+    },
+
+    hadCollision: true,
+
+  };
+
+}
+
+
+function tickTrafficAndCollisionsStep(
+
+  nextRuntime: HomeDriveRuntimeState,
+
+  trafficRef: HomeDriveMutableRef<HomeDriveTrafficRuntimeState> | undefined,
+
+  crosswalksRef:
+
+    | HomeDriveMutableRef<HomeDriveCrosswalkRuntimeState>
+
+    | undefined,
+
+): SimulationStepResult {
+
+  if (!trafficRef) {
+
+    return {
+
+      runtime: nextRuntime,
+
+      hadCollision: false,
+
+    };
+
+  }
+
+
+  const nextTraffic = tickHomeDriveTraffic(
+
+    trafficRef.current,
+
+    FIXED_STEP_SECONDS,
+
+    {
+
+      crosswalks: crosswalksRef?.current,
+
+    },
+
+  );
+
+
+  const collisionResolution = resolveHomeDriveTrafficCollisions(
+
+    nextRuntime.car,
+
+    nextTraffic,
+
+    nextRuntime.elapsedSeconds,
+
+    {
+
+      brutality: 1.62,
+
+    },
+
+  );
+
 
   trafficRef.current = collisionResolution.traffic;
 
+
   if (collisionResolution.events.length <= 0 || !collisionResolution.impact) {
+
     return {
+
       runtime: nextRuntime,
+
       hadCollision: false,
+
     };
+
   }
+
 
   return {
+
     runtime: {
+
       ...nextRuntime,
+
       car: collisionResolution.car,
+
       impact: mergeHomeDriveImpactStates(
+
         nextRuntime.impact,
+
         collisionResolution.impact,
+
       ),
+
     },
+
     hadCollision: true,
+
   };
+
 }
 
+
 function tickParkedVehiclesAndCollisionsStep(
+
   nextRuntime: HomeDriveRuntimeState,
+
   parkedVehiclesRef:
+
     | HomeDriveMutableRef<HomeDriveParkedVehicleRuntimeState>
+
     | undefined,
+
 ): SimulationStepResult {
+
   if (!parkedVehiclesRef) {
+
     return {
+
       runtime: nextRuntime,
+
       hadCollision: false,
+
     };
+
   }
 
+
   const impactedParkedVehicles = tickHomeDriveParkedVehicleImpactState(
+
     parkedVehiclesRef.current,
+
     FIXED_STEP_SECONDS,
+
   );
 
+
   const collisionResolution = resolveHomeDriveParkedVehicleCollisions(
+
     nextRuntime.car,
+
     impactedParkedVehicles,
+
     nextRuntime.elapsedSeconds,
+
     {
+
       brutality: 1.72,
+
       playerRadiusMeters: 1.64,
+
       parkedVehiclePushMultiplier: 0.9,
+
       playerPushMultiplier: 0.92,
+
       playerReverseKickMultiplier: 0.52,
+
       minImpactSpeedMps: 0.72,
+
       maxDamagePerHit: 0.42,
+
     },
+
   );
+
 
   parkedVehiclesRef.current = collisionResolution.parkedVehicles;
 
+
   if (collisionResolution.events.length <= 0 || !collisionResolution.impact) {
+
     return {
+
       runtime: nextRuntime,
+
       hadCollision: false,
+
     };
+
   }
+
 
   return {
+
     runtime: {
+
       ...nextRuntime,
+
       car: collisionResolution.car,
+
       impact: mergeHomeDriveImpactStates(
+
         nextRuntime.impact,
+
         collisionResolution.impact,
+
       ),
+
     },
+
     hadCollision: true,
+
   };
+
 }
 
+
 function tickBuildingCollisionsStep(
+
   nextRuntime: HomeDriveRuntimeState,
+
   buildings: readonly HomeDriveBuilding[] | undefined,
+
   buildingCollisionsRef:
+
     | HomeDriveMutableRef<HomeDriveBuildingCollisionRuntimeState>
+
     | undefined,
+
 ): SimulationStepResult {
+
   if (!buildingCollisionsRef || !buildings || buildings.length <= 0) {
+
     return {
+
       runtime: nextRuntime,
+
       hadCollision: false,
+
     };
+
   }
 
+
   const collisionResolution = resolveHomeDriveBuildingCollisions(
+
     nextRuntime.car,
+
     buildings,
+
     buildingCollisionsRef.current,
+
     nextRuntime.elapsedSeconds,
+
     {
+
       brutality: 1.86,
+
       playerRadiusMeters: 1.72,
+
       playerPushMultiplier: 0.98,
+
       reverseKickMultiplier: 0.62,
+
       maxReverseKickMps: 13.5,
+
       minImpactSpeedMps: 0.68,
+
       cooldownSeconds: 0.28,
+
       candidateRadiusMeters: 108,
+
       maxCandidateBuildings: 36,
+
     },
+
   );
+
 
   buildingCollisionsRef.current = collisionResolution.buildingCollisions;
 
+
   if (collisionResolution.events.length <= 0 || !collisionResolution.impact) {
+
     return {
+
       runtime: {
+
         ...nextRuntime,
+
         car: collisionResolution.car,
+
       },
+
       hadCollision: false,
+
     };
+
   }
+
 
   return {
+
     runtime: {
+
       ...nextRuntime,
+
       car: collisionResolution.car,
+
       impact: mergeHomeDriveImpactStates(
+
         nextRuntime.impact,
+
         collisionResolution.impact,
+
       ),
+
     },
+
     hadCollision: true,
+
   };
+
 }
 
+
 function tickSimulationStep(
+
   runtime: HomeDriveRuntimeState,
+
   input: HomeDriveInputState,
+
   trafficRef: HomeDriveMutableRef<HomeDriveTrafficRuntimeState> | undefined,
+
   parkedVehiclesRef:
+
     | HomeDriveMutableRef<HomeDriveParkedVehicleRuntimeState>
+
     | undefined,
+
+  pedestriansRef:
+
+    | HomeDriveMutableRef<HomeDrivePedestrianRuntimeState>
+
+    | undefined,
+
   buildingCollisionsRef:
+
     | HomeDriveMutableRef<HomeDriveBuildingCollisionRuntimeState>
+
     | undefined,
+
   buildings: readonly HomeDriveBuilding[] | undefined,
+
   crosswalksRef:
+
     | HomeDriveMutableRef<HomeDriveCrosswalkRuntimeState>
+
     | undefined,
+
 ): SimulationStepResult {
+
   if (crosswalksRef) {
+
     crosswalksRef.current = tickHomeDriveCrosswalks(
+
       crosswalksRef.current,
+
       FIXED_STEP_SECONDS,
+
     );
+
   }
+
 
   const physicsRuntime = tickHomeDrivePhysics(runtime, input, FIXED_STEP_SECONDS);
 
-  const trafficResult = tickTrafficAndCollisionsStep(
+
+  const pedestrianCollisionResult = tickPedestrianCollisionsStep(
+
     physicsRuntime,
-    trafficRef,
-    crosswalksRef,
+
+    pedestriansRef,
+
   );
+
+
+  const trafficResult = tickTrafficAndCollisionsStep(
+
+    pedestrianCollisionResult.runtime,
+
+    trafficRef,
+
+    crosswalksRef,
+
+  );
+
 
   const parkedResult = tickParkedVehiclesAndCollisionsStep(
+
     trafficResult.runtime,
+
     parkedVehiclesRef,
+
   );
+
 
   /**
+
    * Prédio entra por último.
+
    *
+
    * Motivo:
+
    * se tráfego/carro parado empurrar o player para dentro da fachada,
+
    * o prédio corrige a posição final e gera o impacto visual.
+
    */
+
   const buildingResult = tickBuildingCollisionsStep(
+
     parkedResult.runtime,
+
     buildings,
+
     buildingCollisionsRef,
+
   );
 
+
   return {
+
     runtime: buildingResult.runtime,
+
     hadCollision:
+
+      pedestrianCollisionResult.hadCollision ||
+
       trafficResult.hadCollision ||
+
       parkedResult.hadCollision ||
+
       buildingResult.hadCollision,
+
   };
+
 }
+
 
 function getImpactSerial(runtime: HomeDriveRuntimeState): number | null {
+
   const serial = runtime.impact?.serial;
 
+
   return typeof serial === "number" && Number.isFinite(serial) ? serial : null;
+
 }
 
+
 export default function HomeDriveThreeSimulation({
+
   runtimeRef,
+
   inputRef,
+
   trafficRef,
+
   parkedVehiclesRef,
+
   buildingCollisionsRef,
+
   buildings,
+
   pedestriansRef,
+
   crosswalksRef,
+
   pedestrianPerformance,
+
   enabled = true,
+
   publishRuntimeSnapshot,
+
   snapshotHz = DEFAULT_SNAPSHOT_HZ,
+
 }: HomeDriveThreeSimulationProps) {
+
   const accumulatorRef = useRef(0);
+
   const snapshotAccumulatorRef = useRef(0);
+
   const pedestrianAccumulatorRef = useRef(0);
+
   const pedestrianTickIndexRef = useRef(0);
+
   const lastPublishedImpactSerialRef = useRef<number | null>(null);
 
+
   useFrame((_, rawDeltaSeconds) => {
+
     if (!enabled) {
+
       accumulatorRef.current = 0;
+
       snapshotAccumulatorRef.current = 0;
+
       pedestrianAccumulatorRef.current = 0;
+
       return;
+
     }
+
 
     const deltaSeconds = sanitizeDeltaSeconds(rawDeltaSeconds);
 
+
     if (deltaSeconds <= 0) {
+
       return;
+
     }
 
+
     accumulatorRef.current = Math.min(
+
       accumulatorRef.current + deltaSeconds,
+
       MAX_ACCUMULATED_SECONDS,
+
     );
 
+
     let steps = 0;
+
     let hadCollisionThisFrame = false;
 
+
     while (
+
       accumulatorRef.current >= FIXED_STEP_SECONDS &&
+
       steps < MAX_STEPS_PER_FRAME
+
     ) {
+
       const stepResult = tickSimulationStep(
+
         runtimeRef.current,
+
         inputRef.current,
+
         trafficRef,
+
         parkedVehiclesRef,
+
+        pedestriansRef,
+
         buildingCollisionsRef,
+
         buildings,
+
         crosswalksRef,
+
       );
 
+
       runtimeRef.current = stepResult.runtime;
+
       hadCollisionThisFrame = hadCollisionThisFrame || stepResult.hadCollision;
 
+
       const pedestrianStepSeconds = pedestrianPerformance
+
         ? getHomeDrivePedestrianSimulationStepSeconds(pedestrianPerformance)
+
         : FIXED_STEP_SECONDS;
+
 
       pedestrianAccumulatorRef.current += FIXED_STEP_SECONDS;
 
+
       while (pedestrianAccumulatorRef.current >= pedestrianStepSeconds) {
+
         pedestrianTickIndexRef.current += 1;
 
+
         tickPedestriansStep(
+
           pedestriansRef,
+
           crosswalksRef,
+
           runtimeRef.current,
+
           pedestrianStepSeconds,
+
           pedestrianTickIndexRef.current,
+
           pedestrianPerformance,
+
         );
 
+
         pedestrianAccumulatorRef.current -= pedestrianStepSeconds;
+
       }
 
+
       accumulatorRef.current -= FIXED_STEP_SECONDS;
+
       steps += 1;
+
     }
+
 
     if (steps >= MAX_STEPS_PER_FRAME) {
+
       accumulatorRef.current = 0;
+
       pedestrianAccumulatorRef.current = 0;
+
     }
+
+
+    tickPedestrianImpactVisualFrame(
+
+      pedestriansRef,
+
+      runtimeRef.current,
+
+      accumulatorRef.current,
+
+    );
+
 
     if (!publishRuntimeSnapshot) {
+
       return;
+
     }
+
 
     const currentImpactSerial = getImpactSerial(runtimeRef.current);
+
     const hasNewImpactSerial =
+
       currentImpactSerial !== null &&
+
       currentImpactSerial !== lastPublishedImpactSerialRef.current;
 
+
     if (hadCollisionThisFrame || hasNewImpactSerial) {
+
       lastPublishedImpactSerialRef.current = currentImpactSerial;
+
       snapshotAccumulatorRef.current = 0;
+
       publishRuntimeSnapshot();
+
       return;
+
     }
 
+
     const safeSnapshotHz = Math.max(1, Math.min(snapshotHz, 8));
+
     const snapshotIntervalSeconds = 1 / safeSnapshotHz;
+
 
     snapshotAccumulatorRef.current += deltaSeconds;
 
+
     if (snapshotAccumulatorRef.current < snapshotIntervalSeconds) {
+
       return;
+
     }
 
+
     snapshotAccumulatorRef.current = 0;
+
     lastPublishedImpactSerialRef.current = currentImpactSerial;
+
     publishRuntimeSnapshot();
+
   });
 
-  return null;
-}
 
+  return null;
+
+}

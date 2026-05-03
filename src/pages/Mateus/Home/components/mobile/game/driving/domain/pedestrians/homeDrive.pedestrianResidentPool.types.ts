@@ -59,6 +59,17 @@ export type HomeDrivePedestrianResidentPoolConfig = Readonly<{
   viewportSideCount?: number;
   viewportMaxTeleportsPerTick?: number;
   viewportMinSpacingMeters?: number;
+
+  /**
+   * Quando true, o pool vira tamanho fixo após o boot/preload.
+   * Depois disso o runtime só reaproveita/teleporta agentes existentes.
+   */
+  lockAfterBoot?: boolean;
+
+  /**
+   * Deve ficar false no jogo normal. Permite criação tardia apenas em modo debug/fallback.
+   */
+  allowRuntimeExpansion?: boolean;
 }>;
 
 export type HomeDrivePedestrianResidentPoolSlot = Readonly<{
@@ -111,3 +122,5 @@ export type HomeDrivePedestrianResidentPoolUpdateOptions = Readonly<{
   config: HomeDrivePedestrianResidentPoolConfig;
   runtime?: import("./homeDrive.pedestrianResidentPoolRuntime.types").HomeDrivePedestrianResidentPoolRuntime;
 }>;
+
+
