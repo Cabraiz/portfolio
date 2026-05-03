@@ -62,6 +62,7 @@ import {
 import HomeDriveThreeRoadNetwork from "./HomeDriveThreeRoadNetwork";
 import HomeDriveThreeSimulation from "./HomeDriveThreeSimulation";
 import HomeDriveThreeTraffic from "./HomeDriveThreeTraffic";
+import HomeDriveThreeUrbanFixtures from "./urbanFixtures";
 import HomeDriveThreeWorldObjects from "./HomeDriveThreeWorldObjects";
 import { HOME_DRIVE_THREE_COLORS } from "./homeDriveThree.materials";
 import styles from "./HomeDriveThreeScene.module.css";
@@ -129,6 +130,13 @@ const BUILDING_RUBBLE_VISIBLE_RADIUS_PORTRAIT = 560;
 const BUILDING_RUBBLE_VISIBLE_RADIUS_LANDSCAPE = 860;
 const BUILDING_RUBBLE_MAX_VISIBLE_PORTRAIT = 420;
 const BUILDING_RUBBLE_MAX_VISIBLE_LANDSCAPE = 900;
+
+const URBAN_FIXTURES_VISIBLE_RADIUS_PORTRAIT = 680;
+const URBAN_FIXTURES_VISIBLE_RADIUS_LANDSCAPE = 860;
+const URBAN_FIXTURES_MAX_STREET_LIGHTS_PORTRAIT = 180;
+const URBAN_FIXTURES_MAX_STREET_LIGHTS_LANDSCAPE = 260;
+const URBAN_FIXTURES_MAX_TRAFFIC_LIGHTS_PORTRAIT = 72;
+const URBAN_FIXTURES_MAX_TRAFFIC_LIGHTS_LANDSCAPE = 112;
 
 const THREE_CLOCK_DEPRECATION_WARNING =
   "THREE.Clock: This module has been deprecated. Please use THREE.Timer instead.";
@@ -360,7 +368,28 @@ function HomeDriveThreeWorld({
         runtimeRef={runtimeRef}
         visibleRadiusMeters={760}
         maxVisibleCrosswalks={96}
-        showSignals
+        showSignals={false}
+      />
+
+      <HomeDriveThreeUrbanFixtures
+        runtimeRef={runtimeRef}
+        crosswalksRef={crosswalksRef}
+        visibleRadiusMeters={
+          isPortrait
+            ? URBAN_FIXTURES_VISIBLE_RADIUS_PORTRAIT
+            : URBAN_FIXTURES_VISIBLE_RADIUS_LANDSCAPE
+        }
+        maxVisibleStreetLights={
+          isPortrait
+            ? URBAN_FIXTURES_MAX_STREET_LIGHTS_PORTRAIT
+            : URBAN_FIXTURES_MAX_STREET_LIGHTS_LANDSCAPE
+        }
+        maxVisibleTrafficLights={
+          isPortrait
+            ? URBAN_FIXTURES_MAX_TRAFFIC_LIGHTS_PORTRAIT
+            : URBAN_FIXTURES_MAX_TRAFFIC_LIGHTS_LANDSCAPE
+        }
+        snapshotHz={6}
       />
 
       <HomeDriveThreeParkedVehicles
@@ -633,4 +662,6 @@ export default function HomeDriveThreeScene({
     </div>
   );
 }
+
+
 

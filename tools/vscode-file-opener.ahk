@@ -7,13 +7,29 @@
 ;   1) Manual: cola paths e abre no VSCode.
 ;   2) Automático: detecta ZIP novo em Downloads com menos de 3MB,
 ;      extrai, infere o destino pelo encaixe dos folders internos,
-;      copia/substitui no projeto, cria backup e abre arquivos no VSCode.
+;      copia/substitui no projeto e cria backup.
+;      Por padrão, NÃO abre/foca VSCode após aplicar o ZIP.
 ;   3) Rollback: botão para reverter o último ZIP aplicado.
 ;      - Arquivo sobrescrito volta do backup.
 ;      - Arquivo criado pelo ZIP é apagado.
 ; ============================================================
 
 AppName := "VSCode File Opener + ZIP Auto Apply"
+
+; ============================================================
+; GUI 9:16
+; ============================================================
+
+; Janela HUD em formato vertical 9:16, com altura máxima de 620px.
+; 620 * 9 / 16 = 349px de largura aproximada.
+; A organização é em blocos compactos e botões em grade vertical.
+GuiAspectWidth := 9
+GuiAspectHeight := 16
+GuiMaxHeight := 620
+GuiInitialHeight := GuiMaxHeight
+GuiInitialWidth := Round(GuiInitialHeight * GuiAspectWidth / GuiAspectHeight)
+GuiContentMargin := 10
+GuiContentWidth := GuiInitialWidth - (GuiContentMargin * 2)
 
 DefaultRoot := "C:\Users\Cabraiz\Documents\GitHub\portfolio"
 
@@ -31,6 +47,10 @@ MobileRootRelative := "src\pages\Mateus\Home\components\mobile"
 CloseTabsBeforeOpen := true
 CopyFoundFilesContentToClipboard := true
 ClearInputAfterSuccessfulOpen := true
+
+; Default false: ZIP aplica arquivos em modo silencioso, sem focar VSCode.
+; Use o botão "Abrir abas ZIP" para alternar para true quando quiser revisar as abas abertas.
+OpenTabsAfterZipApply := false
 
 OpenBatchSize := 12
 
@@ -79,7 +99,9 @@ global ResultEdit
 global ConfigText
 global WatcherText
 global ZipStatusText
+global ZipDeliveryHudText
 global WatchToggleButton
+global ZipOpenTabsToggleButton
 
 global IsProcessing := false
 global IsZipProcessing := false
@@ -121,22 +143,24 @@ StartZipWatcher()
 
 LoadConfig() {
     global ConfigFile, CodeCommand, ProjectRoot, DefaultRoot, DownloadsDir
-    global AutoZipWatcherEnabled, MaxAutoZipBytes
+    global AutoZipWatcherEnabled, MaxAutoZipBytes, OpenTabsAfterZipApply
 
     CodeCommand := IniRead(ConfigFile, "config", "codeCommand", "")
     ProjectRoot := IniRead(ConfigFile, "config", "projectRoot", DefaultRoot)
     DownloadsDir := IniRead(ConfigFile, "config", "downloadsDir", DownloadsDir)
     AutoZipWatcherEnabled := IniRead(ConfigFile, "config", "autoZipWatcherEnabled", AutoZipWatcherEnabled ? "1" : "0") = "1"
+    OpenTabsAfterZipApply := IniRead(ConfigFile, "config", "openTabsAfterZipApply", OpenTabsAfterZipApply ? "1" : "0") = "1"
     MaxAutoZipBytes := Integer(IniRead(ConfigFile, "config", "maxAutoZipBytes", String(MaxAutoZipBytes)))
 }
 
 SaveConfig() {
-    global ConfigFile, CodeCommand, ProjectRoot, DownloadsDir, AutoZipWatcherEnabled, MaxAutoZipBytes
+    global ConfigFile, CodeCommand, ProjectRoot, DownloadsDir, AutoZipWatcherEnabled, MaxAutoZipBytes, OpenTabsAfterZipApply
 
     IniWrite(CodeCommand, ConfigFile, "config", "codeCommand")
     IniWrite(ProjectRoot, ConfigFile, "config", "projectRoot")
     IniWrite(DownloadsDir, ConfigFile, "config", "downloadsDir")
     IniWrite(AutoZipWatcherEnabled ? "1" : "0", ConfigFile, "config", "autoZipWatcherEnabled")
+    IniWrite(OpenTabsAfterZipApply ? "1" : "0", ConfigFile, "config", "openTabsAfterZipApply")
     IniWrite(String(MaxAutoZipBytes), ConfigFile, "config", "maxAutoZipBytes")
 }
 
@@ -323,68 +347,85 @@ AskDownloadsDir(*) {
 
 BuildGui() {
     global MainGui, BannerText, InputEdit, ResultEdit, ConfigText, AppName
-    global WatcherText, ZipStatusText, WatchToggleButton
+    global WatcherText, ZipStatusText, ZipDeliveryHudText, WatchToggleButton, ZipOpenTabsToggleButton
+    global GuiInitialWidth, GuiInitialHeight, GuiContentWidth
 
-    MainGui := Gui("+Resize +AlwaysOnTop", AppName)
-    MainGui.SetFont("s10", "Segoe UI")
+    contentW := GuiContentWidth
+    gap := 6
+    buttonH := 25
+    halfW := Floor((contentW - gap) / 2)
+    thirdW := Floor((contentW - (gap * 2)) / 3)
 
-    MainGui.AddText("xm ym w960", "Cole paths manualmente ou deixe o app aberto: ZIP novo em Downloads com menos de 3MB será analisado e aplicado automaticamente.")
-
-    BannerText := MainGui.AddText("xm y+8 w960 h30 +Border c555555", "AGUARDANDO — cole paths, pressione Ctrl+V/Ctrl+Enter ou baixe um ZIP pequeno em Downloads.")
-
-    WatcherText := MainGui.AddText("xm y+8 w960 h24 +Border c555555", "WATCHER — inicializando...")
-    ZipStatusText := MainGui.AddText("xm y+4 w960 h42 +Border c555555", "ZIP — nenhum ZIP processado nesta sessão.")
+    ; Sem +Resize: mantém a HUD travada em 9:16 e evita passar de 620px de altura.
+    MainGui := Gui("+AlwaysOnTop", AppName)
+    MainGui.SetFont("s8", "Segoe UI")
 
     MainGui.AddText(
-        "xm y+8 w960 c777777",
-        "Inferência ZIP: src/... -> raiz do projeto | domain/three/... -> game/driving | game/driving/... -> components/mobile | wrappers como portfolio/src são ignorados."
+        "xm ym w" contentW " h32",
+        "ZIP watcher: aplica ZIP novo menor que 3MB. Default: silencioso, sem focar VSCode."
     )
 
-    InputEdit := MainGui.AddEdit("xm y+10 w960 h215 WantTab -Wrap")
+    BannerText := MainGui.AddText("xm y+4 w" contentW " h30 +Border c555555", "AGUARDANDO — cole paths ou baixe um ZIP pequeno em Downloads.")
 
-    openButton := MainGui.AddButton("xm y+10 w138 h34 Default", "Abrir paths")
+    WatcherText := MainGui.AddText("xm y+3 w" contentW " h23 +Border c555555", "WATCHER — inicializando...")
+    ZipStatusText := MainGui.AddText("xm y+3 w" contentW " h32 +Border c555555", "ZIP — nenhum ZIP processado nesta sessão.")
+    ZipDeliveryHudText := MainGui.AddText("xm y+3 w" contentW " h76 +Border c555555", "HUD ENTREGA ZIP — inicializando...")
+
+    MainGui.AddText(
+        "xm y+4 w" contentW " h24 c777777",
+        "Inferência: src -> raiz | domain/three -> driving | game/driving -> mobile."
+    )
+
+    InputEdit := MainGui.AddEdit("xm y+4 w" contentW " h65 WantTab -Wrap")
+
+    openButton := MainGui.AddButton("xm y+6 w" halfW " h" buttonH " Default", "Abrir paths")
     openButton.OnEvent("Click", QueueProcessInput)
 
-    pasteButton := MainGui.AddButton("x+8 yp w138 h34", "Colar e abrir")
+    pasteButton := MainGui.AddButton("x+" gap " yp w" halfW " h" buttonH, "Colar e abrir")
     pasteButton.OnEvent("Click", PasteClipboardAndQueue)
 
-    processZipButton := MainGui.AddButton("x+8 yp w170 h34", "Processar ZIP recente")
+    processZipButton := MainGui.AddButton("xm y+4 w" halfW " h" buttonH, "Processar ZIP")
     processZipButton.OnEvent("Click", ProcessLatestZipClicked)
 
-    revertZipButton := MainGui.AddButton("x+8 yp w170 h34", "Reverter último ZIP")
+    revertZipButton := MainGui.AddButton("x+" gap " yp w" halfW " h" buttonH, "Reverter ZIP")
     revertZipButton.OnEvent("Click", RevertLastApplyClicked)
 
-    WatchToggleButton := MainGui.AddButton("x+8 yp w128 h34", "Watcher ON")
+    WatchToggleButton := MainGui.AddButton("xm y+4 w" halfW " h" buttonH, "Watcher ON")
     WatchToggleButton.OnEvent("Click", ToggleZipWatcher)
 
-    chooseCodeButton := MainGui.AddButton("xm y+8 w128 h34", "VSCode")
+    ZipOpenTabsToggleButton := MainGui.AddButton("x+" gap " yp w" halfW " h" buttonH, "Abas ZIP: OFF")
+    ZipOpenTabsToggleButton.OnEvent("Click", ToggleZipOpenTabsAfterApply)
+
+    chooseCodeButton := MainGui.AddButton("xm y+6 w" thirdW " h" buttonH, "VSCode")
     chooseCodeButton.OnEvent("Click", ChooseVSCodeClicked)
 
-    chooseRootButton := MainGui.AddButton("x+8 yp w128 h34", "Projeto")
+    chooseRootButton := MainGui.AddButton("x+" gap " yp w" thirdW " h" buttonH, "Projeto")
     chooseRootButton.OnEvent("Click", ChooseProjectRootClicked)
 
-    chooseDownloadsButton := MainGui.AddButton("x+8 yp w128 h34", "Downloads")
+    chooseDownloadsButton := MainGui.AddButton("x+" gap " yp w" thirdW " h" buttonH, "Downloads")
     chooseDownloadsButton.OnEvent("Click", AskDownloadsDir)
 
-    backupFolderButton := MainGui.AddButton("x+8 yp w150 h34", "Abrir backup")
+    backupFolderButton := MainGui.AddButton("xm y+4 w" halfW " h" buttonH, "Abrir backup")
     backupFolderButton.OnEvent("Click", OpenBackupFolderClicked)
 
-    clearButton := MainGui.AddButton("x+8 yp w82 h34", "Limpar")
+    clearButton := MainGui.AddButton("x+" gap " yp w" halfW " h" buttonH, "Limpar")
     clearButton.OnEvent("Click", ClearAll)
 
-    MainGui.AddText("xm y+14 w960", "Resultado / diagnóstico:")
-    ResultEdit := MainGui.AddEdit("xm y+6 w960 h165 ReadOnly -Wrap")
+    MainGui.AddText("xm y+5 w" contentW " h16", "Resultado / diagnóstico:")
+    ResultEdit := MainGui.AddEdit("xm y+3 w" contentW " h80 ReadOnly -Wrap")
 
-    ConfigText := MainGui.AddText("xm y+10 w960 c555555", "")
+    ConfigText := MainGui.AddText("xm y+4 w" contentW " h70 c555555", "")
 
     RefreshConfigText()
     RefreshWatcherText()
+    RefreshZipOpenTabsToggleText()
+    SetZipHud("idle", "Aguardando ZIP novo ou processamento manual.", "info")
     SetBanner("AGUARDANDO — manual ou automático pronto.", "info")
 
     MainGui.OnEvent("Size", GuiResize)
     MainGui.OnEvent("Close", (*) => ExitApp())
 
-    MainGui.Show("w1000 h700")
+    MainGui.Show("w" GuiInitialWidth " h" GuiInitialHeight)
 
     KeepWindowReady()
 }
@@ -405,19 +446,20 @@ ChooseProjectRootClicked(*) {
 
 RefreshConfigText() {
     global ConfigText, CodeCommand, ProjectRoot, DownloadsDir
-    global CloseTabsBeforeOpen, CopyFoundFilesContentToClipboard, OpenBatchSize
-    global DrivingRootRelative, MobileRootRelative, MaxAutoZipBytes
+    global CloseTabsBeforeOpen, CopyFoundFilesContentToClipboard, OpenBatchSize, OpenTabsAfterZipApply
+    global DrivingRootRelative, MobileRootRelative, MaxAutoZipBytes, GuiInitialWidth, GuiMaxHeight
 
     closeMode := CloseTabsBeforeOpen ? "ligado" : "desligado"
     copyMode := CopyFoundFilesContentToClipboard ? "ligado" : "desligado"
+    zipOpenMode := OpenTabsAfterZipApply ? "ligado" : "desligado/silencioso"
     maxMb := Round(MaxAutoZipBytes / 1024 / 1024, 2)
 
     ConfigText.Value :=
-        "VSCode: " CodeCommand "`n"
+        "Layout: 9:16 " GuiInitialWidth "x" GuiMaxHeight " | ZIP abas: " zipOpenMode " | Manual fecha abas: " closeMode " | Lote: " OpenBatchSize "`n"
+        . "VSCode: " CodeCommand "`n"
         . "Projeto: " ProjectRoot "`n"
-        . "Downloads monitorado: " DownloadsDir " | ZIP máximo: " maxMb " MB`n"
-        . "Base domain/three: " DrivingRootRelative " | Base game/driving: " MobileRootRelative "`n"
-        . "Fechar abas antes: " closeMode " | Copiar conteúdo manual: " copyMode " | Lote VSCode: " OpenBatchSize
+        . "Downloads: " DownloadsDir " | ZIP máx.: " maxMb " MB`n"
+        . "Base domain/three: " DrivingRootRelative
 }
 
 RefreshWatcherText() {
@@ -433,31 +475,189 @@ RefreshWatcherText() {
     }
 }
 
+RefreshZipOpenTabsToggleText() {
+    global ZipOpenTabsToggleButton, OpenTabsAfterZipApply
+
+    try {
+        ZipOpenTabsToggleButton.Text := OpenTabsAfterZipApply ? "Abas ZIP: ON" : "Abas ZIP: OFF"
+    }
+}
+
+ToggleZipOpenTabsAfterApply(*) {
+    global OpenTabsAfterZipApply
+
+    OpenTabsAfterZipApply := !OpenTabsAfterZipApply
+    SaveConfig()
+    RefreshZipOpenTabsToggleText()
+    RefreshConfigText()
+
+    if (OpenTabsAfterZipApply) {
+        SetZipStatus("Abrir abas após aplicar ZIP ligado. Próximo ZIP vai focar/abrir VSCode.", "ok")
+        SetZipHud("vscode_on", "Modo revisão ligado: após aplicar o ZIP, os arquivos alterados serão abertos no VSCode.", "ok")
+    } else {
+        SetZipStatus("Abrir abas após aplicar ZIP desligado. Próximo ZIP será aplicado na surdina.", "warn")
+        SetZipHud("vscode_off", "Modo silencioso ligado: ZIP será extraído, copiado e versionado com backup sem focar VSCode.", "warn")
+    }
+}
+
+SetZipHud(stage := "idle", detail := "", kind := "info") {
+    global ZipDeliveryHudText
+
+    try {
+        if (kind = "ok") {
+            ZipDeliveryHudText.Opt("c007000")
+        } else if (kind = "warn") {
+            ZipDeliveryHudText.Opt("c9A5A00")
+        } else if (kind = "error") {
+            ZipDeliveryHudText.Opt("cB00020")
+        } else {
+            ZipDeliveryHudText.Opt("c555555")
+        }
+
+        ZipDeliveryHudText.Value := BuildZipDeliveryHud(stage, detail)
+    }
+}
+
+BuildZipDeliveryHud(stage := "idle", detail := "") {
+    title := "HUD ENTREGA ZIP — " ZipStageLabel(stage)
+
+    if (detail != "") {
+        title .= " — " detail
+    }
+
+    return title "`r`n"
+        . ZipHudToken(stage, ["detected", "stabilizing"], "01 Recebido") " | " ZipHudToken(stage, ["extracting"], "02 Unzip") "`r`n"
+        . ZipHudToken(stage, ["collecting", "planning"], "03 Paths") " | " ZipHudToken(stage, ["copying"], "04 Copy") "`r`n"
+        . ZipHudToken(stage, ["manifest"], "05 Manifest") " | " ZipHudToken(stage, ["vscode", "vscode_skip", "vscode_on", "vscode_off"], "06 VSCode") "`r`n"
+        . ZipHudToken(stage, ["done", "failed", "idle"], "07 Entrega")
+}
+
+ZipHudToken(activeStage, keys, label) {
+    active := false
+
+    for key in keys {
+        if (activeStage = key) {
+            active := true
+            break
+        }
+    }
+
+    return active ? ">> " label : "   " label
+}
+
+ZipHudLine(activeStage, keys, label) {
+    active := false
+
+    for key in keys {
+        if (activeStage = key) {
+            active := true
+            break
+        }
+    }
+
+    marker := active ? ">> " : "   "
+    suffix := active ? "  [agora]" : ""
+
+    return marker label suffix "`r`n"
+}
+
+ZipStageLabel(stage) {
+    if (stage = "detected") {
+        return "ZIP detectado"
+    }
+
+    if (stage = "stabilizing") {
+        return "aguardando estabilizar"
+    }
+
+    if (stage = "extracting") {
+        return "extraindo"
+    }
+
+    if (stage = "collecting") {
+        return "lendo arquivos"
+    }
+
+    if (stage = "planning") {
+        return "mapeando destinos"
+    }
+
+    if (stage = "copying") {
+        return "implementando"
+    }
+
+    if (stage = "manifest") {
+        return "preparando rollback"
+    }
+
+    if (stage = "vscode") {
+        return "abrindo VSCode"
+    }
+
+    if (stage = "vscode_skip") {
+        return "modo silencioso"
+    }
+
+    if (stage = "vscode_on") {
+        return "modo revisão ligado"
+    }
+
+    if (stage = "vscode_off") {
+        return "modo silencioso ligado"
+    }
+
+    if (stage = "done") {
+        return "concluído"
+    }
+
+    if (stage = "failed") {
+        return "falhou"
+    }
+
+    return "aguardando"
+}
+
+MakeOpenResultSkipped(reason := "Abertura de abas desabilitada.") {
+    return {
+        closeAttempted: false,
+        closedTabs: false,
+        batches: 0,
+        runOk: true,
+        skipped: true,
+        error: reason
+    }
+}
+
 GuiResize(guiObj, minMax, width, height) {
-    global BannerText, WatcherText, ZipStatusText, InputEdit, ResultEdit, ConfigText
+    global BannerText, WatcherText, ZipStatusText, ZipDeliveryHudText, InputEdit, ResultEdit, ConfigText
+    global GuiContentMargin, GuiContentWidth, GuiMaxHeight
 
     if (minMax = -1) {
         return
     }
 
-    margin := 20
-    contentWidth := width - margin * 2
+    ; Segurança para DPI/reflow: conserva proporção vertical e não passa de 620px de altura.
+    contentWidth := width - (GuiContentMargin * 2)
 
-    inputHeight := height - 497
-
-    if (inputHeight < 150) {
-        inputHeight := 150
+    if (contentWidth > GuiContentWidth) {
+        contentWidth := GuiContentWidth
     }
 
-    resultY := inputHeight + 294
-    resultHeight := 165
+    if (contentWidth < 300) {
+        contentWidth := 300
+    }
 
-    BannerText.Move(, , contentWidth)
-    WatcherText.Move(, , contentWidth)
-    ZipStatusText.Move(, , contentWidth)
-    InputEdit.Move(, , contentWidth, inputHeight)
-    ResultEdit.Move(, resultY, contentWidth, resultHeight)
-    ConfigText.Move(, height - 118, contentWidth)
+    if (height > GuiMaxHeight) {
+        height := GuiMaxHeight
+    }
+
+    BannerText.Move(, , contentWidth, 30)
+    WatcherText.Move(, , contentWidth, 23)
+    ZipStatusText.Move(, , contentWidth, 32)
+    ZipDeliveryHudText.Move(, , contentWidth, 76)
+    InputEdit.Move(, , contentWidth, 65)
+    ResultEdit.Move(, , contentWidth, 80)
+    ConfigText.Move(, , contentWidth, 70)
 }
 
 SetBanner(message, kind := "info") {
@@ -706,6 +906,7 @@ ToggleZipWatcher(*) {
     SaveConfig()
     StartZipWatcher()
     SetZipStatus(AutoZipWatcherEnabled ? "Watcher ligado." : "Watcher desligado.", AutoZipWatcherEnabled ? "ok" : "warn")
+    SetZipHud(AutoZipWatcherEnabled ? "idle" : "vscode_off", AutoZipWatcherEnabled ? "Monitoramento de Downloads ativo." : "Monitoramento pausado.", AutoZipWatcherEnabled ? "ok" : "warn")
 }
 
 MarkExistingDownloadsZips() {
@@ -760,6 +961,7 @@ ScanDownloadsForNewZip(*) {
 
         if (!IsZipStable(zipPath)) {
             SetZipStatus("Aguardando download estabilizar: " A_LoopFileName " (" FormatBytes(size) ")", "info")
+            SetZipHud("stabilizing", A_LoopFileName " ainda está chegando em Downloads.", "info")
             continue
         }
 
@@ -832,6 +1034,7 @@ ProcessZipFile(zipPath, markSeen := true) {
         LastProcessedZip := zipPath
         SetBanner("PROCESSANDO ZIP — extraindo e analisando estrutura...", "info")
         SetZipStatus("Processando " GetFileName(zipPath) " (" FormatBytes(SafeFileGetSize(zipPath)) ")", "info")
+        SetZipHud("detected", GetFileName(zipPath) " recebido para aplicação.", "info")
 
         result := ApplyZipToProject(zipPath)
 
@@ -842,8 +1045,13 @@ ProcessZipFile(zipPath, markSeen := true) {
         SetResult(result.report)
 
         if (result.success) {
-            SetBanner("OK — ZIP aplicado. Arquivos copiados/substituídos e abertos no VSCode.", "ok")
-            SetZipStatus("OK: " GetFileName(zipPath) " aplicado. " result.appliedCount " arquivo(s).", "ok")
+            if (result.HasOwnProp("openTabs") && result.openTabs) {
+                SetBanner("OK — ZIP aplicado e arquivos abertos no VSCode.", "ok")
+                SetZipStatus("OK: " GetFileName(zipPath) " aplicado. " result.appliedCount " arquivo(s). Abas abertas.", "ok")
+            } else {
+                SetBanner("OK — ZIP aplicado em modo silencioso. VSCode não foi focado.", "ok")
+                SetZipStatus("OK: " GetFileName(zipPath) " aplicado na surdina. " result.appliedCount " arquivo(s).", "ok")
+            }
         } else {
             SetBanner("ERRO/AVISO — ZIP não foi aplicado completamente. Veja o diagnóstico.", "error")
             SetZipStatus("Falhou ou ficou incompleto: " GetFileName(zipPath), "error")
@@ -855,6 +1063,7 @@ ProcessZipFile(zipPath, markSeen := true) {
 
         SetBanner("ERRO — processamento do ZIP interrompido.", "error")
         SetZipStatus("Erro ao processar " GetFileName(zipPath), "error")
+        SetZipHud("failed", "Erro inesperado durante processamento do ZIP.", "error")
         SetResult(FormatAhkError(err))
     }
 
@@ -899,8 +1108,9 @@ GetFileSignature(path) {
 }
 
 ApplyZipToProject(zipPath) {
-    global TempRoot, ProjectRoot
+    global TempRoot, ProjectRoot, OpenTabsAfterZipApply
 
+    SetZipHud("detected", GetFileName(zipPath) " pronto para extração.", "info")
     EnsureDir(TempRoot)
 
     zipName := GetNameNoExt(zipPath)
@@ -913,38 +1123,48 @@ ApplyZipToProject(zipPath) {
 
     EnsureDir(extractDir)
 
+    SetZipHud("extracting", "Extraindo em: " extractDir, "info")
     extractOk := ExtractZip(zipPath, extractDir)
 
     if (!extractOk) {
+        SetZipHud("failed", "Falha na extração do ZIP.", "error")
         return {
             success: false,
             appliedCount: 0,
+            openTabs: OpenTabsAfterZipApply,
             report: "Falha ao extrair ZIP:`r`n" zipPath "`r`n`r`nVerifique se PowerShell/Expand-Archive está disponível e se o ZIP não está corrompido."
         }
     }
 
+    SetZipHud("collecting", "Extração concluída. Lendo arquivos compatíveis.", "info")
     files := CollectExtractedFiles(extractDir)
 
     if (files.Length = 0) {
+        SetZipHud("failed", "ZIP extraído, mas sem arquivos compatíveis.", "error")
         return {
             success: false,
             appliedCount: 0,
+            openTabs: OpenTabsAfterZipApply,
             report: "ZIP extraído, mas nenhum arquivo compatível foi encontrado.`r`nZIP: " zipPath
         }
     }
 
+    SetZipHud("planning", files.Length " arquivo(s) compatível(is). Inferindo destino no projeto.", "info")
     planResult := BuildZipApplyPlan(files)
 
     if (planResult.plan.Length = 0) {
+        SetZipHud("failed", "Nenhum destino seguro foi inferido. Nada foi copiado.", "error")
         report := "Nenhum arquivo seguro para aplicar.`r`n`r`n"
-        report .= BuildZipAnalysisReport(zipPath, extractDir, files, planResult, { applied: [], failed: [], backupDir: "" }, { closeAttempted: false, closedTabs: false, batches: 0, runOk: false, error: "" })
+        report .= BuildZipAnalysisReport(zipPath, extractDir, files, planResult, { applied: [], failed: [], backupDir: "" }, MakeOpenResultSkipped("ZIP não chegou à etapa de abertura de abas."))
 
-        return { success: false, appliedCount: 0, report: report }
+        return { success: false, appliedCount: 0, openTabs: OpenTabsAfterZipApply, report: report }
     }
 
+    SetZipHud("copying", planResult.plan.Length " arquivo(s) no plano. Copiando/substituindo com backup.", "info")
     applyResult := CopyPlannedFiles(planResult.plan, zipPath)
 
     if (applyResult.applied.Length > 0) {
+        SetZipHud("manifest", "Criando manifest para rollback do último ZIP.", "info")
         manifestPath := SaveApplyManifest(applyResult, zipPath)
         applyResult.manifest := manifestPath
     }
@@ -954,17 +1174,26 @@ ApplyZipToProject(zipPath) {
         openedFiles.Push(item.target)
     }
 
-    openResult := { closeAttempted: false, closedTabs: false, batches: 0, runOk: false, error: "" }
+    openResult := MakeOpenResultSkipped("Modo silencioso ZIP: abrir abas após aplicar está OFF.")
 
-    if (openedFiles.Length > 0) {
+    if (OpenTabsAfterZipApply && openedFiles.Length > 0) {
+        SetZipHud("vscode", openedFiles.Length " arquivo(s) aplicado(s). Abrindo abas no VSCode.", "info")
         openResult := OpenFilesInVSCode(openedFiles)
+    } else if (openedFiles.Length > 0) {
+        SetZipHud("vscode_skip", openedFiles.Length " arquivo(s) aplicado(s). VSCode preservado sem foco.", "warn")
     }
 
     report := BuildZipAnalysisReport(zipPath, extractDir, files, planResult, applyResult, openResult)
 
-    success := (applyResult.applied.Length > 0 && applyResult.failed.Length = 0 && openResult.runOk)
+    success := (applyResult.applied.Length > 0 && applyResult.failed.Length = 0 && (!OpenTabsAfterZipApply || openResult.runOk))
 
-    return { success: success, appliedCount: applyResult.applied.Length, report: report }
+    if (success) {
+        SetZipHud("done", OpenTabsAfterZipApply ? "Entrega concluída com abas abertas." : "Entrega concluída em modo silencioso.", "ok")
+    } else {
+        SetZipHud("failed", "Entrega incompleta. Veja o diagnóstico.", "error")
+    }
+
+    return { success: success, appliedCount: applyResult.applied.Length, openTabs: OpenTabsAfterZipApply, report: report }
 }
 
 ExtractZip(zipPath, destinationDir) {
@@ -1254,8 +1483,9 @@ CopyPlannedFiles(plan, zipPath) {
     applied := []
     failed := []
 
-    for item in plan {
+    for index, item in plan {
         try {
+            SetZipHud("copying", "Aplicando " index "/" plan.Length ": " item.targetRelative, "info")
             targetDir := GetDirName(item.target)
             EnsureDir(targetDir)
 
@@ -1310,13 +1540,20 @@ BuildZipAnalysisReport(zipPath, extractDir, files, planResult, applyResult, open
     }
 
     report .= "`r`nVSCode:`r`n"
-    report .= "  Fechar abas tentou: " (openResult.closeAttempted ? "sim" : "não") "`r`n"
-    report .= "  Fechamento confirmado: " (openResult.closedTabs ? "sim" : "não") "`r`n"
-    report .= "  Lotes enviados: " openResult.batches "`r`n"
-    report .= "  Comando executado: " (openResult.runOk ? "sim" : "não") "`r`n"
+    if (openResult.HasOwnProp("skipped") && openResult.skipped) {
+        report .= "  Abrir abas após aplicar ZIP: desligado/silencioso`r`n"
+        report .= "  VSCode focado: não`r`n"
+        report .= "  Motivo: " openResult.error "`r`n"
+    } else {
+        report .= "  Abrir abas após aplicar ZIP: ligado`r`n"
+        report .= "  Fechar abas tentou: " (openResult.closeAttempted ? "sim" : "não") "`r`n"
+        report .= "  Fechamento confirmado: " (openResult.closedTabs ? "sim" : "não") "`r`n"
+        report .= "  Lotes enviados: " openResult.batches "`r`n"
+        report .= "  Comando executado: " (openResult.runOk ? "sim" : "não") "`r`n"
 
-    if (openResult.HasOwnProp("error") && openResult.error != "") {
-        report .= "  Erro VSCode: " openResult.error "`r`n"
+        if (openResult.HasOwnProp("error") && openResult.error != "") {
+            report .= "  Erro VSCode: " openResult.error "`r`n"
+        }
     }
 
     if (applyResult.applied.Length > 0) {
@@ -1520,6 +1757,8 @@ ReadApplyManifest(manifestPath) {
 }
 
 RevertApplyManifest(manifestPath) {
+    global OpenTabsAfterZipApply
+
     manifest := ReadApplyManifest(manifestPath)
     reverted := []
     failed := []
@@ -1562,9 +1801,9 @@ RevertApplyManifest(manifestPath) {
         }
     }
 
-    openResult := { closeAttempted: false, closedTabs: false, batches: 0, runOk: false, error: "" }
+    openResult := MakeOpenResultSkipped("Modo silencioso ZIP: rollback não abriu abas porque abrir abas ZIP está OFF.")
 
-    if (openAfterRevert.Length > 0) {
+    if (OpenTabsAfterZipApply && openAfterRevert.Length > 0) {
         openResult := OpenFilesInVSCode(UniqueArray(openAfterRevert))
     }
 
@@ -1586,13 +1825,20 @@ BuildRevertReport(manifest, reverted, failed, openResult) {
     report .= "  Falhas: " failed.Length "`r`n"
 
     report .= "`r`nVSCode:`r`n"
-    report .= "  Fechar abas tentou: " (openResult.closeAttempted ? "sim" : "não") "`r`n"
-    report .= "  Fechamento confirmado: " (openResult.closedTabs ? "sim" : "não") "`r`n"
-    report .= "  Lotes enviados: " openResult.batches "`r`n"
-    report .= "  Comando executado: " (openResult.runOk ? "sim" : "não") "`r`n"
+    if (openResult.HasOwnProp("skipped") && openResult.skipped) {
+        report .= "  Abrir abas após rollback: desligado/silencioso`r`n"
+        report .= "  VSCode focado: não`r`n"
+        report .= "  Motivo: " openResult.error "`r`n"
+    } else {
+        report .= "  Abrir abas após rollback: ligado`r`n"
+        report .= "  Fechar abas tentou: " (openResult.closeAttempted ? "sim" : "não") "`r`n"
+        report .= "  Fechamento confirmado: " (openResult.closedTabs ? "sim" : "não") "`r`n"
+        report .= "  Lotes enviados: " openResult.batches "`r`n"
+        report .= "  Comando executado: " (openResult.runOk ? "sim" : "não") "`r`n"
 
-    if (openResult.HasOwnProp("error") && openResult.error != "") {
-        report .= "  Erro VSCode: " openResult.error "`r`n"
+        if (openResult.HasOwnProp("error") && openResult.error != "") {
+            report .= "  Erro VSCode: " openResult.error "`r`n"
+        }
     }
 
     if (reverted.Length > 0) {
