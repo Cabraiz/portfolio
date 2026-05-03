@@ -10,7 +10,30 @@ export type HomeDriveVehicleModelKey =
   | "light-pickup"
   | "delivery-van"
   | "taxi-sedan"
-  | "app-driver-sedan";
+  | "app-driver-sedan"
+  | "mini-hatch"
+  | "classic-beetle"
+  | "retro-station-wagon"
+  | "executive-sedan"
+  | "sport-coupe"
+  | "muscle-coupe"
+  | "luxury-suv"
+  | "offroad-suv"
+  | "hilux-pickup"
+  | "double-cab-pickup"
+  | "flatbed-pickup"
+  | "dump-truck"
+  | "box-truck"
+  | "semi-truck"
+  | "city-bus"
+  | "articulated-bus"
+  | "school-bus"
+  | "minibus"
+  | "ambulance-van"
+  | "police-suv"
+  | "street-motorcycle"
+  | "delivery-motorcycle"
+  | "urban-bicycle";
 
 export type HomeDriveVehiclePaintKey =
   | "white"
@@ -22,16 +45,32 @@ export type HomeDriveVehiclePaintKey =
   | "beige"
   | "taxi-yellow"
   | "delivery-white"
-  | "utility-gray";
+  | "utility-gray"
+  | "construction-orange"
+  | "bus-yellow"
+  | "police-blue"
+  | "emergency-white"
+  | "motorcycle-black"
+  | "bicycle-teal";
 
 export type HomeDriveVehicleModelCategory =
   | "hatch"
   | "sedan"
+  | "wagon"
+  | "coupe"
+  | "sport"
   | "suv"
   | "pickup"
   | "van"
   | "taxi"
-  | "app";
+  | "app"
+  | "truck"
+  | "bus"
+  | "microbus"
+  | "emergency"
+  | "police"
+  | "motorcycle"
+  | "bicycle";
 
 export type HomeDriveVehicleRoadKindWeightMap = Readonly<{
   street?: number;

@@ -377,28 +377,67 @@ function getTrafficVehicleModelKind(
 ): HomeDriveTrafficVehicleKind {
   switch (modelKey) {
     case "compact-hatch":
+    case "mini-hatch":
       return "compact";
 
     case "popular-hatch":
+    case "classic-beetle":
       return "hatch";
 
     case "small-sedan":
     case "mid-sedan":
+    case "executive-sedan":
     case "app-driver-sedan":
       return "sedan";
 
+    case "retro-station-wagon":
+      return "wagon";
+
+    case "sport-coupe":
+    case "muscle-coupe":
+      return "sport";
+
     case "compact-suv":
     case "mid-suv":
+    case "luxury-suv":
+    case "offroad-suv":
       return "suv";
 
     case "light-pickup":
+    case "hilux-pickup":
+    case "double-cab-pickup":
+    case "flatbed-pickup":
       return "pickup";
 
     case "delivery-van":
+    case "ambulance-van":
       return "delivery";
+
+    case "dump-truck":
+    case "box-truck":
+    case "semi-truck":
+      return "truck";
+
+    case "city-bus":
+    case "articulated-bus":
+    case "school-bus":
+      return "bus";
+
+    case "minibus":
+      return "microbus";
 
     case "taxi-sedan":
       return "taxi";
+
+    case "police-suv":
+      return "police";
+
+    case "street-motorcycle":
+    case "delivery-motorcycle":
+      return "motorcycle";
+
+    case "urban-bicycle":
+      return "bicycle";
 
     default:
       return "compact";
@@ -445,7 +484,23 @@ function getTrafficVehicleColorFromPaint(
       return "beige";
 
     case "taxi-yellow":
+    case "bus-yellow":
       return "yellow";
+
+    case "construction-orange":
+      return "constructionOrange";
+
+    case "police-blue":
+      return "policeBlue";
+
+    case "emergency-white":
+      return "emergencyWhite";
+
+    case "motorcycle-black":
+      return "motorcycleBlack";
+
+    case "bicycle-teal":
+      return "bicycleTeal";
 
     default:
       return "white";
@@ -456,6 +511,12 @@ function getVehicleSpeedMultiplier(
   kind: HomeDriveTrafficVehicleKind,
 ): number {
   switch (kind) {
+    case "bicycle":
+      return 0.42;
+
+    case "motorcycle":
+      return 1.18;
+
     case "truck":
       return 0.66;
 
@@ -505,6 +566,12 @@ function getVehicleAccelerationMultiplier(
   kind: HomeDriveTrafficVehicleKind,
 ): number {
   switch (kind) {
+    case "bicycle":
+      return 0.42;
+
+    case "motorcycle":
+      return 1.28;
+
     case "truck":
       return 0.52;
 
@@ -574,13 +641,22 @@ function toHomeDriveVector2(position: HomeDriveWorldPosition): HomeDriveVector2 
 function getVehicleCollisionRadiusMeters(
   widthMeters: number,
   lengthMeters: number,
+  kind: HomeDriveTrafficVehicleKind,
 ): number {
   const gameplayRadius =
     Math.hypot(widthMeters * 0.46, lengthMeters * 0.24) *
     TRAFFIC_VEHICLE_COLLISION_RADIUS_MULTIPLIER;
 
+  if (kind === "bicycle") {
+    return clamp(gameplayRadius, 0.46, 0.92);
+  }
+
+  if (kind === "motorcycle") {
+    return clamp(gameplayRadius, 0.64, 1.18);
+  }
+
   const minRadius = 1.08 * Math.min(TRAFFIC_VEHICLE_SIZE_MULTIPLIER, 1.35);
-  const maxRadius = 3.15 * TRAFFIC_VEHICLE_SIZE_MULTIPLIER;
+  const maxRadius = kind === "bus" || kind === "truck" ? 4.85 : 3.15 * TRAFFIC_VEHICLE_SIZE_MULTIPLIER;
 
   return clamp(gameplayRadius, minRadius, maxRadius);
 }
@@ -748,6 +824,7 @@ function createTrafficVehicle(
     collisionRadiusMeters: getVehicleCollisionRadiusMeters(
       dimensions.widthMeters,
       dimensions.lengthMeters,
+      kind,
     ),
 
     variant: Math.floor(variantSeed * 6),
@@ -1270,3 +1347,5 @@ export function tickHomeDriveTraffic(
     }),
   };
 }
+
+

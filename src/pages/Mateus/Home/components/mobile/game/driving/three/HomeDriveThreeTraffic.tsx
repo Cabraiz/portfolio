@@ -8,6 +8,7 @@ import {
   InstancedMesh,
   MeshStandardMaterial,
   Object3D,
+  SphereGeometry,
   type BufferGeometry,
   type Material,
 } from "three";
@@ -32,7 +33,7 @@ type TrafficBatch = Readonly<{
   material: Material;
 }>;
 
-type TrafficGeometryKind = "box" | "wheel";
+type TrafficGeometryKind = "box" | "wheel" | "sphere";
 
 type TrafficPart =
   | "body"
@@ -70,7 +71,27 @@ type TrafficPart =
   | "policeLightBarRight"
   | "deliveryCargoBox"
   | "truckCargoBox"
-  | "microbusRoofBand";
+  | "microbusRoofBand"
+  | "twoWheelFrame"
+  | "twoWheelFork"
+  | "twoWheelHandlebar"
+  | "twoWheelSeat"
+  | "twoWheelFrontWheel"
+  | "twoWheelRearWheel"
+  | "twoWheelFrontRim"
+  | "twoWheelRearRim"
+  | "motorcycleFuelTank"
+  | "motorcycleRearFender"
+  | "motorcycleExhaust"
+  | "motorcycleHeadlight"
+  | "bicyclePedalBar"
+  | "riderTorso"
+  | "riderHead"
+  | "riderHelmet"
+  | "riderLeftArm"
+  | "riderRightArm"
+  | "riderLeftLeg"
+  | "riderRightLeg";
 
 type VehiclePartTransform = Readonly<{
   offset: readonly [number, number, number];
@@ -202,6 +223,31 @@ const TRAFFIC_MATERIALS: Readonly<
     roughness: 0.42,
     metalness: 0.3,
   }),
+  policeBlue: new MeshStandardMaterial({
+    color: "#1f3f67",
+    roughness: 0.44,
+    metalness: 0.24,
+  }),
+  constructionOrange: new MeshStandardMaterial({
+    color: "#c96b2c",
+    roughness: 0.58,
+    metalness: 0.12,
+  }),
+  emergencyWhite: new MeshStandardMaterial({
+    color: "#f4f1e8",
+    roughness: 0.42,
+    metalness: 0.14,
+  }),
+  motorcycleBlack: new MeshStandardMaterial({
+    color: "#111315",
+    roughness: 0.36,
+    metalness: 0.28,
+  }),
+  bicycleTeal: new MeshStandardMaterial({
+    color: "#2b7f79",
+    roughness: 0.5,
+    metalness: 0.14,
+  }),
 });
 
 const TRAFFIC_GLASS_MATERIAL = new MeshStandardMaterial({
@@ -304,6 +350,54 @@ const TRAFFIC_MICROBUS_BAND_MATERIAL = new MeshStandardMaterial({
   color: "#d7d1b5",
   roughness: 0.48,
   metalness: 0.12,
+});
+
+const TRAFFIC_TWO_WHEEL_FRAME_MATERIAL = new MeshStandardMaterial({
+  color: "#1b1e20",
+  roughness: 0.48,
+  metalness: 0.36,
+});
+
+const TRAFFIC_TWO_WHEEL_SEAT_MATERIAL = new MeshStandardMaterial({
+  color: "#111111",
+  roughness: 0.72,
+  metalness: 0.08,
+});
+
+const TRAFFIC_MOTORCYCLE_TANK_MATERIAL = new MeshStandardMaterial({
+  color: "#24282c",
+  roughness: 0.34,
+  metalness: 0.38,
+});
+
+const TRAFFIC_MOTORCYCLE_EXHAUST_MATERIAL = new MeshStandardMaterial({
+  color: "#b4bab8",
+  roughness: 0.28,
+  metalness: 0.72,
+});
+
+const TRAFFIC_RIDER_TORSO_MATERIAL = new MeshStandardMaterial({
+  color: "#2c445e",
+  roughness: 0.64,
+  metalness: 0.04,
+});
+
+const TRAFFIC_RIDER_PANTS_MATERIAL = new MeshStandardMaterial({
+  color: "#1e252b",
+  roughness: 0.7,
+  metalness: 0.04,
+});
+
+const TRAFFIC_RIDER_SKIN_MATERIAL = new MeshStandardMaterial({
+  color: "#9f7659",
+  roughness: 0.72,
+  metalness: 0.02,
+});
+
+const TRAFFIC_RIDER_HELMET_MATERIAL = new MeshStandardMaterial({
+  color: "#202326",
+  roughness: 0.38,
+  metalness: 0.28,
 });
 
 const SHARED_PART_CONFIGS: readonly SharedPartConfig[] = [
@@ -499,6 +593,126 @@ const SHARED_PART_CONFIGS: readonly SharedPartConfig[] = [
     material: TRAFFIC_MICROBUS_BAND_MATERIAL,
     renderOrder: 23,
   },
+  {
+    part: "twoWheelFrame",
+    geometryKind: "box",
+    material: TRAFFIC_TWO_WHEEL_FRAME_MATERIAL,
+    renderOrder: 28,
+  },
+  {
+    part: "twoWheelFork",
+    geometryKind: "box",
+    material: TRAFFIC_CHROME_TRIM_MATERIAL,
+    renderOrder: 29,
+  },
+  {
+    part: "twoWheelHandlebar",
+    geometryKind: "box",
+    material: TRAFFIC_CHROME_TRIM_MATERIAL,
+    renderOrder: 30,
+  },
+  {
+    part: "twoWheelSeat",
+    geometryKind: "box",
+    material: TRAFFIC_TWO_WHEEL_SEAT_MATERIAL,
+    renderOrder: 30,
+  },
+  {
+    part: "twoWheelFrontWheel",
+    geometryKind: "wheel",
+    material: TRAFFIC_TIRE_MATERIAL,
+    renderOrder: 27,
+  },
+  {
+    part: "twoWheelRearWheel",
+    geometryKind: "wheel",
+    material: TRAFFIC_TIRE_MATERIAL,
+    renderOrder: 27,
+  },
+  {
+    part: "twoWheelFrontRim",
+    geometryKind: "wheel",
+    material: TRAFFIC_RIM_MATERIAL,
+    renderOrder: 28,
+  },
+  {
+    part: "twoWheelRearRim",
+    geometryKind: "wheel",
+    material: TRAFFIC_RIM_MATERIAL,
+    renderOrder: 28,
+  },
+  {
+    part: "motorcycleFuelTank",
+    geometryKind: "box",
+    material: TRAFFIC_MOTORCYCLE_TANK_MATERIAL,
+    renderOrder: 31,
+  },
+  {
+    part: "motorcycleRearFender",
+    geometryKind: "box",
+    material: TRAFFIC_MOTORCYCLE_TANK_MATERIAL,
+    renderOrder: 30,
+  },
+  {
+    part: "motorcycleExhaust",
+    geometryKind: "box",
+    material: TRAFFIC_MOTORCYCLE_EXHAUST_MATERIAL,
+    renderOrder: 31,
+  },
+  {
+    part: "motorcycleHeadlight",
+    geometryKind: "box",
+    material: TRAFFIC_HEADLIGHT_MATERIAL,
+    renderOrder: 32,
+  },
+  {
+    part: "bicyclePedalBar",
+    geometryKind: "box",
+    material: TRAFFIC_CHROME_TRIM_MATERIAL,
+    renderOrder: 31,
+  },
+  {
+    part: "riderTorso",
+    geometryKind: "box",
+    material: TRAFFIC_RIDER_TORSO_MATERIAL,
+    renderOrder: 34,
+  },
+  {
+    part: "riderHead",
+    geometryKind: "sphere",
+    material: TRAFFIC_RIDER_SKIN_MATERIAL,
+    renderOrder: 35,
+  },
+  {
+    part: "riderHelmet",
+    geometryKind: "sphere",
+    material: TRAFFIC_RIDER_HELMET_MATERIAL,
+    renderOrder: 36,
+  },
+  {
+    part: "riderLeftArm",
+    geometryKind: "box",
+    material: TRAFFIC_RIDER_SKIN_MATERIAL,
+    renderOrder: 34,
+  },
+  {
+    part: "riderRightArm",
+    geometryKind: "box",
+    material: TRAFFIC_RIDER_SKIN_MATERIAL,
+    renderOrder: 34,
+  },
+  {
+    part: "riderLeftLeg",
+    geometryKind: "box",
+    material: TRAFFIC_RIDER_PANTS_MATERIAL,
+    renderOrder: 34,
+  },
+  {
+    part: "riderRightLeg",
+    geometryKind: "box",
+    material: TRAFFIC_RIDER_PANTS_MATERIAL,
+    renderOrder: 34,
+  },
 ];
 
 function groupTrafficByColor(
@@ -534,10 +748,88 @@ function createAllTrafficBatch(
   };
 }
 
+function isTwoWheelVehicle(vehicle: HomeDriveTrafficVehicle): boolean {
+  return vehicle.kind === "motorcycle" || vehicle.kind === "bicycle";
+}
+
+function isMotorcycleVehicle(vehicle: HomeDriveTrafficVehicle): boolean {
+  return vehicle.kind === "motorcycle";
+}
+
+function isBicycleVehicle(vehicle: HomeDriveTrafficVehicle): boolean {
+  return vehicle.kind === "bicycle";
+}
+
+function isTwoWheelTrafficPart(part: TrafficPart): boolean {
+  switch (part) {
+    case "twoWheelFrame":
+    case "twoWheelFork":
+    case "twoWheelHandlebar":
+    case "twoWheelSeat":
+    case "twoWheelFrontWheel":
+    case "twoWheelRearWheel":
+    case "twoWheelFrontRim":
+    case "twoWheelRearRim":
+    case "motorcycleFuelTank":
+    case "motorcycleRearFender":
+    case "motorcycleExhaust":
+    case "motorcycleHeadlight":
+    case "bicyclePedalBar":
+    case "riderTorso":
+    case "riderHead":
+    case "riderHelmet":
+    case "riderLeftArm":
+    case "riderRightArm":
+    case "riderLeftLeg":
+    case "riderRightLeg":
+      return true;
+
+    default:
+      return false;
+  }
+}
+
 function getVehicleShapeProfile(
   vehicle: HomeDriveTrafficVehicle,
 ): VehicleShapeProfile {
   switch (vehicle.kind) {
+    case "bicycle":
+      return {
+        bodyHeightFactor: 0.18,
+        bodyLengthFactor: 0.62,
+        hoodLengthFactor: 0.08,
+        hoodZFactor: 0.22,
+        trunkLengthFactor: 0.08,
+        trunkZFactor: -0.24,
+        cabinWidthFactor: 0.36,
+        cabinHeightFactor: 0.46,
+        cabinLengthFactor: 0.2,
+        cabinZFactor: 0,
+        glassHeightFactor: 0.08,
+        wheelRadiusFactor: 0.22,
+        wheelWidthFactor: 0.075,
+        frontWheelZFactor: 0.38,
+        rearWheelZFactor: 0.38,
+      };
+
+    case "motorcycle":
+      return {
+        bodyHeightFactor: 0.22,
+        bodyLengthFactor: 0.68,
+        hoodLengthFactor: 0.12,
+        hoodZFactor: 0.22,
+        trunkLengthFactor: 0.12,
+        trunkZFactor: -0.25,
+        cabinWidthFactor: 0.42,
+        cabinHeightFactor: 0.46,
+        cabinLengthFactor: 0.22,
+        cabinZFactor: 0.02,
+        glassHeightFactor: 0.1,
+        wheelRadiusFactor: 0.24,
+        wheelWidthFactor: 0.12,
+        frontWheelZFactor: 0.38,
+        rearWheelZFactor: 0.38,
+      };
     case "bus":
       return {
         bodyHeightFactor: 0.58,
@@ -800,6 +1092,14 @@ function getWheelRadiusMeters(vehicle: HomeDriveTrafficVehicle): number {
 
 function getWheelWidthMeters(vehicle: HomeDriveTrafficVehicle): number {
   const profile = getVehicleShapeProfile(vehicle);
+
+  if (isBicycleVehicle(vehicle)) {
+    return Math.max(0.045, Math.min(0.08, vehicle.widthMeters * profile.wheelWidthFactor));
+  }
+
+  if (isMotorcycleVehicle(vehicle)) {
+    return Math.max(0.08, Math.min(0.16, vehicle.widthMeters * profile.wheelWidthFactor));
+  }
 
   return Math.max(0.28, vehicle.widthMeters * profile.wheelWidthFactor);
 }
@@ -1166,6 +1466,27 @@ function shouldRenderTrafficPart(
   vehicle: HomeDriveTrafficVehicle,
   part: TrafficPart,
 ): boolean {
+  if (isTwoWheelVehicle(vehicle)) {
+    if (!isTwoWheelTrafficPart(part)) {
+      return false;
+    }
+
+    if (isBicycleVehicle(vehicle)) {
+      return (
+        part !== "motorcycleFuelTank" &&
+        part !== "motorcycleRearFender" &&
+        part !== "motorcycleExhaust" &&
+        part !== "motorcycleHeadlight"
+      );
+    }
+
+    return part !== "bicyclePedalBar";
+  }
+
+  if (isTwoWheelTrafficPart(part)) {
+    return false;
+  }
+
   switch (part) {
     case "taxiSign":
       return vehicle.kind === "taxi";
@@ -1432,10 +1753,268 @@ function getHoodScoopTransform(vehicle: HomeDriveTrafficVehicle): VehiclePartTra
   };
 }
 
+function getTwoWheelWheelTransform(
+  vehicle: HomeDriveTrafficVehicle,
+  part: TrafficPart,
+  rim: boolean,
+): VehiclePartTransform {
+  const profile = getVehicleShapeProfile(vehicle);
+  const wheelRadius = getWheelRadiusMeters(vehicle);
+  const wheelWidth = getWheelWidthMeters(vehicle);
+  const isFront = part === "twoWheelFrontWheel" || part === "twoWheelFrontRim";
+  const zSign: -1 | 1 = isFront ? 1 : -1;
+  const wheelZFactor = isFront
+    ? profile.frontWheelZFactor
+    : profile.rearWheelZFactor;
+  const rimScale = rim ? 0.56 : 1;
+
+  return {
+    offset: [0, wheelRadius, zSign * vehicle.lengthMeters * wheelZFactor],
+    scale: [
+      wheelRadius * rimScale,
+      wheelWidth * (rim ? 0.72 : 1),
+      wheelRadius * rimScale,
+    ],
+    localRotation: [0, 0, Math.PI / 2],
+  };
+}
+
+function getTwoWheelFrameTransform(
+  vehicle: HomeDriveTrafficVehicle,
+  part: TrafficPart,
+): VehiclePartTransform {
+  const wheelRadius = getWheelRadiusMeters(vehicle);
+  const isBicycle = isBicycleVehicle(vehicle);
+  const frontZ = vehicle.lengthMeters * 0.36;
+  const rearZ = -vehicle.lengthMeters * 0.34;
+  const frameY = wheelRadius * (isBicycle ? 1.68 : 1.55);
+
+  switch (part) {
+    case "twoWheelFrame":
+      return {
+        offset: [0, frameY, isBicycle ? -vehicle.lengthMeters * 0.02 : 0],
+        scale: [
+          vehicle.widthMeters * (isBicycle ? 0.11 : 0.16),
+          vehicle.heightMeters * (isBicycle ? 0.09 : 0.13),
+          vehicle.lengthMeters * (isBicycle ? 0.58 : 0.52),
+        ],
+        localRotation: [isBicycle ? -0.1 : -0.04, 0, 0],
+      };
+
+    case "twoWheelFork":
+      return {
+        offset: [0, frameY + vehicle.heightMeters * 0.18, frontZ - vehicle.lengthMeters * 0.05],
+        scale: [
+          vehicle.widthMeters * (isBicycle ? 0.075 : 0.095),
+          vehicle.heightMeters * (isBicycle ? 0.36 : 0.34),
+          vehicle.lengthMeters * 0.035,
+        ],
+        localRotation: [-0.24, 0, 0],
+      };
+
+    case "twoWheelHandlebar":
+      return {
+        offset: [0, vehicle.heightMeters * (isBicycle ? 0.92 : 0.82), frontZ - vehicle.lengthMeters * 0.09],
+        scale: [
+          vehicle.widthMeters * (isBicycle ? 0.62 : 0.54),
+          vehicle.heightMeters * 0.045,
+          vehicle.lengthMeters * 0.045,
+        ],
+        localRotation: [0, 0, 0],
+      };
+
+    case "twoWheelSeat":
+      return {
+        offset: [0, vehicle.heightMeters * (isBicycle ? 0.66 : 0.58), rearZ + vehicle.lengthMeters * 0.18],
+        scale: [
+          vehicle.widthMeters * (isBicycle ? 0.34 : 0.38),
+          vehicle.heightMeters * 0.055,
+          vehicle.lengthMeters * (isBicycle ? 0.14 : 0.18),
+        ],
+        localRotation: [0.02, 0, 0],
+      };
+
+    case "bicyclePedalBar":
+      return {
+        offset: [0, frameY - vehicle.heightMeters * 0.16, -vehicle.lengthMeters * 0.02],
+        scale: [vehicle.widthMeters * 0.42, vehicle.heightMeters * 0.035, vehicle.lengthMeters * 0.035],
+        localRotation: [0, 0, 0.18],
+      };
+
+    default:
+      return {
+        offset: [0, frameY, 0],
+        scale: [0.001, 0.001, 0.001],
+        localRotation: [0, 0, 0],
+      };
+  }
+}
+
+function getMotorcycleAccessoryTransform(
+  vehicle: HomeDriveTrafficVehicle,
+  part: TrafficPart,
+): VehiclePartTransform {
+  const wheelRadius = getWheelRadiusMeters(vehicle);
+  const frontZ = vehicle.lengthMeters * 0.36;
+  const rearZ = -vehicle.lengthMeters * 0.34;
+
+  switch (part) {
+    case "motorcycleFuelTank":
+      return {
+        offset: [0, wheelRadius * 2.08, vehicle.lengthMeters * 0.08],
+        scale: [vehicle.widthMeters * 0.38, vehicle.heightMeters * 0.18, vehicle.lengthMeters * 0.24],
+        localRotation: [-0.04, 0, 0],
+      };
+
+    case "motorcycleRearFender":
+      return {
+        offset: [0, wheelRadius * 1.82, rearZ + vehicle.lengthMeters * 0.04],
+        scale: [vehicle.widthMeters * 0.28, vehicle.heightMeters * 0.08, vehicle.lengthMeters * 0.24],
+        localRotation: [0.08, 0, 0],
+      };
+
+    case "motorcycleExhaust":
+      return {
+        offset: [vehicle.widthMeters * 0.28, wheelRadius * 1.32, -vehicle.lengthMeters * 0.14],
+        scale: [vehicle.widthMeters * 0.08, vehicle.heightMeters * 0.08, vehicle.lengthMeters * 0.44],
+        localRotation: [0.02, 0.08, 0.02],
+      };
+
+    case "motorcycleHeadlight":
+      return {
+        offset: [0, wheelRadius * 2.42, frontZ - vehicle.lengthMeters * 0.09],
+        scale: [vehicle.widthMeters * 0.18, vehicle.heightMeters * 0.11, vehicle.lengthMeters * 0.055],
+        localRotation: [0, 0, 0],
+      };
+
+    default:
+      return {
+        offset: [0, wheelRadius, 0],
+        scale: [0.001, 0.001, 0.001],
+        localRotation: [0, 0, 0],
+      };
+  }
+}
+
+function getRiderTransform(
+  vehicle: HomeDriveTrafficVehicle,
+  part: TrafficPart,
+): VehiclePartTransform {
+  const isBicycle = isBicycleVehicle(vehicle);
+  const lean = isBicycle ? -0.34 : -0.24;
+  const torsoY = vehicle.heightMeters * (isBicycle ? 0.88 : 0.86);
+  const torsoZ = vehicle.lengthMeters * (isBicycle ? 0.04 : 0.02);
+  const headRadius = vehicle.heightMeters * (isBicycle ? 0.105 : 0.115);
+
+  switch (part) {
+    case "riderTorso":
+      return {
+        offset: [0, torsoY, torsoZ],
+        scale: [vehicle.widthMeters * 0.32, vehicle.heightMeters * 0.34, vehicle.lengthMeters * 0.12],
+        localRotation: [lean, 0, 0],
+      };
+
+    case "riderHead":
+      return {
+        offset: [0, torsoY + vehicle.heightMeters * 0.29, torsoZ + vehicle.lengthMeters * 0.08],
+        scale: [headRadius, headRadius, headRadius],
+        localRotation: [0, 0, 0],
+      };
+
+    case "riderHelmet":
+      return {
+        offset: [0, torsoY + vehicle.heightMeters * 0.305, torsoZ + vehicle.lengthMeters * 0.082],
+        scale: [headRadius * 1.08, headRadius * 0.72, headRadius * 1.08],
+        localRotation: [0, 0, 0],
+      };
+
+    case "riderLeftArm":
+    case "riderRightArm": {
+      const sideSign: -1 | 1 = part === "riderLeftArm" ? -1 : 1;
+
+      return {
+        offset: [
+          sideSign * vehicle.widthMeters * 0.2,
+          torsoY + vehicle.heightMeters * 0.02,
+          vehicle.lengthMeters * 0.22,
+        ],
+        scale: [vehicle.widthMeters * 0.07, vehicle.heightMeters * 0.31, vehicle.widthMeters * 0.07],
+        localRotation: [0.64, 0, sideSign * 0.22],
+      };
+    }
+
+    case "riderLeftLeg":
+    case "riderRightLeg": {
+      const sideSign: -1 | 1 = part === "riderLeftLeg" ? -1 : 1;
+
+      return {
+        offset: [
+          sideSign * vehicle.widthMeters * 0.13,
+          vehicle.heightMeters * (isBicycle ? 0.55 : 0.52),
+          -vehicle.lengthMeters * 0.05,
+        ],
+        scale: [vehicle.widthMeters * 0.075, vehicle.heightMeters * 0.32, vehicle.widthMeters * 0.075],
+        localRotation: [isBicycle ? -0.18 : -0.08, 0, sideSign * 0.18],
+      };
+    }
+
+    default:
+      return {
+        offset: [0, torsoY, torsoZ],
+        scale: [0.001, 0.001, 0.001],
+        localRotation: [0, 0, 0],
+      };
+  }
+}
+
 function getVehiclePartTransform(
   vehicle: HomeDriveTrafficVehicle,
   part: TrafficPart,
 ): VehiclePartTransform {
+  if (
+    part === "twoWheelFrontWheel" ||
+    part === "twoWheelRearWheel" ||
+    part === "twoWheelFrontRim" ||
+    part === "twoWheelRearRim"
+  ) {
+    return getTwoWheelWheelTransform(
+      vehicle,
+      part,
+      part === "twoWheelFrontRim" || part === "twoWheelRearRim",
+    );
+  }
+
+  if (
+    part === "twoWheelFrame" ||
+    part === "twoWheelFork" ||
+    part === "twoWheelHandlebar" ||
+    part === "twoWheelSeat" ||
+    part === "bicyclePedalBar"
+  ) {
+    return getTwoWheelFrameTransform(vehicle, part);
+  }
+
+  if (
+    part === "motorcycleFuelTank" ||
+    part === "motorcycleRearFender" ||
+    part === "motorcycleExhaust" ||
+    part === "motorcycleHeadlight"
+  ) {
+    return getMotorcycleAccessoryTransform(vehicle, part);
+  }
+
+  if (
+    part === "riderTorso" ||
+    part === "riderHead" ||
+    part === "riderHelmet" ||
+    part === "riderLeftArm" ||
+    part === "riderRightArm" ||
+    part === "riderLeftLeg" ||
+    part === "riderRightLeg"
+  ) {
+    return getRiderTransform(vehicle, part);
+  }
+
   if (part === "body") {
     return getBodyTransform(vehicle);
   }
@@ -1665,13 +2244,15 @@ function HomeDriveThreeTraffic({ trafficRef }: HomeDriveThreeTrafficProps) {
     () => new CylinderGeometry(1, 1, 1, 18, 1),
     [],
   );
+  const sphereGeometry = useMemo(() => new SphereGeometry(1, 14, 10), []);
 
   useEffect(() => {
     return () => {
       boxGeometry.dispose();
       wheelGeometry.dispose();
+      sphereGeometry.dispose();
     };
-  }, [boxGeometry, wheelGeometry]);
+  }, [boxGeometry, sphereGeometry, wheelGeometry]);
 
   return (
     <group>
@@ -1697,7 +2278,11 @@ function HomeDriveThreeTraffic({ trafficRef }: HomeDriveThreeTrafficProps) {
           trafficRef={trafficRef}
           batch={allTrafficBatch}
           geometry={
-            config.geometryKind === "wheel" ? wheelGeometry : boxGeometry
+            config.geometryKind === "wheel"
+              ? wheelGeometry
+              : config.geometryKind === "sphere"
+                ? sphereGeometry
+                : boxGeometry
           }
           part={config.part}
           material={config.material}
@@ -1709,3 +2294,4 @@ function HomeDriveThreeTraffic({ trafficRef }: HomeDriveThreeTrafficProps) {
 }
 
 export default memo(HomeDriveThreeTraffic);
+

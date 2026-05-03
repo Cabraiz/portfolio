@@ -19,7 +19,9 @@ export type HomeDriveTrafficVehicleKind =
   | "delivery"
   | "truck"
   | "microbus"
-  | "bus";
+  | "bus"
+  | "motorcycle"
+  | "bicycle";
 
 export type HomeDriveTrafficVehicleColorKey =
   | "white"
@@ -38,7 +40,12 @@ export type HomeDriveTrafficVehicleColorKey =
   | "darkBlue"
   | "lime"
   | "cream"
-  | "charcoal";
+  | "charcoal"
+  | "policeBlue"
+  | "constructionOrange"
+  | "emergencyWhite"
+  | "motorcycleBlack"
+  | "bicycleTeal";
 
 export type HomeDriveTrafficVector2 = Readonly<{
   x: number;
@@ -190,3 +197,5 @@ export type HomeDriveTrafficCollisionEvent = Readonly<{
   impulse: number;
   occurredAt: number;
 }>;
+
+
