@@ -13,22 +13,39 @@ import Libras from "../pages/Libras/Libras";
 import Rosa from "../pages/Rosa/Rosa";
 import Vinho from "../pages/Vinho/Vinho";
 import LandingRouterPage from "../pages/Mateus/LandingPage/LandingRouterPage";
+import HomeDriveStandalonePage from "../pages/Mateus/Home/Drive/HomeDriveStandalonePage";
+import {
+  getHomeDriveLandingRedirectPath,
+  isHomeDriveStandaloneHost,
+} from "../App/appHostRouting";
 
 import { PrivateOutlet } from "../redux/shared/utils/PrivateOutlet";
 import { RouteGuard } from "../components/RouteGuard";
 import DigitalCodeUnlock from "../components/DigitalCodeUnlock";
 
 const AppRoutes = () => {
+  const isDriveHost = isHomeDriveStandaloneHost();
+  const landingElement = isDriveHost ? (
+    <Navigate to="/drive" replace />
+  ) : (
+    <LandingRouterPage />
+  );
+
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/home" replace />} />
+      <Route
+        path="/"
+        element={<Navigate to={getHomeDriveLandingRedirectPath()} replace />}
+      />
 
-      <Route path="/home" element={<LandingRouterPage />} />
-      <Route path="/portfolio" element={<LandingRouterPage />} />
-      <Route path="/roadmap" element={<LandingRouterPage />} />
-      <Route path="/pricing" element={<LandingRouterPage />} />
-      <Route path="/live" element={<LandingRouterPage />} />
-      <Route path="/contact" element={<LandingRouterPage />} />
+      <Route path="/drive" element={<HomeDriveStandalonePage />} />
+
+      <Route path="/home" element={landingElement} />
+      <Route path="/portfolio" element={landingElement} />
+      <Route path="/roadmap" element={landingElement} />
+      <Route path="/pricing" element={landingElement} />
+      <Route path="/live" element={landingElement} />
+      <Route path="/contact" element={landingElement} />
 
       <Route path="/enigma" element={<Enigma />} />
 
@@ -88,3 +105,5 @@ const AppRoutes = () => {
 };
 
 export default AppRoutes;
+
+

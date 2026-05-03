@@ -5,6 +5,12 @@ import mySelf from "../../assets/Mateus/mySelf.png";
 import perfilMini from "../../assets/Mateus/perfilMini.webp";
 import { AnimatePresence, motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
+import { useLocation } from "react-router-dom";
+
+import {
+  isHomeDriveRoutePath,
+  isHomeDriveStandaloneHost,
+} from "../../App/appHostRouting";
 
 type TriggerAvatarItem =
   | {
@@ -19,6 +25,10 @@ type TriggerAvatarItem =
     };
 
 export default function FloatingChat() {
+  const location = useLocation();
+  const shouldHideForDrive =
+    isHomeDriveStandaloneHost() || isHomeDriveRoutePath(location.pathname);
+
   const [isOpen, setIsOpen] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const [messages, setMessages] = useState<string[]>([]);
@@ -116,6 +126,10 @@ export default function FloatingChat() {
       sendMessage();
     }
   };
+
+  if (shouldHideForDrive) {
+    return null;
+  }
 
   return (
     <div
@@ -557,3 +571,5 @@ export default function FloatingChat() {
     </div>
   );
 }
+
+

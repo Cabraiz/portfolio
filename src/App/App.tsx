@@ -1,6 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import { useLocation } from "react-router-dom";
 import AppDesktop from "./AppDesktop";
 import AppMobile from "./AppMobile";
+import {
+  isHomeDriveRoutePath,
+  isHomeDriveStandaloneHost,
+} from "./appHostRouting";
 
 const DESKTOP_MEDIA_QUERY = "(min-width: 768px)";
 
@@ -13,9 +18,19 @@ function getIsDesktop(): boolean {
 }
 
 const App: React.FC = () => {
+  const location = useLocation();
+
+  const shouldForceMobileDrive = useMemo(() => {
+    return isHomeDriveStandaloneHost() || isHomeDriveRoutePath(location.pathname);
+  }, [location.pathname]);
+
   const [isDesktop, setIsDesktop] = useState<boolean>(() => getIsDesktop());
 
   useEffect(() => {
+    if (shouldForceMobileDrive) {
+      return undefined;
+    }
+
     if (typeof globalThis.matchMedia !== "function") {
       return undefined;
     }
@@ -32,7 +47,11 @@ const App: React.FC = () => {
     return () => {
       mediaQuery.removeEventListener("change", handleChange);
     };
-  }, []);
+  }, [shouldForceMobileDrive]);
+
+  if (shouldForceMobileDrive) {
+    return <AppMobile />;
+  }
 
   return isDesktop ? <AppDesktop /> : <AppMobile />;
 };
