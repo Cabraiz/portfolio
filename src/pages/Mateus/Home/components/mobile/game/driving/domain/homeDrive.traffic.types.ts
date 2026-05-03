@@ -52,6 +52,10 @@ export type HomeDriveTrafficVector2 = Readonly<{
   z: number;
 }>;
 
+export type HomeDriveTrafficTurnSignal = "left" | "right" | "hazard" | null;
+
+export type HomeDriveTrafficLaneChangeDirection = -1 | 0 | 1;
+
 export type HomeDriveTrafficVehicle = Readonly<{
   id: string;
 
@@ -114,8 +118,44 @@ export type HomeDriveTrafficVehicle = Readonly<{
   laneIndex: number;
 
   /**
+   * Faixa que o veículo está tentando alcançar.
+   * Quando diferente de laneIndex, o offset lateral é interpolado para simular ultrapassagem.
+   */
+  targetLaneIndex: number;
+
+  /**
+   * Offset lateral alvo, em metros, no eixo road.normal.
+   */
+  targetLaneOffsetMeters: number;
+
+  /**
+   * -1 = mudando para a direita local; 1 = mudando para a esquerda local; 0 = estável.
+   */
+  laneChangeDirection: HomeDriveTrafficLaneChangeDirection;
+
+  /**
+   * Cooldown anti-zigue-zague após troca de faixa ou abortagem de ultrapassagem.
+   */
+  laneChangeCooldownSeconds: number;
+
+  /**
+   * Seta visual usada pelo renderer de tráfego.
+   */
+  turnSignal: HomeDriveTrafficTurnSignal;
+
+  /**
+   * Intensidade normalizada de luz de freio.
+   */
+  brakeLightIntensity: number;
+
+  /**
+   * Veículo à frente que está influenciando a frenagem atual.
+   */
+  followingVehicleId: string | null;
+
+  /**
    * Offset lateral final, em metros, no eixo road.normal.
-   * Esse valor é derivado de directionSign + laneIndex.
+   * Esse valor é derivado de directionSign + laneIndex ou interpolado durante ultrapassagem.
    */
   laneOffsetMeters: number;
 
@@ -197,5 +237,3 @@ export type HomeDriveTrafficCollisionEvent = Readonly<{
   impulse: number;
   occurredAt: number;
 }>;
-
-

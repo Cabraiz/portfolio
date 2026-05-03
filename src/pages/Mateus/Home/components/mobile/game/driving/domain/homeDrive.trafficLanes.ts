@@ -197,8 +197,26 @@ export function getHomeDriveTrafficLaneOffsetMeters(
     Offset é escalar no eixo road.normal.
     directionSign +1: lado direito da via = offset negativo.
     directionSign -1: lado direito da via = offset positivo.
+
+    Caso crítico: ruas bidirecionais estreitas com laneCount=1.
+    Antes os dois sentidos caíam no centro exato da via, então carros de
+    sentidos opostos podiam nascer/rotear um dentro do outro. Para tráfego NPC,
+    tratamos essa rua como duas trilhas virtuais laterais, ainda dentro da
+    largura visual da pista.
   */
   const rightSideSignOnRoadNormal = -normalizedDirectionSign;
+  const totalLaneCount = getHomeDriveTrafficTotalLaneCount(road);
+
+  if (totalLaneCount <= 1) {
+    const virtualHalfLaneOffset = clamp(
+      roadHalfWidth * 0.46,
+      Math.min(0.72, roadHalfWidth * 0.38),
+      Math.max(0.86, roadHalfWidth - 0.58),
+    );
+
+    return rightSideSignOnRoadNormal * virtualHalfLaneOffset;
+  }
+
   const distanceFromCenter =
     roadHalfWidth - laneWidth * (normalizedLaneIndex + 0.5);
 

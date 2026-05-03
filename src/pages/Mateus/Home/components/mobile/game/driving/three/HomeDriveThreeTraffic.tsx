@@ -50,6 +50,12 @@ type TrafficPart =
   | "frontRightHeadlight"
   | "rearLeftTailLight"
   | "rearRightTailLight"
+  | "frontLeftIndicator"
+  | "frontRightIndicator"
+  | "rearLeftIndicator"
+  | "rearRightIndicator"
+  | "rearBrakeLightLeft"
+  | "rearBrakeLightRight"
   | "leftMirror"
   | "rightMirror"
   | "frontLeftWheel"
@@ -310,6 +316,22 @@ const TRAFFIC_TAIL_LIGHT_MATERIAL = new MeshStandardMaterial({
   metalness: 0.08,
 });
 
+const TRAFFIC_INDICATOR_MATERIAL = new MeshStandardMaterial({
+  color: "#e0a442",
+  emissive: "#bd711b",
+  emissiveIntensity: 0.68,
+  roughness: 0.24,
+  metalness: 0.08,
+});
+
+const TRAFFIC_BRAKE_LIGHT_MATERIAL = new MeshStandardMaterial({
+  color: "#e5352d",
+  emissive: "#b40e0a",
+  emissiveIntensity: 0.72,
+  roughness: 0.24,
+  metalness: 0.08,
+});
+
 const TRAFFIC_TAXI_SIGN_MATERIAL = new MeshStandardMaterial({
   color: "#f6d04d",
   emissive: "#c28a18",
@@ -508,6 +530,42 @@ const SHARED_PART_CONFIGS: readonly SharedPartConfig[] = [
     geometryKind: "box",
     material: TRAFFIC_TAIL_LIGHT_MATERIAL,
     renderOrder: 20,
+  },
+  {
+    part: "frontLeftIndicator",
+    geometryKind: "box",
+    material: TRAFFIC_INDICATOR_MATERIAL,
+    renderOrder: 25,
+  },
+  {
+    part: "frontRightIndicator",
+    geometryKind: "box",
+    material: TRAFFIC_INDICATOR_MATERIAL,
+    renderOrder: 25,
+  },
+  {
+    part: "rearLeftIndicator",
+    geometryKind: "box",
+    material: TRAFFIC_INDICATOR_MATERIAL,
+    renderOrder: 25,
+  },
+  {
+    part: "rearRightIndicator",
+    geometryKind: "box",
+    material: TRAFFIC_INDICATOR_MATERIAL,
+    renderOrder: 25,
+  },
+  {
+    part: "rearBrakeLightLeft",
+    geometryKind: "box",
+    material: TRAFFIC_BRAKE_LIGHT_MATERIAL,
+    renderOrder: 26,
+  },
+  {
+    part: "rearBrakeLightRight",
+    geometryKind: "box",
+    material: TRAFFIC_BRAKE_LIGHT_MATERIAL,
+    renderOrder: 26,
   },
   {
     part: "frontLeftWheel",
@@ -1462,9 +1520,58 @@ function getWheelTransform(
   };
 }
 
+function isTrafficIndicatorPart(part: TrafficPart): boolean {
+  return (
+    part === "frontLeftIndicator" ||
+    part === "frontRightIndicator" ||
+    part === "rearLeftIndicator" ||
+    part === "rearRightIndicator"
+  );
+}
+
+function isTrafficBrakeLightPart(part: TrafficPart): boolean {
+  return part === "rearBrakeLightLeft" || part === "rearBrakeLightRight";
+}
+
+function isLeftIndicatorPart(part: TrafficPart): boolean {
+  return part === "frontLeftIndicator" || part === "rearLeftIndicator";
+}
+
+function shouldRenderTrafficIndicator(
+  vehicle: HomeDriveTrafficVehicle,
+  part: TrafficPart,
+  elapsedSeconds: number,
+): boolean {
+  if (!isTrafficIndicatorPart(part) || !vehicle.turnSignal) {
+    return false;
+  }
+
+  const blinkOn = Math.floor(elapsedSeconds * 2.85) % 2 === 0;
+
+  if (!blinkOn) {
+    return false;
+  }
+
+  if (vehicle.turnSignal === "hazard") {
+    return true;
+  }
+
+  return vehicle.turnSignal === "left"
+    ? isLeftIndicatorPart(part)
+    : !isLeftIndicatorPart(part);
+}
+
+function shouldRenderTrafficBrakeLight(
+  vehicle: HomeDriveTrafficVehicle,
+  part: TrafficPart,
+): boolean {
+  return isTrafficBrakeLightPart(part) && vehicle.brakeLightIntensity > 0.08;
+}
+
 function shouldRenderTrafficPart(
   vehicle: HomeDriveTrafficVehicle,
   part: TrafficPart,
+  elapsedSeconds = 0,
 ): boolean {
   if (isTwoWheelVehicle(vehicle)) {
     if (!isTwoWheelTrafficPart(part)) {
@@ -1485,6 +1592,14 @@ function shouldRenderTrafficPart(
 
   if (isTwoWheelTrafficPart(part)) {
     return false;
+  }
+
+  if (isTrafficIndicatorPart(part)) {
+    return shouldRenderTrafficIndicator(vehicle, part, elapsedSeconds);
+  }
+
+  if (isTrafficBrakeLightPart(part)) {
+    return shouldRenderTrafficBrakeLight(vehicle, part);
   }
 
   switch (part) {
@@ -1967,6 +2082,54 @@ function getRiderTransform(
   }
 }
 
+function getIndicatorTransform(
+  vehicle: HomeDriveTrafficVehicle,
+  frontSign: -1 | 1,
+  sideSign: -1 | 1,
+): VehiclePartTransform {
+  const base = getLightTransform(vehicle, frontSign, sideSign);
+  const [baseX, baseY, baseZ] = base.offset;
+  const [baseScaleX, baseScaleY, baseScaleZ] = base.scale;
+
+  return {
+    offset: [
+      baseX + sideSign * vehicle.widthMeters * 0.105,
+      baseY + vehicle.heightMeters * 0.012,
+      baseZ + frontSign * vehicle.lengthMeters * 0.006,
+    ],
+    scale: [
+      Math.max(0.08, baseScaleX * 0.36),
+      Math.max(0.045, baseScaleY * 0.86),
+      Math.max(0.026, baseScaleZ * 1.16),
+    ],
+    localRotation: base.localRotation,
+  };
+}
+
+function getBrakeLightTransform(
+  vehicle: HomeDriveTrafficVehicle,
+  sideSign: -1 | 1,
+): VehiclePartTransform {
+  const base = getLightTransform(vehicle, -1, sideSign);
+  const [baseX, baseY, baseZ] = base.offset;
+  const [baseScaleX, baseScaleY, baseScaleZ] = base.scale;
+  const brakeScale = 0.92 + Math.min(0.52, vehicle.brakeLightIntensity * 0.52);
+
+  return {
+    offset: [
+      baseX,
+      baseY + vehicle.heightMeters * 0.012,
+      baseZ - vehicle.lengthMeters * 0.008,
+    ],
+    scale: [
+      baseScaleX * brakeScale,
+      baseScaleY * brakeScale,
+      Math.max(0.028, baseScaleZ * 1.25),
+    ],
+    localRotation: base.localRotation,
+  };
+}
+
 function getVehiclePartTransform(
   vehicle: HomeDriveTrafficVehicle,
   part: TrafficPart,
@@ -2079,6 +2242,30 @@ function getVehiclePartTransform(
     return getHoodScoopTransform(vehicle);
   }
 
+  if (part === "frontLeftIndicator") {
+    return getIndicatorTransform(vehicle, 1, -1);
+  }
+
+  if (part === "frontRightIndicator") {
+    return getIndicatorTransform(vehicle, 1, 1);
+  }
+
+  if (part === "rearLeftIndicator") {
+    return getIndicatorTransform(vehicle, -1, -1);
+  }
+
+  if (part === "rearRightIndicator") {
+    return getIndicatorTransform(vehicle, -1, 1);
+  }
+
+  if (part === "rearBrakeLightLeft") {
+    return getBrakeLightTransform(vehicle, -1);
+  }
+
+  if (part === "rearBrakeLightRight") {
+    return getBrakeLightTransform(vehicle, 1);
+  }
+
   if (part === "frontLeftHeadlight") {
     return getLightTransform(vehicle, 1, -1);
   }
@@ -2132,8 +2319,9 @@ function setVehiclePartMatrix(
   dummy: Object3D,
   vehicle: HomeDriveTrafficVehicle,
   part: TrafficPart,
+  elapsedSeconds: number,
 ): void {
-  if (!shouldRenderTrafficPart(vehicle, part)) {
+  if (!shouldRenderTrafficPart(vehicle, part, elapsedSeconds)) {
     hideTrafficPartMatrix(dummy);
     return;
   }
@@ -2190,7 +2378,9 @@ function HomeDriveTrafficInstancedPart({
       return;
     }
 
-    const vehicles = trafficRef.current.vehicles;
+    const traffic = trafficRef.current;
+    const vehicles = traffic.vehicles;
+    const elapsedSeconds = traffic.elapsedSeconds;
 
     batch.indexes.forEach((vehicleIndex, instanceIndex) => {
       const vehicle = vehicles[vehicleIndex];
@@ -2199,7 +2389,7 @@ function HomeDriveTrafficInstancedPart({
         return;
       }
 
-      setVehiclePartMatrix(dummy, vehicle, part);
+      setVehiclePartMatrix(dummy, vehicle, part, elapsedSeconds);
       mesh.setMatrixAt(instanceIndex, dummy.matrix);
     });
 
@@ -2294,4 +2484,3 @@ function HomeDriveThreeTraffic({ trafficRef }: HomeDriveThreeTrafficProps) {
 }
 
 export default memo(HomeDriveThreeTraffic);
-

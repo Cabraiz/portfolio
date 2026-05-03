@@ -4,6 +4,11 @@ import { hashVector } from "./homeDrive.math";
 import { shouldHomeDriveTrafficYieldAtCrosswalk } from "./crosswalks";
 import type { HomeDriveCrosswalkRuntimeState } from "./crosswalks";
 import {
+  createHomeDriveTrafficAwarenessSnapshot,
+  stabilizeHomeDriveTrafficLaneSeparation,
+} from "./homeDrive.trafficAwareness";
+import type { HomeDriveTrafficAwarenessDecision } from "./homeDrive.trafficAwareness.types";
+import {
   buildHomeDriveRoadTopology,
   type HomeDriveRoadTopology,
 } from "./homeDrive.roadTopology";
@@ -46,7 +51,7 @@ import type {
  * antes: 176
  * agora: 704
  */
-const DEFAULT_MAX_TRAFFIC_VEHICLES = 704;
+const DEFAULT_MAX_TRAFFIC_VEHICLES = 520;
 
 /**
  * Permite popular ruas um pouco menores.
@@ -56,7 +61,7 @@ const DEFAULT_MIN_ROAD_LENGTH_METERS = 64;
 /**
  * Densidade alta, mas ainda controlada pelo roadChance e pelo espaçamento.
  */
-const DEFAULT_TRAFFIC_DENSITY = 4;
+const DEFAULT_TRAFFIC_DENSITY = 2.15;
 
 /**
  * Aumenta o tamanho visual dos carros.
@@ -74,7 +79,7 @@ const TRAFFIC_VEHICLE_SIZE_MULTIPLIER = 1.25;
  * Quanto menor, mais slots por rua.
  * 0.42 deixa a rua bem mais populada sem ficar 100% congestionada.
  */
-const TRAFFIC_VEHICLE_SPACING_MULTIPLIER = 0.42;
+const TRAFFIC_VEHICLE_SPACING_MULTIPLIER = 0.62;
 
 /**
  * A colisão já cresce porque usa width/length escalados.
@@ -96,6 +101,9 @@ const MIN_ROAD_LENGTH_METERS = 0.000001;
 
 const TRAFFIC_CROSSWALK_LOOKAHEAD_METERS = 58;
 const TRAFFIC_CROSSWALK_STOP_DISTANCE_METERS = 9.5;
+const TRAFFIC_LANE_CHANGE_LATERAL_SPEED_MPS = 3.85;
+const TRAFFIC_LANE_CHANGE_COMPLETE_EPSILON_METERS = 0.09;
+const TRAFFIC_LANE_CHANGE_COMPLETE_COOLDOWN_SECONDS = 1.1;
 
 type CrosswalkYieldResolution = Readonly<{
   speedFactor: number;
@@ -115,6 +123,7 @@ type TrafficSpeedProfile = Readonly<{
 type TrafficVehicleCandidate = Readonly<{
   vehicle: HomeDriveTrafficVehicle;
   priority: number;
+  segmentLengthMeters: number;
 }>;
 
 type TrafficVehicleDimensions = Readonly<{
@@ -810,6 +819,13 @@ function createTrafficVehicle(
     t,
     directionSign: lane.directionSign,
     laneIndex: lane.laneIndex,
+    targetLaneIndex: lane.laneIndex,
+    targetLaneOffsetMeters: lane.laneOffsetMeters,
+    laneChangeDirection: 0,
+    laneChangeCooldownSeconds: 0,
+    turnSignal: null,
+    brakeLightIntensity: 0,
+    followingVehicleId: null,
     laneOffsetMeters: lane.laneOffsetMeters,
 
     position,
@@ -1082,6 +1098,64 @@ function getNextRecoveryMps2(
   return getSafeVehicleSpeedRecoveryMps2(vehicle);
 }
 
+function getLaneChangeDirection(
+  fromLaneIndex: number,
+  toLaneIndex: number,
+): -1 | 0 | 1 {
+  if (toLaneIndex > fromLaneIndex) {
+    return 1;
+  }
+
+  if (toLaneIndex < fromLaneIndex) {
+    return -1;
+  }
+
+  return 0;
+}
+
+function getTurnSignalFromDirection(
+  direction: -1 | 0 | 1,
+): HomeDriveTrafficVehicle["turnSignal"] {
+  if (direction > 0) {
+    return "left";
+  }
+
+  if (direction < 0) {
+    return "right";
+  }
+
+  return null;
+}
+
+function getNumberOrFallback(value: number, fallback: number): number {
+  return Number.isFinite(value) ? value : fallback;
+}
+
+function resolveAwarenessLaneTarget(
+  vehicle: HomeDriveTrafficVehicle,
+  road: HomeDriveGeneratedRoadSegment,
+  decision: HomeDriveTrafficAwarenessDecision | undefined,
+): Readonly<{
+  laneIndex: number;
+  laneOffsetMeters: number;
+}> {
+  const requestedLaneIndex = getNumberOrFallback(
+    decision?.targetLaneIndex ?? vehicle.targetLaneIndex,
+    vehicle.laneIndex,
+  );
+
+  const lane = resolveHomeDriveTrafficLane(
+    road,
+    vehicle.directionSign,
+    requestedLaneIndex,
+  );
+
+  return {
+    laneIndex: lane.laneIndex,
+    laneOffsetMeters: lane.laneOffsetMeters,
+  };
+}
+
 function tickTrafficVehicle(
   vehicle: HomeDriveTrafficVehicle,
   road: HomeDriveGeneratedRoadSegment,
@@ -1089,6 +1163,7 @@ function tickTrafficVehicle(
   topology: HomeDriveRoadTopology,
   deltaSeconds: number,
   crosswalks?: HomeDriveCrosswalkRuntimeState,
+  awarenessDecision?: HomeDriveTrafficAwarenessDecision,
 ): HomeDriveTrafficVehicle {
   if (road.length <= MIN_ROAD_LENGTH_METERS) {
     return vehicle;
@@ -1104,7 +1179,18 @@ function tickTrafficVehicle(
     road,
     crosswalks,
   );
-  const recoveredSpeedMps = baseRecoveredSpeedMps * crosswalkYield.speedFactor;
+  const awarenessSpeedFactor = clamp01(awarenessDecision?.speedFactor ?? 1);
+  const recoveredSpeedMps =
+    baseRecoveredSpeedMps * crosswalkYield.speedFactor * awarenessSpeedFactor;
+  const awarenessBrakeLight = clamp01(
+    awarenessDecision?.brakeLightIntensity ?? 0,
+  );
+  const crosswalkBrakeLight = clamp01(1 - crosswalkYield.speedFactor);
+  const brakeLightIntensity = Math.max(
+    awarenessBrakeLight,
+    crosswalkBrakeLight,
+    recoveredSpeedMps + 0.25 < vehicle.speedMps ? 0.48 : 0,
+  );
 
   const rawNextT = getNextVehicleT(
     vehicle,
@@ -1139,10 +1225,54 @@ function tickTrafficVehicle(
     deltaSeconds,
   );
 
+  const routedToNewSegment = roadStep.segmentId !== vehicle.segmentId;
+  const laneTarget = routedToNewSegment
+    ? {
+        laneIndex: roadStep.laneIndex,
+        laneOffsetMeters: roadStep.laneOffsetMeters,
+      }
+    : resolveAwarenessLaneTarget(vehicle, roadStep.road, awarenessDecision);
+  const currentLaneOffsetMeters = getNumberOrFallback(
+    vehicle.laneOffsetMeters,
+    roadStep.laneOffsetMeters,
+  );
+  const nextLaneOffsetMeters = routedToNewSegment
+    ? laneTarget.laneOffsetMeters
+    : moveTowards(
+        currentLaneOffsetMeters,
+        laneTarget.laneOffsetMeters,
+        TRAFFIC_LANE_CHANGE_LATERAL_SPEED_MPS * deltaSeconds,
+      );
+  const laneChangeComplete =
+    Math.abs(nextLaneOffsetMeters - laneTarget.laneOffsetMeters) <=
+    TRAFFIC_LANE_CHANGE_COMPLETE_EPSILON_METERS;
+  const nextLaneIndex = laneChangeComplete
+    ? laneTarget.laneIndex
+    : vehicle.laneIndex;
+  const laneChangeDirection = routedToNewSegment
+    ? 0
+    : laneChangeComplete
+      ? 0
+      : getLaneChangeDirection(vehicle.laneIndex, laneTarget.laneIndex);
+  const laneChangeCompletedThisTick =
+    !routedToNewSegment &&
+    vehicle.laneChangeDirection !== 0 &&
+    laneChangeDirection === 0;
+  const nextLaneChangeCooldownSeconds = routedToNewSegment
+    ? JUNCTION_COOLDOWN_SECONDS
+    : laneChangeCompletedThisTick
+      ? TRAFFIC_LANE_CHANGE_COMPLETE_COOLDOWN_SECONDS
+      : Math.max(0, vehicle.laneChangeCooldownSeconds - deltaSeconds);
+  const nextTurnSignal = routedToNewSegment
+    ? null
+    : laneChangeDirection !== 0
+      ? awarenessDecision?.turnSignal ?? getTurnSignalFromDirection(laneChangeDirection)
+      : null;
+
   const basePosition = getPositionOnTrafficRoad(
     roadStep.road,
     roadStep.t,
-    roadStep.laneOffsetMeters,
+    nextLaneOffsetMeters,
   );
 
   const impactMagnitude = Math.hypot(
@@ -1176,7 +1306,6 @@ function tickTrafficVehicle(
     deltaSeconds,
   );
 
-  const routedToNewSegment = roadStep.segmentId !== vehicle.segmentId;
   const nextCruiseSpeedMps = getNextCruiseSpeedMps(
     vehicle,
     roadStep.road,
@@ -1201,8 +1330,15 @@ function tickTrafficVehicle(
 
     t: clamp01(roadStep.t),
     directionSign: roadStep.directionSign,
-    laneIndex: roadStep.laneIndex,
-    laneOffsetMeters: roadStep.laneOffsetMeters,
+    laneIndex: nextLaneIndex,
+    targetLaneIndex: laneTarget.laneIndex,
+    targetLaneOffsetMeters: laneTarget.laneOffsetMeters,
+    laneChangeDirection,
+    laneChangeCooldownSeconds: nextLaneChangeCooldownSeconds,
+    turnSignal: nextTurnSignal,
+    brakeLightIntensity,
+    followingVehicleId: awarenessDecision?.followingVehicleId ?? null,
+    laneOffsetMeters: nextLaneOffsetMeters,
 
     position: {
       x: basePosition.x + nextImpactOffset.x,
@@ -1253,7 +1389,68 @@ function createTrafficVehicleCandidate(
   return {
     vehicle,
     priority,
+    segmentLengthMeters: road.length,
   };
+}
+
+function getMaxTrafficVehiclesForSegment(
+  candidate: TrafficVehicleCandidate,
+): number {
+  return clamp(Math.floor(candidate.segmentLengthMeters / 118) + 1, 2, 7);
+}
+
+function selectTrafficSpawnCandidates(
+  candidates: readonly TrafficVehicleCandidate[],
+  maxVehicles: number,
+): readonly TrafficVehicleCandidate[] {
+  const rankedCandidates = candidates
+    .slice()
+    .sort((first, second) => {
+      if (first.priority !== second.priority) {
+        return first.priority - second.priority;
+      }
+
+      return first.vehicle.id.localeCompare(second.vehicle.id);
+    });
+
+  const selected: TrafficVehicleCandidate[] = [];
+  const selectedIds = new Set<string>();
+  const countBySegmentId = new Map<string, number>();
+
+  for (const candidate of rankedCandidates) {
+    if (selected.length >= maxVehicles) {
+      break;
+    }
+
+    const currentCount = countBySegmentId.get(candidate.vehicle.segmentId) ?? 0;
+
+    if (currentCount >= getMaxTrafficVehiclesForSegment(candidate)) {
+      continue;
+    }
+
+    selected.push(candidate);
+    selectedIds.add(candidate.vehicle.id);
+    countBySegmentId.set(candidate.vehicle.segmentId, currentCount + 1);
+  }
+
+  if (selected.length >= maxVehicles) {
+    return selected;
+  }
+
+  for (const candidate of rankedCandidates) {
+    if (selected.length >= maxVehicles) {
+      break;
+    }
+
+    if (selectedIds.has(candidate.vehicle.id)) {
+      continue;
+    }
+
+    selected.push(candidate);
+    selectedIds.add(candidate.vehicle.id);
+  }
+
+  return selected;
 }
 
 export function createInitialHomeDriveTrafficState(
@@ -1296,16 +1493,9 @@ export function createInitialHomeDriveTrafficState(
     }
   }
 
-  const vehicles = candidates
-    .sort((first, second) => {
-      if (first.priority !== second.priority) {
-        return first.priority - second.priority;
-      }
-
-      return first.vehicle.id.localeCompare(second.vehicle.id);
-    })
-    .slice(0, maxVehicles)
-    .map((candidate) => candidate.vehicle);
+  const vehicles = selectTrafficSpawnCandidates(candidates, maxVehicles).map(
+    (candidate) => candidate.vehicle,
+  );
 
   return {
     vehicles,
@@ -1326,26 +1516,28 @@ export function tickHomeDriveTraffic(
   const roads = getTrafficRoadSegments();
   const topology = getTrafficRoadTopology(roads);
 
+  const awareness = createHomeDriveTrafficAwarenessSnapshot(traffic, roads);
+  const movedVehicles = traffic.vehicles.map((vehicle) => {
+    const road = getRoadBySegmentId(roads, vehicle.segmentId);
+
+    if (!road) {
+      return vehicle;
+    }
+
+    return tickTrafficVehicle(
+      vehicle,
+      road,
+      roads,
+      topology,
+      deltaSeconds,
+      options.crosswalks,
+      awareness.decisionsByVehicleId.get(vehicle.id),
+    );
+  });
+
   return {
     ...traffic,
     elapsedSeconds: traffic.elapsedSeconds + deltaSeconds,
-    vehicles: traffic.vehicles.map((vehicle) => {
-      const road = getRoadBySegmentId(roads, vehicle.segmentId);
-
-      if (!road) {
-        return vehicle;
-      }
-
-      return tickTrafficVehicle(
-        vehicle,
-        road,
-        roads,
-        topology,
-        deltaSeconds,
-        options.crosswalks,
-      );
-    }),
+    vehicles: stabilizeHomeDriveTrafficLaneSeparation(movedVehicles, roads),
   };
 }
-
-
