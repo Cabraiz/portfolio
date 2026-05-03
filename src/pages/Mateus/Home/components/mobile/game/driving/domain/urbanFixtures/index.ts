@@ -2,3 +2,5 @@
 
 export * from "./homeDrive.urbanFixtures";
 export * from "./homeDrive.urbanFixtures.types";
+export * from "./homeDrive.urbanFixtureCollision";
+export * from "./homeDrive.urbanFixtureCollision.types";

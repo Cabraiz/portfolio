@@ -56,6 +56,18 @@ import {
 
 import {
 
+  createHomeDriveUrbanTrafficLights,
+
+  resolveHomeDriveUrbanFixtureCollisions,
+
+  type HomeDriveUrbanFixtureCollisionRuntimeState,
+
+  type HomeDriveUrbanStreetLight,
+
+} from "../domain/urbanFixtures";
+
+import {
+
   resolveHomeDrivePedestrianCollisions,
 
   tickHomeDrivePedestrianImpactAgents,
@@ -87,6 +99,10 @@ export type HomeDriveThreeSimulationProps = Readonly<{
   trafficRef?: HomeDriveMutableRef<HomeDriveTrafficRuntimeState>;
 
   parkedVehiclesRef?: HomeDriveMutableRef<HomeDriveParkedVehicleRuntimeState>;
+
+  urbanFixtureCollisionsRef?: HomeDriveMutableRef<HomeDriveUrbanFixtureCollisionRuntimeState>;
+
+  urbanStreetLights?: readonly HomeDriveUrbanStreetLight[];
 
   buildingCollisionsRef?: HomeDriveMutableRef<HomeDriveBuildingCollisionRuntimeState>;
 
@@ -762,6 +778,152 @@ function tickParkedVehiclesAndCollisionsStep(
 }
 
 
+function tickUrbanFixtureCollisionsStep(
+
+  nextRuntime: HomeDriveRuntimeState,
+
+  urbanFixtureCollisionsRef:
+
+    | HomeDriveMutableRef<HomeDriveUrbanFixtureCollisionRuntimeState>
+
+    | undefined,
+
+  urbanStreetLights: readonly HomeDriveUrbanStreetLight[] | undefined,
+
+  crosswalksRef:
+
+    | HomeDriveMutableRef<HomeDriveCrosswalkRuntimeState>
+
+    | undefined,
+
+): SimulationStepResult {
+
+  if (!urbanFixtureCollisionsRef || !urbanStreetLights) {
+
+    return {
+
+      runtime: nextRuntime,
+
+      hadCollision: false,
+
+    };
+
+  }
+
+
+
+  const trafficLights = crosswalksRef
+
+    ? createHomeDriveUrbanTrafficLights(
+
+        crosswalksRef.current.crosswalks,
+
+        crosswalksRef.current.elapsedSeconds,
+
+      )
+
+    : [];
+
+
+
+  const collisionResolution = resolveHomeDriveUrbanFixtureCollisions(
+
+    nextRuntime.car,
+
+    urbanFixtureCollisionsRef.current,
+
+    nextRuntime.elapsedSeconds,
+
+    urbanStreetLights,
+
+    trafficLights,
+
+    {
+
+      brutality: 1.62,
+
+      playerRadiusMeters: 1.72,
+
+      streetLightRadiusMeters: 0.76,
+
+      trafficLightRadiusMeters: 0.94,
+
+      minImpactSpeedMps: 0.66,
+
+      maxCandidateRadiusMeters: 20,
+
+      maxImpactsPerStep: 1,
+
+      maxTrackedImpacts: 420,
+
+      playerPushMultiplier: 0.84,
+
+      reverseKickMultiplier: 0.05,
+
+      maxReverseKickMps: 1.1,
+
+      streetLightLeanMultiplier: 0.98,
+
+      trafficLightLeanMultiplier: 1.34,
+
+    },
+
+  );
+
+
+
+  urbanFixtureCollisionsRef.current =
+
+    collisionResolution.urbanFixtureCollisions;
+
+
+
+  if (collisionResolution.events.length <= 0 || !collisionResolution.impact) {
+
+    return {
+
+      runtime: {
+
+        ...nextRuntime,
+
+        car: collisionResolution.car,
+
+      },
+
+      hadCollision: false,
+
+    };
+
+  }
+
+
+
+  return {
+
+    runtime: {
+
+      ...nextRuntime,
+
+      car: collisionResolution.car,
+
+      impact: mergeHomeDriveImpactStates(
+
+        nextRuntime.impact,
+
+        collisionResolution.impact,
+
+      ),
+
+    },
+
+    hadCollision: true,
+
+  };
+
+}
+
+
+
 function tickBuildingCollisionsStep(
 
   nextRuntime: HomeDriveRuntimeState,
@@ -891,6 +1053,14 @@ function tickSimulationStep(
 
     | undefined,
 
+  urbanFixtureCollisionsRef:
+
+    | HomeDriveMutableRef<HomeDriveUrbanFixtureCollisionRuntimeState>
+
+    | undefined,
+
+  urbanStreetLights: readonly HomeDriveUrbanStreetLight[] | undefined,
+
   buildingCollisionsRef:
 
     | HomeDriveMutableRef<HomeDriveBuildingCollisionRuntimeState>
@@ -952,6 +1122,19 @@ function tickSimulationStep(
   );
 
 
+  const urbanFixtureResult = tickUrbanFixtureCollisionsStep(
+
+    parkedResult.runtime,
+
+    urbanFixtureCollisionsRef,
+
+    urbanStreetLights,
+
+    crosswalksRef,
+
+  );
+
+
   /**
 
    * Prédio entra por último.
@@ -968,7 +1151,7 @@ function tickSimulationStep(
 
   const buildingResult = tickBuildingCollisionsStep(
 
-    parkedResult.runtime,
+    urbanFixtureResult.runtime,
 
     buildings,
 
@@ -988,6 +1171,8 @@ function tickSimulationStep(
       trafficResult.hadCollision ||
 
       parkedResult.hadCollision ||
+
+      urbanFixtureResult.hadCollision ||
 
       buildingResult.hadCollision,
 
@@ -1015,6 +1200,10 @@ export default function HomeDriveThreeSimulation({
   trafficRef,
 
   parkedVehiclesRef,
+
+  urbanFixtureCollisionsRef,
+
+  urbanStreetLights,
 
   buildingCollisionsRef,
 
@@ -1103,6 +1292,10 @@ export default function HomeDriveThreeSimulation({
         parkedVehiclesRef,
 
         pedestriansRef,
+
+        urbanFixtureCollisionsRef,
+
+        urbanStreetLights,
 
         buildingCollisionsRef,
 

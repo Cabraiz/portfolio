@@ -62,6 +62,12 @@ import {
 import HomeDriveThreeRoadNetwork from "./HomeDriveThreeRoadNetwork";
 import HomeDriveThreeSimulation from "./HomeDriveThreeSimulation";
 import HomeDriveThreeTraffic from "./HomeDriveThreeTraffic";
+import {
+  createHomeDriveUrbanStreetLights,
+  createInitialHomeDriveUrbanFixtureCollisionState,
+  type HomeDriveUrbanFixtureCollisionRuntimeState,
+  type HomeDriveUrbanStreetLight,
+} from "../domain/urbanFixtures";
 import HomeDriveThreeUrbanFixtures from "./urbanFixtures";
 import HomeDriveThreeWorldObjects from "./HomeDriveThreeWorldObjects";
 import { HOME_DRIVE_THREE_COLORS } from "./homeDriveThree.materials";
@@ -83,6 +89,8 @@ type HomeDriveThreeWorldProps = Readonly<{
   inputRef: HomeDriveMutableRef<HomeDriveInputState>;
   trafficRef: HomeDriveMutableRef<HomeDriveTrafficRuntimeState>;
   parkedVehiclesRef: HomeDriveMutableRef<HomeDriveParkedVehicleRuntimeState>;
+  urbanFixtureCollisionsRef: HomeDriveMutableRef<HomeDriveUrbanFixtureCollisionRuntimeState>;
+  urbanStreetLights: readonly HomeDriveUrbanStreetLight[];
   buildingCollisionsRef: HomeDriveMutableRef<HomeDriveBuildingCollisionRuntimeState>;
   buildings: readonly HomeDriveBuilding[];
   pedestriansRef: HomeDriveMutableRef<HomeDrivePedestrianRuntimeState>;
@@ -137,6 +145,10 @@ const URBAN_FIXTURES_MAX_STREET_LIGHTS_PORTRAIT = 180;
 const URBAN_FIXTURES_MAX_STREET_LIGHTS_LANDSCAPE = 260;
 const URBAN_FIXTURES_MAX_TRAFFIC_LIGHTS_PORTRAIT = 72;
 const URBAN_FIXTURES_MAX_TRAFFIC_LIGHTS_LANDSCAPE = 112;
+const URBAN_FIXTURES_STREET_LIGHT_DENSITY = 1.18;
+const URBAN_FIXTURES_MAX_STREET_LIGHTS_TOTAL = 1040;
+const URBAN_FIXTURES_MIN_ROAD_LENGTH_METERS = 58;
+const URBAN_FIXTURES_STREET_LIGHT_SEED = 17191;
 
 const THREE_CLOCK_DEPRECATION_WARNING =
   "THREE.Clock: This module has been deprecated. Please use THREE.Timer instead.";
@@ -289,6 +301,8 @@ function HomeDriveThreeWorld({
   inputRef,
   trafficRef,
   parkedVehiclesRef,
+  urbanFixtureCollisionsRef,
+  urbanStreetLights,
   buildingCollisionsRef,
   buildings,
   pedestriansRef,
@@ -346,6 +360,8 @@ function HomeDriveThreeWorld({
         inputRef={inputRef}
         trafficRef={trafficRef}
         parkedVehiclesRef={parkedVehiclesRef}
+        urbanFixtureCollisionsRef={urbanFixtureCollisionsRef}
+        urbanStreetLights={urbanStreetLights}
         buildingCollisionsRef={buildingCollisionsRef}
         buildings={buildings}
         pedestriansRef={pedestriansRef}
@@ -374,6 +390,8 @@ function HomeDriveThreeWorld({
       <HomeDriveThreeUrbanFixtures
         runtimeRef={runtimeRef}
         crosswalksRef={crosswalksRef}
+        urbanFixtureCollisionsRef={urbanFixtureCollisionsRef}
+        streetLights={urbanStreetLights}
         visibleRadiusMeters={
           isPortrait
             ? URBAN_FIXTURES_VISIBLE_RADIUS_PORTRAIT
@@ -520,6 +538,15 @@ export default function HomeDriveThreeScene({
     return getHomeDriveBuildings();
   }, []);
 
+  const urbanStreetLights = useMemo(() => {
+    return createHomeDriveUrbanStreetLights({
+      density: URBAN_FIXTURES_STREET_LIGHT_DENSITY,
+      maxLights: URBAN_FIXTURES_MAX_STREET_LIGHTS_TOTAL,
+      minRoadLengthMeters: URBAN_FIXTURES_MIN_ROAD_LENGTH_METERS,
+      seed: URBAN_FIXTURES_STREET_LIGHT_SEED,
+    });
+  }, []);
+
   const pedestrianPerformance = useMemo(() => {
     return getHomeDrivePedestrianPerformanceProfile(viewport.isPortrait);
   }, [viewport.isPortrait]);
@@ -561,6 +588,11 @@ export default function HomeDriveThreeScene({
   const buildingCollisionsRef =
     useRef<HomeDriveBuildingCollisionRuntimeState>(
       createInitialHomeDriveBuildingCollisionState(),
+    );
+
+  const urbanFixtureCollisionsRef =
+    useRef<HomeDriveUrbanFixtureCollisionRuntimeState>(
+      createInitialHomeDriveUrbanFixtureCollisionState(),
     );
 
   const crosswalksRef = useRef<HomeDriveCrosswalkRuntimeState>(
@@ -647,6 +679,8 @@ export default function HomeDriveThreeScene({
             inputRef={inputRef}
             trafficRef={trafficRef}
             parkedVehiclesRef={parkedVehiclesRef}
+            urbanFixtureCollisionsRef={urbanFixtureCollisionsRef}
+            urbanStreetLights={urbanStreetLights}
             buildingCollisionsRef={buildingCollisionsRef}
             buildings={buildings}
             pedestriansRef={pedestriansRef}
@@ -662,6 +696,3 @@ export default function HomeDriveThreeScene({
     </div>
   );
 }
-
-
-
