@@ -1,0 +1,214 @@
+/* src/pages/Mateus/Home/components/mobile/game/driving/view/HomeDriveBootLoadingScreen.module.css */
+
+@import url("https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Roboto+Condensed:wght@400;700;900&display=swap");
+
+.root {
+  position: absolute;
+  inset: 0;
+  z-index: 90;
+  display: grid;
+  place-items: center;
+  padding:
+    calc(env(safe-area-inset-top, 0px) + 18px)
+    16px
+    calc(env(safe-area-inset-bottom, 0px) + 18px);
+  box-sizing: border-box;
+  overflow: hidden;
+  color: #efe0af;
+  background: #1a2016;
+  pointer-events: auto;
+  image-rendering: pixelated;
+}
+
+.root::before {
+  position: absolute;
+  inset: 0;
+  content: "";
+  background:
+    linear-gradient(180deg, rgba(255, 244, 184, 0.04) 0 1px, transparent 1px 5px),
+    radial-gradient(circle at 50% 38%, rgba(103, 132, 70, 0.25), transparent 42%);
+  opacity: 0.9;
+}
+
+.scanline {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.16) 0 1px,
+    transparent 1px 4px
+  );
+  pointer-events: none;
+}
+
+.panel {
+  position: relative;
+  width: min(86vw, 430px);
+  padding: 18px;
+  border: 2px solid #efe0af;
+  box-shadow:
+    0 0 0 4px #11160e,
+    8px 8px 0 rgba(0, 0, 0, 0.42);
+  background: #2d3724;
+}
+
+.header,
+.footer,
+.steps,
+.mainRow {
+  display: flex;
+  align-items: center;
+}
+
+.header,
+.footer {
+  justify-content: space-between;
+  gap: 10px;
+  font-family: "Roboto Condensed", Arial, sans-serif;
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.brand {
+  color: #ffe59c;
+}
+
+.version {
+  color: rgba(239, 224, 175, 0.62);
+}
+
+.mainRow {
+  gap: 16px;
+  margin-top: 22px;
+}
+
+.percentBox {
+  flex: 0 0 auto;
+  min-width: 92px;
+  padding: 13px 10px 11px;
+  border: 2px solid #10140d;
+  font-family: "Press Start 2P", system-ui, sans-serif;
+  font-size: clamp(1.1rem, 5.8vw, 1.65rem);
+  line-height: 1;
+  text-align: center;
+  color: #10140d;
+  background: #d8b95f;
+  box-shadow: inset -3px -3px 0 rgba(0, 0, 0, 0.24);
+}
+
+.copyBlock {
+  min-width: 0;
+}
+
+.title {
+  margin: 0;
+  font-family: "Press Start 2P", system-ui, sans-serif;
+  font-size: clamp(0.64rem, 2.5vw, 0.78rem);
+  line-height: 1.55;
+  color: #ffe59c;
+  text-transform: uppercase;
+}
+
+.detail {
+  margin: 8px 0 0;
+  font-family: "Roboto Condensed", Arial, sans-serif;
+  font-size: clamp(0.8rem, 3.4vw, 0.95rem);
+  font-weight: 700;
+  line-height: 1.25;
+  color: rgba(239, 224, 175, 0.78);
+}
+
+.progressTrack {
+  position: relative;
+  height: 18px;
+  margin-top: 20px;
+  overflow: hidden;
+  border: 2px solid #10140d;
+  background:
+    repeating-linear-gradient(
+      90deg,
+      rgba(16, 20, 13, 0.28) 0 8px,
+      transparent 8px 12px
+    ),
+    #151b11;
+}
+
+.progressFill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: var(--home-drive-boot-progress, 0%);
+  background: #d8b95f;
+  box-shadow: inset -3px -3px 0 rgba(0, 0, 0, 0.18);
+  transition: width 180ms steps(8, end);
+}
+
+.steps {
+  justify-content: space-between;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.step {
+  flex: 1 1 0;
+  padding: 7px 3px 6px;
+  border: 1px solid rgba(239, 224, 175, 0.42);
+  font-family: "Roboto Condensed", Arial, sans-serif;
+  font-size: 0.64rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-align: center;
+  color: rgba(239, 224, 175, 0.5);
+  background: #202819;
+}
+
+.step[data-state="done"] {
+  color: #10140d;
+  border-color: #d8b95f;
+  background: #d8b95f;
+}
+
+.step[data-state="active"] {
+  color: #ffe59c;
+  border-color: #ffe59c;
+  background: #4b3f1b;
+}
+
+.footer {
+  margin-top: 16px;
+  color: rgba(239, 224, 175, 0.64);
+}
+
+.retryButton {
+  width: 100%;
+  margin-top: 16px;
+  padding: 12px 14px 10px;
+  border: 2px solid #10140d;
+  color: #10140d;
+  font-family: "Press Start 2P", system-ui, sans-serif;
+  font-size: 0.68rem;
+  background: #d8b95f;
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.36);
+}
+
+@media (max-width: 390px) {
+  .panel {
+    width: min(90vw, 360px);
+    padding: 14px;
+  }
+
+  .mainRow {
+    gap: 10px;
+  }
+
+  .percentBox {
+    min-width: 78px;
+    padding-inline: 8px;
+  }
+
+  .step {
+    font-size: 0.56rem;
+    letter-spacing: 0.04em;
+  }
+}

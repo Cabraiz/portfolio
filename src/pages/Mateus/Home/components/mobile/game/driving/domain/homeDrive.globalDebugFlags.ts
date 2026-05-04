@@ -6,7 +6,7 @@
  * true  = monta sampler + painel com FPS, frame budget, vilões e WebGL stats.
  * false = não monta sampler nem overlay.
  */
-export const HOME_DRIVE_RUNTIME_DIAGNOSTICS_OVERLAY_ENABLED = true;
+export const HOME_DRIVE_RUNTIME_DIAGNOSTICS_OVERLAY_ENABLED = false;
 
 /**
  * Frequência de publicação do snapshot do diagnóstico.

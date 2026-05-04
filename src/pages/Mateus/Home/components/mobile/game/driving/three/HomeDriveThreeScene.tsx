@@ -12,50 +12,65 @@ import {
   type Scene,
 } from "three";
 
-import {
-  createInitialHomeDriveBuildingCollisionState,
-  type HomeDriveBuildingCollisionRuntimeState,
-} from "../domain/buildingCollisions";
-import {
-  createInitialHomeDriveCrosswalkState,
-  type HomeDriveCrosswalkRuntimeState,
-} from "../domain/crosswalks";
+import type { HomeDriveBuildingCollisionRuntimeState } from "../domain/buildingCollisions";
+import type { HomeDriveCrosswalkRuntimeState } from "../domain/crosswalks";
 import {
   createHomeDriveRuntimeDiagnosticsSnapshot,
-  createHomeDriveRuntimeProfilerState,
   flushHomeDriveRuntimeProfilerSnapshot,
   type HomeDriveRuntimeDiagnosticsSnapshot,
   type HomeDriveRuntimeProfilerState,
 } from "../domain/diagnostics";
 import type { HomeDriveBuilding } from "../domain/homeDrive.building.types";
-import { getHomeDriveBuildings } from "../domain/homeDrive.buildings";
 import {
+  HOME_DRIVE_RUNTIME_DIAGNOSTICS_SAMPLE_HZ,
   HOME_DRIVE_WORLD_BUILDINGS_ON,
   HOME_DRIVE_WORLD_CARS_ON,
-  HOME_DRIVE_WORLD_MOVING_CARS_TARGET_COUNT,
   HOME_DRIVE_WORLD_PEDESTRIANS_ON,
-  HOME_DRIVE_RUNTIME_DIAGNOSTICS_SAMPLE_HZ,
 } from "../domain/homeDrive.globalDebugFlags";
-import { createInitialHomeDriveTrafficState } from "../domain/homeDrive.traffic";
 import type { HomeDriveTrafficRuntimeState } from "../domain/homeDrive.traffic.types";
 import type {
   HomeDriveInputState,
   HomeDriveRuntimeState,
   HomeDriveViewportMetrics,
 } from "../domain/homeDrive.types";
+import type { HomeDriveParkedVehicleRuntimeState } from "../domain/parkedVehicles";
+import type { HomeDrivePedestrianRuntimeState } from "../domain/pedestrians";
+import type { HomeDrivePedestrianPerformanceProfile } from "../domain/pedestrians/homeDrive.pedestrianPerformance";
+import type {
+  HomeDriveUrbanFixtureCollisionRuntimeState,
+  HomeDriveUrbanStreetLight,
+} from "../domain/urbanFixtures";
+import type { HomeDriveBootAssets } from "../boot/homeDriveBootAssets";
 import {
-  createInitialHomeDriveParkedVehicleState,
-  type HomeDriveParkedVehicleRuntimeState,
-} from "../domain/parkedVehicles";
-import {
-  createInitialHomeDrivePedestrianState,
-  preloadHomeDrivePedestrianBootRuntime,
-  type HomeDrivePedestrianRuntimeState,
-} from "../domain/pedestrians";
-import {
-  getHomeDrivePedestrianPerformanceProfile,
-  type HomeDrivePedestrianPerformanceProfile,
-} from "../domain/pedestrians/homeDrive.pedestrianPerformance";
+  BUILDING_COLLISION_MARK_MAX_VISIBLE_LANDSCAPE,
+  BUILDING_COLLISION_MARK_MAX_VISIBLE_PORTRAIT,
+  BUILDING_COLLISION_MARK_VISIBLE_RADIUS_LANDSCAPE,
+  BUILDING_COLLISION_MARK_VISIBLE_RADIUS_PORTRAIT,
+  BUILDING_RUBBLE_MAX_VISIBLE_LANDSCAPE,
+  BUILDING_RUBBLE_MAX_VISIBLE_PORTRAIT,
+  BUILDING_RUBBLE_VISIBLE_RADIUS_LANDSCAPE,
+  BUILDING_RUBBLE_VISIBLE_RADIUS_PORTRAIT,
+  DAMAGED_BUILDINGS_MAX_VISIBLE_LANDSCAPE,
+  DAMAGED_BUILDINGS_MAX_VISIBLE_PORTRAIT,
+  DAMAGED_BUILDINGS_VISIBLE_RADIUS_LANDSCAPE,
+  DAMAGED_BUILDINGS_VISIBLE_RADIUS_PORTRAIT,
+  HOME_DRIVE_BOOT_WORLD_READY_MIN_FRAMES,
+  HOME_DRIVE_BOOT_WORLD_READY_MIN_MS,
+  INITIAL_CAMERA_FAR,
+  INITIAL_CAMERA_FOV,
+  INITIAL_CAMERA_HEIGHT_METERS,
+  INITIAL_CAMERA_NEAR,
+  PARKED_MAX_VISIBLE_LANDSCAPE,
+  PARKED_MAX_VISIBLE_PORTRAIT,
+  PARKED_VISIBLE_RADIUS_LANDSCAPE,
+  PARKED_VISIBLE_RADIUS_PORTRAIT,
+  URBAN_FIXTURES_MAX_STREET_LIGHTS_LANDSCAPE,
+  URBAN_FIXTURES_MAX_STREET_LIGHTS_PORTRAIT,
+  URBAN_FIXTURES_MAX_TRAFFIC_LIGHTS_LANDSCAPE,
+  URBAN_FIXTURES_MAX_TRAFFIC_LIGHTS_PORTRAIT,
+  URBAN_FIXTURES_VISIBLE_RADIUS_LANDSCAPE,
+  URBAN_FIXTURES_VISIBLE_RADIUS_PORTRAIT,
+} from "../boot/homeDriveBootConfig";
 import {
   getHomeDriveDamagedBuildingIdsFromCollisionState,
   HomeDriveThreeBuildingCollisionMarks,
@@ -69,19 +84,10 @@ import HomeDriveThreeCameraRig from "./HomeDriveThreeCameraRig";
 import { HomeDriveThreeCrosswalks } from "./crosswalks";
 import HomeDriveThreeGround from "./HomeDriveThreeGround";
 import { HomeDriveThreeParkedVehicles } from "./parkedVehicles";
-import {
-  HomeDriveThreePedestrians,
-  prewarmHomeDriveThreePedestrianAnimationBakeCache,
-} from "./pedestrians";
+import { HomeDriveThreePedestrians } from "./pedestrians";
 import HomeDriveThreeRoadNetwork from "./HomeDriveThreeRoadNetwork";
 import HomeDriveThreeSimulation from "./HomeDriveThreeSimulation";
 import HomeDriveThreeTraffic from "./HomeDriveThreeTraffic";
-import {
-  createHomeDriveUrbanStreetLights,
-  createInitialHomeDriveUrbanFixtureCollisionState,
-  type HomeDriveUrbanFixtureCollisionRuntimeState,
-  type HomeDriveUrbanStreetLight,
-} from "../domain/urbanFixtures";
 import HomeDriveThreeUrbanFixtures from "./urbanFixtures";
 import HomeDriveThreeWorldObjects from "./HomeDriveThreeWorldObjects";
 import { HOME_DRIVE_THREE_COLORS } from "./homeDriveThree.materials";
@@ -92,11 +98,13 @@ type HomeDriveMutableRef<T> = {
 };
 
 export type HomeDriveThreeSceneProps = Readonly<{
+  bootAssets: HomeDriveBootAssets;
   runtimeRef: HomeDriveMutableRef<HomeDriveRuntimeState>;
   inputRef: HomeDriveMutableRef<HomeDriveInputState>;
   viewport: HomeDriveViewportMetrics;
   publishRuntimeSnapshot?: () => void;
   onDiagnosticsSnapshot?: (snapshot: HomeDriveRuntimeDiagnosticsSnapshot) => void;
+  onInitialWorldReady?: () => void;
 }>;
 
 type HomeDriveThreeWorldProps = Readonly<{
@@ -115,60 +123,8 @@ type HomeDriveThreeWorldProps = Readonly<{
   isPortrait: boolean;
   publishRuntimeSnapshot?: () => void;
   onDiagnosticsSnapshot?: (snapshot: HomeDriveRuntimeDiagnosticsSnapshot) => void;
+  onInitialWorldReady?: () => void;
 }>;
-
-const INITIAL_CAMERA_HEIGHT_METERS = 2.65;
-const INITIAL_CAMERA_FOV = 66;
-const INITIAL_CAMERA_NEAR = 0.1;
-const INITIAL_CAMERA_FAR = 4200;
-
-// Tráfego dinâmico: limite fixo pedido para reduzir custo de IA/render.
-const TRAFFIC_MAX_VEHICLES_PORTRAIT = HOME_DRIVE_WORLD_MOVING_CARS_TARGET_COUNT;
-const TRAFFIC_MAX_VEHICLES_LANDSCAPE = HOME_DRIVE_WORLD_MOVING_CARS_TARGET_COUNT;
-const TRAFFIC_DENSITY_PORTRAIT = 1.7;
-const TRAFFIC_DENSITY_LANDSCAPE = 2;
-const TRAFFIC_MIN_ROAD_LENGTH_METERS = 64;
-
-// Carros estacionados: pool alto pedido. Eles continuam com culling por raio/limite
-// visível abaixo, então não viram 3000 instâncias desenhadas ao mesmo tempo.
-const PARKED_MAX_VEHICLES_PORTRAIT = 3000;
-const PARKED_MAX_VEHICLES_LANDSCAPE = 3000;
-const PARKED_DENSITY_PORTRAIT = 1.35;
-const PARKED_DENSITY_LANDSCAPE = 1.35;
-const PARKED_MAX_ROADS_PORTRAIT = 3000;
-const PARKED_MAX_ROADS_LANDSCAPE = 3000;
-const PARKED_MIN_ROAD_LENGTH_METERS = 68;
-
-const PARKED_VISIBLE_RADIUS_PORTRAIT = 540;
-const PARKED_VISIBLE_RADIUS_LANDSCAPE = 660;
-const PARKED_MAX_VISIBLE_PORTRAIT = 96;
-const PARKED_MAX_VISIBLE_LANDSCAPE = 148;
-
-const BUILDING_COLLISION_MARK_VISIBLE_RADIUS_PORTRAIT = 430;
-const BUILDING_COLLISION_MARK_VISIBLE_RADIUS_LANDSCAPE = 620;
-const BUILDING_COLLISION_MARK_MAX_VISIBLE_PORTRAIT = 64;
-const BUILDING_COLLISION_MARK_MAX_VISIBLE_LANDSCAPE = 112;
-
-const DAMAGED_BUILDINGS_VISIBLE_RADIUS_PORTRAIT = 560;
-const DAMAGED_BUILDINGS_VISIBLE_RADIUS_LANDSCAPE = 820;
-const DAMAGED_BUILDINGS_MAX_VISIBLE_PORTRAIT = 24;
-const DAMAGED_BUILDINGS_MAX_VISIBLE_LANDSCAPE = 42;
-
-const BUILDING_RUBBLE_VISIBLE_RADIUS_PORTRAIT = 560;
-const BUILDING_RUBBLE_VISIBLE_RADIUS_LANDSCAPE = 860;
-const BUILDING_RUBBLE_MAX_VISIBLE_PORTRAIT = 420;
-const BUILDING_RUBBLE_MAX_VISIBLE_LANDSCAPE = 900;
-
-const URBAN_FIXTURES_VISIBLE_RADIUS_PORTRAIT = 680;
-const URBAN_FIXTURES_VISIBLE_RADIUS_LANDSCAPE = 860;
-const URBAN_FIXTURES_MAX_STREET_LIGHTS_PORTRAIT = 180;
-const URBAN_FIXTURES_MAX_STREET_LIGHTS_LANDSCAPE = 260;
-const URBAN_FIXTURES_MAX_TRAFFIC_LIGHTS_PORTRAIT = 72;
-const URBAN_FIXTURES_MAX_TRAFFIC_LIGHTS_LANDSCAPE = 112;
-const URBAN_FIXTURES_STREET_LIGHT_DENSITY = 1.18;
-const URBAN_FIXTURES_MAX_STREET_LIGHTS_TOTAL = 1040;
-const URBAN_FIXTURES_MIN_ROAD_LENGTH_METERS = 58;
-const URBAN_FIXTURES_STREET_LIGHT_SEED = 17191;
 
 const THREE_CLOCK_DEPRECATION_WARNING =
   "THREE.Clock: This module has been deprecated. Please use THREE.Timer instead.";
@@ -336,6 +292,39 @@ function getNowMs(): number {
   return Date.now();
 }
 
+function HomeDriveThreeBootReadinessProbe({
+  minFrames,
+  minElapsedMs,
+  onReady,
+}: Readonly<{
+  minFrames: number;
+  minElapsedMs: number;
+  onReady?: () => void;
+}>) {
+  const startedAtMsRef = useRef(getNowMs());
+  const frameCountRef = useRef(0);
+  const didReportRef = useRef(false);
+
+  useFrame(() => {
+    if (!onReady || didReportRef.current) {
+      return;
+    }
+
+    frameCountRef.current += 1;
+
+    const elapsedMs = getNowMs() - startedAtMsRef.current;
+
+    if (frameCountRef.current < minFrames || elapsedMs < minElapsedMs) {
+      return;
+    }
+
+    didReportRef.current = true;
+    onReady();
+  });
+
+  return null;
+}
+
 function HomeDriveThreeDiagnosticsSampler({
   runtimeRef,
   trafficRef,
@@ -415,6 +404,7 @@ function HomeDriveThreeWorld({
   isPortrait,
   publishRuntimeSnapshot,
   onDiagnosticsSnapshot,
+  onInitialWorldReady,
 }: HomeDriveThreeWorldProps) {
   const [damagedBuildingIds, setDamagedBuildingIds] = useState<
     readonly string[]
@@ -658,16 +648,24 @@ function HomeDriveThreeWorld({
       ) : null}
 
       <HomeDriveThreeWorldObjects runtimeRef={runtimeRef} />
+
+      <HomeDriveThreeBootReadinessProbe
+        minFrames={HOME_DRIVE_BOOT_WORLD_READY_MIN_FRAMES}
+        minElapsedMs={HOME_DRIVE_BOOT_WORLD_READY_MIN_MS}
+        onReady={onInitialWorldReady}
+      />
     </>
   );
 }
 
 export default function HomeDriveThreeScene({
+  bootAssets,
   runtimeRef,
   inputRef,
   viewport,
   publishRuntimeSnapshot,
   onDiagnosticsSnapshot,
+  onInitialWorldReady,
 }: HomeDriveThreeSceneProps) {
   useEffect(() => {
     if (!import.meta.env.DEV) {
@@ -677,133 +675,32 @@ export default function HomeDriveThreeScene({
     return installThreeClockDeprecationWarningFilter();
   }, []);
 
-  const buildings = useMemo(() => {
-    return HOME_DRIVE_WORLD_BUILDINGS_ON ? getHomeDriveBuildings() : [];
-  }, []);
+  const buildings = bootAssets.buildings;
+  const urbanStreetLights = bootAssets.urbanStreetLights;
+  const pedestrianPerformance = bootAssets.pedestrianPerformance;
 
-  const urbanStreetLights = useMemo(() => {
-    return createHomeDriveUrbanStreetLights({
-      density: URBAN_FIXTURES_STREET_LIGHT_DENSITY,
-      maxLights: URBAN_FIXTURES_MAX_STREET_LIGHTS_TOTAL,
-      minRoadLengthMeters: URBAN_FIXTURES_MIN_ROAD_LENGTH_METERS,
-      seed: URBAN_FIXTURES_STREET_LIGHT_SEED,
-    });
-  }, []);
-
-  const pedestrianPerformance = useMemo(() => {
-    return getHomeDrivePedestrianPerformanceProfile(viewport.isPortrait);
-  }, [viewport.isPortrait]);
-
-  const initialTrafficState = useMemo<HomeDriveTrafficRuntimeState>(() => {
-    if (!HOME_DRIVE_WORLD_CARS_ON) {
-      return {
-        vehicles: [],
-        elapsedSeconds: 0,
-        lastCollisionAt: -999,
-      };
-    }
-
-    return createInitialHomeDriveTrafficState({
-      maxVehicles: viewport.isPortrait
-        ? TRAFFIC_MAX_VEHICLES_PORTRAIT
-        : TRAFFIC_MAX_VEHICLES_LANDSCAPE,
-      density: viewport.isPortrait
-        ? TRAFFIC_DENSITY_PORTRAIT
-        : TRAFFIC_DENSITY_LANDSCAPE,
-      minRoadLengthMeters: TRAFFIC_MIN_ROAD_LENGTH_METERS,
-    });
-  }, [viewport.isPortrait]);
-
-  const trafficRef = useRef<HomeDriveTrafficRuntimeState>(initialTrafficState);
-
-  const initialParkedVehicleState = useMemo<HomeDriveParkedVehicleRuntimeState>(() => {
-    if (!HOME_DRIVE_WORLD_CARS_ON) {
-      return {
-        vehicles: [],
-        seed: 6617,
-      };
-    }
-
-    return createInitialHomeDriveParkedVehicleState({
-      maxVehicles: viewport.isPortrait
-        ? PARKED_MAX_VEHICLES_PORTRAIT
-        : PARKED_MAX_VEHICLES_LANDSCAPE,
-      density: viewport.isPortrait
-        ? PARKED_DENSITY_PORTRAIT
-        : PARKED_DENSITY_LANDSCAPE,
-      maxRoads: viewport.isPortrait
-        ? PARKED_MAX_ROADS_PORTRAIT
-        : PARKED_MAX_ROADS_LANDSCAPE,
-      minRoadLengthMeters: PARKED_MIN_ROAD_LENGTH_METERS,
-      seed: 6617,
-    });
-  }, [viewport.isPortrait]);
-
-  const parkedVehiclesRef = useRef<HomeDriveParkedVehicleRuntimeState>(
-    initialParkedVehicleState,
+  const trafficRef = useRef<HomeDriveTrafficRuntimeState>(
+    bootAssets.trafficState,
   );
-
+  const parkedVehiclesRef = useRef<HomeDriveParkedVehicleRuntimeState>(
+    bootAssets.parkedVehicleState,
+  );
   const buildingCollisionsRef =
     useRef<HomeDriveBuildingCollisionRuntimeState>(
-      createInitialHomeDriveBuildingCollisionState(),
+      bootAssets.buildingCollisionState,
     );
-
   const urbanFixtureCollisionsRef =
     useRef<HomeDriveUrbanFixtureCollisionRuntimeState>(
-      createInitialHomeDriveUrbanFixtureCollisionState(),
+      bootAssets.urbanFixtureCollisionState,
     );
-
   const crosswalksRef = useRef<HomeDriveCrosswalkRuntimeState>(
-    createInitialHomeDriveCrosswalkState({
-      maxCrosswalks: viewport.isPortrait ? 72 : 96,
-      density: viewport.isPortrait ? 0.86 : 1.08,
-      minRoadLengthMeters: 82,
-      seed: 9841,
-    }),
+    bootAssets.crosswalkState,
   );
-
-  const initialPedestrianState = useMemo<HomeDrivePedestrianRuntimeState>(() => {
-    if (!HOME_DRIVE_WORLD_PEDESTRIANS_ON) {
-      return createInitialHomeDrivePedestrianState({
-        density: 0,
-        maxRoads: 0,
-        minRoadLengthMeters: Number.POSITIVE_INFINITY,
-        seed: 7429,
-        initialFocusCenter: runtimeRef.current.car.position,
-      });
-    }
-
-    const animationBakePrewarm =
-      prewarmHomeDriveThreePedestrianAnimationBakeCache();
-    const basePedestrians = createInitialHomeDrivePedestrianState({
-      density: pedestrianPerformance.density,
-      maxRoads: pedestrianPerformance.maxRoads,
-      minRoadLengthMeters: pedestrianPerformance.minRoadLengthMeters,
-      seed: 7429,
-      initialFocusCenter: runtimeRef.current.car.position,
-    });
-
-    return preloadHomeDrivePedestrianBootRuntime(basePedestrians, {
-      enabled: pedestrianPerformance.pedestrianBootPreloadEnabled,
-      activeCenter: runtimeRef.current.car.position,
-      activeHeadingRad: runtimeRef.current.car.headingRad,
-      activeSpeedMps: runtimeRef.current.car.speedMps,
-      seed: 7429,
-      profile: pedestrianPerformance,
-      steps: pedestrianPerformance.pedestrianBootPreloadSteps,
-      stepSeconds: pedestrianPerformance.pedestrianBootPreloadStepSeconds,
-      bakeLibraryClipCount: animationBakePrewarm.clipCount,
-      bakeLibrarySampleCount: animationBakePrewarm.sampleCount,
-      debug: HOME_DRIVE_THREE_PEDESTRIAN_SCENE_DEBUG,
-    }).pedestrians;
-  }, [pedestrianPerformance, runtimeRef]);
-
   const pedestriansRef = useRef<HomeDrivePedestrianRuntimeState>(
-    initialPedestrianState,
+    bootAssets.pedestriansState,
   );
-
   const runtimeProfilerRef = useRef<HomeDriveRuntimeProfilerState>(
-    createHomeDriveRuntimeProfilerState(),
+    bootAssets.runtimeProfilerState,
   );
 
   const dpr = useMemo(() => {
@@ -862,6 +759,7 @@ export default function HomeDriveThreeScene({
             isPortrait={viewport.isPortrait}
             publishRuntimeSnapshot={publishRuntimeSnapshot}
             onDiagnosticsSnapshot={onDiagnosticsSnapshot}
+            onInitialWorldReady={onInitialWorldReady}
           />
         </Suspense>
       </Canvas>
@@ -870,5 +768,7 @@ export default function HomeDriveThreeScene({
     </div>
   );
 }
+
+
 
 

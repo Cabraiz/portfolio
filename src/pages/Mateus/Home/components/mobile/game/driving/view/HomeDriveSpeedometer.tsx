@@ -170,9 +170,6 @@ function HomeDriveSpeedometer({
             ))}
           </div>
 
-          <div className={styles.brandPlate} aria-hidden="true">
-            <span className={styles.brandText}>FREE DRIVE</span>
-          </div>
 
           <div className={styles.digitalReadout} aria-hidden="true">
             {needleState.displaySpeedKmh.toString().padStart(3, "0")}
@@ -198,3 +195,5 @@ function HomeDriveSpeedometer({
 }
 
 export default memo(HomeDriveSpeedometer);
+
+

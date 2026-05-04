@@ -10,6 +10,7 @@ import React, {
 } from "react";
 
 import useHomeDriveEngineAudio from "../audio/useHomeDriveEngineAudio";
+import useHomeDriveBootLoader from "../boot/useHomeDriveBootLoader";
 import {
   createInitialHomeDriveMissionRuntimeState,
   getHomeDriveMissionDestinations,
@@ -29,6 +30,7 @@ import {
 } from "./cockpit";
 import HomeDriveCompass from "./HomeDriveCompass";
 import HomeDriveDiagnosticsOverlay from "./HomeDriveDiagnosticsOverlay";
+import HomeDriveBootLoadingScreen from "./HomeDriveBootLoadingScreen";
 import styles from "./HomeDriveGame.module.css";
 import HomeDriveSpeedometer from "./HomeDriveSpeedometer";
 import HomeDriveSteeringWheel from "./HomeDriveSteeringWheel";
@@ -69,8 +71,60 @@ export default function HomeDriveGame({ onClose }: HomeDriveGameProps) {
     publishRuntimeSnapshot,
   } = useHomeDriveRuntimeRefs();
 
+  const bootLoader = useHomeDriveBootLoader({
+    viewport,
+    runtimeRef,
+  });
+  const isBootDataReady =
+    bootLoader.status === "ready" && bootLoader.assets !== null;
+  const [isWorldReady, setIsWorldReady] = useState(false);
+  const isDriveUnlocked = isBootDataReady && isWorldReady;
+
+  useEffect(() => {
+    setIsWorldReady(false);
+  }, [bootLoader.assets, bootLoader.status]);
+
+  const handleInitialWorldReady = useCallback(() => {
+    setIsWorldReady(true);
+  }, []);
+
+  const loadingSnapshot = useMemo(() => {
+    if (!isBootDataReady || !bootLoader.assets || isWorldReady) {
+      return bootLoader.snapshot;
+    }
+
+    const diagnostics = bootLoader.assets.diagnostics;
+    const movingCars = diagnostics.movingVehicleCount;
+    const parkedCars = diagnostics.parkedVehicleCount;
+    const totalCars = movingCars + parkedCars;
+    const loaded =
+      diagnostics.buildingCount +
+      totalCars +
+      diagnostics.pedestrianAgentCount +
+      diagnostics.crosswalkCount +
+      diagnostics.streetLightCount;
+
+    return {
+      ...bootLoader.snapshot,
+      phase: "rendering" as const,
+      label: "Renderizando cidade",
+      detail:
+        `${diagnostics.buildingCount.toLocaleString("pt-BR")} prédios, ` +
+        `${totalCars.toLocaleString("pt-BR")} carros e ` +
+        `${diagnostics.pedestrianAgentCount.toLocaleString("pt-BR")} pessoas. ` +
+        "Aguardando o primeiro frame real antes de liberar.",
+      progress: Math.max(bootLoader.snapshot.progress, 99),
+      loaded,
+      total: Math.max(loaded, 1),
+    };
+  }, [bootLoader.assets, bootLoader.snapshot, isBootDataReady, isWorldReady]);
+
   const handleSteeringChange = useCallback(
     (steering: number) => {
+      if (!isDriveUnlocked) {
+        return;
+      }
+
       /*
         A direção agora entra direto no inputRef.
         Isso evita render React a cada movimento do volante.
@@ -81,7 +135,7 @@ export default function HomeDriveGame({ onClose }: HomeDriveGameProps) {
         brake: 0,
       });
     },
-    [patchInputRef],
+    [isDriveUnlocked, patchInputRef],
   );
 
   const steeringWheel = useHomeDriveSteeringWheel({
@@ -124,8 +178,8 @@ export default function HomeDriveGame({ onClose }: HomeDriveGameProps) {
   const engineAudio = useHomeDriveEngineAudio({
     runtimeRef,
     inputRef,
-    enabled: true,
-    paused: false,
+    enabled: isDriveUnlocked,
+    paused: !isDriveUnlocked,
     muted: false,
     masterVolume: 0.92,
     updateHz: 30,
@@ -145,14 +199,22 @@ export default function HomeDriveGame({ onClose }: HomeDriveGameProps) {
   });
 
   useEffect(() => {
+    if (!isDriveUnlocked) {
+      return;
+    }
+
     patchInputRef({
       steering: steeringWheel.steering,
       throttle: 1,
       brake: 0,
     });
-  }, [patchInputRef, steeringWheel.steering]);
+  }, [isDriveUnlocked, patchInputRef, steeringWheel.steering]);
 
   useEffect(() => {
+    if (!isDriveUnlocked) {
+      return;
+    }
+
     setMissionRuntime((currentRuntime) => {
       const result = tickHomeDriveMissionRuntime({
         runtime: currentRuntime,
@@ -164,6 +226,7 @@ export default function HomeDriveGame({ onClose }: HomeDriveGameProps) {
       return result.runtime;
     });
   }, [
+    isDriveUnlocked,
     missionDestinations,
     runtimeSnapshot.car.position.x,
     runtimeSnapshot.car.position.z,
@@ -185,8 +248,12 @@ export default function HomeDriveGame({ onClose }: HomeDriveGameProps) {
   ]);
 
   const startEngineAudioFromGesture = useCallback(() => {
+    if (!isDriveUnlocked) {
+      return;
+    }
+
     engineAudio.startFromGesture();
-  }, [engineAudio]);
+  }, [engineAudio, isDriveUnlocked]);
 
   useEffect(() => {
     if (!onClose) {
@@ -213,6 +280,10 @@ export default function HomeDriveGame({ onClose }: HomeDriveGameProps) {
   const handlePointerDownCapture = useCallback(
     (event: React.PointerEvent<HTMLDivElement>) => {
       if (isInteractiveOverlayTarget(event.target)) {
+        return;
+      }
+
+      if (!isDriveUnlocked) {
         return;
       }
 
@@ -249,7 +320,7 @@ export default function HomeDriveGame({ onClose }: HomeDriveGameProps) {
       engineAudio.stop();
       onClose();
     },
-    [engineAudio, onClose, startEngineAudioFromGesture],
+    [engineAudio, isDriveUnlocked, onClose, startEngineAudioFromGesture],
   );
 
   const rootStyle = useMemo<CSSProperties>(() => {
@@ -271,45 +342,61 @@ export default function HomeDriveGame({ onClose }: HomeDriveGameProps) {
       style={rootStyle}
       onPointerDownCapture={handlePointerDownCapture}
     >
-      <HomeDriveThreeScene
-        runtimeRef={runtimeRef}
-        inputRef={inputRef}
-        viewport={viewport}
-        publishRuntimeSnapshot={publishRuntimeSnapshot}
-        onDiagnosticsSnapshot={
-          shouldShowRuntimeDiagnostics
-            ? handleRuntimeDiagnosticsSnapshot
-            : undefined
-        }
-      />
-
-      {shouldShowRuntimeDiagnostics ? (
-        <HomeDriveDiagnosticsOverlay snapshot={runtimeDiagnosticsSnapshot} />
+      {isBootDataReady && bootLoader.assets ? (
+        <HomeDriveThreeScene
+          bootAssets={bootLoader.assets}
+          runtimeRef={runtimeRef}
+          inputRef={inputRef}
+          viewport={viewport}
+          publishRuntimeSnapshot={publishRuntimeSnapshot}
+          onDiagnosticsSnapshot={
+            shouldShowRuntimeDiagnostics
+              ? handleRuntimeDiagnosticsSnapshot
+              : undefined
+          }
+          onInitialWorldReady={handleInitialWorldReady}
+        />
       ) : null}
 
-      <div className={styles.cockpitLayer} aria-hidden="true">
-        <img
-          className={styles.cockpitImage}
-          src={HOME_DRIVE_COCKPIT_ASSETS.cockpitSrc}
-          alt=""
-          draggable={false}
+      {isDriveUnlocked ? (
+        <>
+          {shouldShowRuntimeDiagnostics ? (
+            <HomeDriveDiagnosticsOverlay snapshot={runtimeDiagnosticsSnapshot} />
+          ) : null}
+
+          <div className={styles.cockpitLayer} aria-hidden="true">
+            <img
+              className={styles.cockpitImage}
+              src={HOME_DRIVE_COCKPIT_ASSETS.cockpitSrc}
+              alt=""
+              draggable={false}
+            />
+            <span className={styles.cockpitShade} />
+            <span className={styles.cockpitGlass} />
+          </div>
+
+          <HomeDriveSpeedometer
+            speedMps={runtimeSnapshot.car.speedMps}
+            impact={runtimeSnapshot.impact}
+          />
+
+          <HomeDriveCompass
+            className={styles.compass}
+            headingRad={runtimeSnapshot.car.headingRad}
+            target={missionCompassTarget}
+          />
+
+          <HomeDriveSteeringWheel controller={steeringWheel} />
+        </>
+      ) : null}
+
+      {!isDriveUnlocked ? (
+        <HomeDriveBootLoadingScreen
+          snapshot={loadingSnapshot}
+          onRetry={bootLoader.retry}
         />
-        <span className={styles.cockpitShade} />
-        <span className={styles.cockpitGlass} />
-      </div>
-
-      <HomeDriveSpeedometer
-        speedMps={runtimeSnapshot.car.speedMps}
-        impact={runtimeSnapshot.impact}
-      />
-
-      <HomeDriveCompass
-        className={styles.compass}
-        headingRad={runtimeSnapshot.car.headingRad}
-        target={missionCompassTarget}
-      />
-
-      <HomeDriveSteeringWheel controller={steeringWheel} />
+      ) : null}
     </div>
   );
 }
+
