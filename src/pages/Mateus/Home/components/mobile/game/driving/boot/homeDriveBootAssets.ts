@@ -437,7 +437,7 @@ export async function createHomeDriveBootAssets({
     report(
       "images",
       "Carregando imagens",
-      `${loadedImages}/${imageSources.length} imagens preparadas.`,
+      "Imagens preparadas.",
       progress,
       loadedImages,
       imageSources.length,
@@ -458,7 +458,7 @@ export async function createHomeDriveBootAssets({
     report(
       "audio",
       "Carregando sons",
-      `${loadedAudios}/${audioSources.length} sons preparados.`,
+      "Sons preparados.",
       progress,
       loadedAudios,
       audioSources.length,
@@ -475,7 +475,7 @@ export async function createHomeDriveBootAssets({
   report(
     "buildings",
     "Montando prédios",
-    `${buildings.length.toLocaleString("pt-BR")} prédios prontos.`,
+    "Cidade montada.",
     48,
     buildings.length,
     buildings.length,
@@ -517,7 +517,7 @@ export async function createHomeDriveBootAssets({
   report(
     "cars",
     "Preparando carros",
-    `${trafficState.vehicles.length} em movimento + ${parkedVehicleState.vehicles.length.toLocaleString("pt-BR")} estacionados.`,
+    "Trânsito pronto.",
     66,
     trafficState.vehicles.length + parkedVehicleState.vehicles.length,
     trafficState.vehicles.length + parkedVehicleState.vehicles.length,
@@ -547,7 +547,7 @@ export async function createHomeDriveBootAssets({
   report(
     "city-fixtures",
     "Preparando cidade",
-    `${crosswalkState.crosswalks.length} faixas + ${urbanStreetLights.length.toLocaleString("pt-BR")} postes.`,
+    "Ruas prontas.",
     76,
     crosswalkState.crosswalks.length + urbanStreetLights.length,
     crosswalkState.crosswalks.length + urbanStreetLights.length,
@@ -595,7 +595,7 @@ export async function createHomeDriveBootAssets({
   report(
     "pedestrians",
     "Preparando pessoas",
-    `${pedestriansState.agents.length.toLocaleString("pt-BR")} pessoas + ${animationBakePrewarm.sampleCount} poses.`,
+    "Pessoas prontas.",
     94,
     pedestriansState.agents.length,
     pedestriansState.agents.length,

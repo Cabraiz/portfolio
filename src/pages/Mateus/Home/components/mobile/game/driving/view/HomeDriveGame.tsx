@@ -93,29 +93,14 @@ export default function HomeDriveGame({ onClose }: HomeDriveGameProps) {
       return bootLoader.snapshot;
     }
 
-    const diagnostics = bootLoader.assets.diagnostics;
-    const movingCars = diagnostics.movingVehicleCount;
-    const parkedCars = diagnostics.parkedVehicleCount;
-    const totalCars = movingCars + parkedCars;
-    const loaded =
-      diagnostics.buildingCount +
-      totalCars +
-      diagnostics.pedestrianAgentCount +
-      diagnostics.crosswalkCount +
-      diagnostics.streetLightCount;
-
     return {
       ...bootLoader.snapshot,
       phase: "rendering" as const,
       label: "Renderizando cidade",
-      detail:
-        `${diagnostics.buildingCount.toLocaleString("pt-BR")} prédios, ` +
-        `${totalCars.toLocaleString("pt-BR")} carros e ` +
-        `${diagnostics.pedestrianAgentCount.toLocaleString("pt-BR")} pessoas. ` +
-        "Aguardando o primeiro frame real antes de liberar.",
+      detail: "Aguardando o primeiro frame real antes de liberar.",
       progress: Math.max(bootLoader.snapshot.progress, 99),
-      loaded,
-      total: Math.max(loaded, 1),
+      loaded: 1,
+      total: 1,
     };
   }, [bootLoader.assets, bootLoader.snapshot, isBootDataReady, isWorldReady]);
 

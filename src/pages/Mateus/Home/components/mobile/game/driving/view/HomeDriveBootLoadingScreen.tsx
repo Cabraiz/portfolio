@@ -21,10 +21,10 @@ type BootStep = Readonly<{
 const BOOT_STEPS: readonly BootStep[] = [
   { phase: "images", label: "IMG" },
   { phase: "audio", label: "SOM" },
-  { phase: "buildings", label: "PRD" },
+  { phase: "buildings", label: "CID" },
   { phase: "cars", label: "CAR" },
   { phase: "city-fixtures", label: "RUA" },
-  { phase: "pedestrians", label: "PES" },
+  { phase: "pedestrians", label: "NPC" },
   { phase: "rendering", label: "GPU" },
 ];
 
@@ -40,12 +40,33 @@ function formatPercent(progress: number): string {
   return `${Math.round(Math.max(0, Math.min(100, progress)))}%`;
 }
 
-function formatElapsed(milliseconds: number): string {
-  if (milliseconds < 1000) {
-    return `${Math.max(0, Math.round(milliseconds))}MS`;
+function getPublicDetail(phase: HomeDriveBootPhase, fallback: string): string {
+  switch (phase) {
+    case "idle":
+      return "Aperte nada. O Drive está acordando.";
+    case "images":
+      return "Preparando o painel e a tela.";
+    case "audio":
+      return "Aquecendo o motor.";
+    case "buildings":
+      return "Montando a cidade.";
+    case "cars":
+      return "Colocando o trânsito na pista.";
+    case "city-fixtures":
+      return "Acendendo ruas e cruzamentos.";
+    case "pedestrians":
+      return "Posicionando pessoas e animações.";
+    case "finalizing":
+      return "Travando tudo antes do primeiro frame.";
+    case "rendering":
+      return "Esperando o mundo aparecer de verdade.";
+    case "ready":
+      return "Drive pronto.";
+    case "error":
+      return fallback || "Não foi possível carregar o Drive.";
+    default:
+      return fallback;
   }
-
-  return `${(milliseconds / 1000).toFixed(1)}S`;
 }
 
 function getPhaseOrder(phase: HomeDriveBootPhase): number {
@@ -104,6 +125,10 @@ function HomeDriveBootLoadingScreen({
     return formatPercent(snapshot.progress);
   }, [snapshot.progress]);
 
+  const publicDetail = useMemo(() => {
+    return getPublicDetail(snapshot.phase, snapshot.detail);
+  }, [snapshot.detail, snapshot.phase]);
+
   const barStyle = useMemo<React.CSSProperties>(() => {
     return {
       "--home-drive-boot-progress": `${Math.max(
@@ -127,7 +152,7 @@ function HomeDriveBootLoadingScreen({
       <div className={styles.panel}>
         <header className={styles.header}>
           <span className={styles.brand}>CABRAIZ DRIVE</span>
-          <span className={styles.version}>BOOT 1.0</span>
+          <span className={styles.version}>FLASH MODE</span>
         </header>
 
         <div className={styles.mainRow}>
@@ -136,7 +161,7 @@ function HomeDriveBootLoadingScreen({
             <h1 className={styles.title}>
               {isError ? "LOAD ERROR" : snapshot.label}
             </h1>
-            <p className={styles.detail}>{snapshot.detail}</p>
+            <p className={styles.detail}>{publicDetail}</p>
           </div>
         </div>
 
@@ -157,9 +182,9 @@ function HomeDriveBootLoadingScreen({
         </div>
 
         <footer className={styles.footer}>
-          <span>{snapshot.phase.toUpperCase()}</span>
-          <span>{formatElapsed(snapshot.elapsedMs)}</span>
-          <span>{snapshot.total > 0 ? `${snapshot.loaded}/${snapshot.total}` : "--"}</span>
+          <span>LOADING</span>
+          <span>NO CLICK</span>
+          <span>WAIT</span>
         </footer>
 
         {isError ? (
