@@ -310,6 +310,72 @@ function getParkedVehicleMassKg(params: {
   return clamp(780 + footprint * 58 * heightFactor, 860, 2450);
 }
 
+
+
+type ParkedVehiclePickContext = Readonly<{
+  road: HomeDriveGeneratedRoadSegment;
+  roadSeed: number;
+  slotIndex: number;
+  sideSalt: number;
+  globalSeed: number;
+}>;
+
+function getDiverseParkedVehicleModelKey(
+  context: ParkedVehiclePickContext,
+): ReturnType<typeof pickHomeDriveVehicleModelKey> {
+  const candidateSeeds = [
+    hashVector(context.roadSeed, context.slotIndex, 743 + context.sideSalt + context.globalSeed),
+    hashVector(context.roadSeed, context.slotIndex, 1743 + context.sideSalt + context.globalSeed),
+    hashVector(context.roadSeed, context.slotIndex, 2743 + context.sideSalt + context.globalSeed),
+    hashVector(context.roadSeed, context.slotIndex, 3743 + context.sideSalt + context.globalSeed),
+  ];
+
+  const candidates = Array.from(
+    new Set(
+      candidateSeeds.map((seed) =>
+        pickHomeDriveVehicleModelKey(seed, {
+          roadKind: context.road.kind,
+          parked: true,
+          commercialBias: context.road.kind === "commercial",
+          serviceBias: context.road.kind === "service",
+        }),
+      ),
+    ),
+  );
+
+  const interestingOffset =
+    context.road.kind === "commercial"
+      ? 1
+      : context.road.kind === "service"
+        ? 2
+        : context.road.kind === "coastal"
+          ? 1
+          : 0;
+
+  return candidates[(context.slotIndex + interestingOffset) % candidates.length] ?? candidates[0];
+}
+
+function getDiverseParkedVehiclePaintKey(
+  modelKey: ReturnType<typeof pickHomeDriveVehicleModelKey>,
+  context: ParkedVehiclePickContext,
+): ReturnType<typeof pickHomeDriveVehiclePaintKey> {
+  const candidateSeeds = [
+    hashVector(context.roadSeed, context.slotIndex, 757 + context.sideSalt + context.globalSeed),
+    hashVector(context.roadSeed, context.slotIndex, 1757 + context.sideSalt + context.globalSeed),
+    hashVector(context.roadSeed, context.slotIndex, 2757 + context.sideSalt + context.globalSeed),
+  ];
+
+  const candidates = Array.from(
+    new Set(candidateSeeds.map((seed) => pickHomeDriveVehiclePaintKey(seed, modelKey))),
+  );
+
+  const paletteShift = Math.floor(
+    hashVector(context.roadSeed, context.globalSeed, 1979 + context.sideSalt) * Math.max(1, candidates.length),
+  );
+
+  return candidates[(context.slotIndex + paletteShift) % candidates.length] ?? candidates[0];
+}
+
 function createParkedVehicleCandidate(
   road: HomeDriveGeneratedRoadSegment,
   slotIndex: number,
@@ -332,9 +398,7 @@ function createParkedVehicleCandidate(
     return null;
   }
 
-  const modelSeed = hashVector(roadSeed, slotIndex, 743 + sideSalt + globalSeed);
   const modeSeed = hashVector(roadSeed, slotIndex, 751 + sideSalt + globalSeed);
-  const paintSeed = hashVector(roadSeed, slotIndex, 757 + sideSalt + globalSeed);
   const directionSeed = hashVector(
     roadSeed,
     slotIndex,
@@ -348,14 +412,16 @@ function createParkedVehicleCandidate(
   );
 
   const mode = getParkedVehicleMode(road, modeSeed);
-  const modelKey = pickHomeDriveVehicleModelKey(modelSeed, {
-    roadKind: road.kind,
-    parked: true,
-    commercialBias: road.kind === "commercial",
-    serviceBias: road.kind === "service",
-  });
+  const pickContext: ParkedVehiclePickContext = {
+    road,
+    roadSeed,
+    slotIndex,
+    sideSalt,
+    globalSeed,
+  };
+  const modelKey = getDiverseParkedVehicleModelKey(pickContext);
   const model = getHomeDriveVehicleModelDescriptor(modelKey);
-  const paintKey = pickHomeDriveVehiclePaintKey(paintSeed, modelKey);
+  const paintKey = getDiverseParkedVehiclePaintKey(modelKey, pickContext);
   const t = getPaddedSlotT(roadSeed, slotIndex, slotCount, side);
   const pointOnRoad = getPointOnRoad(road, t);
   const offsetMeters = getParkedVehicleOffsetFromRoadCenter(
@@ -547,3 +613,5 @@ export function getHomeDriveParkedVehiclesNearPosition(
       distanceMeters: item.distanceMeters,
     }));
 }
+
+

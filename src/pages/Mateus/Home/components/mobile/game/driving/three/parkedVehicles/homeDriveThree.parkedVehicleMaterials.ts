@@ -5,6 +5,7 @@ import {
   MeshStandardMaterial,
   type ColorRepresentation,
   type Material,
+  type MeshStandardMaterialParameters,
 } from "three";
 
 import {
@@ -57,6 +58,24 @@ function getPaintColor(paintKey: HomeDriveVehiclePaintKey): ColorRepresentation 
     case "taxi-yellow":
       return "#d8ad32";
 
+    case "construction-orange":
+      return "#c66b2f";
+
+    case "bus-yellow":
+      return "#d0a83a";
+
+    case "police-blue":
+      return "#254c78";
+
+    case "emergency-white":
+      return "#f2eee4";
+
+    case "motorcycle-black":
+      return "#121416";
+
+    case "bicycle-teal":
+      return "#2d807a";
+
     default:
       return "#d8d4c8";
   }
@@ -67,6 +86,27 @@ function darkenColor(color: ColorRepresentation, amount: number): Color {
   const safeAmount = clamp(amount, 0, 1);
 
   resolvedColor.multiplyScalar(1 - safeAmount);
+
+  return resolvedColor;
+}
+
+function lightenColor(color: ColorRepresentation, amount: number): Color {
+  const resolvedColor = new Color(color);
+  const safeAmount = clamp(amount, 0, 1);
+
+  resolvedColor.lerp(new Color("#ffffff"), safeAmount);
+
+  return resolvedColor;
+}
+
+function blendColor(
+  color: ColorRepresentation,
+  target: ColorRepresentation,
+  amount: number,
+): Color {
+  const resolvedColor = new Color(color);
+
+  resolvedColor.lerp(new Color(target), clamp(amount, 0, 1));
 
   return resolvedColor;
 }
@@ -107,6 +147,30 @@ function createDarkPaintMaterial(
   });
 }
 
+function createFreshPaintMaterial(
+  color: ColorRepresentation,
+  options: HomeDriveThreeParkedVehicleMaterialOptions,
+): MeshStandardMaterial {
+  return new MeshStandardMaterial({
+    color: lightenColor(color, 0.08),
+    roughness: clamp(0.42 + (options.roughnessBoost ?? 0), 0, 1),
+    metalness: clamp(0.28 + (options.metalnessBoost ?? 0), 0, 1),
+    envMapIntensity: 0.62,
+  });
+}
+
+function createSunFadedPaintMaterial(
+  color: ColorRepresentation,
+  options: HomeDriveThreeParkedVehicleMaterialOptions,
+): MeshStandardMaterial {
+  return new MeshStandardMaterial({
+    color: blendColor(color, "#d1c5aa", 0.22),
+    roughness: clamp(0.8 + (options.roughnessBoost ?? 0), 0, 1),
+    metalness: clamp(0.05 + (options.metalnessBoost ?? 0), 0, 1),
+    envMapIntensity: 0.22,
+  });
+}
+
 function createStandardMaterial(params: {
   color: ColorRepresentation;
   roughness: number;
@@ -116,17 +180,27 @@ function createStandardMaterial(params: {
   transparent?: boolean;
   opacity?: number;
 }): MeshStandardMaterial {
-  return new MeshStandardMaterial({
+  const transparent = params.transparent === true;
+
+  const materialParams: MeshStandardMaterialParameters = {
     color: params.color,
     roughness: params.roughness,
     metalness: params.metalness,
-    emissive: params.emissive,
     emissiveIntensity: params.emissiveIntensity ?? 0,
-    transparent: params.transparent,
-    opacity: params.opacity,
+    transparent,
     envMapIntensity: params.metalness > 0.2 ? 0.48 : 0.24,
-    depthWrite: params.transparent ? false : true,
-  });
+    depthWrite: !transparent,
+  };
+
+  if (params.emissive !== undefined) {
+    materialParams.emissive = params.emissive;
+  }
+
+  if (params.opacity !== undefined) {
+    materialParams.opacity = clamp(params.opacity, 0, 1);
+  }
+
+  return new MeshStandardMaterial(materialParams);
 }
 
 export function createHomeDriveThreeParkedVehicleMaterials(
@@ -228,6 +302,11 @@ export function createHomeDriveThreeParkedVehicleMaterials(
     materials[`paint:${paintKey}`] = createPaintMaterial(color, options);
     materials[`paint:${paintKey}:dark`] = createDarkPaintMaterial(color, options);
     materials[`paint:${paintKey}:matte`] = createMattePaintMaterial(color, options);
+    materials[`paint:${paintKey}:fresh`] = createFreshPaintMaterial(color, options);
+    materials[`paint:${paintKey}:sunfaded`] = createSunFadedPaintMaterial(
+      color,
+      options,
+    );
   }
 
   return materials;
@@ -250,6 +329,12 @@ export function getHomeDriveThreeParkedVehicleFallbackMaterialKey(
   }
 
   if (materialKey.startsWith("paint:")) {
+    const segments = materialKey.split(":");
+
+    if (segments.length >= 2 && materials[`paint:${segments[1]}`]) {
+      return `paint:${segments[1]}`;
+    }
+
     return "paint:white";
   }
 
