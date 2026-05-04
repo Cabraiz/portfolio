@@ -1,6 +1,7 @@
 // src/pages/Mateus/Home/components/mobile/game/driving/three/parkedVehicles/HomeDriveThreeParkedVehicles.tsx
 
-import React, { memo, useEffect, useLayoutEffect, useMemo, useRef } from "react";
+import { useFrame } from "@react-three/fiber";
+import React, { memo, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import {
   BoxGeometry,
   CylinderGeometry,
@@ -31,6 +32,7 @@ export type HomeDriveThreeParkedVehiclesProps = Readonly<{
   runtimeRef?: HomeDriveMutableRef<HomeDriveRuntimeState>;
   visibleRadiusMeters?: number;
   maxVisibleVehicles?: number;
+  snapshotHz?: number;
 }>;
 
 type ParkedVehicleInstance = Readonly<{
@@ -53,8 +55,14 @@ type ParkedVehicleBatch = Readonly<{
   instances: readonly ParkedVehicleInstance[];
 }>;
 
+type ParkedVehicleRenderSnapshot = Readonly<{
+  vehicles: readonly HomeDriveParkedVehicle[];
+  key: string;
+}>;
+
 const DEFAULT_VISIBLE_RADIUS_METERS = 560;
 const DEFAULT_MAX_VISIBLE_VEHICLES = 220;
+const DEFAULT_SNAPSHOT_HZ = 18;
 
 function getDistanceSquared(
   first: Readonly<{ x: number; z: number }>,
@@ -65,6 +73,47 @@ function getDistanceSquared(
 
   return dx * dx + dz * dz;
 }
+
+function getFiniteNumber(value: number | null | undefined, fallback: number): number {
+  return typeof value === "number" && Number.isFinite(value) ? value : fallback;
+}
+
+function getParkedVehicleRenderKey(vehicle: HomeDriveParkedVehicle): string {
+  return [
+    vehicle.id,
+    Math.round(getFiniteNumber(vehicle.impactOffset?.x, 0) * 100),
+    Math.round(getFiniteNumber(vehicle.impactOffset?.z, 0) * 100),
+    Math.round(getFiniteNumber(vehicle.impactVelocity?.x, 0) * 100),
+    Math.round(getFiniteNumber(vehicle.impactVelocity?.z, 0) * 100),
+    Math.round(getFiniteNumber(vehicle.visualRollRad, 0) * 1_000),
+    Math.round(getFiniteNumber(vehicle.visualPitchRad, 0) * 1_000),
+    Math.round(getFiniteNumber(vehicle.visualYawOffsetRad, 0) * 1_000),
+    Math.round(getFiniteNumber(vehicle.damage, 0) * 100),
+    vehicle.hasBeenHit ? 1 : 0,
+    getFiniteNumber(vehicle.damageSide, 1) < 0 ? -1 : 1,
+    Math.round(getFiniteNumber(vehicle.damageLocalZ, 0) * 100),
+  ].join(":");
+}
+
+function createVisibleParkedVehicleSnapshot(
+  vehicles: readonly HomeDriveParkedVehicle[],
+  runtime: HomeDriveRuntimeState | undefined,
+  visibleRadiusMeters: number,
+  maxVisibleVehicles: number,
+): ParkedVehicleRenderSnapshot {
+  const visibleVehicles = getVisibleVehicles(
+    vehicles,
+    runtime,
+    visibleRadiusMeters,
+    maxVisibleVehicles,
+  );
+
+  return {
+    vehicles: visibleVehicles,
+    key: visibleVehicles.map(getParkedVehicleRenderKey).join("|"),
+  };
+}
+
 
 function getVisibleVehicles(
   vehicles: readonly HomeDriveParkedVehicle[],
@@ -85,20 +134,20 @@ function getVisibleVehicles(
   return vehicles
     .filter((vehicle) => {
       const effectivePosition = {
-        x: vehicle.position.x + vehicle.impactOffset.x,
-        z: vehicle.position.z + vehicle.impactOffset.z,
+        x: vehicle.position.x + getFiniteNumber(vehicle.impactOffset?.x, 0),
+        z: vehicle.position.z + getFiniteNumber(vehicle.impactOffset?.z, 0),
       };
 
       return getDistanceSquared(effectivePosition, runtime.car.position) <= radiusSquared;
     })
     .sort((first, second) => {
       const firstPosition = {
-        x: first.position.x + first.impactOffset.x,
-        z: first.position.z + first.impactOffset.z,
+        x: first.position.x + getFiniteNumber(first.impactOffset?.x, 0),
+        z: first.position.z + getFiniteNumber(first.impactOffset?.z, 0),
       };
       const secondPosition = {
-        x: second.position.x + second.impactOffset.x,
-        z: second.position.z + second.impactOffset.z,
+        x: second.position.x + getFiniteNumber(second.impactOffset?.x, 0),
+        z: second.position.z + getFiniteNumber(second.impactOffset?.z, 0),
       };
 
       return (
@@ -132,8 +181,8 @@ function getOffsetPosition(
   const headingRad = vehicle.headingRad + vehicle.visualYawOffsetRad;
   const forward = getForwardVector(headingRad);
   const right = getRightVector(headingRad);
-  const baseX = vehicle.position.x + vehicle.impactOffset.x;
-  const baseZ = vehicle.position.z + vehicle.impactOffset.z;
+  const baseX = vehicle.position.x + getFiniteNumber(vehicle.impactOffset?.x, 0);
+  const baseZ = vehicle.position.z + getFiniteNumber(vehicle.impactOffset?.z, 0);
 
   return [
     baseX + right.x * localX + forward.x * localZ,
@@ -269,6 +318,7 @@ function HomeDriveThreeParkedVehicles({
   runtimeRef,
   visibleRadiusMeters = DEFAULT_VISIBLE_RADIUS_METERS,
   maxVisibleVehicles = DEFAULT_MAX_VISIBLE_VEHICLES,
+  snapshotHz = DEFAULT_SNAPSHOT_HZ,
 }: HomeDriveThreeParkedVehiclesProps) {
   const materials = useMemo(() => {
     return createHomeDriveThreeParkedVehicleMaterials();
@@ -278,14 +328,55 @@ function HomeDriveThreeParkedVehicles({
   const wheelGeometry = useMemo(() => new CylinderGeometry(1, 1, 1, 14), []);
   const cylinderGeometry = useMemo(() => new CylinderGeometry(1, 1, 1, 10), []);
 
-  const visibleVehicles = useMemo(() => {
-    return getVisibleVehicles(
+  const snapshotIntervalSeconds = useMemo(() => {
+    const safeSnapshotHz = Math.max(1, Math.min(30, snapshotHz));
+
+    return 1 / safeSnapshotHz;
+  }, [snapshotHz]);
+
+  const snapshotAccumulatorRef = useRef(0);
+  const [snapshot, setSnapshot] = useState<ParkedVehicleRenderSnapshot>(() => {
+    return createVisibleParkedVehicleSnapshot(
       parkedVehiclesRef.current.vehicles,
       runtimeRef?.current,
       visibleRadiusMeters,
       maxVisibleVehicles,
     );
+  });
+
+  useEffect(() => {
+    setSnapshot(
+      createVisibleParkedVehicleSnapshot(
+        parkedVehiclesRef.current.vehicles,
+        runtimeRef?.current,
+        visibleRadiusMeters,
+        maxVisibleVehicles,
+      ),
+    );
   }, [maxVisibleVehicles, parkedVehiclesRef, runtimeRef, visibleRadiusMeters]);
+
+  useFrame((_, deltaSeconds) => {
+    snapshotAccumulatorRef.current += deltaSeconds;
+
+    if (snapshotAccumulatorRef.current < snapshotIntervalSeconds) {
+      return;
+    }
+
+    snapshotAccumulatorRef.current = 0;
+
+    const nextSnapshot = createVisibleParkedVehicleSnapshot(
+      parkedVehiclesRef.current.vehicles,
+      runtimeRef?.current,
+      visibleRadiusMeters,
+      maxVisibleVehicles,
+    );
+
+    setSnapshot((currentSnapshot) => {
+      return currentSnapshot.key === nextSnapshot.key ? currentSnapshot : nextSnapshot;
+    });
+  });
+
+  const visibleVehicles = snapshot.vehicles;
 
   const batches = useMemo(() => {
     return createParkedVehicleBatches(visibleVehicles, materials);
@@ -328,3 +419,5 @@ function HomeDriveThreeParkedVehicles({
 }
 
 export default memo(HomeDriveThreeParkedVehicles);
+
+

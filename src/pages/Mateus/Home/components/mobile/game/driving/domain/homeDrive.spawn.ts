@@ -14,10 +14,12 @@ const DEFAULT_SPAWN_PROGRESS = 0.38;
 const DEFAULT_MIN_SPAWN_ROAD_LENGTH_METERS = 90;
 
 /**
- * Mantém o carro levemente dentro da pista, não exatamente no centro da rua.
- * Isso evita nascer em cima de faixa central/mediana quando a via tiver mão dupla.
+ * Mantém o carro na faixa correta do sentido inicial.
+ *
+ * O offset negativo em road.normal é o lado direito para o sentido
+ * from -> to. Antes usava +1 e o carro nascia visualmente na contramão.
  */
-const DEFAULT_SPAWN_LANE_SIDE: -1 | 1 = 1;
+const DEFAULT_SPAWN_LANE_SIDE: -1 | 1 = -1;
 
 function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value));
@@ -183,3 +185,5 @@ export function createHomeDriveSpawnCarState(): HomeDriveCarState {
     steerAngleRad: 0,
   };
 }
+
+

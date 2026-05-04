@@ -15,6 +15,9 @@ export type HomeDriveParkedVehicleImpactFields = Readonly<{
   collisionRadiusMeters: number;
   massKg: number;
   damage: number;
+  hasBeenHit: boolean;
+  damageSide: -1 | 1;
+  damageLocalZ: number;
 
   impactOffset: HomeDriveParkedVehicleImpactVector2;
   impactVelocity: HomeDriveParkedVehicleImpactVector2;
@@ -39,12 +42,12 @@ export type HomeDriveParkedVehicleImpactTickOptions = Readonly<{
   maxImpactOffsetMeters?: number;
 }>;
 
-const DEFAULT_OFFSET_DECAY_PER_SECOND = 3.35;
+const DEFAULT_OFFSET_DECAY_PER_SECOND = 0;
 const DEFAULT_VELOCITY_DECAY_PER_SECOND = 4.8;
 const DEFAULT_ROTATION_DECAY_PER_SECOND = 5.25;
 const DEFAULT_ANGULAR_DECAY_PER_SECOND = 4.7;
 const DEFAULT_MAX_DELTA_SECONDS = 1 / 18;
-const DEFAULT_MAX_IMPACT_OFFSET_METERS = 2.6;
+const DEFAULT_MAX_IMPACT_OFFSET_METERS = 4.4;
 
 const MIN_ACTIVE_VECTOR_MAGNITUDE = 0.0001;
 const MIN_ACTIVE_SCALAR_MAGNITUDE = 0.0001;
@@ -178,6 +181,23 @@ export function withHomeDriveParkedVehicleImpactDefaults(
     collisionRadiusMeters: getHomeDriveParkedVehicleCollisionRadiusMeters(vehicle),
     massKg: getHomeDriveParkedVehicleMassKg(vehicle),
     damage: getHomeDriveParkedVehicleDamage(vehicle),
+    hasBeenHit: Boolean(
+      (vehicle as HomeDriveParkedVehicleWithImpact & { hasBeenHit?: boolean })
+        .hasBeenHit,
+    ),
+    damageSide:
+      getFiniteNumber(
+        (vehicle as HomeDriveParkedVehicleWithImpact & { damageSide?: number })
+          .damageSide,
+        1,
+      ) < 0
+        ? -1
+        : 1,
+    damageLocalZ: getFiniteNumber(
+      (vehicle as HomeDriveParkedVehicleWithImpact & { damageLocalZ?: number })
+        .damageLocalZ,
+      0,
+    ),
     impactOffset: getHomeDriveParkedVehicleImpactOffset(vehicle),
     impactVelocity: getHomeDriveParkedVehicleImpactVelocity(vehicle),
     visualRollRad: getFiniteNumber(vehicle.visualRollRad, 0),
@@ -304,3 +324,5 @@ export function tickHomeDriveParkedVehicleImpactState(
     ),
   };
 }
+
+

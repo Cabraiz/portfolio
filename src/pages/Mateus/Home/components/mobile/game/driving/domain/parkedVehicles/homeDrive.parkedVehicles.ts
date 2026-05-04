@@ -464,6 +464,9 @@ function createParkedVehicleCandidate(
       heightMeters: model.dimensions.heightMeters,
     }),
     damage: 0,
+    hasBeenHit: false,
+    damageSide: side,
+    damageLocalZ: 0,
     impactOffset: {
       x: 0,
       z: 0,
@@ -613,5 +616,7 @@ export function getHomeDriveParkedVehiclesNearPosition(
       distanceMeters: item.distanceMeters,
     }));
 }
+
+
 
 

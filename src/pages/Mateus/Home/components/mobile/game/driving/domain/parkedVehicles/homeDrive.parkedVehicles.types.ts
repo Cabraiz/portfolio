@@ -54,13 +54,31 @@ export type HomeDriveParkedVehicle = Readonly<{
   damage: number;
 
   /**
-   * Deslocamento transitório aplicado após colisão.
-   * A posição base continua sendo a vaga original.
+   * Quando true, o carro estacionado já recebeu a pancada física principal.
+   * A colisão é one-shot para impedir repetir impulso no mesmo carro.
+   */
+  hasBeenHit: boolean;
+
+  /**
+   * Lado local atingido do veículo. -1 = esquerda, 1 = direita.
+   * Usado para posicionar a chapa amassada no lado certo.
+   */
+  damageSide: HomeDriveParkedVehicleSide;
+
+  /**
+   * Posição longitudinal local do dano em metros.
+   * Valor positivo fica mais perto da frente do veículo.
+   */
+  damageLocalZ: number;
+
+  /**
+   * Deslocamento visual/físico aplicado após colisão.
+   * Depois da primeira pancada ele permanece afastado da vaga original.
    */
   impactOffset: HomeDriveVector2;
 
   /**
-   * Velocidade transitória do impacto.
+   * Velocidade residual usada para animar o primeiro afastamento.
    */
   impactVelocity: HomeDriveVector2;
 
@@ -99,3 +117,5 @@ export type HomeDriveParkedVehicleQueryResult = Readonly<{
   vehicle: HomeDriveParkedVehicle;
   distanceMeters: number;
 }>;
+
+

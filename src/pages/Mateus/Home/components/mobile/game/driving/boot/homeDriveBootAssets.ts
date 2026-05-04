@@ -72,8 +72,18 @@ import type {
   HomeDriveBootProgressSnapshot,
 } from "./homeDriveBootAssets.types";
 
-const IMAGE_PRELOAD_TIMEOUT_MS = 8500;
-const AUDIO_PRELOAD_TIMEOUT_MS = 9000;
+/**
+ * Preload não deve derrubar o Drive em rede fria/celular.
+ * Antes o boot quebrava com 8,5–9s; isso era curto para imagens grandes,
+ * áudio MP3 em cache frio e throttling do browser.
+ *
+ * Estes tempos são janelas de paciência do loading, não erro fatal.
+ * Se passar disso, o asset fica marcado como `deferred-timeout` e o jogo
+ * continua sem travar a pessoa na tela de erro.
+ */
+const IMAGE_PRELOAD_PATIENCE_MS = 60_000;
+const AUDIO_PRELOAD_PATIENCE_MS = 90_000;
+const AUDIO_HTTP_CACHE_PATIENCE_MS = 90_000;
 
 function getNowMs(): number {
   if (typeof performance !== "undefined" && typeof performance.now === "function") {
@@ -97,6 +107,19 @@ function getErrorMessage(error: unknown): string {
   }
 
   return "Falha desconhecida no preload do Drive.";
+}
+
+function isAbortError(error: unknown): boolean {
+  if (typeof DOMException !== "undefined" && error instanceof DOMException) {
+    return error.name === "AbortError";
+  }
+
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "name" in error &&
+    (error as { name?: unknown }).name === "AbortError"
+  );
 }
 
 function createProgressReporter(
@@ -196,22 +219,31 @@ function preloadImageSource(source: string): Promise<HomeDriveBootAssetLoadResul
 
   return new Promise((resolve) => {
     const image = new Image();
+    let settled = false;
 
-    const cleanupTimeout = createTimeout(IMAGE_PRELOAD_TIMEOUT_MS, () => {
-      resolve({
-        source,
-        ok: false,
-        kind: "image",
-        elapsedMs: Math.round(getNowMs() - startedAtMs),
-        status: "timeout",
-        errorMessage: `Timeout carregando imagem: ${source}`,
-      });
+    const cleanupTimeout = createTimeout(IMAGE_PRELOAD_PATIENCE_MS, () => {
+      finish(
+        true,
+        "deferred-timeout",
+        "Imagem demorou além da janela de boot e continuará como carregamento sob demanda.",
+      );
     });
 
-    const finish = async (ok: boolean, status: string, errorMessage?: string) => {
+    const cleanup = () => {
       cleanupTimeout();
+      image.onload = null;
+      image.onerror = null;
+    };
 
-      if (ok && typeof image.decode === "function") {
+    const finish = async (ok: boolean, status: string, errorMessage?: string) => {
+      if (settled) {
+        return;
+      }
+
+      settled = true;
+      cleanup();
+
+      if (ok && status !== "deferred-timeout" && typeof image.decode === "function") {
         try {
           await image.decode();
         } catch {
@@ -248,6 +280,51 @@ function preloadImageSource(source: string): Promise<HomeDriveBootAssetLoadResul
   });
 }
 
+function createAbortableTimeout(timeoutMs: number): {
+  signal?: AbortSignal;
+  cleanup: () => void;
+} {
+  if (typeof AbortController === "undefined" || timeoutMs <= 0) {
+    return {
+      signal: undefined,
+      cleanup: () => undefined,
+    };
+  }
+
+  const controller = new AbortController();
+  const timeoutId = typeof window === "undefined"
+    ? globalThis.setTimeout(() => controller.abort(), timeoutMs)
+    : window.setTimeout(() => controller.abort(), timeoutMs);
+
+  return {
+    signal: controller.signal,
+    cleanup: () => {
+      if (typeof window === "undefined") {
+        globalThis.clearTimeout(timeoutId);
+      } else {
+        window.clearTimeout(timeoutId);
+      }
+    },
+  };
+}
+
+function createDeferredTimeoutResult(params: {
+  source: string;
+  kind: "image" | "audio";
+  startedAtMs: number;
+  status: string;
+  errorMessage: string;
+}): HomeDriveBootAssetLoadResult {
+  return {
+    source: params.source,
+    ok: true,
+    kind: params.kind,
+    elapsedMs: Math.round(getNowMs() - params.startedAtMs),
+    status: params.status,
+    errorMessage: params.errorMessage,
+  };
+}
+
 async function fetchAudioIntoHttpCache(
   source: string,
 ): Promise<HomeDriveBootAssetLoadResult> {
@@ -264,32 +341,52 @@ async function fetchAudioIntoHttpCache(
     };
   }
 
-  const response = await fetch(source, {
-    cache: "force-cache",
-    credentials: "same-origin",
-  });
+  const timeout = createAbortableTimeout(AUDIO_HTTP_CACHE_PATIENCE_MS);
 
-  if (!response.ok) {
+  try {
+    const response = await fetch(source, {
+      cache: "force-cache",
+      credentials: "same-origin",
+      signal: timeout.signal,
+    });
+
+    if (!response.ok) {
+      return {
+        source,
+        ok: false,
+        kind: "audio",
+        elapsedMs: Math.round(getNowMs() - startedAtMs),
+        status: `http-${response.status}`,
+        errorMessage: `Áudio indisponível (${response.status}): ${source}`,
+      };
+    }
+
+    const buffer = await response.arrayBuffer();
+
     return {
       source,
-      ok: false,
+      ok: true,
       kind: "audio",
       elapsedMs: Math.round(getNowMs() - startedAtMs),
-      status: `http-${response.status}`,
-      errorMessage: `Áudio indisponível (${response.status}): ${source}`,
+      status: "cached",
+      bytes: buffer.byteLength,
     };
+  } catch (error) {
+    if (isAbortError(error)) {
+      return createDeferredTimeoutResult({
+        source,
+        kind: "audio",
+        startedAtMs,
+        status: "deferred-timeout",
+        errorMessage:
+          "Áudio demorou além da janela de boot e continuará como carregamento sob demanda.",
+      });
+    }
+
+    throw error;
+  } finally {
+    timeout.cleanup();
   }
-
-  const buffer = await response.arrayBuffer();
-
-  return {
-    source,
-    ok: true,
-    kind: "audio",
-    elapsedMs: Math.round(getNowMs() - startedAtMs),
-    status: "cached",
-    bytes: buffer.byteLength,
-  };
 }
 
 function preloadAudioWithElement(
@@ -310,17 +407,14 @@ function preloadAudioWithElement(
 
   return new Promise((resolve) => {
     const audio = new Audio();
+    let settled = false;
 
-    const cleanupTimeout = createTimeout(AUDIO_PRELOAD_TIMEOUT_MS, () => {
-      audio.src = "";
-      resolve({
-        source,
-        ok: false,
-        kind: "audio",
-        elapsedMs: Math.round(getNowMs() - startedAtMs),
-        status: "timeout",
-        errorMessage: `Timeout carregando áudio: ${source}`,
-      });
+    const cleanupTimeout = createTimeout(AUDIO_PRELOAD_PATIENCE_MS, () => {
+      finish(
+        true,
+        "deferred-timeout",
+        "Áudio demorou além da janela de boot e continuará como carregamento sob demanda.",
+      );
     });
 
     const cleanup = () => {
@@ -331,6 +425,11 @@ function preloadAudioWithElement(
     };
 
     const finish = (ok: boolean, status: string, errorMessage?: string) => {
+      if (settled) {
+        return;
+      }
+
+      settled = true;
       cleanup();
 
       resolve({
@@ -359,7 +458,7 @@ async function preloadAudioSource(
   source: string,
 ): Promise<HomeDriveBootAssetLoadResult> {
   const preflight = await runHomeDriveEngineAudioPreflight(source, {
-    timeoutMs: AUDIO_PRELOAD_TIMEOUT_MS,
+    timeoutMs: AUDIO_PRELOAD_PATIENCE_MS,
     requireAudioContentType: false,
     logResult: false,
   });
@@ -391,29 +490,50 @@ async function preloadSources(
 
   return Promise.all(
     sources.map(async (source) => {
-      const result = await loader(source);
-      reportItem(source, result);
+      try {
+        const result = await loader(source);
+        reportItem(source, result);
 
-      return result;
+        return result;
+      } catch (error) {
+        const result: HomeDriveBootAssetLoadResult = {
+          source,
+          ok: false,
+          kind,
+          elapsedMs: 0,
+          status: "loader-exception",
+          errorMessage: getErrorMessage(error),
+        };
+
+        reportItem(source, result);
+
+        return result;
+      }
     }),
   );
 }
 
-function assertAllCriticalAssetsLoaded(
+function getAssetPreloadSummary(
   results: readonly HomeDriveBootAssetLoadResult[],
-): void {
-  const failed = results.filter((result) => !result.ok);
+): string {
+  const failed = results.filter((result) => !result.ok).length;
+  const deferred = results.filter((result) => result.status === "deferred-timeout").length;
 
-  if (failed.length <= 0) {
-    return;
+  if (failed <= 0 && deferred <= 0) {
+    return "Assets preparados.";
   }
 
-  const message = failed
-    .slice(0, 4)
-    .map((result) => `${result.source}: ${result.errorMessage ?? result.status ?? "erro"}`)
-    .join(" | ");
+  const fragments: string[] = [];
 
-  throw new Error(`Preload crítico incompleto. ${message}`);
+  if (deferred > 0) {
+    fragments.push(`${deferred} asset(s) lento(s) mantido(s) como sob demanda`);
+  }
+
+  if (failed > 0) {
+    fragments.push(`${failed} asset(s) indisponível(is) ignorado(s) sem quebrar o boot`);
+  }
+
+  return fragments.join("; ") + ".";
 }
 
 export async function createHomeDriveBootAssets({
@@ -444,7 +564,14 @@ export async function createHomeDriveBootAssets({
     );
   });
 
-  assertAllCriticalAssetsLoaded(imageResults);
+  report(
+    "images",
+    "Imagens preparadas",
+    getAssetPreloadSummary(imageResults),
+    18,
+    loadedImages,
+    imageSources.length,
+  );
 
   report("audio", "Carregando sons", "Motor e camadas de aceleração.", 20, 0, 0);
   await waitForBrowserPaint();
@@ -465,7 +592,14 @@ export async function createHomeDriveBootAssets({
     );
   });
 
-  assertAllCriticalAssetsLoaded(audioResults);
+  report(
+    "audio",
+    "Sons preparados",
+    getAssetPreloadSummary(audioResults),
+    32,
+    loadedAudios,
+    audioSources.length,
+  );
 
   report("buildings", "Montando prédios", "Gerando a cidade antes do primeiro frame.", 34, 0, 1);
   await waitForBrowserPaint();
@@ -646,3 +780,5 @@ export type {
   HomeDriveBootPhase,
   HomeDriveBootProgressSnapshot,
 } from "./homeDriveBootAssets.types";
+
+

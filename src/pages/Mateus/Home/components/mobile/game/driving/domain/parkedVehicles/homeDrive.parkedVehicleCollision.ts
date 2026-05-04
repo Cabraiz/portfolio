@@ -50,13 +50,13 @@ export type HomeDriveParkedVehicleCollisionResolution = Readonly<{
 const DEFAULT_PLAYER_RADIUS_METERS = 1.52;
 const DEFAULT_COLLISION_COOLDOWN_SECONDS = 0.34;
 const DEFAULT_MIN_IMPACT_SPEED_MPS = 1.25;
-const DEFAULT_COLLISION_BRUTALITY = 1.48;
-const DEFAULT_PARKED_PUSH_MULTIPLIER = 0.82;
+const DEFAULT_COLLISION_BRUTALITY = 1.58;
+const DEFAULT_PARKED_PUSH_MULTIPLIER = 1.18;
 const DEFAULT_PLAYER_PUSH_MULTIPLIER = 0.88;
 const DEFAULT_PLAYER_REVERSE_KICK_MULTIPLIER = 0.56;
-const DEFAULT_MAX_PARKED_IMPACT_VELOCITY_MPS = 14.5;
-const DEFAULT_MAX_PARKED_ANGULAR_VELOCITY_RADPS = 8.4;
-const DEFAULT_MAX_DAMAGE_PER_HIT = 0.38;
+const DEFAULT_MAX_PARKED_IMPACT_VELOCITY_MPS = 18.5;
+const DEFAULT_MAX_PARKED_ANGULAR_VELOCITY_RADPS = 10.2;
+const DEFAULT_MAX_DAMAGE_PER_HIT = 0.78;
 
 /**
  * Maior que antes para a batida realmente derrubar a velocidade física.
@@ -114,6 +114,64 @@ function getCarRightVector(headingRad: number): HomeDriveVector2 {
     x: Math.cos(headingRad),
     z: -Math.sin(headingRad),
   };
+}
+
+function getCarTravelDirection(car: HomeDriveCarState): HomeDriveVector2 {
+  const forward = getCarForwardVector(car.headingRad);
+  const speedSign = car.speedMps >= 0 ? 1 : -1;
+
+  return {
+    x: forward.x * speedSign,
+    z: forward.z * speedSign,
+  };
+}
+
+function blendImpactPushDirection(params: {
+  car: HomeDriveCarState;
+  normalFromVehicleToPlayer: HomeDriveVector2;
+}): HomeDriveVector2 {
+  const contactPushDirection = {
+    x: -params.normalFromVehicleToPlayer.x,
+    z: -params.normalFromVehicleToPlayer.z,
+  };
+  const travelDirection = getCarTravelDirection(params.car);
+
+  return normalizeVectorOrFallback(
+    {
+      x: contactPushDirection.x * 0.72 + travelDirection.x * 0.28,
+      z: contactPushDirection.z * 0.72 + travelDirection.z * 0.28,
+    },
+    contactPushDirection,
+  );
+}
+
+function getImpactDamageSide(params: {
+  vehicleHeadingRad: number;
+  normalFromVehicleToPlayer: HomeDriveVector2;
+}): -1 | 1 {
+  const right = getCarRightVector(params.vehicleHeadingRad);
+
+  return params.normalFromVehicleToPlayer.x * right.x +
+    params.normalFromVehicleToPlayer.z * right.z >=
+    0
+    ? 1
+    : -1;
+}
+
+function getImpactDamageLocalZ(params: {
+  vehicle: HomeDriveParkedVehicleWithImpact;
+  normalFromVehicleToPlayer: HomeDriveVector2;
+}): number {
+  const forward = getCarForwardVector(params.vehicle.headingRad);
+  const longitudinalDot =
+    params.normalFromVehicleToPlayer.x * forward.x +
+    params.normalFromVehicleToPlayer.z * forward.z;
+
+  return clamp(
+    longitudinalDot * params.vehicle.lengthMeters * 0.44,
+    -params.vehicle.lengthMeters * 0.42,
+    params.vehicle.lengthMeters * 0.42,
+  );
 }
 
 function getSafeCollisionNormalFromVehicleToPlayer(
@@ -236,6 +294,7 @@ function resolvePlayerCarImpact(params: {
 
 function applyCollisionToParkedVehicle(params: {
   vehicle: HomeDriveParkedVehicleWithImpact;
+  car: HomeDriveCarState;
   normalFromVehicleToPlayer: HomeDriveVector2;
   impulse: number;
   relativeSpeedMps: number;
@@ -249,10 +308,10 @@ function applyCollisionToParkedVehicle(params: {
   const massKg = getHomeDriveParkedVehicleMassKg(vehicle);
   const inverseMassFactor = clamp(1450 / massKg, 0.42, 1.42);
 
-  const pushDirection = {
-    x: -params.normalFromVehicleToPlayer.x,
-    z: -params.normalFromVehicleToPlayer.z,
-  };
+  const pushDirection = blendImpactPushDirection({
+    car: params.car,
+    normalFromVehicleToPlayer: params.normalFromVehicleToPlayer,
+  });
 
   const impactVelocityMps = clamp(
     params.impulse * 0.48 * params.pushMultiplier * inverseMassFactor,
@@ -263,40 +322,51 @@ function applyCollisionToParkedVehicle(params: {
   const right = getCarRightVector(vehicle.headingRad);
   const sideHit =
     pushDirection.x * right.x + pushDirection.z * right.z >= 0 ? 1 : -1;
+  const damageSide = getImpactDamageSide({
+    vehicleHeadingRad: vehicle.headingRad,
+    normalFromVehicleToPlayer: params.normalFromVehicleToPlayer,
+  });
+  const damageLocalZ = getImpactDamageLocalZ({
+    vehicle,
+    normalFromVehicleToPlayer: params.normalFromVehicleToPlayer,
+  });
 
   const angularKick = clampAbs(
-    sideHit * params.impulse * 0.28 * inverseMassFactor,
+    sideHit * params.impulse * 0.34 * inverseMassFactor,
     params.maxAngularVelocityRadps,
   );
 
   const damageDelta = clamp(
-    (params.impulse / 26) * (0.38 + params.relativeSpeedMps / 42),
-    0.018,
+    0.34 + (params.impulse / 26) * 0.34 + params.relativeSpeedMps * 0.014,
+    0.34,
     params.maxDamagePerHit,
   );
 
-  const nextDamage = clamp((vehicle.damage ?? 0) + damageDelta, 0, 1);
+  const nextDamage = clamp(Math.max(vehicle.damage ?? 0, damageDelta), 0, 1);
 
   return {
     ...vehicle,
     damage: nextDamage,
+    hasBeenHit: true,
+    damageSide,
+    damageLocalZ,
     impactVelocity: {
       x: clampAbs(
-        vehicle.impactVelocity.x + pushDirection.x * impactVelocityMps,
+        pushDirection.x * impactVelocityMps,
         params.maxVelocityMps,
       ),
       z: clampAbs(
-        vehicle.impactVelocity.z + pushDirection.z * impactVelocityMps,
+        pushDirection.z * impactVelocityMps,
         params.maxVelocityMps,
       ),
     },
     impactOffset: {
       x:
         vehicle.impactOffset.x +
-        pushDirection.x * clamp(params.impulse * 0.022, 0, 0.46),
+        pushDirection.x * clamp(params.impulse * 0.052, 0.42, 1.18),
       z:
         vehicle.impactOffset.z +
-        pushDirection.z * clamp(params.impulse * 0.022, 0, 0.46),
+        pushDirection.z * clamp(params.impulse * 0.052, 0.42, 1.18),
     },
     visualRollRad: clampAbs(
       vehicle.visualRollRad + sideHit * params.impulse * 0.014,
@@ -323,6 +393,10 @@ function shouldSkipVehicleCollision(
   nowSeconds: number,
   cooldownSeconds: number,
 ): boolean {
+  if (vehicle.hasBeenHit === true || (vehicle.damage ?? 0) >= 0.99) {
+    return true;
+  }
+
   const lastCollisionAt =
     typeof vehicle.lastCollisionAt === "number" &&
     Number.isFinite(vehicle.lastCollisionAt)
@@ -416,6 +490,8 @@ export function resolveHomeDriveParkedVehicleCollisions(
       brutality,
     });
 
+    const carAtImpact = resolvedCar;
+
     events.push({
       vehicleId: vehicle.id,
       impulse,
@@ -425,7 +501,7 @@ export function resolveHomeDriveParkedVehicleCollisions(
     });
 
     strongestImpact = createHomeDriveImpactFromCollision({
-      car: resolvedCar,
+      car: carAtImpact,
       normal: normalFromVehicleToPlayer,
       relativeSpeedMps,
       impulse,
@@ -434,7 +510,7 @@ export function resolveHomeDriveParkedVehicleCollisions(
     });
 
     resolvedCar = resolvePlayerCarImpact({
-      car: resolvedCar,
+      car: carAtImpact,
       normalFromVehicleToPlayer,
       overlapMeters,
       impulse,
@@ -444,6 +520,7 @@ export function resolveHomeDriveParkedVehicleCollisions(
 
     return applyCollisionToParkedVehicle({
       vehicle,
+      car: carAtImpact,
       normalFromVehicleToPlayer,
       impulse,
       relativeSpeedMps,
@@ -482,3 +559,5 @@ export function getHomeDriveParkedVehicleDebugRenderedPosition(
     z: vehicle.position.z + offset.z,
   };
 }
+
+

@@ -750,7 +750,7 @@ function tickParkedVehiclesAndCollisionsStep(
 
       playerRadiusMeters: 1.64,
 
-      parkedVehiclePushMultiplier: 0.9,
+      parkedVehiclePushMultiplier: 1.24,
 
       playerPushMultiplier: 0.92,
 
@@ -758,7 +758,7 @@ function tickParkedVehiclesAndCollisionsStep(
 
       minImpactSpeedMps: 0.72,
 
-      maxDamagePerHit: 0.42,
+      maxDamagePerHit: 0.78,
 
     },
 
@@ -1559,5 +1559,7 @@ export default function HomeDriveThreeSimulation({
   return null;
 
 }
+
+
 
 

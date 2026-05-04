@@ -10,7 +10,7 @@ export const FREE_DRIVE_START_HEADING_RAD = 0;
 
 export const FREE_DRIVE_WHEEL_BASE_METERS = 2.72;
 
-export const FREE_DRIVE_START_SPEED_MPS = 0.6;
+export const FREE_DRIVE_START_SPEED_MPS = 2.4;
 
 /**
  * 38.8 m/s ≈ 139.7 km/h.
@@ -108,3 +108,5 @@ export const FREE_DRIVE_CAMERA_FOV_STRENGTH = 0.92;
 
 export const FREE_DRIVE_STEERING_WHEEL_IMAGE_SRC =
   "/images/home-drive/free-drive-steering-wheel.png";
+
+
