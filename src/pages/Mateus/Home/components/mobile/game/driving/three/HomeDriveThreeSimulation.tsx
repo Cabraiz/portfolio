@@ -33,6 +33,7 @@ import { mergeHomeDriveImpactStates } from "../domain/homeDrive.impact";
 import { tickHomeDrivePhysics } from "../domain/homeDrive.physics";
 
 import { tickHomeDriveTraffic } from "../domain/homeDrive.traffic";
+import { getHomeDriveTrafficPerformanceProfile } from "../domain/homeDrive.trafficPerformance";
 
 import type { HomeDriveTrafficRuntimeState } from "../domain/homeDrive.traffic.types";
 
@@ -82,6 +83,14 @@ import type { HomeDrivePedestrianPerformanceProfile } from "../domain/pedestrian
 
 import { getHomeDrivePedestrianSimulationStepSeconds } from "../domain/pedestrians/homeDrive.pedestrianPerformance";
 
+import {
+
+  measureHomeDriveRuntimeProfilerSection,
+
+  type HomeDriveRuntimeProfilerState,
+
+} from "../domain/diagnostics";
+
 
 type HomeDriveMutableRef<T> = {
 
@@ -114,11 +123,15 @@ export type HomeDriveThreeSimulationProps = Readonly<{
 
   pedestrianPerformance?: HomeDrivePedestrianPerformanceProfile;
 
+  isPortrait?: boolean;
+
   enabled?: boolean;
 
   publishRuntimeSnapshot?: () => void;
 
   snapshotHz?: number;
+
+  runtimeProfilerRef?: HomeDriveMutableRef<HomeDriveRuntimeProfilerState>;
 
 }>;
 
@@ -586,6 +599,8 @@ function tickTrafficAndCollisionsStep(
 
     | undefined,
 
+  isPortrait: boolean,
+
 ): SimulationStepResult {
 
   if (!trafficRef) {
@@ -601,6 +616,9 @@ function tickTrafficAndCollisionsStep(
   }
 
 
+  const trafficPerformance = getHomeDriveTrafficPerformanceProfile(isPortrait);
+
+
   const nextTraffic = tickHomeDriveTraffic(
 
     trafficRef.current,
@@ -610,6 +628,14 @@ function tickTrafficAndCollisionsStep(
     {
 
       crosswalks: crosswalksRef?.current,
+
+      activeCenter: nextRuntime.car.position,
+
+      activeHeadingRad: nextRuntime.car.headingRad,
+
+      activeSpeedMps: nextRuntime.car.speedMps,
+
+      performance: trafficPerformance,
 
     },
 
@@ -627,6 +653,8 @@ function tickTrafficAndCollisionsStep(
     {
 
       brutality: 1.62,
+
+      maxCandidateRadiusMeters: trafficPerformance.collisionCandidateRadiusMeters,
 
     },
 
@@ -1075,6 +1103,14 @@ function tickSimulationStep(
 
     | undefined,
 
+  runtimeProfilerRef:
+
+    | HomeDriveMutableRef<HomeDriveRuntimeProfilerState>
+
+    | undefined,
+
+  isPortrait: boolean,
+
 ): SimulationStepResult {
 
   if (crosswalksRef) {
@@ -1090,47 +1126,97 @@ function tickSimulationStep(
   }
 
 
-  const physicsRuntime = tickHomeDrivePhysics(runtime, input, FIXED_STEP_SECONDS);
+  const physicsRuntime = measureHomeDriveRuntimeProfilerSection(
 
+    runtimeProfilerRef?.current,
 
-  const pedestrianCollisionResult = tickPedestrianCollisionsStep(
+    "physics",
 
-    physicsRuntime,
-
-    pedestriansRef,
-
-  );
-
-
-  const trafficResult = tickTrafficAndCollisionsStep(
-
-    pedestrianCollisionResult.runtime,
-
-    trafficRef,
-
-    crosswalksRef,
+    () => tickHomeDrivePhysics(runtime, input, FIXED_STEP_SECONDS),
 
   );
 
 
-  const parkedResult = tickParkedVehiclesAndCollisionsStep(
+  const pedestrianCollisionResult = measureHomeDriveRuntimeProfilerSection(
 
-    trafficResult.runtime,
+    runtimeProfilerRef?.current,
 
-    parkedVehiclesRef,
+    "pedestrians",
+
+    () =>
+
+      tickPedestrianCollisionsStep(
+
+        physicsRuntime,
+
+        pedestriansRef,
+
+      ),
 
   );
 
 
-  const urbanFixtureResult = tickUrbanFixtureCollisionsStep(
+  const trafficResult = measureHomeDriveRuntimeProfilerSection(
 
-    parkedResult.runtime,
+    runtimeProfilerRef?.current,
 
-    urbanFixtureCollisionsRef,
+    "traffic",
 
-    urbanStreetLights,
+    () =>
 
-    crosswalksRef,
+      tickTrafficAndCollisionsStep(
+
+        pedestrianCollisionResult.runtime,
+
+        trafficRef,
+
+        crosswalksRef,
+
+        isPortrait,
+
+      ),
+
+  );
+
+
+  const parkedResult = measureHomeDriveRuntimeProfilerSection(
+
+    runtimeProfilerRef?.current,
+
+    "parkedVehicles",
+
+    () =>
+
+      tickParkedVehiclesAndCollisionsStep(
+
+        trafficResult.runtime,
+
+        parkedVehiclesRef,
+
+      ),
+
+  );
+
+
+  const urbanFixtureResult = measureHomeDriveRuntimeProfilerSection(
+
+    runtimeProfilerRef?.current,
+
+    "urbanFixtures",
+
+    () =>
+
+      tickUrbanFixtureCollisionsStep(
+
+        parkedResult.runtime,
+
+        urbanFixtureCollisionsRef,
+
+        urbanStreetLights,
+
+        crosswalksRef,
+
+      ),
 
   );
 
@@ -1149,13 +1235,23 @@ function tickSimulationStep(
 
    */
 
-  const buildingResult = tickBuildingCollisionsStep(
+  const buildingResult = measureHomeDriveRuntimeProfilerSection(
 
-    urbanFixtureResult.runtime,
+    runtimeProfilerRef?.current,
 
-    buildings,
+    "buildings",
 
-    buildingCollisionsRef,
+    () =>
+
+      tickBuildingCollisionsStep(
+
+        urbanFixtureResult.runtime,
+
+        buildings,
+
+        buildingCollisionsRef,
+
+      ),
 
   );
 
@@ -1215,11 +1311,15 @@ export default function HomeDriveThreeSimulation({
 
   pedestrianPerformance,
 
+  isPortrait = true,
+
   enabled = true,
 
   publishRuntimeSnapshot,
 
   snapshotHz = DEFAULT_SNAPSHOT_HZ,
+
+  runtimeProfilerRef,
 
 }: HomeDriveThreeSimulationProps) {
 
@@ -1303,6 +1403,10 @@ export default function HomeDriveThreeSimulation({
 
         crosswalksRef,
 
+        runtimeProfilerRef,
+
+        isPortrait,
+
       );
 
 
@@ -1326,19 +1430,31 @@ export default function HomeDriveThreeSimulation({
         pedestrianTickIndexRef.current += 1;
 
 
-        tickPedestriansStep(
+        measureHomeDriveRuntimeProfilerSection(
 
-          pedestriansRef,
+          runtimeProfilerRef?.current,
 
-          crosswalksRef,
+          "pedestrians",
 
-          runtimeRef.current,
+          () => {
 
-          pedestrianStepSeconds,
+            tickPedestriansStep(
 
-          pedestrianTickIndexRef.current,
+              pedestriansRef,
 
-          pedestrianPerformance,
+              crosswalksRef,
+
+              runtimeRef.current,
+
+              pedestrianStepSeconds,
+
+              pedestrianTickIndexRef.current,
+
+              pedestrianPerformance,
+
+            );
+
+          },
 
         );
 
@@ -1364,13 +1480,25 @@ export default function HomeDriveThreeSimulation({
     }
 
 
-    tickPedestrianImpactVisualFrame(
+    measureHomeDriveRuntimeProfilerSection(
 
-      pedestriansRef,
+      runtimeProfilerRef?.current,
 
-      runtimeRef.current,
+      "pedestrians",
 
-      accumulatorRef.current,
+      () => {
+
+        tickPedestrianImpactVisualFrame(
+
+          pedestriansRef,
+
+          runtimeRef.current,
+
+          accumulatorRef.current,
+
+        );
+
+      },
 
     );
 
@@ -1431,3 +1559,5 @@ export default function HomeDriveThreeSimulation({
   return null;
 
 }
+
+

@@ -259,10 +259,6 @@ export function preloadHomeDrivePedestrianBootRuntime(
 
   const lockedPedestrians = attachBootDiagnostics(nextPedestrians, diagnostics);
 
-  if (options.debug && typeof console !== "undefined") {
-    console.info("[Pedestrians:BootPreload]", diagnostics);
-  }
-
   return {
     pedestrians: lockedPedestrians,
     diagnostics,

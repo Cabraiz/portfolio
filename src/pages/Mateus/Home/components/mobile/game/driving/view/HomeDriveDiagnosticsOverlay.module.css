@@ -1,0 +1,172 @@
+/* src/pages/Mateus/Home/components/mobile/game/driving/view/HomeDriveDiagnosticsOverlay.module.css */
+
+.panel {
+  position: absolute;
+  top: calc(var(--home-drive-safe-top, 0px) + 10px);
+  left: 10px;
+  z-index: 86;
+  width: min(320px, calc(100vw - 20px));
+  box-sizing: border-box;
+  padding: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  color: #f9f4dd;
+  background:
+    linear-gradient(180deg, rgba(16, 23, 28, 0.92), rgba(7, 11, 14, 0.84)),
+    radial-gradient(circle at 12% 0%, rgba(255, 255, 255, 0.12), transparent 34%);
+  box-shadow:
+    0 16px 36px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.14);
+  font-family:
+    Inter,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+  pointer-events: none;
+  backdrop-filter: blur(14px) saturate(1.08);
+  -webkit-backdrop-filter: blur(14px) saturate(1.08);
+  contain: layout paint style;
+}
+
+.header {
+  display: grid;
+  gap: 2px;
+  margin-bottom: 10px;
+}
+
+.title {
+  display: block;
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1.08;
+  letter-spacing: 0.075em;
+  text-transform: uppercase;
+}
+
+.caption {
+  display: block;
+  color: rgba(249, 244, 221, 0.62);
+  font-size: 10px;
+  font-weight: 650;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.barShell {
+  display: flex;
+  width: 100%;
+  height: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.25);
+}
+
+.barSegment {
+  display: block;
+  height: 100%;
+  min-width: 0;
+  transition: width 180ms ease;
+}
+
+.barSegment[data-kind="cars"] {
+  background: linear-gradient(90deg, rgba(255, 117, 74, 0.95), rgba(255, 154, 93, 0.95));
+}
+
+.barSegment[data-kind="pedestrians"] {
+  background: linear-gradient(90deg, rgba(88, 160, 255, 0.95), rgba(117, 209, 255, 0.95));
+}
+
+.barSegment[data-kind="buildings"] {
+  background: linear-gradient(90deg, rgba(142, 118, 255, 0.95), rgba(186, 150, 255, 0.95));
+}
+
+.barSegment[data-enabled="false"] {
+  opacity: 0.22;
+}
+
+.legendList {
+  display: grid;
+  gap: 6px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 7px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.055);
+}
+
+.legendItem[data-enabled="false"] {
+  opacity: 0.56;
+}
+
+.legendLeft {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.legendDot {
+  flex: 0 0 auto;
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+}
+
+.legendItem[data-kind="cars"] .legendDot {
+  background: rgba(255, 137, 84, 1);
+}
+
+.legendItem[data-kind="pedestrians"] .legendDot {
+  background: rgba(99, 179, 255, 1);
+}
+
+.legendItem[data-kind="buildings"] .legendDot {
+  background: rgba(163, 134, 255, 1);
+}
+
+.legendLabel {
+  overflow: hidden;
+  font-size: 11px;
+  font-weight: 760;
+  line-height: 1.1;
+  letter-spacing: 0.02em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.legendRight {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 7px;
+  flex: 0 0 auto;
+  font-variant-numeric: tabular-nums;
+}
+
+.legendRight strong {
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.legendRight small {
+  color: rgba(249, 244, 221, 0.56);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}

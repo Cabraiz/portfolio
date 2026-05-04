@@ -5,26 +5,47 @@ import React, { memo, useEffect, useLayoutEffect, useMemo, useRef } from "react"
 import {
   BoxGeometry,
   CylinderGeometry,
+  DynamicDrawUsage,
+  Euler,
   InstancedMesh,
   MeshStandardMaterial,
   Object3D,
+  Quaternion,
   SphereGeometry,
+  Vector3,
   type BufferGeometry,
   type Material,
 } from "three";
 
+import {
+  getHomeDriveTrafficPerformanceProfile,
+  getHomeDriveTrafficRenderTier,
+  getHomeDriveTrafficSpatialRelation,
+  type HomeDriveTrafficRenderTier,
+} from "../domain/homeDrive.trafficPerformance";
 import type {
   HomeDriveTrafficRuntimeState,
   HomeDriveTrafficVehicle,
   HomeDriveTrafficVehicleColorKey,
 } from "../domain/homeDrive.traffic.types";
+import type { HomeDriveRuntimeState } from "../domain/homeDrive.types";
 
 type HomeDriveTrafficRef = {
   current: HomeDriveTrafficRuntimeState;
 };
 
+type HomeDriveRuntimeRef = {
+  current: HomeDriveRuntimeState;
+};
+
+type HomeDriveTrafficRenderTiersRef = {
+  current: readonly HomeDriveTrafficRenderTier[];
+};
+
 export type HomeDriveThreeTrafficProps = Readonly<{
   trafficRef: HomeDriveTrafficRef;
+  runtimeRef: HomeDriveRuntimeRef;
+  isPortrait: boolean;
 }>;
 
 type TrafficBatch = Readonly<{
@@ -133,6 +154,10 @@ type SharedPartConfig = Readonly<{
   material: Material;
   renderOrder: number;
 }>;
+
+const TRAFFIC_BODY_EULER = new Euler();
+const TRAFFIC_BODY_QUATERNION = new Quaternion();
+const TRAFFIC_PART_LOCAL_OFFSET = new Vector3();
 
 const PAINTED_TRAFFIC_PARTS: readonly TrafficPart[] = [
   "body",
@@ -2315,6 +2340,85 @@ function getVehiclePartTransform(
   return getWheelTransform(vehicle, part, false);
 }
 
+function getTrafficPartUpdateStride(_part: TrafficPart): number {
+  /*
+    Luzes, freios, indicadores, vidros e acessórios são instâncias separadas.
+    Quando esses detalhes atualizavam a cada 2/3 frames, eles ficavam com
+    matriz antiga enquanto o corpo já tinha avançado/rotacionado. Com a
+    redução de 50% do pool, é mais barato e visualmente correto manter todas
+    as partes rígidas sincronizadas a cada frame.
+  */
+  return 1;
+}
+
+function isBodyTierTrafficPart(part: TrafficPart): boolean {
+  return (
+    part === "body" ||
+    part === "hood" ||
+    part === "trunk" ||
+    part === "cabinFrame" ||
+    part === "frontLeftWheel" ||
+    part === "frontRightWheel" ||
+    part === "rearLeftWheel" ||
+    part === "rearRightWheel" ||
+    part === "twoWheelFrame" ||
+    part === "twoWheelFrontWheel" ||
+    part === "twoWheelRearWheel" ||
+    part === "riderTorso" ||
+    part === "riderHead"
+  );
+}
+
+function isCoreTierTrafficPart(part: TrafficPart): boolean {
+  if (isBodyTierTrafficPart(part)) {
+    return true;
+  }
+
+  return (
+    part === "windshield" ||
+    part === "rearGlass" ||
+    part === "frontBumper" ||
+    part === "rearBumper" ||
+    part === "frontLeftHeadlight" ||
+    part === "frontRightHeadlight" ||
+    part === "rearLeftTailLight" ||
+    part === "rearRightTailLight" ||
+    part === "rearBrakeLightLeft" ||
+    part === "rearBrakeLightRight" ||
+    part === "frontGrille" ||
+    part === "taxiSign" ||
+    part === "policeLightBarLeft" ||
+    part === "policeLightBarRight" ||
+    part === "deliveryCargoBox" ||
+    part === "truckCargoBox" ||
+    part === "twoWheelFork" ||
+    part === "twoWheelHandlebar" ||
+    part === "twoWheelSeat" ||
+    part === "motorcycleFuelTank" ||
+    part === "motorcycleHeadlight"
+  );
+}
+
+function shouldRenderTrafficPartForTier(
+  part: TrafficPart,
+  tier: HomeDriveTrafficRenderTier,
+): boolean {
+  switch (tier) {
+    case "full":
+      return true;
+
+    case "core":
+      return isCoreTierTrafficPart(part);
+
+    case "body":
+      return isBodyTierTrafficPart(part);
+
+    case "hidden":
+    default:
+      return false;
+  }
+}
+
 function setVehiclePartMatrix(
   dummy: Object3D,
   vehicle: HomeDriveTrafficVehicle,
@@ -2331,22 +2435,29 @@ function setVehiclePartMatrix(
   const [scaleX, scaleY, scaleZ] = transform.scale;
   const [localRotX, localRotY, localRotZ] = transform.localRotation;
 
-  const cos = Math.cos(vehicle.headingRad);
-  const sin = Math.sin(vehicle.headingRad);
+  const renderHeadingRad = vehicle.headingRad + vehicle.visualYawOffsetRad;
+  const renderRollRad = vehicle.visualRollRad + vehicle.damage * 0.08;
 
-  const worldOffsetX = localX * cos + localZ * sin;
-  const worldOffsetZ = -localX * sin + localZ * cos;
+  TRAFFIC_BODY_EULER.set(
+    vehicle.visualPitchRad,
+    renderHeadingRad,
+    renderRollRad,
+  );
+  TRAFFIC_BODY_QUATERNION.setFromEuler(TRAFFIC_BODY_EULER);
+  TRAFFIC_PART_LOCAL_OFFSET
+    .set(localX, localY, localZ)
+    .applyQuaternion(TRAFFIC_BODY_QUATERNION);
 
   dummy.position.set(
-    vehicle.position.x + worldOffsetX,
-    localY,
-    vehicle.position.z + worldOffsetZ,
+    vehicle.position.x + TRAFFIC_PART_LOCAL_OFFSET.x,
+    TRAFFIC_PART_LOCAL_OFFSET.y,
+    vehicle.position.z + TRAFFIC_PART_LOCAL_OFFSET.z,
   );
 
   dummy.rotation.set(
     vehicle.visualPitchRad + localRotX,
-    vehicle.headingRad + vehicle.visualYawOffsetRad + localRotY,
-    vehicle.visualRollRad + vehicle.damage * 0.08 + localRotZ,
+    renderHeadingRad + localRotY,
+    renderRollRad + localRotZ,
   );
 
   dummy.scale.set(scaleX, scaleY, scaleZ);
@@ -2360,6 +2471,8 @@ function HomeDriveTrafficInstancedPart({
   part,
   material,
   renderOrder,
+  renderTiersRef,
+  packVisibleInstances,
 }: Readonly<{
   trafficRef: HomeDriveTrafficRef;
   batch: TrafficBatch;
@@ -2367,9 +2480,13 @@ function HomeDriveTrafficInstancedPart({
   part: TrafficPart;
   material: Material;
   renderOrder: number;
+  renderTiersRef: HomeDriveTrafficRenderTiersRef;
+  packVisibleInstances: boolean;
 }>) {
   const meshRef = useRef<InstancedMesh>(null);
   const dummy = useMemo(() => new Object3D(), []);
+  const frameIndexRef = useRef(0);
+  const updateStride = getTrafficPartUpdateStride(part);
 
   const syncInstances = () => {
     const mesh = meshRef.current;
@@ -2381,26 +2498,49 @@ function HomeDriveTrafficInstancedPart({
     const traffic = trafficRef.current;
     const vehicles = traffic.vehicles;
     const elapsedSeconds = traffic.elapsedSeconds;
+    const renderTiers = renderTiersRef.current;
+    let packedInstanceIndex = 0;
 
-    batch.indexes.forEach((vehicleIndex, instanceIndex) => {
+    batch.indexes.forEach((vehicleIndex, legacyInstanceIndex) => {
       const vehicle = vehicles[vehicleIndex];
+      const tier = renderTiers[vehicleIndex] ?? "full";
 
-      if (!vehicle) {
+      if (!vehicle || !shouldRenderTrafficPartForTier(part, tier)) {
+        if (!packVisibleInstances) {
+          hideTrafficPartMatrix(dummy);
+          mesh.setMatrixAt(legacyInstanceIndex, dummy.matrix);
+        }
+
         return;
       }
 
       setVehiclePartMatrix(dummy, vehicle, part, elapsedSeconds);
-      mesh.setMatrixAt(instanceIndex, dummy.matrix);
+      mesh.setMatrixAt(
+        packVisibleInstances ? packedInstanceIndex : legacyInstanceIndex,
+        dummy.matrix,
+      );
+      packedInstanceIndex += 1;
     });
 
+    mesh.count = packVisibleInstances ? packedInstanceIndex : batch.indexes.length;
     mesh.instanceMatrix.needsUpdate = true;
   };
 
   useLayoutEffect(() => {
+    if (meshRef.current) {
+      meshRef.current.instanceMatrix.setUsage(DynamicDrawUsage);
+    }
+
     syncInstances();
   }, [batch.indexes, dummy, part]);
 
   useFrame(() => {
+    frameIndexRef.current += 1;
+
+    if (updateStride > 1 && frameIndexRef.current % updateStride !== 0) {
+      return;
+    }
+
     syncInstances();
   });
 
@@ -2418,8 +2558,79 @@ function HomeDriveTrafficInstancedPart({
   );
 }
 
-function HomeDriveThreeTraffic({ trafficRef }: HomeDriveThreeTrafficProps) {
+function HomeDriveThreeTraffic({
+  trafficRef,
+  runtimeRef,
+  isPortrait,
+}: HomeDriveThreeTrafficProps) {
   const vehicles = trafficRef.current.vehicles;
+  const trafficPerformance = useMemo(
+    () => getHomeDriveTrafficPerformanceProfile(isPortrait),
+    [isPortrait],
+  );
+  const renderTiersRef = useRef<readonly HomeDriveTrafficRenderTier[]>([]);
+  const visibilityAccumulatorRef = useRef(0);
+
+  const syncVisibilityMask = () => {
+    const runtime = runtimeRef.current;
+    const traffic = trafficRef.current;
+    const tiers: HomeDriveTrafficRenderTier[] = traffic.vehicles.map(() => "hidden");
+    const candidates = traffic.vehicles
+      .map((vehicle, index) => {
+        const tier = getHomeDriveTrafficRenderTier(
+          vehicle,
+          runtime.car.position,
+          runtime.car.headingRad,
+          runtime.car.speedMps,
+          trafficPerformance,
+        );
+
+        if (tier === "hidden") {
+          return null;
+        }
+
+        const relation = getHomeDriveTrafficSpatialRelation(
+          vehicle.position,
+          runtime.car.position,
+          runtime.car.headingRad,
+        );
+        const tierWeight =
+          tier === "full" ? -900 : tier === "core" ? -420 : -120;
+        const forwardPenalty = relation.forwardMeters < 0
+          ? Math.abs(relation.forwardMeters) * 2.2
+          : relation.forwardMeters * 0.16;
+
+        return {
+          index,
+          tier,
+          score: tierWeight + relation.distanceMeters + relation.lateralAbsMeters * 0.65 + forwardPenalty,
+        };
+      })
+      .filter((candidate): candidate is NonNullable<typeof candidate> => Boolean(candidate))
+      .sort((first, second) => first.score - second.score)
+      .slice(0, trafficPerformance.renderMaxVisibleVehicles);
+
+    candidates.forEach((candidate) => {
+      tiers[candidate.index] = candidate.tier;
+    });
+
+    renderTiersRef.current = tiers;
+  };
+
+  useLayoutEffect(() => {
+    syncVisibilityMask();
+  }, [trafficPerformance]);
+
+  useFrame((_, deltaSeconds) => {
+    visibilityAccumulatorRef.current += deltaSeconds;
+
+    if (visibilityAccumulatorRef.current < 1 / trafficPerformance.renderMaskHz) {
+      return;
+    }
+
+    visibilityAccumulatorRef.current = 0;
+    syncVisibilityMask();
+  });
 
   const colorBatches = useMemo(() => {
     return groupTrafficByColor(vehicles);
@@ -2457,6 +2668,8 @@ function HomeDriveThreeTraffic({ trafficRef }: HomeDriveThreeTrafficProps) {
               part={part}
               material={batch.material}
               renderOrder={16}
+              renderTiersRef={renderTiersRef}
+              packVisibleInstances={trafficPerformance.packVisibleInstancesEnabled}
             />
           ))}
         </React.Fragment>
@@ -2477,6 +2690,8 @@ function HomeDriveThreeTraffic({ trafficRef }: HomeDriveThreeTrafficProps) {
           part={config.part}
           material={config.material}
           renderOrder={config.renderOrder}
+          renderTiersRef={renderTiersRef}
+          packVisibleInstances={trafficPerformance.packVisibleInstancesEnabled}
         />
       ))}
     </group>

@@ -20,6 +20,12 @@ export type HomeDriveTrafficCollisionOptions = Readonly<{
   cooldownSeconds?: number;
   minImpactSpeedMps?: number;
   brutality?: number;
+
+  /**
+   * Raio amplo de pré-filtro. Mantém colisão exata perto do player e evita
+   * testar carros frios do outro lado do mapa.
+   */
+  maxCandidateRadiusMeters?: number;
 }>;
 
 export type HomeDriveTrafficCollisionResolution = Readonly<{
@@ -245,23 +251,34 @@ export function resolveHomeDriveTrafficCollisions(
   const minImpactSpeedMps =
     options.minImpactSpeedMps ?? DEFAULT_MIN_IMPACT_SPEED_MPS;
   const brutality = options.brutality ?? DEFAULT_COLLISION_BRUTALITY;
+  const maxCandidateRadiusMeters = Math.max(
+    playerRadiusMeters + 8,
+    options.maxCandidateRadiusMeters ?? 64,
+  );
 
   let resolvedCar = car;
   let maxImpulse = 0;
   let mergedImpact: HomeDriveRuntimeImpactState | null = null;
   const events: HomeDriveTrafficCollisionEvent[] = [];
 
-  const resolvedVehicles = traffic.vehicles.map((vehicle) => {
+  let resolvedVehicles: HomeDriveTrafficVehicle[] | null = null;
+
+  traffic.vehicles.forEach((vehicle, vehicleIndex) => {
     if (nowSeconds - vehicle.lastCollisionAt < cooldownSeconds) {
-      return vehicle;
+      return;
     }
 
     const distance = getDistance(resolvedCar.position, vehicle.position);
+
+    if (distance > maxCandidateRadiusMeters + vehicle.collisionRadiusMeters) {
+      return;
+    }
+
     const collisionDistance =
       playerRadiusMeters + vehicle.collisionRadiusMeters;
 
     if (distance >= collisionDistance) {
-      return vehicle;
+      return;
     }
 
     const relativeSpeedMps = getRelativeImpactSpeedMps(resolvedCar, vehicle);
@@ -270,7 +287,7 @@ export function resolveHomeDriveTrafficCollisions(
       relativeSpeedMps < minImpactSpeedMps &&
       Math.abs(resolvedCar.speedMps) < minImpactSpeedMps
     ) {
-      return vehicle;
+      return;
     }
 
     const overlapMeters = collisionDistance - distance;
@@ -317,15 +334,25 @@ export function resolveHomeDriveTrafficCollisions(
       impulse,
     );
 
-    return resolveVehicleImpact(vehicle, normal, impulse, nowSeconds);
+    if (!resolvedVehicles) {
+      resolvedVehicles = traffic.vehicles.slice();
+    }
+
+    resolvedVehicles[vehicleIndex] = resolveVehicleImpact(
+      vehicle,
+      normal,
+      impulse,
+      nowSeconds,
+    );
   });
 
-  const nextTraffic = {
-    ...traffic,
-    vehicles: resolvedVehicles,
-    lastCollisionAt:
-      events.length > 0 ? nowSeconds : traffic.lastCollisionAt,
-  };
+  const nextTraffic = events.length > 0
+    ? {
+        ...traffic,
+        vehicles: resolvedVehicles ?? traffic.vehicles,
+        lastCollisionAt: nowSeconds,
+      }
+    : traffic;
 
   return {
     car: resolvedCar,
@@ -344,9 +371,17 @@ export function hasHomeDriveTrafficCollision(
 ): boolean {
   const playerRadiusMeters =
     options.playerRadiusMeters ?? DEFAULT_PLAYER_RADIUS_METERS;
+  const maxCandidateRadiusMeters = Math.max(
+    playerRadiusMeters + 8,
+    options.maxCandidateRadiusMeters ?? 64,
+  );
 
   return traffic.vehicles.some((vehicle) => {
     const distance = getDistance(car.position, vehicle.position);
+
+    if (distance > maxCandidateRadiusMeters + vehicle.collisionRadiusMeters) {
+      return false;
+    }
 
     return distance < playerRadiusMeters + vehicle.collisionRadiusMeters;
   });

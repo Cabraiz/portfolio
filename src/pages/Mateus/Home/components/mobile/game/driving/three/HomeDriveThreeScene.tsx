@@ -20,8 +20,22 @@ import {
   createInitialHomeDriveCrosswalkState,
   type HomeDriveCrosswalkRuntimeState,
 } from "../domain/crosswalks";
+import {
+  createHomeDriveRuntimeDiagnosticsSnapshot,
+  createHomeDriveRuntimeProfilerState,
+  flushHomeDriveRuntimeProfilerSnapshot,
+  type HomeDriveRuntimeDiagnosticsSnapshot,
+  type HomeDriveRuntimeProfilerState,
+} from "../domain/diagnostics";
 import type { HomeDriveBuilding } from "../domain/homeDrive.building.types";
 import { getHomeDriveBuildings } from "../domain/homeDrive.buildings";
+import {
+  HOME_DRIVE_WORLD_BUILDINGS_ON,
+  HOME_DRIVE_WORLD_CARS_ON,
+  HOME_DRIVE_WORLD_MOVING_CARS_TARGET_COUNT,
+  HOME_DRIVE_WORLD_PEDESTRIANS_ON,
+  HOME_DRIVE_RUNTIME_DIAGNOSTICS_SAMPLE_HZ,
+} from "../domain/homeDrive.globalDebugFlags";
 import { createInitialHomeDriveTrafficState } from "../domain/homeDrive.traffic";
 import type { HomeDriveTrafficRuntimeState } from "../domain/homeDrive.traffic.types";
 import type {
@@ -82,6 +96,7 @@ export type HomeDriveThreeSceneProps = Readonly<{
   inputRef: HomeDriveMutableRef<HomeDriveInputState>;
   viewport: HomeDriveViewportMetrics;
   publishRuntimeSnapshot?: () => void;
+  onDiagnosticsSnapshot?: (snapshot: HomeDriveRuntimeDiagnosticsSnapshot) => void;
 }>;
 
 type HomeDriveThreeWorldProps = Readonly<{
@@ -95,9 +110,11 @@ type HomeDriveThreeWorldProps = Readonly<{
   buildings: readonly HomeDriveBuilding[];
   pedestriansRef: HomeDriveMutableRef<HomeDrivePedestrianRuntimeState>;
   crosswalksRef: HomeDriveMutableRef<HomeDriveCrosswalkRuntimeState>;
+  runtimeProfilerRef: HomeDriveMutableRef<HomeDriveRuntimeProfilerState>;
   pedestrianPerformance: HomeDrivePedestrianPerformanceProfile;
   isPortrait: boolean;
   publishRuntimeSnapshot?: () => void;
+  onDiagnosticsSnapshot?: (snapshot: HomeDriveRuntimeDiagnosticsSnapshot) => void;
 }>;
 
 const INITIAL_CAMERA_HEIGHT_METERS = 2.65;
@@ -105,18 +122,21 @@ const INITIAL_CAMERA_FOV = 66;
 const INITIAL_CAMERA_NEAR = 0.1;
 const INITIAL_CAMERA_FAR = 4200;
 
-const TRAFFIC_MAX_VEHICLES_PORTRAIT = 472;
-const TRAFFIC_MAX_VEHICLES_LANDSCAPE = 704;
-const TRAFFIC_DENSITY_PORTRAIT = 3.4;
-const TRAFFIC_DENSITY_LANDSCAPE = 4;
+// Tráfego dinâmico: limite fixo pedido para reduzir custo de IA/render.
+const TRAFFIC_MAX_VEHICLES_PORTRAIT = HOME_DRIVE_WORLD_MOVING_CARS_TARGET_COUNT;
+const TRAFFIC_MAX_VEHICLES_LANDSCAPE = HOME_DRIVE_WORLD_MOVING_CARS_TARGET_COUNT;
+const TRAFFIC_DENSITY_PORTRAIT = 1.7;
+const TRAFFIC_DENSITY_LANDSCAPE = 2;
 const TRAFFIC_MIN_ROAD_LENGTH_METERS = 64;
 
-const PARKED_MAX_VEHICLES_PORTRAIT = 126;
-const PARKED_MAX_VEHICLES_LANDSCAPE = 220;
-const PARKED_DENSITY_PORTRAIT = 0.92;
-const PARKED_DENSITY_LANDSCAPE = 1.24;
-const PARKED_MAX_ROADS_PORTRAIT = 96;
-const PARKED_MAX_ROADS_LANDSCAPE = 172;
+// Carros estacionados: pool alto pedido. Eles continuam com culling por raio/limite
+// visível abaixo, então não viram 3000 instâncias desenhadas ao mesmo tempo.
+const PARKED_MAX_VEHICLES_PORTRAIT = 3000;
+const PARKED_MAX_VEHICLES_LANDSCAPE = 3000;
+const PARKED_DENSITY_PORTRAIT = 1.35;
+const PARKED_DENSITY_LANDSCAPE = 1.35;
+const PARKED_MAX_ROADS_PORTRAIT = 3000;
+const PARKED_MAX_ROADS_LANDSCAPE = 3000;
 const PARKED_MIN_ROAD_LENGTH_METERS = 68;
 
 const PARKED_VISIBLE_RADIUS_PORTRAIT = 540;
@@ -296,6 +316,89 @@ function HomeDriveThreeEnvironment() {
   return null;
 }
 
+
+type HomeDriveThreeDiagnosticsSamplerProps = Readonly<{
+  runtimeRef: HomeDriveMutableRef<HomeDriveRuntimeState>;
+  trafficRef: HomeDriveMutableRef<HomeDriveTrafficRuntimeState>;
+  parkedVehiclesRef: HomeDriveMutableRef<HomeDriveParkedVehicleRuntimeState>;
+  buildings: readonly HomeDriveBuilding[];
+  buildingCollisionsRef: HomeDriveMutableRef<HomeDriveBuildingCollisionRuntimeState>;
+  pedestriansRef: HomeDriveMutableRef<HomeDrivePedestrianRuntimeState>;
+  runtimeProfilerRef: HomeDriveMutableRef<HomeDriveRuntimeProfilerState>;
+  onDiagnosticsSnapshot: (snapshot: HomeDriveRuntimeDiagnosticsSnapshot) => void;
+}>;
+
+function getNowMs(): number {
+  if (typeof performance !== "undefined" && typeof performance.now === "function") {
+    return performance.now();
+  }
+
+  return Date.now();
+}
+
+function HomeDriveThreeDiagnosticsSampler({
+  runtimeRef,
+  trafficRef,
+  parkedVehiclesRef,
+  buildings,
+  buildingCollisionsRef,
+  pedestriansRef,
+  runtimeProfilerRef,
+  onDiagnosticsSnapshot,
+}: HomeDriveThreeDiagnosticsSamplerProps) {
+  const { gl } = useThree();
+  const smoothedFpsRef = useRef(60);
+  const lastPublishAtMsRef = useRef(0);
+  const sampleIntervalMs =
+    1000 / Math.max(1, HOME_DRIVE_RUNTIME_DIAGNOSTICS_SAMPLE_HZ);
+
+  useFrame((_, deltaSeconds) => {
+    const nowMs = getNowMs();
+    const instantFps = deltaSeconds > 0 ? 1 / deltaSeconds : smoothedFpsRef.current;
+
+    smoothedFpsRef.current =
+      smoothedFpsRef.current * 0.84 + instantFps * 0.16;
+
+    if (nowMs - lastPublishAtMsRef.current < sampleIntervalMs) {
+      return;
+    }
+
+    lastPublishAtMsRef.current = nowMs;
+
+    onDiagnosticsSnapshot(
+      createHomeDriveRuntimeDiagnosticsSnapshot({
+        sampledAtMs: nowMs,
+        fps: smoothedFpsRef.current,
+        frameTimeMs: deltaSeconds * 1000,
+        runtime: runtimeRef.current,
+        traffic: trafficRef.current,
+        parkedVehicles: parkedVehiclesRef.current,
+        pedestrians: pedestriansRef.current,
+        buildings,
+        buildingCollisions: buildingCollisionsRef.current,
+        renderer: {
+          memory: {
+            geometries: gl.info.memory.geometries,
+            textures: gl.info.memory.textures,
+          },
+          render: {
+            calls: gl.info.render.calls,
+            triangles: gl.info.render.triangles,
+            points: gl.info.render.points,
+            lines: gl.info.render.lines,
+          },
+        },
+        profiler: flushHomeDriveRuntimeProfilerSnapshot(
+          runtimeProfilerRef.current,
+          nowMs,
+        ),
+      }),
+    );
+  });
+
+  return null;
+}
+
 function HomeDriveThreeWorld({
   runtimeRef,
   inputRef,
@@ -307,9 +410,11 @@ function HomeDriveThreeWorld({
   buildings,
   pedestriansRef,
   crosswalksRef,
+  runtimeProfilerRef,
   pedestrianPerformance,
   isPortrait,
   publishRuntimeSnapshot,
+  onDiagnosticsSnapshot,
 }: HomeDriveThreeWorldProps) {
   const [damagedBuildingIds, setDamagedBuildingIds] = useState<
     readonly string[]
@@ -355,20 +460,43 @@ function HomeDriveThreeWorld({
 
   return (
     <>
-      <HomeDriveThreeSimulation
+      {onDiagnosticsSnapshot ? (
+        <HomeDriveThreeDiagnosticsSampler
           runtimeRef={runtimeRef}
+          trafficRef={trafficRef}
+          parkedVehiclesRef={parkedVehiclesRef}
+          buildings={buildings}
+          buildingCollisionsRef={buildingCollisionsRef}
+          pedestriansRef={pedestriansRef}
+          runtimeProfilerRef={runtimeProfilerRef}
+          onDiagnosticsSnapshot={onDiagnosticsSnapshot}
+        />
+      ) : null}
+
+      <HomeDriveThreeSimulation
+        runtimeRef={runtimeRef}
         inputRef={inputRef}
-        trafficRef={trafficRef}
-        parkedVehiclesRef={parkedVehiclesRef}
+        trafficRef={HOME_DRIVE_WORLD_CARS_ON ? trafficRef : undefined}
+        parkedVehiclesRef={
+          HOME_DRIVE_WORLD_CARS_ON ? parkedVehiclesRef : undefined
+        }
         urbanFixtureCollisionsRef={urbanFixtureCollisionsRef}
         urbanStreetLights={urbanStreetLights}
-        buildingCollisionsRef={buildingCollisionsRef}
-        buildings={buildings}
-        pedestriansRef={pedestriansRef}
+        buildingCollisionsRef={
+          HOME_DRIVE_WORLD_BUILDINGS_ON ? buildingCollisionsRef : undefined
+        }
+        buildings={HOME_DRIVE_WORLD_BUILDINGS_ON ? buildings : []}
+        pedestriansRef={
+          HOME_DRIVE_WORLD_PEDESTRIANS_ON ? pedestriansRef : undefined
+        }
         crosswalksRef={crosswalksRef}
-        pedestrianPerformance={pedestrianPerformance}
+        pedestrianPerformance={
+          HOME_DRIVE_WORLD_PEDESTRIANS_ON ? pedestrianPerformance : undefined
+        }
+        isPortrait={isPortrait}
         publishRuntimeSnapshot={publishRuntimeSnapshot}
         snapshotHz={8}
+        runtimeProfilerRef={runtimeProfilerRef}
       />
 
       <HomeDriveThreeCameraRig runtimeRef={runtimeRef} />
@@ -410,110 +538,124 @@ function HomeDriveThreeWorld({
         snapshotHz={6}
       />
 
-      <HomeDriveThreeParkedVehicles
-        parkedVehiclesRef={parkedVehiclesRef}
-        runtimeRef={runtimeRef}
-        visibleRadiusMeters={
-          isPortrait
-            ? PARKED_VISIBLE_RADIUS_PORTRAIT
-            : PARKED_VISIBLE_RADIUS_LANDSCAPE
-        }
-        maxVisibleVehicles={
-          isPortrait ? PARKED_MAX_VISIBLE_PORTRAIT : PARKED_MAX_VISIBLE_LANDSCAPE
-        }
-      />
+      {HOME_DRIVE_WORLD_CARS_ON ? (
+        <HomeDriveThreeParkedVehicles
+          parkedVehiclesRef={parkedVehiclesRef}
+          runtimeRef={runtimeRef}
+          visibleRadiusMeters={
+            isPortrait
+              ? PARKED_VISIBLE_RADIUS_PORTRAIT
+              : PARKED_VISIBLE_RADIUS_LANDSCAPE
+          }
+          maxVisibleVehicles={
+            isPortrait ? PARKED_MAX_VISIBLE_PORTRAIT : PARKED_MAX_VISIBLE_LANDSCAPE
+          }
+        />
+      ) : null}
 
-      <HomeDriveThreeBuildings
-        buildings={buildings}
-        hiddenBuildingIds={damagedBuildingIds}
-      />
+      {HOME_DRIVE_WORLD_BUILDINGS_ON ? (
+        <>
+          <HomeDriveThreeBuildings
+            buildings={buildings}
+            hiddenBuildingIds={damagedBuildingIds}
+          />
 
-      <HomeDriveThreeDamagedBuildings
-        buildings={buildings}
-        buildingCollisionsRef={buildingCollisionsRef}
-        runtimeRef={runtimeRef}
-        visibleRadiusMeters={
-          isPortrait
-            ? DAMAGED_BUILDINGS_VISIBLE_RADIUS_PORTRAIT
-            : DAMAGED_BUILDINGS_VISIBLE_RADIUS_LANDSCAPE
-        }
-        maxVisibleBuildings={
-          isPortrait
-            ? DAMAGED_BUILDINGS_MAX_VISIBLE_PORTRAIT
-            : DAMAGED_BUILDINGS_MAX_VISIBLE_LANDSCAPE
-        }
-        snapshotHz={8}
-      />
+          <HomeDriveThreeDamagedBuildings
+            buildings={buildings}
+            buildingCollisionsRef={buildingCollisionsRef}
+            runtimeRef={runtimeRef}
+            visibleRadiusMeters={
+              isPortrait
+                ? DAMAGED_BUILDINGS_VISIBLE_RADIUS_PORTRAIT
+                : DAMAGED_BUILDINGS_VISIBLE_RADIUS_LANDSCAPE
+            }
+            maxVisibleBuildings={
+              isPortrait
+                ? DAMAGED_BUILDINGS_MAX_VISIBLE_PORTRAIT
+                : DAMAGED_BUILDINGS_MAX_VISIBLE_LANDSCAPE
+            }
+            snapshotHz={8}
+          />
 
-      <HomeDriveThreeBuildingRubble
-        buildingCollisionsRef={buildingCollisionsRef}
-        runtimeRef={runtimeRef}
-        visibleRadiusMeters={
-          isPortrait
-            ? BUILDING_RUBBLE_VISIBLE_RADIUS_PORTRAIT
-            : BUILDING_RUBBLE_VISIBLE_RADIUS_LANDSCAPE
-        }
-        maxVisiblePieces={
-          isPortrait
-            ? BUILDING_RUBBLE_MAX_VISIBLE_PORTRAIT
-            : BUILDING_RUBBLE_MAX_VISIBLE_LANDSCAPE
-        }
-        snapshotHz={8}
-      />
+          <HomeDriveThreeBuildingRubble
+            buildingCollisionsRef={buildingCollisionsRef}
+            runtimeRef={runtimeRef}
+            visibleRadiusMeters={
+              isPortrait
+                ? BUILDING_RUBBLE_VISIBLE_RADIUS_PORTRAIT
+                : BUILDING_RUBBLE_VISIBLE_RADIUS_LANDSCAPE
+            }
+            maxVisiblePieces={
+              isPortrait
+                ? BUILDING_RUBBLE_MAX_VISIBLE_PORTRAIT
+                : BUILDING_RUBBLE_MAX_VISIBLE_LANDSCAPE
+            }
+            snapshotHz={8}
+          />
 
-      <HomeDriveThreeBuildingCollisionMarks
-        buildingCollisionsRef={buildingCollisionsRef}
-        runtimeRef={runtimeRef}
-        visibleRadiusMeters={
-          isPortrait
-            ? BUILDING_COLLISION_MARK_VISIBLE_RADIUS_PORTRAIT
-            : BUILDING_COLLISION_MARK_VISIBLE_RADIUS_LANDSCAPE
-        }
-        maxVisibleMarks={
-          isPortrait
-            ? BUILDING_COLLISION_MARK_MAX_VISIBLE_PORTRAIT
-            : BUILDING_COLLISION_MARK_MAX_VISIBLE_LANDSCAPE
-        }
-        snapshotHz={12}
-      />
+          <HomeDriveThreeBuildingCollisionMarks
+            buildingCollisionsRef={buildingCollisionsRef}
+            runtimeRef={runtimeRef}
+            visibleRadiusMeters={
+              isPortrait
+                ? BUILDING_COLLISION_MARK_VISIBLE_RADIUS_PORTRAIT
+                : BUILDING_COLLISION_MARK_VISIBLE_RADIUS_LANDSCAPE
+            }
+            maxVisibleMarks={
+              isPortrait
+                ? BUILDING_COLLISION_MARK_MAX_VISIBLE_PORTRAIT
+                : BUILDING_COLLISION_MARK_MAX_VISIBLE_LANDSCAPE
+            }
+            snapshotHz={12}
+          />
 
-      <HomeDriveThreeBuildingSigns runtimeRef={runtimeRef} />
-      <HomeDriveThreeTraffic trafficRef={trafficRef} />
+          <HomeDriveThreeBuildingSigns runtimeRef={runtimeRef} />
+        </>
+      ) : null}
+      {HOME_DRIVE_WORLD_CARS_ON ? (
+        <HomeDriveThreeTraffic
+          trafficRef={trafficRef}
+          runtimeRef={runtimeRef}
+          isPortrait={isPortrait}
+        />
+      ) : null}
 
-      <HomeDriveThreePedestrians
-        pedestriansRef={pedestriansRef}
-        runtimeRef={runtimeRef}
-        visibleRadiusMeters={pedestrianPerformance.visibleRadiusMeters}
-        maxVisiblePedestrians={pedestrianPerformance.maxVisiblePedestrians}
-        fullDetailRadiusMeters={pedestrianPerformance.fullDetailRadiusMeters}
-        mediumDetailRadiusMeters={pedestrianPerformance.mediumDetailRadiusMeters}
-        snapshotHz={pedestrianPerformance.snapshotHz}
-        enableInstancedRig={pedestrianPerformance.enableInstancedRig}
-        enableBakedAnimation={pedestrianPerformance.enableBakedAnimation}
-        maxFullReactPedestrians={pedestrianPerformance.maxFullReactPedestrians}
-        maxMediumReactPedestrians={pedestrianPerformance.maxMediumReactPedestrians}
-        maxInstancedPedestrians={pedestrianPerformance.maxInstancedPedestrians}
-        instancedAnimationHz={pedestrianPerformance.instancedAnimationHzNear}
-        instancedAnimationUpdateStride={
-          pedestrianPerformance.instancedMatrixUpdateStride
-        }
-        instancedMaxUpdatesPerFrame={
-          pedestrianPerformance.instancedMaxUpdatesPerFrame
-        }
-        enableRenderSeparation={
-          pedestrianPerformance.enablePedestrianRenderSeparation
-        }
-        renderSeparationCellSizeMeters={
-          pedestrianPerformance.pedestrianRenderSeparationCellSizeMeters
-        }
-        renderSeparationMinMeters={
-          pedestrianPerformance.pedestrianRenderSeparationMinMeters
-        }
-        renderSeparationMaxOffsetMeters={
-          pedestrianPerformance.pedestrianRenderSeparationMaxOffsetMeters
-        }
-        debug={false}
-      />
+      {HOME_DRIVE_WORLD_PEDESTRIANS_ON ? (
+        <HomeDriveThreePedestrians
+          pedestriansRef={pedestriansRef}
+          runtimeRef={runtimeRef}
+          visibleRadiusMeters={pedestrianPerformance.visibleRadiusMeters}
+          maxVisiblePedestrians={pedestrianPerformance.maxVisiblePedestrians}
+          fullDetailRadiusMeters={pedestrianPerformance.fullDetailRadiusMeters}
+          mediumDetailRadiusMeters={pedestrianPerformance.mediumDetailRadiusMeters}
+          snapshotHz={pedestrianPerformance.snapshotHz}
+          enableInstancedRig={pedestrianPerformance.enableInstancedRig}
+          enableBakedAnimation={pedestrianPerformance.enableBakedAnimation}
+          maxFullReactPedestrians={pedestrianPerformance.maxFullReactPedestrians}
+          maxMediumReactPedestrians={pedestrianPerformance.maxMediumReactPedestrians}
+          maxInstancedPedestrians={pedestrianPerformance.maxInstancedPedestrians}
+          instancedAnimationHz={pedestrianPerformance.instancedAnimationHzNear}
+          instancedAnimationUpdateStride={
+            pedestrianPerformance.instancedMatrixUpdateStride
+          }
+          instancedMaxUpdatesPerFrame={
+            pedestrianPerformance.instancedMaxUpdatesPerFrame
+          }
+          enableRenderSeparation={
+            pedestrianPerformance.enablePedestrianRenderSeparation
+          }
+          renderSeparationCellSizeMeters={
+            pedestrianPerformance.pedestrianRenderSeparationCellSizeMeters
+          }
+          renderSeparationMinMeters={
+            pedestrianPerformance.pedestrianRenderSeparationMinMeters
+          }
+          renderSeparationMaxOffsetMeters={
+            pedestrianPerformance.pedestrianRenderSeparationMaxOffsetMeters
+          }
+          debug={false}
+        />
+      ) : null}
 
       <HomeDriveThreeWorldObjects runtimeRef={runtimeRef} />
     </>
@@ -525,6 +667,7 @@ export default function HomeDriveThreeScene({
   inputRef,
   viewport,
   publishRuntimeSnapshot,
+  onDiagnosticsSnapshot,
 }: HomeDriveThreeSceneProps) {
   useEffect(() => {
     if (!import.meta.env.DEV) {
@@ -535,7 +678,7 @@ export default function HomeDriveThreeScene({
   }, []);
 
   const buildings = useMemo(() => {
-    return getHomeDriveBuildings();
+    return HOME_DRIVE_WORLD_BUILDINGS_ON ? getHomeDriveBuildings() : [];
   }, []);
 
   const urbanStreetLights = useMemo(() => {
@@ -551,7 +694,15 @@ export default function HomeDriveThreeScene({
     return getHomeDrivePedestrianPerformanceProfile(viewport.isPortrait);
   }, [viewport.isPortrait]);
 
-  const initialTrafficState = useMemo(() => {
+  const initialTrafficState = useMemo<HomeDriveTrafficRuntimeState>(() => {
+    if (!HOME_DRIVE_WORLD_CARS_ON) {
+      return {
+        vehicles: [],
+        elapsedSeconds: 0,
+        lastCollisionAt: -999,
+      };
+    }
+
     return createInitialHomeDriveTrafficState({
       maxVehicles: viewport.isPortrait
         ? TRAFFIC_MAX_VEHICLES_PORTRAIT
@@ -565,7 +716,14 @@ export default function HomeDriveThreeScene({
 
   const trafficRef = useRef<HomeDriveTrafficRuntimeState>(initialTrafficState);
 
-  const initialParkedVehicleState = useMemo(() => {
+  const initialParkedVehicleState = useMemo<HomeDriveParkedVehicleRuntimeState>(() => {
+    if (!HOME_DRIVE_WORLD_CARS_ON) {
+      return {
+        vehicles: [],
+        seed: 6617,
+      };
+    }
+
     return createInitialHomeDriveParkedVehicleState({
       maxVehicles: viewport.isPortrait
         ? PARKED_MAX_VEHICLES_PORTRAIT
@@ -604,7 +762,17 @@ export default function HomeDriveThreeScene({
     }),
   );
 
-  const initialPedestrianState = useMemo(() => {
+  const initialPedestrianState = useMemo<HomeDrivePedestrianRuntimeState>(() => {
+    if (!HOME_DRIVE_WORLD_PEDESTRIANS_ON) {
+      return createInitialHomeDrivePedestrianState({
+        density: 0,
+        maxRoads: 0,
+        minRoadLengthMeters: Number.POSITIVE_INFINITY,
+        seed: 7429,
+        initialFocusCenter: runtimeRef.current.car.position,
+      });
+    }
+
     const animationBakePrewarm =
       prewarmHomeDriveThreePedestrianAnimationBakeCache();
     const basePedestrians = createInitialHomeDrivePedestrianState({
@@ -632,6 +800,10 @@ export default function HomeDriveThreeScene({
 
   const pedestriansRef = useRef<HomeDrivePedestrianRuntimeState>(
     initialPedestrianState,
+  );
+
+  const runtimeProfilerRef = useRef<HomeDriveRuntimeProfilerState>(
+    createHomeDriveRuntimeProfilerState(),
   );
 
   const dpr = useMemo(() => {
@@ -685,9 +857,11 @@ export default function HomeDriveThreeScene({
             buildings={buildings}
             pedestriansRef={pedestriansRef}
             crosswalksRef={crosswalksRef}
+            runtimeProfilerRef={runtimeProfilerRef}
             pedestrianPerformance={pedestrianPerformance}
             isPortrait={viewport.isPortrait}
             publishRuntimeSnapshot={publishRuntimeSnapshot}
+            onDiagnosticsSnapshot={onDiagnosticsSnapshot}
           />
         </Suspense>
       </Canvas>
@@ -696,3 +870,5 @@ export default function HomeDriveThreeScene({
     </div>
   );
 }
+
+

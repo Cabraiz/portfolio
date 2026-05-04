@@ -2,6 +2,7 @@
 
 import type { HomeDriveVector2 } from "./homeDrive.types";
 import type { HomeDriveCrosswalkRuntimeState } from "./crosswalks";
+import type { HomeDriveTrafficPerformanceProfile } from "./homeDrive.trafficPerformance";
 import type { HomeDriveTrafficDirectionSign } from "./homeDrive.trafficLanes";
 import type { HomeDriveVehicleModelKey } from "./vehicles";
 
@@ -226,6 +227,15 @@ export type HomeDriveTrafficGenerationOptions = Readonly<{
 export type HomeDriveTrafficTickOptions = Readonly<{
   enabled?: boolean;
   crosswalks?: HomeDriveCrosswalkRuntimeState;
+
+  /**
+   * Centro ativo do pool de tráfego. Normalmente é a posição do carro do player.
+   * Quando informado, o runtime passa a atualizar IA completa apenas no volume útil.
+   */
+  activeCenter?: HomeDriveVector2;
+  activeHeadingRad?: number;
+  activeSpeedMps?: number;
+  performance?: HomeDriveTrafficPerformanceProfile;
 }>;
 
 export type HomeDriveTrafficCollisionEvent = Readonly<{

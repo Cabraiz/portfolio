@@ -9,6 +9,23 @@ import {
 } from "./homeDrive.trafficAwareness";
 import type { HomeDriveTrafficAwarenessDecision } from "./homeDrive.trafficAwareness.types";
 import {
+  getHomeDriveTrafficPerformanceProfile,
+  getHomeDriveTrafficSpatialRelation,
+  getHomeDriveTrafficSimulationPriority,
+  shouldKinematicTickHomeDriveTrafficVehicle,
+  shouldRecycleHomeDriveTrafficVehicle,
+  shouldSimulateHomeDriveTrafficVehicle,
+  type HomeDriveTrafficPerformanceProfile,
+} from "./homeDrive.trafficPerformance";
+import {
+  getHomeDriveTrafficDesiredCenterGapMeters,
+  getHomeDriveTrafficForwardProgress,
+  getHomeDriveTrafficLaneOccupancyKey,
+  isHomeDriveTrafficVehicleProtectedFromRecycle,
+  shouldHomeDriveTrafficVehicleReceiveStuckRescue,
+} from "./homeDrive.trafficCongestion";
+import { repairHomeDriveTrafficIntersectionAccumulation } from "./homeDrive.trafficIntersectionFlow";
+import {
   buildHomeDriveRoadTopology,
   type HomeDriveRoadTopology,
 } from "./homeDrive.roadTopology";
@@ -101,9 +118,18 @@ const MIN_ROAD_LENGTH_METERS = 0.000001;
 
 const TRAFFIC_CROSSWALK_LOOKAHEAD_METERS = 58;
 const TRAFFIC_CROSSWALK_STOP_DISTANCE_METERS = 9.5;
+const TRAFFIC_CROSSWALK_MAX_FULL_STOP_SECONDS = 3.8;
+const TRAFFIC_CROSSWALK_CREEP_SPEED_FACTOR = 0.18;
 const TRAFFIC_LANE_CHANGE_LATERAL_SPEED_MPS = 3.85;
 const TRAFFIC_LANE_CHANGE_COMPLETE_EPSILON_METERS = 0.09;
 const TRAFFIC_LANE_CHANGE_COMPLETE_COOLDOWN_SECONDS = 1.1;
+
+const TRAFFIC_RECYCLE_PLACEMENT_ATTEMPTS = 18;
+const TRAFFIC_RECYCLE_MIN_WORLD_GAP_METERS = 13.5;
+const TRAFFIC_RECYCLE_TARGET_T_MARGIN = 0.08;
+const TRAFFIC_CONGESTION_T_MARGIN = 0.024;
+const TRAFFIC_CONGESTION_STUCK_SPEED_RECOVERY_RATIO = 0.72;
+const TRAFFIC_CONGESTION_STUCK_RECOVERY_MIN_MPS = 3.2;
 
 type CrosswalkYieldResolution = Readonly<{
   speedFactor: number;
@@ -136,6 +162,7 @@ let cachedTrafficRoadSegments: readonly HomeDriveGeneratedRoadSegment[] | null =
   null;
 
 let cachedTrafficRoadTopology: HomeDriveRoadTopology | null = null;
+let cachedTrafficRoadBySegmentId: ReadonlyMap<string, HomeDriveGeneratedRoadSegment> | null = null;
 
 function getRoadTags(road: HomeDriveGeneratedRoadSegment): readonly string[] {
   const roadWithTags = road as HomeDriveGeneratedRoadSegment & {
@@ -866,11 +893,660 @@ function createTrafficVehicle(
   };
 }
 
+function getRoadBySegmentIdMap(
+  roads: readonly HomeDriveGeneratedRoadSegment[],
+): ReadonlyMap<string, HomeDriveGeneratedRoadSegment> {
+  if (cachedTrafficRoadBySegmentId) {
+    return cachedTrafficRoadBySegmentId;
+  }
+
+  cachedTrafficRoadBySegmentId = new Map(roads.map((road) => [road.id, road]));
+
+  return cachedTrafficRoadBySegmentId;
+}
+
 function getRoadBySegmentId(
   roads: readonly HomeDriveGeneratedRoadSegment[],
   segmentId: string,
 ): HomeDriveGeneratedRoadSegment | undefined {
-  return roads.find((road) => road.id === segmentId);
+  return getRoadBySegmentIdMap(roads).get(segmentId);
+}
+
+type TrafficRuntimePerformanceContext = Readonly<{
+  activeCenter: HomeDriveVector2;
+  activeHeadingRad: number;
+  activeSpeedMps: number;
+  profile: HomeDriveTrafficPerformanceProfile;
+}>;
+
+function hasTrafficPerformanceContext(
+  options: HomeDriveTrafficTickOptions,
+): options is HomeDriveTrafficTickOptions & { activeCenter: HomeDriveVector2 } {
+  return Boolean(options.activeCenter);
+}
+
+function createTrafficRuntimePerformanceContext(
+  options: HomeDriveTrafficTickOptions,
+): TrafficRuntimePerformanceContext | null {
+  if (!hasTrafficPerformanceContext(options)) {
+    return null;
+  }
+
+  return {
+    activeCenter: options.activeCenter,
+    activeHeadingRad: Number.isFinite(options.activeHeadingRad)
+      ? Number(options.activeHeadingRad)
+      : 0,
+    activeSpeedMps: Number.isFinite(options.activeSpeedMps)
+      ? Number(options.activeSpeedMps)
+      : 0,
+    profile: options.performance ?? getHomeDriveTrafficPerformanceProfile(true),
+  };
+}
+
+function getTrafficRoadProjection(
+  road: HomeDriveGeneratedRoadSegment,
+  point: HomeDriveVector2,
+): Readonly<{ t: number; distanceMeters: number }> {
+  const dx = point.x - road.from.x;
+  const dz = point.z - road.from.z;
+  const projectedMeters = dx * road.direction.x + dz * road.direction.z;
+  const t = clamp(projectedMeters / Math.max(MIN_ROAD_LENGTH_METERS, road.length), 0.06, 0.94);
+  const projectedX = road.from.x + road.direction.x * road.length * t;
+  const projectedZ = road.from.z + road.direction.z * road.length * t;
+
+  return {
+    t,
+    distanceMeters: Math.hypot(point.x - projectedX, point.z - projectedZ),
+  };
+}
+
+function getTrafficRecycleTargetPoint(
+  vehicle: HomeDriveTrafficVehicle,
+  trafficElapsedSeconds: number,
+  context: TrafficRuntimePerformanceContext,
+  attemptIndex = 0,
+): HomeDriveVector2 {
+  const forwardX = Math.sin(context.activeHeadingRad);
+  const forwardZ = Math.cos(context.activeHeadingRad);
+  const rightX = Math.cos(context.activeHeadingRad);
+  const rightZ = -Math.sin(context.activeHeadingRad);
+  const serial = Math.floor(trafficElapsedSeconds * 3) + attemptIndex * 17;
+  const attemptSeed = vehicle.routeSeed + attemptIndex * 101.37;
+  const forwardSeed = hashVector(attemptSeed, serial, 811);
+  const sideSeed = hashVector(attemptSeed, serial, 823);
+  const speedBoost = clamp(Math.abs(context.activeSpeedMps) * 4.5, 0, 140);
+  const forwardMeters = lerp(
+    context.profile.recycleForwardMinMeters,
+    context.profile.recycleForwardMaxMeters + speedBoost,
+    smoothstep01(forwardSeed),
+  );
+  const sideMeters =
+    (sideSeed - 0.5) * 2 * context.profile.recycleSideMaxMeters;
+
+  return {
+    x: context.activeCenter.x + forwardX * forwardMeters + rightX * sideMeters,
+    z: context.activeCenter.z + forwardZ * forwardMeters + rightZ * sideMeters,
+  };
+}
+
+function findRecycleRoadForVehicle(
+  vehicle: HomeDriveTrafficVehicle,
+  roads: readonly HomeDriveGeneratedRoadSegment[],
+  trafficElapsedSeconds: number,
+  context: TrafficRuntimePerformanceContext,
+  attemptIndex = 0,
+): Readonly<{ road: HomeDriveGeneratedRoadSegment; t: number }> | null {
+  const targetPoint = getTrafficRecycleTargetPoint(
+    vehicle,
+    trafficElapsedSeconds,
+    context,
+    attemptIndex,
+  );
+  let best: Readonly<{ road: HomeDriveGeneratedRoadSegment; t: number; score: number }> | null = null;
+
+  for (const road of roads) {
+    if (road.length < DEFAULT_MIN_ROAD_LENGTH_METERS) {
+      continue;
+    }
+
+    const projected = getTrafficRoadProjection(road, targetPoint);
+
+    if (projected.distanceMeters > context.profile.recycleSideMaxMeters * 0.85) {
+      continue;
+    }
+
+    const relation = getHomeDriveTrafficSpatialRelation(
+      { x: road.center.x, z: road.center.z },
+      context.activeCenter,
+      context.activeHeadingRad,
+    );
+
+    if (relation.forwardMeters < context.profile.recycleForwardMinMeters * 0.42) {
+      continue;
+    }
+
+    const roadSeed = hashVector(
+      vehicle.routeSeed + attemptIndex * 83,
+      road.segmentIndex,
+      trafficElapsedSeconds,
+    );
+    const score =
+      projected.distanceMeters -
+      relation.forwardMeters * 0.035 +
+      roadSeed * 34 +
+      attemptIndex * 0.35;
+
+    if (!best || score < best.score) {
+      best = {
+        road,
+        t: projected.t,
+        score,
+      };
+    }
+  }
+
+  if (best) {
+    return { road: best.road, t: best.t };
+  }
+
+  return null;
+}
+
+function getRecyclePlacementLane(
+  vehicle: HomeDriveTrafficVehicle,
+  road: HomeDriveGeneratedRoadSegment,
+  attemptIndex: number,
+): Readonly<{
+  directionSign: HomeDriveTrafficDirectionSign;
+  laneIndex: number;
+  laneOffsetMeters: number;
+}> {
+  const roadSeed = getStableRoadSeed(road) + vehicle.routeSeed + attemptIndex * 97;
+  const slotSeed = Math.floor(
+    hashVector(vehicle.routeSeed + attemptIndex * 31, road.segmentIndex, 857) * 4096,
+  );
+  const directionSign = getInitialDirectionSign(road, roadSeed, slotSeed);
+  const laneIndex = getInitialLaneIndex(road, directionSign, roadSeed, slotSeed);
+  const lane = resolveHomeDriveTrafficLane(road, directionSign, laneIndex);
+
+  return {
+    directionSign: lane.directionSign,
+    laneIndex: lane.laneIndex,
+    laneOffsetMeters: lane.laneOffsetMeters,
+  };
+}
+
+function getRecyclePlacementT(
+  vehicle: HomeDriveTrafficVehicle,
+  road: HomeDriveGeneratedRoadSegment,
+  baseT: number,
+  attemptIndex: number,
+): number {
+  const jitter =
+    (hashVector(vehicle.routeSeed + attemptIndex * 43, road.segmentIndex, 863) - 0.5) *
+    (0.1 + Math.min(0.1, attemptIndex * 0.012));
+
+  return clamp(
+    baseT + jitter,
+    TRAFFIC_RECYCLE_TARGET_T_MARGIN,
+    1 - TRAFFIC_RECYCLE_TARGET_T_MARGIN,
+  );
+}
+
+function hasTrafficRecycleHoldZoneConflict(
+  candidate: HomeDriveTrafficVehicle,
+  road: HomeDriveGeneratedRoadSegment | undefined,
+  crosswalks: HomeDriveCrosswalkRuntimeState | undefined,
+): boolean {
+  if (!road || road.length <= MIN_ROAD_LENGTH_METERS) {
+    return true;
+  }
+
+  /*
+    Reciclagem não pode cair em boca de cruzamento. O bug visual vinha daqui:
+    carro frio era reaproveitado em stop-line/semáforo, parava, virava líder
+    imóvel e a próxima leva empilhava atrás dele.
+  */
+  if (candidate.t <= 0.14 || candidate.t >= 0.86) {
+    return true;
+  }
+
+  if (!crosswalks) {
+    return false;
+  }
+
+  for (const crosswalk of crosswalks.crosswalks) {
+    if (crosswalk.segmentId !== candidate.segmentId) {
+      continue;
+    }
+
+    if (!crosswalk.hasYieldControl && crosswalk.signalPhase === "off") {
+      continue;
+    }
+
+    const distanceMeters = Math.abs(crosswalk.t - candidate.t) * road.length;
+
+    if (distanceMeters <= 46) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+function hasTrafficRecyclePlacementConflict(
+  candidate: HomeDriveTrafficVehicle,
+  vehicles: readonly HomeDriveTrafficVehicle[],
+  roadsBySegmentId: ReadonlyMap<string, HomeDriveGeneratedRoadSegment>,
+  context: TrafficRuntimePerformanceContext,
+  crosswalks?: HomeDriveCrosswalkRuntimeState,
+): boolean {
+  const candidateRelation = getHomeDriveTrafficSpatialRelation(
+    candidate.position,
+    context.activeCenter,
+    context.activeHeadingRad,
+  );
+
+  if (candidateRelation.distanceMeters < context.profile.recycleMinPlayerDistanceMeters) {
+    return true;
+  }
+
+  const candidateRoad = roadsBySegmentId.get(candidate.segmentId);
+
+  if (hasTrafficRecycleHoldZoneConflict(candidate, candidateRoad, crosswalks)) {
+    return true;
+  }
+
+  const candidateLaneKey = getHomeDriveTrafficLaneOccupancyKey(candidate);
+  const candidateProgress = getHomeDriveTrafficForwardProgress(candidate);
+
+  for (const other of vehicles) {
+    if (other.id === candidate.id) {
+      continue;
+    }
+
+    const worldGapMeters = Math.hypot(
+      other.position.x - candidate.position.x,
+      other.position.z - candidate.position.z,
+    );
+
+    if (worldGapMeters < TRAFFIC_RECYCLE_MIN_WORLD_GAP_METERS) {
+      return true;
+    }
+
+    if (!candidateRoad || other.segmentId !== candidate.segmentId) {
+      continue;
+    }
+
+    if (getHomeDriveTrafficLaneOccupancyKey(other) !== candidateLaneKey) {
+      continue;
+    }
+
+    const centerGapMeters =
+      Math.abs(getHomeDriveTrafficForwardProgress(other) - candidateProgress) *
+      candidateRoad.length;
+    const desiredCenterGapMeters = getHomeDriveTrafficDesiredCenterGapMeters(
+      candidate,
+      other,
+    );
+
+    if (centerGapMeters < desiredCenterGapMeters) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+function buildRecycledTrafficVehicle(
+  vehicle: HomeDriveTrafficVehicle,
+  road: HomeDriveGeneratedRoadSegment,
+  t: number,
+  attemptIndex: number,
+): HomeDriveTrafficVehicle {
+  const lane = getRecyclePlacementLane(vehicle, road, attemptIndex);
+  const position = getPositionOnTrafficRoad(road, t, lane.laneOffsetMeters);
+  const cruiseSpeedMps = getCruiseSpeedForVehicleOnRoad(vehicle, road);
+  const speedMps = Math.max(
+    MIN_TRAFFIC_CRUISE_SPEED_MPS,
+    Math.min(cruiseSpeedMps, vehicle.speedMps > 0 ? vehicle.speedMps : cruiseSpeedMps),
+  );
+
+  return {
+    ...vehicle,
+    roadId: road.roadId,
+    segmentId: road.id,
+    segmentIndex: road.segmentIndex,
+    previousSegmentId: null,
+    junctionCooldownSeconds: JUNCTION_COOLDOWN_SECONDS,
+    t,
+    directionSign: lane.directionSign,
+    laneIndex: lane.laneIndex,
+    targetLaneIndex: lane.laneIndex,
+    targetLaneOffsetMeters: lane.laneOffsetMeters,
+    laneChangeDirection: 0,
+    laneChangeCooldownSeconds: 0,
+    turnSignal: null,
+    brakeLightIntensity: 0,
+    followingVehicleId: null,
+    laneOffsetMeters: lane.laneOffsetMeters,
+    position,
+    headingRad: getHomeDriveTrafficHeadingRadians(road, lane.directionSign),
+    speedMps,
+    cruiseSpeedMps,
+    speedRecoveryMps2: getRecoveryForVehicleOnRoad(vehicle, road),
+    impactOffset: { x: 0, z: 0 },
+    impactVelocity: { x: 0, z: 0 },
+    visualRollRad: 0,
+    visualPitchRad: 0,
+    visualYawOffsetRad: 0,
+    impactAngularVelocityRadps: 0,
+    yieldingToCrosswalkId: null,
+    yieldTimerSeconds: 0,
+  };
+}
+
+function recycleTrafficVehicleNearPlayer(
+  vehicle: HomeDriveTrafficVehicle,
+  roads: readonly HomeDriveGeneratedRoadSegment[],
+  trafficElapsedSeconds: number,
+  context: TrafficRuntimePerformanceContext,
+  vehicles: readonly HomeDriveTrafficVehicle[],
+  roadsBySegmentId: ReadonlyMap<string, HomeDriveGeneratedRoadSegment>,
+  crosswalks?: HomeDriveCrosswalkRuntimeState,
+): HomeDriveTrafficVehicle {
+  for (let attemptIndex = 0; attemptIndex < TRAFFIC_RECYCLE_PLACEMENT_ATTEMPTS; attemptIndex += 1) {
+    const target = findRecycleRoadForVehicle(
+      vehicle,
+      roads,
+      trafficElapsedSeconds,
+      context,
+      attemptIndex,
+    );
+
+    if (!target) {
+      continue;
+    }
+
+    const t = getRecyclePlacementT(vehicle, target.road, target.t, attemptIndex);
+    const candidate = buildRecycledTrafficVehicle(
+      vehicle,
+      target.road,
+      t,
+      attemptIndex,
+    );
+
+    if (
+      !hasTrafficRecyclePlacementConflict(
+        candidate,
+        vehicles,
+        roadsBySegmentId,
+        context,
+        crosswalks,
+      )
+    ) {
+      return candidate;
+    }
+  }
+
+  return vehicle;
+}
+
+function recycleColdTrafficVehicles(
+  vehicles: readonly HomeDriveTrafficVehicle[],
+  roads: readonly HomeDriveGeneratedRoadSegment[],
+  trafficElapsedSeconds: number,
+  context: TrafficRuntimePerformanceContext | null,
+  crosswalks?: HomeDriveCrosswalkRuntimeState,
+): readonly HomeDriveTrafficVehicle[] {
+  if (!context || !context.profile.runtimeRecyclingEnabled) {
+    return vehicles;
+  }
+
+  const roadsBySegmentId = getRoadBySegmentIdMap(roads);
+  const nextVehicles = vehicles.slice();
+  let teleports = 0;
+  let changed = false;
+
+  for (let index = 0; index < nextVehicles.length; index += 1) {
+    if (teleports >= context.profile.maxTeleportsPerTick) {
+      break;
+    }
+
+    const vehicle = nextVehicles[index];
+
+    if (
+      !shouldRecycleHomeDriveTrafficVehicle(
+        vehicle,
+        context.activeCenter,
+        context.activeHeadingRad,
+        context.activeSpeedMps,
+        trafficElapsedSeconds,
+        context.profile,
+      )
+    ) {
+      continue;
+    }
+
+    const recycled = recycleTrafficVehicleNearPlayer(
+      vehicle,
+      roads,
+      trafficElapsedSeconds,
+      context,
+      nextVehicles,
+      roadsBySegmentId,
+      crosswalks,
+    );
+
+    if (recycled === vehicle) {
+      continue;
+    }
+
+    nextVehicles[index] = recycled;
+    teleports += 1;
+    changed = true;
+  }
+
+  return changed ? nextVehicles : vehicles;
+}
+
+function getActiveTrafficVehicleIndexes(
+  vehicles: readonly HomeDriveTrafficVehicle[],
+  trafficElapsedSeconds: number,
+  context: TrafficRuntimePerformanceContext | null,
+): readonly number[] {
+  if (!context) {
+    return vehicles.map((_, index) => index);
+  }
+
+  if (!context.profile.frameBudgetEnabled) {
+    return vehicles
+      .map((vehicle, index) => ({ vehicle, index }))
+      .filter(({ vehicle }) =>
+        shouldSimulateHomeDriveTrafficVehicle(
+          vehicle,
+          context.activeCenter,
+          context.activeHeadingRad,
+          context.activeSpeedMps,
+          trafficElapsedSeconds,
+          context.profile,
+        ),
+      )
+      .map(({ index }) => index);
+  }
+
+  const forcedIndexes: number[] = [];
+  const candidates: Array<Readonly<{ index: number; priority: number }>> = [];
+
+  vehicles.forEach((vehicle, index) => {
+    if (trafficElapsedSeconds - vehicle.lastCollisionAt <= context.profile.damagedGraceSeconds) {
+      forcedIndexes.push(index);
+      return;
+    }
+
+    const relation = getHomeDriveTrafficSpatialRelation(
+      vehicle.position,
+      context.activeCenter,
+      context.activeHeadingRad,
+    );
+
+    if (relation.distanceMeters <= context.profile.forcedCollisionRadiusMeters) {
+      forcedIndexes.push(index);
+      return;
+    }
+
+    if (
+      !shouldSimulateHomeDriveTrafficVehicle(
+        vehicle,
+        context.activeCenter,
+        context.activeHeadingRad,
+        context.activeSpeedMps,
+        trafficElapsedSeconds,
+        context.profile,
+      )
+    ) {
+      return;
+    }
+
+    candidates.push({
+      index,
+      priority: getHomeDriveTrafficSimulationPriority(
+        vehicle,
+        context.activeCenter,
+        context.activeHeadingRad,
+        context.activeSpeedMps,
+        trafficElapsedSeconds,
+        context.profile,
+      ),
+    });
+  });
+
+  const forcedSet = new Set(forcedIndexes);
+  const remainingBudget = Math.max(
+    0,
+    context.profile.maxFullSimulationVehiclesPerTick - forcedSet.size,
+  );
+
+  const selected = candidates
+    .filter((candidate) => !forcedSet.has(candidate.index))
+    .sort((first, second) => first.priority - second.priority)
+    .slice(0, remainingBudget)
+    .map((candidate) => candidate.index);
+
+  return [...forcedIndexes, ...selected];
+}
+
+function getKinematicTrafficVehicleIndexes(
+  vehicles: readonly HomeDriveTrafficVehicle[],
+  activeIndexes: readonly number[],
+  trafficElapsedSeconds: number,
+  context: TrafficRuntimePerformanceContext | null,
+): readonly number[] {
+  if (!context || !context.profile.frameBudgetEnabled) {
+    return [];
+  }
+
+  const activeSet = new Set(activeIndexes);
+  const modulo = Math.max(1, context.profile.kinematicTickModulo);
+  const tickSerial = Math.floor(trafficElapsedSeconds * 60);
+  const candidates: Array<Readonly<{ index: number; priority: number }>> = [];
+
+  vehicles.forEach((vehicle, index) => {
+    if (activeSet.has(index)) {
+      return;
+    }
+
+    if ((index + tickSerial) % modulo !== 0) {
+      return;
+    }
+
+    if (
+      !shouldKinematicTickHomeDriveTrafficVehicle(
+        vehicle,
+        context.activeCenter,
+        context.activeHeadingRad,
+        context.activeSpeedMps,
+        trafficElapsedSeconds,
+        context.profile,
+      )
+    ) {
+      return;
+    }
+
+    candidates.push({
+      index,
+      priority: getHomeDriveTrafficSimulationPriority(
+        vehicle,
+        context.activeCenter,
+        context.activeHeadingRad,
+        context.activeSpeedMps,
+        trafficElapsedSeconds,
+        context.profile,
+      ),
+    });
+  });
+
+  return candidates
+    .sort((first, second) => first.priority - second.priority)
+    .slice(0, context.profile.maxKinematicVehiclesPerTick)
+    .map((candidate) => candidate.index);
+}
+
+function getAwarenessTrafficVehicleIndexes(
+  vehicles: readonly HomeDriveTrafficVehicle[],
+  activeIndexes: readonly number[],
+  kinematicIndexes: readonly number[],
+  trafficElapsedSeconds: number,
+  context: TrafficRuntimePerformanceContext | null,
+): readonly number[] {
+  if (!context || !context.profile.frameBudgetEnabled) {
+    return vehicles.map((_, index) => index);
+  }
+
+  const selectedIndexes = new Set<number>();
+
+  activeIndexes.forEach((index) => selectedIndexes.add(index));
+  kinematicIndexes.forEach((index) => selectedIndexes.add(index));
+
+  vehicles.forEach((vehicle, index) => {
+    if (selectedIndexes.has(index)) {
+      return;
+    }
+
+    const relation = getHomeDriveTrafficSpatialRelation(
+      vehicle.position,
+      context.activeCenter,
+      context.activeHeadingRad,
+    );
+
+    const recentlyDamaged =
+      trafficElapsedSeconds - vehicle.lastCollisionAt <= context.profile.damagedGraceSeconds;
+    const hardNear = relation.distanceMeters <= context.profile.activeRadiusMeters * 1.35;
+    const visibleStopper =
+      relation.distanceMeters <= context.profile.renderCoreRadiusMeters &&
+      (vehicle.speedMps <= 2.4 ||
+        Boolean(vehicle.yieldingToCrosswalkId) ||
+        Boolean(vehicle.followingVehicleId) ||
+        vehicle.brakeLightIntensity > 0.45);
+
+    if (recentlyDamaged || hardNear || visibleStopper) {
+      selectedIndexes.add(index);
+    }
+  });
+
+  return [...selectedIndexes];
+}
+
+function createActiveTrafficState(
+  traffic: HomeDriveTrafficRuntimeState,
+  vehicles: readonly HomeDriveTrafficVehicle[],
+  indexes: readonly number[],
+): HomeDriveTrafficRuntimeState {
+  return {
+    ...traffic,
+    vehicles: indexes.map((index) => vehicles[index]),
+  };
 }
 
 function decayVector(
@@ -1020,7 +1696,10 @@ function resolveCrosswalkYieldForVehicle(
 
   if (bestDistanceMeters <= TRAFFIC_CROSSWALK_STOP_DISTANCE_METERS) {
     return {
-      speedFactor: 0,
+      speedFactor:
+        vehicle.yieldTimerSeconds >= TRAFFIC_CROSSWALK_MAX_FULL_STOP_SECONDS
+          ? TRAFFIC_CROSSWALK_CREEP_SPEED_FACTOR
+          : 0,
       crosswalkId: bestCrosswalkId,
     };
   }
@@ -1367,6 +2046,373 @@ function tickTrafficVehicle(
   };
 }
 
+function tickTrafficVehicleKinematic(
+  vehicle: HomeDriveTrafficVehicle,
+  road: HomeDriveGeneratedRoadSegment,
+  roads: readonly HomeDriveGeneratedRoadSegment[],
+  topology: HomeDriveRoadTopology,
+  deltaSeconds: number,
+): HomeDriveTrafficVehicle {
+  if (road.length <= MIN_ROAD_LENGTH_METERS) {
+    return vehicle;
+  }
+
+  const cruiseSpeedMps = getSafeVehicleCruiseSpeedMps(vehicle, road);
+  const recoveryMps2 = getSafeVehicleSpeedRecoveryMps2(vehicle);
+  const nextSpeedMps = moveTowards(
+    Math.max(0, Number.isFinite(vehicle.speedMps) ? vehicle.speedMps : cruiseSpeedMps),
+    cruiseSpeedMps,
+    Math.max(0, recoveryMps2 * deltaSeconds),
+  );
+  const rawNextT = getNextVehicleT(vehicle, road, deltaSeconds, nextSpeedMps);
+
+  const roadStep = resolveHomeDriveTrafficRoadStep({
+    roads,
+    topology,
+    vehicle,
+    currentRoad: road,
+    nextT: rawNextT,
+    routeSeed: vehicle.routeSeed,
+  });
+
+  const routedToNewSegment = roadStep.segmentId !== vehicle.segmentId;
+  const laneOffsetMeters = routedToNewSegment
+    ? roadStep.laneOffsetMeters
+    : moveTowards(
+        getNumberOrFallback(vehicle.laneOffsetMeters, roadStep.laneOffsetMeters),
+        getNumberOrFallback(vehicle.targetLaneOffsetMeters, roadStep.laneOffsetMeters),
+        TRAFFIC_LANE_CHANGE_LATERAL_SPEED_MPS * 0.55 * deltaSeconds,
+      );
+  const basePosition = getPositionOnTrafficRoad(
+    roadStep.road,
+    roadStep.t,
+    laneOffsetMeters,
+  );
+
+  const decayedImpactVelocity = decayVector(
+    vehicle.impactVelocity,
+    IMPACT_VELOCITY_DECAY_PER_SECOND,
+    deltaSeconds,
+  );
+  const nextImpactOffset = decayVector(
+    {
+      x: vehicle.impactOffset.x + decayedImpactVelocity.x * deltaSeconds,
+      z: vehicle.impactOffset.z + decayedImpactVelocity.z * deltaSeconds,
+    },
+    IMPACT_OFFSET_DECAY_PER_SECOND,
+    deltaSeconds,
+  );
+
+  return {
+    ...vehicle,
+    roadId: roadStep.roadId,
+    segmentId: roadStep.segmentId,
+    segmentIndex: roadStep.segmentIndex,
+    previousSegmentId: roadStep.previousSegmentId,
+    junctionCooldownSeconds: routedToNewSegment
+      ? JUNCTION_COOLDOWN_SECONDS
+      : Math.max(0, vehicle.junctionCooldownSeconds - deltaSeconds),
+    t: clamp01(roadStep.t),
+    directionSign: roadStep.directionSign,
+    laneIndex: routedToNewSegment ? roadStep.laneIndex : vehicle.laneIndex,
+    targetLaneIndex: routedToNewSegment ? roadStep.laneIndex : vehicle.targetLaneIndex,
+    targetLaneOffsetMeters: routedToNewSegment
+      ? roadStep.laneOffsetMeters
+      : vehicle.targetLaneOffsetMeters,
+    laneChangeDirection: routedToNewSegment ? 0 : vehicle.laneChangeDirection,
+    laneChangeCooldownSeconds: Math.max(0, vehicle.laneChangeCooldownSeconds - deltaSeconds),
+    turnSignal: routedToNewSegment ? null : vehicle.turnSignal,
+    brakeLightIntensity: Math.max(0, vehicle.brakeLightIntensity - deltaSeconds * 2.8),
+    followingVehicleId: null,
+    laneOffsetMeters,
+    position: {
+      x: basePosition.x + nextImpactOffset.x,
+      z: basePosition.z + nextImpactOffset.z,
+    },
+    headingRad: getHomeDriveTrafficHeadingRadians(
+      roadStep.road,
+      roadStep.directionSign,
+    ),
+    speedMps: nextSpeedMps,
+    cruiseSpeedMps: routedToNewSegment
+      ? getCruiseSpeedForVehicleOnRoad(vehicle, roadStep.road)
+      : cruiseSpeedMps,
+    speedRecoveryMps2: routedToNewSegment
+      ? getRecoveryForVehicleOnRoad(vehicle, roadStep.road)
+      : recoveryMps2,
+    impactOffset: nextImpactOffset,
+    impactVelocity: decayedImpactVelocity,
+    visualRollRad: decayScalar(
+      vehicle.visualRollRad,
+      IMPACT_ROTATION_DECAY_PER_SECOND,
+      deltaSeconds,
+    ),
+    visualPitchRad: decayScalar(
+      vehicle.visualPitchRad,
+      IMPACT_ROTATION_DECAY_PER_SECOND,
+      deltaSeconds,
+    ),
+    visualYawOffsetRad: decayScalar(
+      vehicle.visualYawOffsetRad,
+      IMPACT_ROTATION_DECAY_PER_SECOND,
+      deltaSeconds,
+    ),
+    impactAngularVelocityRadps: decayScalar(
+      vehicle.impactAngularVelocityRadps,
+      IMPACT_ANGULAR_DECAY_PER_SECOND,
+      deltaSeconds,
+    ),
+    yieldingToCrosswalkId: null,
+    yieldTimerSeconds: Math.max(0, vehicle.yieldTimerSeconds - deltaSeconds * 2),
+  };
+}
+
+function getTrafficVehicleWithProgress(
+  vehicle: HomeDriveTrafficVehicle,
+  road: HomeDriveGeneratedRoadSegment,
+  forwardProgress: number,
+  minimumSpeedMps: number,
+): HomeDriveTrafficVehicle {
+  const safeForwardProgress = clamp(
+    forwardProgress,
+    TRAFFIC_CONGESTION_T_MARGIN,
+    1 - TRAFFIC_CONGESTION_T_MARGIN,
+  );
+  const t = vehicle.directionSign === 1
+    ? safeForwardProgress
+    : 1 - safeForwardProgress;
+  const lane = resolveHomeDriveTrafficLane(
+    road,
+    vehicle.directionSign,
+    vehicle.laneIndex,
+  );
+  const position = getPositionOnTrafficRoad(road, t, lane.laneOffsetMeters);
+  const rescuedSpeedMps = Math.max(
+    vehicle.speedMps,
+    Math.min(
+      vehicle.cruiseSpeedMps,
+      Math.max(minimumSpeedMps, vehicle.cruiseSpeedMps * 0.42),
+    ),
+  );
+
+  return {
+    ...vehicle,
+    t,
+    laneIndex: lane.laneIndex,
+    targetLaneIndex: lane.laneIndex,
+    targetLaneOffsetMeters: lane.laneOffsetMeters,
+    laneOffsetMeters: lane.laneOffsetMeters,
+    laneChangeDirection: 0,
+    laneChangeCooldownSeconds: Math.max(vehicle.laneChangeCooldownSeconds, 0.16),
+    turnSignal: null,
+    brakeLightIntensity: Math.max(0.18, vehicle.brakeLightIntensity * 0.55),
+    followingVehicleId: null,
+    position: {
+      x: position.x + vehicle.impactOffset.x,
+      z: position.z + vehicle.impactOffset.z,
+    },
+    headingRad: getHomeDriveTrafficHeadingRadians(road, lane.directionSign),
+    speedMps: rescuedSpeedMps,
+    yieldingToCrosswalkId: null,
+    yieldTimerSeconds: Math.max(0, vehicle.yieldTimerSeconds - 1.2),
+  };
+}
+
+function getTrafficVehicleWithStuckRescue(
+  vehicle: HomeDriveTrafficVehicle,
+  minimumSpeedMps: number,
+): HomeDriveTrafficVehicle {
+  const rescueSpeedMps = Math.min(
+    vehicle.cruiseSpeedMps,
+    Math.max(
+      minimumSpeedMps,
+      vehicle.cruiseSpeedMps * TRAFFIC_CONGESTION_STUCK_SPEED_RECOVERY_RATIO,
+    ),
+  );
+
+  if (vehicle.speedMps >= rescueSpeedMps) {
+    return vehicle;
+  }
+
+  return {
+    ...vehicle,
+    speedMps: rescueSpeedMps,
+    brakeLightIntensity: Math.min(vehicle.brakeLightIntensity, 0.2),
+    followingVehicleId: null,
+    yieldingToCrosswalkId: null,
+    yieldTimerSeconds: 0,
+  };
+}
+
+function repairTrafficCongestionAfterBudgetTick(
+  vehicles: readonly HomeDriveTrafficVehicle[],
+  roads: readonly HomeDriveGeneratedRoadSegment[],
+  trafficElapsedSeconds: number,
+  context: TrafficRuntimePerformanceContext | null,
+  crosswalks?: HomeDriveCrosswalkRuntimeState,
+): readonly HomeDriveTrafficVehicle[] {
+  if (!context || !context.profile.congestionGuardEnabled) {
+    return vehicles;
+  }
+
+  const roadsBySegmentId = getRoadBySegmentIdMap(roads);
+  const nextVehicles = vehicles.slice();
+  const buckets = new Map<string, Array<{ index: number; progress: number }>>();
+
+  nextVehicles.forEach((vehicle, index) => {
+    const road = roadsBySegmentId.get(vehicle.segmentId);
+
+    if (!road || road.length <= MIN_ROAD_LENGTH_METERS) {
+      return;
+    }
+
+    const key = getHomeDriveTrafficLaneOccupancyKey(vehicle);
+    const item = {
+      index,
+      progress: getHomeDriveTrafficForwardProgress(vehicle),
+    };
+    const bucket = buckets.get(key);
+
+    if (bucket) {
+      bucket.push(item);
+    } else {
+      buckets.set(key, [item]);
+    }
+  });
+
+  let repairedVehicles = 0;
+  let recycledVehicles = 0;
+  let changed = false;
+
+  for (const bucket of buckets.values()) {
+    if (bucket.length <= 1) {
+      continue;
+    }
+
+    bucket.sort((first, second) => first.progress - second.progress);
+
+    for (let itemIndex = bucket.length - 2; itemIndex >= 0; itemIndex -= 1) {
+      if (
+        repairedVehicles >= context.profile.congestionRepairMaxVehiclesPerTick &&
+        recycledVehicles >= context.profile.congestionRecycleMaxVehiclesPerTick
+      ) {
+        break;
+      }
+
+      const followerItem = bucket[itemIndex];
+      const leaderItem = bucket[itemIndex + 1];
+      const follower = nextVehicles[followerItem.index];
+      const leader = nextVehicles[leaderItem.index];
+      const road = roadsBySegmentId.get(follower.segmentId);
+
+      if (!road || road.length <= MIN_ROAD_LENGTH_METERS) {
+        continue;
+      }
+
+      const currentGapMeters = Math.max(
+        0,
+        (leaderItem.progress - followerItem.progress) * road.length,
+      );
+      const desiredGapMeters = getHomeDriveTrafficDesiredCenterGapMeters(
+        follower,
+        leader,
+      );
+
+      if (currentGapMeters >= desiredGapMeters) {
+        continue;
+      }
+
+      const canRecycleFollower =
+        recycledVehicles < context.profile.congestionRecycleMaxVehiclesPerTick &&
+        currentGapMeters <= desiredGapMeters * context.profile.congestionHardGapRatio &&
+        !isHomeDriveTrafficVehicleProtectedFromRecycle(
+          follower,
+          context.activeCenter,
+          context.activeHeadingRad,
+          trafficElapsedSeconds,
+          context.profile,
+        );
+
+      if (canRecycleFollower) {
+        const recycled = recycleTrafficVehicleNearPlayer(
+          follower,
+          roads,
+          trafficElapsedSeconds,
+          context,
+          nextVehicles,
+          roadsBySegmentId,
+          crosswalks,
+        );
+
+        if (recycled !== follower) {
+          nextVehicles[followerItem.index] = recycled;
+          recycledVehicles += 1;
+          changed = true;
+          continue;
+        }
+      }
+
+      if (repairedVehicles >= context.profile.congestionRepairMaxVehiclesPerTick) {
+        continue;
+      }
+
+      const repairedProgress =
+        leaderItem.progress - desiredGapMeters / Math.max(MIN_ROAD_LENGTH_METERS, road.length);
+
+      if (repairedProgress <= TRAFFIC_CONGESTION_T_MARGIN) {
+        continue;
+      }
+
+      const repaired = getTrafficVehicleWithProgress(
+        follower,
+        road,
+        repairedProgress,
+        context.profile.stuckRescueMinSpeedMps,
+      );
+
+      nextVehicles[followerItem.index] = repaired;
+      bucket[itemIndex] = {
+        ...followerItem,
+        progress: getHomeDriveTrafficForwardProgress(repaired),
+      };
+      repairedVehicles += 1;
+      changed = true;
+    }
+  }
+
+  for (let index = 0; index < nextVehicles.length; index += 1) {
+    if (repairedVehicles >= context.profile.congestionRepairMaxVehiclesPerTick) {
+      break;
+    }
+
+    const vehicle = nextVehicles[index];
+
+    if (
+      !shouldHomeDriveTrafficVehicleReceiveStuckRescue(
+        vehicle,
+        context.activeCenter,
+        context.activeHeadingRad,
+        trafficElapsedSeconds,
+        context.profile,
+      )
+    ) {
+      continue;
+    }
+
+    nextVehicles[index] = getTrafficVehicleWithStuckRescue(
+      vehicle,
+      Math.max(
+        TRAFFIC_CONGESTION_STUCK_RECOVERY_MIN_MPS,
+        context.profile.stuckRescueMinSpeedMps,
+      ),
+    );
+    repairedVehicles += 1;
+    changed = true;
+  }
+
+  return changed ? nextVehicles : vehicles;
+}
+
 function createTrafficVehicleCandidate(
   road: HomeDriveGeneratedRoadSegment,
   slotIndex: number,
@@ -1515,29 +2561,145 @@ export function tickHomeDriveTraffic(
 
   const roads = getTrafficRoadSegments();
   const topology = getTrafficRoadTopology(roads);
+  const roadsBySegmentId = getRoadBySegmentIdMap(roads);
+  const context = createTrafficRuntimePerformanceContext(options);
+  const nextElapsedSeconds = traffic.elapsedSeconds + deltaSeconds;
 
-  const awareness = createHomeDriveTrafficAwarenessSnapshot(traffic, roads);
-  const movedVehicles = traffic.vehicles.map((vehicle) => {
-    const road = getRoadBySegmentId(roads, vehicle.segmentId);
+  const pooledVehicles = recycleColdTrafficVehicles(
+    traffic.vehicles,
+    roads,
+    nextElapsedSeconds,
+    context,
+    options.crosswalks,
+  );
+  const activeIndexes = getActiveTrafficVehicleIndexes(
+    pooledVehicles,
+    nextElapsedSeconds,
+    context,
+  );
+  const kinematicIndexes = getKinematicTrafficVehicleIndexes(
+    pooledVehicles,
+    activeIndexes,
+    nextElapsedSeconds,
+    context,
+  );
+
+  if (activeIndexes.length <= 0 && kinematicIndexes.length <= 0) {
+    const repairedVehicles = repairTrafficCongestionAfterBudgetTick(
+      pooledVehicles,
+      roads,
+      nextElapsedSeconds,
+      context,
+      options.crosswalks,
+    );
+    const flowRepairedVehicles = repairHomeDriveTrafficIntersectionAccumulation({
+      vehicles: repairedVehicles,
+      roads,
+      roadsBySegmentId,
+      topology,
+      options: {
+        elapsedSeconds: nextElapsedSeconds,
+        activeCenter: context?.activeCenter,
+        activeHeadingRad: context?.activeHeadingRad,
+        crosswalks: options.crosswalks,
+        enabled: context?.profile.congestionGuardEnabled ?? true,
+        maxRepairsPerTick: context?.profile.congestionRepairMaxVehiclesPerTick,
+      },
+    });
+
+    return {
+      ...traffic,
+      elapsedSeconds: nextElapsedSeconds,
+      vehicles: flowRepairedVehicles,
+    };
+  }
+
+  const movedVehicles = pooledVehicles.slice();
+
+  if (activeIndexes.length > 0) {
+    const awarenessIndexes = getAwarenessTrafficVehicleIndexes(
+      pooledVehicles,
+      activeIndexes,
+      kinematicIndexes,
+      nextElapsedSeconds,
+      context,
+    );
+    const awarenessTraffic = createActiveTrafficState(
+      traffic,
+      pooledVehicles,
+      awarenessIndexes,
+    );
+    const awareness = createHomeDriveTrafficAwarenessSnapshot(awarenessTraffic, roads);
+    const movedActiveVehicles = activeIndexes.map((vehicleIndex) => {
+      const vehicle = pooledVehicles[vehicleIndex];
+      const road = roadsBySegmentId.get(vehicle.segmentId);
+
+      if (!road) {
+        return vehicle;
+      }
+
+      return tickTrafficVehicle(
+        vehicle,
+        road,
+        roads,
+        topology,
+        deltaSeconds,
+        options.crosswalks,
+        awareness.decisionsByVehicleId.get(vehicle.id),
+      );
+    });
+    const stabilizedActiveVehicles = stabilizeHomeDriveTrafficLaneSeparation(
+      movedActiveVehicles,
+      roads,
+    );
+
+    activeIndexes.forEach((vehicleIndex, activeIndex) => {
+      movedVehicles[vehicleIndex] = stabilizedActiveVehicles[activeIndex];
+    });
+  }
+
+  kinematicIndexes.forEach((vehicleIndex) => {
+    const vehicle = movedVehicles[vehicleIndex] ?? pooledVehicles[vehicleIndex];
+    const road = roadsBySegmentId.get(vehicle.segmentId);
 
     if (!road) {
-      return vehicle;
+      return;
     }
 
-    return tickTrafficVehicle(
+    movedVehicles[vehicleIndex] = tickTrafficVehicleKinematic(
       vehicle,
       road,
       roads,
       topology,
-      deltaSeconds,
-      options.crosswalks,
-      awareness.decisionsByVehicleId.get(vehicle.id),
+      deltaSeconds * Math.max(1, context?.profile.kinematicTickModulo ?? 1),
     );
+  });
+
+  const repairedVehicles = repairTrafficCongestionAfterBudgetTick(
+    movedVehicles,
+    roads,
+    nextElapsedSeconds,
+    context,
+    options.crosswalks,
+  );
+  const flowRepairedVehicles = repairHomeDriveTrafficIntersectionAccumulation({
+    vehicles: repairedVehicles,
+    roads,
+    roadsBySegmentId,
+    topology,
+    options: {
+      elapsedSeconds: nextElapsedSeconds,
+      activeCenter: context?.activeCenter,
+      activeHeadingRad: context?.activeHeadingRad,
+      crosswalks: options.crosswalks,
+      enabled: context?.profile.congestionGuardEnabled ?? true,
+      maxRepairsPerTick: context?.profile.congestionRepairMaxVehiclesPerTick,
+    },
   });
 
   return {
     ...traffic,
-    elapsedSeconds: traffic.elapsedSeconds + deltaSeconds,
-    vehicles: stabilizeHomeDriveTrafficLaneSeparation(movedVehicles, roads),
+    elapsedSeconds: nextElapsedSeconds,
+    vehicles: flowRepairedVehicles,
   };
 }

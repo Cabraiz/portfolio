@@ -17,6 +17,8 @@ import {
   tickHomeDriveMissionRuntime,
   type HomeDriveMissionRuntimeState,
 } from "../domain/missions";
+import type { HomeDriveRuntimeDiagnosticsSnapshot } from "../domain/diagnostics";
+import { HOME_DRIVE_RUNTIME_DIAGNOSTICS_OVERLAY_ENABLED } from "../domain/homeDrive.globalDebugFlags";
 import { useHomeDriveRuntimeRefs } from "../hooks/useHomeDriveRuntimeRefs";
 import { useHomeDriveSteeringWheel } from "../hooks/useHomeDriveSteeringWheel";
 import { useHomeDriveViewport } from "../hooks/useHomeDriveViewport";
@@ -26,6 +28,7 @@ import {
   HOME_DRIVE_COCKPIT_ASSETS,
 } from "./cockpit";
 import HomeDriveCompass from "./HomeDriveCompass";
+import HomeDriveDiagnosticsOverlay from "./HomeDriveDiagnosticsOverlay";
 import styles from "./HomeDriveGame.module.css";
 import HomeDriveSpeedometer from "./HomeDriveSpeedometer";
 import HomeDriveSteeringWheel from "./HomeDriveSteeringWheel";
@@ -96,6 +99,22 @@ export default function HomeDriveGame({ onClose }: HomeDriveGameProps) {
         startedAtSeconds: runtimeRef.current.elapsedSeconds,
       }),
     );
+
+  const shouldShowRuntimeDiagnostics =
+    HOME_DRIVE_RUNTIME_DIAGNOSTICS_OVERLAY_ENABLED;
+  const [runtimeDiagnosticsSnapshot, setRuntimeDiagnosticsSnapshot] =
+    useState<HomeDriveRuntimeDiagnosticsSnapshot | null>(null);
+
+  const handleRuntimeDiagnosticsSnapshot = useCallback(
+    (snapshot: HomeDriveRuntimeDiagnosticsSnapshot) => {
+      if (!shouldShowRuntimeDiagnostics) {
+        return;
+      }
+
+      setRuntimeDiagnosticsSnapshot(snapshot);
+    },
+    [shouldShowRuntimeDiagnostics],
+  );
 
   const closeTapRef = useRef<HiddenCloseTapState>({
     count: 0,
@@ -257,7 +276,16 @@ export default function HomeDriveGame({ onClose }: HomeDriveGameProps) {
         inputRef={inputRef}
         viewport={viewport}
         publishRuntimeSnapshot={publishRuntimeSnapshot}
+        onDiagnosticsSnapshot={
+          shouldShowRuntimeDiagnostics
+            ? handleRuntimeDiagnosticsSnapshot
+            : undefined
+        }
       />
+
+      {shouldShowRuntimeDiagnostics ? (
+        <HomeDriveDiagnosticsOverlay snapshot={runtimeDiagnosticsSnapshot} />
+      ) : null}
 
       <div className={styles.cockpitLayer} aria-hidden="true">
         <img
