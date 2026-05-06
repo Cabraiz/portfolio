@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CamCrop</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <main class="shell">
+    <header class="header">
+      <div>
+        <h1>CamCrop</h1>
+        <p>Sem OBS · sem admin · navegador</p>
+      </div>
+      <label class="switch" title="Ativar/desativar transformação">
+        <input id="enabled" type="checkbox" />
+        <span></span>
+      </label>
+    </header>
+
+    <section class="card statusCard">
+      <div class="line"><strong>Status</strong><span id="hookStatus">Verificando...</span></div>
+      <p class="hint">No Teams/Meet ele não aparece como “CamCrop”. Você escolhe uma câmera normal no site e o CamCrop transforma o vídeo por dentro do navegador.</p>
+    </section>
+
+    <section class="card">
+      <button id="unlockCamera" class="primary">Permitir e listar câmeras da aba</button>
+      <label class="field">
+        <span>Câmera de entrada</span>
+        <select id="cameraSelect">
+          <option value="">Usar câmera escolhida no Teams/Meet</option>
+        </select>
+      </label>
+      <p class="hint">A lista agora vem da aba aberta do Teams/Meet, não do popup. Depois de trocar, desligue/ligue a câmera ou recarregue a reunião.</p>
+    </section>
+
+    <section class="card grid2">
+      <label class="field">
+        <span>Rotação</span>
+        <select id="rotate">
+          <option value="0">0°</option>
+          <option value="90">90°</option>
+          <option value="180">180°</option>
+          <option value="270">270°</option>
+        </select>
+      </label>
+
+      <label class="check">
+        <input id="mirror" type="checkbox" />
+        <span>Espelhar</span>
+      </label>
+    </section>
+
+    <section class="card">
+      <div class="cardTitle">Corte</div>
+      <label class="range"><span>Esquerda <b id="cropLeftValue">0%</b></span><input id="cropLeft" type="range" min="0" max="45" value="0" /></label>
+      <label class="range"><span>Direita <b id="cropRightValue">0%</b></span><input id="cropRight" type="range" min="0" max="45" value="0" /></label>
+      <label class="range"><span>Topo <b id="cropTopValue">0%</b></span><input id="cropTop" type="range" min="0" max="45" value="0" /></label>
+      <label class="range"><span>Baixo <b id="cropBottomValue">0%</b></span><input id="cropBottom" type="range" min="0" max="45" value="0" /></label>
+    </section>
+
+    <section class="card">
+      <div class="cardTitle">Mover enquadramento</div>
+      <label class="range"><span>Horizontal <b id="moveXValue">0%</b></span><input id="moveX" type="range" min="-100" max="100" value="0" /></label>
+      <label class="range"><span>Vertical <b id="moveYValue">0%</b></span><input id="moveY" type="range" min="-100" max="100" value="0" /></label>
+      <p class="hint">Dica: primeiro faça um corte leve e depois use mover para reposicionar sem se perder.</p>
+    </section>
+
+    <section class="card grid3">
+      <div class="qualityNote">Padrão v8: 1080p para reduzir pixelização no Teams.</div>
+      <label class="field">
+        <span>Largura</span>
+        <input id="width" type="number" min="320" max="3840" step="160" />
+      </label>
+      <label class="field">
+        <span>Altura</span>
+        <input id="height" type="number" min="240" max="2160" step="90" />
+      </label>
+      <label class="field">
+        <span>FPS</span>
+        <input id="fps" type="number" min="5" max="60" step="5" />
+      </label>
+    </section>
+
+    <footer>
+      <button id="reset" class="ghost">Resetar</button>
+      <span id="status">Pronto</span>
+    </footer>
+  </main>
+  <script src="popup.js"></script>
+</body>
+</html>

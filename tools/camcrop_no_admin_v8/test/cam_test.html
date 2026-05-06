@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CamCrop Teste Local</title>
+  <style>
+    :root { color-scheme: dark; font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    body { margin: 0; min-height: 100vh; background: #0f1115; color: #f4f7fb; display: grid; place-items: center; padding: 24px; }
+    main { width: min(980px, 100%); display: grid; gap: 16px; }
+    .card { background: #171a21; border: 1px solid rgba(255,255,255,.09); border-radius: 18px; padding: 18px; }
+    h1 { margin: 0 0 6px; font-size: 24px; letter-spacing: -.03em; }
+    p { color: #a9b3c5; line-height: 1.55; }
+    video { width: 100%; aspect-ratio: 16 / 9; background: #000; border-radius: 16px; border: 1px solid rgba(255,255,255,.08); object-fit: contain; }
+    button { border: 0; border-radius: 12px; padding: 12px 14px; font-weight: 800; cursor: pointer; background: #f4f7fb; color: #0f1115; }
+    code { background: rgba(255,255,255,.08); padding: 2px 5px; border-radius: 6px; }
+    .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    #status { color: #a9b3c5; }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="card">
+      <h1>Teste Local CamCrop</h1>
+      <p>Com a extensão carregada, este botão chama <code>getUserMedia()</code>. O vídeo abaixo deve receber crop, rotação e espelhamento configurados no popup da extensão.</p>
+      <div class="row">
+        <button id="start">Iniciar câmera</button>
+        <button id="stop">Parar</button>
+        <span id="status">Pronto</span>
+      </div>
+    </section>
+    <video id="preview" autoplay muted playsinline></video>
+  </main>
+  <script>
+    const preview = document.getElementById('preview');
+    const statusEl = document.getElementById('status');
+    let stream = null;
+
+    document.getElementById('start').onclick = async () => {
+      try {
+        if (stream) stream.getTracks().forEach((track) => track.stop());
+        statusEl.textContent = 'Solicitando câmera...';
+        stream = await navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 720 }, audio: false });
+        preview.srcObject = stream;
+        statusEl.textContent = 'Câmera ativa';
+      } catch (error) {
+        console.error(error);
+        statusEl.textContent = 'Erro: ' + error.message;
+      }
+    };
+
+    document.getElementById('stop').onclick = () => {
+      if (stream) stream.getTracks().forEach((track) => track.stop());
+      stream = null;
+      preview.srcObject = null;
+      statusEl.textContent = 'Parado';
+    };
+  </script>
+</body>
+</html>
