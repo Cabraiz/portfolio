@@ -12,7 +12,7 @@ const DEFAULT_CONFIG = {
   width: 1920,
   height: 1080,
   fps: 30,
-  configVersion: 8
+  configVersion: 9
 };
 
 const $ = (id) => document.getElementById(id);
@@ -43,7 +43,6 @@ function clampNumber(value, min, max) {
 
 function normalizeConfig(input) {
   const cfg = { ...DEFAULT_CONFIG, ...(input || {}) };
-  const incomingVersion = Number(input?.configVersion || 0);
   cfg.enabled = Boolean(cfg.enabled);
   cfg.deviceId = typeof cfg.deviceId === "string" ? cfg.deviceId : "";
   cfg.rotate = [0, 90, 180, 270].includes(Number(cfg.rotate)) ? Number(cfg.rotate) : 0;
@@ -57,15 +56,7 @@ function normalizeConfig(input) {
   cfg.width = clampNumber(cfg.width, 320, 3840);
   cfg.height = clampNumber(cfg.height, 240, 2160);
   cfg.fps = clampNumber(cfg.fps, 5, 60);
-  cfg.configVersion = 8;
-
-  // Upgrade older saved settings that were 720p by default.
-  // The old 1280x720 canvas made the 90° letterboxed image too small
-  // and Teams/WebRTC could make it look pixelated for the other person.
-  if (incomingVersion < 8 && cfg.width === 1280 && cfg.height === 720) {
-    cfg.width = 1920;
-    cfg.height = 1080;
-  }
+  cfg.configVersion = 9;
 
   return cfg;
 }
@@ -118,17 +109,34 @@ function readForm() {
     moveY: Number(fields.moveY.value),
     width: Number(fields.width.value),
     height: Number(fields.height.value),
-    fps: Number(fields.fps.value)
+    fps: Number(fields.fps.value),
+    configVersion: DEFAULT_CONFIG.configVersion
+  });
+}
+
+async function applyConfigToActiveTab(cfg) {
+  try {
+    const response = await sendToActiveTab({ type: "CAMCROP_POPUP_CONFIG_UPDATE", config: cfg });
+    return Boolean(response?.ok);
+  } catch (_) {
+    return false;
+  }
+}
+
+function persistAndApplyConfig(statusOnSuccess = "Aplicado em tempo real.") {
+  const cfg = { ...currentConfig, configVersion: DEFAULT_CONFIG.configVersion };
+  chrome.storage.local.set({ camcropConfig: cfg }, async () => {
+    const applied = await applyConfigToActiveTab(cfg);
+    setStatus(applied ? statusOnSuccess : "Salvo. Abra uma aba suportada do Teams/Meet.");
   });
 }
 
 function saveConfigDebounced() {
   currentConfig = readForm();
   renderRangeValues();
+  setStatus("Aplicando...");
   clearTimeout(saveTimer);
-  saveTimer = setTimeout(() => {
-    chrome.storage.local.set({ camcropConfig: currentConfig }, () => setStatus("Salvo. Reative a câmera na reunião."));
-  }, 120);
+  saveTimer = setTimeout(() => persistAndApplyConfig(), 80);
 }
 
 async function getActiveTab() {
@@ -161,7 +169,7 @@ function renderCameraOptions(cameras) {
   const stillExists = Array.from(fields.cameraSelect.options).some((option) => option.value === previousValue);
   fields.cameraSelect.value = stillExists ? previousValue : "";
   currentConfig.deviceId = fields.cameraSelect.value;
-  chrome.storage.local.set({ camcropConfig: currentConfig });
+  persistAndApplyConfig("Câmera salva. Se não trocar ao vivo, desligue/ligue a câmera no Teams.");
 }
 
 async function checkHook() {
@@ -216,13 +224,13 @@ function bindEvents() {
   $("reset").addEventListener("click", () => {
     currentConfig = { ...DEFAULT_CONFIG };
     renderForm();
-    chrome.storage.local.set({ camcropConfig: currentConfig }, () => setStatus("Resetado. Reative a câmera."));
+    persistAndApplyConfig("Resetado e aplicado em tempo real.");
   });
 }
 
 chrome.storage.local.get(["camcropConfig"], async (result) => {
   currentConfig = normalizeConfig(result.camcropConfig);
-  chrome.storage.local.set({ camcropConfig: currentConfig });
+  chrome.storage.local.set({ camcropConfig: { ...currentConfig, configVersion: DEFAULT_CONFIG.configVersion } });
   renderForm();
   bindEvents();
 

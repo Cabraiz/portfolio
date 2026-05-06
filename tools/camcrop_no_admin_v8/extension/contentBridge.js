@@ -13,7 +13,7 @@
     width: 1920,
     height: 1080,
     fps: 30,
-    configVersion: 8
+    configVersion: 9
   };
 
   let currentConfig = { ...DEFAULT_CONFIG };
@@ -27,8 +27,7 @@
 
   function normalizeConfig(input) {
     const cfg = { ...DEFAULT_CONFIG, ...(input || {}) };
-    const incomingVersion = Number(input?.configVersion || 0);
-    cfg.enabled = Boolean(cfg.enabled);
+      cfg.enabled = Boolean(cfg.enabled);
     cfg.deviceId = typeof cfg.deviceId === "string" ? cfg.deviceId : "";
     cfg.rotate = [0, 90, 180, 270].includes(Number(cfg.rotate)) ? Number(cfg.rotate) : 0;
     cfg.mirror = Boolean(cfg.mirror);
@@ -41,15 +40,7 @@
     cfg.width = clampNumber(cfg.width, 320, 3840);
     cfg.height = clampNumber(cfg.height, 240, 2160);
     cfg.fps = clampNumber(cfg.fps, 5, 60);
-    cfg.configVersion = 8;
-
-    // Upgrade older saved settings that were 720p by default.
-    // The old 1280x720 canvas made the 90° letterboxed image too small
-    // and Teams/WebRTC could make it look pixelated for the other person.
-    if (incomingVersion < 8 && cfg.width === 1280 && cfg.height === 720) {
-      cfg.width = 1920;
-      cfg.height = 1080;
-    }
+    cfg.configVersion = 9;
 
     return cfg;
   }
@@ -103,6 +94,14 @@
 
   chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     if (!message || !message.type) return false;
+
+
+    if (message.type === "CAMCROP_POPUP_CONFIG_UPDATE") {
+      currentConfig = normalizeConfig(message.config);
+      postConfig();
+      sendResponse({ ok: true });
+      return false;
+    }
 
     if (message.type === "CAMCROP_POPUP_PING") {
       requestFromPage("CAMCROP_PING", {}, 2500)

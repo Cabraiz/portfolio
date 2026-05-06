@@ -16,7 +16,7 @@
     width: 1920,
     height: 1080,
     fps: 30,
-    configVersion: 8
+    configVersion: 9
   };
 
   let config = { ...DEFAULT_CONFIG };
@@ -30,8 +30,7 @@
 
   function normalizeConfig(input) {
     const cfg = { ...DEFAULT_CONFIG, ...(input || {}) };
-    const incomingVersion = Number(input?.configVersion || 0);
-    cfg.enabled = Boolean(cfg.enabled);
+      cfg.enabled = Boolean(cfg.enabled);
     cfg.deviceId = typeof cfg.deviceId === "string" ? cfg.deviceId : "";
     cfg.rotate = [0, 90, 180, 270].includes(Number(cfg.rotate)) ? Number(cfg.rotate) : 0;
     cfg.mirror = Boolean(cfg.mirror);
@@ -44,15 +43,7 @@
     cfg.width = clampNumber(cfg.width, 320, 3840);
     cfg.height = clampNumber(cfg.height, 240, 2160);
     cfg.fps = clampNumber(cfg.fps, 5, 60);
-    cfg.configVersion = 8;
-
-    // Upgrade older saved settings that were 720p by default.
-    // The old 1280x720 canvas made the 90° letterboxed image too small
-    // and Teams/WebRTC could make it look pixelated for the other person.
-    if (incomingVersion < 8 && cfg.width === 1280 && cfg.height === 720) {
-      cfg.width = 1920;
-      cfg.height = 1080;
-    }
+    cfg.configVersion = 9;
 
     return cfg;
   }
@@ -267,6 +258,30 @@
 
     let stopped = false;
     let rafId = 0;
+    let lastDrawAt = 0;
+    let lastWidth = canvas.width;
+    let lastHeight = canvas.height;
+    let outputVideoTrack = null;
+
+    function applyLiveOutputSize(nextCfg) {
+      const nextWidth = Math.round(nextCfg.width);
+      const nextHeight = Math.round(nextCfg.height);
+      if (nextWidth === lastWidth && nextHeight === lastHeight) return;
+
+      canvas.width = nextWidth;
+      canvas.height = nextHeight;
+      lastWidth = nextWidth;
+      lastHeight = nextHeight;
+
+      if (outputVideoTrack && typeof outputVideoTrack.applyConstraints === "function") {
+        outputVideoTrack.applyConstraints({
+          width: nextWidth,
+          height: nextHeight,
+          frameRate: Math.round(nextCfg.fps)
+        }).catch(() => {});
+      }
+    }
+
     const pipeline = {
       stop() {
         if (stopped) return;
@@ -274,20 +289,35 @@
         if (rafId) cancelAnimationFrame(rafId);
         inputStream.getTracks().forEach((track) => track.stop());
         activePipelines.delete(pipeline);
+      },
+      onConfigChanged(nextCfg) {
+        applyLiveOutputSize(nextCfg);
       }
     };
     activePipelines.add(pipeline);
 
-    const render = () => {
+    const render = (now = performance.now()) => {
       if (stopped) return;
-      drawFrame(ctx, video, canvas, config);
+
+      const liveCfg = normalizeConfig(config);
+      const targetFps = Math.max(5, Math.min(60, Math.round(liveCfg.fps)));
+      const frameInterval = 1000 / targetFps;
+
+      if (!lastDrawAt || now - lastDrawAt >= frameInterval) {
+        applyLiveOutputSize(liveCfg);
+        drawFrame(ctx, video, canvas, liveCfg);
+        lastDrawAt = now;
+      }
+
       rafId = requestAnimationFrame(render);
     };
 
-    const outputStream = canvas.captureStream(Math.round(cfg.fps));
+    // Capture at a high ceiling and throttle drawing ourselves. This allows FPS,
+    // width and height changes to respond without recreating the Teams camera stream.
+    const outputStream = canvas.captureStream(60);
     inputStream.getAudioTracks().forEach((track) => outputStream.addTrack(track));
 
-    const outputVideoTrack = outputStream.getVideoTracks()[0];
+    outputVideoTrack = outputStream.getVideoTracks()[0];
     if (outputVideoTrack) {
       try {
         outputVideoTrack.contentHint = "detail";
@@ -364,7 +394,13 @@
     if (event.source !== window || !event.data) return;
 
     if (event.data.type === "CAMCROP_CONFIG") {
+      const previousConfig = config;
       config = normalizeConfig(event.data.config);
+      activePipelines.forEach((pipeline) => {
+        try {
+          pipeline.onConfigChanged?.(config, previousConfig);
+        } catch (_) {}
+      });
       return;
     }
 

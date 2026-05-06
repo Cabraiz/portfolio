@@ -104,3 +104,11 @@ Se o popup mostrar **aba não suportada**, a extensão não foi injetada naquela
 - A extensão agora solicita a câmera física com qualidade ideal maior, para evitar que o Teams/Meet receba uma fonte já reduzida.
 - A trilha de vídeo gerada pelo canvas usa `contentHint = "detail"` para priorizar nitidez.
 - Configurações antigas em 720p são migradas automaticamente para 1080p.
+
+
+## Novidade da v9
+
+- **Largura e altura agora são preservadas exatamente** quando você salva 1280x720, 1920x1080 ou outro valor válido.
+- Removida a migração forçada que convertia 1280x720 para 1920x1080.
+- Crop, mover, rotação, espelhar, largura e altura agora são enviados para a aba em **tempo real**, sem precisar apertar F5.
+- O canvas redimensiona ao vivo; para troca de câmera física, alguns sites ainda podem exigir desligar/ligar a câmera dentro da reunião.
