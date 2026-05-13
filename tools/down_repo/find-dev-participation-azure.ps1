@@ -1,137 +1,1468 @@
-
 param(
-  [string]$Organization = "",
-  [string]$Project = "",
-  [string]$DestRoot = "$env:USERPROFILE\Documents\GitHub\AzureReposAudit",
-  [string]$TargetsJsonPath = "",
-  [ValidateSet("Contains","Exact")][string]$NameMatchMode = "Contains",
-  [switch]$SkipPrComments,
-  [switch]$ScanReviewersList,
-  [switch]$ScanCommits,
-  [int]$CommitsTop = 500,
-  [int]$PrTop = 1000,
-  [switch]$NoResume,
-  [switch]$ResetState,
-  [switch]$OpenCsv,
-  [int]$ApiTimeoutSeconds = 120
+    [string]$Organization = "",
+    [string]$Project = "",
+
+    [string]$DestRoot = "$env:USERPROFILE\Documents\GitHub\AzureReposAudit",
+    [string]$TargetsJsonPath = "",
+
+    [ValidateSet("Contains", "Exact")]
+    [string]$NameMatchMode = "Contains",
+
+    [switch]$SkipPrComments,
+    [switch]$ScanReviewersList,
+    [switch]$ScanCommits,
+
+    [int]$PrTop = 1000,
+    [int]$CommitsTop = 500,
+
+    [switch]$NoResume,
+    [switch]$ResetState,
+    [switch]$OpenCsv,
+
+    [int]$ApiTimeoutSeconds = 120
 )
-$ErrorActionPreference="Stop"
-function WI($m){Write-Host "[INFO] $m" -ForegroundColor Cyan}
-function WO($m){Write-Host "[OK]   $m" -ForegroundColor Green}
-function WW($m){Write-Host "[WARN] $m" -ForegroundColor Yellow}
-function WE($m){Write-Host "[ERRO] $m" -ForegroundColor Red}
-function GP($o,$n){ if($null -eq $o){return ""}; $p=$o.PSObject.Properties[$n]; if($null -eq $p -or $null -eq $p.Value){return ""}; return [string]$p.Value }
-function HP($o,$n){ if($null -eq $o){return $false}; return $null -ne $o.PSObject.Properties[$n] }
-function N($s){ if([string]::IsNullOrWhiteSpace($s)){return ""}; $x=([string]$s).Trim().ToLowerInvariant(); try{$d=$x.Normalize([Text.NormalizationForm]::FormD); $r=""; foreach($c in $d.ToCharArray()){ if([Globalization.CharUnicodeInfo]::GetUnicodeCategory($c) -ne [Globalization.UnicodeCategory]::NonSpacingMark){$r+=$c}}; return $r.Normalize([Text.NormalizationForm]::FormC)}catch{return $x}}
-function H($s){$sha=[Security.Cryptography.SHA256]::Create(); try{$b=[Text.Encoding]::UTF8.GetBytes([string]$s); return ([BitConverter]::ToString($sha.ComputeHash($b))).Replace('-','').ToLowerInvariant()}finally{$sha.Dispose()}}
-function SH($s){return (H $s).Substring(0,12)}
-function Esc($s){return [Uri]::EscapeDataString([string]$s)}
-function AddQ($u,$n,$v){$sep='?'; if($u.Contains('?')){$sep='&'}; return "$u$sep$(Esc $n)=$(Esc $v)"}
-function HeaderVal($headers,$name){ if($null -eq $headers){return ""}; foreach($k in $headers.Keys){ if(([string]$k).ToLowerInvariant() -eq $name.ToLowerInvariant()){ $v=$headers[$k]; if($null -eq $v){return ""}; if($v -is [array]){return [string]$v[0]}; return [string]$v }}; return "" }
-function AdoGet($url,$headers,$timeout,$op){
-  $out=New-Object System.Collections.ArrayList; $token=""
-  do{
-    $actual=$url; if(-not [string]::IsNullOrWhiteSpace($token)){$actual=AddQ $url "continuationToken" $token}
-    try{
-      $resp=Invoke-WebRequest -Uri $actual -Headers $headers -Method Get -TimeoutSec $timeout -UseBasicParsing
-      $txt=[string]$resp.Content
-      if(-not [string]::IsNullOrWhiteSpace($txt)){
-        $j=$txt|ConvertFrom-Json
-        if(HP $j "value"){ foreach($i in @($j.value)){[void]$out.Add($i)} } else { [void]$out.Add($j) }
-      }
-      $token=HeaderVal $resp.Headers "x-ms-continuationtoken"
-    }catch{ throw "$op falhou: $($_.Exception.Message)" }
-  }while(-not [string]::IsNullOrWhiteSpace($token))
-  return @($out)
+
+$ErrorActionPreference = "Stop"
+
+function Write-Info {
+    param([string]$Message)
+    Write-Host "[INFO] $Message" -ForegroundColor Cyan
 }
-function NewTemplate($path){ @'
+
+function Write-Ok {
+    param([string]$Message)
+    Write-Host "[OK]   $Message" -ForegroundColor Green
+}
+
+function Write-Warn2 {
+    param([string]$Message)
+    Write-Host "[WARN] $Message" -ForegroundColor Yellow
+}
+
+function Write-Bad {
+    param([string]$Message)
+    Write-Host "[ERRO] $Message" -ForegroundColor Red
+}
+
+function Get-PropValue {
+    param(
+        [object]$Obj,
+        [string]$Name
+    )
+
+    if ($null -eq $Obj) {
+        return ""
+    }
+
+    $prop = $Obj.PSObject.Properties[$Name]
+
+    if ($null -eq $prop) {
+        return ""
+    }
+
+    if ($null -eq $prop.Value) {
+        return ""
+    }
+
+    return [string]$prop.Value
+}
+
+function Test-HasProp {
+    param(
+        [object]$Obj,
+        [string]$Name
+    )
+
+    if ($null -eq $Obj) {
+        return $false
+    }
+
+    return ($null -ne $Obj.PSObject.Properties[$Name])
+}
+
+function Get-HashText {
+    param([string]$Text)
+
+    $sha = [System.Security.Cryptography.SHA256]::Create()
+
+    try {
+        $bytes = [System.Text.Encoding]::UTF8.GetBytes($Text)
+        $hashBytes = $sha.ComputeHash($bytes)
+        return ([BitConverter]::ToString($hashBytes)).Replace("-", "").ToLowerInvariant()
+    }
+    finally {
+        $sha.Dispose()
+    }
+}
+
+function Get-ShortHash {
+    param([string]$Text)
+
+    $hash = Get-HashText $Text
+    return $hash.Substring(0, 12)
+}
+
+function Normalize-Text {
+    param([string]$Text)
+
+    if ([string]::IsNullOrWhiteSpace($Text)) {
+        return ""
+    }
+
+    $s = $Text.Trim().ToLowerInvariant()
+
+    try {
+        $normalized = $s.Normalize([Text.NormalizationForm]::FormD)
+        $chars = New-Object System.Collections.Generic.List[char]
+
+        foreach ($ch in $normalized.ToCharArray()) {
+            $category = [Globalization.CharUnicodeInfo]::GetUnicodeCategory($ch)
+
+            if ($category -ne [Globalization.UnicodeCategory]::NonSpacingMark) {
+                $chars.Add($ch)
+            }
+        }
+
+        $arr = $chars.ToArray()
+        return (-join $arr).Normalize([Text.NormalizationForm]::FormC)
+    }
+    catch {
+        return $s
+    }
+}
+
+function New-TargetTemplate {
+    param([string]$Path)
+
+    $template = @'
 [
   { "email": "dev1@empresa.com" },
   { "email": "dev2@empresa.com" },
   { "email": "dev3@empresa.com" },
+
   { "name": "Nome Completo" },
   { "id": "00000000-0000-0000-0000-000000000000" },
   { "url": "https://vssps.dev.azure.com/ORG/_apis/Identities/00000000-0000-0000-0000-000000000000" }
 ]
-'@ | Set-Content -Path $path -Encoding UTF8 }
-function LoadTargets($path){
-  $raw=Get-Content $path -Raw -Encoding UTF8; if([string]::IsNullOrWhiteSpace($raw)){throw "target-devs.json vazio"}
-  $p=$raw|ConvertFrom-Json
-  if((-not ($p -is [array])) -and (HP $p "targets")){$items=@($p.targets)} elseif((-not ($p -is [array])) -and (HP $p "devs")){$items=@($p.devs)} else {$items=@($p)}
-  $list=New-Object System.Collections.ArrayList
-  foreach($it in $items){
-    if($null -eq $it){continue}
-    $name="";$email="";$id="";$url=""
-    if($it -is [string]){$name=[string]$it}else{$name=GP $it "name"; if([string]::IsNullOrWhiteSpace($name)){$name=GP $it "displayName"}; $email=GP $it "email"; if([string]::IsNullOrWhiteSpace($email)){$email=GP $it "uniqueName"}; $id=GP $it "id"; $url=GP $it "url"}
-    $kind="";$term="";$key="";$extraId=""
-    if(-not [string]::IsNullOrWhiteSpace($email)){$kind="email";$term=$email.Trim();$key= if([string]::IsNullOrWhiteSpace($name)){$term}else{$name.Trim()}}
-    elseif(-not [string]::IsNullOrWhiteSpace($id)){$kind="id";$term=$id.Trim();$key= if([string]::IsNullOrWhiteSpace($name)){$term}else{$name.Trim()}}
-    elseif(-not [string]::IsNullOrWhiteSpace($url)){$kind="url";$term=$url.Trim();$key= if([string]::IsNullOrWhiteSpace($name)){$term}else{$name.Trim()}; if($term -match "([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})"){$extraId=$Matches[1]}}
-    elseif(-not [string]::IsNullOrWhiteSpace($name)){$kind="name";$term=$name.Trim();$key=$term}
-    if([string]::IsNullOrWhiteSpace($term)){continue}
-    [void]$list.Add([pscustomobject]@{Key=$key;Kind=$kind;Term=$term;Norm=N $term;ExtraId=$extraId})
-  }
-  return @($list)
-}
-function IdVals($id){$a=New-Object System.Collections.ArrayList; if($null -eq $id){return @()}; foreach($p in @('id','displayName','uniqueName','email','descriptor','url')){$v=GP $id $p; if(-not [string]::IsNullOrWhiteSpace($v)){[void]$a.Add($v)}}; return @($a|Select-Object -Unique)}
-function IdKey($id){$v=GP $id 'id'; if($v){return 'id:'+(N $v)}; $v=GP $id 'email'; if(-not $v){$v=GP $id 'uniqueName'}; if($v){return 'email:'+(N $v)}; $v=GP $id 'url'; if($v){return 'url:'+(N $v)}; $v=GP $id 'displayName'; if($v){return 'name:'+(N $v)}; return ""}
-function Matches($targets,$id,$mode){
-  $vals=@(IdVals $id); $res=New-Object System.Collections.ArrayList; if($vals.Count -eq 0){return @()}
-  foreach($t in $targets){ foreach($v in $vals){ $nv=N $v; $ok=$false; if($t.Kind -in @('email','id','url')){$ok=($nv -eq $t.Norm); if((-not $ok) -and $t.Kind -eq 'url' -and -not [string]::IsNullOrWhiteSpace($t.ExtraId)){$ok=($nv -eq (N $t.ExtraId))}} else { if($mode -eq 'Exact'){$ok=($nv -eq $t.Norm)}else{$ok=($nv.Contains($t.Norm) -or $t.Norm.Contains($nv))} }; if($ok){[void]$res.Add([pscustomobject]@{TargetKey=$t.Key;TargetKind=$t.Kind;MatchedTerm=$t.Term;MatchedValue=$v})} } }
-  return @($res)
-}
-function Snap($id){return [pscustomobject]@{Id=GP $id 'id';DisplayName=GP $id 'displayName';UniqueName=GP $id 'uniqueName';Email=GP $id 'email';Descriptor=GP $id 'descriptor';Url=GP $id 'url'}}
-function CommitId($p){return [pscustomobject]@{id="";displayName=GP $p 'name';uniqueName=GP $p 'email';email=GP $p 'email';descriptor="";url=""}}
-function Prev($s,$max=180){ if([string]::IsNullOrWhiteSpace($s)){return ""}; $c=(([string]$s) -replace '<[^>]+>',' ' -replace '\s+',' ').Trim(); if($c.Length -le $max){return $c}; return $c.Substring(0,$max)+'...' }
-function Row($key,$m,$id,$repoName,$repoId,$branch,$type,$date,$dateSource,$prId,$prTitle,$prStatus,$prCreated,$prClosed,$commentId,$commentPub,$commentUpd,$commentPreview,$commitId,$commitDate,$commitComment){$s=Snap $id; return [pscustomobject]@{EvidenceKey=$key;TargetKey=$m.TargetKey;TargetKind=$m.TargetKind;MatchedTerm=$m.MatchedTerm;MatchedValue=$m.MatchedValue;RepoName=$repoName;RepoId=$repoId;RepoDefaultBranch=$branch;ParticipationType=$type;ParticipationDate=$date;DateSource=$dateSource;PullRequestId=$prId;PullRequestTitle=$prTitle;PullRequestStatus=$prStatus;PullRequestCreationDate=$prCreated;PullRequestClosedDate=$prClosed;CommentId=$commentId;CommentPublishedDate=$commentPub;CommentLastUpdatedDate=$commentUpd;CommentPreview=$commentPreview;CommitId=$commitId;CommitDate=$commitDate;CommitComment=$commitComment;IdentityId=$s.Id;IdentityDisplayName=$s.DisplayName;IdentityUniqueName=$s.UniqueName;IdentityEmail=$s.Email;IdentityDescriptor=$s.Descriptor;IdentityUrl=$s.Url}}
-function AppendCsv($path,$rows){ if(@($rows).Count -eq 0){return}; if(Test-Path $path){$rows|Export-Csv $path -NoTypeInformation -Encoding UTF8 -Append}else{$rows|Export-Csv $path -NoTypeInformation -Encoding UTF8} }
-function FailCsv($path,$repo,$op,$msg){$r=[pscustomobject]@{Repo=$repo;Operation=$op;Message=(([string]$msg)-replace "`r|`n",' ')}; AppendCsv $path @($r)}
-function SaveState($path,$state){$state.UpdatedAt=(Get-Date).ToString('s'); $state|ConvertTo-Json -Depth 10|Set-Content $path -Encoding UTF8}
-function LoadState($path,$ctx){ if(!(Test-Path $path)){return [pscustomobject]@{ContextHash=$ctx;CreatedAt=(Get-Date).ToString('s');UpdatedAt=(Get-Date).ToString('s');LastCompletedRepoName="";TotalEvidence=0}}; try{$s=Get-Content $path -Raw -Encoding UTF8|ConvertFrom-Json; if((GP $s 'ContextHash') -ne $ctx){throw 'contexto mudou'}; if(!(HP $s 'LastCompletedRepoName')){$s|Add-Member LastCompletedRepoName "" -Force}; if(!(HP $s 'TotalEvidence')){$s|Add-Member TotalEvidence 0 -Force}; return $s}catch{return [pscustomobject]@{ContextHash=$ctx;CreatedAt=(Get-Date).ToString('s');UpdatedAt=(Get-Date).ToString('s');LastCompletedRepoName="";TotalEvidence=0}} }
-function EmptyHistory($path){@([pscustomobject]@{EvidenceKey="";TargetKey="";TargetKind="";MatchedTerm="";MatchedValue="";RepoName="";RepoId="";RepoDefaultBranch="";ParticipationType="";ParticipationDate="";DateSource="";PullRequestId="";PullRequestTitle="";PullRequestStatus="";PullRequestCreationDate="";PullRequestClosedDate="";CommentId="";CommentPublishedDate="";CommentLastUpdatedDate="";CommentPreview="";CommitId="";CommitDate="";CommitComment="";IdentityId="";IdentityDisplayName="";IdentityUniqueName="";IdentityEmail="";IdentityDescriptor="";IdentityUrl=""})|Select-Object -First 0|Export-Csv $path -NoTypeInformation -Encoding UTF8}
-function Summaries($raw,$hist,$byDevRepo,$byRepo,$byDev){
-  if(!(Test-Path $raw)){EmptyHistory $hist; @()|Export-Csv $byDevRepo -NoTypeInformation -Encoding UTF8; @()|Export-Csv $byRepo -NoTypeInformation -Encoding UTF8; @()|Export-Csv $byDev -NoTypeInformation -Encoding UTF8; return 0}
-  $rows=@(Import-Csv $raw -Encoding UTF8); $map=@{}; foreach($r in $rows){if($r.EvidenceKey -and !$map.ContainsKey($r.EvidenceKey)){$map[$r.EvidenceKey]=$r}}
-  $u=@($map.Values|Sort-Object TargetKey,RepoName,ParticipationDate,ParticipationType); if($u.Count){$u|Export-Csv $hist -NoTypeInformation -Encoding UTF8}else{EmptyHistory $hist}
-  $a=@(); foreach($g in @($u|Group-Object { $_.TargetKey+'||'+$_.RepoName })){ $gr=@($g.Group); $f=$gr[0]; $dates=@($gr|?{$_.ParticipationDate}|Sort-Object ParticipationDate); $types=@($gr|Select-Object -ExpandProperty ParticipationType -Unique|Sort-Object); $a += [pscustomobject]@{TargetKey=$f.TargetKey;RepoName=$f.RepoName;RepoId=$f.RepoId;EvidenceCount=$gr.Count;ParticipationTypes=($types -join '; ');FirstDate=if($dates.Count){$dates[0].ParticipationDate}else{''};LastDate=if($dates.Count){$dates[$dates.Count-1].ParticipationDate}else{''}} }
-  $b=@(); foreach($g in @($u|Group-Object RepoName)){ $gr=@($g.Group); $f=$gr[0]; $dates=@($gr|?{$_.ParticipationDate}|Sort-Object ParticipationDate); $types=@($gr|Select-Object -ExpandProperty ParticipationType -Unique|Sort-Object); $devs=@($gr|Select-Object -ExpandProperty TargetKey -Unique|Sort-Object); $b += [pscustomobject]@{RepoName=$f.RepoName;RepoId=$f.RepoId;EvidenceCount=$gr.Count;DevsMatched=$devs.Count;Devs=($devs -join '; ');ParticipationTypes=($types -join '; ');FirstDate=if($dates.Count){$dates[0].ParticipationDate}else{''};LastDate=if($dates.Count){$dates[$dates.Count-1].ParticipationDate}else{''}} }
-  $c=@(); foreach($g in @($u|Group-Object TargetKey)){ $gr=@($g.Group); $f=$gr[0]; $dates=@($gr|?{$_.ParticipationDate}|Sort-Object ParticipationDate); $types=@($gr|Select-Object -ExpandProperty ParticipationType -Unique|Sort-Object); $repos=@($gr|Select-Object -ExpandProperty RepoName -Unique|Sort-Object); $c += [pscustomobject]@{TargetKey=$f.TargetKey;EvidenceCount=$gr.Count;ReposMatched=$repos.Count;Repos=($repos -join '; ');ParticipationTypes=($types -join '; ');FirstDate=if($dates.Count){$dates[0].ParticipationDate}else{''};LastDate=if($dates.Count){$dates[$dates.Count-1].ParticipationDate}else{''}} }
-  $a|Export-Csv $byDevRepo -NoTypeInformation -Encoding UTF8; $b|Export-Csv $byRepo -NoTypeInformation -Encoding UTF8; $c|Export-Csv $byDev -NoTypeInformation -Encoding UTF8; return $u.Count
-}
-function CheckDup($match,$id,$bucket,$dupCsv){ if($match.TargetKind -ne 'name'){return}; $k=IdKey $id; if(!$k){return}; if(!$bucket.ContainsKey($match.TargetKey)){$bucket[$match.TargetKey]=@{}}; $b=$bucket[$match.TargetKey]; if(!$b.ContainsKey($k)){$s=Snap $id; $b[$k]=[pscustomobject]@{TargetKey=$match.TargetKey;MatchedTerm=$match.MatchedTerm;IdentityKey=$k;IdentityId=$s.Id;DisplayName=$s.DisplayName;UniqueName=$s.UniqueName;Email=$s.Email;Url=$s.Url}}; if($b.Keys.Count -gt 1){$b.Values|Export-Csv $dupCsv -NoTypeInformation -Encoding UTF8; WE "Nome ambíguo: '$($match.TargetKey)' bateu em mais de uma identidade."; Write-Host "CSV de duplicatas: $dupCsv"; Write-Host "Troque por email, id ou url e rode com -ResetState."; exit 2} }
+'@
 
-if([string]::IsNullOrWhiteSpace($Organization)){$Organization=Read-Host "Cole o nome da Organization do Azure DevOps"}
-if([string]::IsNullOrWhiteSpace($Project)){$Project=Read-Host "Cole o nome do Project do Azure DevOps"}
-if([string]::IsNullOrWhiteSpace($Organization) -or [string]::IsNullOrWhiteSpace($Project)){WE "Organization e Project são obrigatórios."; exit 1}
-New-Item -ItemType Directory -Force -Path $DestRoot|Out-Null; $auditDir=Join-Path $DestRoot '_dev_participation_audit'; New-Item -ItemType Directory -Force -Path $auditDir|Out-Null
-if([string]::IsNullOrWhiteSpace($TargetsJsonPath)){$TargetsJsonPath=Join-Path $DestRoot 'target-devs.json'}
-if(!(Test-Path $TargetsJsonPath)){NewTemplate $TargetsJsonPath; WW "Arquivo criado: $TargetsJsonPath"; Start-Process notepad.exe $TargetsJsonPath; exit 0}
-$rawTargets=Get-Content $TargetsJsonPath -Raw -Encoding UTF8; $targetsHash=SH $rawTargets; $targets=@(LoadTargets $TargetsJsonPath); if($targets.Count -eq 0){WE "Nenhum alvo válido no JSON."; exit 1}
-$scanComments=-not [bool]$SkipPrComments; $ctx=H (($Organization.Trim().ToLowerInvariant(),$Project.Trim().ToLowerInvariant(),$targetsHash,$NameMatchMode,"comments=$scanComments","reviewers=$([bool]$ScanReviewersList)","commits=$([bool]$ScanCommits)") -join '|')
-$stamp=Get-Date -Format 'yyyyMMdd-HHmmss'; $stateFile=Join-Path $auditDir "scan-state-$targetsHash.json"; $rawCsv=Join-Path $auditDir "participation-raw-$targetsHash.csv"; $histCsv=Join-Path $auditDir "participation-history-$stamp.csv"; $byDevRepoCsv=Join-Path $auditDir "summary-by-dev-repo-$stamp.csv"; $byRepoCsv=Join-Path $auditDir "summary-by-repo-$stamp.csv"; $byDevCsv=Join-Path $auditDir "summary-by-dev-$stamp.csv"; $catalogCsv=Join-Path $auditDir "repos-catalog-$stamp.csv"; $accessCsv=Join-Path $auditDir "repos-accessible-$stamp.csv"; $disabledCsv=Join-Path $auditDir "repos-disabled-$stamp.csv"; $failCsv=Join-Path $auditDir "scan-failures-$stamp.csv"; $dupCsv=Join-Path $auditDir "target-duplicates-$stamp.csv"
-if($ResetState){Remove-Item $stateFile -Force -ErrorAction SilentlyContinue; Remove-Item $rawCsv -Force -ErrorAction SilentlyContinue}
-$state=if($NoResume){[pscustomobject]@{ContextHash=$ctx;CreatedAt=(Get-Date).ToString('s');UpdatedAt=(Get-Date).ToString('s');LastCompletedRepoName="";TotalEvidence=0}}else{LoadState $stateFile $ctx}; SaveState $stateFile $state
-WI "Targets carregados:"; foreach($t in $targets){Write-Host " - $($t.Kind): $($t.Key)"}
-$patSecure=Read-Host "Cole seu PAT do Azure DevOps" -AsSecureString; $ptr=[Runtime.InteropServices.Marshal]::SecureStringToBSTR($patSecure); try{$pat=[Runtime.InteropServices.Marshal]::PtrToStringBSTR($ptr)}finally{[Runtime.InteropServices.Marshal]::ZeroFreeBSTR($ptr)}; if([string]::IsNullOrWhiteSpace($pat)){WE "PAT vazio."; exit 1}
-$headers=@{Authorization='Basic '+[Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(":$pat"))}; $baseApi="https://dev.azure.com/$Organization/$(Esc $Project)/_apis"
-WI "Listando repositórios..."; $visible=@(AdoGet "$baseApi/git/repositories?api-version=7.1" $headers $ApiTimeoutSeconds 'LIST_REPOSITORIES' | Sort-Object name)
-$catalog=@(); $access=@(); $disabled=@(); foreach($r in $visible){$dis=$false; try{$dis=[Convert]::ToBoolean((GP $r 'isDisabled'))}catch{$dis=$false}; $status=if($dis){'DISABLED'}else{'ACCESSIBLE'}; $row=[pscustomobject]@{Status=$status;Name=GP $r 'name';Id=GP $r 'id';IsDisabled=$dis;DefaultBranch=GP $r 'defaultBranch';Size=GP $r 'size'}; $catalog+=$row; if($dis){$disabled+=$r}else{$access+=$r}}
-$catalog|Export-Csv $catalogCsv -NoTypeInformation -Encoding UTF8; @($catalog|?{$_.Status -eq 'ACCESSIBLE'})|Export-Csv $accessCsv -NoTypeInformation -Encoding UTF8; @($catalog|?{$_.Status -eq 'DISABLED'})|Export-Csv $disabledCsv -NoTypeInformation -Encoding UTF8
-Write-Host "Visíveis pela API:       $($visible.Count)"; Write-Host "Acessíveis/ativos:       $($access.Count)"; Write-Host "Disabled/desabilitados:  $($disabled.Count)"
-$repos=@($access); $last=GP $state 'LastCompletedRepoName'; if((-not $NoResume) -and $last){WW "Retomando depois de: $last"; $repos=@($access|?{[string]::Compare((GP $_ 'name'),$last,$true) -gt 0})}
-if($repos.Count -eq 0){WO "Nada pendente. Gerando CSVs finais."; $total=Summaries $rawCsv $histCsv $byDevRepoCsv $byRepoCsv $byDevCsv; Write-Host "CSV principal: $histCsv"; if($OpenCsv){Start-Process notepad.exe $histCsv}; exit 0}
-$dups=@{}; $totalRun=0; $fails=0; $i=0
-foreach($repo in $repos){$i++; $repoId=GP $repo 'id'; $repoName=GP $repo 'name'; $branch=GP $repo 'defaultBranch'; Write-Host ""; WI "[$i/$($repos.Count)] $repoName"; $rows=New-Object System.Collections.ArrayList
-  try{ $prs=@(AdoGet "$baseApi/git/repositories/$repoId/pullrequests?searchCriteria.status=all&%24top=$PrTop&api-version=7.1" $headers $ApiTimeoutSeconds 'LIST_PULL_REQUESTS')
-    foreach($pr in $prs){$prId=GP $pr 'pullRequestId'; $prTitle=GP $pr 'title'; $prStatus=GP $pr 'status'; $prCreated=GP $pr 'creationDate'; $prClosed=GP $pr 'closedDate'
-      foreach($m in @(Matches $targets $pr.createdBy $NameMatchMode)){CheckDup $m $pr.createdBy $dups $dupCsv; $key="$repoId|PR_CREATED|$prId|$($m.TargetKey)|$($m.MatchedTerm)"; [void]$rows.Add((Row $key $m $pr.createdBy $repoName $repoId $branch 'PR_CREATED' $prCreated 'pullRequest.creationDate' $prId $prTitle $prStatus $prCreated $prClosed '' '' '' '' '' '' ''))}
-      if($ScanReviewersList -and (HP $pr 'reviewers')){foreach($rev in @($pr.reviewers)){foreach($m in @(Matches $targets $rev $NameMatchMode)){CheckDup $m $rev $dups $dupCsv; $rid=GP $rev 'id'; $key="$repoId|PR_REVIEWER_LISTED|$prId|$rid|$($m.TargetKey)|$($m.MatchedTerm)"; [void]$rows.Add((Row $key $m $rev $repoName $repoId $branch 'PR_REVIEWER_LISTED' '' 'no_exact_reviewer_date_in_pr_list' $prId $prTitle $prStatus $prCreated $prClosed '' '' '' '' '' '' ''))}}}
-      if($scanComments){try{$threads=@(AdoGet "$baseApi/git/repositories/$repoId/pullRequests/$prId/threads?api-version=7.1" $headers $ApiTimeoutSeconds 'LIST_PR_THREADS'); foreach($th in $threads){if(!(HP $th 'comments')){continue}; foreach($c in @($th.comments)){if($null -eq $c.author){continue}; foreach($m in @(Matches $targets $c.author $NameMatchMode)){CheckDup $m $c.author $dups $dupCsv; $cid=GP $c 'id'; $pub=GP $c 'publishedDate'; $upd=GP $c 'lastUpdatedDate'; $prev=Prev (GP $c 'content'); $key="$repoId|PR_COMMENT|$prId|$cid|$($m.TargetKey)|$($m.MatchedTerm)"; [void]$rows.Add((Row $key $m $c.author $repoName $repoId $branch 'PR_COMMENT' $pub 'comment.publishedDate' $prId $prTitle $prStatus $prCreated $prClosed $cid $pub $upd $prev '' '' ''))}}}}catch{FailCsv $failCsv $repoName "LIST_PR_THREADS_$prId" $_.Exception.Message}}
-    }
-  }catch{$fails++; FailCsv $failCsv $repoName 'LIST_PULL_REQUESTS' $_.Exception.Message; WW "Falha ao varrer PRs deste repo."}
-  if($ScanCommits){try{$commits=@(AdoGet "$baseApi/git/repositories/$repoId/commits?searchCriteria.%24top=$CommitsTop&api-version=7.1" $headers $ApiTimeoutSeconds 'LIST_COMMITS'); foreach($cm in $commits){$cid=GP $cm 'commitId'; $cprev=Prev (GP $cm 'comment') 220; foreach($role in @('author','committer')){$person=$cm.$role; if($null -eq $person){continue}; $ident=CommitId $person; foreach($m in @(Matches $targets $ident $NameMatchMode)){CheckDup $m $ident $dups $dupCsv; $date=GP $person 'date'; $ptype=if($role -eq 'author'){'COMMIT_AUTHOR'}else{'COMMIT_COMMITTER'}; $key="$repoId|$ptype|$cid|$($m.TargetKey)|$($m.MatchedTerm)"; [void]$rows.Add((Row $key $m $ident $repoName $repoId $branch $ptype $date "commit.$role.date" '' '' '' '' '' '' '' '' '' $cid $date $cprev))}}}}catch{$fails++; FailCsv $failCsv $repoName 'LIST_COMMITS' $_.Exception.Message; WW "Falha ao varrer commits deste repo."}}
-  if($rows.Count -gt 0){AppendCsv $rawCsv @($rows); WO "Participações encontradas: $($rows.Count)"}else{WI "Nenhuma participação encontrada."}
-  $totalRun += $rows.Count; $state.LastCompletedRepoName=$repoName; $state.TotalEvidence=[int](GP $state 'TotalEvidence')+$rows.Count; SaveState $stateFile $state
+    $template | Set-Content -Path $Path -Encoding UTF8
 }
-$totalUnique=Summaries $rawCsv $histCsv $byDevRepoCsv $byRepoCsv $byDevCsv
-Write-Host ""; Write-Host "========================================"; Write-Host "Finalizado"; Write-Host "========================================"; Write-Host "Visíveis pela API:        $($visible.Count)"; Write-Host "Acessíveis/ativos:        $($access.Count)"; Write-Host "Disabled/desabilitados:   $($disabled.Count)"; Write-Host "Participações nesta execução: $totalRun"; Write-Host "Participações únicas totais:  $totalUnique"; Write-Host "Falhas:                       $fails"; Write-Host ""; Write-Host "CSV principal:"; Write-Host $histCsv; Write-Host ""; Write-Host "Resumo por dev + repo:"; Write-Host $byDevRepoCsv; Write-Host ""; Write-Host "Resumo por repo:"; Write-Host $byRepoCsv; Write-Host ""; Write-Host "Resumo por dev:"; Write-Host $byDevCsv; Write-Host ""; Write-Host "Duplicatas, se houver:"; Write-Host $dupCsv; if($OpenCsv){Start-Process notepad.exe $histCsv}
+
+function Load-Targets {
+    param([string]$Path)
+
+    $raw = Get-Content -Path $Path -Raw -Encoding UTF8
+
+    if ([string]::IsNullOrWhiteSpace($raw)) {
+        throw "Arquivo de devs vazio: $Path"
+    }
+
+    $parsed = $raw | ConvertFrom-Json
+
+    if ((-not ($parsed -is [System.Array])) -and (Test-HasProp -Obj $parsed -Name "targets")) {
+        $items = @($parsed.targets)
+    }
+    elseif ((-not ($parsed -is [System.Array])) -and (Test-HasProp -Obj $parsed -Name "devs")) {
+        $items = @($parsed.devs)
+    }
+    else {
+        $items = @($parsed)
+    }
+
+    $targets = New-Object System.Collections.Generic.List[object]
+
+    foreach ($item in $items) {
+        if ($null -eq $item) {
+            continue
+        }
+
+        $name = ""
+        $email = ""
+        $id = ""
+        $url = ""
+
+        if ($item -is [string]) {
+            $name = [string]$item
+        }
+        else {
+            $name = Get-PropValue -Obj $item -Name "name"
+
+            if ([string]::IsNullOrWhiteSpace($name)) {
+                $name = Get-PropValue -Obj $item -Name "displayName"
+            }
+
+            $email = Get-PropValue -Obj $item -Name "email"
+
+            if ([string]::IsNullOrWhiteSpace($email)) {
+                $email = Get-PropValue -Obj $item -Name "uniqueName"
+            }
+
+            $id = Get-PropValue -Obj $item -Name "id"
+            $url = Get-PropValue -Obj $item -Name "url"
+        }
+
+        $kind = ""
+        $term = ""
+        $key = ""
+        $extractedId = ""
+
+        if (-not [string]::IsNullOrWhiteSpace($email)) {
+            $kind = "email"
+            $term = $email.Trim()
+
+            if (-not [string]::IsNullOrWhiteSpace($name)) {
+                $key = $name.Trim()
+            }
+            else {
+                $key = $term
+            }
+        }
+        elseif (-not [string]::IsNullOrWhiteSpace($id)) {
+            $kind = "id"
+            $term = $id.Trim()
+
+            if (-not [string]::IsNullOrWhiteSpace($name)) {
+                $key = $name.Trim()
+            }
+            else {
+                $key = $term
+            }
+        }
+        elseif (-not [string]::IsNullOrWhiteSpace($url)) {
+            $kind = "url"
+            $term = $url.Trim()
+
+            if (-not [string]::IsNullOrWhiteSpace($name)) {
+                $key = $name.Trim()
+            }
+            else {
+                $key = $term
+            }
+
+            if ($term -match "([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})") {
+                $extractedId = $Matches[1]
+            }
+        }
+        elseif (-not [string]::IsNullOrWhiteSpace($name)) {
+            $kind = "name"
+            $term = $name.Trim()
+            $key = $term
+        }
+
+        if ([string]::IsNullOrWhiteSpace($term)) {
+            continue
+        }
+
+        $targets.Add([PSCustomObject]@{
+            Key = $key
+            Kind = $kind
+            Term = $term
+            NormalizedTerm = Normalize-Text $term
+            ExtractedId = $extractedId
+        })
+    }
+
+    return @($targets)
+}
+
+function Get-IdentityValues {
+    param([object]$Identity)
+
+    $values = New-Object System.Collections.Generic.List[string]
+
+    if ($null -eq $Identity) {
+        return @()
+    }
+
+    foreach ($propName in @("id", "displayName", "uniqueName", "email", "descriptor", "url")) {
+        $v = Get-PropValue -Obj $Identity -Name $propName
+
+        if (-not [string]::IsNullOrWhiteSpace($v)) {
+            $values.Add($v)
+        }
+    }
+
+    return @($values | Select-Object -Unique)
+}
+
+function Get-IdentityKey {
+    param([object]$Identity)
+
+    if ($null -eq $Identity) {
+        return ""
+    }
+
+    $id = Get-PropValue -Obj $Identity -Name "id"
+
+    if (-not [string]::IsNullOrWhiteSpace($id)) {
+        return "id:" + (Normalize-Text $id)
+    }
+
+    $email = Get-PropValue -Obj $Identity -Name "email"
+
+    if ([string]::IsNullOrWhiteSpace($email)) {
+        $email = Get-PropValue -Obj $Identity -Name "uniqueName"
+    }
+
+    if (-not [string]::IsNullOrWhiteSpace($email)) {
+        return "email:" + (Normalize-Text $email)
+    }
+
+    $url = Get-PropValue -Obj $Identity -Name "url"
+
+    if (-not [string]::IsNullOrWhiteSpace($url)) {
+        return "url:" + (Normalize-Text $url)
+    }
+
+    $displayName = Get-PropValue -Obj $Identity -Name "displayName"
+
+    if (-not [string]::IsNullOrWhiteSpace($displayName)) {
+        return "name:" + (Normalize-Text $displayName)
+    }
+
+    return ""
+}
+
+function Find-Matches {
+    param(
+        [object[]]$Targets,
+        [object]$Identity,
+        [string]$NameMatchMode
+    )
+
+    $values = @(Get-IdentityValues -Identity $Identity)
+
+    if ($values.Count -eq 0) {
+        return @()
+    }
+
+    $matches = New-Object System.Collections.Generic.List[object]
+
+    foreach ($target in $Targets) {
+        foreach ($value in $values) {
+            $normalizedValue = Normalize-Text $value
+            $isMatch = $false
+
+            if ($target.Kind -eq "email" -or $target.Kind -eq "id" -or $target.Kind -eq "url") {
+                $isMatch = ($normalizedValue -eq $target.NormalizedTerm)
+
+                if ((-not $isMatch) -and $target.Kind -eq "url" -and -not [string]::IsNullOrWhiteSpace($target.ExtractedId)) {
+                    $isMatch = ($normalizedValue -eq (Normalize-Text $target.ExtractedId))
+                }
+            }
+            else {
+                if ($NameMatchMode -eq "Exact") {
+                    $isMatch = ($normalizedValue -eq $target.NormalizedTerm)
+                }
+                else {
+                    $isMatch = (
+                        $normalizedValue.Contains($target.NormalizedTerm) -or
+                        $target.NormalizedTerm.Contains($normalizedValue)
+                    )
+                }
+            }
+
+            if ($isMatch) {
+                $matches.Add([PSCustomObject]@{
+                    TargetKey = $target.Key
+                    TargetKind = $target.Kind
+                    MatchedTerm = $target.Term
+                    MatchedValue = $value
+                })
+            }
+        }
+    }
+
+    return @($matches)
+}
+
+function New-IdentitySnapshot {
+    param([object]$Identity)
+
+    return [PSCustomObject]@{
+        Id = Get-PropValue -Obj $Identity -Name "id"
+        DisplayName = Get-PropValue -Obj $Identity -Name "displayName"
+        UniqueName = Get-PropValue -Obj $Identity -Name "uniqueName"
+        Email = Get-PropValue -Obj $Identity -Name "email"
+        Descriptor = Get-PropValue -Obj $Identity -Name "descriptor"
+        Url = Get-PropValue -Obj $Identity -Name "url"
+    }
+}
+
+function New-CommitIdentity {
+    param([object]$Person)
+
+    return [PSCustomObject]@{
+        id = ""
+        displayName = Get-PropValue -Obj $Person -Name "name"
+        uniqueName = Get-PropValue -Obj $Person -Name "email"
+        email = Get-PropValue -Obj $Person -Name "email"
+        descriptor = ""
+        url = ""
+    }
+}
+
+function Get-Preview {
+    param(
+        [string]$Text,
+        [int]$Max = 180
+    )
+
+    if ([string]::IsNullOrWhiteSpace($Text)) {
+        return ""
+    }
+
+    $clean = $Text -replace "<[^>]+>", " "
+    $clean = $clean -replace "\s+", " "
+    $clean = $clean.Trim()
+
+    if ($clean.Length -le $Max) {
+        return $clean
+    }
+
+    return $clean.Substring(0, $Max) + "..."
+}
+
+function New-Row {
+    param(
+        [string]$EvidenceKey,
+        [object]$Match,
+        [object]$Identity,
+
+        [string]$RepoName,
+        [string]$RepoId,
+        [string]$RepoDefaultBranch,
+
+        [string]$ParticipationType,
+        [string]$ParticipationDate,
+        [string]$DateSource,
+
+        [string]$PullRequestId,
+        [string]$PullRequestTitle,
+        [string]$PullRequestStatus,
+        [string]$PullRequestCreationDate,
+        [string]$PullRequestClosedDate,
+
+        [string]$CommentId,
+        [string]$CommentPublishedDate,
+        [string]$CommentLastUpdatedDate,
+        [string]$CommentPreview,
+
+        [string]$CommitId,
+        [string]$CommitDate,
+        [string]$CommitComment
+    )
+
+    $snapshot = New-IdentitySnapshot -Identity $Identity
+
+    return [PSCustomObject]@{
+        EvidenceKey = $EvidenceKey
+
+        TargetKey = $Match.TargetKey
+        TargetKind = $Match.TargetKind
+        MatchedTerm = $Match.MatchedTerm
+        MatchedValue = $Match.MatchedValue
+
+        RepoName = $RepoName
+        RepoId = $RepoId
+        RepoDefaultBranch = $RepoDefaultBranch
+
+        ParticipationType = $ParticipationType
+        ParticipationDate = $ParticipationDate
+        DateSource = $DateSource
+
+        PullRequestId = $PullRequestId
+        PullRequestTitle = $PullRequestTitle
+        PullRequestStatus = $PullRequestStatus
+        PullRequestCreationDate = $PullRequestCreationDate
+        PullRequestClosedDate = $PullRequestClosedDate
+
+        CommentId = $CommentId
+        CommentPublishedDate = $CommentPublishedDate
+        CommentLastUpdatedDate = $CommentLastUpdatedDate
+        CommentPreview = $CommentPreview
+
+        CommitId = $CommitId
+        CommitDate = $CommitDate
+        CommitComment = $CommitComment
+
+        IdentityId = $snapshot.Id
+        IdentityDisplayName = $snapshot.DisplayName
+        IdentityUniqueName = $snapshot.UniqueName
+        IdentityEmail = $snapshot.Email
+        IdentityDescriptor = $snapshot.Descriptor
+        IdentityUrl = $snapshot.Url
+    }
+}
+
+function Append-CsvRows {
+    param(
+        [string]$Path,
+        [object[]]$Rows
+    )
+
+    if ($Rows.Count -eq 0) {
+        return
+    }
+
+    if (Test-Path $Path) {
+        $Rows | Export-Csv -Path $Path -NoTypeInformation -Encoding UTF8 -Append
+    }
+    else {
+        $Rows | Export-Csv -Path $Path -NoTypeInformation -Encoding UTF8
+    }
+}
+
+function Get-HeaderValue {
+    param(
+        [object]$Headers,
+        [string]$Name
+    )
+
+    if ($null -eq $Headers) {
+        return ""
+    }
+
+    foreach ($key in $Headers.Keys) {
+        if (([string]$key).ToLowerInvariant() -eq $Name.ToLowerInvariant()) {
+            $value = $Headers[$key]
+
+            if ($null -eq $value) {
+                return ""
+            }
+
+            if ($value -is [array]) {
+                return [string]$value[0]
+            }
+
+            return [string]$value
+        }
+    }
+
+    return ""
+}
+
+function Add-QueryParameter {
+    param(
+        [string]$Url,
+        [string]$Name,
+        [string]$Value
+    )
+
+    $encodedName = [System.Uri]::EscapeDataString($Name)
+    $encodedValue = [System.Uri]::EscapeDataString($Value)
+
+    if ($Url.Contains("?")) {
+        return "$Url&$encodedName=$encodedValue"
+    }
+
+    return "$Url`?$encodedName=$encodedValue"
+}
+
+function Invoke-AdoPaged {
+    param(
+        [string]$Url,
+        [hashtable]$Headers,
+        [int]$TimeoutSeconds,
+        [string]$Operation
+    )
+
+    $items = New-Object System.Collections.Generic.List[object]
+    $continuationToken = ""
+
+    do {
+        $actualUrl = $Url
+
+        if (-not [string]::IsNullOrWhiteSpace($continuationToken)) {
+            $actualUrl = Add-QueryParameter -Url $Url -Name "continuationToken" -Value $continuationToken
+        }
+
+        try {
+            $response = Invoke-WebRequest `
+                -Uri $actualUrl `
+                -Headers $Headers `
+                -Method Get `
+                -TimeoutSec $TimeoutSeconds `
+                -UseBasicParsing
+
+            $content = [string]$response.Content
+
+            if (-not [string]::IsNullOrWhiteSpace($content)) {
+                $json = $content | ConvertFrom-Json
+
+                if (Test-HasProp -Obj $json -Name "value") {
+                    foreach ($item in @($json.value)) {
+                        $items.Add($item)
+                    }
+                }
+                else {
+                    $items.Add($json)
+                }
+            }
+
+            $continuationToken = Get-HeaderValue -Headers $response.Headers -Name "x-ms-continuationtoken"
+        }
+        catch {
+            throw "$Operation falhou: $($_.Exception.Message)"
+        }
+    }
+    while (-not [string]::IsNullOrWhiteSpace($continuationToken))
+
+    return @($items)
+}
+
+function Test-RepoDisabled {
+    param([object]$Repo)
+
+    $value = Get-PropValue -Obj $Repo -Name "isDisabled"
+
+    if ([string]::IsNullOrWhiteSpace($value)) {
+        return $false
+    }
+
+    try {
+        return [System.Convert]::ToBoolean($value)
+    }
+    catch {
+        return $false
+    }
+}
+
+function Add-Failure {
+    param(
+        [string]$Path,
+        [string]$Repo,
+        [string]$Operation,
+        [string]$Message
+    )
+
+    $row = [PSCustomObject]@{
+        Repo = $Repo
+        Operation = $Operation
+        Message = ($Message -replace "`r|`n", " ")
+    }
+
+    if (Test-Path $Path) {
+        $row | Export-Csv -Path $Path -NoTypeInformation -Encoding UTF8 -Append
+    }
+    else {
+        $row | Export-Csv -Path $Path -NoTypeInformation -Encoding UTF8
+    }
+}
+
+function Save-State {
+    param(
+        [string]$Path,
+        [object]$State
+    )
+
+    $State.UpdatedAt = (Get-Date).ToString("s")
+    $State | ConvertTo-Json -Depth 10 | Set-Content -Path $Path -Encoding UTF8
+}
+
+function Load-State {
+    param(
+        [string]$Path,
+        [string]$ContextHash
+    )
+
+    if (-not (Test-Path $Path)) {
+        return [PSCustomObject]@{
+            ContextHash = $ContextHash
+            CreatedAt = (Get-Date).ToString("s")
+            UpdatedAt = (Get-Date).ToString("s")
+            LastCompletedRepoName = ""
+            TotalEvidence = 0
+        }
+    }
+
+    try {
+        $state = Get-Content -Path $Path -Raw -Encoding UTF8 | ConvertFrom-Json
+
+        if ((Get-PropValue -Obj $state -Name "ContextHash") -ne $ContextHash) {
+            return [PSCustomObject]@{
+                ContextHash = $ContextHash
+                CreatedAt = (Get-Date).ToString("s")
+                UpdatedAt = (Get-Date).ToString("s")
+                LastCompletedRepoName = ""
+                TotalEvidence = 0
+            }
+        }
+
+        if (-not (Test-HasProp -Obj $state -Name "LastCompletedRepoName")) {
+            $state | Add-Member -NotePropertyName "LastCompletedRepoName" -NotePropertyValue "" -Force
+        }
+
+        if (-not (Test-HasProp -Obj $state -Name "TotalEvidence")) {
+            $state | Add-Member -NotePropertyName "TotalEvidence" -NotePropertyValue 0 -Force
+        }
+
+        return $state
+    }
+    catch {
+        return [PSCustomObject]@{
+            ContextHash = $ContextHash
+            CreatedAt = (Get-Date).ToString("s")
+            UpdatedAt = (Get-Date).ToString("s")
+            LastCompletedRepoName = ""
+            TotalEvidence = 0
+        }
+    }
+}
+
+function Export-EmptyHistory {
+    param([string]$Path)
+
+    @(
+        [PSCustomObject]@{
+            EvidenceKey = ""
+            TargetKey = ""
+            TargetKind = ""
+            MatchedTerm = ""
+            MatchedValue = ""
+            RepoName = ""
+            RepoId = ""
+            RepoDefaultBranch = ""
+            ParticipationType = ""
+            ParticipationDate = ""
+            DateSource = ""
+            PullRequestId = ""
+            PullRequestTitle = ""
+            PullRequestStatus = ""
+            PullRequestCreationDate = ""
+            PullRequestClosedDate = ""
+            CommentId = ""
+            CommentPublishedDate = ""
+            CommentLastUpdatedDate = ""
+            CommentPreview = ""
+            CommitId = ""
+            CommitDate = ""
+            CommitComment = ""
+            IdentityId = ""
+            IdentityDisplayName = ""
+            IdentityUniqueName = ""
+            IdentityEmail = ""
+            IdentityDescriptor = ""
+            IdentityUrl = ""
+        }
+    ) | Select-Object -First 0 | Export-Csv -Path $Path -NoTypeInformation -Encoding UTF8
+}
+
+function Write-Summaries {
+    param(
+        [string]$RawPath,
+        [string]$HistoryPath,
+        [string]$ByDevRepoPath,
+        [string]$ByRepoPath,
+        [string]$ByDevPath
+    )
+
+    if (-not (Test-Path $RawPath)) {
+        Export-EmptyHistory -Path $HistoryPath
+
+        @() | Export-Csv -Path $ByDevRepoPath -NoTypeInformation -Encoding UTF8
+        @() | Export-Csv -Path $ByRepoPath -NoTypeInformation -Encoding UTF8
+        @() | Export-Csv -Path $ByDevPath -NoTypeInformation -Encoding UTF8
+
+        return 0
+    }
+
+    $rows = @(Import-Csv -Path $RawPath -Encoding UTF8)
+    $map = @{}
+
+    foreach ($row in $rows) {
+        if ([string]::IsNullOrWhiteSpace($row.EvidenceKey)) {
+            continue
+        }
+
+        if (-not $map.ContainsKey($row.EvidenceKey)) {
+            $map[$row.EvidenceKey] = $row
+        }
+    }
+
+    $unique = @($map.Values | Sort-Object TargetKey, RepoName, ParticipationDate, ParticipationType)
+
+    if ($unique.Count -gt 0) {
+        $unique | Export-Csv -Path $HistoryPath -NoTypeInformation -Encoding UTF8
+    }
+    else {
+        Export-EmptyHistory -Path $HistoryPath
+    }
+
+    $devRepoSummary = New-Object System.Collections.Generic.List[object]
+    $repoSummary = New-Object System.Collections.Generic.List[object]
+    $devSummary = New-Object System.Collections.Generic.List[object]
+
+    foreach ($group in @($unique | Group-Object { $_.TargetKey + "||" + $_.RepoName })) {
+        $items = @($group.Group)
+        $first = $items[0]
+        $dates = @($items | Where-Object { -not [string]::IsNullOrWhiteSpace($_.ParticipationDate) } | Sort-Object ParticipationDate)
+        $types = @($items | Select-Object -ExpandProperty ParticipationType -Unique | Sort-Object)
+
+        $firstDate = ""
+        $lastDate = ""
+
+        if ($dates.Count -gt 0) {
+            $firstDate = $dates[0].ParticipationDate
+            $lastDate = $dates[$dates.Count - 1].ParticipationDate
+        }
+
+        $devRepoSummary.Add([PSCustomObject]@{
+            TargetKey = $first.TargetKey
+            RepoName = $first.RepoName
+            RepoId = $first.RepoId
+            EvidenceCount = $items.Count
+            ParticipationTypes = ($types -join "; ")
+            FirstDate = $firstDate
+            LastDate = $lastDate
+        })
+    }
+
+    foreach ($group in @($unique | Group-Object RepoName)) {
+        $items = @($group.Group)
+        $first = $items[0]
+        $dates = @($items | Where-Object { -not [string]::IsNullOrWhiteSpace($_.ParticipationDate) } | Sort-Object ParticipationDate)
+        $types = @($items | Select-Object -ExpandProperty ParticipationType -Unique | Sort-Object)
+        $devs = @($items | Select-Object -ExpandProperty TargetKey -Unique | Sort-Object)
+
+        $firstDate = ""
+        $lastDate = ""
+
+        if ($dates.Count -gt 0) {
+            $firstDate = $dates[0].ParticipationDate
+            $lastDate = $dates[$dates.Count - 1].ParticipationDate
+        }
+
+        $repoSummary.Add([PSCustomObject]@{
+            RepoName = $first.RepoName
+            RepoId = $first.RepoId
+            EvidenceCount = $items.Count
+            DevsMatched = $devs.Count
+            Devs = ($devs -join "; ")
+            ParticipationTypes = ($types -join "; ")
+            FirstDate = $firstDate
+            LastDate = $lastDate
+        })
+    }
+
+    foreach ($group in @($unique | Group-Object TargetKey)) {
+        $items = @($group.Group)
+        $first = $items[0]
+        $dates = @($items | Where-Object { -not [string]::IsNullOrWhiteSpace($_.ParticipationDate) } | Sort-Object ParticipationDate)
+        $types = @($items | Select-Object -ExpandProperty ParticipationType -Unique | Sort-Object)
+        $repos = @($items | Select-Object -ExpandProperty RepoName -Unique | Sort-Object)
+
+        $firstDate = ""
+        $lastDate = ""
+
+        if ($dates.Count -gt 0) {
+            $firstDate = $dates[0].ParticipationDate
+            $lastDate = $dates[$dates.Count - 1].ParticipationDate
+        }
+
+        $devSummary.Add([PSCustomObject]@{
+            TargetKey = $first.TargetKey
+            EvidenceCount = $items.Count
+            ReposMatched = $repos.Count
+            Repos = ($repos -join "; ")
+            ParticipationTypes = ($types -join "; ")
+            FirstDate = $firstDate
+            LastDate = $lastDate
+        })
+    }
+
+    @($devRepoSummary) | Export-Csv -Path $ByDevRepoPath -NoTypeInformation -Encoding UTF8
+    @($repoSummary) | Export-Csv -Path $ByRepoPath -NoTypeInformation -Encoding UTF8
+    @($devSummary) | Export-Csv -Path $ByDevPath -NoTypeInformation -Encoding UTF8
+
+    return $unique.Count
+}
+
+function Check-DuplicateOrStop {
+    param(
+        [object]$Match,
+        [object]$Identity,
+        [hashtable]$NameTargetIdentities,
+        [string]$DuplicateCsv
+    )
+
+    if ($Match.TargetKind -ne "name") {
+        return
+    }
+
+    $identityKey = Get-IdentityKey -Identity $Identity
+
+    if ([string]::IsNullOrWhiteSpace($identityKey)) {
+        return
+    }
+
+    if (-not $NameTargetIdentities.ContainsKey($Match.TargetKey)) {
+        $NameTargetIdentities[$Match.TargetKey] = @{}
+    }
+
+    $bucket = $NameTargetIdentities[$Match.TargetKey]
+
+    if (-not $bucket.ContainsKey($identityKey)) {
+        $snapshot = New-IdentitySnapshot -Identity $Identity
+
+        $bucket[$identityKey] = [PSCustomObject]@{
+            TargetKey = $Match.TargetKey
+            MatchedTerm = $Match.MatchedTerm
+            IdentityKey = $identityKey
+            IdentityId = $snapshot.Id
+            DisplayName = $snapshot.DisplayName
+            UniqueName = $snapshot.UniqueName
+            Email = $snapshot.Email
+            Url = $snapshot.Url
+        }
+    }
+
+    if ($bucket.Keys.Count -gt 1) {
+        @($bucket.Values) | Export-Csv -Path $DuplicateCsv -NoTypeInformation -Encoding UTF8
+
+        Write-Bad "Nome ambíguo encontrado: '$($Match.TargetKey)' bateu em mais de uma identidade real."
+        Write-Host ""
+        Write-Host "CSV de duplicatas:"
+        Write-Host $DuplicateCsv
+        Write-Host ""
+        Write-Host "Troque esse item do target-devs.json por email, id ou url e rode novamente com -ResetState."
+        exit 2
+    }
+}
+
+# ============================================================
+# Entrada inicial
+# ============================================================
+
+if ([string]::IsNullOrWhiteSpace($Organization)) {
+    $Organization = Read-Host "Cole o nome da Organization do Azure DevOps"
+}
+
+if ([string]::IsNullOrWhiteSpace($Project)) {
+    $Project = Read-Host "Cole o nome do Project do Azure DevOps"
+}
+
+if ([string]::IsNullOrWhiteSpace($Organization) -or [string]::IsNullOrWhiteSpace($Project)) {
+    Write-Bad "Organization e Project são obrigatórios."
+    exit 1
+}
+
+New-Item -ItemType Directory -Force -Path $DestRoot | Out-Null
+
+$auditDir = Join-Path $DestRoot "_dev_participation_audit"
+New-Item -ItemType Directory -Force -Path $auditDir | Out-Null
+
+if ([string]::IsNullOrWhiteSpace($TargetsJsonPath)) {
+    $TargetsJsonPath = Join-Path $DestRoot "target-devs.json"
+}
+
+if (-not (Test-Path $TargetsJsonPath)) {
+    New-TargetTemplate -Path $TargetsJsonPath
+
+    Write-Warn2 "Arquivo de devs-alvo criado:"
+    Write-Host $TargetsJsonPath
+    Write-Host ""
+    Write-Host "Edite o arquivo e rode novamente."
+
+    try {
+        Start-Process notepad.exe $TargetsJsonPath
+    }
+    catch {}
+
+    exit 0
+}
+
+$targetsRaw = Get-Content -Path $TargetsJsonPath -Raw -Encoding UTF8
+$targetsHash = Get-ShortHash $targetsRaw
+$targets = @(Load-Targets -Path $TargetsJsonPath)
+
+if ($targets.Count -eq 0) {
+    Write-Bad "Nenhum alvo válido em: $TargetsJsonPath"
+    exit 1
+}
+
+$scanComments = -not [bool]$SkipPrComments
+
+$contextText = @(
+    $Organization.Trim().ToLowerInvariant()
+    $Project.Trim().ToLowerInvariant()
+    $targetsHash
+    $NameMatchMode
+    "comments=$scanComments"
+    "reviewers=$([bool]$ScanReviewersList)"
+    "commits=$([bool]$ScanCommits)"
+) -join "|"
+
+$contextHash = Get-HashText $contextText
+
+$stamp = Get-Date -Format "yyyyMMdd-HHmmss"
+
+$stateFile = Join-Path $auditDir "scan-state-$targetsHash.json"
+$rawCsv = Join-Path $auditDir "participation-raw-$targetsHash.csv"
+
+$historyCsv = Join-Path $auditDir "participation-history-$stamp.csv"
+$byDevRepoCsv = Join-Path $auditDir "summary-by-dev-repo-$stamp.csv"
+$byRepoCsv = Join-Path $auditDir "summary-by-repo-$stamp.csv"
+$byDevCsv = Join-Path $auditDir "summary-by-dev-$stamp.csv"
+
+$catalogCsv = Join-Path $auditDir "repos-catalog-$stamp.csv"
+$accessibleCsv = Join-Path $auditDir "repos-accessible-$stamp.csv"
+$disabledCsv = Join-Path $auditDir "repos-disabled-$stamp.csv"
+
+$failCsv = Join-Path $auditDir "scan-failures-$stamp.csv"
+$dupCsv = Join-Path $auditDir "target-duplicates-$stamp.csv"
+
+if ($ResetState) {
+    Remove-Item $stateFile -Force -ErrorAction SilentlyContinue
+    Remove-Item $rawCsv -Force -ErrorAction SilentlyContinue
+}
+
+if ($NoResume) {
+    $state = [PSCustomObject]@{
+        ContextHash = $contextHash
+        CreatedAt = (Get-Date).ToString("s")
+        UpdatedAt = (Get-Date).ToString("s")
+        LastCompletedRepoName = ""
+        TotalEvidence = 0
+    }
+}
+else {
+    $state = Load-State -Path $stateFile -ContextHash $contextHash
+}
+
+Save-State -Path $stateFile -State $state
+
+Write-Info "Targets carregados:"
+foreach ($target in $targets) {
+    Write-Host " - $($target.Kind): $($target.Key)"
+}
+Write-Host ""
+
+$patSecure = Read-Host "Cole seu PAT do Azure DevOps" -AsSecureString
+$ptr = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($patSecure)
+
+try {
+    $pat = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($ptr)
+}
+finally {
+    [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($ptr)
+}
+
+if ([string]::IsNullOrWhiteSpace($pat)) {
+    Write-Bad "PAT vazio."
+    exit 1
+}
+
+$auth = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(":$pat"))
+$headers = @{
+    Authorization = "Basic $auth"
+}
+
+$encodedProject = [System.Uri]::EscapeDataString($Project)
+$baseApi = "https://dev.azure.com/$Organization/$encodedProject/_apis"
+
+# ============================================================
+# Lista repos
+# ============================================================
+
+Write-Info "Listando repositórios..."
+
+$repoUrl = "$baseApi/git/repositories?api-version=7.1"
+$visibleRepos = @(Invoke-AdoPaged -Url $repoUrl -Headers $headers -TimeoutSeconds $ApiTimeoutSeconds -Operation "LIST_REPOSITORIES" | Sort-Object name)
+
+$catalog = New-Object System.Collections.Generic.List[object]
+$accessible = New-Object System.Collections.Generic.List[object]
+$disabled = New-Object System.Collections.Generic.List[object]
+
+foreach ($repo in $visibleRepos) {
+    $isDisabled = Test-RepoDisabled -Repo $repo
+
+    if ($isDisabled) {
+        $status = "DISABLED"
+    }
+    else {
+        $status = "ACCESSIBLE"
+    }
+
+    $catalog.Add([PSCustomObject]@{
+        Status = $status
+        Name = Get-PropValue -Obj $repo -Name "name"
+        Id = Get-PropValue -Obj $repo -Name "id"
+        IsDisabled = $isDisabled
+        DefaultBranch = Get-PropValue -Obj $repo -Name "defaultBranch"
+        Size = Get-PropValue -Obj $repo -Name "size"
+    })
+
+    if ($isDisabled) {
+        $disabled.Add($repo)
+    }
+    else {
+        $accessible.Add($repo)
+    }
+}
+
+@($catalog) | Export-Csv -Path $catalogCsv -NoTypeInformation -Encoding UTF8
+@($catalog | Where-Object { $_.Status -eq "ACCESSIBLE" }) | Export-Csv -Path $accessibleCsv -NoTypeInformation -Encoding UTF8
+@($catalog | Where-Object { $_.Status -eq "DISABLED" }) | Export-Csv -Path $disabledCsv -NoTypeInformation -Encoding UTF8
+
+Write-Host ""
+Write-Host "Visíveis pela API:       $($visibleRepos.Count)"
+Write-Host "Acessíveis/ativos:       $($accessible.Count)"
+Write-Host "Disabled/desabilitados:  $($disabled.Count)"
+Write-Host ""
+
+$reposToScan = @($accessible)
+$lastDone = Get-PropValue -Obj $state -Name "LastCompletedRepoName"
+
+if ((-not $NoResume) -and (-not [string]::IsNullOrWhiteSpace($lastDone))) {
+    Write-Warn2 "Retomando depois de: $lastDone"
+
+    $reposToScan = @(
+        $accessible | Where-Object {
+            [string]::Compare((Get-PropValue -Obj $_ -Name "name"), $lastDone, $true) -gt 0
+        }
+    )
+}
+
+if ($reposToScan.Count -eq 0) {
+    Write-Ok "Nada pendente. Gerando CSVs finais."
+
+    $total = Write-Summaries `
+        -RawPath $rawCsv `
+        -HistoryPath $historyCsv `
+        -ByDevRepoPath $byDevRepoCsv `
+        -ByRepoPath $byRepoCsv `
+        -ByDevPath $byDevCsv
+
+    Write-Host ""
+    Write-Host "CSV principal:"
+    Write-Host $historyCsv
+
+    if ($OpenCsv) {
+        Start-Process notepad.exe $historyCsv
+    }
+
+    exit 0
+}
+
+# ============================================================
+# Varredura
+# ============================================================
+
+$nameTargetIdentities = @{}
+$totalThisRun = 0
+$failCount = 0
+$repoCounter = 0
+
+foreach ($repo in $reposToScan) {
+    $repoCounter++
+
+    $repoId = Get-PropValue -Obj $repo -Name "id"
+    $repoName = Get-PropValue -Obj $repo -Name "name"
+    $repoDefaultBranch = Get-PropValue -Obj $repo -Name "defaultBranch"
+
+    Write-Host ""
+    Write-Info "[$repoCounter/$($reposToScan.Count)] $repoName"
+
+    $repoRows = New-Object System.Collections.Generic.List[object]
+
+    try {
+        $prsUrl = "$baseApi/git/repositories/$repoId/pullrequests?searchCriteria.status=all&`$top=$PrTop&api-version=7.1"
+        $prs = @(Invoke-AdoPaged -Url $prsUrl -Headers $headers -TimeoutSeconds $ApiTimeoutSeconds -Operation "LIST_PULL_REQUESTS")
+
+        foreach ($pr in $prs) {
+            $prId = Get-PropValue -Obj $pr -Name "pullRequestId"
+            $prTitle = Get-PropValue -Obj $pr -Name "title"
+            $prStatus = Get-PropValue -Obj $pr -Name "status"
+            $prCreated = Get-PropValue -Obj $pr -Name "creationDate"
+            $prClosed = Get-PropValue -Obj $pr -Name "closedDate"
+
+            # PR criado pelo dev
+            foreach ($match in @(Find-Matches -Targets $targets -Identity $pr.createdBy -NameMatchMode $NameMatchMode)) {
+                Check-DuplicateOrStop `
+                    -Match $match `
+                    -Identity $pr.createdBy `
+                    -NameTargetIdentities $nameTargetIdentities `
+                    -DuplicateCsv $dupCsv
+
+                $evidenceKey = "$repoId|PR_CREATED|$prId|$($match.TargetKey)|$($match.MatchedTerm)"
+
+                $repoRows.Add((New-Row `
+                    -EvidenceKey $evidenceKey `
+                    -Match $match `
+                    -Identity $pr.createdBy `
+                    -RepoName $repoName `
+                    -RepoId $repoId `
+                    -RepoDefaultBranch $repoDefaultBranch `
+                    -ParticipationType "PR_CREATED" `
+                    -ParticipationDate $prCreated `
+                    -DateSource "pullRequest.creationDate" `
+                    -PullRequestId $prId `
+                    -PullRequestTitle $prTitle `
+                    -PullRequestStatus $prStatus `
+                    -PullRequestCreationDate $prCreated `
+                    -PullRequestClosedDate $prClosed `
+                    -CommentId "" `
+                    -CommentPublishedDate "" `
+                    -CommentLastUpdatedDate "" `
+                    -CommentPreview "" `
+                    -CommitId "" `
+                    -CommitDate "" `
+                    -CommitComment ""))
+            }
+
+            # Reviewer listado no PR
+            if ($ScanReviewersList -and (Test-HasProp -Obj $pr -Name "reviewers")) {
+                foreach ($reviewer in @($pr.reviewers)) {
+                    foreach ($match in @(Find-Matches -Targets $targets -Identity $reviewer -NameMatchMode $NameMatchMode)) {
+                        Check-DuplicateOrStop `
+                            -Match $match `
+                            -Identity $reviewer `
+                            -NameTargetIdentities $nameTargetIdentities `
+                            -DuplicateCsv $dupCsv
+
+                        $reviewerId = Get-PropValue -Obj $reviewer -Name "id"
+                        $evidenceKey = "$repoId|PR_REVIEWER_LISTED|$prId|$reviewerId|$($match.TargetKey)|$($match.MatchedTerm)"
+
+                        $repoRows.Add((New-Row `
+                            -EvidenceKey $evidenceKey `
+                            -Match $match `
+                            -Identity $reviewer `
+                            -RepoName $repoName `
+                            -RepoId $repoId `
+                            -RepoDefaultBranch $repoDefaultBranch `
+                            -ParticipationType "PR_REVIEWER_LISTED" `
+                            -ParticipationDate "" `
+                            -DateSource "no_exact_reviewer_date_in_pr_list" `
+                            -PullRequestId $prId `
+                            -PullRequestTitle $prTitle `
+                            -PullRequestStatus $prStatus `
+                            -PullRequestCreationDate $prCreated `
+                            -PullRequestClosedDate $prClosed `
+                            -CommentId "" `
+                            -CommentPublishedDate "" `
+                            -CommentLastUpdatedDate "" `
+                            -CommentPreview "" `
+                            -CommitId "" `
+                            -CommitDate "" `
+                            -CommitComment ""))
+                    }
+                }
+            }
+
+            # Comentários de PR
+            if ($scanComments) {
+                try {
+                    $threadsUrl = "$baseApi/git/repositories/$repoId/pullRequests/$prId/threads?api-version=7.1"
+                    $threads = @(Invoke-AdoPaged -Url $threadsUrl -Headers $headers -TimeoutSeconds $ApiTimeoutSeconds -Operation "LIST_PR_THREADS")
+
+                    foreach ($thread in $threads) {
+                        if (-not (Test-HasProp -Obj $thread -Name "comments")) {
+                            continue
+                        }
+
+                        foreach ($comment in @($thread.comments)) {
+                            if ($null -eq $comment.author) {
+                                continue
+                            }
+
+                            foreach ($match in @(Find-Matches -Targets $targets -Identity $comment.author -NameMatchMode $NameMatchMode)) {
+                                Check-DuplicateOrStop `
+                                    -Match $match `
+                                    -Identity $comment.author `
+                                    -NameTargetIdentities $nameTargetIdentities `
+                                    -DuplicateCsv $dupCsv
+
+                                $commentId = Get-PropValue -Obj $comment -Name "id"
+                                $published = Get-PropValue -Obj $comment -Name "publishedDate"
+                                $updated = Get-PropValue -Obj $comment -Name "lastUpdatedDate"
+                                $preview = Get-Preview -Text (Get-PropValue -Obj $comment -Name "content")
+                                $evidenceKey = "$repoId|PR_COMMENT|$prId|$commentId|$($match.TargetKey)|$($match.MatchedTerm)"
+
+                                $repoRows.Add((New-Row `
+                                    -EvidenceKey $evidenceKey `
+                                    -Match $match `
+                                    -Identity $comment.author `
+                                    -RepoName $repoName `
+                                    -RepoId $repoId `
+                                    -RepoDefaultBranch $repoDefaultBranch `
+                                    -ParticipationType "PR_COMMENT" `
+                                    -ParticipationDate $published `
+                                    -DateSource "comment.publishedDate" `
+                                    -PullRequestId $prId `
+                                    -PullRequestTitle $prTitle `
+                                    -PullRequestStatus $prStatus `
+                                    -PullRequestCreationDate $prCreated `
+                                    -PullRequestClosedDate $prClosed `
+                                    -CommentId $commentId `
+                                    -CommentPublishedDate $published `
+                                    -CommentLastUpdatedDate $updated `
+                                    -CommentPreview $preview `
+                                    -CommitId "" `
+                                    -CommitDate "" `
+                                    -CommitComment ""))
+                            }
+                        }
+                    }
+                }
+                catch {
+                    Add-Failure `
+                        -Path $failCsv `
+                        -Repo $repoName `
+                        -Operation "LIST_PR_THREADS_$prId" `
+                        -Message $_.Exception.Message
+                }
+            }
+        }
+    }
+    catch {
+        $failCount++
+
+        Add-Failure `
+            -Path $failCsv `
+            -Repo $repoName `
+            -Operation "LIST_PULL_REQUESTS" `
+            -Message $_.Exception.Message
+
+        Write-Warn2 "Falha ao varrer PRs deste repo. Pulando PRs."
+    }
+
+    # Commits, opcional
+    if ($ScanCommits) {
+        try {
+            $commitsUrl = "$baseApi/git/repositories/$repoId/commits?searchCriteria.`$top=$CommitsTop&api-version=7.1"
+            $commits = @(Invoke-AdoPaged -Url $commitsUrl -Headers $headers -TimeoutSeconds $ApiTimeoutSeconds -Operation "LIST_COMMITS")
+
+            foreach ($commit in $commits) {
+                $commitId = Get-PropValue -Obj $commit -Name "commitId"
+                $commitPreview = Get-Preview -Text (Get-PropValue -Obj $commit -Name "comment") -Max 220
+
+                foreach ($role in @("author", "committer")) {
+                    $person = $commit.$role
+
+                    if ($null -eq $person) {
+                        continue
+                    }
+
+                    $identity = New-CommitIdentity -Person $person
+
+                    foreach ($match in @(Find-Matches -Targets $targets -Identity $identity -NameMatchMode $NameMatchMode)) {
+                        Check-DuplicateOrStop `
+                            -Match $match `
+                            -Identity $identity `
+                            -NameTargetIdentities $nameTargetIdentities `
+                            -DuplicateCsv $dupCsv
+
+                        $commitDate = Get-PropValue -Obj $person -Name "date"
+
+                        if ($role -eq "author") {
+                            $participationType = "COMMIT_AUTHOR"
+                        }
+                        else {
+                            $participationType = "COMMIT_COMMITTER"
+                        }
+
+                        $evidenceKey = "$repoId|$participationType|$commitId|$($match.TargetKey)|$($match.MatchedTerm)"
+
+                        $repoRows.Add((New-Row `
+                            -EvidenceKey $evidenceKey `
+                            -Match $match `
+                            -Identity $identity `
+                            -RepoName $repoName `
+                            -RepoId $repoId `
+                            -RepoDefaultBranch $repoDefaultBranch `
+                            -ParticipationType $participationType `
+                            -ParticipationDate $commitDate `
+                            -DateSource "commit.$role.date" `
+                            -PullRequestId "" `
+                            -PullRequestTitle "" `
+                            -PullRequestStatus "" `
+                            -PullRequestCreationDate "" `
+                            -PullRequestClosedDate "" `
+                            -CommentId "" `
+                            -CommentPublishedDate "" `
+                            -CommentLastUpdatedDate "" `
+                            -CommentPreview "" `
+                            -CommitId $commitId `
+                            -CommitDate $commitDate `
+                            -CommitComment $commitPreview))
+                    }
+                }
+            }
+        }
+        catch {
+            $failCount++
+
+            Add-Failure `
+                -Path $failCsv `
+                -Repo $repoName `
+                -Operation "LIST_COMMITS" `
+                -Message $_.Exception.Message
+
+            Write-Warn2 "Falha ao varrer commits deste repo."
+        }
+    }
+
+    if ($repoRows.Count -gt 0) {
+        Append-CsvRows -Path $rawCsv -Rows @($repoRows)
+        Write-Ok "Participações encontradas: $($repoRows.Count)"
+    }
+    else {
+        Write-Info "Nenhuma participação encontrada."
+    }
+
+    $totalThisRun += $repoRows.Count
+
+    $state.LastCompletedRepoName = $repoName
+    $state.TotalEvidence = [int]$state.TotalEvidence + $repoRows.Count
+    Save-State -Path $stateFile -State $state
+}
+
+# ============================================================
+# CSVs finais
+# ============================================================
+
+$totalUnique = Write-Summaries `
+    -RawPath $rawCsv `
+    -HistoryPath $historyCsv `
+    -ByDevRepoPath $byDevRepoCsv `
+    -ByRepoPath $byRepoCsv `
+    -ByDevPath $byDevCsv
+
+Write-Host ""
+Write-Host "========================================"
+Write-Host "Finalizado"
+Write-Host "========================================"
+Write-Host "Visíveis pela API:             $($visibleRepos.Count)"
+Write-Host "Acessíveis/ativos:             $($accessible.Count)"
+Write-Host "Disabled/desabilitados:        $($disabled.Count)"
+Write-Host "Participações nesta execução:  $totalThisRun"
+Write-Host "Participações únicas totais:   $totalUnique"
+Write-Host "Falhas:                        $failCount"
+Write-Host ""
+Write-Host "CSV principal:"
+Write-Host $historyCsv
+Write-Host ""
+Write-Host "Resumo por dev + repo:"
+Write-Host $byDevRepoCsv
+Write-Host ""
+Write-Host "Resumo por repo:"
+Write-Host $byRepoCsv
+Write-Host ""
+Write-Host "Resumo por dev:"
+Write-Host $byDevCsv
+Write-Host ""
+Write-Host "Catálogo acessíveis:"
+Write-Host $accessibleCsv
+Write-Host ""
+Write-Host "Catálogo disabled:"
+Write-Host $disabledCsv
+Write-Host ""
+Write-Host "Falhas:"
+Write-Host $failCsv
+Write-Host ""
+
+if ($OpenCsv) {
+    Start-Process notepad.exe $historyCsv
+}
