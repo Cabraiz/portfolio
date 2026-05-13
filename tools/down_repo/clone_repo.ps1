@@ -78,34 +78,83 @@ function Get-ContextHash {
     return Get-Sha256Text $normalized
 }
 
+function Ensure-StateProperty {
+    param(
+        [object]$State,
+        [string]$Name,
+        [object]$DefaultValue
+    )
+
+    if ($null -eq $State.PSObject.Properties[$Name]) {
+        $State | Add-Member -NotePropertyName $Name -NotePropertyValue $DefaultValue -Force
+    }
+
+    return $State
+}
+
+function Repair-StateObject {
+    param(
+        [object]$State,
+        [string]$ContextHash
+    )
+
+    $State = Ensure-StateProperty -State $State -Name "ContextHash" -DefaultValue $ContextHash
+    $State = Ensure-StateProperty -State $State -Name "CreatedAt" -DefaultValue (Get-Date).ToString("s")
+    $State = Ensure-StateProperty -State $State -Name "UpdatedAt" -DefaultValue (Get-Date).ToString("s")
+
+    $State = Ensure-StateProperty -State $State -Name "CurrentRepoName" -DefaultValue ""
+    $State = Ensure-StateProperty -State $State -Name "CurrentRepoIndex" -DefaultValue 0
+
+    $State = Ensure-StateProperty -State $State -Name "LastCompletedRepoName" -DefaultValue ""
+    $State = Ensure-StateProperty -State $State -Name "LastCompletedRepoIndex" -DefaultValue 0
+    $State = Ensure-StateProperty -State $State -Name "LastCompletedRepoStatus" -DefaultValue ""
+
+    $State = Ensure-StateProperty -State $State -Name "LastSuccessfulRepoName" -DefaultValue ""
+    $State = Ensure-StateProperty -State $State -Name "LastSuccessfulRepoIndex" -DefaultValue 0
+
+    $State = Ensure-StateProperty -State $State -Name "TotalVisibleRepos" -DefaultValue 0
+    $State = Ensure-StateProperty -State $State -Name "TotalAccessibleRepos" -DefaultValue 0
+    $State = Ensure-StateProperty -State $State -Name "TotalDisabledRepos" -DefaultValue 0
+
+    return $State
+}
+
 function New-StateObject {
     param(
         [string]$ContextHash
     )
 
-    return [PSCustomObject]@{
+    $state = [PSCustomObject]@{
         ContextHash              = $ContextHash
         CreatedAt                = (Get-Date).ToString("s")
         UpdatedAt                = (Get-Date).ToString("s")
+
         CurrentRepoName          = ""
         CurrentRepoIndex         = 0
+
         LastCompletedRepoName    = ""
         LastCompletedRepoIndex   = 0
         LastCompletedRepoStatus  = ""
+
         LastSuccessfulRepoName   = ""
         LastSuccessfulRepoIndex  = 0
+
         TotalVisibleRepos        = 0
         TotalAccessibleRepos     = 0
         TotalDisabledRepos       = 0
     }
+
+    return $state
 }
 
 function Save-State {
     param(
         [string]$StateFile,
-        [object]$State
+        [object]$State,
+        [string]$ContextHash
     )
 
+    $State = Repair-StateObject -State $State -ContextHash $ContextHash
     $State.UpdatedAt = (Get-Date).ToString("s")
     $State | ConvertTo-Json -Depth 8 | Set-Content -Path $StateFile -Encoding UTF8
 }
@@ -185,7 +234,7 @@ function Get-ErrorKind {
         return "NOT_FOUND"
     }
 
-    if ($t -match "disabled|repository is disabled|repo is disabled") {
+    if ($t -match "disabled|repository is disabled|repo is disabled|tf401019") {
         return "REPO_DISABLED"
     }
 
@@ -230,7 +279,7 @@ function Explain-ErrorKind {
             return "Repositório não encontrado. Pode ter sido removido, renomeado ou estar invisível para sua conta."
         }
         "REPO_DISABLED" {
-            return "Repositório desabilitado no Azure DevOps. O script deve catalogar e pular."
+            return "Repositório desabilitado no Azure DevOps. O script cataloga e pula."
         }
         "GIT_SAFE_DIRECTORY" {
             return "O Git recusou mexer na pasta por segurança de ownership. Normal em pasta criada por outro usuário/admin/ambiente."
@@ -535,6 +584,7 @@ $state = $null
 if ((-not $NoResume) -and (Test-Path $stateFile)) {
     try {
         $state = Get-Content $stateFile -Raw | ConvertFrom-Json
+        $state = Repair-StateObject -State $state -ContextHash $contextHash
 
         if ($state.ContextHash -ne $contextHash) {
             Write-Warn2 "Estado existe, mas é de outro contexto. Criando estado novo."
@@ -548,7 +598,7 @@ if ((-not $NoResume) -and (Test-Path $stateFile)) {
         }
     }
     catch {
-        Write-Warn2 "Não consegui ler o clone-state.json. Criando estado novo."
+        Write-Warn2 "Não consegui ler/reparar o clone-state.json. Criando estado novo."
         $state = New-StateObject -ContextHash $contextHash
     }
 }
@@ -556,7 +606,8 @@ else {
     $state = New-StateObject -ContextHash $contextHash
 }
 
-Save-State -StateFile $stateFile -State $state
+$state = Repair-StateObject -State $state -ContextHash $contextHash
+Save-State -StateFile $stateFile -State $state -ContextHash $contextHash
 
 $patSecure = Read-Host "Cole seu PAT do Azure DevOps" -AsSecureString
 $ptr = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($patSecure)
@@ -637,10 +688,11 @@ $catalogRows | Export-Csv -Path $catalogCsv -NoTypeInformation -Encoding UTF8
 @($catalogRows | Where-Object { $_.Status -eq "ACCESSIBLE" }) | Export-Csv -Path $accessibleCsv -NoTypeInformation -Encoding UTF8
 @($catalogRows | Where-Object { $_.Status -eq "DISABLED" }) | Export-Csv -Path $disabledCsv -NoTypeInformation -Encoding UTF8
 
+$state = Repair-StateObject -State $state -ContextHash $contextHash
 $state.TotalVisibleRepos = $visibleRepos.Count
 $state.TotalAccessibleRepos = $accessibleRepos.Count
 $state.TotalDisabledRepos = $disabledRepos.Count
-Save-State -StateFile $stateFile -State $state
+Save-State -StateFile $stateFile -State $state -ContextHash $contextHash
 
 Write-Host "========================================"
 Write-Host "Catálogo de repositórios"
@@ -722,6 +774,8 @@ $skipCount = 0
 $failCount = 0
 $disabledSkipCount = $disabledRepos.Count
 
+$accessibleRepoNames = @($accessibleRepos | ForEach-Object { $_.name })
+
 foreach ($repo in $repos) {
     # Segurança extra: se por algum motivo entrou disabled na lista, pula.
     if (Test-RepoDisabled $repo) {
@@ -730,7 +784,7 @@ foreach ($repo in $repos) {
         continue
     }
 
-    $globalIndex = [Array]::IndexOf($accessibleRepos.name, $repo.name) + 1
+    $globalIndex = [Array]::IndexOf($accessibleRepoNames, $repo.name) + 1
 
     $safeName = $repo.name -replace '[\\/:*?"<>|]', '_'
     $target = Join-Path $DestRoot $safeName
@@ -738,9 +792,10 @@ foreach ($repo in $repos) {
     Write-Host ""
     Write-Info "[$globalIndex/$($accessibleRepos.Count) acessíveis] $($repo.name)"
 
+    $state = Repair-StateObject -State $state -ContextHash $contextHash
     $state.CurrentRepoName = $repo.name
     $state.CurrentRepoIndex = $globalIndex
-    Save-State -StateFile $stateFile -State $state
+    Save-State -StateFile $stateFile -State $state -ContextHash $contextHash
 
     Add-Log -LogFile $logFile -Message "START repo=$($repo.name) target=$target"
 
@@ -864,6 +919,7 @@ foreach ($repo in $repos) {
 
     # Avança o estado depois de cada repo tratado.
     # Isso evita recomeçar do zero se cair VPN, terminal, notebook ou autenticação.
+    $state = Repair-StateObject -State $state -ContextHash $contextHash
     $state.CurrentRepoName = ""
     $state.CurrentRepoIndex = 0
     $state.LastCompletedRepoName = $repo.name
@@ -875,21 +931,21 @@ foreach ($repo in $repos) {
         $state.LastSuccessfulRepoIndex = $globalIndex
     }
 
-    Save-State -StateFile $stateFile -State $state
+    Save-State -StateFile $stateFile -State $state -ContextHash $contextHash
 }
 
 Write-Host ""
 Write-Host "========================================"
 Write-Host "Finalizado"
 Write-Host "========================================"
-Write-Host "Visíveis pela API:       $($visibleRepos.Count)"
-Write-Host "Acessíveis/ativos:       $($accessibleRepos.Count)"
-Write-Host "Disabled/desabilitados:  $($disabledRepos.Count)"
+Write-Host "Visíveis pela API:        $($visibleRepos.Count)"
+Write-Host "Acessíveis/ativos:        $($accessibleRepos.Count)"
+Write-Host "Disabled/desabilitados:   $($disabledRepos.Count)"
 Write-Host ""
-Write-Host "OK:                      $okCount"
-Write-Host "Pulados existentes/locais:$skipCount"
-Write-Host "Pulados disabled:        $disabledSkipCount"
-Write-Host "Falhas:                  $failCount"
+Write-Host "OK:                       $okCount"
+Write-Host "Pulados existentes/locais: $skipCount"
+Write-Host "Pulados disabled:         $disabledSkipCount"
+Write-Host "Falhas:                   $failCount"
 Write-Host ""
 Write-Host "Último concluído:"
 Write-Host $state.LastCompletedRepoName
