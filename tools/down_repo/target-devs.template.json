@@ -1,0 +1,14 @@
+[
+  {
+    "name": "Nome Completo"
+  },
+  {
+    "email": "pessoa@empresa.com"
+  },
+  {
+    "id": "00000000-0000-0000-0000-000000000000"
+  },
+  {
+    "url": "https://vssps.dev.azure.com/ORG/_apis/Identities/00000000-0000-0000-0000-000000000000"
+  }
+]
