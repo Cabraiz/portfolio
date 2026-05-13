@@ -94,7 +94,9 @@ function New-StateObject {
         LastCompletedRepoStatus  = ""
         LastSuccessfulRepoName   = ""
         LastSuccessfulRepoIndex  = 0
-        TotalKnownRepos          = 0
+        TotalVisibleRepos        = 0
+        TotalAccessibleRepos     = 0
+        TotalDisabledRepos       = 0
     }
 }
 
@@ -108,11 +110,61 @@ function Save-State {
     $State | ConvertTo-Json -Depth 8 | Set-Content -Path $StateFile -Encoding UTF8
 }
 
+function Test-RepoDisabled {
+    param([object]$Repo)
+
+    $prop = $Repo.PSObject.Properties["isDisabled"]
+
+    if ($null -eq $prop) {
+        return $false
+    }
+
+    if ($null -eq $prop.Value) {
+        return $false
+    }
+
+    try {
+        return [System.Convert]::ToBoolean($prop.Value)
+    }
+    catch {
+        return $false
+    }
+}
+
+function Get-RepoStatus {
+    param([object]$Repo)
+
+    if (Test-RepoDisabled $Repo) {
+        return "DISABLED"
+    }
+
+    return "ACCESSIBLE"
+}
+
+function Get-SafeValue {
+    param(
+        [object]$Object,
+        [string]$PropertyName
+    )
+
+    $prop = $Object.PSObject.Properties[$PropertyName]
+
+    if ($null -eq $prop) {
+        return ""
+    }
+
+    if ($null -eq $prop.Value) {
+        return ""
+    }
+
+    return "$($prop.Value)"
+}
+
 function Get-ErrorKind {
     param([string]$Text)
 
     if ([string]::IsNullOrWhiteSpace($Text)) {
-        return "UNKNOWN"
+        return "UNKNOWN_EMPTY_OUTPUT"
     }
 
     $t = $Text.ToLowerInvariant()
@@ -121,7 +173,7 @@ function Get-ErrorKind {
         return "TIMEOUT"
     }
 
-    if ($t -match "authentication failed|could not read username|terminal prompts disabled|cannot prompt|invalid credentials|unauthorized|401|vs30063|tf400813") {
+    if ($t -match "authentication failed|could not read username|terminal prompts disabled|cannot prompt|invalid credentials|unauthorized|401|vs30063|tf400813|personal access token|pat") {
         return "AUTH"
     }
 
@@ -133,16 +185,32 @@ function Get-ErrorKind {
         return "NOT_FOUND"
     }
 
-    if ($t -match "permission denied|access is denied|unable to create file|could not create|filename too long|no space left|disk full|read-only file system|failed to write|unable to write") {
-        return "LOCAL_WRITE"
+    if ($t -match "disabled|repository is disabled|repo is disabled") {
+        return "REPO_DISABLED"
     }
 
-    if ($t -match "could not resolve host|failed to connect|connection timed out|tls|ssl|early eof|rpc failed|remote end hung up|connection was reset|connection reset|network is unreachable|proxy|schannel|recv failure|send failure") {
+    if ($t -match "dubious ownership|safe.directory") {
+        return "GIT_SAFE_DIRECTORY"
+    }
+
+    if ($t -match "permission denied|access is denied|unable to create file|could not create|filename too long|no space left|disk full|read-only file system|failed to write|unable to write|could not lock|index.lock|shallow.lock|packed-refs.lock|cannot lock ref") {
+        return "LOCAL_WRITE_OR_LOCK"
+    }
+
+    if ($t -match "not a git repository|not a git repo|does not appear to be a git repository|bad object|corrupt|loose object|object file.*is empty|invalid object|unable to read") {
+        return "LOCAL_REPO_CORRUPT"
+    }
+
+    if ($t -match "could not resolve host|failed to connect|connection timed out|tls|ssl|early eof|rpc failed|remote end hung up|connection was reset|connection reset|network is unreachable|proxy|schannel|recv failure|send failure|http 407|http 502|http 503|http 504") {
         return "NETWORK"
     }
 
-    if ($t -match "your local changes|would be overwritten|divergent branches|need to specify how to reconcile|not possible to fast-forward|non-fast-forward|merge conflict|unmerged files") {
+    if ($t -match "your local changes|would be overwritten|divergent branches|need to specify how to reconcile|not possible to fast-forward|non-fast-forward|merge conflict|unmerged files|refusing to merge unrelated histories") {
         return "LOCAL_GIT_STATE"
+    }
+
+    if ($t -match "couldn't find remote ref|could not read from remote repository|no such remote|remote origin already exists|origin does not appear") {
+        return "REMOTE_CONFIG"
     }
 
     return "UNKNOWN"
@@ -161,8 +229,20 @@ function Explain-ErrorKind {
         "NOT_FOUND" {
             return "Repositório não encontrado. Pode ter sido removido, renomeado ou estar invisível para sua conta."
         }
-        "LOCAL_WRITE" {
-            return "Problema local de gravação. Pode ser bloqueio corporativo, pasta sem permissão, nome longo, disco cheio ou EDR/antivírus."
+        "REPO_DISABLED" {
+            return "Repositório desabilitado no Azure DevOps. O script deve catalogar e pular."
+        }
+        "GIT_SAFE_DIRECTORY" {
+            return "O Git recusou mexer na pasta por segurança de ownership. Normal em pasta criada por outro usuário/admin/ambiente."
+        }
+        "LOCAL_WRITE_OR_LOCK" {
+            return "Problema local de gravação ou lock. Pode ser arquivo travado, index.lock, antivírus/EDR, nome longo, disco cheio ou permissão."
+        }
+        "LOCAL_REPO_CORRUPT" {
+            return "O repo local parece parcial/corrompido. Melhor renomear a pasta local e clonar de novo."
+        }
+        "REMOTE_CONFIG" {
+            return "Configuração remota local quebrada ou divergente. O origin pode estar errado ou o repo remoto mudou."
         }
         "NETWORK" {
             return "Problema transitório de rede/VPN/proxy/TLS. O script tenta novamente antes de pular."
@@ -173,6 +253,9 @@ function Explain-ErrorKind {
         "LOCAL_GIT_STATE" {
             return "Repo local tem estado que impede pull automático seguro. O script não sobrescreve mudanças locais."
         }
+        "UNKNOWN_EMPTY_OUTPUT" {
+            return "O Git falhou sem devolver mensagem útil. Pode ser bloqueio externo, processo morto, EDR/antivírus, ou problema na forma de execução."
+        }
         default {
             return "Erro não classificado. Veja o log bruto."
         }
@@ -182,7 +265,7 @@ function Explain-ErrorKind {
 function Test-RetryableKind {
     param([string]$Kind)
 
-    return @("NETWORK", "TIMEOUT", "UNKNOWN") -contains $Kind
+    return @("NETWORK", "TIMEOUT", "UNKNOWN", "UNKNOWN_EMPTY_OUTPUT") -contains $Kind
 }
 
 function Quote-Arg {
@@ -436,6 +519,9 @@ if ($ResetState -and (Test-Path $stateFile)) {
 $stamp = Get-Date -Format "yyyyMMdd-HHmmss"
 $logFile = Join-Path $logDir "clone-log-$stamp.txt"
 $failCsv = Join-Path $logDir "clone-failures-$stamp.csv"
+$catalogCsv = Join-Path $logDir "repos-catalog-$stamp.csv"
+$accessibleCsv = Join-Path $logDir "repos-accessible-$stamp.csv"
+$disabledCsv = Join-Path $logDir "repos-disabled-$stamp.csv"
 
 "repo,status,kind,target,message" | Set-Content -Path $failCsv -Encoding UTF8
 
@@ -515,9 +601,9 @@ catch {
     exit 1
 }
 
-$allRepos = @($response.value | Sort-Object name)
+$visibleRepos = @($response.value | Sort-Object name)
 
-if (-not $allRepos -or $allRepos.Count -eq 0) {
+if (-not $visibleRepos -or $visibleRepos.Count -eq 0) {
     Write-Warn2 "Nenhum repositório encontrado."
     Write-Host ""
     Write-Host "Possíveis causas:"
@@ -528,8 +614,65 @@ if (-not $allRepos -or $allRepos.Count -eq 0) {
     exit 0
 }
 
-$state.TotalKnownRepos = $allRepos.Count
+# Catalogação antes de qualquer clone/fetch.
+$catalogRows = @(
+    foreach ($repo in $visibleRepos) {
+        $status = Get-RepoStatus $repo
+
+        [PSCustomObject]@{
+            Status        = $status
+            Name          = Get-SafeValue $repo "name"
+            Id            = Get-SafeValue $repo "id"
+            IsDisabled    = if ($status -eq "DISABLED") { "true" } else { "false" }
+            DefaultBranch = Get-SafeValue $repo "defaultBranch"
+            Size          = Get-SafeValue $repo "size"
+        }
+    }
+)
+
+$disabledRepos = @($visibleRepos | Where-Object { Test-RepoDisabled $_ } | Sort-Object name)
+$accessibleRepos = @($visibleRepos | Where-Object { -not (Test-RepoDisabled $_) } | Sort-Object name)
+
+$catalogRows | Export-Csv -Path $catalogCsv -NoTypeInformation -Encoding UTF8
+@($catalogRows | Where-Object { $_.Status -eq "ACCESSIBLE" }) | Export-Csv -Path $accessibleCsv -NoTypeInformation -Encoding UTF8
+@($catalogRows | Where-Object { $_.Status -eq "DISABLED" }) | Export-Csv -Path $disabledCsv -NoTypeInformation -Encoding UTF8
+
+$state.TotalVisibleRepos = $visibleRepos.Count
+$state.TotalAccessibleRepos = $accessibleRepos.Count
+$state.TotalDisabledRepos = $disabledRepos.Count
 Save-State -StateFile $stateFile -State $state
+
+Write-Host "========================================"
+Write-Host "Catálogo de repositórios"
+Write-Host "========================================"
+Write-Host "Visíveis pela API:       $($visibleRepos.Count)"
+Write-Host "Acessíveis/ativos:       $($accessibleRepos.Count)"
+Write-Host "Disabled/desabilitados:  $($disabledRepos.Count)"
+Write-Host ""
+Write-Host "Catálogo completo:"
+Write-Host $catalogCsv
+Write-Host ""
+Write-Host "Somente acessíveis:"
+Write-Host $accessibleCsv
+Write-Host ""
+Write-Host "Somente disabled:"
+Write-Host $disabledCsv
+Write-Host ""
+
+if ($disabledRepos.Count -gt 0) {
+    Write-Warn2 "Repos disabled foram catalogados e serão pulados antes de qualquer fetch/clone."
+    Write-Host ""
+    Write-Host "Primeiros disabled encontrados:"
+    $disabledRepos |
+        Select-Object -First 10 |
+        ForEach-Object { Write-Host " - $($_.name)" }
+    Write-Host ""
+}
+
+if ($accessibleRepos.Count -eq 0) {
+    Write-Warn2 "Nenhum repositório acessível/ativo para processar."
+    exit 0
+}
 
 $resumePoint = ""
 
@@ -542,18 +685,18 @@ elseif ((-not $NoResume) -and (-not [string]::IsNullOrWhiteSpace($state.LastComp
     Write-Warn2 "Retomando automaticamente depois de: $resumePoint"
 }
 
-$repos = $allRepos
+$repos = $accessibleRepos
 
 if (-not [string]::IsNullOrWhiteSpace($resumePoint)) {
     if (-not [string]::IsNullOrWhiteSpace($StartFromName)) {
         # StartFromName é inclusivo.
-        $repos = @($allRepos | Where-Object {
+        $repos = @($accessibleRepos | Where-Object {
             [string]::Compare($_.name, $resumePoint, $true) -ge 0
         })
     }
     else {
         # Retomada automática é depois do último concluído.
-        $repos = @($allRepos | Where-Object {
+        $repos = @($accessibleRepos | Where-Object {
             [string]::Compare($_.name, $resumePoint, $true) -gt 0
         })
     }
@@ -570,22 +713,30 @@ if ($repos.Count -eq 0) {
     exit 0
 }
 
-Write-Info "Total conhecido: $($allRepos.Count)"
+Write-Info "Total acessível/ativo: $($accessibleRepos.Count)"
 Write-Info "Pendentes nesta execução: $($repos.Count)"
 Write-Host ""
 
 $okCount = 0
 $skipCount = 0
 $failCount = 0
+$disabledSkipCount = $disabledRepos.Count
 
 foreach ($repo in $repos) {
-    $globalIndex = [Array]::IndexOf($allRepos.name, $repo.name) + 1
+    # Segurança extra: se por algum motivo entrou disabled na lista, pula.
+    if (Test-RepoDisabled $repo) {
+        Write-Warn2 "Pulando disabled: $($repo.name)"
+        $skipCount++
+        continue
+    }
+
+    $globalIndex = [Array]::IndexOf($accessibleRepos.name, $repo.name) + 1
 
     $safeName = $repo.name -replace '[\\/:*?"<>|]', '_'
     $target = Join-Path $DestRoot $safeName
 
     Write-Host ""
-    Write-Info "[$globalIndex/$($allRepos.Count)] $($repo.name)"
+    Write-Info "[$globalIndex/$($accessibleRepos.Count) acessíveis] $($repo.name)"
 
     $state.CurrentRepoName = $repo.name
     $state.CurrentRepoIndex = $globalIndex
@@ -731,15 +882,29 @@ Write-Host ""
 Write-Host "========================================"
 Write-Host "Finalizado"
 Write-Host "========================================"
-Write-Host "OK:       $okCount"
-Write-Host "Pulados:  $skipCount"
-Write-Host "Falhas:   $failCount"
+Write-Host "Visíveis pela API:       $($visibleRepos.Count)"
+Write-Host "Acessíveis/ativos:       $($accessibleRepos.Count)"
+Write-Host "Disabled/desabilitados:  $($disabledRepos.Count)"
+Write-Host ""
+Write-Host "OK:                      $okCount"
+Write-Host "Pulados existentes/locais:$skipCount"
+Write-Host "Pulados disabled:        $disabledSkipCount"
+Write-Host "Falhas:                  $failCount"
 Write-Host ""
 Write-Host "Último concluído:"
 Write-Host $state.LastCompletedRepoName
 Write-Host ""
 Write-Host "Último com sucesso:"
 Write-Host $state.LastSuccessfulRepoName
+Write-Host ""
+Write-Host "Catálogo completo:"
+Write-Host $catalogCsv
+Write-Host ""
+Write-Host "Repos acessíveis:"
+Write-Host $accessibleCsv
+Write-Host ""
+Write-Host "Repos disabled:"
+Write-Host $disabledCsv
 Write-Host ""
 Write-Host "Estado:"
 Write-Host $stateFile
@@ -752,8 +917,8 @@ Write-Host $failCsv
 Write-Host ""
 
 if ($failCount -gt 0) {
-    Write-Warn2 "Houve falhas, mas o script não parou. Na próxima execução, ele continua depois do último repo concluído."
+    Write-Warn2 "Houve falhas, mas o script não parou. Na próxima execução, ele continua depois do último repo acessível concluído."
 }
 else {
-    Write-Ok "Nenhuma falha registrada."
+    Write-Ok "Nenhuma falha registrada nos repos acessíveis processados."
 }
