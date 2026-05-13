@@ -1,9 +1,15 @@
 [
   {
-    "name": "Nome Completo"
+    "email": "dev1@empresa.com"
   },
   {
-    "email": "pessoa@empresa.com"
+    "email": "dev2@empresa.com"
+  },
+  {
+    "email": "dev3@empresa.com"
+  },
+  {
+    "name": "Nome Completo"
   },
   {
     "id": "00000000-0000-0000-0000-000000000000"
