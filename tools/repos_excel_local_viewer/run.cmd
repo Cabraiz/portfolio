@@ -1,22 +1,20 @@
 @echo off
 setlocal
 cd /d "%~dp0"
-title Repos Excel Local Viewer - Porta 9999
-
-echo =======================================
-echo Repos Excel Local Viewer
-echo =======================================
-echo Porta: 9999
-echo URL: http://localhost:9999
 echo.
-
-where py >nul 2>nul
-if %errorlevel%==0 (
-    py -3 server.py
-) else (
-    python server.py
+echo ================================================
+echo  Repos Excel Timeline Viewer
+echo ================================================
+echo.
+where python >nul 2>nul
+if errorlevel 1 (
+    echo Python nao encontrado no PATH.
+    echo Instale o Python 3 ou adicione python.exe ao PATH.
+    echo.
+    pause
+    exit /b 1
 )
-
+start "" "http://localhost:9999"
+python server.py
 echo.
-echo Servidor encerrado.
 pause

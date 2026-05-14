@@ -1,45 +1,30 @@
-Repos Excel Local Viewer
-========================
+Repos Excel Timeline Viewer
 
-Objetivo
---------
-Rodar um servidor local na porta 9999 para analisar um arquivo .xlsx com as 3 primeiras colunas:
+Missão:
+Ver quais repositórios foram usados em um período.
 
-A: Data
-B: Pessoa
-C: Repositorio
+Entrada esperada no Excel:
+A = Data
+B = Pessoa
+C = Repositorio
 
-Ele permite escolher uma range de ano/mes, por exemplo 2025-02 ate 2026-08, e visualizar:
-- Repositorios unicos usados no periodo
-- Historico cronologico
-- Resumo por pessoa
-- Exportacao CSV filtrada
-
-Como rodar
-----------
+Como rodar:
 1. Extraia o ZIP.
-2. Dê duplo clique em run.cmd.
-3. Abra, se nao abrir sozinho:
-   http://localhost:9999
-4. Selecione seu arquivo .xlsx.
-5. Escolha o periodo por ano/mes.
+2. Clique em run.cmd.
+3. Abra http://localhost:9999
+4. Selecione o .xlsx.
+5. Arraste o range slider de meses.
 
-Dependencias
-------------
-Nao precisa instalar Flask, pandas, openpyxl ou npm.
-Usa somente Python padrao.
+A tabela mostra:
+- Repositorio
+- Primeira data dentro do período selecionado
+- Última data dentro do período selecionado
+- Anos em que apareceu
+- Meses ativos no período
 
-Requisitos
-----------
-Python 3 instalado no Windows.
+Ordenação: clique nos cabeçalhos.
 
-Observacoes
------------
-- O arquivo nao sai da maquina. Tudo roda localmente.
-- O leitor XLSX considera a primeira aba do arquivo.
-- Se a primeira linha tiver Data/Pessoa/Repositorio, ela e tratada como cabecalho e ignorada.
-- Datas aceitas:
-  13/05/2026 18:16
-  13/05/2026
-  2026-05-13T18:16:00Z
-  numero serial do Excel
+Dependências:
+- Python 3 instalado.
+- Nenhuma biblioteca externa.
+- O front usa Google Fonts via internet; sem internet usa fallback local.
