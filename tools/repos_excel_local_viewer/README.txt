@@ -1,30 +1,40 @@
-Repos Excel Timeline Viewer
+Team Repo Usage Viewer
 
-Missão:
-Ver quais repositórios foram usados em um período.
+Objetivo:
+Saber quais repositórios o time usa dentro de uma organização que tem mais de um projeto.
 
-Entrada esperada no Excel:
+Entrada esperada em cada XLSX:
 A = Data
 B = Pessoa
 C = Repositorio
 
-Como rodar:
+Uso rápido:
 1. Extraia o ZIP.
-2. Clique em run.cmd.
-3. Abra http://localhost:9999
-4. Selecione o .xlsx.
-5. Arraste o range slider de meses.
+2. Execute run.cmd.
+3. Abra http://localhost:9999.
+4. Selecione vários .xlsx, um por projeto.
 
-A tabela mostra:
-- Repositorio
-- Primeira data dentro do período selecionado
-- Última data dentro do período selecionado
-- Anos em que apareceu
-- Meses ativos no período
+No seu Windows:
+O run.cmd tenta primeiro:
+py -3 server.py
 
-Ordenação: clique nos cabeçalhos.
+Modo array/config:
+1. Coloque os .xlsx dentro da pasta data/.
+2. Edite data/projects.json.
+3. Clique em "Carregar data/projects.json" na tela.
 
-Dependências:
-- Python 3 instalado.
-- Nenhuma biblioteca externa.
-- O front usa Google Fonts via internet; sem internet usa fallback local.
+Exemplo de data/projects.json:
+{
+  "organization": "QualicorpBr",
+  "projects": [
+    { "id": "qualitech", "name": "Qualitech", "file": "qualitech.xlsx" },
+    { "id": "outro-projeto", "name": "Outro Projeto", "file": "outro-projeto.xlsx" }
+  ]
+}
+
+Resultado:
+Repositorio | Projetos | Primeira data | Última data | Anos | Meses ativos
+
+Regra de unique:
+Se o mesmo repositório aparece 100 vezes, ele vira 1 linha.
+Se aparece em dois projetos, continua 1 linha, com os dois projetos na coluna Projetos.

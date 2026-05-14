@@ -1,254 +1,322 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+
 from __future__ import annotations
-import datetime as dt
-import json, os, re, sys, tempfile, traceback, urllib.parse, zipfile
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
 from xml.etree import ElementTree as ET
+import datetime as dt
+import json, os, re, sys, tempfile, traceback, urllib.parse, zipfile
 
 ROOT = Path(__file__).resolve().parent
-APP_DIR = ROOT / "web"
+APP = ROOT / "web"
+DATA = ROOT / "data"
 PORT = 9999
+
 NS = {
-    "main": "http://schemas.openxmlformats.org/spreadsheetml/2006/main",
-    "pkgrel": "http://schemas.openxmlformats.org/package/2006/relationships",
+    "m": "http://schemas.openxmlformats.org/spreadsheetml/2006/main",
+    "r": "http://schemas.openxmlformats.org/package/2006/relationships",
 }
 
-def xml_from_zip(zf: zipfile.ZipFile, path: str) -> ET.Element:
-    with zf.open(path) as f:
-        return ET.fromstring(f.read())
+def norm(s):
+    s = (s or "").strip().lower()
+    tr = str.maketrans("áàãâéêíóôõúç", "aaaaeeiooouc")
+    return re.sub(r"\s+", " ", s.translate(tr))
 
-def norm_header(s: str) -> str:
-    s = str(s or "").strip().lower()
-    for a, b in {"á":"a","à":"a","ã":"a","â":"a","é":"e","ê":"e","í":"i","ó":"o","ô":"o","õ":"o","ú":"u","ç":"c"}.items():
-        s = s.replace(a, b)
-    return re.sub(r"\s+", " ", s)
-
-def col_index(ref: str) -> int:
-    letters = re.sub(r"[^A-Z]", "", str(ref).upper())
-    n = 0
-    for ch in letters:
-        n = n * 26 + ord(ch) - ord("A") + 1
-    return n
-
-def safe(v) -> str:
+def text(v):
     return "" if v is None else str(v).strip()
 
-def read_shared_strings(zf: zipfile.ZipFile) -> List[str]:
-    if "xl/sharedStrings.xml" not in zf.namelist():
+def xml(z, path):
+    with z.open(path) as f:
+        return ET.fromstring(f.read())
+
+def col_idx(ref):
+    letters = re.sub(r"[^A-Z]", "", ref.upper())
+    n = 0
+    for ch in letters:
+        n = n * 26 + ord(ch) - 64
+    return n
+
+def shared_strings(z):
+    if "xl/sharedStrings.xml" not in z.namelist():
         return []
-    root = xml_from_zip(zf, "xl/sharedStrings.xml")
+    root = xml(z, "xl/sharedStrings.xml")
     out = []
-    for si in root.findall("main:si", NS):
-        out.append("".join((t.text or "") for t in si.findall(".//main:t", NS)))
+    for si in root.findall("m:si", NS):
+        out.append("".join(t.text or "" for t in si.findall(".//m:t", NS)))
     return out
 
-def read_date_style_ids(zf: zipfile.ZipFile) -> set[int]:
-    builtins = {14,15,16,17,18,19,20,21,22,27,30,36,45,46,47,50,57}
-    if "xl/styles.xml" not in zf.namelist():
+def date_style_ids(z):
+    if "xl/styles.xml" not in z.namelist():
         return set()
-    root = xml_from_zip(zf, "xl/styles.xml")
+    builtins = {14,15,16,17,18,19,20,21,22,27,30,36,45,46,47,50,57}
+    root = xml(z, "xl/styles.xml")
     custom = set()
-    numfmts = root.find("main:numFmts", NS)
+    numfmts = root.find("m:numFmts", NS)
     if numfmts is not None:
-        for n in numfmts.findall("main:numFmt", NS):
-            try: fmt_id = int(n.attrib.get("numFmtId", "0"))
-            except ValueError: continue
-            code = (n.attrib.get("formatCode", "") or "").lower()
-            if any(tok in code for tok in ["yy", "yyyy", "dd", "mmm", "mmmm", "h:", "hh:", "ss"]):
-                custom.add(fmt_id)
-    date_ids = builtins | custom
-    styles = set()
-    cellxfs = root.find("main:cellXfs", NS)
-    if cellxfs is not None:
-        for i, xf in enumerate(cellxfs.findall("main:xf", NS)):
-            try: fmt_id = int(xf.attrib.get("numFmtId", "0"))
-            except ValueError: fmt_id = 0
-            if fmt_id in date_ids:
-                styles.add(i)
-    return styles
+        for nf in numfmts.findall("m:numFmt", NS):
+            code = (nf.attrib.get("formatCode") or "").lower()
+            if any(x in code for x in ["yy", "yyyy", "dd", "mmm", "mmmm", "h:", "hh:", "ss"]):
+                try:
+                    custom.add(int(nf.attrib.get("numFmtId", "0")))
+                except ValueError:
+                    pass
+    ids = builtins | custom
+    out = set()
+    xfs = root.find("m:cellXfs", NS)
+    if xfs is not None:
+        for i, xf in enumerate(xfs.findall("m:xf", NS)):
+            try:
+                if int(xf.attrib.get("numFmtId", "0")) in ids:
+                    out.add(i)
+            except ValueError:
+                pass
+    return out
 
-def first_sheet_path(zf: zipfile.ZipFile) -> str:
-    wb = xml_from_zip(zf, "xl/workbook.xml")
-    rels = xml_from_zip(zf, "xl/_rels/workbook.xml.rels")
-    sheet = wb.find("main:sheets/main:sheet", NS)
+def first_sheet(z):
+    wb = xml(z, "xl/workbook.xml")
+    rels = xml(z, "xl/_rels/workbook.xml.rels")
+    sheet = wb.find("m:sheets/m:sheet", {"m":"http://schemas.openxmlformats.org/spreadsheetml/2006/main"})
     if sheet is None:
         raise ValueError("Nenhuma aba encontrada no XLSX.")
     rid = sheet.attrib.get("{http://schemas.openxmlformats.org/officeDocument/2006/relationships}id")
     target = ""
-    for rel in rels.findall("pkgrel:Relationship", NS):
+    for rel in rels.findall("r:Relationship", NS):
         if rel.attrib.get("Id") == rid:
-            target = rel.attrib.get("Target", "")
+            target = rel.attrib.get("Target","")
             break
     if not target:
         raise ValueError("Não consegui localizar a primeira aba.")
-    if target.startswith("/"): return target.lstrip("/")
-    if target.startswith("worksheets/"): return "xl/" + target
-    if target.startswith("xl/"): return target
+    if target.startswith("/"):
+        return target[1:]
+    if target.startswith("xl/"):
+        return target
+    if target.startswith("worksheets/"):
+        return "xl/" + target
     return "xl/" + target
 
-def excel_serial_to_datetime(value: float) -> Optional[dt.datetime]:
+def excel_date(n):
     try:
-        return dt.datetime(1899, 12, 30) + dt.timedelta(days=float(value))
+        return dt.datetime(1899, 12, 30) + dt.timedelta(days=float(n))
     except Exception:
         return None
 
-def parse_date(value) -> Optional[dt.datetime]:
-    s = safe(value)
-    if not s: return None
-    clean = s.strip().replace("Z", "").replace("T", " ")
-    if re.fullmatch(r"\d+(\.\d+)?", clean):
+def parse_date(v):
+    s = text(v)
+    if not s:
+        return None
+    s = s.replace("T", " ").replace("Z", "").strip()
+    if re.fullmatch(r"\d+(\.\d+)?", s):
         try:
-            num = float(clean)
-            if 20000 <= num <= 90000:
-                return excel_serial_to_datetime(num)
+            f = float(s)
+            if 20000 <= f <= 90000:
+                return excel_date(f)
         except Exception:
             pass
-    for fmt in ["%d/%m/%Y %H:%M:%S","%d/%m/%Y %H:%M","%d/%m/%Y","%Y-%m-%d %H:%M:%S","%Y-%m-%d %H:%M","%Y-%m-%d","%m/%d/%Y %H:%M:%S","%m/%d/%Y %H:%M","%m/%d/%Y"]:
+    for fmt in ("%d/%m/%Y %H:%M:%S","%d/%m/%Y %H:%M","%d/%m/%Y",
+                "%Y-%m-%d %H:%M:%S","%Y-%m-%d %H:%M","%Y-%m-%d",
+                "%m/%d/%Y %H:%M:%S","%m/%d/%Y %H:%M","%m/%d/%Y"):
         try:
-            return dt.datetime.strptime(clean[:19], fmt)
+            return dt.datetime.strptime(s[:19], fmt)
         except Exception:
             pass
     try:
-        return dt.datetime.fromisoformat(clean)
+        return dt.datetime.fromisoformat(s)
     except Exception:
         return None
 
-def cell_value(cell: ET.Element, shared: List[str], date_styles: set[int]):
-    ctype = cell.attrib.get("t", "")
-    style = cell.attrib.get("s", "")
-    if ctype == "inlineStr":
-        return "".join((t.text or "") for t in cell.findall(".//main:t", NS)).strip()
-    v = cell.find("main:v", NS)
-    if v is None or v.text is None: return ""
+def cell_value(c, ss, ds):
+    typ = c.attrib.get("t","")
+    sid = c.attrib.get("s","")
+    if typ == "inlineStr":
+        return "".join(t.text or "" for t in c.findall(".//m:t", NS)).strip()
+    v = c.find("m:v", NS)
+    if v is None or v.text is None:
+        return ""
     raw = v.text
-    if ctype == "s":
+    if typ == "s":
         try:
-            idx = int(raw)
-            return shared[idx] if 0 <= idx < len(shared) else ""
+            i = int(raw)
+            return ss[i] if 0 <= i < len(ss) else ""
         except Exception:
             return ""
-    if ctype == "b": return "TRUE" if raw == "1" else "FALSE"
     try:
-        if style != "" and int(style) in date_styles:
-            d = excel_serial_to_datetime(float(raw))
-            if d: return d.strftime("%Y-%m-%d %H:%M:%S")
+        if sid != "" and int(sid) in ds:
+            d = excel_date(float(raw))
+            if d:
+                return d.strftime("%Y-%m-%d %H:%M:%S")
     except Exception:
         pass
     return raw
 
-def read_xlsx(path: Path) -> List[dict]:
-    raw_rows = []
-    with zipfile.ZipFile(path, "r") as zf:
-        shared = read_shared_strings(zf)
-        date_styles = read_date_style_ids(zf)
-        sheet_path = first_sheet_path(zf)
-        root = xml_from_zip(zf, sheet_path)
-        sheet_data = root.find("main:sheetData", NS)
-        if sheet_data is None: return []
-        for row in sheet_data.findall("main:row", NS):
-            row_num = int(row.attrib.get("r", "0") or "0")
-            cells: Dict[int, object] = {}
-            for c in row.findall("main:c", NS):
-                col = col_index(c.attrib.get("r", ""))
-                if col in (1,2,3):
-                    cells[col] = cell_value(c, shared, date_styles)
-            if cells:
-                raw_rows.append((row_num, cells))
-    if not raw_rows: return []
+def project_id(name):
+    s = norm(name)
+    s = re.sub(r"[^a-z0-9]+", "-", s).strip("-")
+    return s or "projeto"
+
+def read_xlsx(path, project, pid, org):
+    rows = []
+    with zipfile.ZipFile(path, "r") as z:
+        ss = shared_strings(z)
+        ds = date_style_ids(z)
+        root = xml(z, first_sheet(z))
+        data = root.find("m:sheetData", NS)
+        raw_rows = []
+        if data is None:
+            return []
+        for row in data.findall("m:row", NS):
+            rn = int(row.attrib.get("r", "0") or "0")
+            vals = {}
+            for c in row.findall("m:c", NS):
+                ci = col_idx(c.attrib.get("r", ""))
+                if ci in (1,2,3):
+                    vals[ci] = cell_value(c, ss, ds)
+            if vals:
+                raw_rows.append((rn, vals))
+    if not raw_rows:
+        return []
     start = 0
     first = raw_rows[0][1]
-    if "data" in norm_header(first.get(1,"")) or "pessoa" in norm_header(first.get(2,"")) or norm_header(first.get(3,"")) in {"repositorio","repository","repo"}:
+    if ("data" in norm(text(first.get(1))) or "pessoa" in norm(text(first.get(2))) or
+        "repo" in norm(text(first.get(3))) or "repositorio" in norm(text(first.get(3)))):
         start = 1
-    rows = []
-    for row_num, cells in raw_rows[start:]:
-        d = parse_date(cells.get(1,""))
-        person = safe(cells.get(2,""))
-        repo = safe(cells.get(3,""))
+    for rn, vals in raw_rows[start:]:
+        d = parse_date(vals.get(1, ""))
+        repo = text(vals.get(3, ""))
         if not d or not repo:
             continue
         rows.append({
+            "organization": org,
+            "project": project,
+            "projectId": pid,
             "date": d.strftime("%Y-%m-%d"),
             "dateTime": d.strftime("%Y-%m-%d %H:%M:%S"),
             "month": d.strftime("%Y-%m"),
             "year": d.year,
-            "person": person,
+            "person": text(vals.get(2, "")),
             "repo": repo,
-            "row": row_num,
+            "row": rn,
         })
-    rows.sort(key=lambda r: (r["dateTime"], r["repo"].lower()))
+    rows.sort(key=lambda x: (x["dateTime"], x["project"].lower(), x["repo"].lower()))
     return rows
 
-def json_response(h: BaseHTTPRequestHandler, status: int, payload: dict):
-    data = json.dumps(payload, ensure_ascii=False).encode("utf-8")
+def send_json(h, status, payload):
+    b = json.dumps(payload, ensure_ascii=False).encode("utf-8")
     h.send_response(status)
     h.send_header("Content-Type", "application/json; charset=utf-8")
-    h.send_header("Content-Length", str(len(data)))
+    h.send_header("Content-Length", str(len(b)))
     h.end_headers()
-    h.wfile.write(data)
+    h.wfile.write(b)
 
-def static_response(h: BaseHTTPRequestHandler, path: Path):
+def send_file(h, path):
     if not path.exists() or not path.is_file():
         h.send_error(404); return
-    ctype = {".html":"text/html; charset=utf-8", ".css":"text/css; charset=utf-8", ".js":"application/javascript; charset=utf-8"}.get(path.suffix.lower(), "application/octet-stream")
-    data = path.read_bytes()
-    h.send_response(200); h.send_header("Content-Type", ctype); h.send_header("Content-Length", str(len(data))); h.end_headers(); h.wfile.write(data)
+    typ = {
+        ".html":"text/html; charset=utf-8",
+        ".css":"text/css; charset=utf-8",
+        ".js":"application/javascript; charset=utf-8",
+        ".json":"application/json; charset=utf-8",
+    }.get(path.suffix.lower(), "application/octet-stream")
+    b = path.read_bytes()
+    h.send_response(200)
+    h.send_header("Content-Type", typ)
+    h.send_header("Content-Length", str(len(b)))
+    h.end_headers()
+    h.wfile.write(b)
+
+def load_config():
+    cfg = DATA / "projects.json"
+    if not cfg.exists():
+        return {"ok": True, "organization": "", "projects": [], "rows": [], "warnings": ["data/projects.json não encontrado."]}
+    raw = json.loads(cfg.read_text(encoding="utf-8"))
+    org = text(raw.get("organization",""))
+    items = raw.get("projects", [])
+    if not isinstance(items, list):
+        raise ValueError("'projects' precisa ser um array.")
+    projects, rows, warnings = [], [], []
+    for i, item in enumerate(items, 1):
+        name = text(item.get("name", f"Projeto {i}"))
+        file = text(item.get("file", ""))
+        pid = text(item.get("id", "")) or project_id(name)
+        if not file:
+            warnings.append(f"{name}: campo file vazio.")
+            continue
+        p = (DATA / file).resolve()
+        if not str(p).startswith(str(DATA.resolve())):
+            warnings.append(f"{name}: caminho bloqueado.")
+            continue
+        if not p.exists():
+            warnings.append(f"{name}: arquivo data/{file} não encontrado.")
+            continue
+        try:
+            r = read_xlsx(p, name, pid, org)
+            rows += r
+            projects.append({"id": pid, "name": name, "file": file, "rowsCount": len(r)})
+        except Exception as e:
+            warnings.append(f"{name}: falha ao ler {file}: {e}")
+    return {"ok": True, "organization": org, "projects": projects, "rows": rows, "warnings": warnings,
+            "months": sorted({r["month"] for r in rows}), "rowsCount": len(rows)}
 
 class Handler(BaseHTTPRequestHandler):
-    server_version = "ReposTimelineLocal/2.0"
+    server_version = "TeamRepoUnique/3.1"
     def log_message(self, fmt, *args):
         sys.stdout.write("[HTTP] " + (fmt % args) + "\n")
     def do_GET(self):
         route = urllib.parse.urlparse(self.path).path
         if route in ("/", "/index.html"):
-            return static_response(self, APP_DIR / "index.html")
+            return send_file(self, APP/"index.html")
+        if route == "/api/config":
+            try: return send_json(self, 200, load_config())
+            except Exception as e:
+                traceback.print_exc(); return send_json(self, 500, {"ok": False, "error": str(e)})
         if route.startswith("/assets/"):
-            safe = (APP_DIR / route.lstrip("/")).resolve()
-            if not str(safe).startswith(str(APP_DIR.resolve())):
+            p = (APP / route.lstrip("/")).resolve()
+            if not str(p).startswith(str(APP.resolve())):
                 self.send_error(403); return
-            return static_response(self, safe)
+            return send_file(self, p)
         self.send_error(404)
     def do_POST(self):
-        if urllib.parse.urlparse(self.path).path != "/api/analyze":
+        route = urllib.parse.urlparse(self.path).path
+        if route != "/api/analyze":
             self.send_error(404); return
         try:
-            length = int(self.headers.get("Content-Length", "0") or "0")
-            filename = urllib.parse.unquote(self.headers.get("X-Filename", "arquivo.xlsx") or "arquivo.xlsx")
-            if length <= 0: return json_response(self, 400, {"ok": False, "error": "Arquivo vazio."})
+            n = int(self.headers.get("Content-Length", "0") or "0")
+            filename = urllib.parse.unquote(self.headers.get("X-Filename", "arquivo.xlsx"))
+            org = urllib.parse.unquote(self.headers.get("X-Organization", ""))
+            project = urllib.parse.unquote(self.headers.get("X-Project", "") or Path(filename).stem)
+            pid = urllib.parse.unquote(self.headers.get("X-Project-Id", "") or project_id(project))
+            if n <= 0:
+                return send_json(self, 400, {"ok": False, "error": "Arquivo vazio."})
             if not filename.lower().endswith(".xlsx"):
-                return json_response(self, 400, {"ok": False, "error": "Envie um arquivo .xlsx."})
-            body = self.rfile.read(length)
+                return send_json(self, 400, {"ok": False, "error": "Envie .xlsx."})
+            body = self.rfile.read(n)
             with tempfile.NamedTemporaryFile(delete=False, suffix=".xlsx") as tmp:
-                tmp.write(body); tmp_path = Path(tmp.name)
+                tmp.write(body)
+                tmp_path = Path(tmp.name)
             try:
-                rows = read_xlsx(tmp_path)
+                rows = read_xlsx(tmp_path, project, pid, org)
             finally:
-                try: tmp_path.unlink(missing_ok=True)
-                except Exception: pass
-            months = sorted(set(r["month"] for r in rows))
-            repos = sorted(set(r["repo"] for r in rows), key=lambda x: x.lower())
-            return json_response(self, 200, {"ok": True, "filename": filename, "rows": rows, "months": months, "reposCount": len(repos), "rowsCount": len(rows), "minMonth": months[0] if months else "", "maxMonth": months[-1] if months else ""})
+                tmp_path.unlink(missing_ok=True)
+            return send_json(self, 200, {"ok": True, "filename": filename, "project": project, "projectId": pid,
+                                         "organization": org, "rows": rows, "months": sorted({r["month"] for r in rows}),
+                                         "rowsCount": len(rows)})
         except zipfile.BadZipFile:
-            return json_response(self, 400, {"ok": False, "error": "XLSX inválido ou corrompido."})
-        except Exception as exc:
-            traceback.print_exc()
-            return json_response(self, 500, {"ok": False, "error": str(exc)})
+            return send_json(self, 400, {"ok": False, "error": "XLSX inválido/corrompido."})
+        except Exception as e:
+            traceback.print_exc(); return send_json(self, 500, {"ok": False, "error": str(e)})
 
 def main():
     os.chdir(ROOT)
-    httpd = ThreadingHTTPServer(("127.0.0.1", PORT), Handler)
-    print("\n============================================================")
-    print(" Repos Excel Timeline Viewer")
+    print("")
+    print("============================================================")
+    print(" Team Repo Usage Viewer")
     print("============================================================")
     print(f" Servidor: http://localhost:{PORT}")
-    print(" Colunas esperadas: A=Data, B=Pessoa, C=Repositorio")
-    print(" Pressione CTRL+C para encerrar.\n")
-    try:
-        httpd.serve_forever()
-    except KeyboardInterrupt:
-        print("\nEncerrando servidor...")
+    print(" Entrada XLSX: A=Data, B=Pessoa, C=Repositorio")
+    print(" Suporta múltiplos projetos por upload ou data/projects.json")
+    print(" CTRL+C para encerrar.")
+    print("")
+    ThreadingHTTPServer(("127.0.0.1", PORT), Handler).serve_forever()
 
 if __name__ == "__main__":
     main()
