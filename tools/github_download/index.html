@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GitHub Folder Downloader</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/styles.css" />
+</head>
+<body>
+  <main class="shell">
+    <section class="hero-card">
+      <div class="ambient ambient-a"></div>
+      <div class="ambient ambient-b"></div>
+
+      <header class="topbar" aria-label="Cabeçalho">
+        <div class="brand-mark" aria-hidden="true">
+          <span></span><span></span><span></span>
+        </div>
+        <div>
+          <p class="eyebrow">local · python · porta 9998</p>
+          <h1>Recorte uma pasta de um repositório.</h1>
+        </div>
+      </header>
+
+      <p class="lead">
+        Cole uma URL de pasta no formato <strong>/tree/branch/caminho/da/pasta</strong>.
+        O servidor local baixa o ZIP da branch, extrai apenas o diretório escolhido e salva no
+        <strong>temp real do Windows</strong>. Ao concluir, a pasta final é aberta automaticamente.
+      </p>
+
+      <form id="downloadForm" class="panel" autocomplete="off" novalidate>
+        <label for="githubUrl">URL da pasta no GitHub</label>
+        <div class="input-row">
+          <input
+            id="githubUrl"
+            name="githubUrl"
+            type="text"
+            required
+            inputmode="url"
+            spellcheck="false"
+            autocomplete="off"
+            placeholder="https://github.com/owner/repository/tree/branch/path/to/folder"
+          />
+          <button id="downloadButton" type="submit" aria-label="Baixar apenas a pasta informada">
+            <span class="button-text">Baixar pasta</span>
+            <span class="loader" aria-hidden="true"></span>
+          </button>
+        </div>
+        <p class="hint">
+          Exemplo de formato: <code>https://github.com/owner/repository/tree/main/tools/viewer</code>
+        </p>
+
+        <details class="token-box">
+          <summary>Repositório privado ou limite de API? Use token opcional</summary>
+          <input
+            id="token"
+            name="token"
+            type="password"
+            spellcheck="false"
+            autocomplete="off"
+            placeholder="GitHub token opcional — não é salvo"
+          />
+          <p>O token é enviado apenas para o servidor local durante esta requisição.</p>
+        </details>
+      </form>
+
+      <section class="status-grid" aria-live="polite">
+        <article class="stat-card">
+          <span>Destino</span>
+          <strong id="destination">%TEMP%\github-folder-downloader</strong>
+        </article>
+        <article class="stat-card">
+          <span>Status</span>
+          <strong id="statusText">Pronto</strong>
+        </article>
+        <article class="stat-card">
+          <span>Arquivos</span>
+          <strong id="fileCount">—</strong>
+        </article>
+      </section>
+
+      <section id="resultBox" class="result-box" hidden>
+        <div class="result-heading">
+          <p class="eyebrow">resultado</p>
+          <h2 id="resultTitle">Pasta baixada</h2>
+        </div>
+        <dl>
+          <div><dt>Repositório</dt><dd id="resultRepo">—</dd></div>
+          <div><dt>Branch</dt><dd id="resultBranch">—</dd></div>
+          <div><dt>Pasta</dt><dd id="resultFolder">—</dd></div>
+          <div><dt>Local</dt><dd id="resultPath">—</dd></div>
+          <div><dt>Tamanho extraído</dt><dd id="resultSize">—</dd></div>
+        </dl>
+      </section>
+
+      <section id="errorBox" class="error-box" hidden></section>
+    </section>
+  </main>
+
+  <script src="/assets/app.js"></script>
+</body>
+</html>
