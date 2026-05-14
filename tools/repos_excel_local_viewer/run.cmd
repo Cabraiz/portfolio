@@ -8,36 +8,21 @@ echo  Repos Excel Timeline Viewer
 echo ================================================
 echo.
 
-where python >nul 2>nul
-if not errorlevel 1 (
-    set "PYTHON_CMD=python"
-    goto run
-)
-
 where py >nul 2>nul
-if not errorlevel 1 (
-    set "PYTHON_CMD=py -3"
-    goto run
+if errorlevel 1 (
+    echo Python Launcher "py" nao encontrado.
+    echo Instale o Python 3 ou ajuste o PATH.
+    echo.
+    pause
+    exit /b 1
 )
 
-echo Python nao encontrado.
-echo.
-echo Tente instalar o Python 3 e marque:
-echo   [x] Add python.exe to PATH
-echo.
-echo Ou instale via winget:
-echo   winget install Python.Python.3
-echo.
-pause
-exit /b 1
-
-:run
-echo Usando: %PYTHON_CMD%
+echo Usando Python via: py -3
 echo Abrindo http://localhost:9999
 echo.
 
 start "" "http://localhost:9999"
-%PYTHON_CMD% server.py
+py -3 server.py
 
 echo.
 pause
