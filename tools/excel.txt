@@ -1,1 +1,1 @@
-=ÚNICO(FILTRO(C2:C2000,(A2:A2000>=DATA(2026,1,1))*(A2:A2000<=HOJE()),""))
+=LET(bruto,A2:A2000,repos,C2:C2000,datas,SEERRO(SE(ÉNÚM(bruto),INT(bruto),DATA(VALOR(ESQUERDA(bruto,4)),VALOR(EXT.TEXTO(bruto,6,2)),VALOR(EXT.TEXTO(bruto,9,2)))),0),CLASSIFICAR(ÚNICO(FILTRO(repos,(repos<>"")*(datas>=DATA(2026,1,1))*(datas<=HOJE()),""))))
