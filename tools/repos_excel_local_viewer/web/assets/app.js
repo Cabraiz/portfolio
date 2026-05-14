@@ -1,4 +1,4 @@
-const s={org:"QualicorpBr",datasets:[],months:[],from:0,to:0,sort:"repo",dir:"asc",search:"",scope:"all"};
+const s={org:"OrganizacaoBr",datasets:[],months:[],from:0,to:0,sort:"repo",dir:"asc",search:"",scope:"all"};
 const $=q=>document.querySelector(q);
 const els={org:$("#orgInput"),load:$("#loadConfigBtn"),clear:$("#clearBtn"),drop:$("#dropZone"),file:$("#fileInput"),pick:$("#pickBtn"),projects:$("#projectStrip"),status:$("#statusLine"),controls:$("#controls"),stats:$("#stats"),table:$("#tableCard"),range:$("#rangeTitle"),from:$("#fromSlider"),to:$("#toSlider"),fill:$("#railFill"),scale:$("#scale"),search:$("#searchInput"),scope:$("#scopeSelect"),all:$("#allBtn"),year:$("#yearBtn"),export:$("#exportBtn"),statRepos:$("#statRepos"),statProjects:$("#statProjects"),statFirst:$("#statFirst"),statLast:$("#statLast"),tbody:$("#tbody")};
 function status(msg,k="info"){els.status.textContent=`[${k==="error"?"ERRO":k==="ok"?"OK":"INFO"}] ${msg}`}

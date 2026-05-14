@@ -23,15 +23,6 @@ Modo array/config:
 2. Edite data/projects.json.
 3. Clique em "Carregar data/projects.json" na tela.
 
-Exemplo de data/projects.json:
-{
-  "organization": "QualicorpBr",
-  "projects": [
-    { "id": "qualitech", "name": "Qualitech", "file": "qualitech.xlsx" },
-    { "id": "outro-projeto", "name": "Outro Projeto", "file": "outro-projeto.xlsx" }
-  ]
-}
-
 Resultado:
 Repositorio | Projetos | Primeira data | Última data | Anos | Meses ativos
 

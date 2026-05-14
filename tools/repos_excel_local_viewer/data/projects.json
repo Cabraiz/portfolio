@@ -1,10 +1,10 @@
 {
-  "organization": "QualicorpBr",
+  "organization": "ORGANIZAÇÃO",
   "projects": [
     {
-      "id": "qualitech",
-      "name": "Qualitech",
-      "file": "qualitech.xlsx"
+      "id": "outro-projeto",
+      "name": "Outro Projeto",
+      "file": "outro-projeto.xlsx"
     },
     {
       "id": "outro-projeto",
