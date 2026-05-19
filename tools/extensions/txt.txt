@@ -1,0 +1,6 @@
+code.cmd --list-extensions --show-versions | Out-File -Encoding UTF8 ".\vscode-extensions.txt"
+
+Get-Content ".\vscode-extensions.txt" | ForEach-Object {
+    $ext = ($_ -split "@")[0]
+    code.cmd --install-extension $ext --force
+}
