@@ -3,6 +3,8 @@
 
 ; ============================================================
 ; VSCode File Opener + ZIP Auto Apply - AutoHotkey v2
+; Versão: generic-smart para qualquer projeto dentro do ProjectRoot
+; Correção: aceita .ps1/.py/.sh e resolve paths por sufixo, sem cadastrar folders
 ; Fluxos:
 ;   1) Manual: cola paths e abre no VSCode.
 ;   2) Automático: detecta ZIP novo em Downloads com menos de 3MB,
@@ -14,7 +16,7 @@
 ;      - Arquivo criado pelo ZIP é apagado.
 ; ============================================================
 
-AppName := "VSCode File Opener + ZIP Auto Apply"
+AppName := "VSCode File Opener + ZIP Auto Apply Inteligente"
 
 ; ============================================================
 ; GUI 9:16
@@ -31,18 +33,11 @@ GuiInitialWidth := Round(GuiInitialHeight * GuiAspectWidth / GuiAspectHeight)
 GuiContentMargin := 10
 GuiContentWidth := GuiInitialWidth - (GuiContentMargin * 2)
 
-DefaultRoot := "C:\Users\Cabraiz\Documents\GitHub\portfolio"
+DefaultRoot := "C:\Users\Cabraiz\Documents\GitHub\agent-avaliador-de-cancelamento"
 
-; Base usada quando o path dentro do ZIP/texto começa em:
-;   domain\...
-;   three\...
-;   driving\domain\...
-DrivingRootRelative := "src\pages\Mateus\Home\components\mobile\game\driving"
-
-; Base usada quando o path começa em:
-;   game\driving\...
-;   mobile\game\driving\...
-MobileRootRelative := "src\pages\Mateus\Home\components\mobile"
+; Compatibilidade antiga: não usado no modo agent-avaliador.
+DrivingRootRelative := ""
+MobileRootRelative := ""
 
 CloseTabsBeforeOpen := true
 CopyFoundFilesContentToClipboard := true
@@ -74,16 +69,16 @@ IgnoreExistingZipsOnStartup := true
 
 DownloadsDir := GetDefaultDownloadsDir()
 
-SupportedExtensionsRegex := "tsx?|jsx?|css|scss|sass|less|json|mdx?|html|ya?ml|xml|txt|env|svg|png|jpe?g|webp|gif|glb|gltf|mp3|wav|ogg|mp4|webm|ttf|otf|woff2?"
+SupportedExtensionsRegex := "tsx?|jsx?|css|scss|sass|less|json|mdx?|html|ya?ml|xml|txt|env|pyw?|ps1|psm1|psd1|sh|bash|zsh|bat|cmd|sql|toml|ini|cfg|conf|properties|lock|svg|png|jpe?g|webp|gif|glb|gltf|mp3|wav|ogg|mp4|webm|ttf|otf|woff2?"
 
 AppDataPath := EnvGet("APPDATA")
 if (AppDataPath = "") {
     AppDataPath := A_ScriptDir
 }
 
-ConfigFile := AppDataPath "\vscode-file-opener.ini"
-BackupRoot := AppDataPath "\vscode-file-opener-backups"
-TempRoot := A_Temp "\vscode-file-opener-zip"
+ConfigFile := AppDataPath "\vscode-file-opener-inteligente.ini"
+BackupRoot := AppDataPath "\vscode-file-opener-inteligente-backups"
+TempRoot := A_Temp "\vscode-file-opener-inteligente-zip"
 
 ; ============================================================
 ; Globais
@@ -373,7 +368,7 @@ BuildGui() {
 
     MainGui.AddText(
         "xm y+4 w" contentW " h24 c777777",
-        "Inferência: src -> raiz | domain/three -> driving | game/driving -> mobile."
+        "Inferência: genérica — remove wrapper, testa path direto e encaixe por sufixo dentro do ProjectRoot."
     )
 
     InputEdit := MainGui.AddEdit("xm y+4 w" contentW " h65 WantTab -Wrap")
@@ -459,7 +454,7 @@ RefreshConfigText() {
         . "VSCode: " CodeCommand "`n"
         . "Projeto: " ProjectRoot "`n"
         . "Downloads: " DownloadsDir " | ZIP máx.: " maxMb " MB`n"
-        . "Base domain/three: " DrivingRootRelative
+        . "Base principal: " ProjectRoot
 }
 
 RefreshWatcherText() {
@@ -1276,7 +1271,7 @@ BuildZipApplyPlan(files) {
 }
 
 ResolveZipRelativeTarget(relativePath) {
-    global ProjectRoot, DrivingRootRelative, MobileRootRelative
+    global ProjectRoot
 
     rel := NormalizeZipRelativePath(relativePath)
 
@@ -1284,90 +1279,86 @@ ResolveZipRelativeTarget(relativePath) {
         return { found: false, target: "", score: 0, reason: "Path vazio." }
     }
 
+    if (!IsSafeZipRelativePath(rel)) {
+        return { found: false, target: "", score: 0, reason: "Path inseguro no ZIP: " rel }
+    }
+
     projectFull := RTrim(GetFullPath(ProjectRoot), "\")
-    drivingRoot := projectFull "\" DrivingRootRelative
-    mobileRoot := projectFull "\" MobileRootRelative
-
     candidates := []
+    segments := StrSplit(rel, "\")
 
-    ; Maior confiança: o ZIP traz a árvore real do projeto ou algo acima dela.
-    tail := TailFromSegment(rel, "src")
-    if (tail != "") {
-        AddCandidate(candidates, projectFull, tail, "achou segmento src no ZIP", 90)
+    ; 1) Path direto, mas só dá prioridade quando o primeiro segmento
+    ;    já parece pertencer ao projeto. Isso evita criar:
+    ;    ProjectRoot\qualquer-wrapper\scripts\x.ps1
+    directScore := 88
+
+    if (segments.Length = 1) {
+        directScore := 105
+    } else if (ProjectHasTopLevelSegment(segments[1])) {
+        directScore := 125
+    } else if (IsLikelyWrapperSegment(segments[1])) {
+        directScore := 25
+    } else {
+        directScore := 55
     }
 
-    tail := TailFromSequence(rel, ["pages", "Mateus"])
-    if (tail != "") {
-        AddCandidate(candidates, projectFull "\src", tail, "achou pages\\Mateus no ZIP", 82)
-    }
+    AddCandidate(candidates, projectFull, rel, "path relativo direto calculado de forma segura", directScore)
 
-    tail := TailFromSequence(rel, ["Home", "components", "mobile"])
-    if (tail != "") {
-        AddCandidate(candidates, projectFull "\src\pages\Mateus", tail, "achou Home\\components\\mobile no ZIP", 78)
-    }
+    ; 2) Modo inteligente real:
+    ;    tenta TODOS os sufixos possíveis do path. Assim não precisa cadastrar
+    ;    api/docs/scripts/src/etc no AHK. Se existir ProjectRoot\scripts,
+    ;    scripts\arquivo.ps1 ganha naturalmente de wrapper\scripts\arquivo.ps1.
+    ;
+    ;    Exemplos:
+    ;      pacote\scripts\start.ps1          -> scripts\start.ps1
+    ;      agent-x\api\main.py              -> api\main.py
+    ;      qualquer\observability\p.yml     -> observability\p.yml
+    Loop segments.Length - 1 {
+        startIndex := A_Index + 1
+        tail := JoinSegmentsFrom(segments, startIndex)
 
-    tail := TailFromSequence(rel, ["components", "mobile"])
-    if (tail != "") {
-        AddCandidate(candidates, projectFull "\src\pages\Mateus\Home", tail, "achou components\\mobile no ZIP", 74)
-    }
-
-    tail := TailFromSequence(rel, ["mobile", "game", "driving"])
-    if (tail != "") {
-        AddCandidate(candidates, projectFull "\src\pages\Mateus\Home\components", tail, "achou mobile\\game\\driving no ZIP", 72)
-    }
-
-    tail := TailFromSequence(rel, ["game", "driving"])
-    if (tail != "") {
-        AddCandidate(candidates, mobileRoot, tail, "achou game\\driving no ZIP", 70)
-    }
-
-    tail := TailFromSegment(rel, "driving")
-    if (tail != "") {
-        AddCandidate(candidates, mobileRoot "\game", tail, "achou segmento driving no ZIP", 66)
-    }
-
-    ; Paths curtos que o ChatGPT costuma entregar: domain/..., three/...
-    tail := TailFromSegment(rel, "domain")
-    if (tail != "") {
-        AddCandidate(candidates, drivingRoot, tail, "achou segmento domain no ZIP", 64)
-    }
-
-    tail := TailFromSegment(rel, "three")
-    if (tail != "") {
-        AddCandidate(candidates, drivingRoot, tail, "achou segmento three no ZIP", 64)
-    }
-
-    ; Outros paths comuns de src quando o ZIP vem já recortado.
-    for firstSegment in ["components", "hooks", "data", "utils", "core", "shared", "styles", "assets", "pages"] {
-        tail := TailFromSegment(rel, firstSegment)
-        if (tail != "") {
-            AddCandidate(candidates, projectFull "\src", tail, "achou segmento " firstSegment " e assumiu base src", 45)
+        if (tail = "") {
+            continue
         }
+
+        firstTailSegment := StrSplit(tail, "\")[1]
+        baseScore := 70
+
+        if (ProjectHasTopLevelSegment(firstTailSegment)) {
+            baseScore := 132
+        } else if (FileExist(projectFull "\" tail)) {
+            baseScore := 138
+        } else if (DirExist(GetDirName(projectFull "\" tail))) {
+            baseScore := 118
+        } else if (startIndex = segments.Length) {
+            ; Último recurso: nome solto. Só deve vencer se for arquivo único já existente.
+            baseScore := 35
+        }
+
+        AddCandidate(candidates, projectFull, tail, "encaixe genérico por sufixo: " tail, baseScore)
     }
 
-    ; Se veio só nome de arquivo, só sobrescreve se existir um único arquivo com esse nome no projeto.
-    if (!InStr(rel, "\")) {
+    ; 3) Arquivo solto: privilegia arquivo existente único. Se não existir,
+    ;    cria na raiz do projeto.
+    if (segments.Length = 1) {
         existing := FindUniqueFileByNameIndexed(rel)
         if (existing.status = "found") {
-            AddCandidate(candidates, GetDirName(existing.path), GetFileName(existing.path), "arquivo solto encontrado de forma única no projeto", 88)
+            AddCandidate(candidates, GetDirName(existing.path), GetFileName(existing.path), "arquivo solto encontrado de forma única no projeto", 160)
         } else if (existing.status = "ambiguous") {
-            return { found: false, target: "", score: 0, reason: "Arquivo solto ambíguo. O ZIP precisa trazer pastas junto do arquivo." }
+            return { found: false, target: "", score: 0, reason: "Arquivo solto ambíguo. Informe pastas no ZIP/path." }
+        } else {
+            AddCandidate(candidates, projectFull, rel, "arquivo solto aplicado na raiz do projeto", 95)
         }
     }
 
     if (candidates.Length = 0) {
-        return { found: false, target: "", score: 0, reason: "Nenhum segmento compatível encontrado: src, game, driving, domain, three etc." }
+        return { found: false, target: "", score: 0, reason: "Nenhum destino seguro foi inferido." }
     }
 
     best := SelectBestCandidate(candidates)
 
     if (!IsPathInsideProject(best.target)) {
         return { found: false, target: "", score: 0, reason: "Destino calculado ficou fora do projeto. Bloqueado por segurança." }
-    }
-
-    ; Score mínimo baixo porque arquivos novos podem não existir ainda.
-    if (best.score < 55 && !FileExist(best.target) && !DirExist(GetDirName(best.target))) {
-        return { found: false, target: "", score: best.score, reason: "Destino sem confiança suficiente: " best.target }
     }
 
     return { found: true, target: best.target, score: best.score, reason: best.reason }
@@ -1585,8 +1576,8 @@ BuildZipAnalysisReport(zipPath, extractDir, files, planResult, applyResult, open
     }
 
     report .= "`r`nRegra de segurança:`r`n"
-    report .= "  O script só copia se conseguir encaixar o arquivo em uma base conhecida do projeto ou achar um arquivo existente único.`r`n"
-    report .= "  Se um arquivo novo for ignorado, o ZIP precisa trazer mais pastas no path interno.`r`n"
+    report .= "  O script só copia dentro do ProjectRoot, bloqueia path absoluto/UNC/.. e cria backup antes de overwrite.`r`n"
+    report .= "  A inferência agora é genérica: remove wrappers, testa path direto e todos os sufixos possíveis do path.`r`n"
 
     return report
 }
@@ -2009,28 +2000,23 @@ ResolveToken(token) {
 }
 
 GetCandidateRoots() {
-    global ProjectRoot, DrivingRootRelative, MobileRootRelative
+    global ProjectRoot
 
     roots := []
     projectFull := RTrim(GetFullPath(ProjectRoot), "\")
     roots.Push(projectFull)
 
-    drivingRoot := projectFull "\" DrivingRootRelative
+    ; Roots úteis para colar paths curtos manualmente.
+    ; Agora é dinâmico: pega todas as pastas diretas do ProjectRoot,
+    ; sem lista fixa api/docs/scripts/etc.
+    Loop Files projectFull "\*", "D" {
+        lowerPath := StrLower(A_LoopFileFullPath)
 
-    if (DirExist(drivingRoot)) {
-        roots.Push(GetFullPath(drivingRoot))
-    }
+        if (ShouldSkipPath(lowerPath)) {
+            continue
+        }
 
-    mobileRoot := projectFull "\" MobileRootRelative
-
-    if (DirExist(mobileRoot)) {
-        roots.Push(GetFullPath(mobileRoot))
-    }
-
-    srcRoot := projectFull "\src"
-
-    if (DirExist(srcRoot)) {
-        roots.Push(GetFullPath(srcRoot))
+        roots.Push(GetFullPath(A_LoopFileFullPath))
     }
 
     return UniqueArray(roots)
@@ -2407,13 +2393,37 @@ BuildReport(tokens, resolved, notFound, ambiguous, openResult, clipboardResult) 
 ; ============================================================
 
 NormalizeZipRelativePath(path) {
+    global ProjectRoot
+
     path := NormalizeSlashes(path)
     path := RegExReplace(path, "^\.\\", "")
     path := RegExReplace(path, "^\\+", "")
     path := RegExReplace(path, "\\+", "\")
+    path := Trim(path, "\")
 
-    ; Remove wrappers muito comuns criados por ferramentas.
-    path := RegExReplace(path, "i)^(.+?)\\(src|pages|Home|components|mobile|game|driving|domain|three)\\", "$2\")
+    if (path = "") {
+        return ""
+    }
+
+    ; Remove a pasta raiz do projeto quando o ZIP vem assim:
+    ; agent-avaliador-de-cancelamento\api\...
+    ; qualquer-wrapper\agent-avaliador-de-cancelamento\api\...
+    ; qualquer-wrapper\x\agent-avaliador-de-cancelamento\api\...
+    projectName := StrLower(GetFileName(RTrim(GetFullPath(ProjectRoot), "\")))
+
+    if (projectName != "") {
+        segments := StrSplit(path, "\")
+
+        for index, segment in segments {
+            if (StrLower(segment) = projectName) {
+                if (segments.Length > index) {
+                    return JoinSegmentsFrom(segments, index + 1)
+                }
+
+                return ""
+            }
+        }
+    }
 
     return path
 }
@@ -2422,6 +2432,69 @@ NormalizeSlashes(path) {
     path := StrReplace(path, "/", "\")
     path := RegExReplace(path, "\\+", "\")
     return path
+}
+
+IsSafeZipRelativePath(path) {
+    path := NormalizeSlashes(path)
+
+    if (path = "") {
+        return false
+    }
+
+    ; Bloqueia caminho absoluto Windows, UNC e traversal.
+    if (RegExMatch(path, "i)^[a-z]:\\")) {
+        return false
+    }
+
+    if (StartsWith(path, "\\")) {
+        return false
+    }
+
+    if (InStr(path, ":")) {
+        return false
+    }
+
+    if (RegExMatch("\" path "\", "\\\.\.($|\\)")) {
+        return false
+    }
+
+    return true
+}
+
+ProjectHasTopLevelSegment(segmentName) {
+    global ProjectRoot
+
+    if (segmentName = "") {
+        return false
+    }
+
+    projectFull := RTrim(GetFullPath(ProjectRoot), "\")
+    candidate := projectFull "\" segmentName
+
+    return DirExist(candidate) || FileExist(candidate)
+}
+
+IsLikelyWrapperSegment(segmentName) {
+    global ProjectRoot
+
+    lower := StrLower(segmentName)
+    projectName := StrLower(GetFileName(RTrim(GetFullPath(ProjectRoot), "\")))
+
+    if (projectName != "" && InStr(lower, projectName)) {
+        return true
+    }
+
+    ; Nomes típicos de pasta wrapper gerada por ZIP/export do ChatGPT/GitHub.
+    return (
+        InStr(lower, "patch") ||
+        InStr(lower, "update") ||
+        InStr(lower, "bundle") ||
+        InStr(lower, "output") ||
+        InStr(lower, "artifact") ||
+        InStr(lower, "generated") ||
+        InStr(lower, "chatgpt") ||
+        InStr(lower, "zip")
+    )
 }
 
 TailFromSegment(path, segmentName) {
@@ -2565,7 +2638,49 @@ GetDefaultDownloadsDir() {
 
 IsSupportedFile(path) {
     global SupportedExtensionsRegex
-    return RegExMatch(path, "i)\.(" SupportedExtensionsRegex ")$")
+
+    SplitPath(path, &fileName)
+    lowerName := StrLower(fileName)
+
+    ; Extensões comuns de código/config/scripts.
+    if (RegExMatch(path, "i)\.(" SupportedExtensionsRegex ")$")) {
+        return true
+    }
+
+    ; Arquivos importantes sem extensão ou com nome especial.
+    for exactName in [
+        "dockerfile",
+        "containerfile",
+        "makefile",
+        "procfile",
+        "license",
+        "licence",
+        "notice",
+        "readme",
+        ".gitignore",
+        ".gitattributes",
+        ".dockerignore",
+        ".editorconfig",
+        ".npmrc",
+        ".python-version",
+        ".node-version",
+        ".nvmrc"
+    ] {
+        if (lowerName = exactName) {
+            return true
+        }
+    }
+
+    ; Exemplos: Dockerfile.dev, Makefile.local, .env.example.
+    if (RegExMatch(lowerName, "i)^(dockerfile|containerfile|makefile)(\.|$)")) {
+        return true
+    }
+
+    if (RegExMatch(lowerName, "i)^\.env\.(example|sample|template|local\.example)$")) {
+        return true
+    }
+
+    return false
 }
 
 SafeFileGetSize(path) {

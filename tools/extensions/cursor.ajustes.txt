@@ -1,0 +1,19 @@
+Sempre use o maior nível de raciocínio disponível para tarefas de código.
+
+Quando o modelo selecionado suportar Thinking, Extended Thinking, High Reasoning, Max Reasoning ou equivalente, utilize esse modo.
+
+Antes de alterar arquivos:
+- analise a arquitetura;
+- identifique os arquivos relevantes;
+- entenda causa raiz, dependências e riscos;
+- só depois implemente.
+
+Não faça mudanças por tentativa e erro.
+Não altere arquivos fora do escopo.
+Não crie documentação extra sem pedido.
+
+Depois de alterar código, sempre informe:
+- arquivos alterados;
+- o que mudou;
+- por que mudou;
+- comandos para validar.
