@@ -1,19 +1,93 @@
-Sempre use o maior nível de raciocínio disponível para tarefas de código.
+# Modo precisão máxima para tarefas de código
 
-Quando o modelo selecionado suportar Thinking, Extended Thinking, High Reasoning, Max Reasoning ou equivalente, utilize esse modo.
+Para qualquer tarefa envolvendo código, arquitetura, bug, refatoração, performance, build, testes, dependências, scripts, frontend, backend, Docker, banco de dados ou alteração de arquivos, priorize precisão acima de rapidez.
 
-Antes de alterar arquivos:
-- analise a arquitetura;
-- identifique os arquivos relevantes;
-- entenda causa raiz, dependências e riscos;
-- só depois implemente.
+Use sempre o maior nível de raciocínio disponível no modelo selecionado.  
+Quando houver Thinking, Extended Thinking, High Reasoning, Max Reasoning, Max Mode ou equivalente, use esse modo.  
+Se o modo não puder ser ativado diretamente, siga o mesmo padrão de análise profunda antes de agir.
 
-Não faça mudanças por tentativa e erro.
-Não altere arquivos fora do escopo.
-Não crie documentação extra sem pedido.
+## Regra principal
 
-Depois de alterar código, sempre informe:
-- arquivos alterados;
-- o que mudou;
-- por que mudou;
-- comandos para validar.
+Nunca altere arquivos imediatamente.
+
+Antes de editar qualquer arquivo:
+
+1. Entenda exatamente o pedido.
+2. Analise a arquitetura relevante.
+3. Identifique os arquivos realmente envolvidos.
+4. Leia o contexto necessário antes de modificar.
+5. Encontre a causa raiz do problema.
+6. Avalie dependências, efeitos colaterais e riscos.
+7. Planeje a menor alteração suficiente.
+8. Só então implemente.
+
+Não faça mudanças por tentativa e erro.  
+Não altere arquivos fora do escopo.  
+Não refatore sem necessidade.  
+Não crie documentação extra sem pedido.  
+Não crie arquivos novos sem necessidade clara.  
+Não introduza bibliotecas novas sem justificativa técnica.  
+Não remova código sem entender quem usa esse código.
+
+## Autoavaliação obrigatória
+
+Antes de finalizar qualquer resposta com alteração de código, faça uma revisão interna usando este checklist:
+
+- A causa raiz foi identificada?
+- A alteração resolve exatamente o que foi pedido?
+- A solução é a menor alteração segura?
+- Algum arquivo fora do escopo foi alterado?
+- Algum import, tipo, rota, contrato, API, CSS, script ou build pode ter quebrado?
+- A solução respeita o padrão atual do projeto?
+- Existe comando claro para validar?
+- Se o usuário pediu ZIP, o ZIP foi realmente criado?
+
+Se algum item falhar, corrija antes de responder.
+
+## Política obrigatória para ZIP
+
+Quando o usuário pedir ZIP, gere um arquivo ZIP real.
+
+Não responda apenas com instruções.
+Não diga somente quais arquivos mudaram.
+Não deixe de criar o ZIP se houver acesso ao terminal ou ao workspace.
+
+O ZIP deve conter somente arquivos criados ou alterados.
+O ZIP deve preservar os caminhos relativos corretos do projeto.
+O ZIP não deve incluir:
+
+- node_modules
+- dist
+- build
+- .git
+- cache
+- arquivos temporários
+- dependências baixadas
+- logs desnecessários
+
+Nome sugerido para o ZIP:
+
+patch-cursor-YYYYMMDD-HHMM.zip
+
+Se estiver no Windows/PowerShell, pode usar Compress-Archive.
+Se precisar montar uma pasta temporária, use uma pasta temporária e depois remova.
+
+## Resposta final obrigatória
+
+Depois de alterar arquivos, sempre responda com:
+
+1. Arquivos alterados.
+2. O que mudou.
+3. Por que mudou.
+4. Riscos ou pontos de atenção.
+5. Comandos para validar.
+6. Caminho do ZIP, se eu pedi ZIP.
+
+Se eu pedi ZIP e o ZIP não pôde ser criado, explique objetivamente o motivo técnico.
+
+## Comportamento esperado
+
+Se a tarefa for simples, seja direto.
+Se a tarefa envolver múltiplos arquivos, risco de regressão ou arquitetura, faça análise completa antes de editar.
+Se houver dúvida sobre o projeto, procure arquivos relacionados antes de responder.
+Não invente estrutura, função, script, dependência ou arquivo que não foi encontrado no projeto.
