@@ -144,3 +144,90 @@ repetir 2–5 vezes
 testar outra rede
 
 Mas sendo honesto: se ele sempre cai com ParameterConfig, isso tende a voltar até atualizarem/repararem a versão/policy. O paliativo pode destravar um estado preso, mas não corrige o bug da 7.4.6.
+
+
+
+
+
+
+
+===============================================================
+
+Se guimessenger64.node apareceu, então o erro não é “arquivo inexistente”.
+
+Nesse caso, quando o Windows/FortiClient diz:
+
+não foi possível encontrar o módulo especificado
+guimessenger64.node
+assets\main.js
+
+normalmente significa:
+
+o guimessenger64.node existe,
+mas alguma DLL/dependência que ele precisa não carregou
+OU a instalação está inconsistente
+OU a versão do FortiClient está quebrada/corrompida
+
+Ou seja: o módulo existe, mas ele não consegue ser carregado.
+
+Rode estes comandos para pegar evidência limpa:
+
+$FortiDir = "${env:ProgramFiles}\Fortinet\FortiClient"
+
+if (!(Test-Path $FortiDir)) {
+  $FortiDir = "${env:ProgramFiles(x86)}\Fortinet\FortiClient"
+}
+
+$Node = Get-ChildItem $FortiDir -Recurse -ErrorAction SilentlyContinue |
+  Where-Object { $_.Name -eq "guimessenger64.node" } |
+  Select-Object -First 1
+
+$Node | Format-List FullName, Length, LastWriteTime
+
+Depois:
+
+Get-AuthenticodeSignature $Node.FullName | Format-List
+
+E:
+
+Get-Item $Node.FullName -Stream * -ErrorAction SilentlyContinue
+
+Se aparecer Zone.Identifier, tenta desbloquear:
+
+Unblock-File $Node.FullName
+
+Mas provavelmente vai falhar por estar em Program Files ou nem vai resolver.
+
+Agora rode para confirmar versão + erro no log do Windows:
+
+$FortiClient = Join-Path $FortiDir "FortiClient.exe"
+
+(Get-Item $FortiClient).VersionInfo |
+  Select-Object ProductVersion, FileVersion, FileDescription
+Get-WinEvent -LogName Application -MaxEvents 300 |
+  Where-Object {
+    $_.ProviderName -like "*Forti*" -or
+    $_.Message -like "*guimessenger*" -or
+    $_.Message -like "*.node*" -or
+    $_.Message -like "*main.js*" -or
+    $_.Message -like "*VPN*" -or
+    $_.Message -like "*Parameter*"
+  } |
+  Select-Object TimeCreated, ProviderName, Id, LevelDisplayName, Message |
+  Format-List
+
+Paliativo prático agora: não abra FortiClient.exe, porque a UI está quebrando. Use só o CLI:
+
+$FortiVPN = Join-Path $FortiDir "FortiVPN.exe"
+$Tunnel = "Secure Internet Access"
+
+& $FortiVPN --cli --disconnect --tunnel $Tunnel
+Start-Sleep -Seconds 10
+ipconfig /flushdns
+& $FortiVPN --cli --connect --tunnel $Tunnel
+Start-Sleep -Seconds 20
+& $FortiVPN --cli --status --tunnel $Tunnel
+
+Mas sendo direto: se o arquivo existe e mesmo assim dá erro em guimessenger64.node, isso é repair/reinstall/update. Não é algo que PowerShell sem admin conserte com segurança.
+
+Mensagem para TI, agora mais precisa:
