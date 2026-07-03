@@ -24,6 +24,7 @@ import { shouldDisableScrollFades } from "../../../../features/scroll/scrollMoti
 import {
   HOME_MOBILE_SOCIAL_LINKS,
   PROFILE_IMAGE,
+  PROFILE_IMAGE_ALT,
   SOCIAL_ICONS,
 } from "../data/home.data";
 import { homeHeroTokens } from "../layout/homeHero.tokens";
@@ -388,7 +389,7 @@ function HomeMobile() {
           <div style={stackWrapStyle}>
             <HeroMobileStack
               imageSrc={PROFILE_IMAGE}
-              imageAlt="Mateus Cabral"
+              imageAlt={PROFILE_IMAGE_ALT}
               socialItems={socialItems}
               imageLoaded={isImageLoaded}
               onImageLoad={() => setIsImageLoaded(true)}
@@ -414,5 +415,7 @@ function HomeMobile() {
 }
 
 export default HomeMobile;
+
+
 
 

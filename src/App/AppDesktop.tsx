@@ -196,7 +196,10 @@ export default function AppDesktop() {
         touchMultiplier: smoothOptions.touchMultiplier,
       }}
     >
-      <TitleWebsite title1="Bem Vindo! 🫡" title2="Cabraiz" />
+      <TitleWebsite
+        title1="Mateus Cardoso Cabral | Empresário de IA"
+        title2="Cabraiz | IA, Investimentos, Software e Tecnologia"
+      />
 
       {!isNavHidden && (
         <AppNavbar
@@ -223,3 +226,5 @@ export default function AppDesktop() {
     </ReactLenis>
   );
 }
+
+

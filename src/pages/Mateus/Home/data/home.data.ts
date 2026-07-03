@@ -68,6 +68,8 @@ export const MEET_QR_POPOVER_SUBTITLE =
 export const MEET_QR_POPOVER_CTA_LABEL = "Abrir conversa";
 
 export const PROFILE_IMAGE = profileImage;
+export const PROFILE_IMAGE_ALT =
+  "Foto de Mateus Cardoso Cabral, empresário de inteligência artificial, investidor e desenvolvedor de software";
 
 export const SOCIAL_ICONS = {
   gmail: gmailIcon,
@@ -162,3 +164,5 @@ export const seals: readonly SealItem[] = [
     cat: cat4Icon,
   },
 ];
+
+

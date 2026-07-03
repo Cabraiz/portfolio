@@ -3,7 +3,11 @@ import { Col } from "react-bootstrap";
 import MeetQrPopoverButton from "./MeetQrPopoverButton";
 import SocialButton from "./SocialButton";
 import { useHomeHeroLayout } from "../../hooks/useHomeHeroLayout";
-import { PROFILE_IMAGE, SOCIAL_ICONS } from "../../data/home.data";
+import {
+	PROFILE_IMAGE,
+	PROFILE_IMAGE_ALT,
+	SOCIAL_ICONS,
+} from "../../data/home.data";
 
 type HeroProfileColumnProps = Readonly<{
 	isCompactDesktop: boolean;
@@ -119,7 +123,7 @@ export default function HeroProfileColumn({
 				>
 					<img
 						src={PROFILE_IMAGE}
-						alt="Mateus"
+						alt={PROFILE_IMAGE_ALT}
 						loading="eager"
 						decoding="async"
 						fetchPriority="high"
@@ -171,3 +175,5 @@ export default function HeroProfileColumn({
 		</Col>
 	);
 }
+
+

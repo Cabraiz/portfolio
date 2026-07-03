@@ -270,7 +270,10 @@ function AppMobile() {
     >
       <div className="app-lenis-content" style={mobileLayoutStyle}>
         {!isGameStandaloneSurface ? (
-          <TitleWebsite title1="Bem Vindo! 🤝" title2="Cabraiz" />
+          <TitleWebsite
+            title1="Mateus Cardoso Cabral | Empresário de IA"
+            title2="Cabraiz | IA, Investimentos, Software e Tecnologia"
+          />
         ) : null}
 
         {!isNavHidden && (
@@ -295,5 +298,7 @@ function AppMobile() {
 }
 
 export default AppMobile;
+
+
 
 
