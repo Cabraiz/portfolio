@@ -197,8 +197,8 @@ export default function AppDesktop() {
       }}
     >
       <TitleWebsite
-        title1="Mateus Cardoso Cabral | Empresário de IA"
-        title2="Cabraiz | IA, Investimentos, Software e Tecnologia"
+        title1="Mateus Cardoso Cabral | Fundador e Investidor em IA"
+        title2="Cabraiz | IA, Tecnologia e Software"
       />
 
       {!isNavHidden && (
@@ -226,5 +226,3 @@ export default function AppDesktop() {
     </ReactLenis>
   );
 }
-
-

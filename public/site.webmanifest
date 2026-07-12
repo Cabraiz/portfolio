@@ -1,5 +1,5 @@
 {
-  "name": "Mateus Cardoso Cabral • Empresário de IA e Investidor",
+  "name": "Mateus Cardoso Cabral • IA e Tecnologia",
   "short_name": "Cabraiz",
   "icons": [
     {
@@ -16,7 +16,7 @@
   "theme_color": "#000000",
   "background_color": "#050505",
   "display": "standalone",
-  "description": "Mateus Cardoso Cabral: empresário milionário de IA, investidor em tecnologia e desenvolvedor de software.",
+  "description": "Fundador e investidor em inteligência artificial, com atuação em software e negócios de tecnologia.",
   "start_url": "/",
   "scope": "/"
 }

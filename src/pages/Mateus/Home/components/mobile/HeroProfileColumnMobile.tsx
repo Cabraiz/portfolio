@@ -17,7 +17,7 @@ export type HeroProfileColumnMobileProps = Readonly<{
 
 export default function HeroProfileColumnMobile({
   imageSrc,
-  imageAlt = "Foto de Mateus Cardoso Cabral, empresário de inteligência artificial, investidor e desenvolvedor de software",
+  imageAlt = "Retrato de Mateus Cardoso Cabral",
   socialItems,
   imageLoaded = true,
   onImageLoad,
@@ -226,5 +226,3 @@ export default function HeroProfileColumnMobile({
     </div>
   );
 }
-
-

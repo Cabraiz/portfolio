@@ -21,7 +21,7 @@ export type HeroMobileStackProps = Readonly<{
 
 function HeroMobileStack({
   imageSrc,
-  imageAlt = "Foto de Mateus Cardoso Cabral, empresário de inteligência artificial, investidor e desenvolvedor de software",
+  imageAlt = "Retrato de Mateus Cardoso Cabral",
   socialItems,
   primaryActions = [],
   imageLoaded = true,
@@ -96,5 +96,3 @@ function HeroMobileStack({
 }
 
 export default HeroMobileStack;
-
-

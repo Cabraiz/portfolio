@@ -184,10 +184,10 @@ export default function HeroTextColumn({
 
 	return (
 		<Col md={5} style={heroTextColumnStyle} className="px-0">
-			<div style={seniorTitleStyle}>Senior</div>
+			<div style={seniorTitleStyle}>{isPT ? "Fundador" : "Founder"}</div>
 
 			<div className="font-sequel" style={roleContainerStyle}>
-				<RoleTitle />
+				<RoleTitle isPT={isPT} />
 			</div>
 
 			<div style={sealsContainerStyle}>
