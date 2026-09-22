@@ -38,7 +38,7 @@
     "placeholder": "Type your message...",
     "send": "Send",
     "sending": "Sending...",
-    "sendSuccess": "Your message was sent to Mateus on Telegram.",
+    "sendSuccess": "Message sent. Mateus' reply will appear here.",
     "sendError": "The message could not be sent. Please try again.",
     "close": "Close",
     "intro": "Hey, Mateus. My name is "

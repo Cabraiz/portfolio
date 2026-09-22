@@ -4,6 +4,7 @@ import test from "node:test";
 import contactHandler from "../api/contact.js";
 
 const originalFetch = globalThis.fetch;
+const CONVERSATION_ID = "16b7d6c2-6d4d-4a0f-9d88-12ef8ac25f41";
 
 test.afterEach(() => {
 	globalThis.fetch = originalFetch;
@@ -31,7 +32,8 @@ test("forwards a valid portfolio message to Telegram", async () => {
 				"x-forwarded-for": "203.0.113.10",
 			},
 			body: JSON.stringify({
-				message: "Olá, quero conversar sobre um projeto.",
+			message: "Olá, quero conversar sobre um projeto.",
+			conversationId: CONVERSATION_ID,
 				pageUrl: "https://cabraiz.com/contact",
 				language: "pt-BR",
 				startedAt: Date.now() - 3000,
@@ -51,6 +53,52 @@ test("forwards a valid portfolio message to Telegram", async () => {
 	assert.equal(telegramBody.chat_id, "123456");
 	assert.match(telegramBody.text, /Olá, quero conversar sobre um projeto\./);
 	assert.match(telegramBody.text, /https:\/\/cabraiz\.com\/contact/);
+	assert.match(telegramBody.text, new RegExp(`\\[Conversa: ${CONVERSATION_ID}\\]`));
+});
+
+test("returns Telegram replies for the matching browser conversation", async () => {
+	process.env.TELEGRAM_BOT_TOKEN = "test-token";
+	process.env.TELEGRAM_CHAT_ID = "123456";
+
+	globalThis.fetch = async () =>
+		new Response(
+			JSON.stringify({
+				ok: true,
+				result: [
+					{
+						update_id: 77,
+						message: {
+							date: 1_790_100_000,
+							text: "Olá! Recebi sua mensagem.",
+							from: { is_bot: false },
+							chat: { id: 123456 },
+							reply_to_message: {
+								text: `Mensagem original\n[Conversa: ${CONVERSATION_ID}]`,
+							},
+						},
+					},
+				],
+			}),
+			{ status: 200, headers: { "content-type": "application/json" } }
+		);
+
+	const response = await contactHandler.fetch(
+		new Request(
+			`https://relay.example/api/contact?conversationId=${CONVERSATION_ID}&after=0`,
+			{ headers: { origin: "https://cabraiz.com" } }
+		)
+	);
+	const body = await response.json();
+
+	assert.equal(response.status, 200);
+	assert.equal(body.cursor, 77);
+	assert.deepEqual(body.replies, [
+		{
+			id: 77,
+			text: "Olá! Recebi sua mensagem.",
+			sentAt: 1_790_100_000_000,
+		},
+	]);
 });
 
 test("rejects requests from another origin", async () => {
@@ -72,6 +120,9 @@ test("rejects requests from another origin", async () => {
 });
 
 test("requires a human-sized delay before submission", async () => {
+	process.env.TELEGRAM_BOT_TOKEN = "test-token";
+	process.env.TELEGRAM_CHAT_ID = "123456";
+
 	const response = await contactHandler.fetch(
 		new Request("https://relay.example/api/contact", {
 			method: "POST",
@@ -80,7 +131,8 @@ test("requires a human-sized delay before submission", async () => {
 				origin: "https://cabraiz.com",
 			},
 			body: JSON.stringify({
-				message: "Mensagem rápida demais",
+		message: "Mensagem rápida demais",
+		conversationId: CONVERSATION_ID,
 				startedAt: Date.now(),
 			}),
 		})

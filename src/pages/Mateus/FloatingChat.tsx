@@ -24,6 +24,43 @@ type TriggerAvatarItem =
       ariaLabel: string;
     };
 
+type ChatMessage = {
+  id: string;
+  text: string;
+  author: "visitor" | "mateus";
+};
+
+type ContactReply = {
+  id: number;
+  text: string;
+};
+
+const CHAT_CONVERSATION_STORAGE_KEY = "cabraiz-chat-conversation-id";
+const CHAT_CONVERSATION_ID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const CONTACT_API_URL =
+  import.meta.env.VITE_CONTACT_API_URL?.trim() || "/api/contact";
+
+function getOrCreateConversationId(): string {
+  const conversationId = window.crypto.randomUUID();
+  try {
+    const storedConversationId = window.localStorage.getItem(
+      CHAT_CONVERSATION_STORAGE_KEY
+    );
+    if (
+      storedConversationId &&
+      CHAT_CONVERSATION_ID_PATTERN.test(storedConversationId)
+    ) {
+      return storedConversationId;
+    }
+
+    window.localStorage.setItem(CHAT_CONVERSATION_STORAGE_KEY, conversationId);
+  } catch {
+    // A conversa continua durante esta visita quando o armazenamento é bloqueado.
+  }
+  return conversationId;
+}
+
 export default function FloatingChat() {
   const location = useLocation();
   const shouldHideForStandaloneGame =
@@ -31,13 +68,15 @@ export default function FloatingChat() {
 
   const [isOpen, setIsOpen] = useState(false);
   const [inputValue, setInputValue] = useState("");
-  const [messages, setMessages] = useState<string[]>([]);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [conversationId] = useState(getOrCreateConversationId);
   const [sendStatus, setSendStatus] = useState<
     "idle" | "sending" | "sent" | "error"
   >("idle");
   const chatRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const chatOpenedAtRef = useRef(Date.now());
+  const replyCursorRef = useRef(0);
 
   const { t, i18n } = useTranslation();
   const phrases = t("floatingChat.phrases", {
@@ -98,6 +137,60 @@ export default function FloatingChat() {
     if (isOpen) inputRef.current?.focus();
   }, [isOpen]);
 
+  useEffect(() => {
+    if (!isOpen || !messages.some((message) => message.author === "visitor")) {
+      return;
+    }
+
+    let cancelled = false;
+    const readReplies = async () => {
+      try {
+        const url = new URL(CONTACT_API_URL, window.location.origin);
+        url.searchParams.set("conversationId", conversationId);
+        url.searchParams.set("after", String(replyCursorRef.current));
+        const response = await fetch(url);
+        if (!response.ok) return;
+
+        const payload = (await response.json()) as {
+          replies?: ContactReply[];
+          cursor?: number;
+        };
+        if (cancelled || !Array.isArray(payload.replies)) return;
+
+        if (Number.isSafeInteger(payload.cursor)) {
+          replyCursorRef.current = Math.max(
+            replyCursorRef.current,
+            Number(payload.cursor)
+          );
+        }
+
+        setMessages((currentMessages) => {
+          const knownIds = new Set(currentMessages.map((message) => message.id));
+          const newReplies = payload.replies!
+            .filter((reply) => !knownIds.has(`telegram-${reply.id}`))
+            .map((reply) => ({
+              id: `telegram-${reply.id}`,
+              text: reply.text,
+              author: "mateus" as const,
+            }));
+
+          return newReplies.length > 0
+            ? [...currentMessages, ...newReplies]
+            : currentMessages;
+        });
+      } catch {
+        // A próxima consulta automática tenta novamente sem interromper o chat.
+      }
+    };
+
+    void readReplies();
+    const interval = window.setInterval(() => void readReplies(), 4000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(interval);
+    };
+  }, [conversationId, isOpen, messages]);
+
   const openChat = () => {
     chatOpenedAtRef.current = Date.now();
     setSendStatus("idle");
@@ -112,26 +205,31 @@ export default function FloatingChat() {
     setSendStatus("sending");
 
     try {
-      const response = await fetch(
-        import.meta.env.VITE_CONTACT_API_URL?.trim() || "/api/contact",
-        {
+      const response = await fetch(CONTACT_API_URL, {
           method: "POST",
           headers: { "content-type": "application/json" },
           body: JSON.stringify({
             message,
+            conversationId,
             pageUrl: window.location.href,
             language: i18n.resolvedLanguage ?? i18n.language,
             startedAt: chatOpenedAtRef.current,
             website: "",
           }),
-        }
-      );
+        });
 
       if (!response.ok) {
         throw new Error(`Contact API returned ${response.status}`);
       }
 
-      setMessages((prev) => [...prev, message]);
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: `visitor-${Date.now()}-${window.crypto.randomUUID()}`,
+          text: message,
+          author: "visitor",
+        },
+      ]);
       setInputValue("");
       setSendStatus("sent");
     } catch (error) {
@@ -475,26 +573,64 @@ export default function FloatingChat() {
                 )
               )}
 
-              {messages.map((msg, index) => (
-                <div
-                  key={`user-${index}`}
-                  style={{
-                    alignSelf: "flex-end",
-                    background: "rgba(255, 255, 255, 0.12)",
-                    border: "1px solid rgba(255, 255, 255, 0.2)",
-                    padding: `${scale(0.6)}rem ${scale(1)}rem`,
-                    borderRadius: "12px",
-                    maxWidth: "80%",
-                    wordWrap: "break-word",
-                    color: "#fff",
-                    backdropFilter: "blur(8px)",
-                    WebkitBackdropFilter: "blur(8px)",
-                    fontSize: `${scale(1)}rem`,
-                  }}
-                >
-                  {msg}
-                </div>
-              ))}
+              {messages.map((message) =>
+                message.author === "visitor" ? (
+                  <div
+                    key={message.id}
+                    data-chat-author="visitor"
+                    style={{
+                      alignSelf: "flex-end",
+                      background: "rgba(255, 255, 255, 0.12)",
+                      border: "1px solid rgba(255, 255, 255, 0.2)",
+                      padding: `${scale(0.6)}rem ${scale(1)}rem`,
+                      borderRadius: "12px",
+                      maxWidth: "80%",
+                      wordWrap: "break-word",
+                      color: "#fff",
+                      backdropFilter: "blur(8px)",
+                      WebkitBackdropFilter: "blur(8px)",
+                      fontSize: `${scale(1)}rem`,
+                    }}
+                  >
+                    {message.text}
+                  </div>
+                ) : (
+                  <div
+                    key={message.id}
+                    data-chat-author="mateus"
+                    style={{
+                      display: "flex",
+                      alignItems: "flex-end",
+                      maxWidth: "80%",
+                    }}
+                  >
+                    <img
+                      src={perfilMini}
+                      alt="Perfil"
+                      style={{
+                        width: "28px",
+                        height: "28px",
+                        borderRadius: "50%",
+                        marginRight: "0.5rem",
+                        flexShrink: 0,
+                      }}
+                    />
+                    <div
+                      style={{
+                        background: "rgba(241, 196, 15, 0.18)",
+                        border: "1px solid rgba(241, 196, 15, 0.4)",
+                        padding: `${scale(0.6)}rem ${scale(1)}rem`,
+                        borderRadius: "12px",
+                        wordWrap: "break-word",
+                        color: "#fff",
+                        fontSize: `${scale(1)}rem`,
+                      }}
+                    >
+                      {message.text}
+                    </div>
+                  </div>
+                )
+              )}
             </div>
 
             <div

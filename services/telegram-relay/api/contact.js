@@ -9,7 +9,13 @@ const DEFAULT_ALLOWED_ORIGINS = [
 
 const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000;
 const RATE_LIMIT_MAX_REQUESTS = 5;
+const TELEGRAM_UPDATES_CACHE_MS = 2000;
+const CONVERSATION_ID_PATTERN =
+	/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const recentRequests = new Map();
+let cachedUpdates = [];
+let cachedUpdatesExpiresAt = 0;
+let updatesRequest = null;
 
 function json(body, status, origin = null) {
 	const headers = {
@@ -67,7 +73,13 @@ function cleanSingleLine(value, maxLength) {
 		.slice(0, maxLength);
 }
 
-function formatTelegramMessage({ message, pageUrl, language, userAgent }) {
+function formatTelegramMessage({
+	message,
+	pageUrl,
+	language,
+	userAgent,
+	conversationId,
+}) {
 	const receivedAt = new Intl.DateTimeFormat("pt-BR", {
 		dateStyle: "short",
 		timeStyle: "medium",
@@ -83,7 +95,42 @@ function formatTelegramMessage({ message, pageUrl, language, userAgent }) {
 		`Idioma: ${language || "não informado"}`,
 		`Recebida em: ${receivedAt}`,
 		`Navegador: ${userAgent || "não informado"}`,
+		"",
+		"↩️ Use Responder nesta mensagem para devolver a resposta ao visitante.",
+		`[Conversa: ${conversationId}]`,
 	].join("\n");
+}
+
+async function getTelegramUpdates(token) {
+	const now = Date.now();
+	if (cachedUpdatesExpiresAt > now) return cachedUpdates;
+	if (updatesRequest) return updatesRequest;
+
+	updatesRequest = (async () => {
+		const params = new URLSearchParams({
+			limit: "100",
+			timeout: "0",
+			allowed_updates: JSON.stringify(["message"]),
+		});
+		const response = await fetch(
+			`https://api.telegram.org/bot${token}/getUpdates?${params}`,
+			{ signal: AbortSignal.timeout(8000) }
+		);
+		const payload = await response.json();
+		if (!response.ok || payload.ok !== true || !Array.isArray(payload.result)) {
+			throw new Error(`Telegram getUpdates returned ${response.status}`);
+		}
+
+		cachedUpdates = payload.result;
+		cachedUpdatesExpiresAt = Date.now() + TELEGRAM_UPDATES_CACHE_MS;
+		return cachedUpdates;
+	})();
+
+	try {
+		return await updatesRequest;
+	} finally {
+		updatesRequest = null;
+	}
 }
 
 export default {
@@ -99,7 +146,7 @@ export default {
 				status: 204,
 				headers: {
 					"access-control-allow-origin": allowedOrigin,
-					"access-control-allow-methods": "POST, OPTIONS",
+					"access-control-allow-methods": "GET, POST, OPTIONS",
 					"access-control-allow-headers": "content-type",
 					"access-control-max-age": "86400",
 					vary: "Origin",
@@ -107,7 +154,7 @@ export default {
 			});
 		}
 
-		if (request.method !== "POST") {
+		if (request.method !== "GET" && request.method !== "POST") {
 			return json(
 				{ ok: false, error: "Método não permitido." },
 				405,
@@ -117,6 +164,70 @@ export default {
 
 		if (!allowedOrigin) {
 			return json({ ok: false, error: "Origem não permitida." }, 403);
+		}
+
+		const token = process.env.TELEGRAM_BOT_TOKEN;
+		const chatId = process.env.TELEGRAM_CHAT_ID;
+		if (!token || !chatId) {
+			console.error(
+				"Telegram relay is missing required environment variables."
+			);
+			return json(
+				{ ok: false, error: "Serviço temporariamente indisponível." },
+				503,
+				allowedOrigin
+			);
+		}
+
+		if (request.method === "GET") {
+			const url = new URL(request.url);
+			const conversationId = url.searchParams.get("conversationId") ?? "";
+			const afterUpdateId = Number(url.searchParams.get("after") ?? 0);
+
+			if (
+				!CONVERSATION_ID_PATTERN.test(conversationId) ||
+				!Number.isSafeInteger(afterUpdateId) ||
+				afterUpdateId < 0
+			) {
+				return json({ ok: false, error: "Conversa inválida." }, 400, allowedOrigin);
+			}
+
+			try {
+				const updates = await getTelegramUpdates(token);
+				const marker = `[Conversa: ${conversationId}]`;
+				const replies = updates
+					.filter((update) => {
+						const reply = update.message;
+						return (
+							Number(update.update_id) > afterUpdateId &&
+							String(reply?.chat?.id) === String(chatId) &&
+							reply?.from?.is_bot !== true &&
+							typeof reply?.text === "string" &&
+							reply.reply_to_message?.text?.includes(marker)
+						);
+					})
+					.map((update) => ({
+						id: Number(update.update_id),
+						text: update.message.text.trim().slice(0, 1000),
+						sentAt: Number(update.message.date) * 1000,
+					}));
+				const cursor = replies.reduce(
+					(maximum, reply) => Math.max(maximum, reply.id),
+					afterUpdateId
+				);
+
+				return json({ ok: true, replies, cursor }, 200, allowedOrigin);
+			} catch (error) {
+				console.error(
+					"Telegram replies could not be read.",
+					error instanceof Error ? error.message : "Unknown error"
+				);
+				return json(
+					{ ok: false, error: "Não foi possível buscar respostas." },
+					502,
+					allowedOrigin
+				);
+			}
 		}
 
 		const contentLength = Number(request.headers.get("content-length") ?? 0);
@@ -144,6 +255,10 @@ export default {
 		const website =
 			typeof payload.website === "string" ? payload.website.trim() : "";
 		const startedAt = Number(payload.startedAt);
+		const conversationId =
+			typeof payload.conversationId === "string"
+				? payload.conversationId.trim()
+				: "";
 		const now = Date.now();
 
 		if (website) {
@@ -156,6 +271,10 @@ export default {
 				400,
 				allowedOrigin
 			);
+		}
+
+		if (!CONVERSATION_ID_PATTERN.test(conversationId)) {
+			return json({ ok: false, error: "Conversa inválida." }, 400, allowedOrigin);
 		}
 
 		if (
@@ -175,24 +294,12 @@ export default {
 			);
 		}
 
-		const token = process.env.TELEGRAM_BOT_TOKEN;
-		const chatId = process.env.TELEGRAM_CHAT_ID;
-		if (!token || !chatId) {
-			console.error(
-				"Telegram relay is missing required environment variables."
-			);
-			return json(
-				{ ok: false, error: "Serviço temporariamente indisponível." },
-				503,
-				allowedOrigin
-			);
-		}
-
 		const telegramText = formatTelegramMessage({
 			message,
 			pageUrl: cleanSingleLine(payload.pageUrl, 300),
 			language: cleanSingleLine(payload.language, 20),
 			userAgent: cleanSingleLine(request.headers.get("user-agent"), 180),
+			conversationId,
 		});
 
 		try {

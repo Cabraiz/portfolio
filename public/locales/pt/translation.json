@@ -29,7 +29,7 @@
     "placeholder": "Digite sua mensagem...",
     "send": "Enviar",
     "sending": "Enviando...",
-    "sendSuccess": "Mensagem enviada para o Mateus no Telegram.",
+    "sendSuccess": "Mensagem enviada. A resposta do Mateus aparecerá aqui.",
     "sendError": "Não foi possível enviar agora. Tente novamente.",
     "close": "Fechar",
     "intro": "Olá, Mateus. Me chamo "
