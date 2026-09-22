@@ -32,10 +32,14 @@ export default function FloatingChat() {
   const [isOpen, setIsOpen] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const [messages, setMessages] = useState<string[]>([]);
+  const [sendStatus, setSendStatus] = useState<
+    "idle" | "sending" | "sent" | "error"
+  >("idle");
   const chatRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const chatOpenedAtRef = useRef(Date.now());
 
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const phrases = t("floatingChat.phrases", {
     returnObjects: true,
   }) as string[];
@@ -90,40 +94,56 @@ export default function FloatingChat() {
     return () => clearInterval(interval);
   }, [phrases.length]);
 
-  const typewriterText = t("floatingChat.intro");
-
   useEffect(() => {
-    if (!isOpen || !inputRef.current || messages.length > 0) return;
+    if (isOpen) inputRef.current?.focus();
+  }, [isOpen]);
 
-    inputRef.current.focus();
-    setInputValue("");
+  const openChat = () => {
+    chatOpenedAtRef.current = Date.now();
+    setSendStatus("idle");
+    if (messages.length === 0) setInputValue(t("floatingChat.intro"));
+    setIsOpen(true);
+  };
 
-    let i = 0;
-    const interval = setInterval(() => {
-      if (i < typewriterText.length) {
-        const char = typewriterText[i];
-        if (char !== undefined) {
-          setInputValue((prev) => prev + char);
+  const sendMessage = async () => {
+    const message = inputValue.trim();
+    if (!message || sendStatus === "sending") return;
+
+    setSendStatus("sending");
+
+    try {
+      const response = await fetch(
+        import.meta.env.VITE_CONTACT_API_URL?.trim() || "/api/contact",
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            message,
+            pageUrl: window.location.href,
+            language: i18n.resolvedLanguage ?? i18n.language,
+            startedAt: chatOpenedAtRef.current,
+            website: "",
+          }),
         }
-        i += 1;
-      } else {
-        clearInterval(interval);
+      );
+
+      if (!response.ok) {
+        throw new Error(`Contact API returned ${response.status}`);
       }
-    }, 100);
 
-    return () => clearInterval(interval);
-  }, [isOpen, messages.length, typewriterText]);
-
-  const sendMessage = () => {
-    if (inputValue.trim()) {
-      setMessages((prev) => [...prev, inputValue]);
+      setMessages((prev) => [...prev, message]);
       setInputValue("");
+      setSendStatus("sent");
+    } catch (error) {
+      console.error("Não foi possível enviar a mensagem do portfólio.", error);
+      setSendStatus("error");
     }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
-      sendMessage();
+      e.preventDefault();
+      void sendMessage();
     }
   };
 
@@ -142,7 +162,7 @@ export default function FloatingChat() {
     >
       {!isOpen && (
         <button
-          onClick={() => setIsOpen(true)}
+          onClick={openChat}
           style={{
             display: "flex",
             alignItems: "center",
@@ -517,7 +537,11 @@ export default function FloatingChat() {
                   enterKeyHint="send"
                   placeholder={t("floatingChat.placeholder")}
                   value={inputValue}
-                  onChange={(e) => setInputValue(e.target.value)}
+                  maxLength={1000}
+                  onChange={(e) => {
+                    setInputValue(e.target.value);
+                    if (sendStatus !== "sending") setSendStatus("idle");
+                  }}
                   onKeyDown={handleKeyDown}
                   style={{
                     width: "100%",
@@ -533,20 +557,42 @@ export default function FloatingChat() {
               </form>
 
               <button
-                onClick={sendMessage}
+                type="button"
+                onClick={() => void sendMessage()}
+                disabled={!inputValue.trim() || sendStatus === "sending"}
                 style={{
                   padding: `0 ${scale(1)}rem`,
                   backgroundColor: "#f1c40f",
                   color: "#000",
                   border: "none",
                   borderRadius: "8px",
-                  cursor: "pointer",
+                  cursor:
+                    !inputValue.trim() || sendStatus === "sending"
+                      ? "not-allowed"
+                      : "pointer",
                   fontWeight: "bold",
                   fontSize: `${scale(1)}rem`,
+                  opacity:
+                    !inputValue.trim() || sendStatus === "sending" ? 0.65 : 1,
                 }}
               >
-                {t("floatingChat.send")}
+                {sendStatus === "sending"
+                  ? t("floatingChat.sending")
+                  : t("floatingChat.send")}
               </button>
+            </div>
+
+            <div
+              aria-live="polite"
+              style={{
+                minHeight: `${scale(1.25)}rem`,
+                marginTop: `${scale(0.4)}rem`,
+                color: sendStatus === "error" ? "#ffb4ab" : "#b9f6ca",
+                fontSize: `${scale(0.82)}rem`,
+              }}
+            >
+              {sendStatus === "sent" && t("floatingChat.sendSuccess")}
+              {sendStatus === "error" && t("floatingChat.sendError")}
             </div>
 
             <button

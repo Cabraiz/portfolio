@@ -83,7 +83,8 @@
     "storybook-watch": "sb-rn-watcher",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "test:relay": "node --test services/telegram-relay/test/*.test.mjs"
   },
   "eslintConfig": {
     "extends": [

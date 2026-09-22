@@ -37,6 +37,9 @@
     "greetingEvening": "Good evening!",
     "placeholder": "Type your message...",
     "send": "Send",
+    "sending": "Sending...",
+    "sendSuccess": "Your message was sent to Mateus on Telegram.",
+    "sendError": "The message could not be sent. Please try again.",
     "close": "Close",
     "intro": "Hey, Mateus. My name is "
   },

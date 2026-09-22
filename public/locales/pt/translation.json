@@ -28,6 +28,9 @@
     "greetingEvening": "Boa noite!",
     "placeholder": "Digite sua mensagem...",
     "send": "Enviar",
+    "sending": "Enviando...",
+    "sendSuccess": "Mensagem enviada para o Mateus no Telegram.",
+    "sendError": "Não foi possível enviar agora. Tente novamente.",
     "close": "Fechar",
     "intro": "Olá, Mateus. Me chamo "
   },
