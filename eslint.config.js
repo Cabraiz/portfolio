@@ -1,10 +1,12 @@
 // eslint.config.js
 import js from "@eslint/js";
+import eslintReact from "@eslint-react/eslint-plugin";
 import globals from "globals";
 import tseslint from "typescript-eslint";
-import pluginReact from "eslint-plugin-react";
 import pluginPrettier from "eslint-plugin-prettier";
 import { defineConfig } from "eslint/config";
+
+const reactRecommended = eslintReact.configs["recommended-typescript"];
 
 export default defineConfig([
   {
@@ -23,23 +25,17 @@ export default defineConfig([
         ...globals.node,
       },
     },
-    settings: {
-      react: {
-        version: "detect",
-      },
-    },
+    settings: reactRecommended.settings,
     plugins: {
       prettier: pluginPrettier,
-      react: pluginReact,
+      ...reactRecommended.plugins,
     },
     rules: {
       ...js.configs.recommended.rules,
       ...tseslint.configs.recommended[0].rules,
-      ...pluginReact.configs.recommended.rules,
+      ...reactRecommended.rules,
       "prettier/prettier": "off",
       "no-unused-vars": "warn",
-      "react/react-in-jsx-scope": "off",
-      "react/prop-types": "off",
     },
   },
 ]);

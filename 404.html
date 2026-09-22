@@ -76,7 +76,13 @@
     <script>
       const path = window.location.pathname + window.location.search + window.location.hash;
       const cleanPath = decodeURIComponent(path);
-      window.location.replace("/?" + cleanPath);
+      const cleanPathname = decodeURIComponent(window.location.pathname).replace(/\/+$/, "");
+
+      if (cleanPathname === "/resume") {
+        window.location.replace("/files/mateus-cabral-resume.pdf");
+      } else {
+        window.location.replace("/?" + cleanPath);
+      }
     </script>
   </body>
 </html>
