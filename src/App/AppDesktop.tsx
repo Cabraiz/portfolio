@@ -21,6 +21,7 @@ import type {
   ScrollViewport,
 } from "../features/scroll/lenisScrollProfiles";
 import "./AppDesktop.css";
+import "../pages/Mateus/Mateus.css";
 
 import "react-toastify/dist/ReactToastify.css";
 
