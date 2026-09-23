@@ -14,6 +14,9 @@ import {
 	WHATSAPP_HREF,
 } from "../../data/home.data";
 
+const polishedGoldGradient =
+	"linear-gradient(105deg, #c58b22 0%, #f3cf66 15%, #fff3b7 28%, #d29a27 41%, #fff8d1 50%, #d29a27 59%, #fff3b7 72%, #f3cf66 85%, #c58b22 100%)";
+
 type HeroTextColumnProps = Readonly<{
 	isCompactDesktop: boolean;
 	isPT: boolean;
@@ -52,8 +55,7 @@ export default function HeroTextColumn({
 			fontSize: isCompactDesktop ? "3rem" : "4rem",
 			fontWeight: 700,
 			color: "transparent",
-			backgroundImage:
-				"linear-gradient(105deg, #8a5700 0%, #e1b338 20%, #fff6c7 38%, #c48a10 55%, #ffe18a 75%, #8b5700 100%)",
+			backgroundImage: polishedGoldGradient,
 			backgroundSize: "220px 100%",
 			backgroundRepeat: "no-repeat",
 			backgroundClip: "text",
@@ -85,8 +87,7 @@ export default function HeroTextColumn({
 		return {
 			...contentBlockWidth,
 			minWidth: 0,
-			backgroundImage:
-				"linear-gradient(105deg, #8a5700 0%, #e1b338 20%, #fff6c7 38%, #c48a10 55%, #ffe18a 75%, #8b5700 100%)",
+			backgroundImage: polishedGoldGradient,
 			marginBottom: isCompactDesktop ? "30px" : "46px",
 			display: "flex",
 			alignItems: "center",

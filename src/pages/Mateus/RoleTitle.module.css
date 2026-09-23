@@ -1,0 +1,161 @@
+.glassFrame {
+  isolation: isolate;
+  border: 1px solid rgba(221, 169, 48, 0.82);
+  background: linear-gradient(
+    135deg,
+    rgba(7, 17, 28, 0.68) 0%,
+    rgba(10, 26, 39, 0.42) 48%,
+    rgba(6, 15, 25, 0.58) 100%
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 245, 199, 0.12),
+    inset 0 -1px 0 rgba(159, 111, 21, 0.18),
+    0 12px 30px rgba(0, 0, 0, 0.18);
+  backdrop-filter: blur(14px) saturate(128%);
+  -webkit-backdrop-filter: blur(14px) saturate(128%);
+}
+
+.glassFrame::before {
+  position: absolute;
+  inset: -28% auto -28% -34%;
+  z-index: 0;
+  width: 38%;
+  content: "";
+  background: linear-gradient(
+    112deg,
+    transparent 12%,
+    rgba(255, 255, 255, 0.025) 30%,
+    rgba(255, 244, 194, 0.17) 49%,
+    rgba(255, 255, 255, 0.035) 66%,
+    transparent 84%
+  );
+  mix-blend-mode: screen;
+  pointer-events: none;
+  transform: translateX(-165%) skewX(-16deg);
+  animation: glassLightSweep 7.2s cubic-bezier(0.42, 0, 0.2, 1) infinite;
+}
+
+.glassFrame::after {
+  position: absolute;
+  inset: -1px;
+  z-index: 2;
+  padding: 2px;
+  border-radius: inherit;
+  content: "";
+  background: linear-gradient(
+    105deg,
+    #9f6814 0%,
+    #d79b29 22%,
+    #fff2ad 42%,
+    #fff9d4 50%,
+    #e5ad3c 60%,
+    #b57518 82%,
+    #8e5a10 100%
+  );
+  background-position: 110% 0;
+  background-size: 240% 100%;
+  pointer-events: none;
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  animation: goldBorderLight 7.2s ease-in-out infinite;
+}
+
+.goldLabel {
+  position: relative;
+  z-index: 1;
+  color: transparent;
+  background-image: linear-gradient(
+    105deg,
+    #b97716 0%,
+    #e5ad3c 18%,
+    #ffe99a 36%,
+    #fff9d4 50%,
+    #e2aa38 64%,
+    #f0c85f 82%,
+    #aa6b12 100%
+  );
+  background-position: 105% 0;
+  background-size: 240% 100%;
+  background-clip: text;
+  filter: drop-shadow(0 2px 8px rgba(199, 139, 18, 0.22));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: goldTextLight 7.2s ease-in-out infinite;
+}
+
+@keyframes glassLightSweep {
+  0%,
+  46% {
+    opacity: 0;
+    transform: translateX(-165%) skewX(-16deg);
+  }
+
+  54% {
+    opacity: 0.16;
+  }
+
+  70% {
+    opacity: 0;
+    transform: translateX(430%) skewX(-16deg);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateX(430%) skewX(-16deg);
+  }
+}
+
+@keyframes goldBorderLight {
+  0%,
+  42% {
+    background-position: 110% 0;
+    filter: brightness(0.88) saturate(0.92);
+  }
+
+  58% {
+    background-position: 50% 0;
+    filter: brightness(1.2) saturate(1.06);
+  }
+
+  74%,
+  100% {
+    background-position: -10% 0;
+    filter: brightness(0.94) saturate(0.96);
+  }
+}
+
+@keyframes goldTextLight {
+  0%,
+  42% {
+    background-position: 105% 0;
+    filter: brightness(0.94) drop-shadow(0 2px 8px rgba(199, 139, 18, 0.18));
+  }
+
+  58% {
+    background-position: 50% 0;
+    filter: brightness(1.18) drop-shadow(0 2px 12px rgba(255, 222, 116, 0.28));
+  }
+
+  74%,
+  100% {
+    background-position: -5% 0;
+    filter: brightness(1) drop-shadow(0 2px 8px rgba(199, 139, 18, 0.2));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glassFrame::before {
+    display: none;
+  }
+
+  .glassFrame::after,
+  .goldLabel {
+    animation: none;
+  }
+}
