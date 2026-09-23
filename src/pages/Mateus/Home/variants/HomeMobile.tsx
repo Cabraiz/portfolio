@@ -69,6 +69,15 @@ function HomeMobile() {
         .to(
           logo,
           {
+            x: -36,
+            duration: 0.05,
+            ease: "power2.out",
+          },
+          0,
+        )
+        .to(
+          logo,
+          {
             y: () => Math.min(380, window.innerHeight * 0.5),
             rotation: 2,
             scale: 1.08,
@@ -79,6 +88,7 @@ function HomeMobile() {
         .to(
           logo,
           {
+            x: 0,
             y: 0,
             rotation: 0,
             scale: 1,
@@ -101,14 +111,24 @@ function HomeMobile() {
         element: HTMLElement | null,
         start: number,
         distance: number,
+        constrainToViewport = false,
       ) => {
         if (!element) return;
+
+        const resolveDistance = () => {
+          if (!constrainToViewport) return distance;
+
+          const availableSpace =
+            window.innerWidth - (element.offsetLeft + element.offsetWidth) - 8;
+
+          return Math.max(0, Math.min(distance, availableSpace));
+        };
 
         timeline
           .to(
             element,
             {
-              x: distance,
+              x: resolveDistance,
               skewX: -1.2,
               duration: 0.09,
               ease: "power2.out",
@@ -128,7 +148,7 @@ function HomeMobile() {
       };
 
       pushBlock(eyebrowRef.current, 0.015, 58);
-      pushBlock(titleRef.current, 0.055, 56);
+      pushBlock(titleRef.current, 0.055, 56, true);
       pushBlock(identityRef.current, 0.09, 60);
       pushBlock(introRef.current, 0.17, 66);
       pushBlock(partnersRef.current, 0.3, 62);

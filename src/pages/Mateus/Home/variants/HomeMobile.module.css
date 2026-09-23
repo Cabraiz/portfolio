@@ -137,11 +137,10 @@
 }
 
 .partners {
-  position: absolute;
-  bottom: 134px;
-  left: 20px;
+  position: relative;
   z-index: 3;
   width: 128px;
+  margin-top: 24px;
   padding: 8px 10px 8px 0;
   border-radius: 0 14px 14px 0;
   box-sizing: border-box;
@@ -208,8 +207,8 @@
 
 .portrait {
   position: absolute;
+  top: 218px;
   right: -65px;
-  bottom: 76px;
   z-index: 1;
   width: min(100vw, 390px);
   height: auto;
@@ -283,12 +282,7 @@
 
   .portrait {
     right: -58px;
-    bottom: 14px;
     width: min(94vw, 350px);
-  }
-
-  .partners {
-    bottom: 124px;
   }
 
   .partnerLogos {
@@ -302,11 +296,8 @@
     padding-left: 26px;
   }
 
-  .partners {
-    left: 26px;
-  }
-
   .portrait {
+    top: 232px;
     right: -62px;
     width: min(92vw, 390px);
   }
