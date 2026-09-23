@@ -4,21 +4,13 @@ import {
   useCallback,
   useEffect,
   useMemo,
-  useRef,
   useState,
   type CSSProperties,
   type PointerEvent as ReactPointerEvent,
   type RefObject,
 } from "react";
 
-import {
-  addGsapTicker,
-  removeGsapTicker,
-} from "@/features/scroll/gsapRuntime";
-
 import { useLiveReducedMotion } from "./useLiveReducedMotion";
-
-type GsapTickerCallback = (time: number) => void;
 
 type LiveMagneticPointerState = Readonly<{
   clientX: number;
@@ -74,10 +66,6 @@ function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);
 }
 
-function lerp(from: number, to: number, alpha: number): number {
-  return from + (to - from) * alpha;
-}
-
 function resolvePointerState(
   event: ReactPointerEvent<HTMLElement>,
 ): LiveMagneticPointerState {
@@ -124,24 +112,21 @@ export function useLiveMagneticPointer({
   const [offsetY, setOffsetY] = useState(0);
   const [scale, setScale] = useState(1);
 
-  const currentOffsetRef = useRef({ x: 0, y: 0, scale: 1 });
-  const targetOffsetRef = useRef({ x: 0, y: 0, scale: 1 });
-
   const isActive = !disabled && !reducedMotion;
 
   const reset = useCallback(() => {
     setPointer(DEFAULT_POINTER);
     setIsPointerInside(false);
-    targetOffsetRef.current = { x: 0, y: 0, scale: 1 };
+    setOffsetX(0);
+    setOffsetY(0);
+    setScale(1);
   }, []);
 
   const updateTargetFromPointer = useCallback(
     (nextPointer: LiveMagneticPointerState) => {
-      targetOffsetRef.current = {
-        x: nextPointer.centeredX * maxOffsetX,
-        y: nextPointer.centeredY * maxOffsetY,
-        scale: 1 + Math.min(nextPointer.distance * scaleBoost, scaleBoost),
-      };
+      setOffsetX(nextPointer.centeredX * maxOffsetX);
+      setOffsetY(nextPointer.centeredY * maxOffsetY);
+      setScale(1 + Math.min(nextPointer.distance * scaleBoost, scaleBoost));
     },
     [maxOffsetX, maxOffsetY, scaleBoost],
   );
@@ -181,38 +166,11 @@ export function useLiveMagneticPointer({
 
   useEffect(() => {
     if (!isActive) {
-      targetOffsetRef.current = { x: 0, y: 0, scale: 1 };
-      currentOffsetRef.current = { x: 0, y: 0, scale: 1 };
       setOffsetX(0);
       setOffsetY(0);
       setScale(1);
-      return undefined;
     }
-
-    const onTick: GsapTickerCallback = () => {
-      const alpha = clamp(smoothing, 0.01, 1);
-
-      currentOffsetRef.current = {
-        x: lerp(currentOffsetRef.current.x, targetOffsetRef.current.x, alpha),
-        y: lerp(currentOffsetRef.current.y, targetOffsetRef.current.y, alpha),
-        scale: lerp(
-          currentOffsetRef.current.scale,
-          targetOffsetRef.current.scale,
-          alpha,
-        ),
-      };
-
-      setOffsetX(currentOffsetRef.current.x);
-      setOffsetY(currentOffsetRef.current.y);
-      setScale(currentOffsetRef.current.scale);
-    };
-
-    addGsapTicker(onTick);
-
-    return () => {
-      removeGsapTicker(onTick);
-    };
-  }, [isActive, smoothing]);
+  }, [isActive]);
 
   useEffect(() => {
     if (!containerRef?.current || !isActive) {
@@ -237,8 +195,9 @@ export function useLiveMagneticPointer({
       "--live-magnetic-scale": scale.toFixed(4),
       transform,
       willChange: "transform",
+      transition: `transform ${Math.round(clamp(smoothing, 0.08, 0.45) * 900)}ms ease-out`,
     }) as CSSProperties,
-    [offsetX, offsetY, scale, transform],
+    [offsetX, offsetY, scale, smoothing, transform],
   );
 
   const bind = useMemo(

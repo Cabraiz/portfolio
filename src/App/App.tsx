@@ -1,13 +1,22 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { Suspense, lazy, useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
-import AppDesktop from "./AppDesktop";
-import AppMobile from "./AppMobile";
 import {
   isHomeGameRoutePath,
   isHomeGameStandaloneHost,
 } from "./appHostRouting";
 
 const DESKTOP_MEDIA_QUERY = "(min-width: 768px)";
+
+const AppDesktop = lazy(() => import("./AppDesktop"));
+const AppMobile = lazy(() => import("./AppMobile"));
+
+const appShellFallback = (
+  <div
+    aria-label="Carregando portfólio"
+    role="status"
+    style={{ minHeight: "100dvh", background: "#050505" }}
+  />
+);
 
 function getIsDesktop(): boolean {
   if (typeof globalThis.matchMedia !== "function") {
@@ -50,10 +59,18 @@ const App: React.FC = () => {
   }, [shouldForceMobileGame]);
 
   if (shouldForceMobileGame) {
-    return <AppMobile />;
+    return (
+      <Suspense fallback={appShellFallback}>
+        <AppMobile />
+      </Suspense>
+    );
   }
 
-  return isDesktop ? <AppDesktop /> : <AppMobile />;
+  return (
+    <Suspense fallback={appShellFallback}>
+      {isDesktop ? <AppDesktop /> : <AppMobile />}
+    </Suspense>
+  );
 };
 
 export default App;

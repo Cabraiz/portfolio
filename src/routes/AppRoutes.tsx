@@ -1,20 +1,5 @@
+import { Suspense, lazy } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
-
-import RegisterHubLocal from "../pages/RegisterHubLocal/Register";
-import LoginHubLocal from "../pages/LoginHubLocal/login";
-import Hublocal from "../pages/Hublocal/Hublocal";
-import Resume from "../pages/Resume/Resume";
-import Doris from "../pages/Doris.mobi/principal";
-import CasaNova from "../pages/CasaNova/CasaNova";
-import Surprise from "../pages/Surprise/Surprise";
-
-import Enigma from "../pages/Enigma/Enigma";
-import Libras from "../pages/Libras/Libras";
-import Rosa from "../pages/Rosa/Rosa";
-import Vinho from "../pages/Vinho/Vinho";
-import LandingRouterPage from "../pages/Mateus/LandingPage/LandingRouterPage";
-import HomeDriveStandalonePage from "../pages/Mateus/Home/Drive/HomeDriveStandalonePage";
-import HomeElevatorStandalonePage from "../pages/Mateus/Home/Elevator/HomeElevatorStandalonePage";
 import {
   getHomeGameLandingRedirectPath,
   HOME_DRIVE_ROUTE_PATH,
@@ -27,6 +12,35 @@ import { PrivateOutlet } from "../redux/shared/utils/PrivateOutlet";
 import { RouteGuard } from "../components/RouteGuard";
 import DigitalCodeUnlock from "../components/DigitalCodeUnlock";
 
+const RegisterHubLocal = lazy(() => import("../pages/RegisterHubLocal/Register"));
+const LoginHubLocal = lazy(() => import("../pages/LoginHubLocal/login"));
+const Hublocal = lazy(() => import("../pages/Hublocal/Hublocal"));
+const Resume = lazy(() => import("../pages/Resume/Resume"));
+const Doris = lazy(() => import("../pages/Doris.mobi/principal"));
+const CasaNova = lazy(() => import("../pages/CasaNova/CasaNova"));
+const Surprise = lazy(() => import("../pages/Surprise/Surprise"));
+const Enigma = lazy(() => import("../pages/Enigma/Enigma"));
+const Libras = lazy(() => import("../pages/Libras/Libras"));
+const Rosa = lazy(() => import("../pages/Rosa/Rosa"));
+const Vinho = lazy(() => import("../pages/Vinho/Vinho"));
+const LandingRouterPage = lazy(
+  () => import("../pages/Mateus/LandingPage/LandingRouterPage"),
+);
+const HomeDriveStandalonePage = lazy(
+  () => import("../pages/Mateus/Home/Drive/HomeDriveStandalonePage"),
+);
+const HomeElevatorStandalonePage = lazy(
+  () => import("../pages/Mateus/Home/Elevator/HomeElevatorStandalonePage"),
+);
+
+const routeFallback = (
+  <div
+    aria-label="Carregando página"
+    role="status"
+    style={{ minHeight: "100dvh", background: "#050505" }}
+  />
+);
+
 const AppRoutes = () => {
   const landingElement = isHomeDriveStandaloneHost() ? (
     <Navigate to={HOME_DRIVE_ROUTE_PATH} replace />
@@ -37,7 +51,8 @@ const AppRoutes = () => {
   );
 
   return (
-    <Routes>
+    <Suspense fallback={routeFallback}>
+      <Routes>
       <Route
         path="/"
         element={<Navigate to={getHomeGameLandingRedirectPath()} replace />}
@@ -52,7 +67,8 @@ const AppRoutes = () => {
       <Route path="/home" element={landingElement} />
       <Route path="/portfolio" element={landingElement} />
       <Route path="/roadmap" element={landingElement} />
-      <Route path="/pricing" element={landingElement} />
+      <Route path="/technologies" element={landingElement} />
+      <Route path="/pricing" element={<Navigate to="/technologies" replace />} />
       <Route path="/live" element={landingElement} />
       <Route path="/contact" element={landingElement} />
 
@@ -109,7 +125,8 @@ const AppRoutes = () => {
       <Route path="/hublocal" element={<PrivateOutlet />}>
         <Route index element={<Hublocal />} />
       </Route>
-    </Routes>
+      </Routes>
+    </Suspense>
   );
 };
 

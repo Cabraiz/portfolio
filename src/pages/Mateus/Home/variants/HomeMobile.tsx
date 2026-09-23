@@ -1,6 +1,8 @@
 // src/pages/Mateus/Home/variants/HomeMobile.tsx
 
 import {
+  Suspense,
+  lazy,
   useCallback,
   useEffect,
   useLayoutEffect,
@@ -18,8 +20,6 @@ import gsap from "gsap";
 
 import HeroMobileStack from "../components/mobile/HeroMobileStack";
 import type { MobileSocialItem } from "../components/mobile/SocialRowMobile";
-import HomeDriveGame from "../components/mobile/game/driving/HomeDriveGame";
-import HomeElevatorGame from "../components/mobile/game/elevator/HomeElevatorGame";
 import { shouldDisableScrollFades } from "../../../../features/scroll/scrollMotionFlags";
 import {
   HOME_MOBILE_SOCIAL_LINKS,
@@ -28,6 +28,13 @@ import {
   SOCIAL_ICONS,
 } from "../data/home.data";
 import { homeHeroTokens } from "../layout/homeHero.tokens";
+
+const HomeDriveGame = lazy(
+  () => import("../components/mobile/game/driving/HomeDriveGame"),
+);
+const HomeElevatorGame = lazy(
+  () => import("../components/mobile/game/elevator/HomeElevatorGame"),
+);
 
 const MOBILE_HERO_BACKGROUND = `
   radial-gradient(
@@ -402,12 +409,14 @@ function HomeMobile() {
 
       {isGameOpen ? (
         <div style={driveOverlayStyle}>
-          {activeGame === "drive" ? (
-            <HomeDriveGame onClose={handleCloseGame} />
-          ) : null}
-          {activeGame === "elevator" ? (
-            <HomeElevatorGame onClose={handleCloseGame} />
-          ) : null}
+          <Suspense fallback={null}>
+            {activeGame === "drive" ? (
+              <HomeDriveGame onClose={handleCloseGame} />
+            ) : null}
+            {activeGame === "elevator" ? (
+              <HomeElevatorGame onClose={handleCloseGame} />
+            ) : null}
+          </Suspense>
         </div>
       ) : null}
     </div>

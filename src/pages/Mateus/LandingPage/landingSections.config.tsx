@@ -8,14 +8,7 @@ import {
 
 import type { LandingSectionId } from "@/features/navigation/landingSections";
 
-import ContactDesktop from "../Contact/ContactDesktop";
-import ContactMobile from "../Contact/ContactMobile";
-import Live from "../Live/Live";
-import HomeDesktop from "../Home/variants/HomeDesktop";
-import HomeMobile from "../Home/variants/HomeMobile";
-import Portfolio from "../Portfolio/Portfolio";
 import RoadMapErrorBoundary from "../RoadMap/ui/chrome/RoadMapErrorBoundary";
-import Technologies from "../Technologies/Technologies";
 
 import LandingSectionSkeleton from "./LandingSectionSkeleton";
 import type {
@@ -30,8 +23,15 @@ import {
 	type LandingSectionHeightRole,
 } from "./landingLayout.tokens";
 
+const ContactDesktop = lazy(() => import("../Contact/ContactDesktop"));
+const ContactMobile = lazy(() => import("../Contact/ContactMobile"));
+const HomeDesktop = lazy(() => import("../Home/variants/HomeDesktop"));
+const HomeMobile = lazy(() => import("../Home/variants/HomeMobile"));
+const Live = lazy(() => import("../Live/Live"));
+const Portfolio = lazy(() => import("../Portfolio/Portfolio"));
 const RoadMap = lazy(() => import("../RoadMap/RoadMap"));
 const RoadMapMobile = lazy(() => import("../RoadMap/RoadMapMobile"));
+const Technologies = lazy(() => import("../Technologies/Technologies"));
 
 type LandingRenderableViewportMode = "desktop" | "mobile";
 
@@ -114,10 +114,10 @@ const MOBILE_HERO_STABLE_BEHAVIOR: LandingSectionBehavior = {
 	}),
 };
 
-const MOBILE_CONTENT_STABLE_BEHAVIOR: LandingSectionBehavior = {
-	renderStrategy: "always-mounted",
-	measurementStrategy: "none",
-	cacheMeasurements: false,
+const MOBILE_CONTENT_VIRTUALIZED_BEHAVIOR: LandingSectionBehavior = {
+	renderStrategy: "placeholder-when-far",
+	measurementStrategy: "resize-observer",
+	cacheMeasurements: true,
 	keepMountedWhenNear: true,
 	placeholderFallbackMinHeight: resolveLandingSectionMinHeight("mobile", {
 		preferDynamicViewport: false,
@@ -129,16 +129,16 @@ const DESKTOP_HERO_RENDER_HINTS: LandingSectionRenderHints = {
 	alwaysMountedOnDesktop: true,
 	prefersStableRender: true,
 	urlSyncEligible: true,
-	preferredNearDistance: 999,
-	disableFarOnDesktop: true,
+	preferredNearDistance: 1,
+	disableFarOnDesktop: false,
 };
 
 const DESKTOP_STABLE_CONTENT_RENDER_HINTS: LandingSectionRenderHints = {
 	alwaysMountedOnDesktop: false,
-	prefersStableRender: true,
+	prefersStableRender: false,
 	urlSyncEligible: true,
-	preferredNearDistance: 6,
-	disableFarOnDesktop: true,
+	preferredNearDistance: 0,
+	disableFarOnDesktop: false,
 };
 
 const MOBILE_DEFAULT_RENDER_HINTS: LandingSectionRenderHints = {
@@ -276,7 +276,22 @@ function toLandingSectionDefinition(
 		id: config.id,
 		order: config.order,
 		viewportMode,
-		content: createElement(viewportConfig.Component),
+		content: (
+			<Suspense
+				fallback={renderSuspenseFallback(
+					config.id === "home"
+						? "hero"
+						: config.id === "portfolio"
+							? "portfolio"
+							: config.id === "roadMap"
+								? "roadmap"
+								: "content",
+					viewportConfig.expectedMinHeight
+				)}
+			>
+				{createElement(viewportConfig.Component)}
+			</Suspense>
+		),
 		placeholderMinHeight: viewportConfig.expectedMinHeight,
 		sectionStyle: viewportConfig.sectionStyle,
 		contentStyle: viewportConfig.contentStyle,
@@ -359,7 +374,7 @@ export const LANDING_SECTIONS_CONFIG = [
 		mobile: createViewportConfig(
 			"mobile",
 			Portfolio,
-			MOBILE_CONTENT_STABLE_BEHAVIOR,
+			MOBILE_CONTENT_VIRTUALIZED_BEHAVIOR,
 			{
 				sectionRole: "content",
 			}
@@ -380,14 +395,14 @@ export const LANDING_SECTIONS_CONFIG = [
 				},
 				renderHints: {
 					...DESKTOP_STABLE_CONTENT_RENDER_HINTS,
-					preferredNearDistance: 8,
+					preferredNearDistance: 0,
 				},
 			}
 		),
 		mobile: createViewportConfig(
 			"mobile",
 			RoadMapMobileWithBoundary,
-			MOBILE_CONTENT_STABLE_BEHAVIOR,
+			MOBILE_CONTENT_VIRTUALIZED_BEHAVIOR,
 			{
 				sectionRole: "content",
 				contentStyle: {
@@ -412,7 +427,7 @@ export const LANDING_SECTIONS_CONFIG = [
 		mobile: createViewportConfig(
 			"mobile",
 			Technologies,
-			MOBILE_CONTENT_STABLE_BEHAVIOR,
+			MOBILE_CONTENT_VIRTUALIZED_BEHAVIOR,
 			{
 				sectionRole: "content",
 			}
@@ -433,7 +448,7 @@ export const LANDING_SECTIONS_CONFIG = [
 		mobile: createViewportConfig(
 			"mobile",
 			Live,
-			MOBILE_CONTENT_STABLE_BEHAVIOR,
+			MOBILE_CONTENT_VIRTUALIZED_BEHAVIOR,
 			{
 				sectionRole: "content",
 			}
@@ -454,7 +469,7 @@ export const LANDING_SECTIONS_CONFIG = [
 		mobile: createViewportConfig(
 			"mobile",
 			ContactMobile,
-			MOBILE_CONTENT_STABLE_BEHAVIOR,
+			MOBILE_CONTENT_VIRTUALIZED_BEHAVIOR,
 			{
 				sectionRole: "content",
 			}
@@ -529,8 +544,12 @@ export function getLandingRenderPolicyOptions(
 		.map((section) => section.id);
 
 	const preferredNearDistance = sections.reduce((maxDistance, section) => {
+		if (section.alwaysMountedOnDesktop) {
+			return maxDistance;
+		}
+
 		return Math.max(maxDistance, section.preferredNearDistance ?? 1);
-	}, 1);
+	}, 0);
 
 	const disableFar =
 		viewportMode !== "mobile" &&

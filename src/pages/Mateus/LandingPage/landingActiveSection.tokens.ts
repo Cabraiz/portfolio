@@ -65,7 +65,7 @@ const MOBILE_TOKENS: LandingActiveSectionCommitTokens = {
   swapScoreDelta: 64,
   distanceHysteresisPx: 28,
   commitIdleMs: 90,
-  preferredNearDistance: 2,
+  preferredNearDistance: 0,
 };
 
 const DESKTOP_COMPACT_TOKENS: LandingActiveSectionCommitTokens = {
@@ -75,7 +75,7 @@ const DESKTOP_COMPACT_TOKENS: LandingActiveSectionCommitTokens = {
   swapScoreDelta: 92,
   distanceHysteresisPx: 48,
   commitIdleMs: 120,
-  preferredNearDistance: 3,
+  preferredNearDistance: 0,
 };
 
 const DESKTOP_WIDE_TOKENS: LandingActiveSectionCommitTokens = {
@@ -85,7 +85,7 @@ const DESKTOP_WIDE_TOKENS: LandingActiveSectionCommitTokens = {
   swapScoreDelta: 128,
   distanceHysteresisPx: 72,
   commitIdleMs: 160,
-  preferredNearDistance: 999,
+  preferredNearDistance: 0,
 };
 
 function clamp(value: number, min: number, max: number): number {

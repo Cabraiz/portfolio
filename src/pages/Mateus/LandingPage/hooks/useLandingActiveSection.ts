@@ -355,14 +355,12 @@ function areObservationsEquivalent(
 }
 
 function resolveDefaultSchedulingOptions(
-  viewportMode: LandingSectionViewportMode,
+  _viewportMode: LandingSectionViewportMode,
 ): Required<UseLandingActiveSectionSchedulingOptions> {
-  const isDesktop = viewportMode !== "mobile";
-
   return {
-    eventSource: isDesktop ? "window-only" : "container-only",
-    attachWindowScroll: isDesktop,
-    attachContainerScroll: !isDesktop,
+    eventSource: "window-only",
+    attachWindowScroll: true,
+    attachContainerScroll: false,
     attachResizeObserver: true,
     listenResize: true,
     listenOrientationChange: true,

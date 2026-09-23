@@ -88,12 +88,6 @@ export function useLiveParallaxField({
   const [layerCount, setLayerCount] = useState(0);
 
   const layersRef = useRef<ParallaxLayer[]>([]);
-  const activePointerRef = useRef<LiveParallaxPointer>({
-    normalizedX: 0.5,
-    normalizedY: 0.5,
-    distanceFromCenter: 0,
-  });
-
   const isActive = !disabled && !reducedMotion;
 
   const refresh = useCallback(() => {
@@ -130,62 +124,42 @@ export function useLiveParallaxField({
   }, [refresh, reset]);
 
   useEffect(() => {
-    if (!pointer) {
-      return;
-    }
-
-    activePointerRef.current = pointer;
-  }, [pointer]);
-
-  useEffect(() => {
     if (!isActive) {
       reset();
       return undefined;
     }
 
-    let frameId = 0;
-
-    const tick = () => {
-      const resolvedPointer = activePointerRef.current;
-      const layers = layersRef.current;
-
-      if (layers.length > 0) {
-        const centeredX = clamp(resolvedPointer.normalizedX * 2 - 1, -1, 1);
-        const centeredY = clamp(resolvedPointer.normalizedY * 2 - 1, -1, 1);
-
-        layers.forEach(({ element, depth, rotate }) => {
-          const weight = Math.max(0.12, depth);
-          const translateX = centeredX * maxTranslateX * weight;
-          const translateY = centeredY * maxTranslateY * weight;
-          const rotateY = centeredX * rotate * weight;
-          const rotateX = centeredY * rotate * -1 * weight;
-
-          gsap.to(element, {
-            x: translateX,
-            y: translateY,
-            rotateX,
-            rotateY,
-            duration: clamp(smoothing * 1.8, 0.08, 0.45),
-            ease: "power2.out",
-            overwrite: "auto",
-            force3D: true,
-          });
-        });
-      }
-
-      frameId = globalThis.requestAnimationFrame(tick);
+    const resolvedPointer = pointer ?? {
+      normalizedX: 0.5,
+      normalizedY: 0.5,
+      distanceFromCenter: 0,
     };
+    const centeredX = clamp(resolvedPointer.normalizedX * 2 - 1, -1, 1);
+    const centeredY = clamp(resolvedPointer.normalizedY * 2 - 1, -1, 1);
 
-    frameId = globalThis.requestAnimationFrame(tick);
+    layersRef.current.forEach(({ element, depth, rotate }) => {
+      const weight = Math.max(0.12, depth);
 
-    return () => {
-      globalThis.cancelAnimationFrame(frameId);
-    };
+      gsap.to(element, {
+        x: centeredX * maxTranslateX * weight,
+        y: centeredY * maxTranslateY * weight,
+        rotateX: centeredY * rotate * -1 * weight,
+        rotateY: centeredX * rotate * weight,
+        duration: clamp(smoothing * 1.8, 0.08, 0.45),
+        ease: "power2.out",
+        overwrite: "auto",
+        force3D: true,
+      });
+    });
+
+    return undefined;
   }, [
     isActive,
+    layerCount,
     maxRotateDeg,
     maxTranslateX,
     maxTranslateY,
+    pointer,
     reset,
     smoothing,
   ]);

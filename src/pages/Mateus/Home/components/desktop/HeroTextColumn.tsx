@@ -1,4 +1,4 @@
-import { type CSSProperties, useMemo } from "react";
+import { type CSSProperties, useMemo, useState } from "react";
 import { Col } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import Tippy from "@tippyjs/react";
@@ -49,6 +49,7 @@ export default function HeroTextColumn({
 	whatsappTopLabel,
 	secondaryLabel,
 }: HeroTextColumnProps) {
+	const [activeSealKey, setActiveSealKey] = useState<string | null>(null);
 	const { t } = useTranslation();
 
 	const seniorTitleStyle = useMemo<CSSProperties>(() => {
@@ -204,18 +205,21 @@ export default function HeroTextColumn({
 									boxSizing: "border-box",
 								}}
 							>
-								<img
-									src={seal.cat}
-									alt={`${seal.alt} mascot`}
-									style={{
-										height: "11vh",
-										maxWidth: "96px",
-										width: "auto",
-										borderRadius: "8px",
-										display: "block",
-										flexShrink: 0,
-									}}
-								/>
+								{activeSealKey === seal.key ? (
+									<img
+										src={seal.cat}
+										alt={`${seal.alt} mascot`}
+										decoding="async"
+										style={{
+											height: "11vh",
+											maxWidth: "96px",
+											width: "auto",
+											borderRadius: "8px",
+											display: "block",
+											flexShrink: 0,
+										}}
+									/>
+								) : null}
 								<p
 									style={{
 										fontSize: "12px",
@@ -228,6 +232,12 @@ export default function HeroTextColumn({
 							</div>
 						}
 						placement="top"
+						onShow={() => setActiveSealKey(seal.key)}
+						onHidden={() =>
+							setActiveSealKey((currentKey) =>
+								currentKey === seal.key ? null : currentKey
+							)
+						}
 						animation="fade"
 						arrow
 						delay={[500, 100]}

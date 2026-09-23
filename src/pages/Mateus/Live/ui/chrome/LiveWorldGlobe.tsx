@@ -43,11 +43,10 @@ export type LiveWorldGlobeProps = Readonly<{
   title?: string;
   subtitle?: string;
   eyebrow?: string;
-  target?: LiveWorldGlobePoint | null;
-  origin?: LiveWorldGlobePoint | null;
-  markers?: readonly LiveWorldGlobePoint[];
-  autoRotateSpeed?: number;
-  showArcToTarget?: boolean;
+	target?: LiveWorldGlobePoint | null;
+	origin?: LiveWorldGlobePoint | null;
+	markers?: readonly LiveWorldGlobePoint[];
+	showArcToTarget?: boolean;
 }>;
 
 const DEFAULT_BASE_COLOR: GlobeRgbColor = [0.094, 0.133, 0.212];
@@ -135,24 +134,6 @@ function normalizeAngle(angle: number): number {
   return normalized;
 }
 
-function lerp(start: number, end: number, amount: number): number {
-  return start + (end - start) * amount;
-}
-
-function lerpAngle(current: number, target: number, amount: number): number {
-  let delta = target - current;
-
-  while (delta > Math.PI) {
-    delta -= Math.PI * 2;
-  }
-
-  while (delta < -Math.PI) {
-    delta += Math.PI * 2;
-  }
-
-  return current + delta * amount;
-}
-
 function resolvePointColor(
   color: GlobeRgbColor | undefined,
   fallback: GlobeRgbColor
@@ -208,11 +189,10 @@ export default function LiveWorldGlobe({
   title = "Presença global",
   subtitle = "Globo vivo para apontar o país ou região do projeto em spotlight.",
   eyebrow = "world focus",
-  target = DEFAULT_TARGET,
-  origin = null,
-  markers,
-  autoRotateSpeed = 0.0024,
-  showArcToTarget = true,
+	target = DEFAULT_TARGET,
+	origin = null,
+	markers,
+	showArcToTarget = true,
 }: LiveWorldGlobeProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const stageRef = useRef<HTMLDivElement | null>(null);
@@ -225,18 +205,6 @@ export default function LiveWorldGlobe({
   const targetFocus = useMemo(() => {
     return resolveGlobeFocus(resolvedTarget);
   }, [resolvedTarget]);
-
-  const phiRef = useRef<number>(targetFocus.phi);
-  const thetaRef = useRef<number>(targetFocus.theta);
-  const focusPhiRef = useRef<number>(targetFocus.phi);
-  const focusThetaRef = useRef<number>(targetFocus.theta);
-  const orbitOffsetRef = useRef<number>(0);
-
-  useEffect(() => {
-    focusPhiRef.current = targetFocus.phi;
-    focusThetaRef.current = targetFocus.theta;
-    orbitOffsetRef.current = 0;
-  }, [targetFocus]);
 
   useEffect(() => {
     const element = stageRef.current;
@@ -347,7 +315,7 @@ export default function LiveWorldGlobe({
 
     const dpr =
       typeof window !== "undefined"
-        ? Math.min(window.devicePixelRatio || 1, 2)
+				? Math.min(window.devicePixelRatio || 1, 1.25)
         : 1;
 
     const internalWidth = Math.round(canvasSize.width * dpr);
@@ -356,19 +324,15 @@ export default function LiveWorldGlobe({
     canvas.width = internalWidth;
     canvas.height = internalHeight;
 
-    let frame = 0;
-    let animationFrameId = 0;
-    let destroyed = false;
-
-    const globe = createGlobe(canvas, {
+		const globe = createGlobe(canvas, {
       devicePixelRatio: dpr,
       width: internalWidth,
       height: internalHeight,
-      phi: phiRef.current,
-      theta: thetaRef.current,
+			phi: targetFocus.phi,
+			theta: targetFocus.theta,
       dark: 1,
       diffuse: 1.15,
-      mapSamples: 18000,
+			mapSamples: 10000,
       mapBrightness: 5.8,
       scale: 0.98,
       opacity: 1,
@@ -384,53 +348,18 @@ export default function LiveWorldGlobe({
       arcs: arcModels,
     });
 
-    const animate = () => {
-      frame += 1;
+		setIsReady(true);
 
-      orbitOffsetRef.current = normalizeAngle(
-        orbitOffsetRef.current + autoRotateSpeed
-      );
-
-      const orbitalPhi = normalizeAngle(
-        focusPhiRef.current + orbitOffsetRef.current
-      );
-
-      const nextPhi = normalizeAngle(
-        orbitalPhi + Math.sin(frame * 0.0085) * 0.06
-      );
-      const nextTheta =
-        focusThetaRef.current + Math.sin(frame * 0.0055) * 0.015;
-
-      phiRef.current = lerpAngle(phiRef.current, nextPhi, 0.075);
-      thetaRef.current = lerp(thetaRef.current, nextTheta, 0.06);
-
-      globe.update({
-        phi: phiRef.current,
-        theta: thetaRef.current,
-        markers: markerModels,
-        arcs: arcModels,
-      });
-
-      if (!destroyed) {
-        animationFrameId = window.requestAnimationFrame(animate);
-      }
-    };
-
-    setIsReady(true);
-    animationFrameId = window.requestAnimationFrame(animate);
-
-    return () => {
-      destroyed = true;
-      window.cancelAnimationFrame(animationFrameId);
-      globe.destroy();
+		return () => {
+			globe.destroy();
       setIsReady(false);
     };
-  }, [
-    arcModels,
-    autoRotateSpeed,
-    canvasSize.height,
-    canvasSize.width,
-    markerModels,
+	}, [
+		arcModels,
+		canvasSize.height,
+		canvasSize.width,
+		markerModels,
+		targetFocus,
   ]);
 
   const locationLabel = resolvedTarget.country ?? resolvedTarget.label;
@@ -500,7 +429,7 @@ export default function LiveWorldGlobe({
         </div>
 
         <div className={styles.pillRow}>
-          <span className={styles.pill}>Rotação viva</span>
+					<span className={styles.pill}>Render otimizado</span>
           <span className={styles.pill}>{resolvedPoints.length} pontos</span>
           {origin ? <span className={styles.pill}>Trajeto ligado</span> : null}
         </div>

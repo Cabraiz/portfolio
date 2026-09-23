@@ -1,7 +1,6 @@
 import type * as React from "react";
 import { useState, useRef, useEffect } from "react";
 import msgIcon from "../../assets/Mateus/msgIcon.png";
-import mySelf from "../../assets/Mateus/mySelf.png";
 import perfilMini from "../../assets/Mateus/perfilMini.webp";
 import { AnimatePresence, motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
@@ -94,7 +93,7 @@ export default function FloatingChat() {
   const triggerItems: TriggerAvatarItem[] = [
     {
       type: "image",
-      src: mySelf,
+      src: perfilMini,
       alt: "Mateus Cabral",
     },
     {

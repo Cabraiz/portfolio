@@ -1,6 +1,7 @@
 import React, {
   type CSSProperties,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -181,6 +182,57 @@ const LandingPageMobile: React.FC = () => {
     historyMode: "replace",
   });
 
+  const initialRouteTargetIdRef = useRef(routeSectionId);
+
+  useLayoutEffect(() => {
+    const container = containerRef.current;
+    const targetSectionId = initialRouteTargetIdRef.current;
+    const target = container?.querySelector<HTMLElement>(`#${targetSectionId}`);
+
+    if (!target) {
+      return;
+    }
+
+    let userInteracted = false;
+    const stopRealignment = () => {
+      userInteracted = true;
+    };
+    const alignTarget = () => {
+      if (userInteracted) {
+        return;
+      }
+
+      const targetTop = window.scrollY + target.getBoundingClientRect().top;
+      window.scrollTo({
+        top: Math.max(0, targetTop - navbarOffsetPx),
+        behavior: "auto",
+      });
+    };
+
+    alignTarget();
+    const frameId = window.requestAnimationFrame(alignTarget);
+    const timerIds =
+      targetSectionId === DEFAULT_LANDING_SECTION_ID
+        ? []
+        : [120, 360, 720].map((delay) => window.setTimeout(alignTarget, delay));
+
+    window.addEventListener("wheel", stopRealignment, {
+      passive: true,
+      once: true,
+    });
+    window.addEventListener("touchstart", stopRealignment, {
+      passive: true,
+      once: true,
+    });
+
+    return () => {
+      window.cancelAnimationFrame(frameId);
+      timerIds.forEach((timerId) => window.clearTimeout(timerId));
+      window.removeEventListener("wheel", stopRealignment);
+      window.removeEventListener("touchstart", stopRealignment);
+    };
+  }, [navbarOffsetPx]);
+
   const { registerSectionElement, getPlaceholderMinHeight } =
     useLandingSectionMeasurements({
       defaultPlaceholderMinHeight: resolveLandingSectionMinHeight("mobile", {
@@ -195,7 +247,7 @@ const LandingPageMobile: React.FC = () => {
   const renderPolicy = useSectionRenderPolicy({
     sections,
     activeSectionId,
-    nearDistance: 1,
+    nearDistance: 0,
     viewportMode: "mobile",
   });
 
