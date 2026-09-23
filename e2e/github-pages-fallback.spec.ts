@@ -1,6 +1,16 @@
 import { expect, test } from "@playwright/test";
 import { readFile } from "node:fs/promises";
 
+test("application document uses the dark background before JavaScript", async ({
+  request,
+}) => {
+  const response = await request.get("/home");
+  const html = await response.text();
+
+  expect(response.status()).toBe(200);
+  expect(html).toMatch(/html,body,#root\{[^}]*background:#050505[^}]*\}/);
+});
+
 test("GitHub Pages fallback redirects without painting the old 404 screen", async ({
   request,
 }) => {
