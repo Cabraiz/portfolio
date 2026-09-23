@@ -67,7 +67,7 @@ jobs:
           fi
 
       - name: 🛠️ Build app
-        run: npx vite build && cp 404.html dist/
+        run: npx vite build && node scripts/prepare-github-pages.mjs
         env:
           VITE_CONTACT_API_URL: ${{ vars.VITE_CONTACT_API_URL }}
 
