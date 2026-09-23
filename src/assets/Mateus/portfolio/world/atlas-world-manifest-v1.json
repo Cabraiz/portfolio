@@ -1,0 +1,208 @@
+{
+  "projection": "equirectangular",
+  "worldSize": {
+    "width": 6720,
+    "height": 3360
+  },
+  "tileSize": {
+    "width": 1680,
+    "height": 840
+  },
+  "degreesPerPixel": 0.05357142857142857,
+  "rows": 4,
+  "columns": 4,
+  "tiles": [
+    {
+      "row": 0,
+      "column": 0,
+      "file": "atlas-world-r0-c0-v1.webp",
+      "bounds": {
+        "west": -180.0,
+        "south": 45.0,
+        "east": -90.0,
+        "north": 90.0
+      },
+      "bytes": 182254
+    },
+    {
+      "row": 0,
+      "column": 1,
+      "file": "atlas-world-r0-c1-v1.webp",
+      "bounds": {
+        "west": -90.0,
+        "south": 45.0,
+        "east": 0.0,
+        "north": 90.0
+      },
+      "bytes": 137120
+    },
+    {
+      "row": 0,
+      "column": 2,
+      "file": "atlas-world-r0-c2-v1.webp",
+      "bounds": {
+        "west": 0.0,
+        "south": 45.0,
+        "east": 90.0,
+        "north": 90.0
+      },
+      "bytes": 229084
+    },
+    {
+      "row": 0,
+      "column": 3,
+      "file": "atlas-world-r0-c3-v1.webp",
+      "bounds": {
+        "west": 90.0,
+        "south": 45.0,
+        "east": 180.0,
+        "north": 90.0
+      },
+      "bytes": 247328
+    },
+    {
+      "row": 1,
+      "column": 0,
+      "file": "atlas-world-r1-c0-v1.webp",
+      "bounds": {
+        "west": -180.0,
+        "south": 0.0,
+        "east": -90.0,
+        "north": 45.0
+      },
+      "bytes": 89752
+    },
+    {
+      "row": 1,
+      "column": 1,
+      "file": "atlas-world-r1-c1-v1.webp",
+      "bounds": {
+        "west": -90.0,
+        "south": 0.0,
+        "east": 0.0,
+        "north": 45.0
+      },
+      "bytes": 119920
+    },
+    {
+      "row": 1,
+      "column": 2,
+      "file": "atlas-world-r1-c2-v1.webp",
+      "bounds": {
+        "west": 0.0,
+        "south": 0.0,
+        "east": 90.0,
+        "north": 45.0
+      },
+      "bytes": 281762
+    },
+    {
+      "row": 1,
+      "column": 3,
+      "file": "atlas-world-r1-c3-v1.webp",
+      "bounds": {
+        "west": 90.0,
+        "south": 0.0,
+        "east": 180.0,
+        "north": 45.0
+      },
+      "bytes": 164102
+    },
+    {
+      "row": 2,
+      "column": 0,
+      "file": "atlas-world-r2-c0-v1.webp",
+      "bounds": {
+        "west": -180.0,
+        "south": -45.0,
+        "east": -90.0,
+        "north": 0.0
+      },
+      "bytes": 18618
+    },
+    {
+      "row": 2,
+      "column": 1,
+      "file": "atlas-world-r2-c1-v1.webp",
+      "bounds": {
+        "west": -90.0,
+        "south": -45.0,
+        "east": 0.0,
+        "north": 0.0
+      },
+      "bytes": 139378
+    },
+    {
+      "row": 2,
+      "column": 2,
+      "file": "atlas-world-r2-c2-v1.webp",
+      "bounds": {
+        "west": 0.0,
+        "south": -45.0,
+        "east": 90.0,
+        "north": 0.0
+      },
+      "bytes": 92530
+    },
+    {
+      "row": 2,
+      "column": 3,
+      "file": "atlas-world-r2-c3-v1.webp",
+      "bounds": {
+        "west": 90.0,
+        "south": -45.0,
+        "east": 180.0,
+        "north": 0.0
+      },
+      "bytes": 105504
+    },
+    {
+      "row": 3,
+      "column": 0,
+      "file": "atlas-world-r3-c0-v1.webp",
+      "bounds": {
+        "west": -180.0,
+        "south": -90.0,
+        "east": -90.0,
+        "north": -45.0
+      },
+      "bytes": 53742
+    },
+    {
+      "row": 3,
+      "column": 1,
+      "file": "atlas-world-r3-c1-v1.webp",
+      "bounds": {
+        "west": -90.0,
+        "south": -90.0,
+        "east": 0.0,
+        "north": -45.0
+      },
+      "bytes": 79494
+    },
+    {
+      "row": 3,
+      "column": 2,
+      "file": "atlas-world-r3-c2-v1.webp",
+      "bounds": {
+        "west": 0.0,
+        "south": -90.0,
+        "east": 90.0,
+        "north": -45.0
+      },
+      "bytes": 53822
+    },
+    {
+      "row": 3,
+      "column": 3,
+      "file": "atlas-world-r3-c3-v1.webp",
+      "bounds": {
+        "west": 90.0,
+        "south": -90.0,
+        "east": 180.0,
+        "north": -45.0
+      },
+      "bytes": 62044
+    }
+  ]
+}

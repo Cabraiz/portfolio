@@ -86,6 +86,7 @@ export default function FloatingChat() {
 
   const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
   const shouldHideForMobileHome = isMobile && location.pathname === "/home";
+  const shouldHideForPortfolio = location.pathname === "/portfolio";
   const scale = (value: number) => (isMobile ? value * 0.8 : value);
 
   const bottomOffset = isMobile ? "30px" : "3vh";
@@ -244,7 +245,11 @@ export default function FloatingChat() {
     }
   };
 
-  if (shouldHideForStandaloneGame || shouldHideForMobileHome) {
+  if (
+    shouldHideForStandaloneGame ||
+    shouldHideForMobileHome ||
+    shouldHideForPortfolio
+  ) {
     return null;
   }
 

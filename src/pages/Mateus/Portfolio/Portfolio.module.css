@@ -1,133 +1,1013 @@
 .portfolioRoot {
+  --atlas-ink: #073c3d;
+  --atlas-deep: #064f4d;
+  --atlas-teal: #0b6662;
+  --atlas-paper: #edf7f4;
+  --atlas-navbar-overlap: 0px;
+  --atlas-camera-x: -37.5%;
+  --atlas-camera-y: -57.2222%;
   position: relative;
+  isolation: isolate;
   width: 100%;
-  min-height: 0;
-  color: #fdf5e6;
-  content-visibility: auto;
-  contain: layout style paint;
-  contain-intrinsic-size: 920px;
-
-  --portfolio-section-min-height: calc(100dvh - 84px);
-  --portfolio-section-padding-top: 26px;
-  --portfolio-section-padding-bottom: 40px;
-  --portfolio-section-padding-inline: clamp(20px, 3vw, 40px);
-
-  --portfolio-layout-width: 1480px;
-  --portfolio-layout-gap: 22px;
-  --portfolio-rail-column-width: 300px;
-
-  --portfolio-stage-height: 500px;
-  --portfolio-timeline-max-height: 500px;
-
-  --portfolio-surface-border: 1px solid rgba(255, 255, 255, 0.08);
-  --portfolio-surface-bg: rgba(255, 255, 255, 0.028);
-  --portfolio-surface-shadow: 0 10px 24px rgba(0, 0, 0, 0.16);
-
-  --portfolio-hit-zone-fade: rgba(8, 8, 10, 0.1);
-  --portfolio-hit-zone-fade-strong: rgba(8, 8, 10, 0.18);
-  --portfolio-hit-zone-ring: rgba(255, 255, 255, 0.16);
-  --portfolio-hit-zone-text: rgba(255, 255, 255, 0.96);
-  --portfolio-hit-zone-text-muted: rgba(253, 245, 230, 0.74);
+  min-height: max(
+    620px,
+    calc(100dvh - var(--app-navbar-height, 70px) - 4px)
+  );
+  overflow: visible;
+  color: var(--atlas-ink);
+  background: #dcefeb;
+  font-family: "Inter", Arial, sans-serif;
+  content-visibility: visible;
 }
 
-.portfolioSection {
+.portfolioRoot[data-header-backdrop-docked="true"] {
+  --atlas-navbar-overlap: calc(var(--app-navbar-height, 70px) + 8px);
+}
+
+.portfolioRoot[data-map-view="winnipeg"] {
+  --atlas-camera-x: -23.0171%;
+  --atlas-camera-y: -22.2805%;
+}
+
+.backdropViewport {
+  position: absolute;
+  inset: 0;
+  top: calc(-1 * var(--atlas-navbar-overlap));
+  z-index: 0;
+  overflow: hidden;
+  background: #dcefeb;
+  pointer-events: none;
+}
+
+.worldSurface {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 401.7857%;
+  aspect-ratio: 2 / 1;
+  transform: translate(var(--atlas-camera-x), var(--atlas-camera-y));
+  transform-origin: top left;
+  transition: transform 2800ms cubic-bezier(0.65, 0, 0.35, 1);
+  will-change: transform;
+}
+
+.worldMapSurface {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+  overflow: hidden;
+  opacity: 0.86;
+  user-select: none;
+  pointer-events: none;
+}
+
+.worldMapSurface img {
+  display: block;
   width: 100%;
-  min-height: var(--portfolio-section-min-height);
-  padding:
-    var(--portfolio-section-padding-top)
-    var(--portfolio-section-padding-inline)
-    var(--portfolio-section-padding-bottom);
-  box-sizing: border-box;
+  height: 100%;
+  border-radius: 0;
+  object-fit: cover;
+  user-select: none;
+  pointer-events: none;
+}
+
+.geoViewport {
+  position: absolute;
+  inset: 0;
+  top: calc(-1 * var(--atlas-navbar-overlap));
+  z-index: 3;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.worldGeoSurface {
+  z-index: 1;
+  pointer-events: none;
+}
+
+.paperTexture {
+  position: absolute;
+  inset: 0;
+  top: calc(-1 * var(--atlas-navbar-overlap));
+  z-index: 1;
+  pointer-events: none;
   background:
-    radial-gradient(
-      circle at 14% 0%,
-      rgba(252, 213, 53, 0.06),
-      transparent 26%
-    ),
-    radial-gradient(
-      circle at 86% 10%,
-      rgba(255, 179, 71, 0.05),
-      transparent 22%
-    ),
-    linear-gradient(180deg, rgba(8, 8, 10, 0.96), rgba(11, 11, 14, 0.985));
-  background-repeat: no-repeat;
-  background-size: cover;
+    radial-gradient(circle at 0% 100%, rgba(250, 241, 214, 0.74), transparent 34%),
+    linear-gradient(90deg, rgba(244, 248, 238, 0.74) 0%, transparent 24% 76%, rgba(225, 244, 244, 0.78) 100%),
+    repeating-linear-gradient(0deg, transparent 0 5px, rgba(20, 94, 91, 0.022) 6px);
 }
 
-.portfolioContent {
-  width: min(100%, var(--portfolio-layout-width));
-  margin: 10px auto 0;
+.atlasFrame {
+  position: relative;
+  z-index: auto;
   display: grid;
-  grid-template-columns:
-    minmax(0, 1fr)
-    minmax(280px, var(--portfolio-rail-column-width));
-  gap: var(--portfolio-layout-gap);
-  align-items: start;
+  grid-template-columns: minmax(260px, 300px) minmax(400px, 1fr) minmax(350px, 410px);
+  gap: clamp(14px, 1.6vw, 26px);
+  align-items: center;
+  width: min(100%, 1560px);
+  min-height: max(
+    620px,
+    calc(100dvh - var(--app-navbar-height, 70px) - 4px)
+  );
+  margin: 0 auto;
+  padding: clamp(28px, 4dvh, 48px) clamp(22px, 3vw, 48px) clamp(18px, 3dvh, 34px);
+  box-sizing: border-box;
 }
 
-.portfolioStageColumn {
+.cornerStatement {
+  position: absolute;
+  top: 15px;
+  right: clamp(24px, 3vw, 52px);
+  z-index: 6;
+  display: flex;
+  flex-direction: column;
+  color: rgba(7, 60, 61, 0.72);
+  font-family: "Arial Narrow", "Roboto Condensed", sans-serif;
+  font-size: 8px;
+  font-weight: 700;
+  line-height: 1.24;
+  letter-spacing: 0.2em;
+}
+
+.indexPanel {
+  position: relative;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   min-width: 0;
+  height: min(590px, calc(100dvh - 112px));
+  min-height: 520px;
+}
+
+.projectList {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.projectButton {
+  position: relative;
   display: grid;
-  gap: 0;
-  align-content: start;
+  grid-template-columns: 28px 34px minmax(0, 1fr);
+  gap: 9px;
+  align-items: center;
+  width: 100%;
+  min-height: 48px;
+  padding: 8px 12px 8px 10px;
+  border: 1px solid rgba(7, 76, 76, 0.12);
+  border-radius: 9px;
+  box-sizing: border-box;
+  color: var(--atlas-ink);
+  background: rgba(250, 253, 248, 0.84);
+  box-shadow: 0 8px 18px rgba(22, 76, 72, 0.07);
+  text-align: left;
+  cursor: pointer;
+  transition: transform 180ms ease, background 180ms ease, color 180ms ease, box-shadow 180ms ease;
 }
 
-.portfolioRailColumn {
+.projectButton:hover {
+  transform: translateX(3px);
+  box-shadow: 0 12px 24px rgba(22, 76, 72, 0.12);
+}
+
+.projectButtonActive {
+  color: #f4f6e8;
+  border-color: rgba(1, 55, 54, 0.74);
+  background: linear-gradient(135deg, #075c59, #063f40);
+  box-shadow: 0 12px 26px rgba(4, 66, 63, 0.22);
+}
+
+.projectOrdinal {
+  font-family: "Arial Narrow", "Roboto Condensed", sans-serif;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  opacity: 0.82;
+}
+
+.projectLogo {
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  object-fit: contain;
+  background: rgba(255, 255, 255, 0.86);
+}
+
+.projectButtonCopy {
+  display: flex;
+  flex-direction: column;
   min-width: 0;
-  align-self: start;
 }
 
-@media (min-width: 1600px) {
-  .portfolioRoot {
-    --portfolio-layout-width: 1560px;
-    --portfolio-layout-gap: 24px;
-    --portfolio-rail-column-width: 320px;
-    --portfolio-stage-height: 540px;
-    --portfolio-timeline-max-height: 540px;
+.projectButtonCopy strong {
+  overflow: hidden;
+  font-family: "Arial Narrow", "Roboto Condensed", sans-serif;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.projectButtonCopy small {
+  margin-top: 3px;
+  overflow: hidden;
+  font-size: 8px;
+  font-weight: 600;
+  line-height: 1.1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  opacity: 0.72;
+}
+
+.mapPanel {
+  position: relative;
+  z-index: 2;
+  align-self: stretch;
+  min-width: 0;
+  height: min(650px, calc(100dvh - 142px));
+  min-height: 550px;
+}
+
+.mapScene {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  transform-origin: 53% 44%;
+  transition:
+    opacity 460ms ease,
+    transform 900ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.mapSceneActive {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.mapSceneInactive {
+  opacity: 0;
+  transform: translateY(12%) scale(0.78);
+  pointer-events: none;
+}
+
+.worldJourney {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  opacity: 1;
+}
+
+.journeyRoute,
+.journeyTraveler {
+  position: absolute;
+  top: var(--route-y);
+  left: var(--route-x);
+  width: var(--route-length);
+  height: 0;
+  transform: rotate(var(--route-angle));
+  transform-origin: left center;
+}
+
+.journeyRoute {
+  z-index: 2;
+  border-top: 2px dashed rgba(4, 82, 79, 0.88);
+  filter: drop-shadow(0 1px 2px rgba(255, 255, 245, 0.8));
+  animation: journeyRouteDraw 2350ms 120ms cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+.journeyTraveler {
+  z-index: 7;
+  pointer-events: none;
+}
+
+.journeyTraveler > span {
+  position: absolute;
+  top: -7px;
+  left: 0;
+  width: 14px;
+  height: 14px;
+  border: 3px solid rgba(255, 255, 245, 0.96);
+  border-radius: 50%;
+  box-sizing: border-box;
+  background: #075c59;
+  box-shadow:
+    0 0 0 5px rgba(255, 255, 245, 0.42),
+    0 7px 18px rgba(2, 60, 58, 0.28);
+  animation: journeyTravelerMove 2350ms 180ms cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+.journeyMarker {
+  all: unset;
+  position: absolute;
+  z-index: 8;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  box-sizing: border-box;
+  cursor: default;
+}
+
+.journeyOrigin {
+  top: var(--geo-y);
+  left: var(--geo-x);
+  transform: translate(-50%, -50%);
+  animation: originAppear 360ms 80ms ease both;
+}
+
+.journeyDestination {
+  top: var(--geo-y);
+  left: var(--geo-x);
+  cursor: pointer;
+  pointer-events: auto;
+  transform: translate(-50%, -50%);
+  animation: destinationAppear 520ms 2260ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.journeyMarkerDot {
+  width: 15px;
+  height: 15px;
+  border: 4px solid rgba(255, 255, 247, 0.96);
+  border-radius: 50%;
+  box-sizing: border-box;
+  background: #075c59;
+  box-shadow:
+    0 0 0 6px rgba(247, 251, 238, 0.46),
+    0 9px 20px rgba(2, 57, 56, 0.24);
+}
+
+.journeyDestination .journeyMarkerDot {
+  width: 19px;
+  height: 19px;
+  background: #fffdf1;
+  box-shadow:
+    0 0 0 3px #075c59,
+    0 0 0 9px rgba(247, 251, 238, 0.56),
+    0 10px 24px rgba(2, 57, 56, 0.3);
+}
+
+.journeyMarkerLabel {
+  position: absolute;
+  top: -11px;
+  left: 29px;
+  display: flex;
+  flex-direction: column;
+  width: max-content;
+  max-width: 150px;
+  padding: 8px 11px;
+  border-radius: 7px;
+  color: #f5f7ea;
+  background: linear-gradient(135deg, rgba(5, 79, 76, 0.97), rgba(3, 54, 55, 0.97));
+  box-shadow: 0 10px 22px rgba(2, 53, 52, 0.2);
+  text-align: left;
+  pointer-events: none;
+}
+
+.journeyOrigin .journeyMarkerLabel {
+  right: 29px;
+  left: auto;
+}
+
+.journeyMarkerLabel strong {
+  font-size: 11px;
+  line-height: 1.05;
+}
+
+.journeyMarkerLabel small {
+  margin-top: 3px;
+  font-size: 7px;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  opacity: 0.72;
+}
+
+.journeyStatus {
+  position: absolute;
+  z-index: 9;
+  right: 0;
+  bottom: 12%;
+  left: 0;
+  color: rgba(4, 69, 67, 0.78);
+  font-family: "Arial Narrow", "Roboto Condensed", sans-serif;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.13em;
+  text-align: center;
+  text-transform: uppercase;
+  pointer-events: none;
+  animation: statusAppear 420ms 2320ms ease both;
+}
+
+.routeNetwork {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.routeLine {
+  position: absolute;
+  top: var(--route-y);
+  left: var(--route-x);
+  width: var(--route-length);
+  height: 0;
+  border-top: 2px dashed rgba(247, 252, 241, 0.88);
+  transform: rotate(var(--route-angle));
+  transform-origin: left center;
+  filter: drop-shadow(0 1px 1px rgba(2, 65, 62, 0.18));
+  opacity: 0.82;
+  transition: opacity 220ms ease, border-color 220ms ease, filter 220ms ease;
+}
+
+.routeLineActive {
+  border-color: rgba(2, 79, 76, 0.94);
+  filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.72));
+  opacity: 1;
+}
+
+.routeHub {
+  position: absolute;
+  top: var(--geo-y);
+  left: var(--geo-x);
+  z-index: 4;
+  width: 40px;
+  height: 40px;
+  border: 3px solid #f8fbef;
+  border-radius: 50%;
+  box-sizing: border-box;
+  background: rgba(5, 93, 88, 0.9);
+  box-shadow: 0 0 0 7px rgba(247, 251, 238, 0.52), 0 10px 24px rgba(1, 70, 67, 0.24);
+  transform: translate(-50%, -50%);
+}
+
+.routeHub span {
+  position: absolute;
+  inset: 9px;
+  border-radius: 50%;
+  background: #fffdf1;
+}
+
+.mapPoint {
+  position: absolute;
+  top: var(--point-y);
+  left: var(--point-x);
+  z-index: 5;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  pointer-events: auto;
+  transform: translate(-50%, -50%);
+}
+
+.mapPointDot {
+  width: 10px;
+  height: 10px;
+  border: 3px solid rgba(255, 255, 248, 0.94);
+  border-radius: 50%;
+  box-sizing: border-box;
+  background: #0a6662;
+  box-shadow: 0 0 0 2px rgba(6, 83, 80, 0.24);
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.mapPoint:hover .mapPointDot,
+.mapPointActive .mapPointDot {
+  transform: scale(1.35);
+  box-shadow: 0 0 0 5px rgba(255, 255, 246, 0.52), 0 0 0 7px rgba(6, 83, 80, 0.22);
+}
+
+.mapPointLabel {
+  position: absolute;
+  top: -12px;
+  left: 26px;
+  display: flex;
+  flex-direction: column;
+  width: max-content;
+  max-width: 150px;
+  padding: 8px 11px;
+  border-radius: 7px;
+  color: #f5f7ea;
+  background: linear-gradient(135deg, rgba(5, 79, 76, 0.96), rgba(3, 54, 55, 0.96));
+  box-shadow: 0 10px 22px rgba(2, 53, 52, 0.2);
+  text-align: left;
+  pointer-events: none;
+}
+
+.mapPointLabel strong {
+  font-size: 11px;
+  line-height: 1.05;
+}
+
+.mapPointLabel small {
+  margin-top: 2px;
+  font-size: 7px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  opacity: 0.72;
+}
+
+.atlasPager {
+  position: absolute;
+  right: 0;
+  bottom: 6px;
+  left: 0;
+  z-index: 7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 13px;
+}
+
+.atlasPager button {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  border: 1px solid rgba(6, 67, 65, 0.72);
+  border-radius: 50%;
+  color: #f4f6e9;
+  background: #075653;
+  box-shadow: 0 8px 18px rgba(4, 62, 61, 0.16);
+  font-size: 20px;
+  cursor: pointer;
+  transition: transform 180ms ease, background 180ms ease;
+}
+
+.atlasPager button:hover {
+  background: #033f3e;
+  transform: translateY(-2px);
+}
+
+.atlasPager > span {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  min-width: 58px;
+  color: #063f40;
+  font-family: "Arial Narrow", "Roboto Condensed", sans-serif;
+}
+
+.atlasPager strong {
+  font-size: 14px;
+  letter-spacing: 0.05em;
+}
+
+.atlasPager small {
+  font-size: 10px;
+  font-weight: 700;
+  opacity: 0.62;
+}
+
+.detailCard {
+  position: relative;
+  z-index: 5;
+  align-self: center;
+  min-width: 0;
+}
+
+@media (min-width: 981px) {
+  .indexPanel {
+    transform: translateY(-60px);
+  }
+
+  .detailCard {
+    transform: translateY(-44px);
   }
 }
 
-@media (max-width: 1080px) {
-  .portfolioRoot {
-    --portfolio-layout-gap: 18px;
-    --portfolio-rail-column-width: 220px;
-  }
+.locationHeader {
+  display: flex;
+  flex-direction: column;
+  min-height: 60px;
+  padding-left: 6px;
+  color: var(--atlas-deep);
+}
 
-  .portfolioContent {
-    grid-template-columns: minmax(0, 1fr) 220px;
+.locationHeader strong {
+  font-family: "Arial Narrow", "Roboto Condensed", sans-serif;
+  font-size: clamp(22px, 2vw, 30px);
+  font-weight: 900;
+  line-height: 0.95;
+  text-transform: uppercase;
+}
+
+.locationHeader span {
+  margin-top: 2px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.projectPreview {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+  border: 10px solid rgba(255, 255, 255, 0.78);
+  border-bottom: 0;
+  border-radius: 14px 14px 0 0;
+  box-sizing: border-box;
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: 0 18px 38px rgba(34, 82, 77, 0.14);
+}
+
+.projectPreview img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  object-position: center 8%;
+  animation: previewReveal 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.previewYear {
+  position: absolute;
+  top: 13px;
+  right: 13px;
+  padding: 5px 8px;
+  border-radius: 999px;
+  color: #f8f8ed;
+  background: rgba(4, 64, 62, 0.88);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.detailBody {
+  padding: 15px 18px 17px;
+  border: 1px solid rgba(6, 74, 71, 0.1);
+  border-top: 0;
+  border-radius: 0 0 14px 14px;
+  background: rgba(253, 253, 247, 0.9);
+  box-shadow: 0 18px 38px rgba(34, 82, 77, 0.14);
+}
+
+.detailTitleRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.detailTitleRow > div {
+  min-width: 0;
+}
+
+.detailTitleRow span {
+  color: rgba(7, 60, 61, 0.62);
+  font-size: 7px;
+  font-weight: 800;
+  letter-spacing: 0.17em;
+}
+
+.detailTitleRow h2 {
+  margin: 3px 0 0;
+  color: #082f31;
+  font-family: "Arial Narrow", "Roboto Condensed", sans-serif;
+  font-size: clamp(20px, 1.8vw, 28px);
+  font-weight: 900;
+  line-height: 0.96;
+  letter-spacing: -0.025em;
+}
+
+.detailTitleRow img {
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  border-radius: 8px;
+  object-fit: contain;
+  background: #fff;
+  box-shadow: 0 6px 14px rgba(23, 78, 74, 0.1);
+}
+
+.detailBody > p {
+  margin: 10px 0 12px;
+  color: rgba(8, 47, 49, 0.76);
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.detailMeta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(7, 70, 68, 0.1);
+  color: rgba(7, 60, 61, 0.7);
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.detailMeta span + span::before {
+  content: "•";
+  margin-right: 10px;
+  opacity: 0.45;
+}
+
+.technologyList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.technologyList span {
+  padding: 5px 9px;
+  border: 1px solid rgba(7, 71, 69, 0.08);
+  border-radius: 999px;
+  color: #084543;
+  background: rgba(7, 103, 98, 0.08);
+  font-size: 8px;
+  font-weight: 800;
+}
+
+.projectButton:focus-visible,
+.mapPoint:focus-visible,
+.journeyDestination:focus-visible,
+.atlasPager button:focus-visible {
+  outline: 3px solid rgba(2, 78, 75, 0.42);
+  outline-offset: 3px;
+}
+
+@keyframes journeyRouteDraw {
+  from {
+    opacity: 0;
+    transform: rotate(var(--route-angle)) scaleX(0);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(var(--route-angle)) scaleX(1);
   }
 }
 
-@media (max-width: 960px) {
-  .portfolioRoot {
-    --portfolio-section-padding-inline: 16px;
-    --portfolio-section-padding-bottom: 42px;
-    --portfolio-stage-height: clamp(320px, 48vh, 400px);
-    --portfolio-timeline-max-height: none;
+@keyframes journeyTravelerMove {
+  0% {
+    left: 0;
+    opacity: 0;
+    transform: scale(0.7);
+  }
+  12% {
+    opacity: 1;
+  }
+  82% {
+    opacity: 1;
+  }
+  100% {
+    left: calc(100% - 14px);
+    opacity: 0;
+    transform: scale(1.15);
+  }
+}
+
+@keyframes originAppear {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.65);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes destinationAppear {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.3);
+  }
+  70% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.18);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes statusAppear {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes previewReveal {
+  from {
+    opacity: 0;
+    transform: scale(1.025);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (max-width: 1180px) {
+  .atlasFrame {
+    grid-template-columns: 250px minmax(360px, 1fr) 340px;
+    gap: 13px;
+    padding-right: 20px;
+    padding-left: 20px;
   }
 
-  .portfolioContent {
+  .projectButton {
+    grid-template-columns: 24px 30px minmax(0, 1fr);
+    min-height: 56px;
+    gap: 7px;
+    padding-right: 8px;
+    padding-left: 8px;
+  }
+
+  .projectLogo {
+    width: 28px;
+    height: 28px;
+  }
+
+  .mapPointLabel {
+    max-width: 118px;
+  }
+}
+
+@media (max-width: 980px) {
+  .portfolioRoot {
+    min-height: auto;
+    overflow: visible;
+  }
+
+  .atlasFrame {
+    grid-template-columns: minmax(220px, 0.72fr) minmax(420px, 1.28fr);
+    min-height: auto;
+    padding-top: 52px;
+    padding-bottom: 44px;
+  }
+
+  .indexPanel {
+    height: 550px;
+  }
+
+  .mapPanel {
+    height: 580px;
+  }
+
+  .detailCard {
+    grid-column: 1 / -1;
+    width: min(100%, 700px);
+    margin: 24px auto 0;
+  }
+
+  .projectPreview {
+    aspect-ratio: 16 / 7;
+  }
+}
+
+@media (max-width: 720px) {
+  .worldSurface {
+    top: 450px;
+    left: 50vw;
+    width: 6426px;
+    transition: transform 2800ms cubic-bezier(0.65, 0, 0.35, 1) !important;
+  }
+
+  .atlasFrame {
     grid-template-columns: 1fr;
-    gap: 14px;
+    gap: 22px;
+    padding: 58px 16px 54px;
   }
 
-  .portfolioRailColumn {
-    order: 2;
+  .cornerStatement {
+    top: 18px;
+    right: 18px;
   }
 
-  .portfolioStageColumn {
-    order: 1;
+  .indexPanel {
+    height: auto;
+    min-height: 0;
+  }
+
+  .projectList {
+    flex-direction: row;
+    gap: 9px;
+    margin-right: -16px;
+    padding: 2px 16px 12px 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .projectList::-webkit-scrollbar {
+    display: none;
+  }
+
+  .projectButton {
+    flex: 0 0 228px;
+  }
+
+  .mapPanel {
+    height: 500px;
+    min-height: 500px;
+  }
+
+  .detailCard {
+    grid-column: auto;
+    width: 100%;
+    margin-top: 0;
+  }
+
+  .projectPreview {
+    aspect-ratio: 16 / 9;
   }
 }
 
-@media (max-width: 560px) {
-  .portfolioRoot {
-    --portfolio-section-padding-top: 22px;
-    --portfolio-section-padding-bottom: 36px;
-    --portfolio-stage-height: clamp(300px, 44vh, 360px);
+@media (max-width: 420px) {
+  .atlasFrame {
+    padding-right: 12px;
+    padding-left: 12px;
   }
 
-  .portfolioContent {
-    margin-top: 18px;
+  .cornerStatement {
+    display: none;
+  }
+
+  .mapPanel {
+    height: 450px;
+    min-height: 450px;
+  }
+
+  .routeHub {
+    width: 34px;
+    height: 34px;
+  }
+
+  .routeHub span {
+    inset: 7px;
+  }
+
+  .mapPointLabel {
+    left: 18px;
+    max-width: 105px;
+  }
+
+  .journeyMarkerLabel {
+    left: 22px;
+    max-width: 102px;
+    padding: 7px 9px;
+  }
+
+  .journeyOrigin .journeyMarkerLabel {
+    right: 22px;
+  }
+
+  .journeyDestination .journeyMarkerLabel {
+    top: 23px;
+    left: 5px;
+  }
+
+  .journeyStatus {
+    bottom: 18%;
+    font-size: 7px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .projectButton,
+  .mapPointDot,
+  .atlasPager button,
+  .projectPreview img {
+    transition: none;
+    animation: none;
+  }
+
+  .worldSurface,
+  .mapScene {
+    transition: none !important;
+  }
+
+  .worldJourney,
+  .journeyOrigin,
+  .journeyDestination,
+  .journeyStatus {
+    opacity: 1;
+    animation: none;
+  }
+
+  .journeyRoute {
+    opacity: 1;
+    transform: rotate(var(--route-angle)) scaleX(1);
+    animation: none;
+  }
+
+  .journeyTraveler > span {
+    display: none;
+    animation: none;
   }
 }

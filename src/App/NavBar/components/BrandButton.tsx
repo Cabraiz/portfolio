@@ -7,6 +7,7 @@ export type BrandButtonProps = Readonly<{
   logoAlt?: string;
   mobile?: boolean;
   invertMobileLogo?: boolean;
+  invertLogo?: boolean;
   compactDesktop?: boolean;
   mobileLogoSize?: number;
   desktopLogoSize?: number;
@@ -44,6 +45,7 @@ const BrandButton: React.FC<BrandButtonProps> = ({
   logoAlt = "Logo",
   mobile = false,
   invertMobileLogo = false,
+  invertLogo = false,
   compactDesktop = false,
   mobileLogoSize = 44,
   desktopLogoSize = 52,
@@ -85,7 +87,7 @@ const BrandButton: React.FC<BrandButtonProps> = ({
           objectFit: "cover",
           flex: "0 0 auto",
           display: "block",
-          filter: mobile && invertMobileLogo ? "invert(1)" : undefined,
+          filter: invertLogo || (mobile && invertMobileLogo) ? "invert(1)" : undefined,
         }}
       />
     </button>

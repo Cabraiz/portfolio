@@ -236,6 +236,12 @@
   box-shadow: 0 -12px 34px rgba(103, 12, 33, 0.16);
 }
 
+:global(main[data-active-section="portfolio"]) .actions {
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
 .actions a {
   display: inline-flex;
   align-items: center;

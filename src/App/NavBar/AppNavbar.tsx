@@ -48,10 +48,7 @@ const desktopNavbarRootStyle: CSSProperties = {
   left: 0,
   right: 0,
   zIndex: 1000,
-  border: "none",
   background: "transparent",
-  backgroundColor: "transparent",
-  backgroundImage: "none",
   backdropFilter: "none",
   WebkitBackdropFilter: "none",
   boxShadow: "none",
@@ -63,7 +60,6 @@ const mobileNavbarRootStyle: CSSProperties = {
   left: 0,
   right: 0,
   zIndex: 1000,
-  border: "none",
   background: "transparent",
   backdropFilter: "none",
   WebkitBackdropFilter: "none",
@@ -111,6 +107,7 @@ export default function AppNavbar({
   const navbarHeight = getNavbarHeight(isMobileView);
   const isCompactDesktop =
     !isMobileView && viewport.width <= NAVBAR_DESKTOP_COMPACT_BREAKPOINT;
+  const isPortfolioTheme = activeSectionId === "portfolio";
 
   useNavbarBodyScrollLock({
     isMobileView,
@@ -204,8 +201,20 @@ export default function AppNavbar({
   );
 
   const resolvedNavbarRootStyle = useMemo<CSSProperties>(() => {
-    return isMobileView ? mobileNavbarRootStyle : desktopNavbarRootStyle;
-  }, [isMobileView]);
+    const baseStyle = isMobileView ? mobileNavbarRootStyle : desktopNavbarRootStyle;
+
+    if (!isPortfolioTheme) {
+      return baseStyle;
+    }
+
+    return {
+      ...baseStyle,
+      background: "transparent",
+      backdropFilter: "none",
+      WebkitBackdropFilter: "none",
+      boxShadow: "none",
+    };
+  }, [isMobileView, isPortfolioTheme]);
 
   const resolvedNavbarStyle = useMemo<CSSProperties>(
     () => ({
@@ -238,6 +247,7 @@ export default function AppNavbar({
             setNavRef={setNavRef}
             getLabel={(sectionId) => t(`nav.${sectionId}`)}
             logoSrc={logo}
+            lightTheme={isPortfolioTheme}
             renderLeadingVisual={(sectionId) => {
               if (sectionId !== "live") {
                 return null;

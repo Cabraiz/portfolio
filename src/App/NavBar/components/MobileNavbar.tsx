@@ -101,7 +101,9 @@ const MobileNavbar: React.FC<MobileNavbarProps> = ({
       <BrandButton
         onClick={handleBrandClick}
         mobile
-        invertMobileLogo={activeSectionId === "home"}
+        invertMobileLogo={
+          activeSectionId === "home" || activeSectionId === "portfolio"
+        }
         logoSrc={logo}
         logoAlt="Cabraiz"
       />
@@ -112,7 +114,11 @@ const MobileNavbar: React.FC<MobileNavbarProps> = ({
         <MobileMenuToggleButton
           menuOpen={isOpen}
           onToggle={onToggle}
-          lineColor={activeSectionId === "home" ? "#171311" : "#ffffff"}
+          lineColor={
+            activeSectionId === "home" || activeSectionId === "portfolio"
+              ? "#073e3a"
+              : "#ffffff"
+          }
         />
       </div>
 

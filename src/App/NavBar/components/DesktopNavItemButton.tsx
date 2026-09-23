@@ -11,6 +11,7 @@ export type DesktopNavItemButtonProps = Readonly<{
   onHoverStart?: (element: HTMLButtonElement) => void;
   onHoverEnd?: (element: HTMLButtonElement) => void;
   leadingVisual?: React.ReactNode;
+  lightTheme?: boolean;
 }>;
 
 const baseButtonStyle: CSSProperties = {
@@ -76,6 +77,7 @@ const DesktopNavItemButton: React.FC<DesktopNavItemButtonProps> = ({
   onHoverStart,
   onHoverEnd,
   leadingVisual,
+  lightTheme = false,
 }) => {
   const [isHovered, setIsHovered] = useState(false);
 
@@ -103,6 +105,13 @@ const DesktopNavItemButton: React.FC<DesktopNavItemButtonProps> = ({
       style={{
         ...baseButtonStyle,
         ...(isRaised ? emphasizedButtonStyle : null),
+        color: lightTheme
+          ? isRaised
+            ? "#073e3a"
+            : "rgba(7, 62, 58, 0.72)"
+          : isRaised
+            ? "#ffffff"
+            : "rgba(255, 255, 255, 0.74)",
       }}
     >
       <span style={contentStyle}>

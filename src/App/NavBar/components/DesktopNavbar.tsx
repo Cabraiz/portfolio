@@ -23,6 +23,7 @@ export type DesktopNavbarProps = Readonly<{
   getLabel: (sectionId: LandingSectionId) => string;
   logoSrc: string;
   renderLeadingVisual?: (sectionId: LandingSectionId) => ReactNode;
+  lightTheme?: boolean;
 }>;
 
 function getBrandSlotWidth(isCompactDesktop: boolean): string {
@@ -65,6 +66,7 @@ const DesktopNavbar: React.FC<DesktopNavbarProps> = ({
   getLabel,
   logoSrc,
   renderLeadingVisual,
+  lightTheme = false,
 }) => {
   const brandSlotWidth = getBrandSlotWidth(isCompactDesktop);
 
@@ -115,6 +117,7 @@ const DesktopNavbar: React.FC<DesktopNavbarProps> = ({
           onClick={onBrandClick}
           compactDesktop={isCompactDesktop}
           logoSrc={logoSrc}
+          invertLogo={lightTheme}
         />
       </div>
 
@@ -131,12 +134,21 @@ const DesktopNavbar: React.FC<DesktopNavbarProps> = ({
                 setNavRef(sectionId, element);
               }}
               leadingVisual={renderLeadingVisual?.(sectionId)}
+              lightTheme={lightTheme}
             />
           ))}
 
           <div
             style={{
               ...baseUnderlineStyle,
+              ...(lightTheme
+                ? {
+                    background:
+                      "linear-gradient(90deg, #0b665f 0%, #1d9b8d 100%)",
+                    boxShadow:
+                      "0 0 14px rgba(11, 102, 95, 0.2), 0 0 6px rgba(29, 155, 141, 0.16)",
+                  }
+                : null),
               ...underlineStyle,
             }}
           />

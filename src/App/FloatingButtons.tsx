@@ -37,7 +37,25 @@ const mirroredGoldGradient =
 const activeGoldFrame =
   `linear-gradient(135deg, #101115, #1d2027) padding-box, ${mirroredGoldGradient} border-box`;
 
-function getButtonStyle(isActive: boolean): CSSProperties {
+function getButtonStyle(isActive: boolean, lightTheme: boolean): CSSProperties {
+  if (lightTheme) {
+    return {
+      width: isActive ? "22px" : "10px",
+      height: isActive ? "22px" : "10px",
+      padding: 0,
+      border: isActive ? "2px solid #0b665f" : "none",
+      borderRadius: isActive ? "50%" : "2px",
+      transform: isActive ? "none" : "rotate(45deg)",
+      background: isActive ? "rgba(239, 248, 245, 0.95)" : "#0b665f",
+      boxShadow: isActive
+        ? "0 0 0 4px rgba(11, 102, 95, 0.1)"
+        : "0 4px 10px rgba(11, 102, 95, 0.22)",
+      cursor: "pointer",
+      transition:
+        "width 180ms ease, height 180ms ease, transform 180ms ease, box-shadow 180ms ease, border-radius 180ms ease",
+    };
+  }
+
   return {
     width: isActive ? "22px" : "12px",
     height: isActive ? "22px" : "12px",
@@ -72,7 +90,19 @@ const FloatingButtons: React.FC<FloatingButtonsProps> = ({
   }
 
   return (
-    <aside aria-label="Navegação lateral por seções" style={railStyle}>
+    <aside
+      aria-label="Navegação lateral por seções"
+      style={
+        activeSectionId === "portfolio"
+          ? {
+              ...railStyle,
+              background: "rgba(239, 248, 245, 0.78)",
+              border: "1px solid rgba(11, 102, 95, 0.14)",
+              boxShadow: "0 12px 28px rgba(18, 70, 65, 0.1)",
+            }
+          : railStyle
+      }
+    >
       {resolvedItems.map((section) => {
         const isActive = activeSectionId === section.id;
 
@@ -84,7 +114,7 @@ const FloatingButtons: React.FC<FloatingButtonsProps> = ({
             aria-current={isActive ? "page" : undefined}
             title={section.label}
             onClick={() => onNavigateToSection(section.id)}
-            style={getButtonStyle(isActive)}
+            style={getButtonStyle(isActive, activeSectionId === "portfolio")}
           />
         );
       })}

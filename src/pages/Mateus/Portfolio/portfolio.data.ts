@@ -4,11 +4,11 @@ import imagem3 from "../../../assets/Mateus/portfolio/imagem3.webp";
 import imagem4 from "../../../assets/Mateus/portfolio/imagem4.webp";
 import imagem5 from "../../../assets/Mateus/portfolio/imagem5.webp";
 
-import logo1 from "../../../assets/Mateus/portfolio/logos/logo1.webp";
+import logo1 from "../../../assets/Mateus/portfolio/logos/refined/erp-varejo-icon-v2.png";
 import logo2 from "../../../assets/Mateus/portfolio/logos/logo2.webp";
-import logo3 from "../../../assets/Mateus/portfolio/logos/logo3.webp";
-import logo4 from "../../../assets/Mateus/portfolio/logos/logo4.webp";
-import logo5 from "../../../assets/Mateus/portfolio/logos/logo5.webp";
+import logo3 from "../../../assets/Mateus/portfolio/logos/refined/pessoa-barbearia-icon-v2.png";
+import logo4 from "../../../assets/Mateus/portfolio/logos/refined/wagner-advocacia-icon-v2.png";
+import logo5 from "../../../assets/Mateus/portfolio/logos/refined/fran-cabeleireira-icon-v2.png";
 
 import type {
   PortfolioProject,
