@@ -47,7 +47,7 @@ export default function HeroIdentityMobile({
       justifyContent: "flex-start",
       padding: "0 14px",
       boxSizing: "border-box",
-      backgroundImage: "linear-gradient(90deg, #f1c40f 100%, #f1c40f 100%)",
+      backgroundImage: "linear-gradient(90deg, #f41112 100%, #f41112 100%)",
       borderRadius: "10px",
       boxShadow:
         "0 8px 18px rgba(0, 0, 0, 0.18), inset 0 1px 0 rgba(255,255,255,0.14)",

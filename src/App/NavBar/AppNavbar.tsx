@@ -48,12 +48,13 @@ const desktopNavbarRootStyle: CSSProperties = {
   left: 0,
   right: 0,
   zIndex: 1000,
-  borderBottom: "1px solid rgba(255, 255, 255, 0.10)",
-  background:
-    "linear-gradient(180deg, rgba(18, 18, 22, 0.86) 0%, rgba(12, 12, 16, 0.74) 100%)",
-  backdropFilter: "blur(14px)",
-  WebkitBackdropFilter: "blur(14px)",
-  boxShadow: "0 12px 32px rgba(0, 0, 0, 0.18)",
+  border: "none",
+  background: "transparent",
+  backgroundColor: "transparent",
+  backgroundImage: "none",
+  backdropFilter: "none",
+  WebkitBackdropFilter: "none",
+  boxShadow: "none",
 };
 
 const mobileNavbarRootStyle: CSSProperties = {
@@ -62,12 +63,11 @@ const mobileNavbarRootStyle: CSSProperties = {
   left: 0,
   right: 0,
   zIndex: 1000,
-  borderBottom: "1px solid rgba(255, 255, 255, 0.08)",
-  background:
-    "linear-gradient(180deg, rgba(10, 10, 14, 0.96) 0%, rgba(8, 8, 12, 0.92) 100%)",
-  backdropFilter: "blur(12px)",
-  WebkitBackdropFilter: "blur(12px)",
-  boxShadow: "0 8px 22px rgba(0, 0, 0, 0.16)",
+  border: "none",
+  background: "transparent",
+  backdropFilter: "none",
+  WebkitBackdropFilter: "none",
+  boxShadow: "none",
 };
 
 function getBrowserWindow(): Window | null {

@@ -137,7 +137,7 @@ const DESKTOP_STABLE_CONTENT_RENDER_HINTS: LandingSectionRenderHints = {
 	alwaysMountedOnDesktop: false,
 	prefersStableRender: false,
 	urlSyncEligible: true,
-	preferredNearDistance: 0,
+	preferredNearDistance: 1,
 	disableFarOnDesktop: false,
 };
 

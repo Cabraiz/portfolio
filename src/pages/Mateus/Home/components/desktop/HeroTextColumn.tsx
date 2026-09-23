@@ -1,7 +1,5 @@
-import { type CSSProperties, useMemo, useState } from "react";
+import { type CSSProperties, useMemo } from "react";
 import { Col } from "react-bootstrap";
-import { useTranslation } from "react-i18next";
-import Tippy from "@tippyjs/react";
 
 import RoleTitle from "../../../RoleTitle";
 import CTAButton from "../../../shared/CTAButton/CTAButton";
@@ -49,14 +47,19 @@ export default function HeroTextColumn({
 	whatsappTopLabel,
 	secondaryLabel,
 }: HeroTextColumnProps) {
-	const [activeSealKey, setActiveSealKey] = useState<string | null>(null);
-	const { t } = useTranslation();
-
 	const seniorTitleStyle = useMemo<CSSProperties>(() => {
 		return {
 			fontSize: isCompactDesktop ? "3rem" : "4rem",
 			fontWeight: 700,
-			color: "#f1c40f",
+			color: "transparent",
+			backgroundImage:
+				"linear-gradient(105deg, #8a5700 0%, #e1b338 20%, #fff6c7 38%, #c48a10 55%, #ffe18a 75%, #8b5700 100%)",
+			backgroundSize: "220px 100%",
+			backgroundRepeat: "no-repeat",
+			backgroundClip: "text",
+			WebkitBackgroundClip: "text",
+			WebkitTextFillColor: "transparent",
+			filter: "drop-shadow(0 2px 8px rgba(199, 139, 18, 0.24))",
 			marginBottom: isCompactDesktop ? "30px" : "3.2rem",
 			lineHeight: 1,
 			maxWidth: "100%",
@@ -82,7 +85,8 @@ export default function HeroTextColumn({
 		return {
 			...contentBlockWidth,
 			minWidth: 0,
-			backgroundImage: "linear-gradient(90deg, #f1c40f 100%, #f1c40f 100%)",
+			backgroundImage:
+				"linear-gradient(105deg, #8a5700 0%, #e1b338 20%, #fff6c7 38%, #c48a10 55%, #ffe18a 75%, #8b5700 100%)",
 			marginBottom: isCompactDesktop ? "30px" : "46px",
 			display: "flex",
 			alignItems: "center",
@@ -185,7 +189,7 @@ export default function HeroTextColumn({
 
 	return (
 		<Col md={5} style={heroTextColumnStyle} className="px-0">
-			<div style={seniorTitleStyle}>{isPT ? "Fundador" : "Founder"}</div>
+			<div style={seniorTitleStyle}>Dev</div>
 
 			<div className="font-sequel" style={roleContainerStyle}>
 				<RoleTitle isPT={isPT} />
@@ -193,81 +197,30 @@ export default function HeroTextColumn({
 
 			<div style={sealsContainerStyle}>
 				{seals.map((seal) => (
-					<Tippy
+					<div
 						key={seal.key}
-						content={
-							<div
-								style={{
-									display: "flex",
-									gap: "1rem",
-									maxWidth: "280px",
-									padding: "4px",
-									boxSizing: "border-box",
-								}}
-							>
-								{activeSealKey === seal.key ? (
-									<img
-										src={seal.cat}
-										alt={`${seal.alt} mascot`}
-										decoding="async"
-										style={{
-											height: "11vh",
-											maxWidth: "96px",
-											width: "auto",
-											borderRadius: "8px",
-											display: "block",
-											flexShrink: 0,
-										}}
-									/>
-								) : null}
-								<p
-									style={{
-										fontSize: "12px",
-										margin: 0,
-										wordBreak: "break-word",
-									}}
-								>
-									{t(`selo.${seal.key}`)}
-								</p>
-							</div>
-						}
-						placement="top"
-						onShow={() => setActiveSealKey(seal.key)}
-						onHidden={() =>
-							setActiveSealKey((currentKey) =>
-								currentKey === seal.key ? null : currentKey
-							)
-						}
-						animation="fade"
-						arrow
-						delay={[500, 100]}
-						theme="bubble"
-						offset={[0, 20]}
+						style={{
+							minWidth: 0,
+							maxWidth: "100%",
+							display: "flex",
+							alignItems: "center",
+							justifyContent: "center",
+						}}
 					>
-						<div
+						<img
+							src={seal.src}
+							alt={seal.alt}
 							style={{
-								minWidth: 0,
+								height: isCompactDesktop ? "32px" : "40px",
 								maxWidth: "100%",
-								display: "flex",
-								alignItems: "center",
-								justifyContent: "center",
+								width: "auto",
+								display: "block",
+								filter: "grayscale(100%)",
+								opacity: 0.8,
+								...seal.style,
 							}}
-						>
-							<img
-								src={seal.src}
-								alt={seal.alt}
-								style={{
-									height: isCompactDesktop ? "32px" : "40px",
-									maxWidth: "100%",
-									width: "auto",
-									display: "block",
-									filter: "grayscale(100%)",
-									opacity: 0.8,
-									...seal.style,
-								}}
-							/>
-						</div>
-					</Tippy>
+						/>
+					</div>
 				))}
 			</div>
 

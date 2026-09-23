@@ -44,9 +44,9 @@ const baseUnderlineStyle: CSSProperties = {
   height: "clamp(3.8px, calc(3.4px + 0.06vh), 4.2px)",
   borderRadius: "999px",
   background:
-    "linear-gradient(90deg, rgba(255, 215, 0, 0.92) 0%, rgba(255, 235, 153, 0.98) 100%)",
+    "linear-gradient(90deg, rgba(244, 17, 18, 0.92) 0%, rgba(255, 92, 95, 0.98) 100%)",
   boxShadow:
-    "0 0 14px rgba(255, 215, 0, 0.22), 0 0 6px rgba(255, 235, 153, 0.16)",
+    "0 0 14px rgba(244, 17, 18, 0.24), 0 0 6px rgba(255, 92, 95, 0.18)",
   pointerEvents: "none",
   transition:
     "transform 220ms ease, width 220ms ease, opacity 160ms ease, left 220ms ease",
@@ -105,6 +105,7 @@ const DesktopNavbar: React.FC<DesktopNavbarProps> = ({
     maxWidth: "100%",
     padding: "0 clamp(6px, 1vw, 12px) 3px",
     marginTop: "2px",
+    transform: isCompactDesktop ? "translateX(-16px)" : "translateX(-22px)",
   };
 
   return (

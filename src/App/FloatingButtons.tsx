@@ -31,21 +31,25 @@ const railStyle: CSSProperties = {
   boxShadow: "0 12px 28px rgba(0, 0, 0, 0.24)",
 };
 
+const mirroredGoldGradient =
+  "linear-gradient(135deg, #694100 0%, #bd8610 18%, #fff0a3 38%, #a46703 55%, #f2cf62 75%, #714500 100%)";
+
+const activeGoldFrame =
+  `linear-gradient(135deg, #101115, #1d2027) padding-box, ${mirroredGoldGradient} border-box`;
+
 function getButtonStyle(isActive: boolean): CSSProperties {
   return {
     width: isActive ? "22px" : "12px",
     height: isActive ? "22px" : "12px",
     padding: 0,
-    border: isActive ? "2px solid #f4d35e" : "none",
+    border: isActive ? "2px solid transparent" : "none",
     borderRadius: isActive ? "7px" : "2px",
     transform: isActive ? "none" : "rotate(45deg) scale(0.94)",
     transformOrigin: "center",
-    background: isActive
-      ? "radial-gradient(circle at 30% 30%, #101115, #1d2027)"
-      : "linear-gradient(135deg, #f4d35e, #d4a017)",
+    background: isActive ? activeGoldFrame : mirroredGoldGradient,
     boxShadow: isActive
-      ? "0 0 0 1px rgba(255, 211, 94, 0.15), 0 8px 18px rgba(0, 0, 0, 0.28)"
-      : "0 6px 14px rgba(212, 160, 23, 0.24)",
+      ? "0 0 0 1px rgba(242, 207, 98, 0.18), 0 8px 18px rgba(0, 0, 0, 0.3)"
+      : "0 6px 14px rgba(189, 134, 16, 0.3), inset 0 1px 1px rgba(255, 245, 181, 0.42)",
     cursor: "pointer",
     transition:
       "width 180ms ease, height 180ms ease, transform 180ms ease, box-shadow 180ms ease, border-radius 180ms ease",

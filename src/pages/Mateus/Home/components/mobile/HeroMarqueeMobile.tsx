@@ -92,7 +92,7 @@ export default function HeroMarqueeMobile({
       width: "100%",
       margin: 0,
       padding: 0,
-      color: "#f1c40f",
+      color: "#f41112",
       fontSize: "clamp(2rem, 8vw, 2.7rem)",
       fontWeight: 700,
       lineHeight: 0.96,
@@ -131,10 +131,10 @@ export default function HeroMarqueeMobile({
       borderRadius: "10px",
       background:
         "linear-gradient(180deg, rgba(18,18,22,0.96) 0%, rgba(10,10,14,0.985) 100%)",
-      borderTop: "1px solid rgba(241, 196, 15, 0.95)",
-      borderBottom: "1px solid rgba(241, 196, 15, 0.95)",
-      borderLeft: "1px solid rgba(241, 196, 15, 0.16)",
-      borderRight: "1px solid rgba(241, 196, 15, 0.16)",
+      borderTop: "1px solid rgba(244, 17, 18, 0.95)",
+      borderBottom: "1px solid rgba(244, 17, 18, 0.95)",
+      borderLeft: "1px solid rgba(244, 17, 18, 0.16)",
+      borderRight: "1px solid rgba(244, 17, 18, 0.16)",
       boxShadow:
         "0 10px 24px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.03)",
       transform: isGameOpen ? "scale(0.994)" : "scale(1)",
@@ -149,7 +149,7 @@ export default function HeroMarqueeMobile({
       inset: 0,
       pointerEvents: "none",
       background:
-        "linear-gradient(90deg, rgba(241,196,15,0.00) 0%, rgba(241,196,15,0.08) 18%, rgba(241,196,15,0.12) 50%, rgba(241,196,15,0.08) 82%, rgba(241,196,15,0.00) 100%)",
+        "linear-gradient(90deg, rgba(244,17,18,0.00) 0%, rgba(244,17,18,0.08) 18%, rgba(244,17,18,0.12) 50%, rgba(244,17,18,0.08) 82%, rgba(244,17,18,0.00) 100%)",
       opacity: isGameOpen ? 0.48 : 0.9,
       transition: "opacity 220ms ease",
     };

@@ -85,6 +85,7 @@ export default function FloatingChat() {
   const [currentPhraseIndex, setCurrentPhraseIndex] = useState(0);
 
   const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+  const shouldHideForMobileHome = isMobile && location.pathname === "/home";
   const scale = (value: number) => (isMobile ? value * 0.8 : value);
 
   const bottomOffset = isMobile ? "30px" : "3vh";
@@ -193,7 +194,6 @@ export default function FloatingChat() {
   const openChat = () => {
     chatOpenedAtRef.current = Date.now();
     setSendStatus("idle");
-    if (messages.length === 0) setInputValue(t("floatingChat.intro"));
     setIsOpen(true);
   };
 
@@ -244,7 +244,7 @@ export default function FloatingChat() {
     }
   };
 
-  if (shouldHideForStandaloneGame) {
+  if (shouldHideForStandaloneGame || shouldHideForMobileHome) {
     return null;
   }
 
@@ -616,8 +616,8 @@ export default function FloatingChat() {
                     />
                     <div
                       style={{
-                        background: "rgba(241, 196, 15, 0.18)",
-                        border: "1px solid rgba(241, 196, 15, 0.4)",
+                        background: "rgba(244, 17, 18, 0.18)",
+                        border: "1px solid rgba(244, 17, 18, 0.4)",
                         padding: `${scale(0.6)}rem ${scale(1)}rem`,
                         borderRadius: "12px",
                         wordWrap: "break-word",
@@ -697,8 +697,8 @@ export default function FloatingChat() {
                 disabled={!inputValue.trim() || sendStatus === "sending"}
                 style={{
                   padding: `0 ${scale(1)}rem`,
-                  backgroundColor: "#f1c40f",
-                  color: "#000",
+                  backgroundColor: "#f41112",
+                  color: "#fff",
                   border: "none",
                   borderRadius: "8px",
                   cursor:
@@ -734,8 +734,8 @@ export default function FloatingChat() {
               onClick={() => setIsOpen(false)}
               style={{
                 marginTop: `${scale(1)}rem`,
-                backgroundColor: "#f1c40f",
-                color: "#000",
+                backgroundColor: "#f41112",
+                color: "#fff",
                 border: "none",
                 padding: `${scale(0.6)}rem ${scale(1)}rem`,
                 borderRadius: "8px",

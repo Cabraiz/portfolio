@@ -3,11 +3,13 @@ import React, { type CSSProperties } from "react";
 export type MobileMenuToggleButtonProps = Readonly<{
   menuOpen: boolean;
   onToggle: () => void;
+  lineColor?: string;
 }>;
 
 function getBurgerLineStyle(
   index: number,
   menuOpen: boolean,
+  lineColor: string,
 ): CSSProperties {
   let top = "21px";
   let transform = "none";
@@ -43,7 +45,7 @@ function getBurgerLineStyle(
     width: "22px",
     height: "2px",
     borderRadius: "999px",
-    backgroundColor: "#ffffff",
+    backgroundColor: lineColor,
     transition: "transform 0.3s ease, opacity 0.25s ease, top 0.3s ease",
     top,
     transform,
@@ -54,6 +56,7 @@ function getBurgerLineStyle(
 const MobileMenuToggleButton: React.FC<MobileMenuToggleButtonProps> = ({
   menuOpen,
   onToggle,
+  lineColor = "#ffffff",
 }) => {
   return (
     <button
@@ -78,7 +81,7 @@ const MobileMenuToggleButton: React.FC<MobileMenuToggleButtonProps> = ({
       }}
     >
       {[0, 1, 2].map((index) => (
-        <span key={index} style={getBurgerLineStyle(index, menuOpen)} />
+        <span key={index} style={getBurgerLineStyle(index, menuOpen, lineColor)} />
       ))}
     </button>
   );

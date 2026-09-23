@@ -2,7 +2,6 @@ import {
 	useLayoutEffect,
 	useMemo,
 	useRef,
-	useState,
 	type CSSProperties,
 } from "react";
 import { Container, Row } from "react-bootstrap";
@@ -14,19 +13,45 @@ import "../../../../styles/styles.css";
 
 import gsap from "gsap";
 
+import heroCinemaBackground from "@/assets/Mateus/home/hero-cinema-v2.webp";
+import heroCinemaVote2 from "@/assets/Mateus/home/hero-cinema-vote-2.webp";
+import heroCinemaVote3 from "@/assets/Mateus/home/hero-cinema-vote-3.webp";
+import heroCinemaVote4 from "@/assets/Mateus/home/hero-cinema-vote-4.webp";
+import heroCinemaVote5 from "@/assets/Mateus/home/hero-cinema-vote-5.webp";
+import heroCinemaVote6 from "@/assets/Mateus/home/hero-cinema-vote-6.webp";
+import heroCinemaVote7 from "@/assets/Mateus/home/hero-cinema-vote-7.webp";
 import HeroTextColumn from "../components/desktop/HeroTextColumn";
-import HeroProfileColumnDesktop from "../components/desktop/HeroProfileColumn";
 import { useHomeHeroLayout } from "../hooks/useHomeHeroLayout";
 import { getWhatsAppGreeting } from "../utils/home.utils";
 import { shouldDisableScrollFades } from "../../../../features/scroll/scrollMotionFlags";
 
 function HomeDesktop() {
 	const containerRef = useRef<HTMLDivElement>(null);
+	const heroBackgrounds = useMemo(
+		() => [
+			heroCinemaBackground,
+			heroCinemaVote2,
+			heroCinemaVote3,
+			heroCinemaVote4,
+			heroCinemaVote5,
+			heroCinemaVote6,
+			heroCinemaVote7,
+		],
+		[],
+	);
+	const selectedHeroOption = useMemo(() => {
+		const requestedOption = Number(
+			new URLSearchParams(window.location.search).get("hero"),
+		);
+
+		return requestedOption >= 1 && requestedOption <= heroBackgrounds.length
+			? requestedOption
+			: 6;
+	}, [heroBackgrounds.length]);
+	const selectedHeroBackground = heroBackgrounds[selectedHeroOption - 1];
 
 	const { t } = useTranslation();
 	const { sectionStyle, isCompactDesktop } = useHomeHeroLayout();
-
-	const [isImageLoaded, setIsImageLoaded] = useState(false);
 
 	const currentLanguage = i18n.resolvedLanguage ?? i18n.language ?? "pt";
 
@@ -41,6 +66,88 @@ function HomeDesktop() {
 	const whatsappTopLabel = useMemo(() => {
 		return getWhatsAppGreeting();
 	}, []);
+
+	const backgroundImageStyle = useMemo<CSSProperties>(() => {
+		return {
+			position: "absolute",
+			top: 0,
+			left: 0,
+			width: "100%",
+			height: "100%",
+			objectFit: "cover",
+			objectPosition: isCompactDesktop ? "center top" : "center center",
+			display: "block",
+			zIndex: 0,
+		};
+	}, [isCompactDesktop]);
+
+	const backgroundOverlayStyle = useMemo<CSSProperties>(() => {
+		return {
+			position: "absolute",
+			inset: 0,
+			zIndex: 0,
+			pointerEvents: "none",
+			background:
+				"linear-gradient(90deg, rgba(3, 8, 14, 0.94) 0%, rgba(3, 8, 14, 0.78) 27%, rgba(3, 8, 14, 0.28) 48%, rgba(3, 8, 14, 0.06) 72%), linear-gradient(180deg, rgba(2, 5, 9, 0.12) 0%, rgba(2, 5, 9, 0.08) 58%, rgba(2, 5, 9, 0.42) 100%)",
+		};
+	}, []);
+
+	const signatureStyle = useMemo<CSSProperties>(() => {
+		return {
+			position: "absolute",
+			right: isCompactDesktop
+				? "clamp(24px, 3vw, 38px)"
+				: "clamp(42px, 4vw, 76px)",
+			bottom: isCompactDesktop ? "104px" : "clamp(122px, 11vh, 142px)",
+			zIndex: 2,
+			display: "flex",
+			flexDirection: "column",
+			alignItems: "flex-start",
+			gap: isCompactDesktop ? "1px" : "2px",
+			color: "rgba(255, 255, 255, 0.84)",
+			fontFamily: '"Arial Narrow", "Roboto Condensed", "Brutal", sans-serif',
+			fontSize: isCompactDesktop ? "8.5px" : "10px",
+			fontStretch: "condensed",
+			fontWeight: 500,
+			lineHeight: 1.42,
+			letterSpacing: "0.24em",
+			textAlign: "left",
+			textTransform: "uppercase",
+			textShadow: "0 2px 10px rgba(0, 0, 0, 0.72)",
+			transform: "scaleX(0.78) scaleY(1.12)",
+			transformOrigin: "right bottom",
+			whiteSpace: "nowrap",
+			pointerEvents: "none",
+		};
+	}, [isCompactDesktop]);
+
+	const editorialPhraseStyle = useMemo<CSSProperties>(() => {
+		return {
+			position: "absolute",
+			top: isCompactDesktop ? "88px" : "clamp(92px, 9vh, 112px)",
+			right: isCompactDesktop
+				? "clamp(24px, 3vw, 38px)"
+				: "clamp(42px, 4vw, 76px)",
+			zIndex: 2,
+			display: "flex",
+			flexDirection: "column",
+			alignItems: "flex-start",
+			color: "rgba(255, 255, 255, 0.72)",
+			fontFamily: '"Arial Narrow", "Roboto Condensed", "Brutal", sans-serif',
+			fontSize: isCompactDesktop ? "10.4px" : "11.7px",
+			fontStretch: "condensed",
+			fontWeight: 500,
+			lineHeight: 1.42,
+			letterSpacing: "0.36em",
+			textAlign: "left",
+			textTransform: "uppercase",
+			textShadow: "0 2px 10px rgba(0, 0, 0, 0.72)",
+			transform: "scaleX(0.8) scaleY(1.1)",
+			transformOrigin: "right top",
+			whiteSpace: "nowrap",
+			pointerEvents: "none",
+		};
+	}, [isCompactDesktop]);
 
 	const rootStyle = useMemo<CSSProperties>(() => {
 		return {
@@ -100,6 +207,19 @@ function HomeDesktop() {
 		};
 	}, [isCompactDesktop]);
 
+	const contentRailStyle = useMemo<CSSProperties>(() => {
+		return {
+			width: isCompactDesktop
+				? "clamp(430px, 43vw, 610px)"
+				: "clamp(520px, 39vw, 720px)",
+			maxWidth: "100%",
+			minWidth: 0,
+			display: "flex",
+			alignItems: "center",
+			boxSizing: "border-box",
+		};
+	}, [isCompactDesktop]);
+
 	const rowStyle = useMemo<CSSProperties>(() => {
 		const style: CSSProperties = {
 			inlineSize: "100%",
@@ -114,7 +234,7 @@ function HomeDesktop() {
 			flexDirection: "row",
 			alignItems: "center",
 			alignContent: "center",
-			justifyContent: "center",
+			justifyContent: "flex-start",
 			columnGap: isCompactDesktop ? "8px" : "clamp(8px, 0.8vw, 18px)",
 			rowGap: 0,
 			boxSizing: "border-box",
@@ -185,22 +305,47 @@ function HomeDesktop() {
 			data-mateus-hero-root="true"
 			data-mateus-hero-mobile="false"
 		>
+			<img
+				src={selectedHeroBackground}
+				alt=""
+				aria-hidden="true"
+				data-hero-option={selectedHeroOption}
+				loading="eager"
+				decoding="async"
+				fetchPriority="high"
+				style={backgroundImageStyle}
+			/>
+			<div aria-hidden="true" style={backgroundOverlayStyle} />
+			<div
+				style={editorialPhraseStyle}
+				aria-label="Histórias também são feitas de código"
+			>
+				<span>Histórias</span>
+				<span>Também são</span>
+				<span>Feitas de código.</span>
+			</div>
+			<div
+				style={signatureStyle}
+				aria-label="Mateus Cabral, Engenheiro de Software, Fundador"
+			>
+				<strong style={{ fontSize: "1.12em", fontWeight: 700 }}>
+					Mateus Cabral
+				</strong>
+				<span>Engenheiro de Software</span>
+				<span>Fundador</span>
+			</div>
+
 			<Container fluid className="px-0" style={containerStyle}>
 				<div style={innerContainerStyle}>
 					<Row className="custom-section-row g-0 mx-0" style={rowStyle}>
-						<HeroTextColumn
-							isCompactDesktop={isCompactDesktop}
-							isPT={isPT}
-							whatsappTopLabel={whatsappTopLabel}
-							secondaryLabel={secondaryLabel}
-						/>
-
-						<HeroProfileColumnDesktop
-							isCompactDesktop={isCompactDesktop}
-							isPT={isPT}
-							isImageLoaded={isImageLoaded}
-							onImageLoad={() => setIsImageLoaded(true)}
-						/>
+						<div style={contentRailStyle}>
+							<HeroTextColumn
+								isCompactDesktop={isCompactDesktop}
+								isPT={isPT}
+								whatsappTopLabel={whatsappTopLabel}
+								secondaryLabel={secondaryLabel}
+							/>
+						</div>
 					</Row>
 				</div>
 			</Container>

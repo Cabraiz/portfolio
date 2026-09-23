@@ -1,430 +1,217 @@
-// src/pages/Mateus/Home/variants/HomeMobile.tsx
+import { useLayoutEffect, useRef } from "react";
+import { FaLinkedin, FaRegFileAlt, FaWhatsapp } from "react-icons/fa";
+import { SiAnthropic, SiGmail, SiOpenai } from "react-icons/si";
 
-import {
-  Suspense,
-  lazy,
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-  type CSSProperties,
-} from "react";
-import i18n from "@/i18n/i18n";
-import "tippy.js/dist/tippy.css";
+import portrait from "@/assets/Mateus/home/hero-mobile-portrait.png";
+import { ensureGsapRuntime } from "@/features/scroll/gsapRuntime";
+import { RESUME_HREF, WHATSAPP_HREF } from "../data/home.data";
+import styles from "./HomeMobile.module.css";
 
-import "../../../../styles/styles.css";
-
-import gsap from "gsap";
-
-import HeroMobileStack from "../components/mobile/HeroMobileStack";
-import type { MobileSocialItem } from "../components/mobile/SocialRowMobile";
-import { shouldDisableScrollFades } from "../../../../features/scroll/scrollMotionFlags";
-import {
-  HOME_MOBILE_SOCIAL_LINKS,
-  PROFILE_IMAGE,
-  PROFILE_IMAGE_ALT,
-  SOCIAL_ICONS,
-} from "../data/home.data";
-import { homeHeroTokens } from "../layout/homeHero.tokens";
-
-const HomeDriveGame = lazy(
-  () => import("../components/mobile/game/driving/HomeDriveGame"),
-);
-const HomeElevatorGame = lazy(
-  () => import("../components/mobile/game/elevator/HomeElevatorGame"),
-);
-
-const MOBILE_HERO_BACKGROUND = `
-  radial-gradient(
-    circle at 18% 16%,
-    rgba(168, 120, 28, 0.14) 0%,
-    rgba(168, 120, 28, 0.08) 18%,
-    rgba(168, 120, 28, 0.03) 34%,
-    rgba(168, 120, 28, 0.00) 54%
-  ),
-  radial-gradient(
-    circle at 82% 10%,
-    rgba(76, 88, 112, 0.12) 0%,
-    rgba(76, 88, 112, 0.06) 24%,
-    rgba(76, 88, 112, 0.00) 52%
-  ),
-  linear-gradient(
-    180deg,
-    #0b0d11 0%,
-    #090b0f 38%,
-    #07080b 72%,
-    #050608 100%
-  )
-`;
+const MOBILE_PARTNERS = [
+  { label: "LinkedIn", Icon: FaLinkedin },
+  { label: "Gmail", Icon: SiGmail },
+  { label: "Claude", Icon: SiAnthropic },
+  { label: "Codex", Icon: SiOpenai },
+] as const;
 
 function HomeMobile() {
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  const [isImageLoaded, setIsImageLoaded] = useState(false);
-  const [activeGame, setActiveGame] = useState<"drive" | "elevator" | null>(null);
-
-  const isGameOpen = activeGame !== null;
-
-  const currentLanguage = i18n.resolvedLanguage ?? i18n.language ?? "pt";
-
-  const isPT = useMemo(() => {
-    return currentLanguage === "pt" || currentLanguage.startsWith("pt");
-  }, [currentLanguage]);
-
-  const driveLabel = useMemo(() => {
-    return isPT ? "Dirigir" : "Drive";
-  }, [isPT]);
-
-  const driveAriaLabel = useMemo(() => {
-    return isPT ? "Abrir jogo de direção" : "Open driving game";
-  }, [isPT]);
-
-  const elevatorLabel = useMemo(() => {
-    return isPT ? "Elevador" : "Elevator";
-  }, [isPT]);
-
-  const elevatorAriaLabel = useMemo(() => {
-    return isPT ? "Abrir jogo do elevador" : "Open elevator game";
-  }, [isPT]);
-
-  const socialIconImageStyle = useMemo<CSSProperties>(() => {
-    return {
-      width: "18px",
-      height: "18px",
-      display: "block",
-      objectFit: "contain",
-      userSelect: "none",
-      pointerEvents: "none",
-    };
-  }, []);
-
-  const socialItems = useMemo<readonly MobileSocialItem[]>(() => {
-    return HOME_MOBILE_SOCIAL_LINKS.map((item) => {
-      const iconSrc = SOCIAL_ICONS[item.iconKey];
-
-      return {
-        id: item.id,
-        label: item.label,
-        ariaLabel: item.ariaLabel,
-        href: item.href,
-        target: item.target,
-        rel: item.rel,
-        icon: (
-          <img
-            src={iconSrc}
-            alt=""
-            aria-hidden="true"
-            style={socialIconImageStyle}
-            draggable={false}
-          />
-        ),
-      };
-    });
-  }, [socialIconImageStyle]);
-
-  const rootStyle = useMemo<CSSProperties>(() => {
-    return {
-      position: "relative",
-      width: "100%",
-      minWidth: 0,
-      minHeight: "100dvh",
-      display: "flex",
-      flexDirection: "column",
-      overflowX: "hidden",
-      overflowY: isGameOpen ? "hidden" : "visible",
-      backgroundColor: "#07080b",
-      backgroundImage: MOBILE_HERO_BACKGROUND,
-      backgroundRepeat: "no-repeat",
-      backgroundSize: "cover",
-      backgroundPosition: "center top",
-      boxSizing: "border-box",
-    };
-  }, [isGameOpen]);
-
-  const containerStyle = useMemo<CSSProperties>(() => {
-    return {
-      width: "100%",
-      minWidth: 0,
-      minHeight: "100dvh",
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      justifyContent: "center",
-      paddingTop: "clamp(58px, 10vw, 74px)",
-      paddingBottom: "clamp(18px, 4vw, 28px)",
-      paddingInline: "clamp(12px, 4vw, 20px)",
-      boxSizing: "border-box",
-    };
-  }, []);
-
-  const stackWrapStyle = useMemo<CSSProperties>(() => {
-    return {
-      width: `min(100%, ${homeHeroTokens.mobileAttractMode.cardMaxWidth})`,
-      minWidth: 0,
-      maxWidth: homeHeroTokens.mobileAttractMode.cardMaxWidth,
-      margin: "0 auto",
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "stretch",
-      justifyContent: "center",
-      boxSizing: "border-box",
-    };
-  }, []);
-
-  const playWrapStyle = useMemo<CSSProperties>(() => {
-    return {
-      width: "100%",
-      display: "grid",
-      gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-      gap: "10px",
-      justifyContent: "center",
-      alignItems: "stretch",
-      boxSizing: "border-box",
-    };
-  }, []);
-
-  const playButtonStyle = useMemo<CSSProperties>(() => {
-    return {
-      position: "relative",
-      width: "100%",
-      minHeight: homeHeroTokens.mobileAttractMode.launcherMinHeight,
-      display: "inline-flex",
-      alignItems: "center",
-      justifyContent: "center",
-      gap: "10px",
-      padding: "0 14px",
-      borderRadius: "16px",
-      border: "1px solid rgba(255, 210, 132, 0.18)",
-      background:
-        "linear-gradient(180deg, rgba(36,36,44,0.92) 0%, rgba(12,12,16,0.98) 100%)",
-      color: "rgba(255, 244, 226, 0.96)",
-      fontSize: "0.98rem",
-      fontWeight: 700,
-      letterSpacing: "-0.02em",
-      boxShadow:
-        "0 16px 32px rgba(0,0,0,0.24), 0 0 0 1px rgba(255,255,255,0.02) inset",
-      cursor: "pointer",
-      WebkitTapHighlightColor: "transparent",
-      transition:
-        "transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease, opacity 180ms ease",
-      overflow: "hidden",
-      boxSizing: "border-box",
-    };
-  }, []);
-
-  const playPulseStyle = useMemo<CSSProperties>(() => {
-    return {
-      position: "absolute",
-      inset: 0,
-      pointerEvents: "none",
-      background:
-        "linear-gradient(90deg, rgba(255,210,120,0.00) 0%, rgba(255,210,120,0.07) 18%, rgba(255,210,120,0.14) 50%, rgba(255,210,120,0.07) 82%, rgba(255,210,120,0.00) 100%)",
-      opacity: 0.92,
-    };
-  }, []);
-
-  const playIconStyle = useMemo<CSSProperties>(() => {
-    return {
-      position: "relative",
-      zIndex: 1,
-      width: "12px",
-      height: "12px",
-      borderRadius: "999px",
-      background:
-        "radial-gradient(circle, rgba(255,228,178,1) 0%, rgba(255,195,90,0.98) 54%, rgba(255,175,66,0.92) 100%)",
-      boxShadow:
-        "0 0 14px rgba(255, 194, 90, 0.3), 0 0 0 1px rgba(255,255,255,0.05) inset",
-      flexShrink: 0,
-    };
-  }, []);
-
-  const playLabelStyle = useMemo<CSSProperties>(() => {
-    return {
-      position: "relative",
-      zIndex: 1,
-      whiteSpace: "nowrap",
-      textOverflow: "ellipsis",
-      overflow: "hidden",
-    };
-  }, []);
-
-  const driveOverlayStyle = useMemo<CSSProperties>(() => {
-    return {
-      position: "fixed",
-      inset: 0,
-      width: "100vw",
-      height: "100dvh",
-      zIndex: 999,
-      background: "#040507",
-      overflow: "hidden",
-    };
-  }, []);
-
-  const handleOpenDrive = useCallback(() => {
-    setActiveGame("drive");
-  }, []);
-
-  const handleOpenElevator = useCallback(() => {
-    setActiveGame("elevator");
-  }, []);
-
-  const handleCloseGame = useCallback(() => {
-    setActiveGame(null);
-  }, []);
-
-  const elevatorIconStyle = useMemo<CSSProperties>(() => {
-    return {
-      ...playIconStyle,
-      borderRadius: "4px",
-      background:
-        "linear-gradient(180deg, rgba(171,210,255,1) 0%, rgba(85,146,255,0.96) 58%, rgba(65,115,230,0.9) 100%)",
-      boxShadow:
-        "0 0 14px rgba(96, 152, 255, 0.28), 0 0 0 1px rgba(255,255,255,0.05) inset",
-    };
-  }, [playIconStyle]);
-
-  const playLauncher = useMemo(() => {
-    return (
-      <div style={playWrapStyle}>
-        <button
-          type="button"
-          aria-label={driveAriaLabel}
-          style={playButtonStyle}
-          onClick={handleOpenDrive}
-        >
-          <span style={playPulseStyle} />
-          <span style={playIconStyle} />
-          <span style={playLabelStyle}>{driveLabel}</span>
-        </button>
-
-        <button
-          type="button"
-          aria-label={elevatorAriaLabel}
-          style={playButtonStyle}
-          onClick={handleOpenElevator}
-        >
-          <span style={playPulseStyle} />
-          <span style={elevatorIconStyle} />
-          <span style={playLabelStyle}>{elevatorLabel}</span>
-        </button>
-      </div>
-    );
-  }, [
-    driveAriaLabel,
-    driveLabel,
-    elevatorAriaLabel,
-    elevatorIconStyle,
-    elevatorLabel,
-    handleOpenDrive,
-    handleOpenElevator,
-    playButtonStyle,
-    playIconStyle,
-    playLabelStyle,
-    playPulseStyle,
-    playWrapStyle,
-  ]);
-
-  useEffect(() => {
-    const previousHtmlOverflow = document.documentElement.style.overflow;
-    const previousBodyOverflow = document.body.style.overflow;
-    const previousBodyTouchAction = document.body.style.touchAction;
-
-    if (isGameOpen) {
-      document.documentElement.style.overflow = "hidden";
-      document.body.style.overflow = "hidden";
-      document.body.style.touchAction = "none";
-    }
-
-    return () => {
-      document.documentElement.style.overflow = previousHtmlOverflow;
-      document.body.style.overflow = previousBodyOverflow;
-      document.body.style.touchAction = previousBodyTouchAction;
-    };
-  }, [isGameOpen]);
+  const pageRef = useRef<HTMLElement>(null);
+  const eyebrowRef = useRef<HTMLDivElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const identityRef = useRef<HTMLDivElement>(null);
+  const introRef = useRef<HTMLParagraphElement>(null);
+  const partnersRef = useRef<HTMLDivElement>(null);
+  const portraitRef = useRef<HTMLImageElement>(null);
 
   useLayoutEffect(() => {
-    const container = containerRef.current;
+    const page = pageRef.current;
+    const logo = document.querySelector<HTMLElement>(
+      '[data-mobile-brand-pusher="true"]',
+    );
+    const reducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
 
-    if (!container || isGameOpen) {
+    if (!page || !logo || reducedMotion) {
       return;
     }
 
-    if (shouldDisableScrollFades()) {
-      gsap.set(container, {
-        opacity: 1,
-        y: 0,
-        clearProps: "transform,opacity,willChange",
-      });
-      container.style.willChange = "auto";
-      return;
-    }
+    const { gsap, ScrollTrigger } = ensureGsapRuntime();
+    const blockCandidates: Array<HTMLElement | null> = [
+      eyebrowRef.current,
+      titleRef.current,
+      identityRef.current,
+      introRef.current,
+      partnersRef.current,
+    ];
+    const textBlocks = blockCandidates.filter(
+      (element): element is HTMLElement => element !== null,
+    );
 
-    const ctx = gsap.context(() => {
-      gsap.set(container, {
-        opacity: 0,
-        y: 12,
-        willChange: "transform, opacity",
+    const context = gsap.context(() => {
+      gsap.set([logo, ...textBlocks], {
+        willChange: "transform",
+        force3D: true,
       });
 
-      gsap.to(container, {
-        opacity: 1,
-        y: 0,
-        duration: 0.42,
-        ease: "power2.out",
-        overwrite: "auto",
-        onComplete: () => {
-          gsap.set(container, {
-            clearProps: "transform,opacity,willChange",
-          });
-          container.style.willChange = "auto";
+      const timeline = gsap.timeline({
+        defaults: { ease: "none" },
+        scrollTrigger: {
+          trigger: page,
+          start: "top top",
+          end: "bottom top+=72",
+          scrub: 0.45,
+          invalidateOnRefresh: true,
         },
       });
-    }, container);
+
+      timeline
+        .to(
+          logo,
+          {
+            y: () => Math.min(380, window.innerHeight * 0.5),
+            rotation: 2,
+            scale: 1.08,
+            duration: 0.74,
+          },
+          0,
+        )
+        .to(
+          logo,
+          {
+            y: 0,
+            rotation: 0,
+            scale: 1,
+            duration: 0.26,
+            ease: "power2.inOut",
+          },
+          0.74,
+        )
+        .to(
+          portraitRef.current,
+          {
+            y: -22,
+            scale: 1.018,
+            duration: 1,
+          },
+          0,
+        );
+
+      const pushBlock = (
+        element: HTMLElement | null,
+        start: number,
+        distance: number,
+      ) => {
+        if (!element) return;
+
+        timeline
+          .to(
+            element,
+            {
+              x: distance,
+              skewX: -1.2,
+              duration: 0.09,
+              ease: "power2.out",
+            },
+            start,
+          )
+          .to(
+            element,
+            {
+              x: 0,
+              skewX: 0,
+              duration: 0.13,
+              ease: "power2.inOut",
+            },
+            start + 0.09,
+          );
+      };
+
+      pushBlock(eyebrowRef.current, 0.015, 58);
+      pushBlock(titleRef.current, 0.055, 56);
+      pushBlock(identityRef.current, 0.09, 60);
+      pushBlock(introRef.current, 0.17, 66);
+      pushBlock(partnersRef.current, 0.3, 62);
+    }, page);
+
+    const refreshFrame = window.requestAnimationFrame(() => {
+      ScrollTrigger.refresh();
+    });
 
     return () => {
-      ctx.revert();
-      container.style.willChange = "auto";
+      window.cancelAnimationFrame(refreshFrame);
+      context.revert();
+      gsap.set([logo, ...textBlocks, portraitRef.current], {
+        clearProps: "transform,willChange",
+      });
     };
-  }, [isGameOpen]);
+  }, []);
 
   return (
-    <div ref={containerRef} style={rootStyle}>
-      {!isGameOpen ? (
-        <div style={containerStyle}>
-          <div style={stackWrapStyle}>
-            <HeroMobileStack
-              imageSrc={PROFILE_IMAGE}
-              imageAlt={PROFILE_IMAGE_ALT}
-              socialItems={socialItems}
-              imageLoaded={isImageLoaded}
-              onImageLoad={() => setIsImageLoaded(true)}
-              bottomSlot={playLauncher}
-              isGameOpen={isGameOpen}
-            />
+    <main ref={pageRef} className={styles.page} data-mobile-editorial-home>
+      <section className={styles.hero} aria-labelledby="mobile-home-title">
+        <div ref={eyebrowRef} className={styles.eyebrow}>
+          <span>TECNOLOGIA</span>
+          <span>PESSOAS</span>
+          <span>IMPACTO</span>
+        </div>
+
+        <h1 ref={titleRef} id="mobile-home-title" className={styles.title}>
+          <span className={styles.titleLead}>Dev</span>
+          <span className={styles.titleAccent}>Back-End &amp; APIs</span>
+        </h1>
+
+        <div ref={identityRef} className={styles.identity}>
+          <strong>Mateus Cabral</strong>
+          <span>Engenheiro de Software</span>
+          <span>Fundador</span>
+        </div>
+
+        <p ref={introRef} className={styles.intro}>
+          Transformando ideias em produtos reais, do código ao impacto.
+        </p>
+
+        <div
+          ref={partnersRef}
+          className={styles.partners}
+          aria-label="Clientes e parceiros"
+        >
+          <div className={styles.partnersHeading}>
+            <span>CLIENTES</span>
+            <span>E PARCEIROS</span>
+          </div>
+          <div className={styles.partnerLogos}>
+            {MOBILE_PARTNERS.map(({ label, Icon }) => (
+              <div key={label} className={styles.partnerSignature}>
+                <Icon aria-hidden="true" />
+                <span>{label}</span>
+              </div>
+            ))}
           </div>
         </div>
-      ) : null}
 
-      {isGameOpen ? (
-        <div style={driveOverlayStyle}>
-          <Suspense fallback={null}>
-            {activeGame === "drive" ? (
-              <HomeDriveGame onClose={handleCloseGame} />
-            ) : null}
-            {activeGame === "elevator" ? (
-              <HomeElevatorGame onClose={handleCloseGame} />
-            ) : null}
-          </Suspense>
-        </div>
-      ) : null}
-    </div>
+        <img
+          ref={portraitRef}
+          className={styles.portrait}
+          src={portrait}
+          alt="Mateus Cabral"
+          draggable={false}
+        />
+
+        <nav className={styles.actions} aria-label="Ações de contato">
+          <a href={WHATSAPP_HREF} target="_blank" rel="noreferrer noopener">
+            <FaWhatsapp aria-hidden="true" />
+            <span>WhatsApp</span>
+          </a>
+          <span className={styles.actionDivider} aria-hidden="true" />
+          <a href={RESUME_HREF} target="_blank" rel="noreferrer noopener">
+            <FaRegFileAlt aria-hidden="true" />
+            <span>Currículo</span>
+          </a>
+        </nav>
+      </section>
+    </main>
   );
 }
 
 export default HomeMobile;
-
-
-
-

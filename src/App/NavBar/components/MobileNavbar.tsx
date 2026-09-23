@@ -30,10 +30,8 @@ const sideSlotStyle: CSSProperties = {
   flex: "0 0 auto",
 };
 
-const trailingSpacerStyle: CSSProperties = {
-  width: "44px",
-  minWidth: "44px",
-  flex: "0 0 auto",
+const middleSpacerStyle: CSSProperties = {
+  flex: "1 1 auto",
 };
 
 function getPanelStyle(): CSSProperties {
@@ -100,18 +98,23 @@ const MobileNavbar: React.FC<MobileNavbarProps> = ({
 
   return (
     <>
-      <div style={sideSlotStyle}>
-        <MobileMenuToggleButton menuOpen={isOpen} onToggle={onToggle} />
-      </div>
-
       <BrandButton
         onClick={handleBrandClick}
         mobile
+        invertMobileLogo={activeSectionId === "home"}
         logoSrc={logo}
         logoAlt="Cabraiz"
       />
 
-      <div aria-hidden="true" style={trailingSpacerStyle} />
+      <div aria-hidden="true" style={middleSpacerStyle} />
+
+      <div style={sideSlotStyle}>
+        <MobileMenuToggleButton
+          menuOpen={isOpen}
+          onToggle={onToggle}
+          lineColor={activeSectionId === "home" ? "#171311" : "#ffffff"}
+        />
+      </div>
 
       {isOpen ? (
         <>
