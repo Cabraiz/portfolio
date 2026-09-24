@@ -108,6 +108,7 @@ export default function AppNavbar({
   const isCompactDesktop =
     !isMobileView && viewport.width <= NAVBAR_DESKTOP_COMPACT_BREAKPOINT;
   const isPortfolioTheme = activeSectionId === "portfolio";
+  const isRoadMapTheme = activeSectionId === "roadMap";
 
   useNavbarBodyScrollLock({
     isMobileView,
@@ -203,6 +204,14 @@ export default function AppNavbar({
   const resolvedNavbarRootStyle = useMemo<CSSProperties>(() => {
     const baseStyle = isMobileView ? mobileNavbarRootStyle : desktopNavbarRootStyle;
 
+    if (isRoadMapTheme) {
+      return {
+        ...baseStyle,
+        background: "#050505",
+        boxShadow: "0 2px 0 #050505",
+      };
+    }
+
     if (!isPortfolioTheme) {
       return baseStyle;
     }
@@ -214,7 +223,7 @@ export default function AppNavbar({
       WebkitBackdropFilter: "none",
       boxShadow: "none",
     };
-  }, [isMobileView, isPortfolioTheme]);
+  }, [isMobileView, isPortfolioTheme, isRoadMapTheme]);
 
   const resolvedNavbarStyle = useMemo<CSSProperties>(
     () => ({

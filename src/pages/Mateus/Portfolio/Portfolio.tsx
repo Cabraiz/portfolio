@@ -17,6 +17,9 @@ import type { PortfolioProjectId } from "./types";
 import { worldAtlasTiles } from "./worldAtlasTiles";
 
 const PORTFOLIO_AUTOPLAY_INTERVAL_MS = 6200;
+const PORTFOLIO_MAGNET_IDLE_MS = 120;
+const PORTFOLIO_MAGNET_DURATION_SECONDS = 0.62;
+const PORTFOLIO_MAGNET_ENTRY_RATIO = 0.1;
 
 const PROJECT_DESCRIPTIONS: Record<PortfolioProjectId, string> = {
   "erp-varejo":
@@ -25,6 +28,8 @@ const PROJECT_DESCRIPTIONS: Record<PortfolioProjectId, string> = {
     "Experiência bancária mobile desenhada para tornar consultas, movimentações e decisões financeiras mais simples.",
   "app-barber":
     "Agenda digital com recorrência, organização de serviços e uma jornada direta para clientes e profissionais.",
+  "central-clube-livro":
+    "Experiência editorial para um clube de leitura, com narrativas imersivas, encontros e descoberta de livros.",
   "site-adv":
     "Presença institucional elegante, com conteúdo jurídico acessível e canais de contato fáceis de encontrar.",
   "site-cabeleireira":
@@ -38,15 +43,23 @@ const WORLD_MAP_POINTS: ReadonlyArray<
     y: number;
   }>
 > = [
-  { id: "erp-varejo", x: 39.2981, y: 52.0733 },
-  { id: "app-barber", x: 37.0463, y: 63.0836 },
+  { id: "erp-varejo", x: 35.9326, y: 61.8116 },
   { id: "site-adv", x: 36.6992, y: 58.7744 },
-  { id: "site-cabeleireira", x: 38.0075, y: 62.726 },
+  { id: "site-cabeleireira", x: 39.2981, y: 52.0733 },
 ];
 
-const BRAZIL_ROUTE_HUB = { x: 36.6992, y: 58.7744 } as const;
-const WORLD_JOURNEY_ORIGIN = { x: 39.2981, y: 52.0733 } as const;
-const WORLD_JOURNEY_DESTINATION = { x: 23.0171, y: 22.2805 } as const;
+const FORTALEZA_MAP_POSITION = { x: 39.2981, y: 52.0733 } as const;
+const BRAZIL_ROUTE_HUB = FORTALEZA_MAP_POSITION;
+const WORLD_JOURNEY_ORIGIN = FORTALEZA_MAP_POSITION;
+const WORLD_JOURNEY_DESTINATIONS: Partial<
+  Record<PortfolioProjectId, Readonly<{ x: number; y: number }>>
+> = {
+  "app-bank": { x: 20.7708, y: 38.5259 },
+  // Ajuste visual do atlas ilustrado: Salt Lake fica ao sudeste do Great Salt Lake.
+  "app-barber": { x: 19.05, y: 25.15 },
+  // Ajuste visual do atlas ilustrado: Lisboa fica na costa oeste de Portugal.
+  "central-clube-livro": { x: 48.05, y: 28.4876 },
+};
 const WORLD_ASPECT_RATIO = 2;
 
 type MapPointStyle = CSSProperties & {
@@ -96,8 +109,8 @@ function formatCounter(index: number): string {
 export default function Portfolio() {
   const location = useLocation();
   const [isAutoplayPaused, setIsAutoplayPaused] = useState(false);
-  const [isHeaderBackdropDocked, setIsHeaderBackdropDocked] = useState(false);
   const rootRef = useRef<HTMLElement>(null);
+  const isMagnetizingRef = useRef(false);
   const projectListRef = useRef<HTMLDivElement>(null);
   const projectPointerStartRef = useRef<{
     index: number;
@@ -114,51 +127,104 @@ export default function Portfolio() {
     projects: portfolioProjects,
     defaultProjectId: defaultPortfolioProjectId,
   });
-  const { activeSectionId } = useLandingSectionNavigation();
+  const { activeSectionId, navigateToSection } = useLandingSectionNavigation();
   const isPortfolioRoute = location.pathname === "/portfolio";
   const isPortfolioActive = activeSectionId === "portfolio" || isPortfolioRoute;
   const wasPortfolioActiveRef = useRef(false);
 
   useEffect(() => {
     const root = rootRef.current;
-    if (!root) return undefined;
+    const prefersReducedMotion = globalThis.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    );
 
-    let settleTimerId: number | undefined;
+    if (
+      !root ||
+      globalThis.innerWidth <= 980 ||
+      prefersReducedMotion.matches
+    ) {
+      return undefined;
+    }
 
-    const updateHeaderBackdropDock = () => {
+    let idleTimerId: number | undefined;
+    let releaseTimerId: number | undefined;
+    let previousScrollY = globalThis.scrollY;
+    let isScrollingDown = false;
+
+    const releaseMagnet = () => {
+      isMagnetizingRef.current = false;
+    };
+
+    const magnetizePortfolio = () => {
+      idleTimerId = undefined;
+
+      if (
+        isMagnetizingRef.current ||
+        !isScrollingDown ||
+        globalThis.innerWidth <= 980 ||
+        prefersReducedMotion.matches
+      ) {
+        return;
+      }
+
+      const rect = root.getBoundingClientRect();
       const navbarHeight =
         Number.parseFloat(
           getComputedStyle(root).getPropertyValue("--app-navbar-height"),
         ) || 70;
-      const shouldDock =
-        Math.abs(root.getBoundingClientRect().top - navbarHeight) <= 3;
+      const visibleHeight = Math.max(
+        0,
+        Math.min(rect.bottom, globalThis.innerHeight) -
+          Math.max(rect.top, navbarHeight),
+      );
+      const visibleRatio = visibleHeight / Math.max(globalThis.innerHeight, 1);
+      const isEnteringFromHome = rect.top > navbarHeight + 4;
 
-      setIsHeaderBackdropDocked((currentValue) =>
-        currentValue === shouldDock ? currentValue : shouldDock,
+      if (
+        !isEnteringFromHome ||
+        visibleRatio < PORTFOLIO_MAGNET_ENTRY_RATIO
+      ) {
+        return;
+      }
+
+      isMagnetizingRef.current = true;
+      navigateToSection("portfolio", {
+        offsetPx: navbarHeight,
+        duration: PORTFOLIO_MAGNET_DURATION_SECONDS,
+        replace: true,
+        syncUrl: true,
+      });
+
+      globalThis.clearTimeout(releaseTimerId);
+      releaseTimerId = globalThis.window.setTimeout(
+        releaseMagnet,
+        PORTFOLIO_MAGNET_DURATION_SECONDS * 1000 + 180,
       );
     };
 
-    const scheduleHeaderBackdropDockUpdate = () => {
-      setIsHeaderBackdropDocked(false);
-      globalThis.clearTimeout(settleTimerId);
-      settleTimerId = globalThis.window.setTimeout(
-        updateHeaderBackdropDock,
-        140,
+    const scheduleMagnet = () => {
+      const nextScrollY = globalThis.scrollY;
+      isScrollingDown = nextScrollY > previousScrollY;
+      previousScrollY = nextScrollY;
+
+      if (isMagnetizingRef.current) return;
+
+      globalThis.clearTimeout(idleTimerId);
+      idleTimerId = globalThis.window.setTimeout(
+        magnetizePortfolio,
+        PORTFOLIO_MAGNET_IDLE_MS,
       );
     };
 
-    scheduleHeaderBackdropDockUpdate();
-    globalThis.addEventListener("scroll", scheduleHeaderBackdropDockUpdate, {
-      passive: true,
-    });
-    globalThis.addEventListener("resize", scheduleHeaderBackdropDockUpdate);
+    globalThis.addEventListener("scroll", scheduleMagnet, { passive: true });
 
     return () => {
-      globalThis.removeEventListener("scroll", scheduleHeaderBackdropDockUpdate);
-      globalThis.removeEventListener("resize", scheduleHeaderBackdropDockUpdate);
-      globalThis.clearTimeout(settleTimerId);
+      globalThis.removeEventListener("scroll", scheduleMagnet);
+      globalThis.clearTimeout(idleTimerId);
+      globalThis.clearTimeout(releaseTimerId);
+      isMagnetizingRef.current = false;
     };
-  }, []);
+  }, [navigateToSection]);
 
   useEffect(() => {
     const hasJustEnteredPortfolio =
@@ -236,7 +302,8 @@ export default function Portfolio() {
   }, [activeIndex]);
 
   const activeLocation = activeProject.worldLocation;
-  const isWorldJourney = activeProject.id === "app-bank";
+  const worldJourneyDestination =
+    WORLD_JOURNEY_DESTINATIONS[activeProject.id];
 
   const selectProject = useCallback(
     (index: number) => {
@@ -309,9 +376,8 @@ export default function Portfolio() {
       aria-label="Portfólio"
       data-portfolio-root="true"
       data-portfolio-active={isPortfolioActive ? "true" : "false"}
-      data-header-backdrop-docked={isHeaderBackdropDocked ? "true" : "false"}
       data-portfolio-autoplay={isAutoplayPaused ? "paused" : "running"}
-      data-map-view={isWorldJourney ? "winnipeg" : "brazil"}
+      data-map-view={worldJourneyDestination ? activeProject.id : "brazil"}
       onMouseEnter={() => setIsAutoplayPaused(true)}
       onMouseLeave={() => {
         if (isPortfolioActive) setIsAutoplayPaused(false);
@@ -343,7 +409,7 @@ export default function Portfolio() {
         >
           <div className={styles.routeNetwork} aria-hidden="true">
             {WORLD_MAP_POINTS.filter(
-              (point) => point.id !== "site-adv",
+              (point) => point.id !== "site-cabeleireira",
             ).map((point) => (
               <span
                 key={point.id}
@@ -398,13 +464,16 @@ export default function Portfolio() {
               </button>
             );
           })}
-          {isWorldJourney ? (
-            <div className={styles.worldJourney} key="fortaleza-winnipeg">
+          {worldJourneyDestination ? (
+            <div
+              className={styles.worldJourney}
+              key={`fortaleza-${activeProject.id}`}
+            >
               <span
                 className={styles.journeyRoute}
                 style={toRouteStyle(
                   WORLD_JOURNEY_ORIGIN,
-                  WORLD_JOURNEY_DESTINATION,
+                  worldJourneyDestination,
                 )}
                 aria-hidden="true"
               />
@@ -412,7 +481,7 @@ export default function Portfolio() {
                 className={styles.journeyTraveler}
                 style={toRouteStyle(
                   WORLD_JOURNEY_ORIGIN,
-                  WORLD_JOURNEY_DESTINATION,
+                  worldJourneyDestination,
                 )}
                 aria-hidden="true"
               >
@@ -434,15 +503,15 @@ export default function Portfolio() {
               <button
                 type="button"
                 className={`${styles.journeyMarker} ${styles.journeyDestination}`}
-                style={toGeographicPositionStyle(WORLD_JOURNEY_DESTINATION)}
-                aria-label="Destino atual: Winnipeg, Canadá"
+                style={toGeographicPositionStyle(worldJourneyDestination)}
+                aria-label={`Destino atual: ${activeLocation?.city}, ${activeLocation?.country}`}
                 aria-pressed="true"
                 onClick={() => setIsAutoplayPaused(true)}
               >
                 <span className={styles.journeyMarkerDot} />
                 <span className={styles.journeyMarkerLabel}>
-                  <strong>Winnipeg</strong>
-                  <small>APP BANCO · DESTINO</small>
+                  <strong>{activeLocation?.city}</strong>
+                  <small>{activeProject.name} · DESTINO</small>
                 </span>
               </button>
 
@@ -450,20 +519,9 @@ export default function Portfolio() {
           ) : null}
         </div>
 
-        {isWorldJourney ? (
-          <span className={styles.journeyStatus} aria-live="polite">
-            Fortaleza → Winnipeg · rota internacional
-          </span>
-        ) : null}
       </div>
 
       <div className={styles.atlasFrame}>
-        <div className={styles.cornerStatement}>
-          <span>TECNOLOGIA</span>
-          <span>SEM FRONTEIRAS</span>
-          <span>PARA PESSOAS REAIS.</span>
-        </div>
-
         <aside className={styles.indexPanel} aria-label="Índice de projetos">
           <div ref={projectListRef} className={styles.projectList}>
             {portfolioProjects.map((project, index) => {
@@ -517,10 +575,6 @@ export default function Portfolio() {
             >
               ←
             </button>
-            <span>
-              <strong>{formatCounter(activeIndex)}</strong>
-              <small>/ {String(portfolioProjects.length).padStart(2, "0")}</small>
-            </span>
             <button
               type="button"
               onClick={nextProject}
@@ -551,14 +605,12 @@ export default function Portfolio() {
 
           <div className={styles.detailBody}>
             <div className={styles.detailTitleRow}>
-              <div>
-                <span>PROJETO {formatCounter(activeIndex)}</span>
+              <div className={styles.detailTitleCopy}>
                 <h2>{activeProject.name}</h2>
+                <p>{PROJECT_DESCRIPTIONS[activeProject.id]}</p>
               </div>
               <img src={activeProject.logoSrc} alt={activeProject.logoAlt} />
             </div>
-
-            <p>{PROJECT_DESCRIPTIONS[activeProject.id]}</p>
 
             <div className={styles.detailMeta}>
               <span>{activeProject.year}</span>

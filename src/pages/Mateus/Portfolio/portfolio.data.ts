@@ -1,14 +1,16 @@
 import imagem1 from "../../../assets/Mateus/portfolio/imagem1.webp";
 import imagem2 from "../../../assets/Mateus/portfolio/imagem2.webp";
-import imagem3 from "../../../assets/Mateus/portfolio/imagem3.webp";
-import imagem4 from "../../../assets/Mateus/portfolio/imagem4.webp";
-import imagem5 from "../../../assets/Mateus/portfolio/imagem5.webp";
+import imagem3 from "../../../assets/Mateus/portfolio/imagem3-barbearia-v3.webp";
+import imagemCentralClube from "../../../assets/Mateus/portfolio/imagem4-central-clube-livro-v1.webp";
+import imagem4 from "../../../assets/Mateus/portfolio/imagem4-wagner-v2.webp";
+import imagem5 from "../../../assets/Mateus/portfolio/imagem5-fran-v2.webp";
 
-import logo1 from "../../../assets/Mateus/portfolio/logos/refined/erp-varejo-icon-v2.png";
+import logo1 from "../../../assets/Mateus/portfolio/logos/refined/erp-varejo-lockup-v3.png";
 import logo2 from "../../../assets/Mateus/portfolio/logos/logo2.webp";
-import logo3 from "../../../assets/Mateus/portfolio/logos/refined/pessoa-barbearia-icon-v2.png";
-import logo4 from "../../../assets/Mateus/portfolio/logos/refined/wagner-advocacia-icon-v2.png";
-import logo5 from "../../../assets/Mateus/portfolio/logos/refined/fran-cabeleireira-icon-v2.png";
+import logo3 from "../../../assets/Mateus/portfolio/logos/refined/pessoa-barbearia-lockup-v3.png";
+import logoCentralClube from "../../../assets/Mateus/portfolio/logos/refined/entre-paginas-lockup-v2.png";
+import logo4 from "../../../assets/Mateus/portfolio/logos/refined/wagner-advocacia-lockup-v3.png";
+import logo5 from "../../../assets/Mateus/portfolio/logos/refined/fran-site-lockup-v4.png";
 
 import type {
   PortfolioProject,
@@ -52,10 +54,10 @@ export const portfolioProjects: ReadonlyArray<PortfolioProject> = [
     },
     worldLocation: {
       country: "Brasil",
-      city: "Fortaleza",
-      region: "América do Sul",
-      lat: -3.7319,
-      lng: -38.5267,
+      city: "Guararapes",
+      region: "São Paulo",
+      lat: -21.260833,
+      lng: -50.642778,
     },
   },
   {
@@ -78,11 +80,11 @@ export const portfolioProjects: ReadonlyArray<PortfolioProject> = [
       position: "50% 14%",
     },
     worldLocation: {
-      country: "Canadá",
-      city: "Winnipeg",
-      region: "América do Norte",
-      lat: 49.8951,
-      lng: -97.1384,
+      country: "México",
+      city: "Puerto Vallarta",
+      region: "Jalisco · Pacífico",
+      lat: 20.6534,
+      lng: -105.2253,
     },
   },
   {
@@ -105,11 +107,38 @@ export const portfolioProjects: ReadonlyArray<PortfolioProject> = [
       position: "50% 12%",
     },
     worldLocation: {
-      country: "Brasil",
-      city: "São Paulo",
-      region: "América do Sul",
-      lat: -23.5505,
-      lng: -46.6333,
+      country: "Estados Unidos",
+      city: "Salt Lake City",
+      region: "Utah",
+      lat: 40.7608,
+      lng: -111.891,
+    },
+  },
+  {
+    id: "central-clube-livro",
+    name: "CENTRAL · CLUBE DO LIVRO",
+    year: "2026",
+    imageSrc: imagemCentralClube,
+    imageAlt: "Página inicial do projeto Central Clube do Livro",
+    logoSrc: logoCentralClube,
+    logoAlt: "Logo Entre Páginas do projeto Central Clube do Livro",
+    projectLabel: "Projeto em destaque",
+    subtitle: "Comunidade editorial",
+    statusLabel: "SELECIONAR",
+    counterLabel: "04",
+    accent: "burgundy",
+    tags: ["Editorial", "Comunidade", "Leitura"],
+    technologies: ["Next.js", "TypeScript", "GSAP"],
+    media: {
+      ...defaultProjectMedia,
+      position: "center top",
+    },
+    worldLocation: {
+      country: "Portugal",
+      city: "Lisboa",
+      region: "Europa",
+      lat: 38.7223,
+      lng: -9.1393,
     },
   },
   {
@@ -123,7 +152,7 @@ export const portfolioProjects: ReadonlyArray<PortfolioProject> = [
     projectLabel: "Projeto em destaque",
     subtitle: "Presença institucional",
     statusLabel: "SELECIONAR",
-    counterLabel: "04",
+    counterLabel: "05",
     accent: "platinum",
     tags: ["Institucional", "Branding", "Landing"],
     technologies: ["React", "TypeScript", "CSS Modules"],
@@ -150,7 +179,7 @@ export const portfolioProjects: ReadonlyArray<PortfolioProject> = [
     projectLabel: "Projeto em destaque",
     subtitle: "Marca e captação local",
     statusLabel: "SELECIONAR",
-    counterLabel: "05",
+    counterLabel: "06",
     accent: "neutral",
     tags: ["Studio", "Serviços", "Conversão"],
     technologies: ["React", "JavaScript", "UI Design"],
@@ -160,10 +189,10 @@ export const portfolioProjects: ReadonlyArray<PortfolioProject> = [
     },
     worldLocation: {
       country: "Brasil",
-      city: "Rio de Janeiro",
-      region: "América do Sul",
-      lat: -22.9068,
-      lng: -43.1729,
+      city: "Fortaleza",
+      region: "Ceará",
+      lat: -3.7319,
+      lng: -38.5267,
     },
   },
 ] as const;

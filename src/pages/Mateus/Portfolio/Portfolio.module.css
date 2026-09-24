@@ -11,7 +11,7 @@
   width: 100%;
   min-height: max(
     620px,
-    calc(100dvh - var(--app-navbar-height, 70px) - 4px)
+    calc(100dvh - var(--app-navbar-height, 70px))
   );
   overflow: visible;
   color: var(--atlas-ink);
@@ -20,13 +20,23 @@
   content-visibility: visible;
 }
 
-.portfolioRoot[data-header-backdrop-docked="true"] {
+.portfolioRoot[data-portfolio-active="true"] {
   --atlas-navbar-overlap: calc(var(--app-navbar-height, 70px) + 8px);
 }
 
-.portfolioRoot[data-map-view="winnipeg"] {
-  --atlas-camera-x: -23.0171%;
-  --atlas-camera-y: -22.2805%;
+.portfolioRoot[data-map-view="app-bank"] {
+  --atlas-camera-x: -20.7708%;
+  --atlas-camera-y: -38.5259%;
+}
+
+.portfolioRoot[data-map-view="app-barber"] {
+  --atlas-camera-x: -19.05%;
+  --atlas-camera-y: -25.15%;
+}
+
+.portfolioRoot[data-map-view="central-clube-livro"] {
+  --atlas-camera-x: -48.05%;
+  --atlas-camera-y: -28.4876%;
 }
 
 .backdropViewport {
@@ -107,26 +117,11 @@
   width: min(100%, 1560px);
   min-height: max(
     620px,
-    calc(100dvh - var(--app-navbar-height, 70px) - 4px)
+    calc(100dvh - var(--app-navbar-height, 70px))
   );
   margin: 0 auto;
   padding: clamp(28px, 4dvh, 48px) clamp(22px, 3vw, 48px) clamp(18px, 3dvh, 34px);
   box-sizing: border-box;
-}
-
-.cornerStatement {
-  position: absolute;
-  top: 15px;
-  right: clamp(24px, 3vw, 52px);
-  z-index: 6;
-  display: flex;
-  flex-direction: column;
-  color: rgba(7, 60, 61, 0.72);
-  font-family: "Arial Narrow", "Roboto Condensed", sans-serif;
-  font-size: 8px;
-  font-weight: 700;
-  line-height: 1.24;
-  letter-spacing: 0.2em;
 }
 
 .indexPanel {
@@ -149,12 +144,12 @@
 .projectButton {
   position: relative;
   display: grid;
-  grid-template-columns: 28px 34px minmax(0, 1fr);
+  grid-template-columns: 28px 72px minmax(0, 1fr);
   gap: 9px;
   align-items: center;
   width: 100%;
-  min-height: 48px;
-  padding: 8px 12px 8px 10px;
+  min-height: 58px;
+  padding: 6px 12px 6px 10px;
   border: 1px solid rgba(7, 76, 76, 0.12);
   border-radius: 9px;
   box-sizing: border-box;
@@ -187,11 +182,11 @@
 }
 
 .projectLogo {
-  width: 30px;
-  height: 30px;
-  border-radius: 6px;
+  width: 70px;
+  height: 42px;
+  border-radius: 7px;
   object-fit: contain;
-  background: rgba(255, 255, 255, 0.86);
+  background: transparent;
 }
 
 .projectButtonCopy {
@@ -209,6 +204,12 @@
   letter-spacing: -0.01em;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.projectButton[data-project-id="central-clube-livro"] .projectButtonCopy strong {
+  font-size: 10.5px;
+  line-height: 1.05;
+  white-space: normal;
 }
 
 .projectButtonCopy small {
@@ -384,23 +385,6 @@
   opacity: 0.72;
 }
 
-.journeyStatus {
-  position: absolute;
-  z-index: 9;
-  right: 0;
-  bottom: 12%;
-  left: 0;
-  color: rgba(4, 69, 67, 0.78);
-  font-family: "Arial Narrow", "Roboto Condensed", sans-serif;
-  font-size: 9px;
-  font-weight: 800;
-  letter-spacing: 0.13em;
-  text-align: center;
-  text-transform: uppercase;
-  pointer-events: none;
-  animation: statusAppear 420ms 2320ms ease both;
-}
-
 .routeNetwork {
   position: absolute;
   inset: 0;
@@ -546,26 +530,6 @@
   transform: translateY(-2px);
 }
 
-.atlasPager > span {
-  display: flex;
-  align-items: baseline;
-  gap: 5px;
-  min-width: 58px;
-  color: #063f40;
-  font-family: "Arial Narrow", "Roboto Condensed", sans-serif;
-}
-
-.atlasPager strong {
-  font-size: 14px;
-  letter-spacing: 0.05em;
-}
-
-.atlasPager small {
-  font-size: 10px;
-  font-weight: 700;
-  opacity: 0.62;
-}
-
 .detailCard {
   position: relative;
   z-index: 5;
@@ -575,7 +539,9 @@
 
 @media (min-width: 981px) {
   .indexPanel {
-    transform: translateY(-60px);
+    transform: translateY(
+      clamp(-84px, calc(-84px + (720px - 100dvh) * 0.3), -20px)
+    );
   }
 
   .detailCard {
@@ -655,19 +621,13 @@
   gap: 12px;
 }
 
-.detailTitleRow > div {
+.detailTitleCopy {
   min-width: 0;
-}
-
-.detailTitleRow span {
-  color: rgba(7, 60, 61, 0.62);
-  font-size: 7px;
-  font-weight: 800;
-  letter-spacing: 0.17em;
+  flex: 1;
 }
 
 .detailTitleRow h2 {
-  margin: 3px 0 0;
+  margin: 0;
   color: #082f31;
   font-family: "Arial Narrow", "Roboto Condensed", sans-serif;
   font-size: clamp(20px, 1.8vw, 28px);
@@ -677,17 +637,17 @@
 }
 
 .detailTitleRow img {
-  width: 44px;
-  height: 44px;
-  flex: 0 0 44px;
+  width: 100px;
+  height: 60px;
+  flex: 0 0 100px;
   border-radius: 8px;
   object-fit: contain;
-  background: #fff;
-  box-shadow: 0 6px 14px rgba(23, 78, 74, 0.1);
+  background: transparent;
+  box-shadow: none;
 }
 
-.detailBody > p {
-  margin: 10px 0 12px;
+.detailTitleCopy p {
+  margin: 8px 0 0;
   color: rgba(8, 47, 49, 0.76);
   font-size: 11px;
   line-height: 1.35;
@@ -697,6 +657,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
+  margin-top: 12px;
   padding-top: 10px;
   border-top: 1px solid rgba(7, 70, 68, 0.1);
   color: rgba(7, 60, 61, 0.7);
@@ -791,17 +752,6 @@
   }
 }
 
-@keyframes statusAppear {
-  from {
-    opacity: 0;
-    transform: translateY(5px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
 @keyframes previewReveal {
   from {
     opacity: 0;
@@ -822,16 +772,16 @@
   }
 
   .projectButton {
-    grid-template-columns: 24px 30px minmax(0, 1fr);
-    min-height: 56px;
+    grid-template-columns: 24px 64px minmax(0, 1fr);
+    min-height: 58px;
     gap: 7px;
     padding-right: 8px;
     padding-left: 8px;
   }
 
   .projectLogo {
-    width: 28px;
-    height: 28px;
+    width: 62px;
+    height: 40px;
   }
 
   .mapPointLabel {
@@ -885,11 +835,6 @@
     padding: 58px 16px 54px;
   }
 
-  .cornerStatement {
-    top: 18px;
-    right: 18px;
-  }
-
   .indexPanel {
     height: auto;
     min-height: 0;
@@ -934,10 +879,6 @@
     padding-left: 12px;
   }
 
-  .cornerStatement {
-    display: none;
-  }
-
   .mapPanel {
     height: 450px;
     min-height: 450px;
@@ -972,10 +913,6 @@
     left: 5px;
   }
 
-  .journeyStatus {
-    bottom: 18%;
-    font-size: 7px;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -994,8 +931,7 @@
 
   .worldJourney,
   .journeyOrigin,
-  .journeyDestination,
-  .journeyStatus {
+  .journeyDestination {
     opacity: 1;
     animation: none;
   }

@@ -140,6 +140,7 @@ export default function AppDesktop() {
       navigateToSection(sectionId, {
         replace: isCurrentRouteLanding,
         syncUrl: true,
+        duration: sectionId === "home" ? 0.72 : undefined,
       });
 
       setMenuOpen(false);
