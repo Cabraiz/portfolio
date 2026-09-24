@@ -44,7 +44,7 @@ export const LANDING_SECTIONS: readonly LandingSectionDefinition[] = [
   },
   {
     id: "technologies",
-    label: "Tecnologias",
+    label: "Rede IA",
     path: "/technologies",
     anchor: "#technologies",
     order: 4,

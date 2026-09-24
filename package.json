@@ -84,6 +84,8 @@
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "test:e2e": "playwright test",
+    "test:e2e:landing": "playwright test e2e/cognitive-network.spec.ts e2e/github-pages-fallback.spec.ts e2e/landing-navigation.spec.ts e2e/landing-viewport-roundtrip.spec.ts",
+    "test:e2e:viewport": "playwright test e2e/landing-viewport-roundtrip.spec.ts",
     "test:relay": "node --test services/telegram-relay/test/*.test.mjs"
   },
   "eslintConfig": {

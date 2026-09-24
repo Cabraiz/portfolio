@@ -32,7 +32,9 @@ const Portfolio = lazy(() => import("../Portfolio/Portfolio"));
 const RoadMap = lazy(() => import("../RoadMap/RoadMap"));
 const RoadMapMobile = lazy(() => import("../RoadMap/RoadMapMobile"));
 const Services = lazy(() => import("../Services/Services"));
-const Technologies = lazy(() => import("../Technologies/Technologies"));
+const CognitiveNetwork = lazy(
+	() => import("../CognitiveNetwork/CognitiveNetwork")
+);
 
 const SHOW_LEGACY_ROADMAP = false;
 
@@ -452,7 +454,7 @@ export const LANDING_SECTIONS_CONFIG = [
 		order: 3,
 		desktop: createViewportConfig(
 			"desktop",
-			Technologies,
+			CognitiveNetwork,
 			DESKTOP_CONTENT_VIRTUALIZED_BEHAVIOR,
 			{
 				sectionRole: "content",
@@ -461,7 +463,7 @@ export const LANDING_SECTIONS_CONFIG = [
 		),
 		mobile: createViewportConfig(
 			"mobile",
-			Technologies,
+			CognitiveNetwork,
 			MOBILE_CONTENT_VIRTUALIZED_BEHAVIOR,
 			{
 				sectionRole: "content",

@@ -71,6 +71,14 @@ jobs:
         env:
           VITE_CONTACT_API_URL: ${{ vars.VITE_CONTACT_API_URL }}
 
+      - name: 🎭 Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: 🧪 Verify navigation and viewport contracts
+        run: npm run test:e2e:landing
+        env:
+          PLAYWRIGHT_USE_EXISTING_BUILD: "1"
+
       - name: 📤 Upload static site to artifact
         uses: actions/upload-pages-artifact@v3
         with:
