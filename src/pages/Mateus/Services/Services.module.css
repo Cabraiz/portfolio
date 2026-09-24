@@ -5,10 +5,14 @@
 	min-inline-size: 0;
 	block-size: 100%;
 	min-block-size: 100%;
-	overflow: visible;
+	overflow: hidden;
 	box-sizing: border-box;
 	background: #171717;
 	color: #f5f1e8;
+}
+
+:global(section[data-section="roadMap"][data-section-active="true"]) .root {
+	overflow: visible;
 }
 
 .background {
@@ -84,57 +88,36 @@
 	text-transform: uppercase;
 	color: transparent;
 	background-image:
-		radial-gradient(
-			ellipse at 18% 34%,
-			rgba(45, 28, 10, 0.9) 0 4%,
-			rgba(85, 50, 12, 0.58) 7%,
-			transparent 15%
-		),
-		radial-gradient(
-			ellipse at 68% 72%,
-			rgba(28, 22, 15, 0.82) 0 3%,
-			rgba(91, 55, 15, 0.48) 8%,
-			transparent 17%
-		),
-		radial-gradient(
-			circle at 82% 24%,
-			rgba(58, 35, 9, 0.72) 0 2%,
-			transparent 11%
-		),
-		repeating-linear-gradient(
-			112deg,
-			rgba(255, 239, 181, 0.14) 0 1px,
-			transparent 1px 7px,
-			rgba(56, 32, 8, 0.12) 8px 9px,
-			transparent 9px 15px
+		linear-gradient(
+			90deg,
+			rgba(88, 52, 8, 0.2) 0%,
+			rgba(255, 250, 216, 0.38) 23%,
+			rgba(110, 69, 14, 0.1) 49%,
+			rgba(255, 244, 187, 0.34) 73%,
+			rgba(91, 54, 9, 0.18) 100%
 		),
 		linear-gradient(
-			105deg,
-			#805014 0%,
-			#d2a13a 22%,
-			#f2d477 43%,
-			#a56e19 64%,
-			#deb24c 82%,
-			#71440f 100%
-		);
+			180deg,
+			rgba(255, 255, 230, 0.3) 0%,
+			transparent 38%,
+			rgba(65, 38, 7, 0.12) 100%
+		),
+		var(--services-title-texture);
 	background-size:
-		176px 92px,
-		214px 104px,
-		138px 76px,
-		21px 21px,
-		100% 100%;
+		100% 100%,
+		100% 100%,
+		360px 180px;
 	background-position:
 		0 0,
-		48px 13px,
-		21px 36px,
 		0 0,
 		0 0;
-	background-blend-mode: multiply, multiply, multiply, soft-light, normal;
+	background-blend-mode: screen, screen, normal;
 	background-clip: text;
 	-webkit-background-clip: text;
 	-webkit-text-fill-color: transparent;
-	filter: contrast(1.08) saturate(0.92)
-		drop-shadow(0 3px 12px rgba(0, 0, 0, 0.58));
+	-webkit-text-stroke: 0.3px rgba(255, 235, 161, 0.28);
+	filter: brightness(1.28) contrast(1.08) saturate(1.02)
+		drop-shadow(0 3px 12px rgba(0, 0, 0, 0.46));
 }
 
 .workbenchStage {

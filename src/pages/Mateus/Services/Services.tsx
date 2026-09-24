@@ -1,11 +1,16 @@
-import { useLayoutEffect, useRef } from "react";
+import { useLayoutEffect, useRef, type CSSProperties } from "react";
 
+import brassTexture from "@/assets/Mateus/services/aged-brushed-brass-texture-v1.png";
 import workshopBackground from "@/assets/Mateus/services/industrial-workshop-background-v2.png";
 import workbench from "@/assets/Mateus/services/industrial-workbench-base-v2.png";
 import { ensureGsapRuntime } from "@/features/scroll/gsapRuntime";
 import { shouldDisableScrollFades } from "@/features/scroll/scrollMotionFlags";
 
 import styles from "./Services.module.css";
+
+const titleTextureStyle = {
+	"--services-title-texture": `url(${brassTexture})`,
+} as CSSProperties;
 
 export default function Services() {
 	const rootRef = useRef<HTMLElement>(null);
@@ -113,7 +118,7 @@ export default function Services() {
 				);
 
 			gsap.to(title, {
-				backgroundPosition: "22px -4px, 26px 17px, 35px 32px, 7px 0, 0 0",
+				backgroundPosition: "0 0, 0 0, 42px -7px",
 				duration: 6.5,
 				ease: "sine.inOut",
 				repeat: -1,
@@ -157,7 +162,12 @@ export default function Services() {
 
 			<header ref={headingRef} className={styles.heading}>
 				<span className={styles.eyebrow}>SOLUÇÕES DIGITAIS</span>
-				<h2 ref={titleRef} id="services-title" className={styles.title}>
+				<h2
+					ref={titleRef}
+					id="services-title"
+					className={styles.title}
+					style={titleTextureStyle}
+				>
 					Serviços
 				</h2>
 			</header>
