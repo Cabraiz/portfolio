@@ -108,7 +108,7 @@ export default function AppNavbar({
   const isCompactDesktop =
     !isMobileView && viewport.width <= NAVBAR_DESKTOP_COMPACT_BREAKPOINT;
   const isPortfolioTheme = activeSectionId === "portfolio";
-  const isRoadMapTheme = activeSectionId === "roadMap";
+  const isServicesTheme = activeSectionId === "roadMap";
 
   useNavbarBodyScrollLock({
     isMobileView,
@@ -204,14 +204,6 @@ export default function AppNavbar({
   const resolvedNavbarRootStyle = useMemo<CSSProperties>(() => {
     const baseStyle = isMobileView ? mobileNavbarRootStyle : desktopNavbarRootStyle;
 
-    if (isRoadMapTheme) {
-      return {
-        ...baseStyle,
-        background: "#050505",
-        boxShadow: "0 2px 0 #050505",
-      };
-    }
-
     if (!isPortfolioTheme) {
       return baseStyle;
     }
@@ -223,7 +215,7 @@ export default function AppNavbar({
       WebkitBackdropFilter: "none",
       boxShadow: "none",
     };
-  }, [isMobileView, isPortfolioTheme, isRoadMapTheme]);
+  }, [isMobileView, isPortfolioTheme]);
 
   const resolvedNavbarStyle = useMemo<CSSProperties>(
     () => ({
@@ -254,9 +246,12 @@ export default function AppNavbar({
             onBrandClick={handleBrandClick}
             onNavigateToSection={handleNavigate}
             setNavRef={setNavRef}
-            getLabel={(sectionId) => t(`nav.${sectionId}`)}
+            getLabel={(sectionId) =>
+              sectionId === "roadMap" ? "Serviços" : t(`nav.${sectionId}`)
+            }
             logoSrc={logo}
             lightTheme={isPortfolioTheme}
+            goldTheme={isServicesTheme}
             renderLeadingVisual={(sectionId) => {
               if (sectionId !== "live") {
                 return null;

@@ -36,9 +36,9 @@ export const LANDING_SECTIONS: readonly LandingSectionDefinition[] = [
   },
   {
     id: "roadMap",
-    label: "RoadMap",
-    path: "/roadmap",
-    anchor: "#roadmap",
+    label: "Serviços",
+    path: "/servicos",
+    anchor: "#servicos",
     order: 3,
     urlSyncEligible: true,
   },

@@ -56,7 +56,7 @@ export default function HeroTextColumn({
 			fontWeight: 700,
 			color: "transparent",
 			backgroundImage: polishedGoldGradient,
-			backgroundSize: "220px 100%",
+			backgroundSize: "100% 100%",
 			backgroundRepeat: "no-repeat",
 			backgroundClip: "text",
 			WebkitBackgroundClip: "text",
@@ -190,7 +190,7 @@ export default function HeroTextColumn({
 
 	return (
 		<Col md={5} style={heroTextColumnStyle} className="px-0">
-			<div style={seniorTitleStyle}>Dev</div>
+			<div style={seniorTitleStyle}>Desenvolvedor</div>
 
 			<div className="font-sequel" style={roleContainerStyle}>
 				<RoleTitle isPT={isPT} />

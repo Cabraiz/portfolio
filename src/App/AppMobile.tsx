@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import { ReactLenis } from "lenis/react";
@@ -120,6 +120,7 @@ function AppMobile() {
   const navigate = useNavigate();
 
   const [menuOpen, setMenuOpen] = useState(false);
+  const navigationCleanupRef = useRef<(() => void) | null>(null);
   const [smoothOptions, setSmoothOptions] = useState<LenisScrollSettings>(() =>
     buildSmoothSettings(),
   );
@@ -158,11 +159,90 @@ function AppMobile() {
 
   const handleNavigateToSection = useCallback(
     (sectionId: LandingSectionId) => {
-      navigate(getPathBySectionId(sectionId));
+      navigationCleanupRef.current?.();
+      navigationCleanupRef.current = null;
+
+      const browserWindow = getBrowserWindow();
+      const browserDocument = getBrowserDocument();
+      const target = browserDocument?.getElementById(sectionId) ?? null;
+
+      if (browserWindow !== null && browserDocument !== null && target !== null) {
+        const activeWindow = browserWindow;
+        const activeDocument = browserDocument;
+        let cancelled = false;
+        const timerIds: number[] = [];
+
+        function cancelAlignment(): void {
+          cleanup();
+        }
+
+        function cleanup(): void {
+          cancelled = true;
+          timerIds.forEach((timerId) => activeWindow.clearTimeout(timerId));
+          activeWindow.removeEventListener("wheel", cancelAlignment);
+          activeWindow.removeEventListener("touchstart", cancelAlignment);
+
+          if (navigationCleanupRef.current === cleanup) {
+            navigationCleanupRef.current = null;
+          }
+        }
+
+        function alignTarget(): void {
+          if (cancelled) {
+            return;
+          }
+
+          const currentTarget = activeDocument.getElementById(sectionId);
+          const navbar =
+            activeDocument.querySelector<HTMLElement>("nav.navbar");
+
+          if (!currentTarget) {
+            return;
+          }
+
+          const navbarOffset = navbar
+            ? Math.ceil(navbar.getBoundingClientRect().height + 2)
+            : 76;
+          const targetTop =
+            activeWindow.scrollY +
+            currentTarget.getBoundingClientRect().top -
+            navbarOffset;
+
+          activeWindow.scrollTo({
+            top: Math.max(0, targetTop),
+            behavior: getPrefersReducedMotion() ? "auto" : "smooth",
+          });
+        }
+
+        navigationCleanupRef.current = cleanup;
+        browserWindow.addEventListener("wheel", cancelAlignment, {
+          passive: true,
+          once: true,
+        });
+        browserWindow.addEventListener("touchstart", cancelAlignment, {
+          passive: true,
+          once: true,
+        });
+
+        alignTarget();
+        [360, 760, 1180].forEach((delay) => {
+          timerIds.push(browserWindow.setTimeout(alignTarget, delay));
+        });
+        timerIds.push(browserWindow.setTimeout(cleanup, 1800));
+      } else {
+        navigate(getPathBySectionId(sectionId));
+      }
+
       setMenuOpen(false);
     },
     [navigate],
   );
+
+  useEffect(() => {
+    return () => {
+      navigationCleanupRef.current?.();
+    };
+  }, []);
 
   useEffect(() => {
     const browserWindow = getBrowserWindow();

@@ -122,7 +122,7 @@ function resolveLandingSectionRuntimeLabel(sectionId: string): string {
     case "portfolio":
       return "Landing portfolio mobile";
     case "roadMap":
-      return "Landing RoadMap mobile";
+      return "Landing serviços mobile";
     case "technologies":
       return "Landing technologies mobile";
     case "live":

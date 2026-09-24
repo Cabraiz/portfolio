@@ -31,7 +31,10 @@ const Live = lazy(() => import("../Live/Live"));
 const Portfolio = lazy(() => import("../Portfolio/Portfolio"));
 const RoadMap = lazy(() => import("../RoadMap/RoadMap"));
 const RoadMapMobile = lazy(() => import("../RoadMap/RoadMapMobile"));
+const Services = lazy(() => import("../Services/Services"));
 const Technologies = lazy(() => import("../Technologies/Technologies"));
+
+const SHOW_LEGACY_ROADMAP = false;
 
 type LandingRenderableViewportMode = "desktop" | "mobile";
 
@@ -194,12 +197,21 @@ function RoadMapMobileWithBoundary() {
 	);
 }
 
+function ServicesDesktopEntry() {
+	return SHOW_LEGACY_ROADMAP ? <RoadMapDesktopWithBoundary /> : <Services />;
+}
+
+function ServicesMobileEntry() {
+	return SHOW_LEGACY_ROADMAP ? <RoadMapMobileWithBoundary /> : <Services />;
+}
+
 function createViewportConfig(
 	viewportMode: LandingRenderableViewportMode,
 	Component: ComponentType,
 	behavior: LandingSectionBehavior,
 	options?: Readonly<{
 		sectionRole?: LandingSectionHeightRole;
+		subtractNavbarOffset?: boolean;
 		sectionStyle?: CSSProperties;
 		contentStyle?: CSSProperties;
 		renderHints?: LandingSectionRenderHints;
@@ -210,6 +222,7 @@ function createViewportConfig(
 	const expectedMinHeight = resolveLandingSectionMinHeight(viewportMode, {
 		preferDynamicViewport: viewportMode === "desktop",
 		sectionRole,
+		subtractNavbarOffset: options?.subtractNavbarOffset,
 	});
 
 	const scrollMarginTop = resolveLandingScrollMarginTop(viewportMode);
@@ -385,13 +398,23 @@ export const LANDING_SECTIONS_CONFIG = [
 		order: 2,
 		desktop: createViewportConfig(
 			"desktop",
-			RoadMapDesktopWithBoundary,
+			ServicesDesktopEntry,
 			DESKTOP_CONTENT_VIRTUALIZED_BEHAVIOR,
 			{
 				sectionRole: "content",
+				sectionStyle: {
+					height: resolveLandingSectionMinHeight("desktop", {
+						preferDynamicViewport: true,
+						sectionRole: "content",
+					}),
+					overflow: "visible",
+					background: "#171717",
+					backgroundImage: "none",
+				},
 				contentStyle: {
 					minHeight: "100%",
-					height: "auto",
+					height: "100%",
+					overflow: "visible",
 				},
 				renderHints: {
 					...DESKTOP_STABLE_CONTENT_RENDER_HINTS,
@@ -401,13 +424,25 @@ export const LANDING_SECTIONS_CONFIG = [
 		),
 		mobile: createViewportConfig(
 			"mobile",
-			RoadMapMobileWithBoundary,
-			MOBILE_CONTENT_VIRTUALIZED_BEHAVIOR,
+			ServicesMobileEntry,
+			MOBILE_HERO_STABLE_BEHAVIOR,
 			{
 				sectionRole: "content",
+				subtractNavbarOffset: true,
+				sectionStyle: {
+					height: resolveLandingSectionMinHeight("mobile", {
+						preferDynamicViewport: false,
+						sectionRole: "content",
+						subtractNavbarOffset: true,
+					}),
+					overflow: "visible",
+					background: "#171717",
+					backgroundImage: "none",
+				},
 				contentStyle: {
 					minHeight: "100%",
-					height: "auto",
+					height: "100%",
+					overflow: "visible",
 				},
 			}
 		),

@@ -8,7 +8,7 @@
   "nav": {
     "home": "Home",
     "portfolio": "Portfolio",
-    "roadMap": "Road Map",
+		"roadMap": "Services",
     "technologies": "Skills",
     "live": "Live",
     "contact": "Photos"
