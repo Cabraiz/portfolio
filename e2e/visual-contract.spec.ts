@@ -10,7 +10,7 @@ for (const viewport of referenceViewports) {
 	test.describe(viewport.name, () => {
 		test.use({ viewport });
 
-		test("keeps the desktop home typography and social icon scale", async ({
+		test("keeps the desktop home typography and primary action scale", async ({
 			page,
 		}) => {
 			await page.goto("/home");
@@ -30,15 +30,22 @@ for (const viewport of referenceViewports) {
 			expect(roleStyle.color).toBe("rgba(0, 0, 0, 0)");
 			expect(roleStyle.fontSize).toBeGreaterThan(50);
 
-			const linkedInIcon = page.getByAltText("LinkedIn");
-			await expect(linkedInIcon).toBeVisible();
-			const iconBox = await linkedInIcon.boundingBox();
-			expect(iconBox).not.toBeNull();
-			expect(iconBox!.height).toBeLessThanOrEqual(viewport.height * 0.05);
+			const primaryAction = page.getByRole("link", {
+				name: "Open meeting link",
+			});
+			await expect(primaryAction).toBeVisible();
+			const actionBox = await primaryAction.boundingBox();
+			expect(actionBox).not.toBeNull();
+			expect(actionBox!.height).toBeLessThanOrEqual(viewport.height * 0.08);
 		});
 
 		test("keeps the live marquee and animated globe", async ({ page }) => {
 			await page.goto("/live");
+			await expect(page.locator("main[data-landing-viewport]")).toHaveAttribute(
+				"data-active-section",
+				"live",
+				{ timeout: 15_000 }
+			);
 
 			await expect(
 				page.locator('[data-live-hero-marquee-viewport="true"]')

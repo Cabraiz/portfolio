@@ -154,9 +154,10 @@ const LandingPageMobile: React.FC = () => {
     return getLandingSectionDefinitions("mobile");
   }, []);
 
-  const initialSectionId = useMemo<LandingSectionId>(() => {
-    return resolveInitialMobileSectionId(location.pathname);
-  }, [location.pathname]);
+  const initialSectionIdRef = useRef<LandingSectionId>(
+    resolveInitialMobileSectionId(location.pathname),
+  );
+  const initialSectionId = initialSectionIdRef.current;
 
   useLenisEngine();
   useDocumentVisibilitySync();
@@ -165,15 +166,16 @@ const LandingPageMobile: React.FC = () => {
     return subscribeToLandingNavbarOffset("mobile", setNavbarOffsetPx);
   }, []);
 
-  const { activeSectionId, refreshActiveSection } = useLandingActiveSection({
-    containerRef,
-    defaultSectionId: initialSectionId,
-    sectionIds: LANDING_SECTION_ORDER,
-    sectionSelector: ":scope > section[data-page-section='true']",
-    viewportMode: "mobile",
-    navbarOffsetPx,
-    activationViewportRatio: 0.42,
-  });
+  const { activeSectionId, refreshActiveSection, setActiveSectionId } =
+    useLandingActiveSection({
+      containerRef,
+      defaultSectionId: initialSectionId,
+      sectionIds: LANDING_SECTION_ORDER,
+      sectionSelector: ":scope > section[data-page-section='true']",
+      viewportMode: "mobile",
+      navbarOffsetPx,
+      activationViewportRatio: 0.42,
+    });
 
   const { routeSectionId } = useLandingHistorySync({
     committedSectionId: activeSectionId,
@@ -207,6 +209,8 @@ const LandingPageMobile: React.FC = () => {
         top: Math.max(0, targetTop - navbarOffsetPx),
         behavior: "auto",
       });
+      refreshActiveSection("refresh");
+      setActiveSectionId(targetSectionId);
     };
 
     alignTarget();
@@ -214,7 +218,9 @@ const LandingPageMobile: React.FC = () => {
     const timerIds =
       targetSectionId === DEFAULT_LANDING_SECTION_ID
         ? []
-        : [120, 360, 720].map((delay) => window.setTimeout(alignTarget, delay));
+        : [120, 360, 720, 1200, 1900, 2800, 3900, 5000].map((delay) =>
+            window.setTimeout(alignTarget, delay),
+          );
 
     window.addEventListener("wheel", stopRealignment, {
       passive: true,
@@ -231,7 +237,7 @@ const LandingPageMobile: React.FC = () => {
       window.removeEventListener("wheel", stopRealignment);
       window.removeEventListener("touchstart", stopRealignment);
     };
-  }, [navbarOffsetPx]);
+  }, [navbarOffsetPx, refreshActiveSection, setActiveSectionId]);
 
   const { registerSectionElement, getPlaceholderMinHeight } =
     useLandingSectionMeasurements({

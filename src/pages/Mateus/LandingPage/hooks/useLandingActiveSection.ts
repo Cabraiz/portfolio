@@ -574,6 +574,7 @@ export default function useLandingActiveSection({
     observedObservation,
     committedObservation,
     resolveObservationBySectionId,
+    setCommittedSectionId,
   } = useLandingCommittedSection({
     observedSectionId: observedSectionIdState,
     observations: observationsState,
@@ -600,15 +601,19 @@ export default function useLandingActiveSection({
     },
   });
 
-  const setActiveSectionId = useCallback((sectionId: LandingSectionId): void => {
-    setObservedSectionIdState((previousSectionId) => {
-      if (previousSectionId === sectionId) {
-        return previousSectionId;
-      }
+  const setActiveSectionId = useCallback(
+    (sectionId: LandingSectionId): void => {
+      setObservedSectionIdState((previousSectionId) => {
+        if (previousSectionId === sectionId) {
+          return previousSectionId;
+        }
 
-      return sectionId;
-    });
-  }, []);
+        return sectionId;
+      });
+      setCommittedSectionId(sectionId);
+    },
+    [setCommittedSectionId],
+  );
 
   const refreshActiveSection = useCallback(
     (reason: ActiveSectionChangeReason = "refresh"): void => {

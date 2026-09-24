@@ -36,6 +36,7 @@ test("GitHub Pages fallback redirects without painting the old 404 screen", asyn
 for (const route of [
   "/home",
   "/portfolio",
+  "/servicos",
   "/roadmap",
   "/technologies",
   "/live",

@@ -225,10 +225,13 @@ function AppMobile() {
         });
 
         alignTarget();
-        [360, 760, 1180].forEach((delay) => {
+        // Sections are virtualized on mobile and can change height while the
+        // destination is being mounted. Re-align through the whole settling
+        // window so long forward and backward jumps still land at the top.
+        [280, 640, 1080, 1640, 2320, 3120, 4040].forEach((delay) => {
           timerIds.push(browserWindow.setTimeout(alignTarget, delay));
         });
-        timerIds.push(browserWindow.setTimeout(cleanup, 1800));
+        timerIds.push(browserWindow.setTimeout(cleanup, 5000));
       } else {
         navigate(getPathBySectionId(sectionId));
       }

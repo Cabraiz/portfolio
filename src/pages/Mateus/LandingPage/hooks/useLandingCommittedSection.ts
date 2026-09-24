@@ -63,6 +63,7 @@ export type UseLandingCommittedSectionResult = Readonly<{
   resolveObservationBySectionId: (
     sectionId: LandingSectionId,
   ) => LandingSectionObservation<LandingSectionId> | null;
+  setCommittedSectionId: (sectionId: LandingSectionId) => void;
 }>;
 
 function buildObservationLookup(
@@ -144,6 +145,16 @@ export default function useLandingCommittedSection({
   const observationLookup = useMemo(() => {
     return buildObservationLookup(observations);
   }, [observations]);
+  const observationLookupRef = useRef(observationLookup);
+  const onCommittedSectionChangeRef = useRef(onCommittedSectionChange);
+
+  useEffect(() => {
+    observationLookupRef.current = observationLookup;
+  }, [observationLookup]);
+
+  useEffect(() => {
+    onCommittedSectionChangeRef.current = onCommittedSectionChange;
+  }, [onCommittedSectionChange]);
 
   const resolveObservationBySectionId = useCallback(
     (
@@ -206,6 +217,27 @@ export default function useLandingCommittedSection({
       });
     },
     [observationLookup, onCommittedSectionChange],
+  );
+
+  const setCommittedSectionId = useCallback(
+    (sectionId: LandingSectionId): void => {
+      setCommittedSectionIdState((previousSectionId) => {
+        if (previousSectionId === sectionId) {
+          return previousSectionId;
+        }
+
+        const observation = observationLookupRef.current.get(sectionId) ?? null;
+        lastCommitAtRef.current = observation?.timestamp ?? globalThis.Date.now();
+        onCommittedSectionChangeRef.current?.(sectionId, {
+          previousSectionId,
+          reason: "sync",
+          observation,
+        });
+
+        return sectionId;
+      });
+    },
+    [],
   );
 
   useEffect(() => {
@@ -293,5 +325,6 @@ export default function useLandingCommittedSection({
     observedObservation,
     committedObservation,
     resolveObservationBySectionId,
+    setCommittedSectionId,
   };
 }

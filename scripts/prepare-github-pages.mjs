@@ -12,6 +12,7 @@ const appShellPath = path.join(outputDirectory, "index.html");
 const appRoutes = [
   "home",
   "portfolio",
+  "servicos",
   "roadmap",
   "technologies",
   "pricing",

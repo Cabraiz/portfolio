@@ -3,15 +3,18 @@ import { defineConfig } from "@playwright/test";
 export default defineConfig({
   testDir: "./e2e",
   fullyParallel: true,
+  workers: 1,
   reporter: "list",
   use: {
-    baseURL: "http://127.0.0.1:4173",
+    baseURL: "http://127.0.0.1:4174",
     trace: "retain-on-failure",
+    screenshot: "only-on-failure",
   },
   webServer: {
-    command:
-      "npx vite build && node scripts/prepare-github-pages.mjs && npx serve dist -l 4173",
-    url: "http://127.0.0.1:4173",
+    command: process.env.PLAYWRIGHT_USE_EXISTING_BUILD
+      ? "npx serve dist -l 4174"
+      : "npx vite build && node scripts/prepare-github-pages.mjs && npx serve dist -l 4174",
+    url: "http://127.0.0.1:4174",
     reuseExistingServer: false,
     timeout: 120_000,
   },

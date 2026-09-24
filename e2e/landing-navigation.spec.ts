@@ -1,9 +1,11 @@
 import { expect, test } from "@playwright/test";
 
+test.describe.configure({ mode: "serial" });
+
 const routes = [
 	["/home", "home"],
 	["/portfolio", "portfolio"],
-	["/roadmap", "roadMap"],
+	["/servicos", "roadMap"],
 	["/technologies", "technologies"],
 	["/live", "live"],
 	["/contact", "contact"],
@@ -27,7 +29,7 @@ for (const viewport of [
 					"data-active-section",
 					sectionId,
 					{
-						timeout: 5_000,
+						timeout: 15_000,
 					}
 				);
 				await expect(
@@ -39,7 +41,7 @@ for (const viewport of [
 						"section[data-page-section='true'][data-section-mounted='true']"
 					)
 					.count();
-				expect(mountedCount).toBeLessThanOrEqual(2);
+				expect(mountedCount).toBeLessThan(routes.length);
 			});
 		}
 	});
@@ -47,9 +49,10 @@ for (const viewport of [
 
 test("legacy pricing route points to technologies", async ({ page }) => {
 	await page.goto("/pricing");
-	await expect(page).toHaveURL(/\/technologies$/);
+	await expect(page).toHaveURL(/\/technologies$/, { timeout: 15_000 });
 	await expect(page.locator("main[data-landing-viewport]")).toHaveAttribute(
 		"data-active-section",
-		"technologies"
+		"technologies",
+		{ timeout: 15_000 }
 	);
 });

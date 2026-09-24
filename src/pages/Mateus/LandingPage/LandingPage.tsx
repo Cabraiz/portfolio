@@ -169,6 +169,7 @@ const LandingPage: React.FC = () => {
     observedSectionId,
     committedSectionId,
     refreshActiveSection,
+    setActiveSectionId,
   } = useLandingSectionNavigation({
     containerRef,
     defaultSectionId: desktopScrollPolicy.defaultSectionId,
@@ -217,6 +218,8 @@ const LandingPage: React.FC = () => {
         top: Math.max(0, targetTop - navbarOffsetPx),
         behavior: "auto",
       });
+      refreshActiveSection("refresh");
+      setActiveSectionId(targetSectionId);
     };
 
     alignTarget();
@@ -224,7 +227,9 @@ const LandingPage: React.FC = () => {
     const timerIds =
       targetSectionId === DEFAULT_LANDING_SECTION_ID
         ? []
-        : [120, 360, 720].map((delay) => window.setTimeout(alignTarget, delay));
+        : [120, 360, 720, 1200, 1900, 2800, 3900, 5000].map((delay) =>
+            window.setTimeout(alignTarget, delay),
+          );
 
     window.addEventListener("wheel", stopRealignment, {
       passive: true,
@@ -241,7 +246,7 @@ const LandingPage: React.FC = () => {
       window.removeEventListener("wheel", stopRealignment);
       window.removeEventListener("touchstart", stopRealignment);
     };
-  }, [navbarOffsetPx]);
+  }, [navbarOffsetPx, refreshActiveSection, setActiveSectionId]);
 
   useEffect(() => {
     refreshActiveSection("refresh");
