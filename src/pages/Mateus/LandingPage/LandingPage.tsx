@@ -235,6 +235,10 @@ const LandingPage: React.FC = () => {
       passive: true,
       once: true,
     });
+    window.addEventListener("pointerdown", stopRealignment, {
+      passive: true,
+      once: true,
+    });
     window.addEventListener("touchstart", stopRealignment, {
       passive: true,
       once: true,
@@ -244,6 +248,7 @@ const LandingPage: React.FC = () => {
       window.cancelAnimationFrame(frameId);
       timerIds.forEach((timerId) => window.clearTimeout(timerId));
       window.removeEventListener("wheel", stopRealignment);
+      window.removeEventListener("pointerdown", stopRealignment);
       window.removeEventListener("touchstart", stopRealignment);
     };
   }, [navbarOffsetPx, refreshActiveSection, setActiveSectionId]);

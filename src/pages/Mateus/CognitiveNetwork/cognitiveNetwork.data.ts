@@ -35,28 +35,28 @@ export const COGNITIVE_LAYER_META: Readonly<
 	>
 > = {
 	input: {
-		label: "Sinais de entrada",
-		shortLabel: "INPUT",
+		label: "O que foi recebido",
+		shortLabel: "ENTRADA",
 		color: "#7dd3fc",
 	},
 	context: {
-		label: "Contexto aumentado",
-		shortLabel: "CAG",
+		label: "O que já é conhecido",
+		shortLabel: "CONTEXTO",
 		color: "#c084fc",
 	},
 	retrieval: {
-		label: "Recuperação aumentada",
-		shortLabel: "RAG",
+		label: "Busca de informações",
+		shortLabel: "BUSCA",
 		color: "#2dd4bf",
 	},
 	reasoning: {
-		label: "Raciocínio",
-		shortLabel: "MODEL",
+		label: "Comparação de caminhos",
+		shortLabel: "DECIDIR",
 		color: "#f472b6",
 	},
 	output: {
-		label: "Aplicações",
-		shortLabel: "OUTPUT",
+		label: "Resultados",
+		shortLabel: "SAÍDA",
 		color: "#fbbf24",
 	},
 };
@@ -67,7 +67,7 @@ export const COGNITIVE_NODES: readonly CognitiveNode[] = [
 	{
 		id: "intent",
 		label: "Intenção",
-		shortLabel: "INTENT",
+		shortLabel: "PEDIDO",
 		layer: "input",
 		description:
 			"Objetivo declarado que inicia a composição de contexto e define o resultado esperado.",
@@ -81,7 +81,7 @@ export const COGNITIVE_NODES: readonly CognitiveNode[] = [
 	{
 		id: "documents",
 		label: "Documentos",
-		shortLabel: "DOCS",
+		shortLabel: "TEXTOS",
 		layer: "input",
 		description:
 			"Fontes textuais autorizadas, organizadas para extração e associação semântica.",
@@ -95,7 +95,7 @@ export const COGNITIVE_NODES: readonly CognitiveNode[] = [
 	{
 		id: "code",
 		label: "Código",
-		shortLabel: "CODE",
+		shortLabel: "CÓDIGO",
 		layer: "input",
 		description:
 			"Estruturas, contratos e implementações que acrescentam evidência técnica ao contexto.",
@@ -109,7 +109,7 @@ export const COGNITIVE_NODES: readonly CognitiveNode[] = [
 	{
 		id: "preferences",
 		label: "Preferências",
-		shortLabel: "PREFS",
+		shortLabel: "PREFERÊNCIAS",
 		layer: "input",
 		description:
 			"Restrições de linguagem, apresentação e escopo aplicadas antes da síntese.",
@@ -122,8 +122,8 @@ export const COGNITIVE_NODES: readonly CognitiveNode[] = [
 	},
 	{
 		id: "context-cache",
-		label: "Context Cache",
-		shortLabel: "CACHE",
+		label: "Contexto lembrado",
+		shortLabel: "LEMBRAR",
 		layer: "context",
 		description:
 			"Camada CAG que mantém contexto estável já preparado para reduzir reconstruções desnecessárias.",
@@ -136,8 +136,8 @@ export const COGNITIVE_NODES: readonly CognitiveNode[] = [
 	},
 	{
 		id: "curated-memory",
-		label: "Memória curada",
-		shortLabel: "MEMORY",
+		label: "Lembranças organizadas",
+		shortLabel: "MEMÓRIA",
 		layer: "context",
 		description:
 			"Conhecimento resumido, revisado e mantido como contexto de longa duração.",
@@ -150,8 +150,8 @@ export const COGNITIVE_NODES: readonly CognitiveNode[] = [
 	},
 	{
 		id: "context-policy",
-		label: "Política de contexto",
-		shortLabel: "POLICY",
+		label: "Filtro de informações",
+		shortLabel: "FILTRO",
 		layer: "context",
 		description:
 			"Decide o que pode entrar no contexto público e o que deve permanecer fora da visualização.",
@@ -164,8 +164,8 @@ export const COGNITIVE_NODES: readonly CognitiveNode[] = [
 	},
 	{
 		id: "cognitive-core",
-		label: "Núcleo CAG + RAG",
-		shortLabel: "CORE",
+		label: "Centro de decisões",
+		shortLabel: "CÉREBRO",
 		layer: "retrieval",
 		description:
 			"Ponto de convergência entre contexto pré-carregado e recuperação orientada pela consulta.",
@@ -178,8 +178,8 @@ export const COGNITIVE_NODES: readonly CognitiveNode[] = [
 	},
 	{
 		id: "hybrid-search",
-		label: "Busca híbrida",
-		shortLabel: "SEARCH",
+		label: "Busca combinada",
+		shortLabel: "BUSCAR",
 		layer: "retrieval",
 		description:
 			"Combina sinais semânticos e estruturados para localizar material relevante.",
@@ -192,8 +192,8 @@ export const COGNITIVE_NODES: readonly CognitiveNode[] = [
 	},
 	{
 		id: "context-ranking",
-		label: "Ranking contextual",
-		shortLabel: "RANK",
+		label: "Ordem de importância",
+		shortLabel: "ORDENAR",
 		layer: "retrieval",
 		description:
 			"Ordena fragmentos pela relação com o objetivo, recência e força da evidência.",
@@ -207,7 +207,7 @@ export const COGNITIVE_NODES: readonly CognitiveNode[] = [
 	{
 		id: "evidence",
 		label: "Evidências",
-		shortLabel: "EVIDENCE",
+		shortLabel: "PROVAS",
 		layer: "retrieval",
 		description:
 			"Trechos e relações selecionados para sustentar a resposta e permitir verificação.",
@@ -220,8 +220,8 @@ export const COGNITIVE_NODES: readonly CognitiveNode[] = [
 	},
 	{
 		id: "routing",
-		label: "Roteamento",
-		shortLabel: "ROUTE",
+		label: "Escolha de caminho",
+		shortLabel: "ESCOLHER",
 		layer: "reasoning",
 		description:
 			"Seleciona a estratégia adequada para transformar o contexto em uma solução verificável.",
@@ -234,8 +234,8 @@ export const COGNITIVE_NODES: readonly CognitiveNode[] = [
 	},
 	{
 		id: "synthesis",
-		label: "Síntese",
-		shortLabel: "SYNTH",
+		label: "Montagem da resposta",
+		shortLabel: "MONTAR",
 		layer: "reasoning",
 		description:
 			"Integra contexto, evidências e objetivo em uma estrutura coerente de saída.",
@@ -248,8 +248,8 @@ export const COGNITIVE_NODES: readonly CognitiveNode[] = [
 	},
 	{
 		id: "validation",
-		label: "Validação",
-		shortLabel: "VERIFY",
+		label: "Conferência final",
+		shortLabel: "CONFERIR",
 		layer: "reasoning",
 		description:
 			"Compara resultado, requisitos e evidências antes de liberar uma resposta.",
@@ -263,7 +263,7 @@ export const COGNITIVE_NODES: readonly CognitiveNode[] = [
 	{
 		id: "software",
 		label: "Software",
-		shortLabel: "BUILD",
+		shortLabel: "CRIAR",
 		layer: "output",
 		description:
 			"Implementações, testes e artefatos construídos a partir do contexto validado.",
@@ -277,7 +277,7 @@ export const COGNITIVE_NODES: readonly CognitiveNode[] = [
 	{
 		id: "research",
 		label: "Pesquisa",
-		shortLabel: "RESEARCH",
+		shortLabel: "PESQUISAR",
 		layer: "output",
 		description:
 			"Análises sustentadas por fontes e distinção clara entre evidência e inferência.",
@@ -291,7 +291,7 @@ export const COGNITIVE_NODES: readonly CognitiveNode[] = [
 	{
 		id: "design",
 		label: "Design",
-		shortLabel: "DESIGN",
+		shortLabel: "DESENHAR",
 		layer: "output",
 		description:
 			"Sistemas visuais e experiências que convertem intenção técnica em leitura humana.",
@@ -305,7 +305,7 @@ export const COGNITIVE_NODES: readonly CognitiveNode[] = [
 	{
 		id: "automation",
 		label: "Automação",
-		shortLabel: "AUTO",
+		shortLabel: "AUTOMATIZAR",
 		layer: "output",
 		description:
 			"Fluxos repetíveis com critérios explícitos, observação e limites de execução.",
@@ -353,17 +353,18 @@ export const COGNITIVE_VIEW_OPTIONS: readonly Readonly<{
 }>[] = [
 	{
 		id: "neural",
-		label: "Sinapses",
-		description: "Rede de ativações e retornos entre contexto e decisão.",
+		label: "Pensamento",
+		description: "Veja ideias surgindo, sendo comparadas e escolhidas.",
 	},
 	{
 		id: "pipeline",
-		label: "Fluxo CAG/RAG",
-		description: "Leitura em camadas, da entrada até a aplicação.",
+		label: "Como responde",
+		description: "Acompanhe o caminho do pedido até a resposta final.",
 	},
 	{
 		id: "memory",
-		label: "Memória",
-		description: "Órbitas de associação em torno do núcleo cognitivo.",
+		label: "Lembranças",
+		description:
+			"Veja conhecimentos relacionados sendo encontrados e conectados.",
 	},
 ];
