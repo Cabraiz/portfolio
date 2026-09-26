@@ -2,6 +2,10 @@ import { useEffect, useRef } from "react";
 import { useLenis } from "lenis/react";
 
 import { refreshScrollRuntime } from "./gsapRuntime";
+import {
+  clearPendingLandingScrollTarget,
+  readPendingLandingScrollTarget,
+} from "./landingScrollTarget";
 
 type AnimationFrameId = number | null;
 
@@ -9,6 +13,7 @@ export function useDocumentVisibilitySync(): void {
   const lenis = useLenis();
   const refreshFrameRef = useRef<AnimationFrameId>(null);
   const preservedScrollYRef = useRef<number | null>(null);
+  const pendingLandingTargetRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (!lenis || !("document" in globalThis)) {
@@ -48,25 +53,35 @@ export function useDocumentVisibilitySync(): void {
         preservedScrollYRef.current = globalThis.window.scrollY;
       }
 
+      pendingLandingTargetRef.current = readPendingLandingScrollTarget();
+
       cancelPendingRefresh();
       lenis.stop();
     };
 
     const restoreScrollPosition = () => {
       const preservedScrollY = preservedScrollYRef.current;
+      const pendingLandingTarget = pendingLandingTargetRef.current;
       preservedScrollYRef.current = null;
+      pendingLandingTargetRef.current = null;
 
       lenis.start();
 
-      if (preservedScrollY !== null) {
-        lenis.scrollTo(preservedScrollY, {
+      const restoredScrollY = pendingLandingTarget ?? preservedScrollY;
+
+      if (restoredScrollY !== null) {
+        lenis.scrollTo(restoredScrollY, {
           immediate: true,
           force: true,
         });
         globalThis.window.scrollTo({
-          top: preservedScrollY,
+          top: restoredScrollY,
           behavior: "auto",
         });
+      }
+
+      if (pendingLandingTarget !== null) {
+        clearPendingLandingScrollTarget(pendingLandingTarget);
       }
 
       scheduleRefresh();
@@ -102,6 +117,7 @@ export function useDocumentVisibilitySync(): void {
       globalThis.window.removeEventListener("focus", restoreScrollPosition);
       cancelPendingRefresh();
       preservedScrollYRef.current = null;
+      pendingLandingTargetRef.current = null;
 
       /**
        * Ao desmontar, garantimos que o Lenis não fique preso em stop

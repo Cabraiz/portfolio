@@ -454,15 +454,15 @@ function resolveLandingBaseSectionMinHeight(
 }
 
 function shouldSubtractNavbarOffset(
-  viewportMode: LandingRenderableViewportMode,
-  sectionRole: LandingSectionHeightRole,
+  _viewportMode: LandingRenderableViewportMode,
+  _sectionRole: LandingSectionHeightRole,
   explicitPreference?: boolean,
 ): boolean {
   if (typeof explicitPreference === "boolean") {
     return explicitPreference;
   }
 
-  return viewportMode === "desktop" && sectionRole === "content";
+	return false;
 }
 
 function toViewportHeightMinusNavbar(

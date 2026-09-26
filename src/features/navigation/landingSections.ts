@@ -16,8 +16,9 @@ export type LandingSectionDefinition = Readonly<{
 }>;
 
 export const DEFAULT_LANDING_SECTION_ID: LandingSectionId = "home";
+export const SHOW_LEGACY_LIVE_SECTION = false;
 
-export const LANDING_SECTIONS: readonly LandingSectionDefinition[] = [
+export const LEGACY_LANDING_SECTIONS: readonly LandingSectionDefinition[] = [
   {
     id: "home",
     label: "Início",
@@ -67,6 +68,11 @@ export const LANDING_SECTIONS: readonly LandingSectionDefinition[] = [
     urlSyncEligible: true,
   },
 ] as const;
+
+export const LANDING_SECTIONS: readonly LandingSectionDefinition[] =
+  SHOW_LEGACY_LIVE_SECTION
+    ? LEGACY_LANDING_SECTIONS
+    : LEGACY_LANDING_SECTIONS.filter((section) => section.id !== "live");
 
 const LANDING_SECTION_IDS = new Set<LandingSectionId>(
   LANDING_SECTIONS.map((section) => section.id),

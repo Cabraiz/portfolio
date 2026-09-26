@@ -25,6 +25,10 @@ import useLandingActiveSection, {
 } from "../../pages/Mateus/LandingPage/hooks/useLandingActiveSection";
 import type { LandingSectionObservation } from "../../pages/Mateus/LandingPage/hooks/useLandingCommittedSection";
 import type { LandingSectionViewportMode } from "../../pages/Mateus/LandingPage/landing.types";
+import {
+  clearPendingLandingScrollTarget,
+  setPendingLandingScrollTarget,
+} from "../scroll/landingScrollTarget";
 
 type LenisLike =
   | Readonly<{
@@ -34,6 +38,7 @@ type LenisLike =
           offset?: number;
           duration?: number;
           easing?: (value: number) => number;
+          onComplete?: () => void;
         }>,
       ) => void;
     }>
@@ -287,10 +292,15 @@ function scrollToSectionTarget(params: Readonly<{
 
   const targetScrollTop = resolveExactWindowScrollTop(target, offsetPx);
 
+  if (targetScrollTop !== null) {
+    setPendingLandingScrollTarget(targetScrollTop);
+  }
+
   if (targetScrollTop !== null && lenis) {
     lenis.scrollTo(targetScrollTop, {
       duration,
       easing: createEaseOutCubic,
+      onComplete: () => clearPendingLandingScrollTarget(targetScrollTop),
     });
     return;
   }
@@ -300,6 +310,10 @@ function scrollToSectionTarget(params: Readonly<{
       top: targetScrollTop,
       behavior: "smooth",
     });
+    globalThis.window.setTimeout(
+      () => clearPendingLandingScrollTarget(targetScrollTop),
+      Math.max(250, duration * 1000 + 100)
+    );
     return;
   }
 

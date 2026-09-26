@@ -72,6 +72,8 @@ function HomeDesktop() {
 	}, []);
 
 	const backgroundImageStyle = useMemo<CSSProperties>(() => {
+		const usesPortraitNeckCrop = selectedHeroOption === 6;
+
 		return {
 			position: "absolute",
 			top: 0,
@@ -82,8 +84,21 @@ function HomeDesktop() {
 			objectPosition: isCompactDesktop ? "center top" : "center center",
 			display: "block",
 			zIndex: 0,
+			transform: usesPortraitNeckCrop ? "scale(1.055)" : undefined,
+			transformOrigin: usesPortraitNeckCrop ? "72% 22%" : "center center",
 		};
-	}, [isCompactDesktop]);
+	}, [isCompactDesktop, selectedHeroOption]);
+
+	const backgroundFrameStyle = useMemo<CSSProperties>(() => {
+		return {
+			position: "absolute",
+			inset: 0,
+			zIndex: 0,
+			overflow: "clip",
+			contain: "paint",
+			pointerEvents: "none",
+		};
+	}, []);
 
 	const backgroundOverlayStyle = useMemo<CSSProperties>(() => {
 		return {
@@ -107,6 +122,17 @@ function HomeDesktop() {
 				"radial-gradient(circle at 78% 24%, rgba(255, 181, 76, 0.2) 0%, rgba(255, 181, 76, 0.07) 12%, transparent 31%), radial-gradient(circle at 64% 74%, rgba(245, 146, 46, 0.12) 0%, transparent 27%)",
 			mixBlendMode: "screen",
 			transformOrigin: "74% 38%",
+		};
+	}, []);
+
+	const ambientLightFrameStyle = useMemo<CSSProperties>(() => {
+		return {
+			position: "absolute",
+			inset: 0,
+			zIndex: 1,
+			overflow: "clip",
+			contain: "paint",
+			pointerEvents: "none",
 		};
 	}, []);
 
@@ -413,19 +439,27 @@ function HomeDesktop() {
 			data-mateus-hero-root="true"
 			data-mateus-hero-mobile="false"
 		>
-			<img
-				ref={backgroundRef}
-				src={selectedHeroBackground}
-				alt=""
-				aria-hidden="true"
-				data-hero-option={selectedHeroOption}
-				loading="eager"
-				decoding="async"
-				fetchPriority="high"
-				style={backgroundImageStyle}
-			/>
+			<div style={backgroundFrameStyle} data-hero-crop-frame="true">
+				<img
+					ref={backgroundRef}
+					src={selectedHeroBackground}
+					alt=""
+					aria-hidden="true"
+					data-hero-option={selectedHeroOption}
+					data-hero-crop={
+						selectedHeroOption === 6 ? "css-neck-reduction" : "source-frame"
+					}
+					data-hero-source-unchanged="true"
+					loading="eager"
+					decoding="async"
+					fetchPriority="high"
+					style={backgroundImageStyle}
+				/>
+			</div>
 			<div ref={overlayRef} aria-hidden="true" style={backgroundOverlayStyle} />
-			<div ref={ambientLightRef} aria-hidden="true" style={ambientLightStyle} />
+			<div style={ambientLightFrameStyle} aria-hidden="true">
+				<div ref={ambientLightRef} style={ambientLightStyle} />
+			</div>
 			<div ref={kineticFieldRef} aria-hidden="true" style={kineticFieldStyle}>
 				{kineticGlints.map((glint, index) => (
 					<span

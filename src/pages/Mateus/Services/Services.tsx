@@ -1,16 +1,13 @@
-import { useLayoutEffect, useRef, type CSSProperties } from "react";
+import { useLayoutEffect, useRef } from "react";
 
-import brassTexture from "@/assets/Mateus/services/aged-brushed-brass-texture-v1.png";
 import workshopBackground from "@/assets/Mateus/services/industrial-workshop-background-v2.png";
 import workbench from "@/assets/Mateus/services/industrial-workbench-base-v2.png";
+import servicesSignStatic from "@/assets/Mateus/services/services-led-sign-crisp-2x-v7.webp";
+import servicesSignAnimated from "@/assets/Mateus/services/services-led-sign-live-8frames-v8.webp";
 import { ensureGsapRuntime } from "@/features/scroll/gsapRuntime";
 import { shouldDisableScrollFades } from "@/features/scroll/scrollMotionFlags";
 
 import styles from "./Services.module.css";
-
-const titleTextureStyle = {
-	"--services-title-texture": `url(${brassTexture})`,
-} as CSSProperties;
 
 export default function Services() {
 	const rootRef = useRef<HTMLElement>(null);
@@ -117,13 +114,6 @@ export default function Services() {
 					0.5
 				);
 
-			gsap.to(title, {
-				backgroundPosition: "0 0, 0 0, 42px -7px",
-				duration: 6.5,
-				ease: "sine.inOut",
-				repeat: -1,
-				yoyo: true,
-			});
 		}, root);
 
 		const refreshFrame = window.requestAnimationFrame(() => {
@@ -144,41 +134,59 @@ export default function Services() {
 			aria-labelledby="services-title"
 			data-services-root="true"
 		>
-			<img
-				ref={backgroundRef}
-				className={styles.background}
-				src={workshopBackground}
-				alt=""
-				aria-hidden="true"
-				loading="eager"
-				decoding="async"
-			/>
-
-			<div
-				ref={atmosphereRef}
-				className={styles.atmosphere}
-				aria-hidden="true"
-			/>
-
-			<header ref={headingRef} className={styles.heading}>
-				<span className={styles.eyebrow}>SOLUÇÕES DIGITAIS</span>
-				<h2
-					ref={titleRef}
-					id="services-title"
-					className={styles.title}
-					style={titleTextureStyle}
-				>
-					Serviços
-				</h2>
-			</header>
-
-			<div className={styles.workbenchStage} aria-hidden="true">
+			<div className={styles.sceneFrame} data-services-scene-frame="true">
 				<img
-					ref={workbenchRef}
-					className={styles.workbench}
-					src={workbench}
+					ref={backgroundRef}
+					className={styles.background}
+					src={workshopBackground}
 					alt=""
+					aria-hidden="true"
+					loading="eager"
+					decoding="async"
 				/>
+
+				<div
+					ref={atmosphereRef}
+					className={styles.atmosphere}
+					aria-hidden="true"
+				/>
+
+				<header ref={headingRef} className={styles.heading}>
+					<h2
+						ref={titleRef}
+						id="services-title"
+						className={styles.title}
+						data-title-treatment="physical-red-led-storefront-sign-2d"
+					>
+						<span className={styles.titleLabel}>Serviços</span>
+						<picture
+							className={styles.signAnimation}
+							data-sign-frame-count="8"
+							data-sign-motion="baked-eight-frame-loop"
+							aria-hidden="true"
+						>
+							<source
+								media="(prefers-reduced-motion: reduce)"
+								srcSet={servicesSignStatic}
+							/>
+							<img
+								className={styles.titleImage}
+								src={servicesSignAnimated}
+								alt=""
+								decoding="async"
+							/>
+						</picture>
+					</h2>
+				</header>
+
+				<div className={styles.workbenchStage} aria-hidden="true">
+					<img
+						ref={workbenchRef}
+						className={styles.workbench}
+						src={workbench}
+						alt=""
+					/>
+				</div>
 			</div>
 		</section>
 	);

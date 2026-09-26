@@ -215,7 +215,7 @@ const LandingPage: React.FC = () => {
 
       const targetTop = window.scrollY + target.getBoundingClientRect().top;
       window.scrollTo({
-        top: Math.max(0, targetTop - navbarOffsetPx),
+        top: Math.max(0, targetTop),
         behavior: "auto",
       });
       refreshActiveSection("refresh");

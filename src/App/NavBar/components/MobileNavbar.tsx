@@ -77,6 +77,11 @@ const MobileNavbar: React.FC<MobileNavbarProps> = ({
   onNavigateToSection,
   activeSectionId,
 }) => {
+  const usesLightBackground =
+    activeSectionId === "home" ||
+    activeSectionId === "portfolio" ||
+    activeSectionId === "technologies";
+
   const handleBrandClick = useCallback(() => {
     onNavigateToSection(DEFAULT_LANDING_SECTION_ID);
 
@@ -101,9 +106,7 @@ const MobileNavbar: React.FC<MobileNavbarProps> = ({
       <BrandButton
         onClick={handleBrandClick}
         mobile
-        invertMobileLogo={
-          activeSectionId === "home" || activeSectionId === "portfolio"
-        }
+        invertMobileLogo={usesLightBackground}
         logoSrc={logo}
         logoAlt="Cabraiz"
       />
@@ -115,9 +118,11 @@ const MobileNavbar: React.FC<MobileNavbarProps> = ({
           menuOpen={isOpen}
           onToggle={onToggle}
           lineColor={
-            activeSectionId === "home" || activeSectionId === "portfolio"
-              ? "#073e3a"
-              : "#ffffff"
+            activeSectionId === "technologies"
+              ? "#17345f"
+              : usesLightBackground
+                ? "#073e3a"
+                : "#ffffff"
           }
         />
       </div>

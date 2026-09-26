@@ -6,7 +6,10 @@ import {
 	type CSSProperties,
 } from "react";
 
-import type { LandingSectionId } from "@/features/navigation/landingSections";
+import {
+	SHOW_LEGACY_LIVE_SECTION,
+	type LandingSectionId,
+} from "@/features/navigation/landingSections";
 
 import RoadMapErrorBoundary from "../RoadMap/ui/chrome/RoadMapErrorBoundary";
 
@@ -458,6 +461,18 @@ export const LANDING_SECTIONS_CONFIG = [
 			DESKTOP_CONTENT_VIRTUALIZED_BEHAVIOR,
 			{
 				sectionRole: "content",
+				sectionStyle: {
+					height: resolveLandingSectionMinHeight("desktop", {
+						preferDynamicViewport: true,
+						sectionRole: "content",
+					}),
+					overflow: "visible",
+				},
+				contentStyle: {
+					minHeight: "100%",
+					height: "100%",
+					overflow: "visible",
+				},
 				renderHints: DESKTOP_STABLE_CONTENT_RENDER_HINTS,
 			}
 		),
@@ -467,6 +482,20 @@ export const LANDING_SECTIONS_CONFIG = [
 			MOBILE_CONTENT_VIRTUALIZED_BEHAVIOR,
 			{
 				sectionRole: "content",
+				subtractNavbarOffset: true,
+				sectionStyle: {
+					height: resolveLandingSectionMinHeight("mobile", {
+						preferDynamicViewport: false,
+						sectionRole: "content",
+						subtractNavbarOffset: true,
+					}),
+					overflow: "visible",
+				},
+				contentStyle: {
+					minHeight: "100%",
+					height: "100%",
+					overflow: "visible",
+				},
 			}
 		),
 	},
@@ -515,16 +544,18 @@ export const LANDING_SECTIONS_CONFIG = [
 ] as const satisfies readonly LandingSectionConfig[];
 
 export const LANDING_SECTION_ORDER: ReadonlyArray<LandingSectionId> =
-	LANDING_SECTIONS_CONFIG.map((section) => section.id);
+	getLandingSectionsConfig().map((section) => section.id);
 
 export function getLandingSectionsConfig(): readonly LandingSectionConfig[] {
-	return LANDING_SECTIONS_CONFIG;
+	return SHOW_LEGACY_LIVE_SECTION
+		? LANDING_SECTIONS_CONFIG
+		: LANDING_SECTIONS_CONFIG.filter((section) => section.id !== "live");
 }
 
 export function getLandingSectionConfig(
 	sectionId: LandingSectionId
 ): LandingSectionConfig | undefined {
-	return LANDING_SECTIONS_CONFIG.find((section) => section.id === sectionId);
+	return getLandingSectionsConfig().find((section) => section.id === sectionId);
 }
 
 export function getLandingSectionDefinition(
@@ -548,7 +579,8 @@ export function getLandingSectionDefinitions(
 ): ReadonlyArray<LandingSectionResolvedDefinition> {
 	const normalizedViewportMode = normalizeConfigViewportMode(viewportMode);
 
-	return LANDING_SECTIONS_CONFIG.slice()
+	return getLandingSectionsConfig()
+		.slice()
 		.sort((left, right) => left.order - right.order)
 		.map((section) =>
 			toLandingSectionDefinition(section, normalizedViewportMode)

@@ -6,10 +6,11 @@
 	--gold: #ffd84a;
 	position: relative;
 	width: 100%;
-	height: calc(100dvh - var(--landing-navbar-offset-desktop, 72px));
+	height: 100dvh;
 	min-height: 0;
-	max-height: calc(100dvh - var(--landing-navbar-offset-desktop, 72px));
-	padding: 5px 7px 4px;
+	max-height: 100dvh;
+	margin-top: 0;
+	padding: calc(var(--landing-navbar-offset-desktop, 72px) + 5px) 7px 4px;
 	box-sizing: border-box;
 	display: grid;
 	grid-template-rows: 25px minmax(0, 1fr) 52px;
@@ -68,7 +69,7 @@
 	z-index: 3;
 	min-width: 0;
 	display: grid;
-	grid-template-columns: 1fr auto 1fr;
+	grid-template-columns: 1fr auto;
 	align-items: center;
 	gap: 12px;
 	padding: 0 7px;
@@ -218,10 +219,36 @@
 	height: 100%;
 	cursor: crosshair;
 	touch-action: none;
+	background: radial-gradient(circle at 48% 51%, rgba(73, 23, 118, 0.2), transparent 48%);
 }
 
-.coreCanvas[data-pointer-active="true"] {
-	cursor: none;
+.webglCanvas {
+	position: absolute !important;
+	inset: 0;
+	width: 100% !important;
+	height: 100% !important;
+}
+
+@media (min-width: 1200px) and (min-height: 900px) {
+	.webglCanvas {
+		inset: auto;
+		left: 14% !important;
+		top: 16% !important;
+		width: 72% !important;
+		height: 68% !important;
+	}
+}
+
+.modelLoader {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+	color: rgba(109, 237, 255, 0.74);
+	font-size: 0.5rem;
+	letter-spacing: 0.14em;
+	animation: thinkingPulse 1.15s ease-out infinite;
+	pointer-events: none;
 }
 
 .axisLabels {
@@ -252,6 +279,7 @@
 .routeCard {
 	position: absolute;
 	z-index: 5;
+	overflow: hidden;
 	top: 19%;
 	left: 55%;
 	width: clamp(156px, 15vw, 222px);
@@ -706,6 +734,432 @@
 	color: rgba(184, 218, 232, 0.38);
 }
 
+/* Clinical neural interface: white-blue glass, navy typography and fast live charts. */
+.section {
+	--cyan: #168ff2;
+	--violet: #7367e8;
+	--pink: #dc61d4;
+	--lime: #22bf9f;
+	--gold: #f0a44d;
+	color: #17345f;
+	background:
+		radial-gradient(circle at 36% 46%, rgba(91, 177, 255, 0.24), transparent 34%),
+		radial-gradient(circle at 82% 22%, rgba(206, 142, 255, 0.16), transparent 28%),
+		linear-gradient(135deg, #f8fbff 0%, #eaf4ff 52%, #f7faff 100%);
+	font-family: Inter, "Segoe UI", Arial, sans-serif;
+}
+
+.section::before {
+	background-image:
+		linear-gradient(rgba(45, 112, 191, 0.045) 1px, transparent 1px),
+		linear-gradient(90deg, rgba(45, 112, 191, 0.045) 1px, transparent 1px);
+	background-size: 28px 28px;
+}
+
+.scanline {
+	opacity: 0.2;
+	mix-blend-mode: multiply;
+}
+
+.commandBar {
+	border-color: rgba(57, 111, 184, 0.17);
+	background: rgba(248, 252, 255, 0.76);
+	color: rgba(43, 73, 115, 0.62);
+	box-shadow: 0 8px 24px rgba(68, 123, 186, 0.08);
+	backdrop-filter: blur(14px);
+}
+
+.commandIdentity i {
+	background: rgba(22, 143, 242, 0.55);
+}
+
+.commandIdentity strong,
+.clockReadout strong {
+	color: #246ab5;
+}
+
+.viewSelector {
+	border-color: rgba(58, 114, 186, 0.19);
+	background: rgba(236, 246, 255, 0.9);
+}
+
+.viewButton {
+	color: rgba(31, 62, 104, 0.6);
+	font-family: Inter, "Segoe UI", Arial, sans-serif;
+}
+
+.viewButton:hover,
+.viewButton[aria-selected="true"] {
+	color: #17345f;
+	background: linear-gradient(180deg, rgba(69, 158, 255, 0.18), rgba(123, 104, 234, 0.1));
+	box-shadow: inset 0 -2px var(--cyan);
+}
+
+.graphPanel,
+.inspector {
+	border-color: rgba(67, 119, 184, 0.18);
+	background: rgba(250, 253, 255, 0.74);
+	box-shadow: 0 14px 38px rgba(55, 108, 171, 0.09), inset 0 0 0 1px rgba(255, 255, 255, 0.7);
+}
+
+.graphPanel::before {
+	border-color: rgba(22, 143, 242, 0.58);
+}
+
+.graphPanel::after {
+	border-color: rgba(220, 97, 212, 0.46);
+}
+
+.coreCanvas {
+	background: radial-gradient(circle at 48% 51%, rgba(109, 183, 255, 0.26), transparent 48%);
+}
+
+.axisLabels,
+.scoreTag {
+	color: rgba(41, 86, 139, 0.46);
+}
+
+.routeCard {
+	border-color: rgba(51, 126, 221, 0.34);
+	background: rgba(255, 255, 255, 0.88);
+	box-shadow: 0 12px 30px rgba(50, 111, 180, 0.13);
+}
+
+.routeCard span {
+	color: #2c7bd7;
+}
+
+.routeCard strong {
+	color: #17345f;
+}
+
+.routeCard small {
+	color: rgba(36, 76, 124, 0.56);
+}
+
+.routeCard::after {
+	background: linear-gradient(90deg, transparent, rgba(68, 157, 255, 0.34), rgba(224, 103, 212, 0.26), transparent);
+}
+
+.thoughtLog {
+	border-color: rgba(70, 129, 198, 0.2);
+	background: linear-gradient(135deg, rgba(255, 255, 255, 0.88), rgba(234, 245, 255, 0.76));
+	box-shadow: 0 12px 28px rgba(50, 106, 169, 0.09);
+}
+
+.thoughtLog header {
+	color: rgba(40, 76, 120, 0.58);
+}
+
+.thoughtLog header strong {
+	color: #337fd5;
+}
+
+.thoughtLog > div,
+.thoughtLog > div strong,
+.thoughtLog > div i {
+	color: rgba(39, 75, 118, 0.42);
+}
+
+.thoughtLog > .activeThought {
+	color: #17345f;
+	background: linear-gradient(90deg, rgba(72, 153, 255, 0.14), rgba(218, 94, 207, 0.07), transparent);
+}
+
+.thoughtLog > .activeThought i {
+	color: var(--pink);
+}
+
+.thoughtLog > .activeThought strong {
+	color: var(--cyan);
+}
+
+.coreCaption span {
+	color: #d34fc6;
+}
+
+.coreCaption strong {
+	color: #17345f;
+}
+
+.coreCaption small {
+	color: rgba(35, 76, 123, 0.56);
+}
+
+.coreCaption .interactionHint {
+	color: #237bc9;
+}
+
+.inspector {
+	display: grid;
+	grid-template-rows: repeat(3, minmax(0, 1fr));
+	gap: 7px;
+	padding: 7px;
+	border-color: rgba(73, 125, 190, 0.18);
+	background: rgba(238, 247, 255, 0.74);
+}
+
+.insightCard {
+	position: relative;
+	min-width: 0;
+	min-height: 0;
+	display: grid;
+	grid-template-rows: 27px minmax(0, 1fr);
+	border: 1px solid rgba(76, 130, 196, 0.16);
+	border-radius: 9px;
+	background: rgba(255, 255, 255, 0.86);
+	box-shadow: 0 8px 24px rgba(62, 113, 175, 0.09);
+	overflow: hidden;
+}
+
+.insightCard::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	border-radius: inherit;
+	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85);
+	pointer-events: none;
+}
+
+.insightHeader {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 6px;
+	padding: 0 8px;
+	border-bottom: 1px solid rgba(76, 130, 196, 0.12);
+	color: #19365f;
+	font-size: 0.55rem;
+	font-weight: 700;
+	letter-spacing: 0.035em;
+	text-transform: uppercase;
+}
+
+.insightHeader strong {
+	color: #2d7fd8;
+	font-size: 0.47rem;
+	font-weight: 650;
+	white-space: nowrap;
+}
+
+.animatedNumber {
+	display: inline-block;
+	min-width: 3ch;
+	font-variant-numeric: tabular-nums;
+}
+
+.attentionLayout {
+	min-height: 0;
+	display: grid;
+	grid-template-columns: minmax(82px, 0.92fr) minmax(88px, 1fr);
+	align-items: center;
+	gap: 3px;
+	padding: 2px 5px 4px;
+}
+
+.attentionGraphic,
+.attentionLayout svg {
+	width: 100%;
+	height: 100%;
+	min-height: 0;
+}
+
+.attentionGraphic {
+	position: relative;
+	overflow: hidden;
+}
+
+.attentionGraphic > svg {
+	position: relative;
+	z-index: 2;
+	display: block;
+}
+
+.attentionWireCanvas {
+	position: absolute;
+	inset: 0;
+	z-index: 1;
+	width: 100%;
+	height: 100%;
+	pointer-events: none;
+	transform-origin: 48.2% 50%;
+	will-change: transform;
+}
+
+.attentionTrack,
+.attentionSegment {
+	fill: none;
+	stroke-width: 14;
+}
+
+.attentionTrack {
+	stroke: #e7eff9;
+}
+
+.attentionSegment {
+	transform: rotate(-90deg);
+	transform-origin: 54px 54px;
+	transition: stroke-dasharray 900ms ease-in-out, stroke-dashoffset 900ms ease-in-out;
+}
+
+.attentionChord {
+	fill: none;
+	stroke-linecap: round;
+	transition: stroke-opacity 140ms linear, stroke-width 140ms linear;
+}
+
+.attentionWireField {
+	transform-box: view-box;
+	transform-origin: 54px 54px;
+	will-change: transform;
+}
+
+.attentionWireFieldA {
+	animation: attentionWireDriftA 4.2s ease-in-out infinite alternate;
+}
+
+.attentionWireFieldB {
+	animation: attentionWireDriftB 5.1s ease-in-out -1.7s infinite alternate;
+}
+
+.attentionWireFieldC {
+	animation: attentionWireDriftC 3.7s ease-in-out -2.4s infinite alternate;
+}
+
+.attentionCore {
+	fill: #ffffff;
+	stroke: #4fa5ef;
+	stroke-width: 2;
+	filter: drop-shadow(0 0 4px rgba(55, 143, 232, 0.4));
+}
+
+.attentionLegend {
+	display: grid;
+	gap: 3px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.attentionLegend li {
+	display: grid;
+	grid-template-columns: 7px 1fr auto;
+	align-items: center;
+	gap: 5px;
+	color: #314e74;
+	font-size: 0.49rem;
+}
+
+.attentionLegend i {
+	width: 6px;
+	height: 6px;
+	border-radius: 50%;
+	box-shadow: 0 0 6px currentColor;
+}
+
+.attentionLegend strong {
+	color: #1d6fbd;
+	font-size: 0.45rem;
+}
+
+.scatterPlot,
+.radarChart {
+	width: 100%;
+	height: 100%;
+	min-height: 0;
+	padding: 3px 5px 4px;
+	box-sizing: border-box;
+}
+
+.chartGridLine {
+	stroke: rgba(52, 96, 151, 0.12);
+	stroke-width: 1;
+}
+
+.scatterCurve {
+	fill: none;
+	stroke: #24a8dc;
+	stroke-width: 1.6;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+	opacity: 0.8;
+	filter: drop-shadow(0 2px 3px rgba(39, 153, 211, 0.22));
+}
+
+.scatterPoint {
+	transition: opacity 140ms linear;
+}
+
+.scatterPlot text,
+.radarChart text {
+	fill: rgba(37, 72, 116, 0.62);
+	font: 600 7px/1 Inter, "Segoe UI", Arial, sans-serif;
+	letter-spacing: 0.02em;
+	text-anchor: middle;
+}
+
+.verticalChartLabel {
+	transform: rotate(-90deg);
+}
+
+.radarGrid,
+.radarAxis {
+	fill: none;
+	stroke: rgba(70, 103, 151, 0.16);
+	stroke-width: 1;
+}
+
+.radarReference {
+	fill: rgba(116, 104, 232, 0.05);
+	stroke: rgba(116, 104, 232, 0.3);
+	stroke-width: 1;
+	stroke-dasharray: 3 3;
+}
+
+.radarValue {
+	fill: rgba(45, 127, 216, 0.22);
+	stroke: #2f82dd;
+	stroke-width: 2;
+	filter: drop-shadow(0 3px 5px rgba(53, 124, 204, 0.2));
+}
+
+.radarPoint {
+	fill: #df62d5;
+	stroke: #ffffff;
+	stroke-width: 1;
+}
+
+.timeline {
+	border-color: rgba(68, 119, 183, 0.16);
+	background: rgba(250, 253, 255, 0.82);
+	box-shadow: 0 -8px 24px rgba(62, 112, 173, 0.07);
+}
+
+.timeline path {
+	opacity: 0.45;
+	mix-blend-mode: multiply;
+}
+
+.timelineViolet {
+	fill: #8775ec;
+}
+
+.timelineCyan {
+	fill: #37aaf1;
+}
+
+.timelineGold {
+	fill: #efb462;
+}
+
+.timelineLabels {
+	color: rgba(28, 56, 94, 0.68);
+}
+
+.simulationNote {
+	color: rgba(38, 78, 124, 0.48);
+}
+
 @keyframes thinkingPulse {
 	0% {
 		box-shadow: 0 0 0 0 rgba(255, 79, 186, 0.75);
@@ -714,6 +1168,21 @@
 	100% {
 		box-shadow: 0 0 0 7px rgba(255, 79, 186, 0);
 	}
+}
+
+@keyframes attentionWireDriftA {
+	from { transform: translate(-0.8px, 0.45px) rotate(-1.25deg) scale(0.988, 1.012); }
+	to { transform: translate(0.9px, -0.55px) rotate(1.35deg) scale(1.014, 0.986); }
+}
+
+@keyframes attentionWireDriftB {
+	from { transform: translate(0.65px, 0.8px) rotate(1.1deg) scale(1.01, 0.99); }
+	to { transform: translate(-0.75px, -0.7px) rotate(-1.4deg) scale(0.987, 1.013); }
+}
+
+@keyframes attentionWireDriftC {
+	from { transform: translate(-0.45px, -0.75px) rotate(-0.9deg) scale(1.012, 0.988); }
+	to { transform: translate(0.7px, 0.65px) rotate(1.2deg) scale(0.989, 1.011); }
 }
 
 @keyframes routeScan {
@@ -778,10 +1247,11 @@
 
 @media (max-width: 767px) {
 	.section {
-		height: calc(100svh - var(--landing-navbar-offset-mobile, 74px));
-		max-height: calc(100svh - var(--landing-navbar-offset-mobile, 74px));
+		height: 100svh;
+		max-height: 100svh;
+		margin-top: calc(0px - var(--landing-navbar-offset-mobile, 74px));
 		grid-template-rows: 28px minmax(0, 1fr) 33px;
-		padding: 4px;
+		padding: calc(var(--landing-navbar-offset-mobile, 74px) + 4px) 4px 4px;
 	}
 
 	.commandBar {
@@ -805,30 +1275,47 @@
 
 	.workspace {
 		grid-template-columns: 1fr;
-		grid-template-rows: minmax(0, 1fr) 114px;
+		grid-template-rows: minmax(0, 1fr) 122px;
 	}
 
 	.inspector {
-		grid-template-columns: 1fr 1.1fr;
-		grid-template-rows: 25px minmax(0, 1fr);
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		grid-template-rows: minmax(0, 1fr);
+		gap: 4px;
+		padding: 4px;
 	}
 
-	.inspectorTitle {
-		grid-column: 1 / -1;
+	.insightCard {
+		grid-template-rows: 22px minmax(0, 1fr);
+		border-radius: 6px;
 	}
 
-	.signalStack {
-		border-right: 1px solid rgba(115, 194, 255, 0.1);
+	.insightHeader {
+		padding-inline: 5px;
+		font-size: 0.39rem;
 	}
 
-	.histogramPanel {
-		border-bottom: 0;
-	}
-
-	.splitPanel,
-	.readoutPanel,
-	.statusKey {
+	.insightHeader strong {
 		display: none;
+	}
+
+	.attentionLayout {
+		grid-template-columns: 1fr;
+		padding: 0;
+	}
+
+	.attentionLegend {
+		display: none;
+	}
+
+	.scatterPlot,
+	.radarChart {
+		padding: 2px;
+	}
+
+	.scatterPlot text,
+	.radarChart text {
+		font-size: 5.5px;
 	}
 
 	.routeCard {
@@ -891,9 +1378,9 @@
 	}
 
 	.inspector {
-		grid-template-rows:
-			25px minmax(72px, 0.75fr) minmax(82px, 1fr) 42px minmax(70px, 0.65fr)
-			21px;
+		grid-template-rows: repeat(3, minmax(0, 1fr));
+		gap: 5px;
+		padding: 5px;
 	}
 }
 
@@ -904,6 +1391,13 @@
 	.thinkingStatus i,
 	.signalChart path,
 	.histogram i,
+	.attentionSegment,
+	.attentionChord,
+	.attentionWireField,
+	.scatterCurve,
+	.scatterPoint,
+	.radarValue,
+	.radarPoint,
 	.timeline path {
 		animation: none;
 		transition: none;

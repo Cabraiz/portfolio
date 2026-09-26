@@ -109,6 +109,7 @@ export default function AppNavbar({
     !isMobileView && viewport.width <= NAVBAR_DESKTOP_COMPACT_BREAKPOINT;
   const isPortfolioTheme = activeSectionId === "portfolio";
   const isServicesTheme = activeSectionId === "roadMap";
+  const isNeuralTheme = activeSectionId === "technologies";
 
   useNavbarBodyScrollLock({
     isMobileView,
@@ -250,15 +251,18 @@ export default function AppNavbar({
               sectionId === "roadMap" ? "Serviços" : t(`nav.${sectionId}`)
             }
             logoSrc={logo}
-            lightTheme={isPortfolioTheme}
+            lightTheme={isPortfolioTheme || isNeuralTheme}
             goldTheme={isServicesTheme}
+            redAccent={isNeuralTheme}
             renderLeadingVisual={(sectionId) => {
-              if (sectionId !== "live") {
+              if (sectionId !== "technologies") {
                 return null;
               }
 
               return (
                 <span
+                  aria-hidden="true"
+                  data-rede-ia-live-indicator="true"
                   style={{
                     position: "absolute",
                     left: getNavbarLiveAnimationLeft(isCompactDesktop),

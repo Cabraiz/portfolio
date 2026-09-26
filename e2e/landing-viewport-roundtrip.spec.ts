@@ -1,7 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 
 type LandingSection = Readonly<{
-	id: "home" | "portfolio" | "roadMap" | "technologies" | "live" | "contact";
+	id: "home" | "portfolio" | "roadMap" | "technologies" | "contact";
 	label: string;
 	path: string;
 }>;
@@ -11,7 +11,6 @@ const sections: readonly LandingSection[] = [
 	{ id: "portfolio", label: "Portfólio", path: "/portfolio" },
 	{ id: "roadMap", label: "Serviços", path: "/servicos" },
 	{ id: "technologies", label: "Rede IA", path: "/technologies" },
-	{ id: "live", label: "Ao Vivo", path: "/live" },
 	{ id: "contact", label: "Contato", path: "/contact" },
 ] as const;
 
@@ -43,13 +42,14 @@ async function navigateToSection(
 
 async function expectSectionToOwnViewport(
 	page: Page,
-	section: LandingSection
+	section: LandingSection,
+	mobile: boolean
 ): Promise<void> {
 	await expect
 		.poll(
 			async () =>
 				page.evaluate(
-					({ sectionId, expectedPath }) => {
+					({ sectionId, expectedPath, mobile }) => {
 						const landing = document.querySelector<HTMLElement>(
 							"main[data-landing-viewport]"
 						);
@@ -76,8 +76,7 @@ async function expectSectionToOwnViewport(
 						const navbarRect = navbar?.getBoundingClientRect();
 						const previousRect = previous?.getBoundingClientRect();
 						const nextRect = next?.getBoundingClientRect();
-						const expectedTop =
-							sectionId === "home" ? 0 : (navbarRect?.bottom ?? 0);
+						const expectedTop = mobile ? (navbarRect?.bottom ?? 0) : 0;
 						const serviceOverflow = serviceRoot
 							? getComputedStyle(serviceRoot).overflow
 							: null;
@@ -91,6 +90,10 @@ async function expectSectionToOwnViewport(
 							),
 							topAligned: Boolean(
 								currentRect && Math.abs(currentRect.top - expectedTop) <= 5
+							),
+							exactDesktopHeight: Boolean(
+								mobile ||
+								(currentRect && Math.abs(currentRect.height - window.innerHeight) <= 1)
 							),
 							coversViewport: Boolean(
 								currentRect && currentRect.bottom >= window.innerHeight - 1
@@ -107,11 +110,13 @@ async function expectSectionToOwnViewport(
 								document.documentElement.clientWidth,
 							servicesAreIsolated:
 								sectionId === "roadMap"
-									? serviceOverflow === "visible"
-									: serviceOverflow === null || serviceOverflow === "hidden",
+									? serviceOverflow === "clip" || serviceOverflow === "hidden"
+									: serviceOverflow === null ||
+										serviceOverflow === "hidden" ||
+										serviceOverflow === "clip",
 						};
 					},
-					{ sectionId: section.id, expectedPath: section.path }
+					{ sectionId: section.id, expectedPath: section.path, mobile }
 				),
 			{
 				timeout: 8_000,
@@ -124,6 +129,7 @@ async function expectSectionToOwnViewport(
 			mounted: true,
 			content: true,
 			topAligned: true,
+			exactDesktopHeight: true,
 			coversViewport: true,
 			previousIsOutsideContent: true,
 			nextIsOutsideViewport: true,
@@ -168,9 +174,34 @@ for (const viewport of viewports) {
 			if (index > 0) {
 				await navigateToSection(page, section, viewport.mobile);
 			}
-			await expectSectionToOwnViewport(page, section);
+			await expectSectionToOwnViewport(page, section, viewport.mobile);
 		}
 
 		expect(runtimeErrors).toEqual([]);
+	});
+}
+
+for (const viewport of [
+	{ name: "720p", width: 1366, height: 720 },
+	{ name: "1080p", width: 1920, height: 1080 },
+] as const) {
+	test(`${viewport.name}: conclui a navegação após desfocar durante a descida e a volta`, async ({
+		page,
+	}) => {
+		await page.setViewportSize(viewport);
+		await page.goto("/portfolio", { waitUntil: "networkidle" });
+
+		for (const target of [sections[2], sections[3], sections[2]]) {
+			await page.locator(`button[data-nav-link="${target.id}"]`).click();
+			await page.waitForTimeout(180);
+			await page.evaluate(() => window.dispatchEvent(new Event("blur")));
+			await page.waitForTimeout(320);
+			await page.evaluate(() => window.dispatchEvent(new Event("focus")));
+			await expectSectionToOwnViewport(page, target, false);
+			await expect(page.locator("html")).not.toHaveAttribute(
+				"data-landing-scroll-target",
+				/.+/
+			);
+		}
 	});
 }

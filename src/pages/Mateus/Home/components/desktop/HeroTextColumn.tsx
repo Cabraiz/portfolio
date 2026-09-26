@@ -52,8 +52,9 @@ export default function HeroTextColumn({
 }: HeroTextColumnProps) {
 	const seniorTitleStyle = useMemo<CSSProperties>(() => {
 		return {
-			fontSize: isCompactDesktop ? "3rem" : "4rem",
+			fontSize: isCompactDesktop ? "2.31rem" : "3.08rem",
 			fontWeight: 700,
+			letterSpacing: "0.04em",
 			color: "transparent",
 			backgroundImage: polishedGoldGradient,
 			backgroundSize: "100% 100%",

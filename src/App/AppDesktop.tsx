@@ -30,7 +30,6 @@ const links: readonly LandingSectionId[] = [
   "portfolio",
   "roadMap",
   "technologies",
-  "live",
   "contact",
 ];
 
@@ -140,6 +139,7 @@ export default function AppDesktop() {
       navigateToSection(sectionId, {
         replace: isCurrentRouteLanding,
         syncUrl: true,
+        offsetPx: 0,
         duration: sectionId === "home" ? 0.72 : undefined,
       });
 

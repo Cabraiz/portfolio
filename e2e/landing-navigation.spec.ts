@@ -7,7 +7,6 @@ const routes = [
 	["/portfolio", "portfolio"],
 	["/servicos", "roadMap"],
 	["/technologies", "technologies"],
-	["/live", "live"],
 	["/contact", "contact"],
 ] as const;
 
@@ -44,11 +43,39 @@ for (const viewport of [
 				expect(mountedCount).toBeLessThan(routes.length);
 			});
 		}
+
+		test("keeps the legacy live section out of navigation and scroll flow", async ({
+			page,
+		}) => {
+			await page.goto("/technologies");
+			await expect(page.locator("main[data-landing-viewport]")).toHaveAttribute(
+				"data-active-section",
+				"technologies",
+				{ timeout: 15_000 }
+			);
+			await expect(page.locator("section#live")).toHaveCount(0);
+			await expect(page.getByRole("button", { name: "Ao Vivo" })).toHaveCount(0);
+			await expect(
+				page.locator('[data-rede-ia-live-indicator="true"]')
+			).toHaveCount(viewport.name === "desktop" ? 1 : 0);
+		});
 	});
 }
 
 test("legacy pricing route points to technologies", async ({ page }) => {
 	await page.goto("/pricing");
+	await expect(page).toHaveURL(/\/technologies$/, { timeout: 15_000 });
+	await expect(page.locator("main[data-landing-viewport]")).toHaveAttribute(
+		"data-active-section",
+		"technologies",
+		{ timeout: 15_000 }
+	);
+});
+
+test("legacy live stays hidden and redirects to technologies", async ({
+	page,
+}) => {
+	await page.goto("/live");
 	await expect(page).toHaveURL(/\/technologies$/, { timeout: 15_000 });
 	await expect(page.locator("main[data-landing-viewport]")).toHaveAttribute(
 		"data-active-section",

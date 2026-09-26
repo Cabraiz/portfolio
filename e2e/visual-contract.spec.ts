@@ -6,6 +6,42 @@ const referenceViewports = [
 	{ name: "square", width: 1080, height: 1080 },
 ] as const;
 
+test("reduces the visible neck through framing without changing the portrait", async ({
+	page,
+}) => {
+	await page.setViewportSize({ width: 1366, height: 720 });
+	await page.goto("/home");
+
+	const portrait = page.locator('img[data-hero-option="6"]');
+	await expect(portrait).toBeVisible();
+	await expect(portrait).toHaveAttribute(
+		"data-hero-crop",
+		"css-neck-reduction"
+	);
+	await expect(portrait).toHaveAttribute("data-hero-source-unchanged", "true");
+	await expect(page.locator('[data-hero-crop-frame="true"]')).toBeVisible();
+
+	const framing = await portrait.evaluate((image: HTMLImageElement) => {
+		const transform = new DOMMatrixReadOnly(getComputedStyle(image).transform);
+		const stage = image.closest('[data-mateus-hero-root="true"]') as HTMLElement;
+		return {
+			currentSrc: image.currentSrc,
+			naturalWidth: image.naturalWidth,
+			naturalHeight: image.naturalHeight,
+			scale: transform.a,
+			transformOrigin: getComputedStyle(image).transformOrigin,
+			stageClientHeight: stage.clientHeight,
+			stageScrollHeight: stage.scrollHeight,
+		};
+	});
+	expect(framing.currentSrc).toMatch(/hero-cinema-vote-6[^/]*\.webp(?:$|\?)/);
+	expect(framing.naturalWidth).toBe(1672);
+	expect(framing.naturalHeight).toBe(941);
+	expect(framing.scale).toBeGreaterThanOrEqual(1.05);
+	expect(framing.transformOrigin).not.toBe("50% 50%");
+	expect(framing.stageScrollHeight).toBeLessThanOrEqual(framing.stageClientHeight);
+});
+
 for (const viewport of referenceViewports) {
 	test.describe(viewport.name, () => {
 		test.use({ viewport });

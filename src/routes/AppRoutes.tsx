@@ -70,7 +70,7 @@ const AppRoutes = () => {
       <Route path="/roadmap" element={<Navigate to="/servicos" replace />} />
       <Route path="/technologies" element={landingElement} />
       <Route path="/pricing" element={<Navigate to="/technologies" replace />} />
-      <Route path="/live" element={landingElement} />
+      <Route path="/live" element={<Navigate to="/technologies" replace />} />
       <Route path="/contact" element={landingElement} />
 
       <Route path="/enigma" element={<Enigma />} />
