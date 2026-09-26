@@ -329,7 +329,7 @@ function AppMobile() {
       width: "100%",
       flex: 1,
       minHeight: "0",
-      paddingTop: "0px",
+      paddingTop: "var(--app-navbar-height, 72px)",
       paddingBottom: "var(--mobile-safe-bottom, 0px)",
       boxSizing: "border-box",
       background: MOBILE_APP_BACKGROUND,

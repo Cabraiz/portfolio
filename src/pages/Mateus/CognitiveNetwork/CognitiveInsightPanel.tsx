@@ -15,7 +15,7 @@ const ATTENTION_WIRE_MULTIPLIER = 5;
 const ATTENTION_LINK_COUNT =
 	ATTENTION_BASE_LINK_COUNT * ATTENTION_WIRE_MULTIPLIER;
 const ATTENTION_WIRE_DESTINATION_MS = 9000;
-const ATTENTION_WIRE_FRAME_INTERVAL_MS = 1000 / 30;
+const ATTENTION_WIRE_FRAME_INTERVAL_MS = 1000 / 24;
 const LATENT_VISIBLE_POINT_COUNT = 96;
 
 type AttentionWire = Readonly<{
@@ -189,6 +189,9 @@ const AttentionWireCanvas: React.FC<{
 		const reducedMotion = window.matchMedia(
 			"(prefers-reduced-motion: reduce)"
 		).matches;
+		const wiresByLayer = [0, 1, 2].map((layerIndex) =>
+			wires.filter((wire) => wire.layer === layerIndex)
+		);
 		let animationFrameId = 0;
 		let lastRenderedAt = Number.NEGATIVE_INFINITY;
 
@@ -261,8 +264,8 @@ const AttentionWireCanvas: React.FC<{
 				);
 				context.lineCap = "round";
 
-				wires.forEach((wire) => {
-					if (wire.layer !== state.layerIndex) return;
+				const pathsByColor = new Map<string, Path2D>();
+				wiresByLayer[state.layerIndex]?.forEach((wire) => {
 					const startAngle =
 						wire.startAngle +
 						(sequenceValue(motionTick, wire.id + 2400, wire.motionSeed) - 0.5) * 24;
@@ -281,18 +284,20 @@ const AttentionWireCanvas: React.FC<{
 					const start = polarPoint(54, 54, 30.5, startAngle);
 					const end = polarPoint(54, 54, 30.5, endAngle);
 					const control = polarPoint(54, 54, controlRadius, controlAngle);
-					const pulse = reducedMotion
-						? 0.45
-						: 0.5 +
-							0.5 * Math.sin(timestamp * 0.00052 + wire.id * 1.618);
+					let path = pathsByColor.get(wire.color);
+					if (!path) {
+						path = new Path2D();
+						pathsByColor.set(wire.color, path);
+					}
+					path.moveTo(start.x, start.y);
+					path.quadraticCurveTo(control.x, control.y, end.x, end.y);
+				});
 
-					context.beginPath();
-					context.moveTo(start.x, start.y);
-					context.quadraticCurveTo(control.x, control.y, end.x, end.y);
-					context.globalAlpha = 0.06 + pulse * 0.17;
-					context.lineWidth = 0.22 + pulse * 0.16;
-					context.strokeStyle = wire.color;
-					context.stroke();
+				context.globalAlpha = [0.16, 0.13, 0.1][state.layerIndex] ?? 0.12;
+				context.lineWidth = [0.34, 0.3, 0.26][state.layerIndex] ?? 0.3;
+				pathsByColor.forEach((path, color) => {
+					context.strokeStyle = color;
+					context.stroke(path);
 				});
 				context.globalAlpha = 1;
 			});
