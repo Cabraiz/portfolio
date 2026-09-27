@@ -29,6 +29,11 @@
   --atlas-camera-y: -38.5259%;
 }
 
+.portfolioRoot[data-map-view="papua-commerce"] {
+  --atlas-camera-x: -90.8834%;
+  --atlas-camera-y: -55.2466%;
+}
+
 .portfolioRoot[data-map-view="app-barber"] {
   --atlas-camera-x: -19.05%;
   --atlas-camera-y: -25.15%;

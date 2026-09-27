@@ -1,6 +1,7 @@
 export type PortfolioProjectId =
   | "erp-varejo"
   | "app-bank"
+  | "papua-commerce"
   | "app-barber"
   | "central-clube-livro"
   | "site-adv"

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title">
+  <title id="title">Logo Papua Commerce</title>
+  <circle cx="256" cy="256" r="226" fill="#f6efdf"/>
+  <circle cx="256" cy="256" r="210" fill="none" stroke="#173f38" stroke-width="12"/>
+  <path d="M145 190h222l-18 216H163z" fill="#173f38"/>
+  <path d="M190 197c0-91 132-91 132 0" fill="none" stroke="#efb53d" stroke-width="30" stroke-linecap="round"/>
+  <path d="M192 259l48 50 92-112" fill="none" stroke="#e45b3f" stroke-width="30" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="347" cy="145" r="38" fill="#efb53d"/>
+  <path d="M330 145h34M347 128v34" stroke="#173f38" stroke-width="10" stroke-linecap="round"/>
+</svg>

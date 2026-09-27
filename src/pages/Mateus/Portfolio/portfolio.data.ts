@@ -1,5 +1,6 @@
 import imagem1 from "../../../assets/Mateus/portfolio/imagem1.webp";
 import imagem2 from "../../../assets/Mateus/portfolio/imagem2.webp";
+import imagemPapuaCommerce from "../../../assets/Mateus/portfolio/papua-commerce-preview-v1.svg";
 import imagem3 from "../../../assets/Mateus/portfolio/imagem3-barbearia-v3.webp";
 import imagemCentralClube from "../../../assets/Mateus/portfolio/imagem4-central-clube-livro-v1.webp";
 import imagem4 from "../../../assets/Mateus/portfolio/imagem4-wagner-v2.webp";
@@ -7,6 +8,7 @@ import imagem5 from "../../../assets/Mateus/portfolio/imagem5-fran-v2.webp";
 
 import logo1 from "../../../assets/Mateus/portfolio/logos/refined/erp-varejo-lockup-v3.png";
 import logo2 from "../../../assets/Mateus/portfolio/logos/logo2.webp";
+import logoPapuaCommerce from "../../../assets/Mateus/portfolio/logos/refined/papua-commerce-logo-v1.svg";
 import logo3 from "../../../assets/Mateus/portfolio/logos/refined/pessoa-barbearia-lockup-v3.png";
 import logoCentralClube from "../../../assets/Mateus/portfolio/logos/refined/entre-paginas-lockup-v2.png";
 import logo4 from "../../../assets/Mateus/portfolio/logos/refined/wagner-advocacia-lockup-v3.png";
@@ -88,6 +90,33 @@ export const portfolioProjects: ReadonlyArray<PortfolioProject> = [
     },
   },
   {
+    id: "papua-commerce",
+    name: "E-COMMERCE",
+    year: "2024",
+    imageSrc: imagemPapuaCommerce,
+    imageAlt: "Preview do projeto de e-commerce em Papua-Nova Guiné",
+    logoSrc: logoPapuaCommerce,
+    logoAlt: "Logo do projeto Papua Commerce",
+    projectLabel: "Projeto em destaque",
+    subtitle: "Comércio digital internacional",
+    statusLabel: "SELECIONAR",
+    counterLabel: "03",
+    accent: "coral",
+    tags: ["E-commerce", "Catálogo", "Checkout"],
+    technologies: ["React", "Node.js", "PostgreSQL"],
+    media: {
+      ...defaultProjectMedia,
+      position: "center center",
+    },
+    worldLocation: {
+      country: "Papua-Nova Guiné",
+      city: "Port Moresby",
+      region: "Oceania",
+      lat: -9.4438,
+      lng: 147.1803,
+    },
+  },
+  {
     id: "app-barber",
     name: "APP BARBEARIA",
     year: "2023",
@@ -98,7 +127,7 @@ export const portfolioProjects: ReadonlyArray<PortfolioProject> = [
     projectLabel: "Projeto em destaque",
     subtitle: "Agenda e recorrência",
     statusLabel: "SELECIONAR",
-    counterLabel: "03",
+    counterLabel: "04",
     accent: "orange",
     tags: ["Booking", "UX", "Serviços"],
     technologies: ["React", "Node.js", "MongoDB"],
@@ -125,7 +154,7 @@ export const portfolioProjects: ReadonlyArray<PortfolioProject> = [
     projectLabel: "Projeto em destaque",
     subtitle: "Comunidade editorial",
     statusLabel: "SELECIONAR",
-    counterLabel: "04",
+    counterLabel: "05",
     accent: "burgundy",
     tags: ["Editorial", "Comunidade", "Leitura"],
     technologies: ["Next.js", "TypeScript", "GSAP"],
@@ -152,7 +181,7 @@ export const portfolioProjects: ReadonlyArray<PortfolioProject> = [
     projectLabel: "Projeto em destaque",
     subtitle: "Presença institucional",
     statusLabel: "SELECIONAR",
-    counterLabel: "05",
+    counterLabel: "06",
     accent: "platinum",
     tags: ["Institucional", "Branding", "Landing"],
     technologies: ["React", "TypeScript", "CSS Modules"],
@@ -179,7 +208,7 @@ export const portfolioProjects: ReadonlyArray<PortfolioProject> = [
     projectLabel: "Projeto em destaque",
     subtitle: "Marca e captação local",
     statusLabel: "SELECIONAR",
-    counterLabel: "06",
+    counterLabel: "07",
     accent: "neutral",
     tags: ["Studio", "Serviços", "Conversão"],
     technologies: ["React", "JavaScript", "UI Design"],
