@@ -17,11 +17,35 @@
     "hireMe": "WhatsApp",
     "downloadCV": "CURRÍCULO"
   },
-  "floatingChat": {
-    "phrases": [
-      "Mensagens"
-    ],
-    "firstMessage": "estou online, então fique a vontade para me chamar!",
+    "floatingChat": {
+      "phrases": [
+        "Mensagens"
+      ],
+      "availability": "Assistente 24/7",
+      "welcome": "Olá! Sou o assistente 24/7 da Cabraiz. Posso levar você direto ao WhatsApp do Mateus ou apresentar os valores iniciais de cada tipo de projeto.",
+      "quickActionsLabel": "Opções rápidas de atendimento",
+      "whatsappAction": "Falar com Mateus no WhatsApp",
+      "showPrices": "Ver valores",
+      "hidePrices": "Ocultar valores",
+      "pricing": {
+        "front": {
+          "title": "Sites e portfólios",
+          "price": "US$ 400",
+          "description": "Portfólios, sites institucionais e projetos exclusivamente front-end."
+        },
+        "backend": {
+          "title": "Sistemas com backend",
+          "price": "US$ 2.000/mês",
+          "description": "Backend, banco de dados e desenvolvimento contínuo até a finalização."
+        },
+        "global": {
+          "title": "Lançamento global end-to-end",
+          "price": "US$ 18.000",
+          "description": "Produto completo, lançamento internacional e acompanhamento até o faturamento."
+        }
+      },
+      "pricingCta": "Quero falar sobre meu projeto",
+      "firstMessage": "estou online, então fique a vontade para me chamar!",
     "secondMessage": "Fique a vontade para se apresentar",
     "greetingMorning": "Bom dia!",
     "greetingAfternoon": "Boa tarde!",

@@ -1,0 +1,470 @@
+.chatTrigger {
+  position: relative;
+  isolation: isolate;
+  overflow: visible;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  background:
+    linear-gradient(180deg, rgba(49, 52, 60, 0.97), rgba(25, 27, 32, 0.98)) !important;
+  box-shadow:
+    0 18px 35px rgba(0, 0, 0, 0.34),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.4) !important;
+}
+
+.chatTrigger > :not(.mascot) {
+  position: relative;
+  z-index: 3;
+}
+
+.mascot {
+  position: absolute;
+  left: 65%;
+  bottom: calc(100% - 11px);
+  z-index: 2;
+  display: block;
+  width: 147.2px;
+  aspect-ratio: 3 / 2;
+  pointer-events: auto;
+  cursor: pointer;
+  transform: translateX(-50%);
+  transform-origin: 50% 100%;
+  filter: drop-shadow(0 11px 9px rgba(0, 0, 0, 0.48));
+  animation: mascotBreathing 4.8s ease-in-out infinite;
+}
+
+.mascot::before,
+.mascot::after {
+  position: absolute;
+  z-index: 4;
+  content: "";
+  pointer-events: none;
+  opacity: 0;
+}
+
+.mascot::before {
+  top: 9%;
+  right: 13%;
+  width: 8px;
+  height: 13px;
+  border-radius: 70% 30% 65% 35%;
+  background: linear-gradient(160deg, #e8fbff, #5bc8ed 68%, #1b78a2);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
+  transform: rotate(18deg) translateY(-4px);
+}
+
+.mascot::after {
+  top: 18%;
+  right: 6%;
+  width: 5px;
+  height: 8px;
+  border-radius: 70% 30% 65% 35%;
+  background: linear-gradient(160deg, #e8fbff, #58bfe4 70%, #1b78a2);
+  transform: rotate(24deg) translateY(-3px);
+}
+
+.mascot[data-mascot-reaction="idle"]:hover {
+  animation: mascotAfraidHover 320ms ease-in-out infinite alternate;
+  filter:
+    drop-shadow(0 8px 7px rgba(0, 0, 0, 0.55))
+    saturate(0.94);
+}
+
+.mascot[data-mascot-reaction="idle"]:hover::before,
+.mascot[data-mascot-reaction="idle"]:hover::after {
+  opacity: 0.95;
+  animation: mascotSweat 640ms ease-in-out infinite;
+}
+
+.mascot[data-mascot-reaction="idle"]:hover::after {
+  animation-delay: 150ms;
+}
+
+.mascot[data-mascot-reaction="fleeing"] {
+  pointer-events: none;
+  animation: mascotFlee 520ms cubic-bezier(0.55, 0.02, 0.9, 0.48) forwards;
+}
+
+.mascot[data-mascot-reaction="hidden"] {
+  pointer-events: none;
+  opacity: 0;
+  transform: translateX(-50%) translateY(92px) scale(0.72);
+  animation: none;
+}
+
+.mascot[data-mascot-reaction="returning"] {
+  pointer-events: none;
+  animation: mascotReturnScared 960ms cubic-bezier(0.18, 0.78, 0.24, 1) forwards;
+}
+
+.mascotImage {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  user-select: none;
+}
+
+.iris {
+  --eye-x: 0px;
+  --eye-y: 0px;
+  position: absolute;
+  z-index: 2;
+  display: block;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.42));
+  transform: translate3d(var(--eye-x), var(--eye-y), 0);
+  transition: transform 110ms cubic-bezier(0.2, 0.75, 0.3, 1);
+  will-change: transform;
+}
+
+.iris::before,
+.iris::after {
+  position: absolute;
+  content: "";
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.iris::before {
+  top: 25%;
+  left: 29%;
+  width: 42%;
+  height: 52%;
+  background:
+    radial-gradient(circle at 67% 24%, rgba(255, 255, 255, 0.92) 0 4%, transparent 5%),
+    radial-gradient(ellipse at 48% 44%, #07100b 0 58%, #010302 76%, #000 100%);
+  box-shadow:
+    inset 1px 1px 2px rgba(71, 120, 83, 0.36),
+    0 0 1px rgba(0, 0, 0, 0.72);
+}
+
+.iris::after {
+  top: 12%;
+  right: 12%;
+  width: 18%;
+  aspect-ratio: 1;
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow:
+    -0.45em 0.55em 0 -0.31em rgba(255, 255, 255, 0.92),
+    0 0 3px rgba(228, 255, 238, 0.95);
+  animation: pupilSparkle 3.4s ease-in-out infinite;
+}
+
+.largeIris {
+  top: 30.27%;
+  left: 25.72%;
+  width: 14.13%;
+  height: 23.44%;
+  background-image: url("../../assets/Mateus/lag-arthur-iris-large-v1.webp");
+}
+
+.smallIris {
+  top: 46.88%;
+  left: 56.77%;
+  width: 6.32%;
+  height: 12.89%;
+  background-image: url("../../assets/Mateus/lag-arthur-iris-small-v1.webp");
+}
+
+.botIntro {
+  display: flex;
+  align-items: flex-start;
+  width: 100%;
+  gap: 0.55rem;
+}
+
+.botAvatar {
+  width: 30px;
+  height: 30px;
+  flex: 0 0 30px;
+  border: 1px solid rgba(224, 146, 70, 0.58);
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.botIntroContent {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.botIntroBubble {
+  padding: 0.72rem 0.9rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px 12px 12px 4px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  font-size: 0.96rem;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+  backdrop-filter: blur(8px);
+}
+
+.quickActions {
+  display: grid;
+  grid-template-columns: 1fr 0.72fr;
+  gap: 0.55rem;
+}
+
+.quickAction {
+  display: inline-flex;
+  min-height: 42px;
+  align-items: center;
+  justify-content: center;
+  padding: 0.62rem 0.75rem;
+  border: 1px solid rgba(224, 146, 70, 0.5);
+  border-radius: 10px;
+  background: rgba(224, 146, 70, 0.08);
+  color: #ffe4c1;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease,
+    background-color 160ms ease;
+}
+
+.quickAction:hover,
+.quickAction:focus-visible {
+  border-color: rgba(255, 188, 107, 0.9);
+  background: rgba(224, 146, 70, 0.18);
+  outline: none;
+  transform: translateY(-1px);
+}
+
+.quickActionPrimary {
+  border-color: rgba(63, 209, 124, 0.5);
+  background: rgba(37, 211, 102, 0.12);
+  color: #baf7d0;
+}
+
+.quickActionPrimary:hover,
+.quickActionPrimary:focus-visible {
+  border-color: rgba(91, 239, 145, 0.9);
+  background: rgba(37, 211, 102, 0.22);
+}
+
+.pricingPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  overflow: hidden;
+}
+
+.pricingCard {
+  padding: 0.72rem 0.8rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 11px;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.025));
+}
+
+.pricingHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.pricingHeader strong {
+  color: #fff;
+  font-size: 0.83rem;
+  line-height: 1.25;
+}
+
+.pricingHeader span {
+  flex-shrink: 0;
+  color: #ffbe6b;
+  font-size: 0.79rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.pricingCard p {
+  margin: 0.38rem 0 0;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.76rem;
+  line-height: 1.4;
+}
+
+.pricingCta {
+  display: inline-flex;
+  min-height: 42px;
+  align-items: center;
+  justify-content: center;
+  padding: 0.7rem 0.85rem;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #d88434, #f1aa5d);
+  box-shadow: 0 8px 20px rgba(216, 132, 52, 0.18);
+  color: #18120d;
+  font-size: 0.82rem;
+  font-weight: 800;
+  text-align: center;
+  text-decoration: none;
+}
+
+.pricingCta:hover,
+.pricingCta:focus-visible {
+  background: linear-gradient(135deg, #e69747, #ffc177);
+  outline: 2px solid rgba(255, 208, 151, 0.55);
+  outline-offset: 2px;
+}
+
+@media (max-width: 520px) {
+  .quickActions {
+    grid-template-columns: 1fr;
+  }
+
+  .pricingHeader {
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+}
+
+.chatTrigger[data-mobile="true"] .mascot {
+  left: 62%;
+  bottom: calc(100% - 7px);
+  width: 73.6px;
+  animation-duration: 5.6s;
+}
+
+@keyframes mascotBreathing {
+  0%,
+  100% {
+    transform: translateX(-50%) rotate(-0.7deg) translateY(0);
+  }
+
+  50% {
+    transform: translateX(-50%) rotate(0.7deg) translateY(-2px);
+  }
+}
+
+@keyframes mascotAfraidHover {
+  0% {
+    transform: translateX(-50%) translateY(7px) rotate(-2.2deg) scale(0.97, 1.03);
+  }
+
+  100% {
+    transform: translateX(-50%) translateY(11px) rotate(2.2deg) scale(0.95, 1.05);
+  }
+}
+
+@keyframes mascotSweat {
+  0%,
+  100% {
+    opacity: 0.25;
+    transform: rotate(18deg) translateY(-5px) scale(0.72);
+  }
+
+  42% {
+    opacity: 1;
+    transform: rotate(18deg) translateY(0) scale(1.05);
+  }
+
+  78% {
+    opacity: 0.72;
+    transform: rotate(18deg) translateY(5px) scale(0.88);
+  }
+}
+
+@keyframes mascotFlee {
+  0% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) rotate(0) scale(1);
+  }
+
+  18% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(-16px) rotate(-5deg) scale(1.08, 0.92);
+  }
+
+  34% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(-8px) rotate(5deg) scale(0.96, 1.08);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(92px) rotate(-2deg) scale(0.72);
+  }
+}
+
+@keyframes mascotReturnScared {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(92px) scale(0.72);
+  }
+
+  42% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(14px) rotate(-3deg) scale(0.9, 1.08);
+  }
+
+  58% {
+    transform: translateX(-50%) translateY(8px) rotate(3deg) scale(0.94, 1.04);
+  }
+
+  72% {
+    transform: translateX(-50%) translateY(11px) rotate(-2deg) scale(0.96, 1.02);
+  }
+
+  84% {
+    transform: translateX(-50%) translateY(5px) rotate(1.2deg) scale(0.98, 1.01);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) rotate(0) scale(1);
+  }
+}
+
+@keyframes pupilSparkle {
+  0%,
+  76%,
+  100% {
+    opacity: 0.88;
+    transform: scale(0.9);
+  }
+
+  84% {
+    opacity: 1;
+    transform: scale(1.16);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mascot {
+    animation: none;
+  }
+
+  .mascot[data-mascot-reaction="idle"]:hover,
+  .mascot[data-mascot-reaction="fleeing"],
+  .mascot[data-mascot-reaction="returning"] {
+    animation: none;
+  }
+
+  .mascot[data-mascot-reaction="fleeing"] {
+    opacity: 0;
+    transform: translateX(-50%) translateY(92px) scale(0.72);
+  }
+
+  .iris {
+    transition: none;
+  }
+
+  .iris::after {
+    animation: none;
+  }
+}

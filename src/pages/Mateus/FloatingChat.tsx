@@ -2,9 +2,13 @@ import type * as React from "react";
 import { useState, useRef, useEffect } from "react";
 import msgIcon from "../../assets/Mateus/msgIcon.png";
 import perfilMini from "../../assets/Mateus/perfilMini.webp";
+import supportCabraiz from "../../assets/Mateus/support-cabraiz-professional-v1.webp";
+import lagArthurChat from "../../assets/Mateus/lag-arthur-chat-blank-eyes-v2.webp";
 import { AnimatePresence, motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { useLocation } from "react-router-dom";
+
+import styles from "./FloatingChat.module.css";
 
 import {
   isHomeGameRoutePath,
@@ -34,11 +38,15 @@ type ContactReply = {
   text: string;
 };
 
+type MascotReaction = "idle" | "fleeing" | "hidden" | "returning";
+
 const CHAT_CONVERSATION_STORAGE_KEY = "cabraiz-chat-conversation-id";
 const CHAT_CONVERSATION_ID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const CONTACT_API_URL =
   import.meta.env.VITE_CONTACT_API_URL?.trim() || "/api/contact";
+const WHATSAPP_SUPPORT_URL =
+  "https://wa.me/5585998575707?text=Ol%C3%A1%20Mateus%2C%20vim%20pelo%20atendimento%2024%2F7%20da%20Cabraiz%20e%20quero%20falar%20sobre%20um%20projeto.";
 
 function getOrCreateConversationId(): string {
   const conversationId = window.crypto.randomUUID();
@@ -68,12 +76,19 @@ export default function FloatingChat() {
   const [isOpen, setIsOpen] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [showPricing, setShowPricing] = useState(false);
+  const [mascotReaction, setMascotReaction] =
+    useState<MascotReaction>("idle");
   const [conversationId] = useState(getOrCreateConversationId);
   const [sendStatus, setSendStatus] = useState<
     "idle" | "sending" | "sent" | "error"
   >("idle");
   const chatRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const mascotRef = useRef<HTMLSpanElement>(null);
+  const largeIrisRef = useRef<HTMLSpanElement>(null);
+  const smallIrisRef = useRef<HTMLSpanElement>(null);
+  const mascotTimersRef = useRef<number[]>([]);
   const chatOpenedAtRef = useRef(Date.now());
   const replyCursorRef = useRef(0);
 
@@ -95,13 +110,13 @@ export default function FloatingChat() {
   const triggerItems: TriggerAvatarItem[] = [
     {
       type: "image",
-      src: perfilMini,
-      alt: "Mateus Cabral",
+      src: supportCabraiz,
+      alt: "Especialista de suporte Cabraiz",
     },
     {
       type: "image",
-      src: "https://i.pravatar.cc/300?img=12",
-      alt: "Contato 1",
+      src: perfilMini,
+      alt: "Mateus Cabral",
     },
     {
       type: "more",
@@ -109,6 +124,91 @@ export default function FloatingChat() {
       ariaLabel: "Mais contatos",
     },
   ];
+
+  useEffect(() => {
+    const mascot = mascotRef.current;
+    const largeIris = largeIrisRef.current;
+    const smallIris = smallIrisRef.current;
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)");
+
+    if (
+      isOpen ||
+      isMobile ||
+      mascotReaction !== "idle" ||
+      reduceMotion.matches ||
+      !finePointer.matches ||
+      !mascot ||
+      !largeIris ||
+      !smallIris
+    ) {
+      return;
+    }
+
+    let animationFrame = 0;
+
+    const positionIrises = (clientX: number, clientY: number) => {
+      const bounds = mascot.getBoundingClientRect();
+      const deltaX = clientX - (bounds.left + bounds.width * 0.46);
+      const deltaY = clientY - (bounds.top + bounds.height * 0.48);
+      const directionX = Math.max(-1, Math.min(1, deltaX / 150));
+      const directionY = Math.max(-1, Math.min(1, deltaY / 115));
+      const offset = (direction: number, negative: number, positive: number) =>
+        direction < 0 ? direction * negative : direction * positive;
+
+      largeIris.style.setProperty(
+        "--eye-x",
+        `${offset(directionX, 7.3, 7)}px`
+      );
+      largeIris.style.setProperty(
+        "--eye-y",
+        `${offset(directionY, 4.5, 0.65)}px`
+      );
+      smallIris.style.setProperty(
+        "--eye-x",
+        `${offset(directionX, 4.2, 4)}px`
+      );
+      smallIris.style.setProperty(
+        "--eye-y",
+        `${offset(directionY, 0.65, 0.55)}px`
+      );
+    };
+
+    const resetIrises = () => {
+      largeIris.style.setProperty("--eye-x", "0px");
+      largeIris.style.setProperty("--eye-y", "0px");
+      smallIris.style.setProperty("--eye-x", "0px");
+      smallIris.style.setProperty("--eye-y", "0px");
+    };
+
+    const handlePointerMove = (event: PointerEvent) => {
+      if (event.pointerType === "touch") return;
+      window.cancelAnimationFrame(animationFrame);
+      animationFrame = window.requestAnimationFrame(() => {
+        positionIrises(event.clientX, event.clientY);
+      });
+    };
+
+    document.addEventListener("pointermove", handlePointerMove, {
+      passive: true,
+    });
+    document.documentElement.addEventListener("mouseleave", resetIrises);
+    window.addEventListener("blur", resetIrises);
+
+    return () => {
+      window.cancelAnimationFrame(animationFrame);
+      document.removeEventListener("pointermove", handlePointerMove);
+      document.documentElement.removeEventListener("mouseleave", resetIrises);
+      window.removeEventListener("blur", resetIrises);
+    };
+  }, [isMobile, isOpen, mascotReaction]);
+
+  useEffect(
+    () => () => {
+      mascotTimersRef.current.forEach((timer) => window.clearTimeout(timer));
+    },
+    []
+  );
 
   useEffect(() => {
     if (!isOpen) return;
@@ -245,6 +345,46 @@ export default function FloatingChat() {
     }
   };
 
+  const scareMascot = () => {
+    if (mascotReaction !== "idle") return;
+
+    mascotTimersRef.current.forEach((timer) => window.clearTimeout(timer));
+    setMascotReaction("fleeing");
+
+    const hideTimer = window.setTimeout(() => {
+      setMascotReaction("hidden");
+    }, 520);
+    const returnTimer = window.setTimeout(() => {
+      setMascotReaction("returning");
+    }, 5520);
+    const idleTimer = window.setTimeout(() => {
+      setMascotReaction("idle");
+      mascotTimersRef.current = [];
+    }, 6480);
+
+    mascotTimersRef.current = [hideTimer, returnTimer, idleTimer];
+  };
+
+  const handleTriggerClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    const mascot = mascotRef.current;
+
+    if (mascot && event.detail > 0) {
+      const bounds = mascot.getBoundingClientRect();
+      const clickedMascot =
+        event.clientX >= bounds.left &&
+        event.clientX <= bounds.right &&
+        event.clientY >= bounds.top &&
+        event.clientY <= bounds.bottom;
+
+      if (clickedMascot) {
+        scareMascot();
+        return;
+      }
+    }
+
+    openChat();
+  };
+
   if (
     shouldHideForStandaloneGame ||
     shouldHideForMobileHome ||
@@ -264,7 +404,9 @@ export default function FloatingChat() {
     >
       {!isOpen && (
         <button
-          onClick={openChat}
+          onClick={handleTriggerClick}
+          className={styles.chatTrigger}
+          data-mobile={isMobile ? "true" : "false"}
           style={{
             display: "flex",
             alignItems: "center",
@@ -286,6 +428,28 @@ export default function FloatingChat() {
           }}
           title="Abrir chat"
         >
+          <span
+            ref={mascotRef}
+            className={styles.mascot}
+            data-mascot-reaction={mascotReaction}
+            aria-hidden="true"
+          >
+            <img
+              className={styles.mascotImage}
+              src={lagArthurChat}
+              alt=""
+              draggable={false}
+            />
+            <span
+              ref={largeIrisRef}
+              className={`${styles.iris} ${styles.largeIris}`}
+            />
+            <span
+              ref={smallIrisRef}
+              className={`${styles.iris} ${styles.smallIris}`}
+            />
+          </span>
+
           {!isMobile ? (
             <>
               <div
@@ -481,8 +645,9 @@ export default function FloatingChat() {
             exit={{ opacity: 0, y: 20, transition: { duration: 0 } }}
             transition={{ duration: 0.8, ease: [0.23, 1, 0.32, 1] }}
             style={{
-              width: isMobile ? "80vw" : "480px",
-              height: isMobile ? "40vh" : "600px",
+              width: isMobile ? "calc(100vw - 32px)" : "480px",
+              height: isMobile ? "min(72vh, 620px)" : "min(680px, calc(100dvh - 40px))",
+              maxHeight: "calc(100dvh - 40px)",
               background: "rgba(255, 255, 255, 0.06)",
               backdropFilter: "blur(18px)",
               WebkitBackdropFilter: "blur(18px)",
@@ -508,21 +673,23 @@ export default function FloatingChat() {
               }}
             >
               <img
-                src={perfilMini}
-                alt="Perfil"
+                src={supportCabraiz}
+                alt="Especialista de suporte Cabraiz"
                 style={{
-                  width: "36px",
-                  height: "36px",
+                  width: "42px",
+                  height: "42px",
                   borderRadius: "50%",
                   objectFit: "cover",
+                  border: "2px solid rgba(224, 146, 70, 0.72)",
+                  boxShadow: "0 0 0 3px rgba(224, 146, 70, 0.1)",
                 }}
               />
               <div style={{ display: "flex", flexDirection: "column" }}>
                 <span style={{ fontWeight: 600, fontSize: `${scale(1.1)}rem` }}>
-                  Mateus Cabral
+                  Suporte Cabraiz
                 </span>
                 <span style={{ fontSize: `${scale(0.9)}rem`, color: "#aaa" }}>
-                  Mensagens para mim
+                  {t("floatingChat.availability")}
                 </span>
               </div>
             </div>
@@ -535,47 +702,88 @@ export default function FloatingChat() {
                 display: "flex",
                 flexDirection: "column",
                 gap: `${scale(0.5)}rem`,
+                minHeight: 0,
+                overflowY: "auto",
+                paddingRight: `${scale(0.25)}rem`,
               }}
             >
-              {[t("floatingChat.secondMessage"), t("floatingChat.firstMessage")].map(
-                (text, index) => (
-                  <div
-                    key={`initial-${index}`}
-                    style={{
-                      display: "flex",
-                      alignItems: "flex-end",
-                      maxWidth: "80%",
-                    }}
-                  >
-                    <img
-                      src={perfilMini}
-                      alt="Perfil"
-                      style={{
-                        width: "28px",
-                        height: "28px",
-                        borderRadius: "50%",
-                        marginRight: "0.5rem",
-                        flexShrink: 0,
-                      }}
-                    />
-                    <div
-                      style={{
-                        background: "rgba(255, 255, 255, 0.12)",
-                        border: "1px solid rgba(255, 255, 255, 0.2)",
-                        padding: `${scale(0.6)}rem ${scale(1)}rem`,
-                        borderRadius: "12px",
-                        wordWrap: "break-word",
-                        color: "#fff",
-                        backdropFilter: "blur(8px)",
-                        WebkitBackdropFilter: "blur(8px)",
-                        fontSize: `${scale(1)}rem`,
-                      }}
-                    >
-                      {text}
-                    </div>
+              <div className={styles.botIntro}>
+                <img
+                  src={supportCabraiz}
+                  alt="Especialista de suporte Cabraiz"
+                  className={styles.botAvatar}
+                />
+                <div className={styles.botIntroContent}>
+                  <div className={styles.botIntroBubble}>
+                    {t("floatingChat.welcome")}
                   </div>
-                )
-              )}
+                  <div
+                    className={styles.quickActions}
+                    aria-label={t("floatingChat.quickActionsLabel")}
+                  >
+                    <a
+                      className={`${styles.quickAction} ${styles.quickActionPrimary}`}
+                      href={WHATSAPP_SUPPORT_URL}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      {t("floatingChat.whatsappAction")}
+                    </a>
+                    <button
+                      className={styles.quickAction}
+                      type="button"
+                      aria-expanded={showPricing}
+                      onClick={() => setShowPricing((current) => !current)}
+                    >
+                      {showPricing
+                        ? t("floatingChat.hidePrices")
+                        : t("floatingChat.showPrices")}
+                    </button>
+                  </div>
+
+                  <AnimatePresence initial={false}>
+                    {showPricing && (
+                      <motion.div
+                        className={styles.pricingPanel}
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.24, ease: "easeOut" }}
+                      >
+                        <div className={styles.pricingCard}>
+                          <div className={styles.pricingHeader}>
+                            <strong>{t("floatingChat.pricing.front.title")}</strong>
+                            <span>{t("floatingChat.pricing.front.price")}</span>
+                          </div>
+                          <p>{t("floatingChat.pricing.front.description")}</p>
+                        </div>
+                        <div className={styles.pricingCard}>
+                          <div className={styles.pricingHeader}>
+                            <strong>{t("floatingChat.pricing.backend.title")}</strong>
+                            <span>{t("floatingChat.pricing.backend.price")}</span>
+                          </div>
+                          <p>{t("floatingChat.pricing.backend.description")}</p>
+                        </div>
+                        <div className={styles.pricingCard}>
+                          <div className={styles.pricingHeader}>
+                            <strong>{t("floatingChat.pricing.global.title")}</strong>
+                            <span>{t("floatingChat.pricing.global.price")}</span>
+                          </div>
+                          <p>{t("floatingChat.pricing.global.description")}</p>
+                        </div>
+                        <a
+                          className={styles.pricingCta}
+                          href={WHATSAPP_SUPPORT_URL}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          {t("floatingChat.pricingCta")}
+                        </a>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              </div>
 
               {messages.map((message) =>
                 message.author === "visitor" ? (
@@ -609,12 +817,14 @@ export default function FloatingChat() {
                     }}
                   >
                     <img
-                      src={perfilMini}
-                      alt="Perfil"
+                      src={supportCabraiz}
+                      alt="Especialista de suporte Cabraiz"
                       style={{
-                        width: "28px",
-                        height: "28px",
+                        width: "30px",
+                        height: "30px",
                         borderRadius: "50%",
+                        objectFit: "cover",
+                        border: "1px solid rgba(224, 146, 70, 0.58)",
                         marginRight: "0.5rem",
                         flexShrink: 0,
                       }}
