@@ -2,8 +2,11 @@ import { useLayoutEffect, useRef } from "react";
 
 import workshopBackground from "@/assets/Mateus/services/industrial-workshop-background-v2.png";
 import workbench from "@/assets/Mateus/services/industrial-workbench-base-v2.png";
-import servicesSignStatic from "@/assets/Mateus/services/services-led-sign-crisp-2x-v7.webp";
-import servicesSignAnimated from "@/assets/Mateus/services/services-led-sign-live-8frames-v8.webp";
+import laptopClubeOff from "@/assets/Mateus/services/devices/laptop-clube-raytrace-off-v3.png";
+import monitorOff from "@/assets/Mateus/services/devices/monitor-raytrace-off-v1.png";
+import phoneClubeOff from "@/assets/Mateus/services/devices/phone-clube-raytrace-off-v2.png";
+import servicesSignStatic from "@/assets/Mateus/services/services-oval-wires-static-v14.png";
+import servicesSignAnimated from "@/assets/Mateus/services/services-sign-lag-arthur-roving-repair-104frames-v17.webp";
 import { ensureGsapRuntime } from "@/features/scroll/gsapRuntime";
 import { shouldDisableScrollFades } from "@/features/scroll/scrollMotionFlags";
 
@@ -15,7 +18,8 @@ export default function Services() {
 	const atmosphereRef = useRef<HTMLDivElement>(null);
 	const headingRef = useRef<HTMLElement>(null);
 	const titleRef = useRef<HTMLHeadingElement>(null);
-	const workbenchRef = useRef<HTMLImageElement>(null);
+	const signRigRef = useRef<HTMLPictureElement>(null);
+	const workbenchRef = useRef<HTMLDivElement>(null);
 
 	useLayoutEffect(() => {
 		const root = rootRef.current;
@@ -23,6 +27,7 @@ export default function Services() {
 		const atmosphere = atmosphereRef.current;
 		const heading = headingRef.current;
 		const title = titleRef.current;
+		const signRig = signRigRef.current;
 		const workbenchElement = workbenchRef.current;
 
 		if (
@@ -31,6 +36,7 @@ export default function Services() {
 			!atmosphere ||
 			!heading ||
 			!title ||
+			!signRig ||
 			!workbenchElement
 		) {
 			return;
@@ -49,10 +55,50 @@ export default function Services() {
 
 		const { gsap, ScrollTrigger } = ensureGsapRuntime();
 		root.dataset.servicesMotion = "scroll";
+		let swingTween: ReturnType<typeof gsap.to> | undefined;
+		let settleTween: ReturnType<typeof gsap.to> | undefined;
+		let settleSwing: ReturnType<typeof gsap.delayedCall> | undefined;
 
 		const context = gsap.context(() => {
-			gsap.set([background, atmosphere, heading, title, workbenchElement], {
+			gsap.set([background, atmosphere, heading, title, signRig, workbenchElement], {
 				force3D: true,
+			});
+			gsap.set(signRig, { rotation: 0, transformOrigin: "50% 0%" });
+
+			settleSwing = gsap
+				.delayedCall(0.1, () => {
+					settleTween = gsap.to(signRig, {
+						rotation: 0,
+						duration: 1.35,
+						ease: "elastic.out(1, 0.32)",
+						overwrite: true,
+					});
+				})
+				.pause();
+
+			ScrollTrigger.create({
+				id: "services-sign-scroll-rig",
+				trigger: root,
+				start: "top bottom",
+				end: "bottom top",
+				onUpdate: (self) => {
+					const rotation = gsap.utils.clamp(
+						-4.25,
+						4.25,
+						-self.getVelocity() / 520,
+					);
+
+					settleTween?.kill();
+					swingTween = gsap.to(signRig, {
+						rotation,
+						duration: 0.14,
+						ease: "power2.out",
+						overwrite: true,
+					});
+					settleSwing.restart(true);
+				},
+				onLeave: () => settleSwing.restart(true),
+				onLeaveBack: () => settleSwing.restart(true),
 			});
 
 			const sceneTimeline = gsap.timeline({
@@ -122,6 +168,9 @@ export default function Services() {
 
 		return () => {
 			window.cancelAnimationFrame(refreshFrame);
+			swingTween?.kill();
+			settleTween?.kill();
+			settleSwing?.kill();
 			context.revert();
 			delete root.dataset.servicesMotion;
 		};
@@ -156,13 +205,14 @@ export default function Services() {
 						ref={titleRef}
 						id="services-title"
 						className={styles.title}
-						data-title-treatment="physical-red-led-storefront-sign-2d"
+						data-title-treatment="physical-amber-oval-storefront-sign-2d"
 					>
 						<span className={styles.titleLabel}>Serviços</span>
 						<picture
+							ref={signRigRef}
 							className={styles.signAnimation}
-							data-sign-frame-count="8"
-							data-sign-motion="baked-eight-frame-loop"
+							data-sign-frame-count="104"
+							data-sign-motion="lag-arthur-rappel-left-right-contact-repair"
 							aria-hidden="true"
 						>
 							<source
@@ -180,12 +230,48 @@ export default function Services() {
 				</header>
 
 				<div className={styles.workbenchStage} aria-hidden="true">
-					<img
-						ref={workbenchRef}
-						className={styles.workbench}
-						src={workbench}
-						alt=""
-					/>
+					<div ref={workbenchRef} className={styles.workbenchRig}>
+						<img className={styles.workbench} src={workbench} alt="" />
+						<div
+							className={styles.deviceRow}
+							data-device-count="3"
+							data-device-lighting="off"
+						>
+							<picture
+								className={`${styles.device} ${styles.laptopDevice}`}
+								data-service-device="laptop"
+							>
+								<img
+									className={styles.deviceImage}
+									src={laptopClubeOff}
+									alt=""
+									decoding="async"
+								/>
+							</picture>
+							<picture
+								className={`${styles.device} ${styles.phoneDevice}`}
+								data-service-device="phone"
+							>
+								<img
+									className={styles.deviceImage}
+									src={phoneClubeOff}
+									alt=""
+									decoding="async"
+								/>
+							</picture>
+							<picture
+								className={`${styles.device} ${styles.monitorDevice}`}
+								data-service-device="monitor"
+							>
+								<img
+									className={styles.deviceImage}
+									src={monitorOff}
+									alt=""
+									decoding="async"
+								/>
+							</picture>
+						</div>
+					</div>
 				</div>
 			</div>
 		</section>
