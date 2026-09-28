@@ -1,10 +1,13 @@
 import { useLayoutEffect, useRef } from "react";
 
 import workshopBackground from "@/assets/Mateus/services/industrial-workshop-background-v2.png";
-import workbench from "@/assets/Mateus/services/industrial-workbench-base-lag-arthur-figures-v3.png";
+import workbench from "@/assets/Mateus/services/industrial-workbench-base-robot-interaction-v5.png";
 import laptopClubeOff from "@/assets/Mateus/services/devices/laptop-workshop-off-v4.png";
-import phoneClubeOff from "@/assets/Mateus/services/devices/phone-workshop-stand-off-v4.png";
-import roboticArmOff from "@/assets/Mateus/services/devices/robotic-arm-workshop-off-v1.png";
+import phoneClubeOff from "@/assets/Mateus/services/devices/phone-workshop-stand-off-v5.png";
+import roboticArmOpen from "@/assets/Mateus/services/devices/robotic-arm-workshop-open-v2.png";
+import roboticArmClosed from "@/assets/Mateus/services/devices/robotic-arm-workshop-closed-v3.png";
+import roboticArmBlock from "@/assets/Mateus/services/devices/robotic-arm-metal-block-v2.png";
+import lagArthurPointing from "@/assets/Mateus/services/lag-arthur-pointing-claw-v3.png";
 import servicesSignAnimated from "@/assets/Mateus/services/services-front-wall-rail-lag-arthur-104frames-v22.webp";
 import servicesSignStatic from "@/assets/Mateus/services/services-front-wall-rail-static-v21.png";
 import { ensureGsapRuntime } from "@/features/scroll/gsapRuntime";
@@ -20,6 +23,11 @@ export default function Services() {
 	const titleRef = useRef<HTMLHeadingElement>(null);
 	const signRigRef = useRef<HTMLPictureElement>(null);
 	const workbenchRef = useRef<HTMLDivElement>(null);
+	const robotArmRigRef = useRef<HTMLDivElement>(null);
+	const robotArmOpenRef = useRef<HTMLImageElement>(null);
+	const robotArmClosedRef = useRef<HTMLImageElement>(null);
+	const robotBlockRef = useRef<HTMLImageElement>(null);
+	const robotCharacterRef = useRef<HTMLImageElement>(null);
 
 	useLayoutEffect(() => {
 		const root = rootRef.current;
@@ -29,6 +37,11 @@ export default function Services() {
 		const title = titleRef.current;
 		const signRig = signRigRef.current;
 		const workbenchElement = workbenchRef.current;
+		const robotArmRig = robotArmRigRef.current;
+		const robotArmOpenElement = robotArmOpenRef.current;
+		const robotArmClosedElement = robotArmClosedRef.current;
+		const robotBlockElement = robotBlockRef.current;
+		const robotCharacterElement = robotCharacterRef.current;
 
 		if (
 			!root ||
@@ -37,7 +50,12 @@ export default function Services() {
 			!heading ||
 			!title ||
 			!signRig ||
-			!workbenchElement
+			!workbenchElement ||
+			!robotArmRig ||
+			!robotArmOpenElement ||
+			!robotArmClosedElement ||
+			!robotBlockElement ||
+			!robotCharacterElement
 		) {
 			return;
 		}
@@ -60,12 +78,130 @@ export default function Services() {
 		let settleSwing: ReturnType<typeof gsap.delayedCall> | undefined;
 
 		const context = gsap.context(() => {
-			gsap.set([background, atmosphere, heading, title, signRig, workbenchElement], {
-				force3D: true,
-			});
+			gsap.set(
+				[
+					background,
+					atmosphere,
+					heading,
+					title,
+					signRig,
+					workbenchElement,
+					robotArmRig,
+					robotBlockElement,
+					robotCharacterElement,
+				],
+				{
+					force3D: true,
+				}
+			);
 			gsap.set(signRig, { rotation: 0, transformOrigin: "50% 0%" });
+			gsap.set(robotArmOpenElement, { autoAlpha: 1 });
+			gsap.set(robotArmClosedElement, { autoAlpha: 0 });
 
-			settleSwing = gsap
+			gsap
+				.timeline({ repeat: -1, repeatDelay: 0.65 })
+				.to(
+					robotCharacterElement,
+					{
+						yPercent: -2.5,
+						rotation: -1.4,
+						duration: 0.42,
+						ease: "power2.out",
+					},
+					0.2
+				)
+				.to(
+					robotArmRig,
+					{
+						xPercent: -1.5,
+						yPercent: 8,
+						rotation: -1.2,
+						duration: 0.9,
+						ease: "power2.inOut",
+					},
+					0.45
+				)
+				.set(robotArmOpenElement, { autoAlpha: 0 }, 1.36)
+				.set(robotArmClosedElement, { autoAlpha: 1 }, 1.36)
+				.to(
+					robotArmRig,
+					{
+						xPercent: -3,
+						yPercent: -3,
+						rotation: 0,
+						duration: 0.82,
+						ease: "power2.inOut",
+					},
+					1.52
+				)
+				.to(
+					robotBlockElement,
+					{
+						xPercent: -6,
+						yPercent: -44,
+						duration: 0.82,
+						ease: "power2.inOut",
+					},
+					1.52
+				)
+				.to(
+					robotCharacterElement,
+					{
+						yPercent: -6,
+						rotation: 1.8,
+						duration: 0.26,
+						yoyo: true,
+						repeat: 1,
+						ease: "power2.inOut",
+					},
+					1.58
+				)
+				.to(
+					robotArmRig,
+					{
+						xPercent: -1.5,
+						yPercent: 8,
+						rotation: -1.2,
+						duration: 0.82,
+						ease: "power2.inOut",
+					},
+					3.02
+				)
+				.to(
+					robotBlockElement,
+					{
+						xPercent: 0,
+						yPercent: 0,
+						duration: 0.82,
+						ease: "power2.inOut",
+					},
+					3.02
+				)
+				.set(robotArmClosedElement, { autoAlpha: 0 }, 3.9)
+				.set(robotArmOpenElement, { autoAlpha: 1 }, 3.9)
+				.to(
+					robotArmRig,
+					{
+						xPercent: 0,
+						yPercent: 0,
+						rotation: 0,
+						duration: 0.72,
+						ease: "power2.inOut",
+					},
+					4.04
+				)
+				.to(
+					robotCharacterElement,
+					{
+						yPercent: 0,
+						rotation: 0,
+						duration: 0.52,
+						ease: "power2.out",
+					},
+					4.04
+				);
+
+			const activeSettleSwing = gsap
 				.delayedCall(0.1, () => {
 					settleTween = gsap.to(signRig, {
 						rotation: 0,
@@ -75,6 +211,7 @@ export default function Services() {
 					});
 				})
 				.pause();
+			settleSwing = activeSettleSwing;
 
 			ScrollTrigger.create({
 				id: "services-sign-scroll-rig",
@@ -85,7 +222,7 @@ export default function Services() {
 					const rotation = gsap.utils.clamp(
 						-4.25,
 						4.25,
-						-self.getVelocity() / 520,
+						-self.getVelocity() / 520
 					);
 
 					settleTween?.kill();
@@ -95,10 +232,10 @@ export default function Services() {
 						ease: "power2.out",
 						overwrite: true,
 					});
-					settleSwing.restart(true);
+					activeSettleSwing.restart(true);
 				},
-				onLeave: () => settleSwing.restart(true),
-				onLeaveBack: () => settleSwing.restart(true),
+				onLeave: () => activeSettleSwing.restart(true),
+				onLeaveBack: () => activeSettleSwing.restart(true),
 			});
 
 			const sceneTimeline = gsap.timeline({
@@ -159,7 +296,6 @@ export default function Services() {
 					{ xPercent: -1.5, y: -16, scale: 1.012, duration: 0.5 },
 					0.5
 				);
-
 		}, root);
 
 		const refreshFrame = window.requestAnimationFrame(() => {
@@ -259,17 +395,43 @@ export default function Services() {
 									decoding="async"
 								/>
 							</picture>
-							<picture
+							<div
 								className={`${styles.device} ${styles.robotArmDevice}`}
 								data-service-device="robot-arm"
 							>
-								<img
-									className={styles.deviceImage}
-									src={roboticArmOff}
-									alt=""
-									decoding="async"
-								/>
-							</picture>
+								<div className={styles.robotInteraction}>
+									<div ref={robotArmRigRef} className={styles.robotArmRig}>
+										<img
+											ref={robotArmOpenRef}
+											className={`${styles.robotArmLayer} ${styles.robotArmOpen}`}
+											src={roboticArmOpen}
+											alt=""
+											decoding="async"
+										/>
+										<img
+											ref={robotArmClosedRef}
+											className={`${styles.robotArmLayer} ${styles.robotArmClosed}`}
+											src={roboticArmClosed}
+											alt=""
+											decoding="async"
+										/>
+									</div>
+									<img
+										ref={robotBlockRef}
+										className={styles.robotBlock}
+										src={roboticArmBlock}
+										alt=""
+										decoding="async"
+									/>
+									<img
+										ref={robotCharacterRef}
+										className={styles.robotCharacter}
+										src={lagArthurPointing}
+										alt=""
+										decoding="async"
+									/>
+								</div>
+							</div>
 						</div>
 					</div>
 				</div>

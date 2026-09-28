@@ -71,9 +71,7 @@
   position: absolute;
   z-index: 2;
   display: block;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: 100% 100%;
+  object-fit: fill;
   filter:
     saturate(0.88)
     contrast(0.96)
@@ -88,7 +86,6 @@
   left: 25.72%;
   width: 14.13%;
   height: 23.44%;
-  background-image: url("../../assets/Mateus/lag-arthur-iris-anime-human-v3.png");
 }
 
 .smallIris {
@@ -96,7 +93,6 @@
   left: 56.77%;
   width: 6.32%;
   height: 12.89%;
-  background-image: url("../../assets/Mateus/lag-arthur-iris-anime-human-v3.png");
 }
 
 .botIntro {
@@ -225,8 +221,14 @@
 
 .quickActionPrimary:hover,
 .quickActionPrimary:focus-visible {
-  border-color: rgba(91, 239, 145, 0.9);
-  background: rgba(37, 211, 102, 0.22);
+  border-color: #58ee91;
+  background: linear-gradient(
+    135deg,
+    rgba(37, 211, 102, 0.82),
+    rgba(19, 132, 72, 0.9)
+  );
+  box-shadow: 0 8px 22px rgba(20, 179, 83, 0.24);
+  color: #ffffff;
 }
 
 .pricingPanel {

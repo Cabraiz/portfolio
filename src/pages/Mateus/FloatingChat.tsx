@@ -2,8 +2,9 @@ import type * as React from "react";
 import { useState, useRef, useEffect, useSyncExternalStore } from "react";
 import msgIcon from "../../assets/Mateus/msgIcon.png";
 import perfilMini from "../../assets/Mateus/perfilMini.webp";
-import supportCabraiz from "../../assets/Mateus/support-cabraiz-professional-v1.webp";
+import lagArthurSupport from "../../assets/Mateus/lag-arthur-support-wig-closeup-v1.webp";
 import lagArthurChat from "../../assets/Mateus/lag-arthur-chat-blank-eyes-closed-mouth-v3.webp";
+import lagArthurIris from "../../assets/Mateus/lag-arthur-iris-anime-cute-v5.png";
 import { AnimatePresence, motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { useLocation } from "react-router-dom";
@@ -139,8 +140,8 @@ export default function FloatingChat() {
   const inputRef = useRef<HTMLInputElement>(null);
   const messagesScrollRef = useRef<HTMLDivElement>(null);
   const mascotRef = useRef<HTMLSpanElement>(null);
-  const largeIrisRef = useRef<HTMLSpanElement>(null);
-  const smallIrisRef = useRef<HTMLSpanElement>(null);
+  const largeIrisRef = useRef<HTMLImageElement>(null);
+  const smallIrisRef = useRef<HTMLImageElement>(null);
   const mascotTimersRef = useRef<number[]>([]);
   const chatOpenedAtRef = useRef(0);
   const replyCursorRef = useRef(0);
@@ -173,8 +174,8 @@ export default function FloatingChat() {
   const triggerItems: TriggerAvatarItem[] = [
     {
       type: "image",
-      src: supportCabraiz,
-      alt: "Especialista de suporte Cabraiz",
+      src: lagArthurSupport,
+      alt: "Lag Arthur, assistente da Cabraiz",
     },
     {
       type: "image",
@@ -551,13 +552,27 @@ export default function FloatingChat() {
               alt=""
               draggable={false}
             />
-            <span
+            <img
               ref={largeIrisRef}
               className={`${styles.iris} ${styles.largeIris}`}
+              src={lagArthurIris}
+              alt=""
+              aria-hidden="true"
+              draggable={false}
+              loading="eager"
+              decoding="sync"
+              fetchPriority="high"
             />
-            <span
+            <img
               ref={smallIrisRef}
               className={`${styles.iris} ${styles.smallIris}`}
+              src={lagArthurIris}
+              alt=""
+              aria-hidden="true"
+              draggable={false}
+              loading="eager"
+              decoding="sync"
+              fetchPriority="high"
             />
           </span>
 
@@ -798,8 +813,8 @@ export default function FloatingChat() {
               }}
             >
               <img
-                src={supportCabraiz}
-                alt="Especialista de suporte Cabraiz"
+                src={lagArthurSupport}
+                alt="Lag Arthur, assistente da Cabraiz"
                 style={{
                   width: "42px",
                   height: "42px",
@@ -837,8 +852,8 @@ export default function FloatingChat() {
             >
               <div className={styles.botIntro}>
                 <img
-                  src={supportCabraiz}
-                  alt="Especialista de suporte Cabraiz"
+                  src={lagArthurSupport}
+                  alt="Lag Arthur, assistente da Cabraiz"
                   className={styles.botAvatar}
                 />
                 <div className={styles.botIntroContent}>
@@ -945,8 +960,8 @@ export default function FloatingChat() {
                     }}
                   >
                     <img
-                      src={supportCabraiz}
-                      alt="Especialista de suporte Cabraiz"
+                      src={lagArthurSupport}
+                      alt="Lag Arthur, assistente da Cabraiz"
                       style={{
                         width: "30px",
                         height: "30px",

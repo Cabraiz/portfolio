@@ -10,11 +10,11 @@ import { useLocation } from "react-router-dom";
 
 import useLandingSectionNavigation from "@/features/navigation/useLandingSectionNavigation";
 
-import flagBrazil from "../../../assets/Mateus/portfolio/flags/brasil-vertical.png";
-import flagUnitedStates from "../../../assets/Mateus/portfolio/flags/estados-unidos-vertical.png";
-import flagGuineaBissau from "../../../assets/Mateus/portfolio/flags/guine-bissau-vertical.png";
-import flagMexico from "../../../assets/Mateus/portfolio/flags/mexico-vertical.png";
-import flagPortugal from "../../../assets/Mateus/portfolio/flags/portugal-vertical.png";
+import flagBrazil from "../../../assets/Mateus/portfolio/flags/brasil-semicircle-v2.png";
+import flagUnitedStates from "../../../assets/Mateus/portfolio/flags/estados-unidos-semicircle-v2.png";
+import flagGuineaBissau from "../../../assets/Mateus/portfolio/flags/guine-bissau-semicircle-v2.png";
+import flagMexico from "../../../assets/Mateus/portfolio/flags/mexico-semicircle-v2.png";
+import flagPortugal from "../../../assets/Mateus/portfolio/flags/portugal-semicircle-v2.png";
 
 import usePortfolioActiveItem from "./hooks/usePortfolioActiveItem";
 import { defaultPortfolioProjectId, portfolioProjects } from "./portfolio.data";

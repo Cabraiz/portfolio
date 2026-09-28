@@ -122,8 +122,7 @@
 	display: block;
 	inline-size: 100%;
 	aspect-ratio: 1672 / 941;
-	filter:
-		drop-shadow(7px 9px 7px rgba(0, 0, 0, 0.66))
+	filter: drop-shadow(7px 9px 7px rgba(0, 0, 0, 0.66))
 		drop-shadow(12px 18px 18px rgba(0, 0, 0, 0.42))
 		drop-shadow(0 5px 12px rgba(235, 139, 32, 0.26));
 	user-select: none;
@@ -223,6 +222,68 @@
 .robotArmDevice {
 	inline-size: 72%;
 	transform: translate(-16%, -2px);
+	aspect-ratio: 1398 / 1125;
+	overflow: visible;
+}
+
+.robotInteraction {
+	position: relative;
+	display: block;
+	inline-size: 100%;
+	block-size: 100%;
+	overflow: visible;
+}
+
+.robotArmRig {
+	position: absolute;
+	z-index: 2;
+	inset: 0;
+	transform-origin: 42% 86%;
+	will-change: transform;
+}
+
+.robotArmLayer {
+	position: absolute;
+	inset: 0;
+	display: block;
+	inline-size: 100%;
+	block-size: 100%;
+	object-fit: contain;
+	user-select: none;
+	pointer-events: none;
+}
+
+.robotArmClosed {
+	opacity: 0;
+}
+
+.robotBlock {
+	position: absolute;
+	z-index: 3;
+	right: 11%;
+	bottom: -2%;
+	display: block;
+	inline-size: 28%;
+	block-size: auto;
+	filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.4));
+	will-change: transform;
+	user-select: none;
+	pointer-events: none;
+}
+
+.robotCharacter {
+	position: absolute;
+	z-index: 4;
+	left: -38%;
+	bottom: -1%;
+	display: block;
+	inline-size: 42%;
+	block-size: auto;
+	filter: drop-shadow(0 5px 5px rgba(0, 0, 0, 0.42));
+	transform-origin: 50% 100%;
+	will-change: transform;
+	user-select: none;
+	pointer-events: none;
 }
 
 @media (max-height: 680px) and (min-width: 992px) {
