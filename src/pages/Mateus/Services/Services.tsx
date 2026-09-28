@@ -2,11 +2,11 @@ import { useLayoutEffect, useRef } from "react";
 
 import workshopBackground from "@/assets/Mateus/services/industrial-workshop-background-v2.png";
 import workbench from "@/assets/Mateus/services/industrial-workbench-base-v2.png";
-import laptopClubeOff from "@/assets/Mateus/services/devices/laptop-clube-raytrace-off-v3.png";
-import monitorOff from "@/assets/Mateus/services/devices/monitor-raytrace-off-v1.png";
-import phoneClubeOff from "@/assets/Mateus/services/devices/phone-clube-raytrace-off-v2.png";
-import servicesSignStatic from "@/assets/Mateus/services/services-oval-wires-static-v14.png";
-import servicesSignAnimated from "@/assets/Mateus/services/services-sign-lag-arthur-roving-repair-104frames-v17.webp";
+import laptopClubeOff from "@/assets/Mateus/services/devices/laptop-workshop-off-v4.png";
+import monitorOff from "@/assets/Mateus/services/devices/monitor-workshop-off-left-v3.png";
+import phoneClubeOff from "@/assets/Mateus/services/devices/phone-workshop-off-v3.png";
+import servicesSignAnimated from "@/assets/Mateus/services/services-front-wall-rail-lag-arthur-104frames-v21.webp";
+import servicesSignStatic from "@/assets/Mateus/services/services-front-wall-rail-static-v21.png";
 import { ensureGsapRuntime } from "@/features/scroll/gsapRuntime";
 import { shouldDisableScrollFades } from "@/features/scroll/scrollMotionFlags";
 
@@ -205,7 +205,7 @@ export default function Services() {
 						ref={titleRef}
 						id="services-title"
 						className={styles.title}
-						data-title-treatment="physical-amber-oval-storefront-sign-2d"
+						data-title-treatment="front-wall-rail-amber-sign-2d"
 					>
 						<span className={styles.titleLabel}>Serviços</span>
 						<picture

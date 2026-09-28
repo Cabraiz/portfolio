@@ -60,18 +60,13 @@
 
 .heading {
 	position: absolute;
-	top: 4px;
-	left: calc(
-		max(
-			clamp(40px, 3.4vw, 50px),
-			calc((100vw - 1480px) / 2 + 8px)
-		) - min(76.245px, 5.6304vw)
-	);
+	top: 80px;
+	left: max(8px, calc((100vw - 1560px) / 2 + 8px));
 	z-index: 3;
 	display: flex;
 	flex-direction: column;
 	align-items: flex-start;
-	inline-size: min(442px, 32.64vw);
+	inline-size: min(413px, 30.5vw);
 	text-shadow: 0 4px 18px rgba(0, 0, 0, 0.72);
 	will-change: transform, opacity;
 }
@@ -126,7 +121,7 @@
 	position: relative;
 	display: block;
 	inline-size: 100%;
-	aspect-ratio: 1677 / 938;
+	aspect-ratio: 1672 / 941;
 	filter:
 		drop-shadow(7px 9px 7px rgba(0, 0, 0, 0.66))
 		drop-shadow(12px 18px 18px rgba(0, 0, 0, 0.42))
@@ -178,7 +173,7 @@
 	z-index: 2;
 	left: 0;
 	right: 0;
-	bottom: 60.2%;
+	bottom: 63.35%;
 	display: grid;
 	grid-template-columns: repeat(3, minmax(0, 1fr));
 	align-items: end;
@@ -188,52 +183,53 @@
 	position: relative;
 	display: block;
 	justify-self: center;
-	filter: drop-shadow(0 9px 10px rgba(0, 0, 0, 0.46));
+	isolation: isolate;
+	filter: drop-shadow(0 5px 6px rgba(0, 0, 0, 0.38));
 	pointer-events: none;
 }
 
 .device::after {
 	content: "";
 	position: absolute;
-	left: 12%;
-	right: 12%;
-	bottom: -1.2%;
-	block-size: 5.5%;
-	z-index: -1;
+	left: 16%;
+	right: 16%;
+	bottom: -0.6%;
+	block-size: 3.2%;
+	z-index: 0;
 	border-radius: 50%;
-	background: rgba(0, 0, 0, 0.78);
-	filter: blur(7px);
+	background: rgba(0, 0, 0, 0.68);
+	filter: blur(4px);
 }
 
 .deviceImage {
 	display: block;
+	position: relative;
+	z-index: 1;
 	inline-size: 100%;
 	block-size: auto;
 	image-rendering: auto;
 }
 
 .laptopDevice {
-	inline-size: 88%;
+	inline-size: 66%;
+	transform: translateX(20%);
 }
 
 .phoneDevice {
-	inline-size: 27%;
+	inline-size: 20%;
+	transform: translateY(-12px);
 }
 
 .monitorDevice {
-	inline-size: 78%;
+	inline-size: 68%;
+	transform: translate(-10%, -12px);
 }
 
 @media (max-height: 680px) and (min-width: 992px) {
 	.heading {
-		top: 4px;
-		left: calc(
-			max(
-				clamp(40px, 3.4vw, 50px),
-				calc((100vw - 1480px) / 2 + 8px)
-			) - min(70.38px, 5.2785vw)
-		);
-		inline-size: min(408px, 30.6vw);
+		top: 56px;
+		left: max(8px, calc((100vw - 1560px) / 2 + 8px));
+		inline-size: min(347px, 26vw);
 	}
 
 	.workbenchRig {
@@ -247,11 +243,11 @@
 	}
 
 	.heading {
-		top: max(-28px, calc(env(safe-area-inset-top) - 28px));
-		left: calc(8vw - min(12.903vw, 76.245px));
+		top: max(20px, calc(env(safe-area-inset-top) + 20px));
+		left: 8px;
 		right: auto;
 		align-items: flex-start;
-		inline-size: min(74.8vw, 442px);
+		inline-size: min(63.6vw, 376px);
 		margin-inline: 0;
 		text-align: left;
 	}
@@ -268,7 +264,7 @@
 
 @media (max-width: 420px) and (max-height: 700px) {
 	.heading {
-		top: max(-28px, calc(env(safe-area-inset-top) - 28px));
+		top: max(20px, calc(env(safe-area-inset-top) + 20px));
 	}
 
 	.workbenchRig {

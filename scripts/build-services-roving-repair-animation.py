@@ -4,29 +4,28 @@ from math import cos, pi, sin
 from pathlib import Path
 from typing import Iterable
 
-from PIL import Image, ImageChops, ImageDraw, ImageFilter
+from PIL import Image, ImageChops, ImageDraw, ImageEnhance, ImageFilter
 
 
 ROOT = Path(__file__).resolve().parents[1]
 ASSETS = ROOT / "src" / "assets" / "Mateus" / "services"
-SOURCE_ANIMATION = ASSETS / "services-sign-lag-arthur-repair-47frames-v15.webp"
-RAPPEL_POSES = ASSETS / "lag-arthur-rappel-poses-v1.png"
-REPAIR_POSES = ASSETS / "lag-arthur-repair-poses-v1.png"
-OUTPUT = ASSETS / "services-sign-lag-arthur-roving-repair-104frames-v17.webp"
+SOURCE_STATIC = ASSETS / "services-front-wall-rail-static-v21.png"
+UNIFIED_ACTION_POSES = ASSETS / "lag-arthur-unified-action-poses-v3.png"
+OUTPUT = ASSETS / "services-front-wall-rail-lag-arthur-104frames-v21.webp"
 
-CANVAS_SIZE = (1280, 716)
-LEFT_BULB = (380, 389)
-RIGHT_BULB = (966, 385)
+CANVAS_SIZE = (1280, 720)
+LEFT_BULB = (325, 345)
+RIGHT_BULB = (955, 345)
 RAPPEL_ANCHOR_X = 640
 RAPPEL_HEIGHT = 190
 WALK_HEIGHT = 180
 REPAIR_HEIGHT = 190
-REPAIR_TOOL_TIP_SOURCE = (563, 660)
+REPAIR_TOOL_TIP_SOURCE = (488, 512)
+REPAIR_POSE_SOURCE_SIZE = (549, 657)
 
 
-def animated_frame(source: Image.Image, index: int) -> Image.Image:
-    source.seek(index)
-    return source.convert("RGBA").copy()
+def light_level(healthy: Image.Image, dark: Image.Image, amount: float) -> Image.Image:
+    return Image.blend(dark, healthy, max(0.0, min(1.0, amount)))
 
 
 def crop_pose(sheet: Image.Image, box: tuple[int, int, int, int]) -> Image.Image:
@@ -52,8 +51,8 @@ def lerp(start: float, end: float, value: float) -> float:
 
 
 def rim_baseline(center_x: float) -> int:
-    normalized = (center_x - 640) / 520
-    return round(399 + 14 * normalized * normalized)
+    # The replacement is intentionally front-facing, so its upper rim stays level.
+    return 342
 
 
 def add_shadow(frame: Image.Image, center_x: int, baseline_y: int, width: int) -> None:
@@ -220,9 +219,8 @@ def composite_repair(
     spark_intensity: float,
 ) -> Image.Image:
     frame = background.copy()
-    scale = REPAIR_HEIGHT / 735
-    tool_x = round(REPAIR_TOOL_TIP_SOURCE[0] * scale)
-    tool_y = round(REPAIR_TOOL_TIP_SOURCE[1] * scale)
+    tool_x = round(REPAIR_TOOL_TIP_SOURCE[0] * pose.width / REPAIR_POSE_SOURCE_SIZE[0])
+    tool_y = round(REPAIR_TOOL_TIP_SOURCE[1] * pose.height / REPAIR_POSE_SOURCE_SIZE[1])
     angle = (0.0, -1.6, 0.0, 1.3)[phase % 4]
     rendered = pose.rotate(
         angle,
@@ -251,49 +249,52 @@ def add_frames(
 
 
 def main() -> None:
-    source = Image.open(SOURCE_ANIMATION)
-    healthy = animated_frame(source, 0)
-    dark = animated_frame(source, 13)
-    idle = [animated_frame(source, index) for index in range(6)]
-    failure = [animated_frame(source, index) for index in range(6, 14)]
-
-    rappel_sheet = Image.open(RAPPEL_POSES).convert("RGBA")
-    rappel_boxes = ((0, 0, 685, 765), (685, 0, 1371, 765), (1371, 0, 2056, 765))
-    descent_pose, _, ascent_pose = [
-        resize_to_height(crop_pose(rappel_sheet, box), RAPPEL_HEIGHT)
-        for box in rappel_boxes
+    healthy = Image.open(SOURCE_STATIC).convert("RGBA").resize(
+        CANVAS_SIZE,
+        Image.Resampling.LANCZOS,
+    )
+    dark = ImageEnhance.Color(healthy).enhance(0.48)
+    dark = ImageEnhance.Brightness(dark).enhance(0.3)
+    idle = [
+        light_level(healthy, dark, amount)
+        for amount in (1.0, 0.98, 1.0, 0.96, 0.99, 1.0)
+    ]
+    failure = [
+        light_level(healthy, dark, amount)
+        for amount in (0.92, 0.34, 0.76, 0.2, 0.56, 0.08, 0.22, 0.0)
     ]
 
-    repair_sheet = Image.open(REPAIR_POSES).convert("RGBA")
-    repair_boxes = ((0, 0, 685, 765), (685, 0, 1370, 765), (1370, 0, 2055, 765))
-    walk_pose = resize_to_height(crop_pose(repair_sheet, repair_boxes[0]), WALK_HEIGHT)
-    repair_pose = resize_to_height(crop_pose(repair_sheet, repair_boxes[2]), REPAIR_HEIGHT)
+    unified_sheet = Image.open(UNIFIED_ACTION_POSES).convert("RGBA")
+    descent_pose = resize_to_height(crop_pose(unified_sheet, (0, 30, 543, 675)), RAPPEL_HEIGHT)
+    walk_pose = resize_to_height(crop_pose(unified_sheet, (543, 0, 1100, 724)), WALK_HEIGHT)
+    repair_pose = resize_to_height(crop_pose(unified_sheet, (1100, 0, 1660, 724)), REPAIR_HEIGHT)
+    ascent_pose = resize_to_height(crop_pose(unified_sheet, (1660, 30, 2172, 675)), RAPPEL_HEIGHT)
 
     frames: list[Image.Image] = []
     durations: list[int] = []
 
-    # Quiet illuminated idle before the two-point maintenance sequence.
-    add_frames(frames, durations, idle, 850)
+    # Keep the sign healthy for longer so the repair remains a rare event.
+    add_frames(frames, durations, idle, 4500)
     add_frames(frames, durations, failure, 125)
 
-    descent_y = (-175, -125, -78, -35, 8, 54, 102, 150, 205)
+    descent_y = (-175, -125, -78, -35, 5, 45, 82, 118, 155)
     add_frames(
         frames,
         durations,
         (
-            composite_rappel(dark, descent_pose, rope_ratio=0.564, y=y)
+            composite_rappel(dark, descent_pose, rope_ratio=0.357, y=y)
             for y in descent_y
         ),
         145,
     )
 
-    left_center = 318
-    right_center = 904
+    left_center = 300
+    right_center = 980
 
     # Walk from the central rope toward the left bulb with visible intermediate steps.
     for index in range(11):
         amount = ease_in_out(index / 10)
-        center_x = lerp(640, left_center, amount)
+        center_x = lerp(RAPPEL_ANCHOR_X, left_center, amount)
         frames.append(
             composite_walker(dark, walk_pose, center_x=center_x, direction=-1, phase=index)
         )
@@ -371,7 +372,7 @@ def main() -> None:
     # Return to the central rope before leaving the scene.
     for index in range(10):
         amount = ease_in_out(index / 9)
-        center_x = lerp(right_center, 640, amount)
+        center_x = lerp(right_center, RAPPEL_ANCHOR_X, amount)
         frames.append(
             composite_walker(
                 healthy,
@@ -383,12 +384,12 @@ def main() -> None:
         )
         durations.append(165)
 
-    ascent_y = (205, 162, 116, 68, 20, -34, -96, -170)
+    ascent_y = (155, 118, 82, 45, 5, -35, -96, -170)
     add_frames(
         frames,
         durations,
         (
-            composite_rappel(healthy, ascent_pose, rope_ratio=0.662, y=y)
+            composite_rappel(healthy, ascent_pose, rope_ratio=0.948, y=y)
             for y in ascent_y
         ),
         145,
