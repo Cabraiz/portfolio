@@ -26,8 +26,8 @@ const PROJECT_DESCRIPTIONS: Record<PortfolioProjectId, string> = {
     "Gestão completa de cotações, produtos e fornecedores para operações comerciais com visão clara do negócio.",
   "app-bank":
     "Experiência bancária mobile desenhada para tornar consultas, movimentações e decisões financeiras mais simples.",
-  "papua-commerce":
-    "Loja virtual com catálogo, carrinho e checkout para conectar produtos locais a clientes em Papua-Nova Guiné.",
+  "guine-bissau-commerce":
+    "Loja virtual com catálogo, carrinho e checkout para conectar produtos locais a clientes em Guiné-Bissau.",
   "app-barber":
     "Agenda digital com recorrência, organização de serviços e uma jornada direta para clientes e profissionais.",
   "central-clube-livro":
@@ -57,8 +57,8 @@ const WORLD_JOURNEY_DESTINATIONS: Partial<
   Record<PortfolioProjectId, Readonly<{ x: number; y: number }>>
 > = {
   "app-bank": { x: 20.7708, y: 38.5259 },
-  // Port Moresby, na costa sudeste de Papua-Nova Guiné.
-  "papua-commerce": { x: 90.8834, y: 55.2466 },
+  // Bissau, na costa oeste da Guiné-Bissau.
+  "guine-bissau-commerce": { x: 45.6673, y: 43.4091 },
   // Ajuste visual do atlas ilustrado: Salt Lake fica ao sudeste do Great Salt Lake.
   "app-barber": { x: 19.05, y: 25.15 },
   // Ajuste visual do atlas ilustrado: Lisboa fica na costa oeste de Portugal.
