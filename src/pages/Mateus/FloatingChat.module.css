@@ -22,14 +22,19 @@
   bottom: calc(100% - 11px);
   z-index: 2;
   display: block;
-  width: 147.2px;
+  width: 103.04px;
   aspect-ratio: 3 / 2;
   pointer-events: auto;
   cursor: pointer;
   transform: translateX(-50%);
   transform-origin: 50% 100%;
   filter: drop-shadow(0 11px 9px rgba(0, 0, 0, 0.48));
+  transition: left 720ms cubic-bezier(0.22, 0.78, 0.22, 1);
   animation: mascotBreathing 4.8s ease-in-out infinite;
+}
+
+.chatTrigger[data-home-active="true"] .mascot {
+	left: 20%;
 }
 
 .mascot::before,
@@ -336,7 +341,7 @@
 .chatTrigger[data-mobile="true"] .mascot {
   left: 62%;
   bottom: calc(100% - 7px);
-  width: 73.6px;
+  width: 51.52px;
   animation-duration: 5.6s;
 }
 

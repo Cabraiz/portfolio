@@ -1,9 +1,9 @@
 import type * as React from "react";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useSyncExternalStore } from "react";
 import msgIcon from "../../assets/Mateus/msgIcon.png";
 import perfilMini from "../../assets/Mateus/perfilMini.webp";
 import supportCabraiz from "../../assets/Mateus/support-cabraiz-professional-v1.webp";
-import lagArthurChat from "../../assets/Mateus/lag-arthur-chat-blank-eyes-v2.webp";
+import lagArthurChat from "../../assets/Mateus/lag-arthur-chat-blank-eyes-closed-mouth-v3.webp";
 import { AnimatePresence, motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { useLocation } from "react-router-dom";
@@ -47,6 +47,32 @@ const CONTACT_API_URL =
   import.meta.env.VITE_CONTACT_API_URL?.trim() || "/api/contact";
 const WHATSAPP_SUPPORT_URL =
   "https://wa.me/5585998575707?text=Ol%C3%A1%20Mateus%2C%20vim%20pelo%20atendimento%2024%2F7%20da%20Cabraiz%20e%20quero%20falar%20sobre%20um%20projeto.";
+
+function getActiveLandingSectionSnapshot(): string | null {
+  if (typeof document === "undefined") return null;
+
+  return (
+    document
+      .querySelector<HTMLElement>('main[data-active-section]')
+      ?.dataset.activeSection ?? null
+  );
+}
+
+function subscribeToActiveLandingSection(onStoreChange: () => void) {
+  if (typeof document === "undefined" || typeof MutationObserver === "undefined") {
+    return () => undefined;
+  }
+
+  const observer = new MutationObserver(onStoreChange);
+  observer.observe(document.body, {
+    attributes: true,
+    attributeFilter: ["data-active-section"],
+    childList: true,
+    subtree: true,
+  });
+
+  return () => observer.disconnect();
+}
 
 function getOrCreateConversationId(): string {
   const conversationId = window.crypto.randomUUID();
@@ -98,9 +124,18 @@ export default function FloatingChat() {
   }) as string[];
 
   const [currentPhraseIndex, setCurrentPhraseIndex] = useState(0);
+  const activeLandingSection = useSyncExternalStore(
+    subscribeToActiveLandingSection,
+    getActiveLandingSectionSnapshot,
+    () => null,
+  );
 
   const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
-  const shouldHideForMobileHome = isMobile && location.pathname === "/home";
+  const isHome = location.pathname === "/home";
+  const isHomeSectionActive = activeLandingSection
+    ? activeLandingSection === "home"
+    : isHome;
+  const shouldHideForMobileHome = isMobile && isHome;
   const shouldHideForPortfolio = location.pathname === "/portfolio";
   const scale = (value: number) => (isMobile ? value * 0.8 : value);
 
@@ -407,6 +442,7 @@ export default function FloatingChat() {
           onClick={handleTriggerClick}
           className={styles.chatTrigger}
           data-mobile={isMobile ? "true" : "false"}
+          data-home-active={isHomeSectionActive ? "true" : "false"}
           style={{
             display: "flex",
             alignItems: "center",
