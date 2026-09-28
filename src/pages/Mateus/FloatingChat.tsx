@@ -785,6 +785,7 @@ export default function FloatingChat() {
               display: "flex",
               flexDirection: "column",
               padding: `${scale(1.5)}rem`,
+              paddingBottom: isMobile ? "16px" : "20px",
               color: "#fff",
               fontSize: `${scale(1)}rem`,
               position: "fixed",
