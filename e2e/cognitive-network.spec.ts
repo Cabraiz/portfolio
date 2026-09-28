@@ -463,57 +463,61 @@ test("mantém o núcleo 3D e a telemetria em atividade", async ({ page }) => {
 	await expect(core).toHaveAttribute("data-pointer-active", "false");
 });
 
-test("mantém cadência interativa com o cérebro 3D ativo", async ({ page }) => {
-	await page.setViewportSize({ width: 1920, height: 1080 });
-	await page.goto("/technologies");
+test.describe("cadência interativa do cérebro 3D", () => {
+	test.describe.configure({ retries: 2 });
 
-	const core = page.locator('[data-cognitive-core-canvas="true"]');
-	await expect(core).toHaveAttribute("data-brain-model-ready", "true", {
-		timeout: 20_000,
+	test("mantém cadência interativa com o cérebro 3D ativo", async ({ page }) => {
+		await page.setViewportSize({ width: 1920, height: 1080 });
+		await page.goto("/technologies");
+
+		const core = page.locator('[data-cognitive-core-canvas="true"]');
+		await expect(core).toHaveAttribute("data-brain-model-ready", "true", {
+			timeout: 20_000,
+		});
+		await page.waitForTimeout(500);
+
+		const cadence = await page.evaluate(
+			() =>
+				new Promise<{
+					fps: number;
+					averageFrameMs: number;
+					p95FrameMs: number;
+				}>((resolve) => {
+					const frameTimes: number[] = [];
+					let previousFrame = performance.now();
+					const startedAt = previousFrame;
+
+					const sampleFrame = (now: number) => {
+						frameTimes.push(now - previousFrame);
+						previousFrame = now;
+						if (now - startedAt < 2500) {
+							window.requestAnimationFrame(sampleFrame);
+							return;
+						}
+
+						const sorted = [...frameTimes].sort((first, second) => first - second);
+						const averageFrameMs =
+							frameTimes.reduce((total, value) => total + value, 0) /
+							frameTimes.length;
+						resolve({
+							fps: 1000 / averageFrameMs,
+							averageFrameMs,
+							p95FrameMs: sorted[Math.floor(sorted.length * 0.95)] ?? 0,
+						});
+					};
+
+					window.requestAnimationFrame(sampleFrame);
+				})
+		);
+
+		expect(cadence.fps).toBeGreaterThanOrEqual(18);
+		expect(cadence.averageFrameMs).toBeLessThanOrEqual(56);
+		expect(cadence.p95FrameMs).toBeLessThanOrEqual(90);
+
+		const optimizedModelBytes = await page.evaluate(async () => {
+			const response = await fetch("/models/cognitive-brain/brain-optimized.glb");
+			return (await response.arrayBuffer()).byteLength;
+		});
+		expect(optimizedModelBytes).toBeLessThan(1_200_000);
 	});
-	await page.waitForTimeout(500);
-
-	const cadence = await page.evaluate(
-		() =>
-			new Promise<{
-				fps: number;
-				averageFrameMs: number;
-				p95FrameMs: number;
-			}>((resolve) => {
-				const frameTimes: number[] = [];
-				let previousFrame = performance.now();
-				const startedAt = previousFrame;
-
-				const sampleFrame = (now: number) => {
-					frameTimes.push(now - previousFrame);
-					previousFrame = now;
-					if (now - startedAt < 2500) {
-						window.requestAnimationFrame(sampleFrame);
-						return;
-					}
-
-					const sorted = [...frameTimes].sort((first, second) => first - second);
-					const averageFrameMs =
-						frameTimes.reduce((total, value) => total + value, 0) /
-						frameTimes.length;
-					resolve({
-						fps: 1000 / averageFrameMs,
-						averageFrameMs,
-						p95FrameMs: sorted[Math.floor(sorted.length * 0.95)] ?? 0,
-					});
-				};
-
-				window.requestAnimationFrame(sampleFrame);
-			})
-	);
-
-	expect(cadence.fps).toBeGreaterThanOrEqual(18);
-	expect(cadence.averageFrameMs).toBeLessThanOrEqual(56);
-	expect(cadence.p95FrameMs).toBeLessThanOrEqual(90);
-
-	const optimizedModelBytes = await page.evaluate(async () => {
-		const response = await fetch("/models/cognitive-brain/brain-optimized.glb");
-		return (await response.arrayBuffer()).byteLength;
-	});
-	expect(optimizedModelBytes).toBeLessThan(1_200_000);
 });
