@@ -11,7 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 ASSETS = ROOT / "src" / "assets" / "Mateus" / "services"
 SOURCE_STATIC = ASSETS / "services-front-wall-rail-static-v21.png"
 UNIFIED_ACTION_POSES = ASSETS / "lag-arthur-unified-action-poses-v3.png"
-OUTPUT = ASSETS / "services-front-wall-rail-lag-arthur-104frames-v21.webp"
+OUTPUT = ASSETS / "services-front-wall-rail-lag-arthur-104frames-v22.webp"
 
 CANVAS_SIZE = (1280, 720)
 LEFT_BULB = (325, 345)
@@ -277,16 +277,14 @@ def main() -> None:
     add_frames(frames, durations, idle, 4500)
     add_frames(frames, durations, failure, 125)
 
-    descent_y = (-175, -125, -78, -35, 5, 45, 82, 118, 155)
-    add_frames(
-        frames,
-        durations,
-        (
-            composite_rappel(dark, descent_pose, rope_ratio=0.357, y=y)
-            for y in descent_y
-        ),
-        145,
-    )
+    descent_y = (-235, -135, -78, -35, 5, 45, 82, 118, 155)
+    descent_frames = [
+        composite_rappel(dark, descent_pose, rope_ratio=0.357, y=y)
+        for y in descent_y
+    ]
+    if ImageChops.difference(descent_frames[0], dark).getbbox() is not None:
+        raise RuntimeError("Lag Arthur must begin fully above the visible frame")
+    add_frames(frames, durations, descent_frames, 145)
 
     left_center = 300
     right_center = 980
@@ -384,16 +382,14 @@ def main() -> None:
         )
         durations.append(165)
 
-    ascent_y = (155, 118, 82, 45, 5, -35, -96, -170)
-    add_frames(
-        frames,
-        durations,
-        (
-            composite_rappel(healthy, ascent_pose, rope_ratio=0.948, y=y)
-            for y in ascent_y
-        ),
-        145,
-    )
+    ascent_y = (155, 118, 82, 45, 5, -45, -135, -235)
+    ascent_frames = [
+        composite_rappel(healthy, ascent_pose, rope_ratio=0.948, y=y)
+        for y in ascent_y
+    ]
+    if ImageChops.difference(ascent_frames[-1], healthy).getbbox() is not None:
+        raise RuntimeError("Lag Arthur must finish fully above the visible frame")
+    add_frames(frames, durations, ascent_frames, 145)
 
     frames.append(healthy.copy())
     durations.append(960)

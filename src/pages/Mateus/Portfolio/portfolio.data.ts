@@ -1,4 +1,4 @@
-import imagem1 from "../../../assets/Mateus/portfolio/imagem1.webp";
+import imagemNexovare from "../../../assets/Mateus/portfolio/nexovare-dashboard-preview-v3.png";
 import imagem2 from "../../../assets/Mateus/portfolio/imagem2.webp";
 import imagemGuineBissauCommerce from "../../../assets/Mateus/portfolio/guine-bissau-commerce-preview-v4.webp";
 import imagem3 from "../../../assets/Mateus/portfolio/imagem3-barbearia-v3.webp";
@@ -6,7 +6,7 @@ import imagemCentralClube from "../../../assets/Mateus/portfolio/imagem4-central
 import imagem4 from "../../../assets/Mateus/portfolio/imagem4-wagner-v2.webp";
 import imagem5 from "../../../assets/Mateus/portfolio/imagem5-fran-v2.webp";
 
-import logo1 from "../../../assets/Mateus/portfolio/logos/refined/erp-varejo-lockup-v3.png";
+import logoNexovare from "../../../assets/Mateus/portfolio/logos/refined/nexovare-nx-mark-v2.png";
 import logo2 from "../../../assets/Mateus/portfolio/logos/logo2.webp";
 import logoGuineBissauCommerce from "../../../assets/Mateus/portfolio/logos/refined/guine-bissau-commerce-logo-v4.png";
 import logo3 from "../../../assets/Mateus/portfolio/logos/refined/pessoa-barbearia-lockup-v3.png";
@@ -37,12 +37,12 @@ const defaultProjectMedia = {
 export const portfolioProjects: ReadonlyArray<PortfolioProject> = [
   {
     id: "erp-varejo",
-    name: "SISTEMA ERP VAREJO",
+    name: "NEXOVARE",
     year: "2021",
-    imageSrc: imagem1,
-    imageAlt: "Preview do projeto ERP VAREJO",
-    logoSrc: logo1,
-    logoAlt: "Logo do projeto ERP VAREJO",
+    imageSrc: imagemNexovare,
+    imageAlt: "Preview do painel de gestão Nexovare",
+    logoSrc: logoNexovare,
+    logoAlt: "Monograma NX do ecossistema Nexovare",
     projectLabel: "Projeto em destaque",
     subtitle: "Ecossistema comercial",
     statusLabel: "SELECIONAR",
@@ -191,10 +191,10 @@ export const portfolioProjects: ReadonlyArray<PortfolioProject> = [
     },
     worldLocation: {
       country: "Brasil",
-      city: "Brasília",
-      region: "América do Sul",
-      lat: -15.7939,
-      lng: -47.8828,
+      city: "São Paulo",
+      region: "São Paulo",
+      lat: -23.5505,
+      lng: -46.6333,
     },
   },
   {

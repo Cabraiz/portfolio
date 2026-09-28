@@ -216,13 +216,13 @@
 }
 
 .phoneDevice {
-	inline-size: 20%;
+	inline-size: 38%;
 	transform: translateY(-12px);
 }
 
-.monitorDevice {
-	inline-size: 68%;
-	transform: translate(-10%, -12px);
+.robotArmDevice {
+	inline-size: 72%;
+	transform: translate(-16%, -2px);
 }
 
 @media (max-height: 680px) and (min-width: 992px) {

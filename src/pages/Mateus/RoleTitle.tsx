@@ -1,7 +1,5 @@
 import { useEffect, useState } from "react";
 
-import styles from "./RoleTitle.module.css";
-
 const titles = [
   "Engenheiro de Software",
   "Dev Full Stack",
@@ -45,31 +43,33 @@ export default function RoleTitle() {
 
   return (
     <div
-      className={styles.glassFrame}
       style={{
-        height: "clamp(5rem, 5.5vw, 6rem)",
+        height: "clamp(4.75rem, 5.35vw, 5.5rem)",
         overflow: "hidden",
         width: "100%",
         position: "relative",
+        border: "2px solid rgba(218, 162, 37, 0.92)",
         borderRadius: "12px",
         padding: "clamp(0.5rem, 0.8vw, 0.85rem) clamp(1rem, 1.6vw, 1.5rem)",
         boxSizing: "border-box",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
+        background: "rgba(4, 15, 27, 0.72)",
       }}
     >
       <div
-        className={styles.goldLabel}
+        aria-live="polite"
         style={{
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           width: "100%",
           height: "100%",
-          fontSize: "clamp(1.8rem, 2.45vw, 2.75rem)",
+          fontSize: "clamp(1.75rem, 2.35vw, 2.5rem)",
           fontWeight: 700,
           fontFamily: '"Brutal", sans-serif',
+          color: "#dcae43",
           textAlign: "center",
           lineHeight: 1.1,
           whiteSpace: "nowrap",

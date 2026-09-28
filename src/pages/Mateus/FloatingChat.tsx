@@ -41,10 +41,15 @@ type ContactReply = {
 type MascotReaction = "idle" | "fleeing" | "hidden" | "returning";
 
 const CHAT_CONVERSATION_STORAGE_KEY = "cabraiz-chat-conversation-id";
+const CHAT_LAST_SENT_AT_STORAGE_KEY = "cabraiz-chat-last-sent-at";
+const CHAT_REPLY_RETENTION_MS = 24 * 60 * 60 * 1000;
 const CHAT_CONVERSATION_ID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const LOCAL_CONTACT_API_URL =
+  "https://cabraiz-telegram-relay.vercel.app/api/contact";
 const CONTACT_API_URL =
-  import.meta.env.VITE_CONTACT_API_URL?.trim() || "/api/contact";
+  import.meta.env.VITE_CONTACT_API_URL?.trim() ||
+  (import.meta.env.DEV ? LOCAL_CONTACT_API_URL : "/api/contact");
 const WHATSAPP_SUPPORT_URL =
   "https://wa.me/5585998575707?text=Ol%C3%A1%20Mateus%2C%20vim%20pelo%20atendimento%2024%2F7%20da%20Cabraiz%20e%20quero%20falar%20sobre%20um%20projeto.";
 
@@ -94,6 +99,24 @@ function getOrCreateConversationId(): string {
   return conversationId;
 }
 
+function hasRecentConversationActivity(): boolean {
+  if (typeof window === "undefined") return false;
+
+  try {
+    const lastSentAt = Number(
+      window.localStorage.getItem(CHAT_LAST_SENT_AT_STORAGE_KEY)
+    );
+
+    return (
+      Number.isFinite(lastSentAt) &&
+      lastSentAt > 0 &&
+      Date.now() - lastSentAt < CHAT_REPLY_RETENTION_MS
+    );
+  } catch {
+    return false;
+  }
+}
+
 export default function FloatingChat() {
   const location = useLocation();
   const shouldHideForStandaloneGame =
@@ -102,6 +125,9 @@ export default function FloatingChat() {
   const [isOpen, setIsOpen] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [hasActiveConversation, setHasActiveConversation] = useState(
+    hasRecentConversationActivity
+  );
   const [showPricing, setShowPricing] = useState(false);
   const [mascotReaction, setMascotReaction] =
     useState<MascotReaction>("idle");
@@ -111,12 +137,14 @@ export default function FloatingChat() {
   >("idle");
   const chatRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const messagesScrollRef = useRef<HTMLDivElement>(null);
   const mascotRef = useRef<HTMLSpanElement>(null);
   const largeIrisRef = useRef<HTMLSpanElement>(null);
   const smallIrisRef = useRef<HTMLSpanElement>(null);
   const mascotTimersRef = useRef<number[]>([]);
-  const chatOpenedAtRef = useRef(Date.now());
+  const chatOpenedAtRef = useRef(0);
   const replyCursorRef = useRef(0);
+  const isSendingRef = useRef(false);
 
   const { t, i18n } = useTranslation();
   const phrases = t("floatingChat.phrases", {
@@ -193,19 +221,19 @@ export default function FloatingChat() {
 
       largeIris.style.setProperty(
         "--eye-x",
-        `${offset(directionX, 7.3, 7)}px`
+        `${offset(directionX, 3.1, 3.1)}px`
       );
       largeIris.style.setProperty(
         "--eye-y",
-        `${offset(directionY, 4.5, 0.65)}px`
+        `${offset(directionY, 1.8, 1.1)}px`
       );
       smallIris.style.setProperty(
         "--eye-x",
-        `${offset(directionX, 4.2, 4)}px`
+        `${offset(directionX, 1.4, 1.4)}px`
       );
       smallIris.style.setProperty(
         "--eye-y",
-        `${offset(directionY, 0.65, 0.55)}px`
+        `${offset(directionY, 0.75, 0.65)}px`
       );
     };
 
@@ -274,7 +302,35 @@ export default function FloatingChat() {
   }, [isOpen]);
 
   useEffect(() => {
-    if (!isOpen || !messages.some((message) => message.author === "visitor")) {
+    if (!isOpen) return;
+
+    const panel = chatRef.current;
+    if (!panel) return;
+
+    const handleWheel = (event: WheelEvent) => {
+      if (event.ctrlKey) return;
+
+      const scrollArea = messagesScrollRef.current;
+      if (!scrollArea || event.deltaY === 0) return;
+
+      const deltaMultiplier =
+        event.deltaMode === WheelEvent.DOM_DELTA_LINE
+          ? 16
+          : event.deltaMode === WheelEvent.DOM_DELTA_PAGE
+            ? scrollArea.clientHeight
+            : 1;
+
+      event.preventDefault();
+      event.stopPropagation();
+      scrollArea.scrollTop += event.deltaY * deltaMultiplier;
+    };
+
+    panel.addEventListener("wheel", handleWheel, { passive: false });
+    return () => panel.removeEventListener("wheel", handleWheel);
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen || !hasActiveConversation) {
       return;
     }
 
@@ -325,7 +381,7 @@ export default function FloatingChat() {
       cancelled = true;
       window.clearInterval(interval);
     };
-  }, [conversationId, isOpen, messages]);
+  }, [conversationId, hasActiveConversation, isOpen]);
 
   const openChat = () => {
     chatOpenedAtRef.current = Date.now();
@@ -335,8 +391,9 @@ export default function FloatingChat() {
 
   const sendMessage = async () => {
     const message = inputValue.trim();
-    if (!message || sendStatus === "sending") return;
+    if (!message || sendStatus === "sending" || isSendingRef.current) return;
 
+    isSendingRef.current = true;
     setSendStatus("sending");
 
     try {
@@ -353,7 +410,14 @@ export default function FloatingChat() {
           }),
         });
 
-      if (!response.ok) {
+      let responsePayload: { ok?: boolean } | null = null;
+      try {
+        responsePayload = (await response.json()) as { ok?: boolean };
+      } catch {
+        // Uma resposta sem JSON não confirma que o relay entregou a mensagem.
+      }
+
+      if (!response.ok || responsePayload?.ok !== true) {
         throw new Error(`Contact API returned ${response.status}`);
       }
 
@@ -366,10 +430,21 @@ export default function FloatingChat() {
         },
       ]);
       setInputValue("");
+      setHasActiveConversation(true);
+      try {
+        window.localStorage.setItem(
+          CHAT_LAST_SENT_AT_STORAGE_KEY,
+          String(Date.now())
+        );
+      } catch {
+        // O polling continua nesta visita quando o armazenamento é bloqueado.
+      }
       setSendStatus("sent");
     } catch (error) {
       console.error("Não foi possível enviar a mensagem do portfólio.", error);
       setSendStatus("error");
+    } finally {
+      isSendingRef.current = false;
     }
   };
 
@@ -462,7 +537,7 @@ export default function FloatingChat() {
             minWidth: "unset",
             maxWidth: isMobile ? "60px" : "none",
           }}
-          title="Abrir chat"
+          aria-label="Abrir chat"
         >
           <span
             ref={mascotRef}
@@ -580,7 +655,7 @@ export default function FloatingChat() {
                   if (item.type === "image") {
                     return (
                       <div
-                        key={`${item.alt}-${index}`}
+                        key={item.alt}
                         style={commonStyle}
                       >
                         <img
@@ -599,7 +674,7 @@ export default function FloatingChat() {
 
                   return (
                     <div
-                      key={`${item.ariaLabel}-${index}`}
+                      key={item.ariaLabel}
                       aria-label={item.ariaLabel}
                       title={item.ariaLabel}
                       style={{
@@ -676,14 +751,16 @@ export default function FloatingChat() {
         {isOpen && (
           <motion.div
             ref={chatRef}
+            data-lenis-prevent
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20, transition: { duration: 0 } }}
             transition={{ duration: 0.8, ease: [0.23, 1, 0.32, 1] }}
             style={{
               width: isMobile ? "calc(100vw - 32px)" : "480px",
-              height: isMobile ? "min(72vh, 620px)" : "min(680px, calc(100dvh - 40px))",
-              maxHeight: "calc(100dvh - 40px)",
+              height: "80dvh",
+              maxHeight: "80dvh",
+              boxSizing: "border-box",
               background: "rgba(255, 255, 255, 0.06)",
               backdropFilter: "blur(18px)",
               WebkitBackdropFilter: "blur(18px)",
@@ -696,16 +773,28 @@ export default function FloatingChat() {
               color: "#fff",
               fontSize: `${scale(1)}rem`,
               position: "fixed",
+              overscrollBehavior: "contain",
               bottom: "20px",
               right: "20px",
             }}
           >
+            <button
+              type="button"
+              className={styles.chatCloseButton}
+              aria-label={t("floatingChat.close")}
+              title={t("floatingChat.close")}
+              onClick={() => setIsOpen(false)}
+            >
+              ×
+            </button>
+
             <div
               style={{
                 display: "flex",
                 alignItems: "center",
                 gap: "0.75rem",
                 marginBottom: `${scale(1)}rem`,
+                paddingRight: `${scale(2.5)}rem`,
               }}
             >
               <img
@@ -731,6 +820,9 @@ export default function FloatingChat() {
             </div>
 
             <div
+              ref={messagesScrollRef}
+              data-chat-scroll-area="true"
+              className={styles.chatScrollArea}
               style={{
                 flex: 1,
                 fontSize: `${scale(1.05)}rem`,
@@ -884,9 +976,23 @@ export default function FloatingChat() {
             </div>
 
             <div
+              aria-live="polite"
+              style={{
+                minHeight: `${scale(1.25)}rem`,
+                marginTop: `${scale(0.4)}rem`,
+                color: sendStatus === "error" ? "#ffb4ab" : "#b9f6ca",
+                fontSize: `${scale(0.82)}rem`,
+              }}
+            >
+              {sendStatus === "sent" && t("floatingChat.sendSuccess")}
+              {sendStatus === "error" && t("floatingChat.sendError")}
+            </div>
+
+            <div
+              data-chat-composer="true"
               style={{
                 display: "flex",
-                marginTop: `${scale(1)}rem`,
+                marginTop: `${scale(0.4)}rem`,
                 gap: `${scale(0.5)}rem`,
               }}
             >
@@ -967,36 +1073,6 @@ export default function FloatingChat() {
                   : t("floatingChat.send")}
               </button>
             </div>
-
-            <div
-              aria-live="polite"
-              style={{
-                minHeight: `${scale(1.25)}rem`,
-                marginTop: `${scale(0.4)}rem`,
-                color: sendStatus === "error" ? "#ffb4ab" : "#b9f6ca",
-                fontSize: `${scale(0.82)}rem`,
-              }}
-            >
-              {sendStatus === "sent" && t("floatingChat.sendSuccess")}
-              {sendStatus === "error" && t("floatingChat.sendError")}
-            </div>
-
-            <button
-              onClick={() => setIsOpen(false)}
-              style={{
-                marginTop: `${scale(1)}rem`,
-                backgroundColor: "#f41112",
-                color: "#fff",
-                border: "none",
-                padding: `${scale(0.6)}rem ${scale(1)}rem`,
-                borderRadius: "8px",
-                cursor: "pointer",
-                fontWeight: "bold",
-                fontSize: `${scale(1)}rem`,
-              }}
-            >
-              {t("floatingChat.close")}
-            </button>
           </motion.div>
         )}
       </AnimatePresence>

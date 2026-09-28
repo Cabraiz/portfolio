@@ -9,10 +9,7 @@
   position: relative;
   isolation: isolate;
   width: 100%;
-  min-height: max(
-    620px,
-    calc(100dvh - var(--app-navbar-height, 70px))
-  );
+  min-height: 100dvh;
   overflow: visible;
   color: var(--atlas-ink);
   background: #dcefeb;
@@ -120,10 +117,7 @@
   gap: clamp(14px, 1.6vw, 26px);
   align-items: center;
   width: min(100%, 1560px);
-  min-height: max(
-    620px,
-    calc(100dvh - var(--app-navbar-height, 70px))
-  );
+  min-height: 100dvh;
   margin: 0 auto;
   padding: clamp(28px, 4dvh, 48px) clamp(22px, 3vw, 48px) clamp(18px, 3dvh, 34px);
   box-sizing: border-box;
@@ -160,7 +154,7 @@
   align-items: center;
   width: 100%;
   min-height: 58px;
-  padding: 6px 12px 6px 10px;
+  padding: 6px 46px 6px 10px;
   border: 1px solid rgba(7, 76, 76, 0.12);
   border-radius: 9px;
   box-sizing: border-box;
@@ -170,6 +164,32 @@
   text-align: left;
   cursor: pointer;
   transition: transform 180ms ease, background 180ms ease, color 180ms ease, box-shadow 180ms ease;
+}
+
+.projectCountryBadge {
+  position: absolute;
+  top: 50%;
+  right: -1px;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 52px;
+  border: 1px solid rgba(7, 76, 76, 0.24);
+  border-right: 0;
+  border-radius: 28px 0 0 28px;
+  box-sizing: border-box;
+  overflow: hidden;
+  color: #083f40;
+  background: transparent;
+  box-shadow: -4px 0 10px rgba(17, 70, 67, 0.08);
+  transform: translateY(-50%);
+}
+
+.projectCountryBadge img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
 }
 
 .projectButton:hover {
@@ -221,6 +241,10 @@
   font-size: 10.5px;
   line-height: 1.05;
   white-space: normal;
+}
+
+.projectButton[data-project-id="site-adv"] .projectButtonCopy strong {
+  font-size: 10.2px;
 }
 
 .projectButtonCopy small {
@@ -586,11 +610,10 @@
   position: relative;
   overflow: hidden;
   aspect-ratio: 16 / 9;
-  border: 10px solid rgba(255, 255, 255, 0.78);
-  border-bottom: 0;
+  border: 0;
   border-radius: 14px 14px 0 0;
   box-sizing: border-box;
-  background: rgba(255, 255, 255, 0.82);
+  background: transparent;
   box-shadow: 0 18px 38px rgba(34, 82, 77, 0.14);
 }
 
@@ -598,8 +621,9 @@
   width: 100%;
   height: 100%;
   display: block;
-  object-fit: cover;
-  object-position: center 8%;
+  object-fit: fill;
+  object-position: center;
+  border-radius: inherit;
   animation: previewReveal 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
@@ -786,7 +810,7 @@
     grid-template-columns: 24px 64px minmax(0, 1fr);
     min-height: 58px;
     gap: 7px;
-    padding-right: 8px;
+    padding-right: 43px;
     padding-left: 8px;
   }
 
@@ -865,7 +889,7 @@
   }
 
   .projectButton {
-    flex: 0 0 228px;
+    flex: 0 0 282px;
   }
 
   .mapPanel {

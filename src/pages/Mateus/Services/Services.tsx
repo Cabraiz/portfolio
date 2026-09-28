@@ -1,11 +1,11 @@
 import { useLayoutEffect, useRef } from "react";
 
 import workshopBackground from "@/assets/Mateus/services/industrial-workshop-background-v2.png";
-import workbench from "@/assets/Mateus/services/industrial-workbench-base-v2.png";
+import workbench from "@/assets/Mateus/services/industrial-workbench-base-lag-arthur-figures-v3.png";
 import laptopClubeOff from "@/assets/Mateus/services/devices/laptop-workshop-off-v4.png";
-import monitorOff from "@/assets/Mateus/services/devices/monitor-workshop-off-left-v3.png";
-import phoneClubeOff from "@/assets/Mateus/services/devices/phone-workshop-off-v3.png";
-import servicesSignAnimated from "@/assets/Mateus/services/services-front-wall-rail-lag-arthur-104frames-v21.webp";
+import phoneClubeOff from "@/assets/Mateus/services/devices/phone-workshop-stand-off-v4.png";
+import roboticArmOff from "@/assets/Mateus/services/devices/robotic-arm-workshop-off-v1.png";
+import servicesSignAnimated from "@/assets/Mateus/services/services-front-wall-rail-lag-arthur-104frames-v22.webp";
 import servicesSignStatic from "@/assets/Mateus/services/services-front-wall-rail-static-v21.png";
 import { ensureGsapRuntime } from "@/features/scroll/gsapRuntime";
 import { shouldDisableScrollFades } from "@/features/scroll/scrollMotionFlags";
@@ -260,12 +260,12 @@ export default function Services() {
 								/>
 							</picture>
 							<picture
-								className={`${styles.device} ${styles.monitorDevice}`}
-								data-service-device="monitor"
+								className={`${styles.device} ${styles.robotArmDevice}`}
+								data-service-device="robot-arm"
 							>
 								<img
 									className={styles.deviceImage}
-									src={monitorOff}
+									src={roboticArmOff}
 									alt=""
 									decoding="async"
 								/>

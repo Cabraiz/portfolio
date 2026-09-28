@@ -108,6 +108,7 @@ async function getTelegramUpdates(token) {
 
 	updatesRequest = (async () => {
 		const params = new URLSearchParams({
+			offset: "-100",
 			limit: "100",
 			timeout: "0",
 			allowed_updates: JSON.stringify(["message"]),
@@ -203,6 +204,7 @@ export default {
 							String(reply?.chat?.id) === String(chatId) &&
 							reply?.from?.is_bot !== true &&
 							typeof reply?.text === "string" &&
+							reply.text.trim().length > 0 &&
 							reply.reply_to_message?.text?.includes(marker)
 						);
 					})
@@ -210,7 +212,8 @@ export default {
 						id: Number(update.update_id),
 						text: update.message.text.trim().slice(0, 1000),
 						sentAt: Number(update.message.date) * 1000,
-					}));
+					}))
+					.sort((left, right) => left.id - right.id);
 				const cursor = replies.reduce(
 					(maximum, reply) => Math.max(maximum, reply.id),
 					afterUpdateId
@@ -312,12 +315,23 @@ export default {
 						chat_id: chatId,
 						text: telegramText,
 						disable_web_page_preview: true,
+						reply_markup: {
+							force_reply: true,
+							input_field_placeholder: "Responder ao visitante",
+						},
 					}),
 					signal: AbortSignal.timeout(8000),
 				}
 			);
 
-			if (!telegramResponse.ok) {
+			let telegramPayload = null;
+			try {
+				telegramPayload = await telegramResponse.json();
+			} catch {
+				// Uma resposta sem JSON não confirma a entrega pelo Bot API.
+			}
+
+			if (!telegramResponse.ok || telegramPayload?.ok !== true) {
 				console.error(
 					"Telegram rejected a portfolio message.",
 					telegramResponse.status

@@ -17,8 +17,12 @@ const sections: readonly LandingSection[] = [
 const roundTrip = [...sections, ...sections.slice(0, -1).reverse()] as const;
 
 const viewports = [
+	{ name: "desktop-1280x720", width: 1280, height: 720, mobile: false },
+	{ name: "desktop-1366x600", width: 1366, height: 600, mobile: false },
 	{ name: "desktop-1366x631", width: 1366, height: 631, mobile: false },
 	{ name: "desktop-1366x720", width: 1366, height: 720, mobile: false },
+	{ name: "desktop-1536x864", width: 1536, height: 864, mobile: false },
+	{ name: "desktop-1920x900", width: 1920, height: 900, mobile: false },
 	{ name: "desktop-1920x1080", width: 1920, height: 1080, mobile: false },
 	{ name: "mobile-390x844", width: 390, height: 844, mobile: true },
 	{ name: "mobile-360x640", width: 360, height: 640, mobile: true },
@@ -60,6 +64,9 @@ async function expectSectionToOwnViewport(
 						const serviceRoot = document.querySelector<HTMLElement>(
 							"#roadMap [data-services-root='true']"
 						);
+						const portfolioRoot = document.querySelector<HTMLElement>(
+							"#portfolio [data-portfolio-root='true']"
+						);
 						const allSections = Array.from(
 							document.querySelectorAll<HTMLElement>(
 								"section[data-page-section='true']"
@@ -76,6 +83,7 @@ async function expectSectionToOwnViewport(
 						const navbarRect = navbar?.getBoundingClientRect();
 						const previousRect = previous?.getBoundingClientRect();
 						const nextRect = next?.getBoundingClientRect();
+						const portfolioRootRect = portfolioRoot?.getBoundingClientRect();
 						const expectedTop = mobile ? (navbarRect?.bottom ?? 0) : 0;
 						const serviceOverflow = serviceRoot
 							? getComputedStyle(serviceRoot).overflow
@@ -97,6 +105,14 @@ async function expectSectionToOwnViewport(
 							),
 							coversViewport: Boolean(
 								currentRect && currentRect.bottom >= window.innerHeight - 1
+							),
+							portfolioVisualRootCoversViewport: Boolean(
+								mobile ||
+									sectionId !== "portfolio" ||
+									(portfolioRootRect &&
+										Math.abs(portfolioRootRect.top) <= 1 &&
+										portfolioRootRect.bottom >= window.innerHeight - 1 &&
+										Math.abs(portfolioRootRect.height - window.innerHeight) <= 1)
 							),
 							previousIsOutsideContent: Boolean(
 								!previousRect ||
@@ -131,6 +147,7 @@ async function expectSectionToOwnViewport(
 			topAligned: true,
 			exactDesktopHeight: true,
 			coversViewport: true,
+			portfolioVisualRootCoversViewport: true,
 			previousIsOutsideContent: true,
 			nextIsOutsideViewport: true,
 			noHorizontalOverflow: true,

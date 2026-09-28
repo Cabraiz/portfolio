@@ -10,6 +10,12 @@ import { useLocation } from "react-router-dom";
 
 import useLandingSectionNavigation from "@/features/navigation/useLandingSectionNavigation";
 
+import flagBrazil from "../../../assets/Mateus/portfolio/flags/brasil-vertical.png";
+import flagUnitedStates from "../../../assets/Mateus/portfolio/flags/estados-unidos-vertical.png";
+import flagGuineaBissau from "../../../assets/Mateus/portfolio/flags/guine-bissau-vertical.png";
+import flagMexico from "../../../assets/Mateus/portfolio/flags/mexico-vertical.png";
+import flagPortugal from "../../../assets/Mateus/portfolio/flags/portugal-vertical.png";
+
 import usePortfolioActiveItem from "./hooks/usePortfolioActiveItem";
 import { defaultPortfolioProjectId, portfolioProjects } from "./portfolio.data";
 import styles from "./Portfolio.module.css";
@@ -20,6 +26,14 @@ const PORTFOLIO_AUTOPLAY_INTERVAL_MS = 6200;
 const PORTFOLIO_MAGNET_IDLE_MS = 120;
 const PORTFOLIO_MAGNET_DURATION_SECONDS = 0.62;
 const PORTFOLIO_MAGNET_ENTRY_RATIO = 0.1;
+
+const COUNTRY_FLAGS: Readonly<Record<string, string>> = {
+  Brasil: flagBrazil,
+  México: flagMexico,
+  "Guiné-Bissau": flagGuineaBissau,
+  "Estados Unidos": flagUnitedStates,
+  Portugal: flagPortugal,
+};
 
 const PROJECT_DESCRIPTIONS: Record<PortfolioProjectId, string> = {
   "erp-varejo":
@@ -530,6 +544,8 @@ export default function Portfolio() {
           <div ref={projectListRef} className={styles.projectList}>
             {portfolioProjects.map((project, index) => {
               const isActive = index === activeIndex;
+              const country = project.worldLocation?.country;
+              const countryFlagSrc = country ? COUNTRY_FLAGS[country] : undefined;
 
               return (
                 <button
@@ -563,6 +579,16 @@ export default function Portfolio() {
                     <strong>{project.name}</strong>
                     <small>{project.subtitle}</small>
                   </span>
+                  {country && countryFlagSrc ? (
+                    <span
+                      className={styles.projectCountryBadge}
+                      role="img"
+                      aria-label={`País do projeto: ${country}`}
+                      title={country}
+                    >
+                      <img src={countryFlagSrc} alt="" aria-hidden="true" />
+                    </span>
+                  ) : null}
                 </button>
               );
             })}

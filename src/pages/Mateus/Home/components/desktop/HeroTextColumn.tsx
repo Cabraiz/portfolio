@@ -63,7 +63,7 @@ export default function HeroTextColumn({
 			WebkitBackgroundClip: "text",
 			WebkitTextFillColor: "transparent",
 			filter: "drop-shadow(0 2px 8px rgba(199, 139, 18, 0.24))",
-			marginBottom: isCompactDesktop ? "30px" : "3.2rem",
+			marginBottom: isCompactDesktop ? "18px" : "24px",
 			lineHeight: 1,
 			maxWidth: "100%",
 			wordBreak: "break-word",
@@ -88,12 +88,11 @@ export default function HeroTextColumn({
 		return {
 			...contentBlockWidth,
 			minWidth: 0,
-			backgroundImage: polishedGoldGradient,
-			marginBottom: isCompactDesktop ? "30px" : "46px",
+			marginBottom: isCompactDesktop ? "18px" : "24px",
 			display: "flex",
 			alignItems: "center",
 			justifyContent: "flex-start",
-			height: isCompactDesktop ? "3rem" : "4rem",
+			height: "auto",
 			boxSizing: "border-box",
 			overflow: "visible",
 		};
@@ -111,7 +110,7 @@ export default function HeroTextColumn({
 			backgroundColor: "rgba(255, 255, 255, 0.035)",
 			border: "1px solid rgba(255, 255, 255, 0.06)",
 			borderRadius: isCompactDesktop ? "16px" : "20px",
-			marginBottom: isCompactDesktop ? "30px" : "8px",
+			marginBottom: isCompactDesktop ? "18px" : "24px",
 			boxSizing: "border-box",
 			overflow: "visible",
 			flexWrap: "nowrap",
@@ -121,7 +120,7 @@ export default function HeroTextColumn({
 	const heroTextColumnStyle = useMemo<CSSProperties>(() => {
 		return {
 			...heroTextColumnBaseStyle,
-			paddingTop: isCompactDesktop ? "clamp(60px, 8vh, 88px)" : "12vh",
+			paddingTop: isCompactDesktop ? "clamp(72px, 10vh, 96px)" : "calc(12vh + 12px)",
 			paddingRight: 0,
 			paddingLeft: isCompactDesktop ? "clamp(6px, 0.8vw, 12px)" : 0,
 			flex: "1 1 0",
@@ -194,7 +193,7 @@ export default function HeroTextColumn({
 			<div style={seniorTitleStyle}>Desenvolvedor</div>
 
 			<div className="font-sequel" style={roleContainerStyle}>
-				<RoleTitle isPT={isPT} />
+				<RoleTitle />
 			</div>
 
 			<div style={sealsContainerStyle}>
