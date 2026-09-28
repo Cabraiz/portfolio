@@ -510,9 +510,19 @@ test.describe("cadência interativa do cérebro 3D", () => {
 				})
 		);
 
-		expect(cadence.fps).toBeGreaterThanOrEqual(18);
-		expect(cadence.averageFrameMs).toBeLessThanOrEqual(56);
-		expect(cadence.p95FrameMs).toBeLessThanOrEqual(90);
+		// GitHub's shared headless runner renders WebGL in software; keep the
+		// stricter interactive target for local hardware while still detecting stalls in CI.
+		const cadenceContract = process.env.CI
+			? { minimumFps: 10, maximumAverageFrameMs: 100, maximumP95FrameMs: 180 }
+			: { minimumFps: 18, maximumAverageFrameMs: 56, maximumP95FrameMs: 90 };
+
+		expect(cadence.fps).toBeGreaterThanOrEqual(cadenceContract.minimumFps);
+		expect(cadence.averageFrameMs).toBeLessThanOrEqual(
+			cadenceContract.maximumAverageFrameMs
+		);
+		expect(cadence.p95FrameMs).toBeLessThanOrEqual(
+			cadenceContract.maximumP95FrameMs
+		);
 
 		const optimizedModelBytes = await page.evaluate(async () => {
 			const response = await fetch("/models/cognitive-brain/brain-optimized.glb");
