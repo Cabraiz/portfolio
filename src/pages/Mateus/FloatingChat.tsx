@@ -1,13 +1,15 @@
 import type * as React from "react";
 import { useState, useRef, useEffect, useSyncExternalStore } from "react";
 import msgIcon from "../../assets/Mateus/msgIcon.png";
-import perfilMini from "../../assets/Mateus/perfilMini.webp";
-import lagArthurSupport from "../../assets/Mateus/lag-arthur-support-wig-closeup-v1.webp";
+import mateusChatAvatar from "../../assets/Mateus/mateus-chat-avatar-v2.webp";
+import lagArthurSupport from "../../assets/Mateus/lag-arthur-support-wig-suit-v2.webp";
 import lagArthurChat from "../../assets/Mateus/lag-arthur-chat-blank-eyes-closed-mouth-v3.webp";
-import lagArthurIris from "../../assets/Mateus/lag-arthur-iris-anime-cute-v5.png";
-import { AnimatePresence, motion } from "framer-motion";
+import lagArthurIris from "../../assets/Mateus/lag-arthur-iris-anime-handpainted-v9.png";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { useLocation } from "react-router-dom";
+
+import useLandingSectionNavigation from "../../features/navigation/useLandingSectionNavigation";
 
 import styles from "./FloatingChat.module.css";
 
@@ -43,7 +45,9 @@ type MascotReaction = "idle" | "fleeing" | "hidden" | "returning";
 
 const CHAT_CONVERSATION_STORAGE_KEY = "cabraiz-chat-conversation-id";
 const CHAT_LAST_SENT_AT_STORAGE_KEY = "cabraiz-chat-last-sent-at";
+const CHAT_MESSAGES_STORAGE_KEY = "cabraiz-chat-messages";
 const CHAT_REPLY_RETENTION_MS = 24 * 60 * 60 * 1000;
+const CHAT_STORED_MESSAGE_LIMIT = 100;
 const CHAT_CONVERSATION_ID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const LOCAL_CONTACT_API_URL =
@@ -118,21 +122,76 @@ function hasRecentConversationActivity(): boolean {
   }
 }
 
+function getStoredMessages(conversationId: string): ChatMessage[] {
+  if (typeof window === "undefined") return [];
+
+  try {
+    const rawMessages = window.localStorage.getItem(CHAT_MESSAGES_STORAGE_KEY);
+    if (!rawMessages) return [];
+
+    const stored = JSON.parse(rawMessages) as {
+      conversationId?: unknown;
+      updatedAt?: unknown;
+      messages?: unknown;
+    };
+    const updatedAt = Number(stored.updatedAt);
+    if (
+      stored.conversationId !== conversationId ||
+      !Number.isFinite(updatedAt) ||
+      Date.now() - updatedAt >= CHAT_REPLY_RETENTION_MS ||
+      !Array.isArray(stored.messages)
+    ) {
+      return [];
+    }
+
+    return stored.messages
+      .filter(
+        (message): message is ChatMessage =>
+          typeof message === "object" &&
+          message !== null &&
+          typeof (message as ChatMessage).id === "string" &&
+          typeof (message as ChatMessage).text === "string" &&
+          ["visitor", "mateus"].includes((message as ChatMessage).author)
+      )
+      .slice(-CHAT_STORED_MESSAGE_LIMIT);
+  } catch {
+    return [];
+  }
+}
+
+function storeMessages(conversationId: string, messages: ChatMessage[]) {
+  try {
+    window.localStorage.setItem(
+      CHAT_MESSAGES_STORAGE_KEY,
+      JSON.stringify({
+        conversationId,
+        updatedAt: Date.now(),
+        messages: messages.slice(-CHAT_STORED_MESSAGE_LIMIT),
+      })
+    );
+  } catch {
+    // A conversa continua durante esta visita quando o armazenamento é bloqueado.
+  }
+}
+
 export default function FloatingChat() {
+  const prefersReducedMotion = useReducedMotion();
   const location = useLocation();
+  const { navigateToSection } = useLandingSectionNavigation();
   const shouldHideForStandaloneGame =
     isHomeGameStandaloneHost() || isHomeGameRoutePath(location.pathname);
 
   const [isOpen, setIsOpen] = useState(false);
   const [inputValue, setInputValue] = useState("");
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [conversationId] = useState(getOrCreateConversationId);
+  const [messages, setMessages] = useState<ChatMessage[]>(() =>
+    getStoredMessages(conversationId)
+  );
   const [hasActiveConversation, setHasActiveConversation] = useState(
     hasRecentConversationActivity
   );
-  const [showPricing, setShowPricing] = useState(false);
   const [mascotReaction, setMascotReaction] =
     useState<MascotReaction>("idle");
-  const [conversationId] = useState(getOrCreateConversationId);
   const [sendStatus, setSendStatus] = useState<
     "idle" | "sending" | "sent" | "error"
   >("idle");
@@ -171,6 +230,10 @@ export default function FloatingChat() {
   const bottomOffset = isMobile ? "30px" : "3vh";
   const rightOffset = isMobile ? "30px" : "3vw";
 
+  useEffect(() => {
+    storeMessages(conversationId, messages);
+  }, [conversationId, messages]);
+
   const triggerItems: TriggerAvatarItem[] = [
     {
       type: "image",
@@ -179,7 +242,7 @@ export default function FloatingChat() {
     },
     {
       type: "image",
-      src: perfilMini,
+      src: mateusChatAvatar,
       alt: "Mateus Cabral",
     },
     {
@@ -388,6 +451,15 @@ export default function FloatingChat() {
     chatOpenedAtRef.current = Date.now();
     setSendStatus("idle");
     setIsOpen(true);
+  };
+
+  const showServices = () => {
+    setIsOpen(false);
+    navigateToSection("roadMap", {
+      replace: true,
+      syncUrl: true,
+      offsetPx: 0,
+    });
   };
 
   const sendMessage = async () => {
@@ -767,10 +839,33 @@ export default function FloatingChat() {
           <motion.div
             ref={chatRef}
             data-lenis-prevent
+            data-chat-panel="true"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20, transition: { duration: 0 } }}
-            transition={{ duration: 0.8, ease: [0.23, 1, 0.32, 1] }}
+            exit={
+              prefersReducedMotion
+                ? { opacity: 0, transition: { duration: 0.12 } }
+                : {
+                    opacity: [1, 0.9, 0],
+                    scaleX: [1, 0.82, 0.05],
+                    scaleY: [1, 0.9, 0.08],
+                    x: [0, 26, 76],
+                    y: [0, 42, 116],
+                    rotate: [0, 1.2, 5],
+                    filter: ["blur(0px)", "blur(1px)", "blur(12px)"],
+                    borderRadius: ["20px", "28px", "50%"],
+                    transition: {
+                      duration: 0.52,
+                      times: [0, 0.46, 1],
+                      ease: [0.4, 0, 0.9, 0.4],
+                    },
+                  }
+            }
+            transition={
+              prefersReducedMotion
+                ? { duration: 0.12 }
+                : { duration: 0.8, ease: [0.23, 1, 0.32, 1] }
+            }
             style={{
               width: isMobile ? "calc(100vw - 32px)" : "480px",
               height: "80dvh",
@@ -792,6 +887,9 @@ export default function FloatingChat() {
               overscrollBehavior: "contain",
               bottom: "20px",
               right: "20px",
+              transformOrigin: "calc(100% - 28px) calc(100% - 28px)",
+              transition:
+                "width 260ms cubic-bezier(0.22, 1, 0.36, 1), height 260ms cubic-bezier(0.22, 1, 0.36, 1)",
             }}
           >
             <button
@@ -810,7 +908,7 @@ export default function FloatingChat() {
                 alignItems: "center",
                 gap: "0.75rem",
                 marginBottom: `${scale(1)}rem`,
-                paddingRight: `${scale(2.5)}rem`,
+                paddingRight: `${scale(3.5)}rem`,
               }}
             >
               <img
@@ -827,7 +925,7 @@ export default function FloatingChat() {
               />
               <div style={{ display: "flex", flexDirection: "column" }}>
                 <span style={{ fontWeight: 600, fontSize: `${scale(1.1)}rem` }}>
-                  Suporte Cabraiz
+                  Atendente virtual
                 </span>
                 <span style={{ fontSize: `${scale(0.9)}rem`, color: "#aaa" }}>
                   {t("floatingChat.availability")}
@@ -876,56 +974,11 @@ export default function FloatingChat() {
                     <button
                       className={styles.quickAction}
                       type="button"
-                      aria-expanded={showPricing}
-                      onClick={() => setShowPricing((current) => !current)}
+                      onClick={showServices}
                     >
-                      {showPricing
-                        ? t("floatingChat.hidePrices")
-                        : t("floatingChat.showPrices")}
+                      {t("floatingChat.showPrices")}
                     </button>
                   </div>
-
-                  <AnimatePresence initial={false}>
-                    {showPricing && (
-                      <motion.div
-                        className={styles.pricingPanel}
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: "auto" }}
-                        exit={{ opacity: 0, height: 0 }}
-                        transition={{ duration: 0.24, ease: "easeOut" }}
-                      >
-                        <div className={styles.pricingCard}>
-                          <div className={styles.pricingHeader}>
-                            <strong>{t("floatingChat.pricing.front.title")}</strong>
-                            <span>{t("floatingChat.pricing.front.price")}</span>
-                          </div>
-                          <p>{t("floatingChat.pricing.front.description")}</p>
-                        </div>
-                        <div className={styles.pricingCard}>
-                          <div className={styles.pricingHeader}>
-                            <strong>{t("floatingChat.pricing.backend.title")}</strong>
-                            <span>{t("floatingChat.pricing.backend.price")}</span>
-                          </div>
-                          <p>{t("floatingChat.pricing.backend.description")}</p>
-                        </div>
-                        <div className={styles.pricingCard}>
-                          <div className={styles.pricingHeader}>
-                            <strong>{t("floatingChat.pricing.global.title")}</strong>
-                            <span>{t("floatingChat.pricing.global.price")}</span>
-                          </div>
-                          <p>{t("floatingChat.pricing.global.description")}</p>
-                        </div>
-                        <a
-                          className={styles.pricingCta}
-                          href={WHATSAPP_SUPPORT_URL}
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          {t("floatingChat.pricingCta")}
-                        </a>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
                 </div>
               </div>
 
@@ -934,21 +987,26 @@ export default function FloatingChat() {
                   <div
                     key={message.id}
                     data-chat-author="visitor"
+                    className={styles.visitorMessage}
                     style={{
-                      alignSelf: "flex-end",
-                      background: "rgba(255, 255, 255, 0.12)",
-                      border: "1px solid rgba(255, 255, 255, 0.2)",
-                      padding: `${scale(0.6)}rem ${scale(1)}rem`,
-                      borderRadius: "12px",
-                      maxWidth: "80%",
-                      wordWrap: "break-word",
-                      color: "#fff",
-                      backdropFilter: "blur(8px)",
-                      WebkitBackdropFilter: "blur(8px)",
-                      fontSize: `${scale(1)}rem`,
+                      maxWidth: "88%",
                     }}
                   >
-                    {message.text}
+                    <div
+                      className={styles.visitorMessageBubble}
+                      style={{
+                        padding: `${scale(0.6)}rem ${scale(1)}rem`,
+                        fontSize: `${scale(1)}rem`,
+                      }}
+                    >
+                      {message.text}
+                    </div>
+                    <span
+                      className={styles.visitorAvatar}
+                      data-chat-avatar="visitor"
+                      role="img"
+                      aria-label={t("floatingChat.anonymousVisitor")}
+                    />
                   </div>
                 ) : (
                   <div
@@ -961,8 +1019,9 @@ export default function FloatingChat() {
                     }}
                   >
                     <img
-                      src={lagArthurSupport}
-                      alt="Lag Arthur, assistente da Cabraiz"
+                      src={mateusChatAvatar}
+                      alt="Mateus Cabral"
+                      data-chat-avatar="mateus"
                       style={{
                         width: "30px",
                         height: "30px",

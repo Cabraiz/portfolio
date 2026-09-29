@@ -35,6 +35,9 @@ const APP_LENIS_MOBILE_SCROLL_CLASS = "mobile-lenis-scroll";
 
 const MOBILE_APP_BACKGROUND =
   "linear-gradient(180deg, #050505 0%, #0a0a0a 38%, #0d0d0d 100%)";
+const MOBILE_HOME_BACKGROUND =
+  "radial-gradient(circle at 78% 22%, rgba(255, 255, 255, 0.78), transparent 34%), linear-gradient(115deg, rgba(255, 255, 255, 0.42), transparent 42%), #f4efe5";
+const MOBILE_PORTFOLIO_BACKGROUND = "#dcefeb";
 
 const links: readonly LandingSectionId[] = [
   "portfolio",
@@ -324,6 +327,13 @@ function AppMobile() {
   }, []);
 
   const mobilePageContentStyle = useMemo<React.CSSProperties>(() => {
+    const activePageBackground =
+      activeSectionId === "home"
+        ? MOBILE_HOME_BACKGROUND
+        : activeSectionId === "portfolio"
+          ? MOBILE_PORTFOLIO_BACKGROUND
+          : MOBILE_APP_BACKGROUND;
+
     return {
       position: "relative",
       width: "100%",
@@ -332,9 +342,9 @@ function AppMobile() {
       paddingTop: "var(--app-navbar-height, 72px)",
       paddingBottom: "var(--mobile-safe-bottom, 0px)",
       boxSizing: "border-box",
-      background: MOBILE_APP_BACKGROUND,
+      background: activePageBackground,
     };
-  }, []);
+  }, [activeSectionId]);
 
   return (
     <ReactLenis
@@ -369,7 +379,10 @@ function AppMobile() {
           />
         )}
 
-        <main style={mobilePageContentStyle}>
+        <main
+          style={mobilePageContentStyle}
+          data-mobile-page-content="true"
+        >
           <AppRoutes />
         </main>
 

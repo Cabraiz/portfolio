@@ -25,12 +25,18 @@ function HomeMobile() {
 
   useLayoutEffect(() => {
     const page = pageRef.current;
+    const portrait = portraitRef.current;
     const logo = document.querySelector<HTMLElement>(
       '[data-mobile-brand-pusher="true"]',
     );
     const reducedMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)",
     ).matches;
+    const partnerItems = Array.from(
+      partnersRef.current?.querySelectorAll<HTMLElement>(
+        "[data-mobile-partner-item]",
+      ) ?? [],
+    );
 
     if (!page || !logo || reducedMotion) {
       return;
@@ -42,14 +48,13 @@ function HomeMobile() {
       titleRef.current,
       identityRef.current,
       introRef.current,
-      partnersRef.current,
     ];
     const textBlocks = blockCandidates.filter(
       (element): element is HTMLElement => element !== null,
     );
 
     const context = gsap.context(() => {
-      gsap.set([logo, ...textBlocks], {
+      gsap.set([logo, ...textBlocks, ...partnerItems], {
         willChange: "transform",
         force3D: true,
       });
@@ -58,8 +63,18 @@ function HomeMobile() {
         defaults: { ease: "none" },
         scrollTrigger: {
           trigger: page,
-          start: "top top",
-          end: "bottom top+=72",
+          start: () => {
+            const navbarHeight =
+              logo.closest("nav")?.getBoundingClientRect().height ?? 72;
+
+            return `top top+=${Math.ceil(navbarHeight)}`;
+          },
+          end: () => {
+            const navbarHeight =
+              logo.closest("nav")?.getBoundingClientRect().height ?? 72;
+
+            return `bottom top+=${Math.ceil(navbarHeight)}`;
+          },
           scrub: 0.45,
           invalidateOnRefresh: true,
         },
@@ -69,8 +84,8 @@ function HomeMobile() {
         .to(
           logo,
           {
-            x: -36,
-            duration: 0.05,
+            x: -100,
+            duration: 0.08,
             ease: "power2.out",
           },
           0,
@@ -83,22 +98,30 @@ function HomeMobile() {
             scale: 1.08,
             duration: 0.74,
           },
-          0,
+          0.08,
+        )
+        .to(
+          logo,
+          {
+            y: 0,
+            rotation: 0,
+            scale: 1,
+            duration: 0.1,
+            ease: "power2.inOut",
+          },
+          0.82,
         )
         .to(
           logo,
           {
             x: 0,
-            y: 0,
-            rotation: 0,
-            scale: 1,
-            duration: 0.26,
+            duration: 0.08,
             ease: "power2.inOut",
           },
-          0.74,
+          0.92,
         )
         .to(
-          portraitRef.current,
+          portrait,
           {
             y: -22,
             scale: 1.018,
@@ -147,11 +170,30 @@ function HomeMobile() {
           );
       };
 
-      pushBlock(eyebrowRef.current, 0.015, 58);
+      pushBlock(eyebrowRef.current, 0.015, 58, true);
       pushBlock(titleRef.current, 0.055, 56, true);
-      pushBlock(identityRef.current, 0.09, 60);
-      pushBlock(introRef.current, 0.17, 66);
-      pushBlock(partnersRef.current, 0.3, 62);
+      pushBlock(identityRef.current, 0.09, 60, true);
+      pushBlock(introRef.current, 0.17, 66, true);
+
+      const partnerExitDuration = 0.11;
+      const partnerExitInterval = 0.155;
+
+      partnerItems.forEach((partner, index) => {
+        timeline.to(
+          partner,
+          {
+            x: () =>
+              Math.max(
+                96,
+                window.innerWidth - partner.getBoundingClientRect().left + 24,
+              ),
+            opacity: 0,
+            duration: partnerExitDuration,
+            ease: "power2.in",
+          },
+          0.28 + index * partnerExitInterval,
+        );
+      });
     }, page);
 
     const refreshFrame = window.requestAnimationFrame(() => {
@@ -161,7 +203,7 @@ function HomeMobile() {
     return () => {
       window.cancelAnimationFrame(refreshFrame);
       context.revert();
-      gsap.set([logo, ...textBlocks, portraitRef.current], {
+      gsap.set([logo, ...textBlocks, ...partnerItems, portrait], {
         clearProps: "transform,willChange",
       });
     };
@@ -201,8 +243,13 @@ function HomeMobile() {
             <span>E PARCEIROS</span>
           </div>
           <div className={styles.partnerLogos}>
-            {MOBILE_PARTNERS.map(({ label, Icon }) => (
-              <div key={label} className={styles.partnerSignature}>
+            {MOBILE_PARTNERS.map(({ label, Icon }, index) => (
+              <div
+                key={label}
+                className={styles.partnerSignature}
+                data-mobile-partner-item={label.toLowerCase()}
+                data-mobile-partner-order={index + 1}
+              >
                 <Icon aria-hidden="true" />
                 <span>{label}</span>
               </div>

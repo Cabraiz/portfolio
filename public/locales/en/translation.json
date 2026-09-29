@@ -30,7 +30,8 @@
       "Real Talk, No Delay",
         "Let's Chat Like Old Times"
       ],
-      "availability": "Online support",
+      "availability": "Online",
+      "anonymousVisitor": "Anonymous visitor",
       "welcome": "Hello! I'm part of Cabraiz's online support. I can take you straight to Mateus on WhatsApp or show the starting prices for each type of project.",
       "quickActionsLabel": "Quick support options",
       "whatsappAction": "Talk to Mateus on WhatsApp",

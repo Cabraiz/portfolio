@@ -21,7 +21,8 @@
       "phrases": [
         "Mensagens"
       ],
-      "availability": "Atendimento online",
+      "availability": "Online",
+      "anonymousVisitor": "Visitante anônimo",
       "welcome": "Olá! Sou do atendimento online da Cabraiz. Posso levar você direto ao WhatsApp do Mateus ou apresentar os valores iniciais de cada tipo de projeto.",
       "quickActionsLabel": "Opções rápidas de atendimento",
       "whatsappAction": "Falar com Mateus no WhatsApp",

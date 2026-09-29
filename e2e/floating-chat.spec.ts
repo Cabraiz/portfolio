@@ -48,6 +48,15 @@ test("sends a portfolio chat message through the contact API", async ({
 	await expect(
 		page.getByText("Olá! Recebi sua mensagem e retorno por aqui.")
 	).toBeVisible();
+	await expect(
+		page.locator('[data-chat-author="visitor"] [data-chat-avatar="visitor"]')
+	).toHaveAttribute("aria-label", /Visitante anônimo|Anonymous visitor/);
+	await expect(
+		page.locator('[data-chat-author="mateus"] [data-chat-avatar="mateus"]')
+	).toHaveAttribute("alt", "Mateus Cabral");
+	await expect(
+		page.locator('[data-chat-author="mateus"] [data-chat-avatar="mateus"]')
+	).toHaveAttribute("src", /mateus-chat-avatar-v2/);
 	expect(receivedPayload).toMatchObject({
 		message: "Olá, quero conversar sobre um projeto.",
 		website: "",
@@ -55,6 +64,26 @@ test("sends a portfolio chat message through the contact API", async ({
 	expect(receivedPayload?.conversationId).toMatch(
 		/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 	);
+
+	await expect
+		.poll(() =>
+			page.evaluate(() =>
+				window.localStorage.getItem("cabraiz-chat-messages")
+			)
+		)
+		.toContain("Olá, quero conversar sobre um projeto.");
+	await page.reload();
+	await page.getByRole("button", { name: "Abrir chat" }).click();
+	await expect(
+		page.locator('[data-chat-author="visitor"]', {
+			hasText: "Olá, quero conversar sobre um projeto.",
+		})
+	).toHaveCount(1);
+	await expect(
+		page.locator('[data-chat-author="mateus"]', {
+			hasText: "Olá! Recebi sua mensagem e retorno por aqui.",
+		})
+	).toHaveCount(1);
 });
 test("keeps the message after a delivery error and allows a successful retry", async ({
 	page,
@@ -227,6 +256,12 @@ test("keeps the open chat and its controls inside short and mobile viewports", a
 		});
 		await expect(closeButton).toBeVisible();
 		await expect(closeButton).toHaveText("×");
+		await expect(page.getByText("Atendente virtual", { exact: true })).toBeVisible();
+		await expect(page.getByText("Online", { exact: true })).toBeVisible();
+		const closeButtonBox = await closeButton.boundingBox();
+		expect(closeButtonBox, `${viewport.width}x${viewport.height}`).not.toBeNull();
+		expect(closeButtonBox!.width).toBeGreaterThanOrEqual(41);
+		expect(closeButtonBox!.height).toBeGreaterThanOrEqual(41);
 		await expect(page.locator('input[name="message"]')).toBeVisible();
 		await expect(
 			page.getByRole("button", { name: /Enviar|Send/, exact: true })
@@ -252,47 +287,49 @@ test("keeps the open chat and its controls inside short and mobile viewports", a
 	}
 });
 
-test("hides the scrollbar and keeps wheel scrolling inside the chat", async ({
+test("opens services and minimizes the chat from the pricing action", async ({
 	page,
 }) => {
-	await page.setViewportSize({ width: 1366, height: 600 });
+	test.setTimeout(45_000);
+	for (const scenario of [
+		{ viewport: { width: 1366, height: 600 }, startPath: "/home" },
+		{ viewport: { width: 390, height: 844 }, startPath: "/contact" },
+	]) {
+		await page.setViewportSize(scenario.viewport);
+		await page.goto(scenario.startPath);
+		await page.getByRole("button", { name: "Abrir chat" }).click();
+
+		const panel = page.locator('[data-chat-panel="true"]');
+		await expect(panel).toBeVisible();
+
+		await page.getByRole("button", { name: /Ver valores|View pricing/ }).click();
+		await expect(page).toHaveURL(/\/servicos$/);
+		await expect(panel).toHaveCount(0, { timeout: 1200 });
+		await expect(page.locator('[data-services-root="true"]')).toBeVisible();
+		await expect(page.getByRole("button", { name: "Abrir chat" })).toBeVisible();
+	}
+});
+
+test("shrinks the chat toward its trigger before removing it", async ({ page }) => {
+	await page.setViewportSize({ width: 1280, height: 720 });
 	await page.goto("/home");
 	await page.getByRole("button", { name: "Abrir chat" }).click();
-	await page.getByRole("button", { name: /Ver valores|View pricing/ }).click();
 
-	const scrollArea = page.locator('[data-chat-scroll-area="true"]');
-	await expect(scrollArea).toBeVisible();
-	await expect
-		.poll(() =>
-			scrollArea.evaluate(
-				(element) => element.scrollHeight > element.clientHeight
-			)
-		)
-		.toBe(true);
-	expect(
-		await scrollArea.evaluate(
-			(element) => getComputedStyle(element).scrollbarWidth
-		)
-	).toBe("none");
+	const panel = page.locator('[data-chat-panel="true"]');
+	await expect(panel).toBeVisible();
+	const before = await panel.boundingBox();
+	expect(before).not.toBeNull();
 
-	const panel = page
-		.getByRole("button", { name: /Fechar|Close/, exact: true })
-		.locator("..");
-	const panelBox = await panel.boundingBox();
-	expect(panelBox).not.toBeNull();
+	await page.getByRole("button", { name: /Fechar|Close/, exact: true }).click();
+	await expect(panel).toBeAttached();
+	await page.waitForTimeout(220);
+	const during = await panel.boundingBox();
+	expect(during).not.toBeNull();
+	expect(during!.width).toBeLessThan(before!.width * 0.92);
+	expect(during!.height).toBeLessThan(before!.height * 0.98);
+	expect(during!.x).toBeGreaterThan(before!.x);
+	expect(during!.y).toBeGreaterThan(before!.y);
 
-	const pathBeforeWheel = new URL(page.url()).pathname;
-	await page.mouse.move(panelBox!.x + 40, panelBox!.y + 40);
-	await page.mouse.wheel(0, 420);
-
-	await expect
-		.poll(() => scrollArea.evaluate((element) => element.scrollTop))
-		.toBeGreaterThan(0);
-	expect(new URL(page.url()).pathname).toBe(pathBeforeWheel);
-
-	for (let attempt = 0; attempt < 6; attempt += 1) {
-		await page.mouse.wheel(0, 1000);
-	}
-	await page.waitForTimeout(250);
-	expect(new URL(page.url()).pathname).toBe(pathBeforeWheel);
+	await expect(panel).toHaveCount(0, { timeout: 1200 });
+	await expect(page.getByRole("button", { name: "Abrir chat" })).toBeVisible();
 });

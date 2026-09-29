@@ -352,12 +352,18 @@ export const LANDING_SECTIONS_CONFIG = [
 			MOBILE_HERO_STABLE_BEHAVIOR,
 			{
 				sectionRole: "hero",
+				subtractNavbarOffset: true,
 				sectionStyle: {
 					minHeight: resolveLandingSectionMinHeight("mobile", {
 						preferDynamicViewport: false,
 						sectionRole: "hero",
+						subtractNavbarOffset: true,
 					}),
-					height: "auto",
+					height: resolveLandingSectionMinHeight("mobile", {
+						preferDynamicViewport: false,
+						sectionRole: "hero",
+						subtractNavbarOffset: true,
+					}),
 					padding: 0,
 					overflow: "visible",
 					background: "transparent",
@@ -365,7 +371,7 @@ export const LANDING_SECTIONS_CONFIG = [
 				},
 				contentStyle: {
 					minHeight: "100%",
-					height: "auto",
+					height: "100%",
 					overflow: "visible",
 					padding: 0,
 				},
@@ -395,6 +401,7 @@ export const LANDING_SECTIONS_CONFIG = [
 			MOBILE_CONTENT_VIRTUALIZED_BEHAVIOR,
 			{
 				sectionRole: "content",
+				subtractNavbarOffset: true,
 			}
 		),
 	},
@@ -517,6 +524,7 @@ export const LANDING_SECTIONS_CONFIG = [
 			MOBILE_CONTENT_VIRTUALIZED_BEHAVIOR,
 			{
 				sectionRole: "content",
+				subtractNavbarOffset: true,
 			}
 		),
 	},
@@ -538,6 +546,7 @@ export const LANDING_SECTIONS_CONFIG = [
 			MOBILE_CONTENT_VIRTUALIZED_BEHAVIOR,
 			{
 				sectionRole: "content",
+				subtractNavbarOffset: true,
 			}
 		),
 	},

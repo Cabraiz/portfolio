@@ -3,11 +3,14 @@ import { useLayoutEffect, useRef } from "react";
 import workshopBackground from "@/assets/Mateus/services/industrial-workshop-background-v2.png";
 import workbench from "@/assets/Mateus/services/industrial-workbench-base-robot-interaction-v5.png";
 import laptopClubeOff from "@/assets/Mateus/services/devices/laptop-workshop-off-v4.png";
-import phoneClubeOff from "@/assets/Mateus/services/devices/phone-workshop-stand-off-v5.png";
-import roboticArmOpen from "@/assets/Mateus/services/devices/robotic-arm-workshop-open-v2.png";
-import roboticArmClosed from "@/assets/Mateus/services/devices/robotic-arm-workshop-closed-v3.png";
+import phoneClubeOff from "@/assets/Mateus/services/devices/phone-workshop-stand-off-v6.png";
+import roboticArmStatic from "@/assets/Mateus/services/devices/robotic-arm-workshop-static-v4.png";
+import roboticClawOpen from "@/assets/Mateus/services/devices/robotic-claw-telescopic-open-v1.png";
+import roboticClawClosed from "@/assets/Mateus/services/devices/robotic-claw-telescopic-closed-v1.png";
 import roboticArmBlock from "@/assets/Mateus/services/devices/robotic-arm-metal-block-v2.png";
-import lagArthurPointing from "@/assets/Mateus/services/lag-arthur-pointing-claw-v3.png";
+import lagArthurControllerBody from "@/assets/Mateus/services/lag-arthur-controller-body-follow-v5.png";
+import lagArthurControllerEyes from "@/assets/Mateus/services/lag-arthur-controller-eyes-gaze-v6.png";
+import lagArthurControllerHead from "@/assets/Mateus/services/lag-arthur-controller-head-gaze-base-v6.png";
 import servicesSignAnimated from "@/assets/Mateus/services/services-front-wall-rail-lag-arthur-104frames-v22.webp";
 import servicesSignStatic from "@/assets/Mateus/services/services-front-wall-rail-static-v21.png";
 import { ensureGsapRuntime } from "@/features/scroll/gsapRuntime";
@@ -23,11 +26,15 @@ export default function Services() {
 	const titleRef = useRef<HTMLHeadingElement>(null);
 	const signRigRef = useRef<HTMLPictureElement>(null);
 	const workbenchRef = useRef<HTMLDivElement>(null);
-	const robotArmRigRef = useRef<HTMLDivElement>(null);
-	const robotArmOpenRef = useRef<HTMLImageElement>(null);
-	const robotArmClosedRef = useRef<HTMLImageElement>(null);
+	const robotArmStaticRef = useRef<HTMLImageElement>(null);
+	const robotClawRef = useRef<HTMLDivElement>(null);
+	const robotClawRailRef = useRef<HTMLSpanElement>(null);
+	const robotClawOpenRef = useRef<HTMLImageElement>(null);
+	const robotClawClosedRef = useRef<HTMLImageElement>(null);
 	const robotBlockRef = useRef<HTMLImageElement>(null);
-	const robotCharacterRef = useRef<HTMLImageElement>(null);
+	const robotCharacterRef = useRef<HTMLDivElement>(null);
+	const robotCharacterHeadRef = useRef<HTMLDivElement>(null);
+	const robotCharacterEyesRef = useRef<HTMLImageElement>(null);
 
 	useLayoutEffect(() => {
 		const root = rootRef.current;
@@ -37,11 +44,15 @@ export default function Services() {
 		const title = titleRef.current;
 		const signRig = signRigRef.current;
 		const workbenchElement = workbenchRef.current;
-		const robotArmRig = robotArmRigRef.current;
-		const robotArmOpenElement = robotArmOpenRef.current;
-		const robotArmClosedElement = robotArmClosedRef.current;
+		const robotArmStaticElement = robotArmStaticRef.current;
+		const robotClawElement = robotClawRef.current;
+		const robotClawRailElement = robotClawRailRef.current;
+		const robotClawOpenElement = robotClawOpenRef.current;
+		const robotClawClosedElement = robotClawClosedRef.current;
 		const robotBlockElement = robotBlockRef.current;
 		const robotCharacterElement = robotCharacterRef.current;
+		const robotCharacterHeadElement = robotCharacterHeadRef.current;
+		const robotCharacterEyesElement = robotCharacterEyesRef.current;
 
 		if (
 			!root ||
@@ -51,11 +62,15 @@ export default function Services() {
 			!title ||
 			!signRig ||
 			!workbenchElement ||
-			!robotArmRig ||
-			!robotArmOpenElement ||
-			!robotArmClosedElement ||
+			!robotArmStaticElement ||
+			!robotClawElement ||
+			!robotClawRailElement ||
+			!robotClawOpenElement ||
+			!robotClawClosedElement ||
 			!robotBlockElement ||
-			!robotCharacterElement
+			!robotCharacterElement ||
+			!robotCharacterHeadElement ||
+			!robotCharacterEyesElement
 		) {
 			return;
 		}
@@ -66,8 +81,10 @@ export default function Services() {
 
 		if (reducedMotion) {
 			root.dataset.servicesMotion = "reduced";
+			root.dataset.robotPhase = "static";
 			return () => {
 				delete root.dataset.servicesMotion;
+				delete root.dataset.robotPhase;
 			};
 		}
 
@@ -86,101 +103,218 @@ export default function Services() {
 					title,
 					signRig,
 					workbenchElement,
-					robotArmRig,
+					robotClawElement,
 					robotBlockElement,
 					robotCharacterElement,
+					robotCharacterHeadElement,
+					robotCharacterEyesElement,
 				],
 				{
 					force3D: true,
 				}
 			);
 			gsap.set(signRig, { rotation: 0, transformOrigin: "50% 0%" });
-			gsap.set(robotArmOpenElement, { autoAlpha: 1 });
-			gsap.set(robotArmClosedElement, { autoAlpha: 0 });
+			gsap.set(robotArmStaticElement, { clearProps: "transform" });
+			gsap.set(robotClawRailElement, { height: 0 });
+			gsap.set(robotClawOpenElement, { autoAlpha: 1 });
+			gsap.set(robotClawClosedElement, { autoAlpha: 0 });
+			gsap.set(robotCharacterHeadElement, {
+				rotation: 0,
+				xPercent: 0,
+				yPercent: 0,
+				transformOrigin: "49% 46%",
+			});
+			gsap.set(robotCharacterEyesElement, { yPercent: 0 });
+			const getClawContactTravel = () => {
+				const clawAssemblyTop =
+					(robotClawElement.offsetParent as HTMLElement | null)?.offsetTop ?? 0;
+				const clawVisibleBottom =
+					clawAssemblyTop +
+					robotClawElement.offsetTop +
+					robotClawElement.offsetHeight * (711 / 768);
+				const blockVisibleTop =
+					robotBlockElement.offsetTop +
+					robotBlockElement.offsetHeight * (399 / 1146);
+				const contactOverlap = Math.max(
+					1.5,
+					robotArmStaticElement.offsetWidth * 0.014
+				);
 
-			gsap
-				.timeline({ repeat: -1, repeatDelay: 0.65 })
+				return Math.max(
+					0,
+					blockVisibleTop - clawVisibleBottom + contactOverlap
+				);
+			};
+			const setRobotPhase = (phase: string) => {
+				root.dataset.robotPhase = phase;
+			};
+
+			const robotInteractionTimeline = gsap
+				.timeline({ repeat: -1, repeatDelay: 0.95, repeatRefresh: true })
+				.call(() => setRobotPhase("rest"), [], 0)
+				.call(() => setRobotPhase("descending"), [], 0.38)
 				.to(
-					robotCharacterElement,
+					robotCharacterHeadElement,
 					{
-						yPercent: -2.5,
-						rotation: -1.4,
-						duration: 0.42,
-						ease: "power2.out",
-					},
-					0.2
-				)
-				.to(
-					robotArmRig,
-					{
-						xPercent: -1.5,
-						yPercent: 8,
-						rotation: -1.2,
-						duration: 0.9,
+						rotation: 7.5,
+						xPercent: 1.4,
+						yPercent: 1.2,
+						duration: 0.82,
 						ease: "power2.inOut",
 					},
-					0.45
+					0.38
 				)
-				.set(robotArmOpenElement, { autoAlpha: 0 }, 1.36)
-				.set(robotArmClosedElement, { autoAlpha: 1 }, 1.36)
 				.to(
-					robotArmRig,
+					robotCharacterEyesElement,
 					{
-						xPercent: -3,
-						yPercent: -3,
+						yPercent: 1.25,
+						duration: 0.28,
+						ease: "power2.inOut",
+					},
+					0.92
+				)
+				.to(
+					robotClawElement,
+					{
+						y: getClawContactTravel,
+						duration: 0.82,
+						ease: "power2.inOut",
+					},
+					0.38
+				)
+				.to(
+					robotClawRailElement,
+					{
+						height: getClawContactTravel,
+						duration: 0.82,
+						ease: "power2.inOut",
+					},
+					0.38
+				)
+				.call(() => setRobotPhase("gripping"), [], 1.2)
+				.set(robotClawOpenElement, { autoAlpha: 0 }, 1.2)
+				.set(robotClawClosedElement, { autoAlpha: 1 }, 1.2)
+				.call(() => setRobotPhase("lifting"), [], 1.46)
+				.to(
+					robotCharacterHeadElement,
+					{
 						rotation: 0,
-						duration: 0.82,
-						ease: "power2.inOut",
-					},
-					1.52
-				)
-				.to(
-					robotBlockElement,
-					{
-						xPercent: -6,
-						yPercent: -44,
-						duration: 0.82,
-						ease: "power2.inOut",
-					},
-					1.52
-				)
-				.to(
-					robotCharacterElement,
-					{
-						yPercent: -6,
-						rotation: 1.8,
-						duration: 0.26,
-						yoyo: true,
-						repeat: 1,
-						ease: "power2.inOut",
-					},
-					1.58
-				)
-				.to(
-					robotArmRig,
-					{
-						xPercent: -1.5,
-						yPercent: 8,
-						rotation: -1.2,
-						duration: 0.82,
-						ease: "power2.inOut",
-					},
-					3.02
-				)
-				.to(
-					robotBlockElement,
-					{
 						xPercent: 0,
 						yPercent: 0,
-						duration: 0.82,
+						duration: 0.88,
 						ease: "power2.inOut",
 					},
-					3.02
+					1.46
 				)
-				.set(robotArmClosedElement, { autoAlpha: 0 }, 3.9)
-				.set(robotArmOpenElement, { autoAlpha: 1 }, 3.9)
 				.to(
-					robotArmRig,
+					robotCharacterEyesElement,
+					{
+						yPercent: 0,
+						duration: 0.48,
+						ease: "power2.inOut",
+					},
+					1.46
+				)
+				.to(
+					robotClawElement,
+					{
+						y: 0,
+						duration: 0.88,
+						ease: "power2.inOut",
+					},
+					1.46
+				)
+				.to(
+					robotClawRailElement,
+					{
+						height: 0,
+						duration: 0.88,
+						ease: "power2.inOut",
+					},
+					1.46
+				)
+				.to(
+					robotBlockElement,
+					{
+						y: () => -getClawContactTravel(),
+						duration: 0.88,
+						ease: "power2.inOut",
+					},
+					1.46
+				)
+				.call(() => setRobotPhase("holding"), [], 2.34)
+				.to(
+					robotCharacterHeadElement,
+					{
+						rotation: 7.5,
+						xPercent: 1.4,
+						yPercent: 1.2,
+						duration: 1.08,
+						ease: "power2.inOut",
+					},
+					2.66
+				)
+				.call(() => setRobotPhase("lowering"), [], 2.86)
+				.to(
+					robotClawElement,
+					{
+						y: getClawContactTravel,
+						duration: 0.88,
+						ease: "power2.inOut",
+					},
+					2.86
+				)
+				.to(
+					robotCharacterEyesElement,
+					{
+						yPercent: 1.25,
+						duration: 0.34,
+						ease: "power2.inOut",
+					},
+					3.42
+				)
+				.to(
+					robotClawRailElement,
+					{
+						height: getClawContactTravel,
+						duration: 0.88,
+						ease: "power2.inOut",
+					},
+					2.86
+				)
+				.to(
+					robotBlockElement,
+					{
+						y: 0,
+						duration: 0.88,
+						ease: "power2.inOut",
+					},
+					2.86
+				)
+				.call(() => setRobotPhase("releasing"), [], 3.76)
+				.set(robotClawClosedElement, { autoAlpha: 0 }, 3.76)
+				.set(robotClawOpenElement, { autoAlpha: 1 }, 3.76)
+				.call(() => setRobotPhase("retracting"), [], 3.9)
+				.to(
+					robotClawElement,
+					{
+						y: 0,
+						duration: 0.72,
+						ease: "power2.inOut",
+					},
+					3.9
+				)
+				.to(
+					robotClawRailElement,
+					{
+						height: 0,
+						duration: 0.72,
+						ease: "power2.inOut",
+					},
+					3.9
+				)
+				.to(
+					robotCharacterHeadElement,
 					{
 						xPercent: 0,
 						yPercent: 0,
@@ -188,18 +322,20 @@ export default function Services() {
 						duration: 0.72,
 						ease: "power2.inOut",
 					},
-					4.04
+					3.9
 				)
 				.to(
-					robotCharacterElement,
+					robotCharacterEyesElement,
 					{
 						yPercent: 0,
-						rotation: 0,
-						duration: 0.52,
-						ease: "power2.out",
+						duration: 0.48,
+						ease: "power2.inOut",
 					},
-					4.04
-				);
+					3.9
+				)
+				.call(() => setRobotPhase("rest"), [], 4.62);
+
+			robotInteractionTimeline.timeScale(0.72);
 
 			const activeSettleSwing = gsap
 				.delayedCall(0.1, () => {
@@ -309,6 +445,7 @@ export default function Services() {
 			settleSwing?.kill();
 			context.revert();
 			delete root.dataset.servicesMotion;
+			delete root.dataset.robotPhase;
 		};
 	}, []);
 
@@ -400,36 +537,81 @@ export default function Services() {
 								data-service-device="robot-arm"
 							>
 								<div className={styles.robotInteraction}>
-									<div ref={robotArmRigRef} className={styles.robotArmRig}>
-										<img
-											ref={robotArmOpenRef}
-											className={`${styles.robotArmLayer} ${styles.robotArmOpen}`}
-											src={roboticArmOpen}
-											alt=""
-											decoding="async"
+									<img
+										ref={robotArmStaticRef}
+										className={styles.robotArmStatic}
+										data-robot-arm-static="true"
+										src={roboticArmStatic}
+										alt=""
+										decoding="async"
+									/>
+									<div className={styles.robotClawAssembly}>
+										<span
+											ref={robotClawRailRef}
+											className={styles.robotClawRail}
+											data-robot-claw-rail="true"
 										/>
-										<img
-											ref={robotArmClosedRef}
-											className={`${styles.robotArmLayer} ${styles.robotArmClosed}`}
-											src={roboticArmClosed}
-											alt=""
-											decoding="async"
-										/>
+										<div
+											ref={robotClawRef}
+											className={styles.robotClawCarriage}
+											data-robot-claw="true"
+										>
+											<img
+												ref={robotClawOpenRef}
+												className={`${styles.robotClawLayer} ${styles.robotClawOpen}`}
+												src={roboticClawOpen}
+												alt=""
+												decoding="async"
+											/>
+											<img
+												ref={robotClawClosedRef}
+												className={`${styles.robotClawLayer} ${styles.robotClawClosed}`}
+												src={roboticClawClosed}
+												alt=""
+												decoding="async"
+											/>
+										</div>
 									</div>
 									<img
 										ref={robotBlockRef}
 										className={styles.robotBlock}
+										data-robot-block="true"
 										src={roboticArmBlock}
 										alt=""
 										decoding="async"
 									/>
-									<img
+									<div
 										ref={robotCharacterRef}
 										className={styles.robotCharacter}
-										src={lagArthurPointing}
-										alt=""
-										decoding="async"
-									/>
+										data-robot-character="true"
+									>
+										<img
+											className={styles.robotCharacterLayer}
+											src={lagArthurControllerBody}
+											alt=""
+											decoding="async"
+										/>
+										<div
+											ref={robotCharacterHeadRef}
+											className={`${styles.robotCharacterLayer} ${styles.robotCharacterHead}`}
+											data-robot-character-head="true"
+										>
+											<img
+												className={styles.robotCharacterHeadLayer}
+												src={lagArthurControllerHead}
+												alt=""
+												decoding="async"
+											/>
+											<img
+												ref={robotCharacterEyesRef}
+												className={`${styles.robotCharacterHeadLayer} ${styles.robotCharacterEyes}`}
+												data-robot-character-eyes="true"
+												src={lagArthurControllerEyes}
+												alt=""
+												decoding="async"
+											/>
+										</div>
+									</div>
 								</div>
 							</div>
 						</div>

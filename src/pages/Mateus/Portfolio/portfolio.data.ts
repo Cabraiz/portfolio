@@ -1,6 +1,6 @@
 import imagemNexovare from "../../../assets/Mateus/portfolio/nexovare-dashboard-preview-v3.png";
-import imagem2 from "../../../assets/Mateus/portfolio/imagem2.webp";
-import imagemGuineBissauCommerce from "../../../assets/Mateus/portfolio/guine-bissau-commerce-preview-v4.webp";
+import imagem2 from "../../../assets/Mateus/portfolio/innomof-banking-app-premium-v2.webp";
+import imagemGuineBissauCommerce from "../../../assets/Mateus/portfolio/bideiras-marketplace-preview-v1.webp";
 import imagem3 from "../../../assets/Mateus/portfolio/imagem3-barbearia-v3.webp";
 import imagemCentralClube from "../../../assets/Mateus/portfolio/imagem4-central-clube-livro-v1.webp";
 import imagem4 from "../../../assets/Mateus/portfolio/imagem4-wagner-v2.webp";
@@ -8,9 +8,9 @@ import imagem5 from "../../../assets/Mateus/portfolio/imagem5-fran-v2.webp";
 
 import logoNexovare from "../../../assets/Mateus/portfolio/logos/refined/nexovare-nx-mark-v2.png";
 import logo2 from "../../../assets/Mateus/portfolio/logos/logo2.webp";
-import logoGuineBissauCommerce from "../../../assets/Mateus/portfolio/logos/refined/guine-bissau-commerce-logo-v4.png";
+import logoGuineBissauCommerce from "../../../assets/Mateus/portfolio/logos/refined/bideiras-market-bag-icon-v1.png";
 import logo3 from "../../../assets/Mateus/portfolio/logos/refined/pessoa-barbearia-lockup-v3.png";
-import logoCentralClube from "../../../assets/Mateus/portfolio/logos/refined/entre-paginas-lockup-v2.png";
+import logoCentralClube from "../../../assets/Mateus/portfolio/logos/refined/entre-paginas-mark-v3.png";
 import logo4 from "../../../assets/Mateus/portfolio/logos/refined/wagner-advocacia-lockup-v3.png";
 import logo5 from "../../../assets/Mateus/portfolio/logos/refined/fran-site-lockup-v4.png";
 
@@ -91,12 +91,12 @@ export const portfolioProjects: ReadonlyArray<PortfolioProject> = [
   },
   {
     id: "guine-bissau-commerce",
-    name: "E-COMMERCE",
+    name: "BIDEIRAS",
     year: "2024",
     imageSrc: imagemGuineBissauCommerce,
-    imageAlt: "Preview do projeto de e-commerce em Guiné-Bissau",
+    imageAlt: "Preview do marketplace Bideiras em Guiné-Bissau",
     logoSrc: logoGuineBissauCommerce,
-    logoAlt: "Logo do projeto Bissau Market",
+    logoAlt: "Ícone da Bideiras em forma de sacola nas cores da Guiné-Bissau",
     projectLabel: "Projeto em destaque",
     subtitle: "Comércio digital internacional",
     statusLabel: "SELECIONAR",
@@ -150,7 +150,7 @@ export const portfolioProjects: ReadonlyArray<PortfolioProject> = [
     imageSrc: imagemCentralClube,
     imageAlt: "Página inicial do projeto Central Clube do Livro",
     logoSrc: logoCentralClube,
-    logoAlt: "Logo Entre Páginas do projeto Central Clube do Livro",
+    logoAlt: "Logo Entre Páginas",
     projectLabel: "Projeto em destaque",
     subtitle: "Comunidade editorial",
     statusLabel: "SELECIONAR",
