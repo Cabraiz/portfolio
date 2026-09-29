@@ -72,6 +72,8 @@
   z-index: 3;
   display: flex;
   flex-direction: column;
+  width: max-content;
+  max-width: 100%;
   margin: 10px 0 0;
   font-family: Georgia, "Times New Roman", serif;
   font-size: clamp(49px, 17.6vw, 68px);
@@ -101,6 +103,8 @@
   z-index: 3;
   display: flex;
   flex-direction: column;
+  width: max-content;
+  max-width: 100%;
   margin-top: 18px;
   font-family: Georgia, "Times New Roman", serif;
   font-size: 12px;

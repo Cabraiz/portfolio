@@ -21,6 +21,7 @@ function HomeMobile() {
   const identityRef = useRef<HTMLDivElement>(null);
   const introRef = useRef<HTMLParagraphElement>(null);
   const partnersRef = useRef<HTMLDivElement>(null);
+  const partnersHeadingRef = useRef<HTMLDivElement>(null);
   const portraitRef = useRef<HTMLImageElement>(null);
 
   useLayoutEffect(() => {
@@ -48,13 +49,20 @@ function HomeMobile() {
       titleRef.current,
       identityRef.current,
       introRef.current,
+      partnersHeadingRef.current,
     ];
     const textBlocks = blockCandidates.filter(
       (element): element is HTMLElement => element !== null,
     );
 
     const context = gsap.context(() => {
-      gsap.set([logo, ...textBlocks, ...partnerItems], {
+      gsap.set(logo, {
+        x: -24,
+        autoAlpha: 1,
+        willChange: "transform",
+        force3D: true,
+      });
+      gsap.set([...textBlocks, ...partnerItems], {
         willChange: "transform",
         force3D: true,
       });
@@ -84,15 +92,6 @@ function HomeMobile() {
         .to(
           logo,
           {
-            x: -100,
-            duration: 0.08,
-            ease: "power2.out",
-          },
-          0,
-        )
-        .to(
-          logo,
-          {
             y: () => Math.min(380, window.innerHeight * 0.5),
             rotation: 2,
             scale: 1.08,
@@ -106,19 +105,10 @@ function HomeMobile() {
             y: 0,
             rotation: 0,
             scale: 1,
-            duration: 0.1,
-            ease: "power2.inOut",
+            duration: 0.18,
+            ease: "power2.in",
           },
           0.82,
-        )
-        .to(
-          logo,
-          {
-            x: 0,
-            duration: 0.08,
-            ease: "power2.inOut",
-          },
-          0.92,
         )
         .to(
           portrait,
@@ -133,6 +123,7 @@ function HomeMobile() {
       const pushBlock = (
         element: HTMLElement | null,
         start: number,
+        release: number,
         distance: number,
         constrainToViewport = false,
       ) => {
@@ -166,17 +157,18 @@ function HomeMobile() {
               duration: 0.13,
               ease: "power2.inOut",
             },
-            start + 0.09,
+            release,
           );
       };
 
-      pushBlock(eyebrowRef.current, 0.015, 58, true);
-      pushBlock(titleRef.current, 0.055, 56, true);
-      pushBlock(identityRef.current, 0.09, 60, true);
-      pushBlock(introRef.current, 0.17, 66, true);
+      pushBlock(eyebrowRef.current, 0.015, 0.2, 58, true);
+      pushBlock(titleRef.current, 0.055, 0.36, 72, true);
+      pushBlock(identityRef.current, 0.09, 0.52, 60, true);
+      pushBlock(introRef.current, 0.17, 0.72, 66, true);
+      pushBlock(partnersHeadingRef.current, 0.22, 0.9, 72, true);
 
-      const partnerExitDuration = 0.11;
-      const partnerExitInterval = 0.155;
+      const partnerExitDuration = 0.08;
+      const partnerExitInterval = 0.1;
 
       partnerItems.forEach((partner, index) => {
         timeline.to(
@@ -191,7 +183,7 @@ function HomeMobile() {
             duration: partnerExitDuration,
             ease: "power2.in",
           },
-          0.28 + index * partnerExitInterval,
+          index * partnerExitInterval,
         );
       });
     }, page);
@@ -238,7 +230,11 @@ function HomeMobile() {
           className={styles.partners}
           aria-label="Clientes e parceiros"
         >
-          <div className={styles.partnersHeading}>
+          <div
+            ref={partnersHeadingRef}
+            className={styles.partnersHeading}
+            data-mobile-partners-heading="true"
+          >
             <span>CLIENTES</span>
             <span>E PARCEIROS</span>
           </div>

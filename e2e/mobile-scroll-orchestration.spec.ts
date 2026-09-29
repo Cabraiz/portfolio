@@ -15,7 +15,7 @@ const homeProgressSamples = [
   0, 0.04, 0.08, 0.16, 0.24, 0.32, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9,
 ] as const;
 
-test("sincroniza Lenis e ScrollTrigger sem o logo invadir a Home", async ({
+test("mantém a logo visível enquanto ela empurra a Home", async ({
   browser,
 }) => {
   test.setTimeout(120_000);
@@ -61,9 +61,12 @@ test("sincroniza Lenis e ScrollTrigger sem o logo invadir a Home", async ({
             title: root.querySelector("h1"),
             identity: root.querySelector("h1 + div"),
             intro: root.querySelector("p"),
-            partners: root.querySelector('[aria-label="Clientes e parceiros"]'),
+            partnersHeading: root.querySelector(
+              '[data-mobile-partners-heading="true"]',
+            ),
           };
           const logoRect = logo.getBoundingClientRect();
+          const logoStyle = getComputedStyle(logo);
           const overlaps: string[] = [];
           const horizontalOverflow: string[] = [];
 
@@ -83,7 +86,38 @@ test("sincroniza Lenis e ScrollTrigger sem o logo invadir a Home", async ({
             }
           }
 
+          for (const partner of root.querySelectorAll<HTMLElement>(
+            "[data-mobile-partner-item]",
+          )) {
+            const style = getComputedStyle(partner);
+            if (Number.parseFloat(style.opacity) <= 0.03) continue;
+
+            const rect = partner.getBoundingClientRect();
+            const overlapWidth =
+              Math.min(logoRect.right, rect.right) -
+              Math.max(logoRect.left, rect.left);
+            const overlapHeight =
+              Math.min(logoRect.bottom, rect.bottom) -
+              Math.max(logoRect.top, rect.top);
+
+            if (overlapWidth > 2 && overlapHeight > 2) {
+              overlaps.push(
+                `partner:${partner.dataset.mobilePartnerItem ?? "unknown"}`,
+              );
+            }
+          }
+
           return {
+            logoVisible:
+              logoStyle.visibility !== "hidden" &&
+              Number.parseFloat(logoStyle.opacity) >= 0.99 &&
+              logoRect.width > 0 &&
+              logoRect.height > 0,
+            logoInsideViewport:
+              logoRect.left >= -1 &&
+              logoRect.right <= innerWidth + 1 &&
+              logoRect.top >= -1 &&
+              logoRect.bottom <= innerHeight + 1,
             overlaps,
             horizontalOverflow,
             scrollWidth: document.documentElement.scrollWidth,
@@ -92,6 +126,8 @@ test("sincroniza Lenis e ScrollTrigger sem o logo invadir a Home", async ({
         });
 
         expect(metrics).not.toBeNull();
+        expect(metrics?.logoVisible).toBe(true);
+        expect(metrics?.logoInsideViewport).toBe(true);
         expect(metrics?.overlaps).toEqual([]);
         expect(metrics?.horizontalOverflow).toEqual([]);
         expect(metrics?.scrollWidth).toBeLessThanOrEqual(
@@ -182,8 +218,7 @@ test("mantém Contato inteiro e livre do chat em retrato e paisagem", async ({
         Math.abs(
           (metrics?.sectionHeight ?? 0) -
             ((metrics?.viewportHeight ?? 0) -
-              (metrics?.navbarHeight ?? 0) -
-              2),
+              (metrics?.navbarHeight ?? 0)),
         ),
       ).toBeLessThanOrEqual(1);
       expect(metrics?.contactTop).toBeGreaterThanOrEqual(
@@ -242,13 +277,20 @@ test("recalcula o ScrollTrigger após resize e troca de orientação", async ({
       }
 
       const logoRect = logo.getBoundingClientRect();
-      return [
+      const elements = [
         root.querySelector(":scope > section > div:first-child"),
         root.querySelector("h1"),
         root.querySelector("h1 + div"),
         root.querySelector("p"),
-        root.querySelector('[aria-label="Clientes e parceiros"]'),
-      ]
+        root.querySelector('[data-mobile-partners-heading="true"]'),
+        ...Array.from(
+          root.querySelectorAll<HTMLElement>("[data-mobile-partner-item]"),
+        ).filter(
+          (element) => Number.parseFloat(getComputedStyle(element).opacity) > 0.03,
+        ),
+      ];
+
+      return elements
         .filter((element): element is HTMLElement => element instanceof HTMLElement)
         .filter((element) => {
           const rect = element.getBoundingClientRect();
