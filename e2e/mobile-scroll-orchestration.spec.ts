@@ -78,6 +78,7 @@ test("mantém a logo visível enquanto ela empurra a Home", async ({
           const logoStyle = getComputedStyle(logo);
           const overlaps: string[] = [];
           const horizontalOverflow: string[] = [];
+          const invalidPartnerExitDirections: string[] = [];
 
           for (const [name, element] of Object.entries(elements)) {
             if (!(element instanceof HTMLElement)) continue;
@@ -99,9 +100,16 @@ test("mantém a logo visível enquanto ela empurra a Home", async ({
             "[data-mobile-partner-item]",
           )) {
             const style = getComputedStyle(partner);
-            if (Number.parseFloat(style.opacity) <= 0.03) continue;
-
             const rect = partner.getBoundingClientRect();
+            if (Number.parseFloat(style.opacity) <= 0.03) {
+              if (rect.left <= innerWidth + 1) {
+                invalidPartnerExitDirections.push(
+                  partner.dataset.mobilePartnerItem ?? "unknown",
+                );
+              }
+              continue;
+            }
+
             const overlapWidth =
               Math.min(logoRect.right, rect.right) -
               Math.max(logoRect.left, rect.left);
@@ -133,6 +141,7 @@ test("mantém a logo visível enquanto ela empurra a Home", async ({
               logoRect.bottom <= navbarRect.bottom + 1,
             overlaps,
             horizontalOverflow,
+            invalidPartnerExitDirections,
             scrollWidth: document.documentElement.scrollWidth,
             viewportWidth: innerWidth,
           };
@@ -147,6 +156,7 @@ test("mantém a logo visível enquanto ela empurra a Home", async ({
           expect(metrics?.logoInsideNavbar).toBe(true);
         }
         expect(metrics?.horizontalOverflow).toEqual([]);
+        expect(metrics?.invalidPartnerExitDirections).toEqual([]);
         expect(metrics?.scrollWidth).toBeLessThanOrEqual(
           metrics?.viewportWidth ?? 0,
         );

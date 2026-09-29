@@ -202,7 +202,7 @@ function HomeMobile() {
           partner,
           {
             x: () =>
-              -(partner.getBoundingClientRect().right + 24),
+              window.innerWidth - partner.getBoundingClientRect().left + 24,
             opacity: 0,
             duration: partnerExitDuration,
             ease: "power2.in",
