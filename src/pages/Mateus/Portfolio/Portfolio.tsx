@@ -77,6 +77,39 @@ const MOBILE_BRAZIL_ROUTE_POINTS: ReadonlyArray<
 ];
 
 const MOBILE_BRAZIL_ROUTE_HUB = MOBILE_BRAZIL_ROUTE_POINTS[2];
+const MOBILE_ROUTE_TARGET_Y = 50;
+const MOBILE_ROUTE_MIN_Y = 12;
+const MOBILE_ROUTE_MAX_Y = 84;
+
+function centerMobileBrazilRoute(
+	activeProjectId: PortfolioProjectId
+): typeof MOBILE_BRAZIL_ROUTE_POINTS {
+	const activePoint = MOBILE_BRAZIL_ROUTE_POINTS.find(
+		(point) => point.id === activeProjectId
+	);
+
+	if (!activePoint) return MOBILE_BRAZIL_ROUTE_POINTS;
+
+	const routePointYs = MOBILE_BRAZIL_ROUTE_POINTS.map((point) => point.y);
+	const lowestPointY = Math.min(...routePointYs);
+	const highestPointY = Math.max(...routePointYs);
+	const distanceBeforeActive = activePoint.y - lowestPointY;
+	const distanceAfterActive = highestPointY - activePoint.y;
+	const scaleBefore =
+		distanceBeforeActive > 0
+			? (MOBILE_ROUTE_TARGET_Y - MOBILE_ROUTE_MIN_Y) / distanceBeforeActive
+			: 1;
+	const scaleAfter =
+		distanceAfterActive > 0
+			? (MOBILE_ROUTE_MAX_Y - MOBILE_ROUTE_TARGET_Y) / distanceAfterActive
+			: 1;
+	const scale = Math.min(1, scaleBefore, scaleAfter);
+
+	return MOBILE_BRAZIL_ROUTE_POINTS.map((point) => ({
+		...point,
+		y: MOBILE_ROUTE_TARGET_Y + (point.y - activePoint.y) * scale,
+	}));
+}
 
 const FORTALEZA_MAP_POSITION = { x: 39.2981, y: 52.0733 } as const;
 const BRAZIL_ROUTE_HUB = FORTALEZA_MAP_POSITION;
@@ -358,7 +391,12 @@ export default function Portfolio() {
 
 	const activeLocation = activeProject.worldLocation;
 	const worldJourneyDestination = WORLD_JOURNEY_DESTINATIONS[activeProject.id];
-	const mobileBrazilRoutePoint = MOBILE_BRAZIL_ROUTE_POINTS.find(
+	const mobileBrazilRoutePoints = centerMobileBrazilRoute(activeProject.id);
+	const mobileBrazilRouteHub =
+		mobileBrazilRoutePoints.find(
+			(point) => point.id === MOBILE_BRAZIL_ROUTE_HUB.id
+		) ?? MOBILE_BRAZIL_ROUTE_HUB;
+	const mobileBrazilRoutePoint = mobileBrazilRoutePoints.find(
 		(point) => point.id === activeProject.id
 	);
 
@@ -619,8 +657,8 @@ export default function Portfolio() {
 									<line
 										key={`mobile-route-mask-${activeProject.id}`}
 										className={styles.mobileRouteRevealMask}
-										x1={MOBILE_BRAZIL_ROUTE_HUB.x}
-										y1={MOBILE_BRAZIL_ROUTE_HUB.y}
+										x1={mobileBrazilRouteHub.x}
+										y1={mobileBrazilRouteHub.y}
 										x2={mobileBrazilRoutePoint.x}
 										y2={mobileBrazilRoutePoint.y}
 										pathLength="1"
@@ -629,14 +667,14 @@ export default function Portfolio() {
 								</mask>
 							</defs>
 
-							{MOBILE_BRAZIL_ROUTE_POINTS.filter(
+							{mobileBrazilRoutePoints.filter(
 								(point) => point.id !== MOBILE_BRAZIL_ROUTE_HUB.id
 							).map((point) => (
 								<line
 									key={`mobile-route-base-${point.id}`}
 									className={styles.mobileRouteBase}
-									x1={MOBILE_BRAZIL_ROUTE_HUB.x}
-									y1={MOBILE_BRAZIL_ROUTE_HUB.y}
+									x1={mobileBrazilRouteHub.x}
+									y1={mobileBrazilRouteHub.y}
 									x2={point.x}
 									y2={point.y}
 									pathLength="100"
@@ -648,8 +686,8 @@ export default function Portfolio() {
 								<line
 									key={`mobile-route-active-${activeProject.id}`}
 									className={styles.mobileRouteActive}
-									x1={MOBILE_BRAZIL_ROUTE_HUB.x}
-									y1={MOBILE_BRAZIL_ROUTE_HUB.y}
+									x1={mobileBrazilRouteHub.x}
+									y1={mobileBrazilRouteHub.y}
 									x2={mobileBrazilRoutePoint.x}
 									y2={mobileBrazilRoutePoint.y}
 									pathLength="100"
@@ -660,7 +698,7 @@ export default function Portfolio() {
 							) : null}
 						</svg>
 
-						{MOBILE_BRAZIL_ROUTE_POINTS.map((point) => {
+						{mobileBrazilRoutePoints.map((point) => {
 							const project = portfolioProjects.find(
 								(candidate) => candidate.id === point.id
 							);

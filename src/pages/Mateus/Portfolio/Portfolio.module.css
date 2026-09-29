@@ -1001,7 +1001,10 @@
 		position: absolute;
 		top: 0;
 		right: 0;
-		bottom: calc(208px + max(4px, env(safe-area-inset-bottom)));
+		bottom: calc(
+			var(--mobile-detail-card-height, 182px) +
+				max(4px, env(safe-area-inset-bottom))
+		);
 		left: 0;
 		z-index: 2;
 		pointer-events: none;
@@ -1425,10 +1428,6 @@
 		height: auto;
 		padding-top: 15px;
 		padding-bottom: 6px;
-	}
-
-	.mobileBrazilRouteNetwork {
-		bottom: calc(194px + max(4px, env(safe-area-inset-bottom)));
 	}
 
 	.mobileProjectPreview {

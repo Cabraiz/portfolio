@@ -219,6 +219,57 @@ test("mantém o portfólio mobile completo dentro de diferentes telas", async ({
 					return Math.abs(destinationCenter - availableMapCenter);
 				})
 				.toBeLessThanOrEqual(1);
+
+			await page.locator('[data-mobile-project-id="erp-varejo"]').click();
+			const brazilDestination = page.locator(
+				'[data-mobile-route-node="erp-varejo"]'
+			);
+			await expect(brazilDestination).toBeVisible();
+			await expect(
+				page.locator('[data-mobile-route-active="erp-varejo"]')
+			).toHaveCount(1);
+			await expect
+				.poll(async () => {
+					const [currentStageBox, currentCardBox, destinationBox] =
+						await Promise.all([
+							stage.boundingBox(),
+							detailCard.boundingBox(),
+							brazilDestination.boundingBox(),
+						]);
+
+					if (!currentStageBox || !currentCardBox || !destinationBox) {
+						return Number.POSITIVE_INFINITY;
+					}
+
+					const availableMapCenter =
+						(currentStageBox.y + currentCardBox.y) / 2;
+					const destinationCenter =
+						destinationBox.y + destinationBox.height / 2;
+
+					return Math.abs(destinationCenter - availableMapCenter);
+				})
+				.toBeLessThanOrEqual(1);
+
+			const [routeNodes, currentStageBox, currentCardBox] = await Promise.all([
+				page.locator("[data-mobile-route-node]").evaluateAll((nodes) =>
+					nodes.map((node) => {
+						const box = node.getBoundingClientRect();
+						return { top: box.top, bottom: box.bottom };
+					})
+				),
+				stage.boundingBox(),
+				detailCard.boundingBox(),
+			]);
+			expect(currentStageBox).not.toBeNull();
+			expect(currentCardBox).not.toBeNull();
+			if (currentStageBox && currentCardBox) {
+				expect(
+					routeNodes.every(
+						(node) =>
+							node.top >= currentStageBox.y && node.bottom <= currentCardBox.y
+					)
+				).toBe(true);
+			}
 			await context.close();
 		});
 	}
