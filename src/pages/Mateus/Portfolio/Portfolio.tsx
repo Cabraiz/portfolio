@@ -113,6 +113,7 @@ type GeographicPositionStyle = CSSProperties & {
 
 type PortfolioRootStyle = CSSProperties & {
 	"--mobile-map-zoom": string;
+	"--mobile-detail-card-height": string;
 };
 
 type MobileRoutePointStyle = CSSProperties & {
@@ -153,7 +154,9 @@ export default function Portfolio() {
 	const location = useLocation();
 	const [isAutoplayPaused, setIsAutoplayPaused] = useState(false);
 	const [mobileMapZoom, setMobileMapZoom] = useState(1);
+	const [mobileDetailCardHeight, setMobileDetailCardHeight] = useState(182);
 	const rootRef = useRef<HTMLElement>(null);
+	const mobileDetailCardRef = useRef<HTMLElement>(null);
 	const isMagnetizingRef = useRef(false);
 	const projectListRef = useRef<HTMLDivElement>(null);
 	const mobileProjectListRef = useRef<HTMLDivElement>(null);
@@ -171,6 +174,24 @@ export default function Portfolio() {
 	const isPortfolioRoute = location.pathname === "/portfolio";
 	const isPortfolioActive = activeSectionId === "portfolio" || isPortfolioRoute;
 	const wasPortfolioActiveRef = useRef(false);
+
+	useEffect(() => {
+		const card = mobileDetailCardRef.current;
+		if (!card) return undefined;
+
+		const updateCardHeight = () => {
+			const height = card.getBoundingClientRect().height;
+			if (height > 0) {
+				setMobileDetailCardHeight(Math.round(height * 100) / 100);
+			}
+		};
+
+		updateCardHeight();
+		const observer = new ResizeObserver(updateCardHeight);
+		observer.observe(card);
+
+		return () => observer.disconnect();
+	}, []);
 
 	useEffect(() => {
 		const root = rootRef.current;
@@ -407,6 +428,7 @@ export default function Portfolio() {
 
 	const portfolioRootStyle = {
 		"--mobile-map-zoom": mobileMapZoom.toFixed(2),
+		"--mobile-detail-card-height": `${mobileDetailCardHeight}px`,
 	} as PortfolioRootStyle;
 
 	return (
@@ -706,6 +728,7 @@ export default function Portfolio() {
 				</div>
 
 				<article
+					ref={mobileDetailCardRef}
 					className={styles.mobileDetailCard}
 					data-mobile-detail-card="true"
 					aria-live="polite"

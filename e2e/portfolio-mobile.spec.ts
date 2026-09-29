@@ -190,6 +190,35 @@ test("mantém o portfólio mobile completo dentro de diferentes telas", async ({
 				expect(worldRouteBox.width).toBeGreaterThan(30);
 				expect(worldRouteBox.height).toBeGreaterThan(20);
 			}
+
+			await page
+				.locator('[data-mobile-project-id="guine-bissau-commerce"]')
+				.click();
+			const bissauDestination = page.locator(
+				'[data-world-journey-destination="guine-bissau-commerce"]'
+			);
+			await expect(bissauDestination).toBeVisible();
+			await expect
+				.poll(async () => {
+					const [currentStageBox, currentCardBox, destinationBox] =
+						await Promise.all([
+							stage.boundingBox(),
+							detailCard.boundingBox(),
+							bissauDestination.boundingBox(),
+						]);
+
+					if (!currentStageBox || !currentCardBox || !destinationBox) {
+						return Number.POSITIVE_INFINITY;
+					}
+
+					const availableMapCenter =
+						(currentStageBox.y + currentCardBox.y) / 2;
+					const destinationCenter =
+						destinationBox.y + destinationBox.height / 2;
+
+					return Math.abs(destinationCenter - availableMapCenter);
+				})
+				.toBeLessThanOrEqual(1);
 			await context.close();
 		});
 	}
