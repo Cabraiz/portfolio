@@ -911,10 +911,13 @@
 
 @media (max-width: 720px) {
 	.portfolioRoot {
+		--mobile-portfolio-height: calc(
+			110dvh - var(--app-navbar-height, 52px) - 2px
+		);
 		width: 100%;
-		height: calc(100dvh - var(--app-navbar-height, 52px) - 2px);
-		min-height: calc(100dvh - var(--app-navbar-height, 52px) - 2px);
-		max-height: calc(100dvh - var(--app-navbar-height, 52px) - 2px);
+		height: var(--mobile-portfolio-height);
+		min-height: var(--mobile-portfolio-height);
+		max-height: var(--mobile-portfolio-height);
 		overflow: visible;
 	}
 

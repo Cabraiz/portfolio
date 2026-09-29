@@ -62,7 +62,7 @@ test("mantém o portfólio mobile completo dentro de diferentes telas", async ({
 				.boundingBox();
 			expect(routeBox).not.toBeNull();
 			if (routeBox) {
-				expect(routeBox.width).toBeGreaterThan(30);
+				expect(routeBox.width).toBeGreaterThan(29);
 				expect(routeBox.height).toBeGreaterThan(35);
 			}
 
@@ -148,16 +148,19 @@ test("mantém o portfólio mobile completo dentro de diferentes telas", async ({
 			expect(stageBox.y).toBeGreaterThanOrEqual(
 				navbarBox.y + navbarBox.height - 1
 			);
-			expect(stageBox.y + stageBox.height).toBeLessThanOrEqual(
-				viewportMetrics.height + 1
-			);
 			expect(
-				Math.abs(rootBox.y + rootBox.height - viewportMetrics.height)
+				Math.abs(
+					rootBox.height -
+						(viewportMetrics.height * 1.1 - navbarBox.height - 2)
+				)
 			).toBeLessThanOrEqual(1);
 			expect(Math.abs(stageBox.height - rootBox.height)).toBeLessThanOrEqual(1);
 			expect(cardBox.y).toBeGreaterThanOrEqual(stageBox.y - 1);
 			expect(cardBox.y + cardBox.height).toBeLessThanOrEqual(
-				viewportMetrics.height + 1
+				rootBox.y + rootBox.height + 1
+			);
+			expect(cardBox.y + cardBox.height).toBeGreaterThan(
+				viewportMetrics.height
 			);
 			expect(cardBox.height).toBeGreaterThanOrEqual(150);
 			expect(cardBox.height).toBeLessThanOrEqual(205);

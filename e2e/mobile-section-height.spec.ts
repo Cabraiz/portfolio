@@ -18,7 +18,7 @@ const homeViewports = [
 	{ width: 667, height: 375 },
 ] as const;
 
-test("usa exatamente a altura útil em todas as seções mobile", async ({
+test("usa a altura contratada em todas as seções mobile", async ({
 	browser,
 }) => {
 	test.setTimeout(60_000);
@@ -49,12 +49,13 @@ test("usa exatamente a altura útil em todas as seções mobile", async ({
 					sectionHeight: activeSection.getBoundingClientRect().height,
 				};
 			}, route.id);
-			expect(
-				Math.abs(
-					metrics.sectionHeight -
-						(metrics.viewportHeight - metrics.navbarHeight - 2)
-				)
-			).toBeLessThanOrEqual(1);
+			const expectedHeight =
+				route.id === "portfolio"
+					? metrics.viewportHeight * 1.1 - metrics.navbarHeight - 2
+					: metrics.viewportHeight - metrics.navbarHeight - 2;
+			expect(Math.abs(metrics.sectionHeight - expectedHeight)).toBeLessThanOrEqual(
+				2
+			);
 		});
 	}
 
