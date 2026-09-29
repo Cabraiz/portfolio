@@ -11,6 +11,7 @@ type PartnerState = {
 	id: string;
 	opacity: number;
 	x: number;
+	right: number;
 };
 
 const readPartnerStates = async (
@@ -24,6 +25,7 @@ const readPartnerStates = async (
 				id: element.getAttribute("data-mobile-partner-item") ?? "",
 				opacity: Number.parseFloat(style.opacity),
 				x: matrix.m41,
+				right: element.getBoundingClientRect().right,
 			};
 		})
 	);
@@ -74,7 +76,7 @@ test("retira clientes e parceiros individualmente durante o scroll", async ({
 					const activeItemIsMoving =
 						states[activeIndex].opacity >= 0.08 &&
 						states[activeIndex].opacity <= 0.92 &&
-						states[activeIndex].x > 0;
+						states[activeIndex].x < 0;
 					const nextItemsAreStill = states
 						.slice(activeIndex + 1)
 						.every(({ opacity, x }) => opacity >= 0.97 && Math.abs(x) <= 0.5);
@@ -102,7 +104,7 @@ test("retira clientes e parceiros individualmente durante o scroll", async ({
 			}
 
 			expect(finalState.every(({ opacity }) => opacity <= 0.02)).toBe(true);
-			expect(finalState.every(({ x }) => x >= viewport.width - 26)).toBe(true);
+			expect(finalState.every(({ right }) => right <= 0)).toBe(true);
 			await context.close();
 		});
 	}
