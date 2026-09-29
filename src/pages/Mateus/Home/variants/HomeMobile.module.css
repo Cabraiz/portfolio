@@ -4,9 +4,9 @@
   --wine: #8d1028;
   width: 100%;
   min-width: 0;
-  height: calc(100dvh - var(--app-navbar-height, 72px) - 2px);
-  min-height: calc(100dvh - var(--app-navbar-height, 72px) - 2px);
-  max-height: calc(100dvh - var(--app-navbar-height, 72px) - 2px);
+  height: calc(100dvh - var(--app-navbar-height, 72px));
+  min-height: calc(100dvh - var(--app-navbar-height, 72px));
+  max-height: calc(100dvh - var(--app-navbar-height, 72px));
   overflow: hidden;
   color: var(--ink);
   background: transparent;

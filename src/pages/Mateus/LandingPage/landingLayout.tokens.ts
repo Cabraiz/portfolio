@@ -1,6 +1,9 @@
 import type { CSSProperties } from "react";
 
-import { NAVBAR_HEIGHT_CSS_VAR } from "../../../App/NavBar/navbar.constants";
+import {
+  NAVBAR_HEIGHT_CSS_VAR,
+  getNavbarHeight,
+} from "../../../App/NavBar/navbar.constants";
 import type { LandingSectionViewportMode } from "./landing.types";
 
 export type LandingRenderableViewportMode = "desktop" | "mobile";
@@ -469,9 +472,9 @@ function toViewportHeightMinusNavbar(
   baseMinHeight: CSSProperties["minHeight"],
   viewportMode: LandingRenderableViewportMode,
 ): CSSProperties["minHeight"] {
-  return `max(0px, calc(${baseMinHeight} - ${resolveLandingNavbarOffsetCssValue(
-    viewportMode,
-  )}))`;
+  const navbarHeight = getNavbarHeight(viewportMode === "mobile");
+
+  return `max(0px, calc(${baseMinHeight} - var(${NAVBAR_HEIGHT_CSS_VAR}, ${navbarHeight}px)))`;
 }
 
 export function resolveLandingSectionMinHeight(
