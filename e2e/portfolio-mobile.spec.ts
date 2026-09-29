@@ -38,7 +38,7 @@ test("mantém o portfólio mobile completo dentro de diferentes telas", async ({
 			const detailCard = page.locator('[data-mobile-detail-card="true"]');
 			const requiredElements = [
 				location,
-				page.locator('[data-mobile-map-route="true"]'),
+				page.locator('[data-mobile-route-active="erp-varejo"]'),
 				page.locator('[data-mobile-map-controls="true"]'),
 				detailCard,
 				page.locator('[data-mobile-feature-copy="true"]'),
@@ -58,12 +58,12 @@ test("mantém o portfólio mobile completo dentro de diferentes telas", async ({
 			await expect(page.locator("[data-mobile-route-node]")).toHaveCount(3);
 
 			const routeBox = await page
-				.locator('[data-mobile-map-route="true"]')
+				.locator('[data-mobile-route-active="erp-varejo"]')
 				.boundingBox();
 			expect(routeBox).not.toBeNull();
 			if (routeBox) {
 				expect(routeBox.width).toBeGreaterThan(30);
-				expect(routeBox.height).toBeGreaterThan(50);
+				expect(routeBox.height).toBeGreaterThan(35);
 			}
 
 			const [featureBox, previewBox, metaBox, technologiesBox] =
@@ -228,27 +228,42 @@ test("mantém o portfólio mobile completo dentro de diferentes telas", async ({
 			await expect(
 				page.locator('[data-mobile-route-active="erp-varejo"]')
 			).toHaveCount(1);
-			await expect
-				.poll(async () => {
-					const [currentStageBox, currentCardBox, destinationBox] =
-						await Promise.all([
-							stage.boundingBox(),
-							detailCard.boundingBox(),
-							brazilDestination.boundingBox(),
-						]);
+			const projectionDelta = await page.evaluate(() => {
+				const surface = document
+					.querySelector('[data-world-geo-surface="true"]')
+					?.getBoundingClientRect();
+				const marker = document
+					.querySelector('[data-mobile-route-node="erp-varejo"]')
+					?.getBoundingClientRect();
+				if (!surface || !marker) return Number.POSITIVE_INFINITY;
 
-					if (!currentStageBox || !currentCardBox || !destinationBox) {
-						return Number.POSITIVE_INFINITY;
-					}
+				const expectedX = surface.x + surface.width * 0.359326;
+				const expectedY = surface.y + surface.height * 0.618116;
+				const actualX = marker.x + marker.width / 2;
+				const actualY = marker.y + marker.height / 2;
+				return Math.hypot(actualX - expectedX, actualY - expectedY);
+			});
+			expect(projectionDelta).toBeLessThanOrEqual(1);
 
-					const availableMapCenter =
-						(currentStageBox.y + currentCardBox.y) / 2;
-					const destinationCenter =
-						destinationBox.y + destinationBox.height / 2;
-
-					return Math.abs(destinationCenter - availableMapCenter);
-				})
-				.toBeLessThanOrEqual(1);
+			const geographicOrder = await page
+				.locator("[data-mobile-route-node]")
+				.evaluateAll((nodes) =>
+					Object.fromEntries(
+						nodes.map((node) => {
+							const box = node.getBoundingClientRect();
+							return [
+								node.getAttribute("data-mobile-route-node"),
+								{ x: box.x + box.width / 2, y: box.y + box.height / 2 },
+							];
+						})
+					)
+				);
+			expect(geographicOrder["erp-varejo"].x).toBeLessThan(
+				geographicOrder["site-cabeleireira"].x
+			);
+			expect(geographicOrder["erp-varejo"].y).toBeGreaterThan(
+				geographicOrder["site-cabeleireira"].y
+			);
 
 			const [routeNodes, currentStageBox, currentCardBox] = await Promise.all([
 				page.locator("[data-mobile-route-node]").evaluateAll((nodes) =>
@@ -389,12 +404,11 @@ test("desenha as rotas locais e replica a viagem do desktop no mobile", async ({
 	await page.goto(new URL("/portfolio", baseURL).toString());
 
 	const activeRoute = page.locator('[data-mobile-route-active="erp-varejo"]');
-	const revealMask = page.locator('[data-mobile-route-reveal="erp-varejo"]');
 	await expect(activeRoute).toHaveCount(1);
 	await expect(page.locator("[data-mobile-route-base]")).toHaveCount(2);
 	await expect(page.locator("[data-mobile-route-node]")).toHaveCount(3);
 
-	const animation = await revealMask.evaluate((element) => {
+	const animation = await activeRoute.evaluate((element) => {
 		const [routeAnimation] = element.getAnimations();
 		const timing = routeAnimation?.effect?.getComputedTiming();
 		return {
@@ -403,13 +417,12 @@ test("desenha as rotas locais e replica a viagem do desktop no mobile", async ({
 			playState: routeAnimation?.playState ?? "missing",
 		};
 	});
-	expect(animation.name).toContain("mobileRouteReveal");
+	expect(animation.name).toContain("journeyRouteDraw");
 	expect(animation.duration).toBe(1100);
 	expect(["running", "finished"]).toContain(animation.playState);
 
 	await page.locator('[data-mobile-project-id="site-adv"]').click();
 	await expect(page.locator('[data-mobile-route-active="site-adv"]')).toHaveCount(1);
-	await expect(page.locator('[data-mobile-route-reveal="site-adv"]')).toHaveCount(1);
 	await expect(page.locator("[data-mobile-route-base]")).toHaveCount(2);
 
 	await page.locator('[data-mobile-project-id="app-bank"]').click();

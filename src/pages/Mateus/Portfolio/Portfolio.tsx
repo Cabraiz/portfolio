@@ -60,56 +60,9 @@ const WORLD_MAP_POINTS: ReadonlyArray<
 	}>
 > = [
 	{ id: "erp-varejo", x: 35.9326, y: 61.8116 },
-	{ id: "site-adv", x: 36.6992, y: 58.7744 },
+	{ id: "site-adv", x: 37.0463, y: 63.0836 },
 	{ id: "site-cabeleireira", x: 39.2981, y: 52.0733 },
 ];
-
-const MOBILE_BRAZIL_ROUTE_POINTS: ReadonlyArray<
-	Readonly<{
-		id: (typeof WORLD_MAP_POINTS)[number]["id"];
-		x: number;
-		y: number;
-	}>
-> = [
-	{ id: "erp-varejo", x: 14, y: 84 },
-	{ id: "site-adv", x: 23, y: 60 },
-	{ id: "site-cabeleireira", x: 66, y: 24 },
-];
-
-const MOBILE_BRAZIL_ROUTE_HUB = MOBILE_BRAZIL_ROUTE_POINTS[2];
-const MOBILE_ROUTE_TARGET_Y = 50;
-const MOBILE_ROUTE_MIN_Y = 12;
-const MOBILE_ROUTE_MAX_Y = 84;
-
-function centerMobileBrazilRoute(
-	activeProjectId: PortfolioProjectId
-): typeof MOBILE_BRAZIL_ROUTE_POINTS {
-	const activePoint = MOBILE_BRAZIL_ROUTE_POINTS.find(
-		(point) => point.id === activeProjectId
-	);
-
-	if (!activePoint) return MOBILE_BRAZIL_ROUTE_POINTS;
-
-	const routePointYs = MOBILE_BRAZIL_ROUTE_POINTS.map((point) => point.y);
-	const lowestPointY = Math.min(...routePointYs);
-	const highestPointY = Math.max(...routePointYs);
-	const distanceBeforeActive = activePoint.y - lowestPointY;
-	const distanceAfterActive = highestPointY - activePoint.y;
-	const scaleBefore =
-		distanceBeforeActive > 0
-			? (MOBILE_ROUTE_TARGET_Y - MOBILE_ROUTE_MIN_Y) / distanceBeforeActive
-			: 1;
-	const scaleAfter =
-		distanceAfterActive > 0
-			? (MOBILE_ROUTE_MAX_Y - MOBILE_ROUTE_TARGET_Y) / distanceAfterActive
-			: 1;
-	const scale = Math.min(1, scaleBefore, scaleAfter);
-
-	return MOBILE_BRAZIL_ROUTE_POINTS.map((point) => ({
-		...point,
-		y: MOBILE_ROUTE_TARGET_Y + (point.y - activePoint.y) * scale,
-	}));
-}
 
 const FORTALEZA_MAP_POSITION = { x: 39.2981, y: 52.0733 } as const;
 const BRAZIL_ROUTE_HUB = FORTALEZA_MAP_POSITION;
@@ -147,11 +100,8 @@ type GeographicPositionStyle = CSSProperties & {
 type PortfolioRootStyle = CSSProperties & {
 	"--mobile-map-zoom": string;
 	"--mobile-detail-card-height": string;
-};
-
-type MobileRoutePointStyle = CSSProperties & {
-	"--mobile-route-x": string;
-	"--mobile-route-y": string;
+	"--mobile-map-center-y": string;
+	"--mobile-world-height": string;
 };
 
 function toGeographicPositionStyle(
@@ -188,6 +138,7 @@ export default function Portfolio() {
 	const [isAutoplayPaused, setIsAutoplayPaused] = useState(false);
 	const [mobileMapZoom, setMobileMapZoom] = useState(1);
 	const [mobileDetailCardHeight, setMobileDetailCardHeight] = useState(182);
+	const [mobileMapAreaHeight, setMobileMapAreaHeight] = useState(320);
 	const rootRef = useRef<HTMLElement>(null);
 	const mobileDetailCardRef = useRef<HTMLElement>(null);
 	const isMagnetizingRef = useRef(false);
@@ -210,18 +161,26 @@ export default function Portfolio() {
 
 	useEffect(() => {
 		const card = mobileDetailCardRef.current;
-		if (!card) return undefined;
+		const root = rootRef.current;
+		if (!card || !root) return undefined;
 
-		const updateCardHeight = () => {
-			const height = card.getBoundingClientRect().height;
-			if (height > 0) {
-				setMobileDetailCardHeight(Math.round(height * 100) / 100);
+		const updateMobileGeometry = () => {
+			const cardBox = card.getBoundingClientRect();
+			const rootBox = root.getBoundingClientRect();
+			if (cardBox.height > 0) {
+				setMobileDetailCardHeight(Math.round(cardBox.height * 100) / 100);
+			}
+			if (cardBox.top > rootBox.top) {
+				setMobileMapAreaHeight(
+					Math.round((cardBox.top - rootBox.top) * 100) / 100
+				);
 			}
 		};
 
-		updateCardHeight();
-		const observer = new ResizeObserver(updateCardHeight);
+		updateMobileGeometry();
+		const observer = new ResizeObserver(updateMobileGeometry);
 		observer.observe(card);
+		observer.observe(root);
 
 		return () => observer.disconnect();
 	}, []);
@@ -391,15 +350,6 @@ export default function Portfolio() {
 
 	const activeLocation = activeProject.worldLocation;
 	const worldJourneyDestination = WORLD_JOURNEY_DESTINATIONS[activeProject.id];
-	const mobileBrazilRoutePoints = centerMobileBrazilRoute(activeProject.id);
-	const mobileBrazilRouteHub =
-		mobileBrazilRoutePoints.find(
-			(point) => point.id === MOBILE_BRAZIL_ROUTE_HUB.id
-		) ?? MOBILE_BRAZIL_ROUTE_HUB;
-	const mobileBrazilRoutePoint = mobileBrazilRoutePoints.find(
-		(point) => point.id === activeProject.id
-	);
-
 	const selectProject = useCallback(
 		(index: number) => {
 			setActiveIndex(index);
@@ -467,6 +417,8 @@ export default function Portfolio() {
 	const portfolioRootStyle = {
 		"--mobile-map-zoom": mobileMapZoom.toFixed(2),
 		"--mobile-detail-card-height": `${mobileDetailCardHeight}px`,
+		"--mobile-map-center-y": `${mobileMapAreaHeight / 2}px`,
+		"--mobile-world-height": `${mobileMapAreaHeight * 6}px`,
 	} as PortfolioRootStyle;
 
 	return (
@@ -508,7 +460,11 @@ export default function Portfolio() {
 					className={`${styles.worldSurface} ${styles.worldGeoSurface}`}
 					data-world-geo-surface="true"
 				>
-					<div className={styles.routeNetwork} aria-hidden="true">
+					<div
+						className={styles.routeNetwork}
+						aria-hidden="true"
+						data-mobile-route-network="true"
+					>
 						{WORLD_MAP_POINTS.filter(
 							(point) => point.id !== "site-cabeleireira"
 						).map((point) => (
@@ -518,6 +474,10 @@ export default function Portfolio() {
 									point.id === activeProject.id ? styles.routeLineActive : ""
 								}`}
 								style={toRouteStyle(BRAZIL_ROUTE_HUB, point)}
+								data-mobile-route-base={point.id}
+								data-mobile-route-active={
+									point.id === activeProject.id ? point.id : undefined
+								}
 							/>
 						))}
 					</div>
@@ -526,6 +486,7 @@ export default function Portfolio() {
 						className={styles.routeHub}
 						style={toGeographicPositionStyle(BRAZIL_ROUTE_HUB)}
 						aria-hidden="true"
+						data-mobile-route-hub="site-cabeleireira"
 					>
 						<span />
 					</div>
@@ -554,6 +515,8 @@ export default function Portfolio() {
 								aria-label={`Selecionar ${project.name}`}
 								aria-pressed={isActive}
 								onClick={() => selectProject(projectIndex)}
+								data-mobile-route-node={point.id}
+								data-mobile-map-marker={isActive ? "true" : undefined}
 							>
 								<span className={styles.mapPointDot} />
 								{isActive ? (
@@ -633,105 +596,6 @@ export default function Portfolio() {
 					<span>{activeLocation?.city ?? "Fortaleza"}</span>
 					<small>{activeLocation?.region}</small>
 				</div>
-
-				{mobileBrazilRoutePoint ? (
-					<div
-						className={styles.mobileBrazilRouteNetwork}
-						data-mobile-route-network="true"
-						aria-hidden="true"
-					>
-						<svg
-							className={styles.mobileRouteCanvas}
-							viewBox="0 0 100 100"
-							preserveAspectRatio="none"
-						>
-							<defs>
-								<mask
-									id={`mobile-route-reveal-${activeProject.id}`}
-									maskUnits="userSpaceOnUse"
-									x="0"
-									y="0"
-									width="100"
-									height="100"
-								>
-									<line
-										key={`mobile-route-mask-${activeProject.id}`}
-										className={styles.mobileRouteRevealMask}
-										x1={mobileBrazilRouteHub.x}
-										y1={mobileBrazilRouteHub.y}
-										x2={mobileBrazilRoutePoint.x}
-										y2={mobileBrazilRoutePoint.y}
-										pathLength="1"
-										data-mobile-route-reveal={activeProject.id}
-									/>
-								</mask>
-							</defs>
-
-							{mobileBrazilRoutePoints.filter(
-								(point) => point.id !== MOBILE_BRAZIL_ROUTE_HUB.id
-							).map((point) => (
-								<line
-									key={`mobile-route-base-${point.id}`}
-									className={styles.mobileRouteBase}
-									x1={mobileBrazilRouteHub.x}
-									y1={mobileBrazilRouteHub.y}
-									x2={point.x}
-									y2={point.y}
-									pathLength="100"
-									data-mobile-route-base={point.id}
-								/>
-							))}
-
-							{mobileBrazilRoutePoint.id !== MOBILE_BRAZIL_ROUTE_HUB.id ? (
-								<line
-									key={`mobile-route-active-${activeProject.id}`}
-									className={styles.mobileRouteActive}
-									x1={mobileBrazilRouteHub.x}
-									y1={mobileBrazilRouteHub.y}
-									x2={mobileBrazilRoutePoint.x}
-									y2={mobileBrazilRoutePoint.y}
-									pathLength="100"
-									mask={`url(#mobile-route-reveal-${activeProject.id})`}
-									data-mobile-map-route="true"
-									data-mobile-route-active={activeProject.id}
-								/>
-							) : null}
-						</svg>
-
-						{mobileBrazilRoutePoints.map((point) => {
-							const project = portfolioProjects.find(
-								(candidate) => candidate.id === point.id
-							);
-							const isActive = point.id === activeProject.id;
-							const isHub = point.id === MOBILE_BRAZIL_ROUTE_HUB.id;
-							const pointStyle = {
-								"--mobile-route-x": `${point.x}%`,
-								"--mobile-route-y": `${point.y}%`,
-							} as MobileRoutePointStyle;
-
-							return (
-								<span
-									key={`mobile-route-node-${point.id}`}
-									className={`${styles.mobileRouteNode} ${
-										isHub ? styles.mobileRouteHub : ""
-									} ${isActive ? styles.mobileRouteNodeActive : ""}`}
-									style={pointStyle}
-									data-mobile-route-node={point.id}
-									data-mobile-map-marker={isActive ? "true" : undefined}
-									data-mobile-route-project={isActive ? point.id : undefined}
-								>
-									<span className={styles.mobileRouteNodeDot} />
-									{isActive ? (
-										<span className={styles.mobileRouteNodeLabel}>
-											<strong>{activeLocation?.city ?? activeProject.name}</strong>
-											<small>{project?.name ?? activeProject.name}</small>
-										</span>
-									) : null}
-								</span>
-							);
-						})}
-					</div>
-				) : null}
 
 				<div
 					className={styles.mobileMapControls}
