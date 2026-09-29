@@ -51,8 +51,16 @@ test("mantém a logo visível enquanto ela empurra a Home", async ({
           const logo = document.querySelector(
             '[data-mobile-brand-pusher="true"]',
           );
+          const landing = document.querySelector(
+            'main[data-landing-viewport="mobile"]',
+          );
+          const navbar = document.querySelector("nav.navbar");
 
-          if (!(root instanceof HTMLElement) || !(logo instanceof HTMLElement)) {
+          if (
+            !(root instanceof HTMLElement) ||
+            !(logo instanceof HTMLElement) ||
+            !(navbar instanceof HTMLElement)
+          ) {
             return null;
           }
 
@@ -66,6 +74,7 @@ test("mantém a logo visível enquanto ela empurra a Home", async ({
             ),
           };
           const logoRect = logo.getBoundingClientRect();
+          const navbarRect = navbar.getBoundingClientRect();
           const logoStyle = getComputedStyle(logo);
           const overlaps: string[] = [];
           const horizontalOverflow: string[] = [];
@@ -108,6 +117,7 @@ test("mantém a logo visível enquanto ela empurra a Home", async ({
           }
 
           return {
+            activeSection: landing?.getAttribute("data-active-section"),
             logoVisible:
               logoStyle.visibility !== "hidden" &&
               Number.parseFloat(logoStyle.opacity) >= 0.99 &&
@@ -118,6 +128,9 @@ test("mantém a logo visível enquanto ela empurra a Home", async ({
               logoRect.right <= innerWidth + 1 &&
               logoRect.top >= -1 &&
               logoRect.bottom <= innerHeight + 1,
+            logoInsideNavbar:
+              logoRect.top >= navbarRect.top - 1 &&
+              logoRect.bottom <= navbarRect.bottom + 1,
             overlaps,
             horizontalOverflow,
             scrollWidth: document.documentElement.scrollWidth,
@@ -128,12 +141,94 @@ test("mantém a logo visível enquanto ela empurra a Home", async ({
         expect(metrics).not.toBeNull();
         expect(metrics?.logoVisible).toBe(true);
         expect(metrics?.logoInsideViewport).toBe(true);
-        expect(metrics?.overlaps).toEqual([]);
+        if (metrics?.activeSection === "home") {
+          expect(metrics?.overlaps).toEqual([]);
+        } else {
+          expect(metrics?.logoInsideNavbar).toBe(true);
+        }
         expect(metrics?.horizontalOverflow).toEqual([]);
         expect(metrics?.scrollWidth).toBeLessThanOrEqual(
           metrics?.viewportWidth ?? 0,
         );
       }
+
+      await context.close();
+    });
+  }
+});
+
+test("encerra o deslocamento da logo no header quando o Portfólio fica ativo", async ({
+  browser,
+}) => {
+  test.setTimeout(90_000);
+  const baseURL = test.info().project.use.baseURL as string;
+
+  for (const viewport of responsiveViewports) {
+    await test.step(`${viewport.width}x${viewport.height}`, async () => {
+      const context = await browser.newContext({
+        viewport,
+        isMobile: true,
+        hasTouch: true,
+        deviceScaleFactor: 1,
+      });
+      const page = await context.newPage();
+      await page.goto(new URL("/home", baseURL).toString(), {
+        waitUntil: "networkidle",
+      });
+
+      const targetScrollTop = await page.evaluate(() => {
+        const portfolio = document.querySelector('[data-section="portfolio"]');
+        if (!(portfolio instanceof HTMLElement)) return 0;
+
+        const portfolioTop = scrollY + portfolio.getBoundingClientRect().top;
+        return Math.max(0, portfolioTop - innerHeight * 0.3);
+      });
+      await page.evaluate(
+        (scrollTop) => window.scrollTo({ top: scrollTop, behavior: "auto" }),
+        targetScrollTop,
+      );
+
+      const landing = page.locator('main[data-landing-viewport="mobile"]');
+      await expect(landing).toHaveAttribute("data-active-section", "portfolio");
+      await page.waitForTimeout(700);
+
+      const metrics = await page.evaluate(() => {
+        const navbar = document.querySelector("nav.navbar");
+        const logo = document.querySelector(
+          '[data-mobile-brand-pusher="true"]',
+        );
+        const portfolio = document.querySelector('[data-section="portfolio"]');
+
+        if (
+          !(navbar instanceof HTMLElement) ||
+          !(logo instanceof HTMLElement) ||
+          !(portfolio instanceof HTMLElement)
+        ) {
+          return null;
+        }
+
+        const navbarBox = navbar.getBoundingClientRect();
+        const logoBox = logo.getBoundingClientRect();
+        const portfolioBox = portfolio.getBoundingClientRect();
+        return {
+          logoTop: logoBox.top,
+          logoBottom: logoBox.bottom,
+          navbarTop: navbarBox.top,
+          navbarBottom: navbarBox.bottom,
+          portfolioTop: portfolioBox.top,
+          viewportHeight: innerHeight,
+        };
+      });
+
+      expect(metrics).not.toBeNull();
+      expect(metrics?.portfolioTop).toBeGreaterThan(metrics?.navbarBottom ?? 0);
+      expect(metrics?.portfolioTop).toBeLessThan(metrics?.viewportHeight ?? 0);
+      expect(metrics?.logoTop).toBeGreaterThanOrEqual(
+        (metrics?.navbarTop ?? 0) - 1,
+      );
+      expect(metrics?.logoBottom).toBeLessThanOrEqual(
+        (metrics?.navbarBottom ?? 0) + 1,
+      );
 
       await context.close();
     });

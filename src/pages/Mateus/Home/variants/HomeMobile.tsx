@@ -44,6 +44,9 @@ function HomeMobile() {
     }
 
     const { gsap, ScrollTrigger } = ensureGsapRuntime();
+    const landingRoot = page.closest<HTMLElement>(
+      'main[data-landing-viewport="mobile"]',
+    );
     const blockCandidates: Array<HTMLElement | null> = [
       eyebrowRef.current,
       titleRef.current,
@@ -55,6 +58,7 @@ function HomeMobile() {
       (element): element is HTMLElement => element !== null,
     );
 
+    let activeSectionObserver: MutationObserver | undefined;
     const context = gsap.context(() => {
       gsap.set(logo, {
         x: -24,
@@ -87,6 +91,29 @@ function HomeMobile() {
           invalidateOnRefresh: true,
         },
       });
+
+      const clampLogoToNavbarOutsideHome = () => {
+        if (landingRoot?.dataset.activeSection === "home") {
+          return;
+        }
+
+        gsap.set(logo, {
+          y: 0,
+          rotation: 0,
+          scale: 1,
+        });
+      };
+
+      timeline.eventCallback("onUpdate", clampLogoToNavbarOutsideHome);
+      if (landingRoot) {
+        activeSectionObserver = new MutationObserver(
+          clampLogoToNavbarOutsideHome,
+        );
+        activeSectionObserver.observe(landingRoot, {
+          attributes: true,
+          attributeFilter: ["data-active-section"],
+        });
+      }
 
       timeline
         .to(
@@ -183,6 +210,8 @@ function HomeMobile() {
           index * partnerExitInterval,
         );
       });
+
+      clampLogoToNavbarOutsideHome();
     }, page);
 
     const refreshFrame = window.requestAnimationFrame(() => {
@@ -191,6 +220,7 @@ function HomeMobile() {
 
     return () => {
       window.cancelAnimationFrame(refreshFrame);
+      activeSectionObserver?.disconnect();
       context.revert();
       gsap.set([logo, ...textBlocks, ...partnerItems, portrait], {
         clearProps: "transform,willChange",
