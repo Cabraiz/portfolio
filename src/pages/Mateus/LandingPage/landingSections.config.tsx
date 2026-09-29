@@ -402,6 +402,10 @@ export const LANDING_SECTIONS_CONFIG = [
 			{
 				sectionRole: "content",
 				subtractNavbarOffset: true,
+				sectionStyle: {
+					background: "#dcefeb",
+					backgroundImage: "none",
+				},
 			}
 		),
 	},

@@ -258,7 +258,10 @@ const LandingPageMobile: React.FC = () => {
   const renderPolicy = useSectionRenderPolicy({
     sections,
     activeSectionId,
-    nearDistance: 0,
+    // Keep the next section mounted while Home is active so its real visual
+    // surface enters the viewport during the transition instead of the generic
+    // section fallback. Other mobile sections remain virtualized as before.
+    nearDistance: activeSectionId === "home" ? 1 : 0,
     viewportMode: "mobile",
   });
 

@@ -235,6 +235,103 @@ test("encerra o deslocamento da logo no header quando o Portfólio fica ativo", 
   }
 });
 
+test("mostra o mapa e preserva as ações durante a passagem ao Portfólio", async ({
+  browser,
+}) => {
+  test.setTimeout(90_000);
+  const baseURL = test.info().project.use.baseURL as string;
+
+  for (const viewport of responsiveViewports) {
+    await test.step(`${viewport.width}x${viewport.height}`, async () => {
+      const context = await browser.newContext({
+        viewport,
+        isMobile: true,
+        hasTouch: true,
+        deviceScaleFactor: 1,
+      });
+      const page = await context.newPage();
+      await page.goto(new URL("/home", baseURL).toString(), {
+        waitUntil: "networkidle",
+      });
+
+      const targetScrollTop = await page.evaluate(() => {
+        const portfolio = document.querySelector('[data-section="portfolio"]');
+        if (!(portfolio instanceof HTMLElement)) return 0;
+
+        const portfolioTop = scrollY + portfolio.getBoundingClientRect().top;
+        return Math.max(0, portfolioTop - innerHeight * 0.72);
+      });
+      await page.evaluate(
+        (scrollTop) => window.scrollTo({ top: scrollTop, behavior: "auto" }),
+        targetScrollTop,
+      );
+      await page.waitForTimeout(700);
+
+      const metrics = await page.evaluate(() => {
+        const landing = document.querySelector(
+          'main[data-landing-viewport="mobile"]',
+        );
+        const portfolioSection = document.querySelector(
+          '[data-section="portfolio"]',
+        );
+        const portfolioRoot = document.querySelector(
+          '[data-portfolio-root="true"]',
+        );
+        const map = document.querySelector('[data-world-map-surface="true"]');
+        const actions = document.querySelector(
+          '[data-mobile-editorial-home] nav[aria-label="Ações de contato"]',
+        );
+
+        if (
+          !(portfolioSection instanceof HTMLElement) ||
+          !(portfolioRoot instanceof HTMLElement) ||
+          !(map instanceof HTMLElement) ||
+          !(actions instanceof HTMLElement)
+        ) {
+          return null;
+        }
+
+        const portfolioBox = portfolioSection.getBoundingClientRect();
+        const actionsBox = actions.getBoundingClientRect();
+        const actionsStyle = getComputedStyle(actions);
+        const mapStyle = getComputedStyle(map);
+        const mapImages = Array.from(map.querySelectorAll("img"));
+
+        return {
+          activeSection: landing?.getAttribute("data-active-section"),
+          portfolioState: portfolioSection.dataset.renderState,
+          portfolioMounted: portfolioSection.dataset.sectionMounted,
+          portfolioTop: portfolioBox.top,
+          actionsVisible:
+            actionsStyle.visibility !== "hidden" &&
+            Number.parseFloat(actionsStyle.opacity) > 0.99 &&
+            actionsBox.bottom > 0 &&
+            actionsBox.top < innerHeight,
+          mapVisible:
+            mapStyle.visibility !== "hidden" &&
+            Number.parseFloat(mapStyle.opacity) > 0.8,
+          mapImagesReady:
+            mapImages.length > 0 &&
+            mapImages.every((image) => image.complete && image.naturalWidth > 0),
+          viewportHeight: innerHeight,
+        };
+      });
+
+      expect(metrics).not.toBeNull();
+      expect(metrics?.activeSection).toBe("home");
+      expect(metrics?.portfolioState).toBe("near");
+      expect(metrics?.portfolioMounted).toBe("true");
+      expect(metrics?.portfolioTop).toBeGreaterThan(0);
+      expect(metrics?.portfolioTop).toBeLessThan(metrics?.viewportHeight ?? 0);
+      expect(metrics?.actionsVisible).toBe(true);
+      expect(metrics?.mapVisible).toBe(true);
+      expect(metrics?.mapImagesReady).toBe(true);
+
+      await context.close();
+    });
+  }
+});
+
 test("mantém Contato inteiro e livre do chat em retrato e paisagem", async ({
   browser,
 }) => {
