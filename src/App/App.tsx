@@ -1,11 +1,13 @@
 import React, { Suspense, lazy, useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
+import { isLandingPath } from "../features/navigation/landingSections";
 import {
   isHomeGameRoutePath,
   isHomeGameStandaloneHost,
 } from "./appHostRouting";
 
 const DESKTOP_MEDIA_QUERY = "(min-width: 768px)";
+const LANDING_DESKTOP_MEDIA_QUERY = "(min-width: 992px)";
 
 const AppDesktop = lazy(() => import("./AppDesktop"));
 const AppMobile = lazy(() => import("./AppMobile"));
@@ -18,22 +20,25 @@ const appShellFallback = (
   />
 );
 
-function getIsDesktop(): boolean {
+function getIsDesktop(mediaQuery: string): boolean {
   if (typeof globalThis.matchMedia !== "function") {
     return true;
   }
 
-  return globalThis.matchMedia(DESKTOP_MEDIA_QUERY).matches;
+  return globalThis.matchMedia(mediaQuery).matches;
 }
 
 const App: React.FC = () => {
   const location = useLocation();
+  const desktopMediaQuery = isLandingPath(location.pathname)
+    ? LANDING_DESKTOP_MEDIA_QUERY
+    : DESKTOP_MEDIA_QUERY;
 
   const shouldForceMobileGame = useMemo(() => {
     return isHomeGameStandaloneHost() || isHomeGameRoutePath(location.pathname);
   }, [location.pathname]);
 
-  const [isDesktop, setIsDesktop] = useState<boolean>(() => getIsDesktop());
+  const [isDesktop, setIsDesktop] = useState<boolean>(() => getIsDesktop(desktopMediaQuery));
 
   useEffect(() => {
     if (shouldForceMobileGame) {
@@ -44,7 +49,7 @@ const App: React.FC = () => {
       return undefined;
     }
 
-    const mediaQuery = globalThis.matchMedia(DESKTOP_MEDIA_QUERY);
+    const mediaQuery = globalThis.matchMedia(desktopMediaQuery);
 
     const handleChange = (event: MediaQueryListEvent) => {
       setIsDesktop(event.matches);
@@ -56,7 +61,7 @@ const App: React.FC = () => {
     return () => {
       mediaQuery.removeEventListener("change", handleChange);
     };
-  }, [shouldForceMobileGame]);
+  }, [shouldForceMobileGame, desktopMediaQuery]);
 
   if (shouldForceMobileGame) {
     return (

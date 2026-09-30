@@ -58,7 +58,7 @@ export const landingLayoutTokens = {
     mobile: {
       stable: "100vh",
       dynamic: "100dvh",
-      preferred: "100vh",
+      preferred: "100dvh",
     },
   },
 
@@ -429,7 +429,7 @@ export function resolveLandingViewportHeightUnit(
     normalizeLandingRenderableViewportMode(viewportMode);
 
   const shouldPreferDynamicViewport =
-    options?.preferDynamicViewport ?? normalizedViewportMode === "desktop";
+    normalizedViewportMode === "mobile" || (options?.preferDynamicViewport ?? true);
 
   return shouldPreferDynamicViewport
     ? landingLayoutTokens.viewportHeight.dynamic
@@ -446,7 +446,7 @@ function resolveLandingBaseSectionMinHeight(
     normalizeLandingRenderableViewportMode(viewportMode);
 
   const shouldPreferDynamicViewport =
-    options?.preferDynamicViewport ?? normalizedViewportMode === "desktop";
+    normalizedViewportMode === "mobile" || (options?.preferDynamicViewport ?? true);
 
   const sectionMinHeight =
     landingLayoutTokens.sectionMinHeight[normalizedViewportMode];
@@ -471,10 +471,14 @@ function shouldSubtractNavbarOffset(
 function toViewportHeightMinusNavbar(
   baseMinHeight: CSSProperties["minHeight"],
   viewportMode: LandingRenderableViewportMode,
+  sectionRole: LandingSectionHeightRole,
 ): CSSProperties["minHeight"] {
   const navbarHeight = getNavbarHeight(viewportMode === "mobile");
+  const alignment = viewportMode === "mobile" && sectionRole === "content"
+    ? ` - ${LANDING_NAVBAR_SCROLL_ALIGNMENT_PX}px`
+    : "";
 
-  return `max(0px, calc(${baseMinHeight} - var(${NAVBAR_HEIGHT_CSS_VAR}, ${navbarHeight}px)))`;
+  return `max(0px, calc(${baseMinHeight} - var(${NAVBAR_HEIGHT_CSS_VAR}, ${navbarHeight}px)${alignment}))`;
 }
 
 export function resolveLandingSectionMinHeight(
@@ -503,7 +507,7 @@ export function resolveLandingSectionMinHeight(
     return baseMinHeight;
   }
 
-  return toViewportHeightMinusNavbar(baseMinHeight, normalizedViewportMode);
+  return toViewportHeightMinusNavbar(baseMinHeight, normalizedViewportMode, sectionRole);
 }
 
 export function resolveLandingHeroSectionMinHeight(
@@ -552,5 +556,5 @@ export function resolveLandingSectionViewportFallback(
     return stableMinHeight;
   }
 
-  return toViewportHeightMinusNavbar(stableMinHeight, normalizedViewportMode);
+  return toViewportHeightMinusNavbar(stableMinHeight, normalizedViewportMode, sectionRole);
 }

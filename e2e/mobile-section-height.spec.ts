@@ -49,10 +49,7 @@ test("usa a altura contratada em todas as seções mobile", async ({
 					sectionHeight: activeSection.getBoundingClientRect().height,
 				};
 			}, route.id);
-			const expectedHeight =
-				route.id === "portfolio"
-					? metrics.viewportHeight * 1.1 - metrics.navbarHeight - 2
-					: metrics.viewportHeight - metrics.navbarHeight - 2;
+                        const expectedHeight = metrics.viewportHeight - metrics.navbarHeight - (route.id === "home" ? 0 : 2);
 			expect(Math.abs(metrics.sectionHeight - expectedHeight)).toBeLessThanOrEqual(
 				2
 			);
@@ -109,7 +106,7 @@ test("remove o header fantasma da Home em retrato e paisagem", async ({
 			});
 
 			expect(Math.abs(metrics.homeTop - metrics.navbarBottom)).toBeLessThanOrEqual(1);
-			expect(Math.abs(metrics.homeBottom - (metrics.viewportHeight - 2))).toBeLessThanOrEqual(1);
+                        expect(Math.abs(metrics.homeBottom - metrics.viewportHeight)).toBeLessThanOrEqual(1);
 			expect(Math.abs(metrics.homeHeight - metrics.heroHeight)).toBeLessThanOrEqual(1);
 			expect(metrics.eyebrowTop - metrics.navbarBottom).toBeGreaterThanOrEqual(4);
 			expect(metrics.eyebrowTop - metrics.navbarBottom).toBeLessThanOrEqual(14);

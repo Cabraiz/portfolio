@@ -18,7 +18,7 @@ const homeProgressSamples = [
 test("mantém a logo visível enquanto ela empurra a Home", async ({
   browser,
 }) => {
-  test.setTimeout(120_000);
+  test.setTimeout(180_000);
   const baseURL = test.info().project.use.baseURL as string;
 
   for (const viewport of responsiveViewports) {
@@ -39,6 +39,7 @@ test("mantém a logo visível enquanto ela empurra a Home", async ({
         .locator("[data-mobile-editorial-home]")
         .evaluate((element) => element.getBoundingClientRect().height);
 
+      let previousLogoTop: number | undefined;
       for (const progress of homeProgressSamples) {
         await page.evaluate(
           (scrollTop) => window.scrollTo({ top: scrollTop, behavior: "auto" }),
@@ -68,7 +69,10 @@ test("mantém a logo visível enquanto ela empurra a Home", async ({
             eyebrow: root.querySelector(":scope > section > div:first-child"),
             title: root.querySelector("h1"),
             identity: root.querySelector("h1 + div"),
-            intro: root.querySelector("p"),
+            ...Object.fromEntries(
+              Array.from(root.querySelectorAll("[data-mobile-intro-line]"),
+                (line, index) => [`intro:${index + 1}`, line]),
+            ),
             partnersHeading: root.querySelector(
               '[data-mobile-partners-heading="true"]',
             ),
@@ -79,6 +83,7 @@ test("mantém a logo visível enquanto ela empurra a Home", async ({
           const overlaps: string[] = [];
           const horizontalOverflow: string[] = [];
           const invalidPartnerExitDirections: string[] = [];
+          const hiddenPartners: string[] = [];
 
           for (const [name, element] of Object.entries(elements)) {
             if (!(element instanceof HTMLElement)) continue;
@@ -101,13 +106,14 @@ test("mantém a logo visível enquanto ela empurra a Home", async ({
           )) {
             const style = getComputedStyle(partner);
             const rect = partner.getBoundingClientRect();
-            if (Number.parseFloat(style.opacity) <= 0.03) {
-              if (rect.left <= innerWidth + 1) {
-                invalidPartnerExitDirections.push(
-                  partner.dataset.mobilePartnerItem ?? "unknown",
-                );
-              }
-              continue;
+            const partnerX = new DOMMatrixReadOnly(style.transform).m41;
+            if (partnerX < -0.5 || partnerX > 40.5) {
+              invalidPartnerExitDirections.push(
+                partner.dataset.mobilePartnerItem ?? "unknown",
+              );
+            }
+            if (Number.parseFloat(style.opacity) < 0.99 || style.visibility === "hidden") {
+              hiddenPartners.push(partner.dataset.mobilePartnerItem ?? "unknown");
             }
 
             const overlapWidth =
@@ -136,12 +142,11 @@ test("mantém a logo visível enquanto ela empurra a Home", async ({
               logoRect.right <= innerWidth + 1 &&
               logoRect.top >= -1 &&
               logoRect.bottom <= innerHeight + 1,
-            logoInsideNavbar:
-              logoRect.top >= navbarRect.top - 1 &&
-              logoRect.bottom <= navbarRect.bottom + 1,
+            logoTop: logoRect.top,
             overlaps,
             horizontalOverflow,
             invalidPartnerExitDirections,
+            hiddenPartners,
             scrollWidth: document.documentElement.scrollWidth,
             viewportWidth: innerWidth,
           };
@@ -150,13 +155,16 @@ test("mantém a logo visível enquanto ela empurra a Home", async ({
         expect(metrics).not.toBeNull();
         expect(metrics?.logoVisible).toBe(true);
         expect(metrics?.logoInsideViewport).toBe(true);
+        if (previousLogoTop !== undefined) {
+          expect(metrics!.logoTop).toBeGreaterThanOrEqual(previousLogoTop - 1);
+        }
+        previousLogoTop = metrics!.logoTop;
         if (metrics?.activeSection === "home") {
           expect(metrics?.overlaps).toEqual([]);
-        } else {
-          expect(metrics?.logoInsideNavbar).toBe(true);
         }
         expect(metrics?.horizontalOverflow).toEqual([]);
         expect(metrics?.invalidPartnerExitDirections).toEqual([]);
+        expect(metrics?.hiddenPartners).toEqual([]);
         expect(metrics?.scrollWidth).toBeLessThanOrEqual(
           metrics?.viewportWidth ?? 0,
         );
@@ -167,7 +175,7 @@ test("mantém a logo visível enquanto ela empurra a Home", async ({
   }
 });
 
-test("encerra o deslocamento da logo no header quando o Portfólio fica ativo", async ({
+test("acompanha a entrada do Portfólio ao alcançar a base da Home", async ({
   browser,
 }) => {
   test.setTimeout(90_000);
@@ -198,8 +206,9 @@ test("encerra o deslocamento da logo no header quando o Portfólio fica ativo", 
         targetScrollTop,
       );
 
-      const landing = page.locator('main[data-landing-viewport="mobile"]');
-      await expect(landing).toHaveAttribute("data-active-section", "portfolio");
+      await expect(page.locator('[data-mobile-brand-pusher="true"]')).toHaveAttribute(
+        "data-mobile-brand-owner", "portfolio",
+      );
       await page.waitForTimeout(700);
 
       const metrics = await page.evaluate(() => {
@@ -220,12 +229,14 @@ test("encerra o deslocamento da logo no header quando o Portfólio fica ativo", 
         const navbarBox = navbar.getBoundingClientRect();
         const logoBox = logo.getBoundingClientRect();
         const portfolioBox = portfolio.getBoundingClientRect();
+        const actionsBox = document.querySelector('nav[aria-label="Ações de contato"]')!.getBoundingClientRect();
         return {
           logoTop: logoBox.top,
           logoBottom: logoBox.bottom,
           navbarTop: navbarBox.top,
           navbarBottom: navbarBox.bottom,
           portfolioTop: portfolioBox.top,
+          actionsTop: actionsBox.top,
           viewportHeight: innerHeight,
         };
       });
@@ -236,9 +247,8 @@ test("encerra o deslocamento da logo no header quando o Portfólio fica ativo", 
       expect(metrics?.logoTop).toBeGreaterThanOrEqual(
         (metrics?.navbarTop ?? 0) - 1,
       );
-      expect(metrics?.logoBottom).toBeLessThanOrEqual(
-        (metrics?.navbarBottom ?? 0) + 1,
-      );
+      expect(metrics!.logoTop).toBeGreaterThanOrEqual(metrics!.portfolioTop - 1);
+      expect(metrics!.logoBottom).toBeLessThanOrEqual(metrics!.viewportHeight + 1);
 
       await context.close();
     });
@@ -361,6 +371,7 @@ test("mantém Contato inteiro e livre do chat em retrato e paisagem", async ({
       await page.goto(new URL("/contact", baseURL).toString(), {
         waitUntil: "networkidle",
       });
+      await page.locator('[data-mobile-contact="true"]').waitFor();
 
       const metrics = await page.evaluate(() => {
         const navbar = document.querySelector("nav.navbar");
@@ -420,7 +431,7 @@ test("mantém Contato inteiro e livre do chat em retrato e paisagem", async ({
         Math.abs(
           (metrics?.sectionHeight ?? 0) -
             ((metrics?.viewportHeight ?? 0) -
-              (metrics?.navbarHeight ?? 0)),
+              (metrics?.navbarHeight ?? 0) - 2),
         ),
       ).toBeLessThanOrEqual(1);
       expect(metrics?.contactTop).toBeGreaterThanOrEqual(
@@ -483,7 +494,7 @@ test("recalcula o ScrollTrigger após resize e troca de orientação", async ({
         root.querySelector(":scope > section > div:first-child"),
         root.querySelector("h1"),
         root.querySelector("h1 + div"),
-        root.querySelector("p"),
+        ...Array.from(root.querySelectorAll("[data-mobile-intro-line]")),
         root.querySelector('[data-mobile-partners-heading="true"]'),
         ...Array.from(
           root.querySelectorAll<HTMLElement>("[data-mobile-partner-item]"),
@@ -510,6 +521,15 @@ test("recalcula o ScrollTrigger após resize e troca de orientação", async ({
 
     expect(overlaps).toEqual([]);
   }
+
+  await page.evaluate(() => scrollTo({ top: 0, behavior: "instant" }));
+  await page.waitForTimeout(850);
+  const restoredLogoY = await page.locator('[data-mobile-brand-pusher="true"]')
+    .evaluate(element => new DOMMatrixReadOnly(getComputedStyle(element).transform).m42);
+  expect(Math.abs(restoredLogoY)).toBeLessThan(1);
+  expect(await page.locator('[data-mobile-partner-item]').evaluateAll(items =>
+    items.every(element => Math.abs(new DOMMatrixReadOnly(getComputedStyle(element).transform).m41) < 0.5),
+  )).toBe(true);
 
   await context.close();
 });

@@ -75,6 +75,7 @@ const MobileMenuToggleButton: React.FC<MobileMenuToggleButtonProps> = ({
         alignItems: "center",
         justifyContent: "center",
         position: "relative",
+        left: "12px",
         cursor: "pointer",
         borderRadius: "12px",
         flex: "0 0 auto",

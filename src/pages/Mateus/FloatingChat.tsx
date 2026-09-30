@@ -10,6 +10,8 @@ import { useTranslation } from "react-i18next";
 import { useLocation } from "react-router-dom";
 
 import useLandingSectionNavigation from "../../features/navigation/useLandingSectionNavigation";
+import { isLandingPath } from "../../features/navigation/landingSections";
+import { useMateusViewport } from "./Home/hooks/useHomeViewport";
 
 import styles from "./FloatingChat.module.css";
 
@@ -218,7 +220,10 @@ export default function FloatingChat() {
     () => null,
   );
 
-  const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+  const { isMobile: isMobileLanding } = useMateusViewport();
+  const isMobile = isLandingPath(location.pathname)
+    ? isMobileLanding
+    : typeof window !== "undefined" && window.innerWidth < 768;
   const isHome = location.pathname === "/home";
   const isHomeSectionActive = activeLandingSection
     ? activeLandingSection === "home"

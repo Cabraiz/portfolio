@@ -235,11 +235,11 @@ function createViewportConfig(
 
 	const defaultSectionStyle: CSSProperties = {
 		minHeight: expectedMinHeight,
-		height: isHeroSection ? expectedMinHeight : "auto",
+                height: isHeroSection || viewportMode === "mobile" ? expectedMinHeight : "auto",
 		scrollMarginTop,
 	};
 
-	const defaultContentStyle: CSSProperties = isHeroSection
+        const defaultContentStyle: CSSProperties = isHeroSection || viewportMode === "mobile"
 		? {
 				minHeight: "100%",
 				height: "100%",

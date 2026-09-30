@@ -17,54 +17,19 @@ jobs:
 
     steps:
       - name: 🔍 Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7.0.1
 
       - name: 🟢 Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7.0.0
         with:
-          node-version: 26.9.0
+          node-version-file: package.json
           cache: npm
+
+      - name: Setup project npm version
+        run: npm install --global npm@12.1.0
 
       - name: 📦 Install dependencies
         run: npm ci
-
-      - name: 🩹 Patch react-toastify deep import and root entry for Vite (Node 20+)
-        run: |
-          FILE=node_modules/react-toastify/dist/ReactToastify.css
-          PKG=node_modules/react-toastify/package.json
-          if [ -f "$FILE" ]; then
-            echo "✅ react-toastify encontrado. Corrigindo package.json com export \".\" e CSS..."
-            tmpfile=$(mktemp)
-            jq '. + {
-              exports: {
-                ".": "./dist/index.js",
-                "./dist/ReactToastify.css": "./dist/ReactToastify.css",
-                "./dist/reacttoastify.css": "./dist/ReactToastify.css"
-              }
-            }' "$PKG" > "$tmpfile" && mv "$tmpfile" "$PKG"
-          else
-            echo "❌ CSS não encontrado. Abortando build."
-            exit 1
-          fi
-
-      - name: 🩹 Patch GSAP deep imports for Vite (Node 20+)
-        run: |
-          PKG=node_modules/gsap/package.json
-          if [ -f "$PKG" ]; then
-            echo "✅ GSAP encontrado. Corrigindo exports no package.json..."
-            tmpfile=$(mktemp)
-            jq '. + {
-              exports: {
-                ".": "./index.js",
-                "./ScrollTrigger": "./ScrollTrigger.js",
-                "./gsap-core": "./gsap-core.js",
-                "./index": "./index.js"
-              }
-            }' "$PKG" > "$tmpfile" && mv "$tmpfile" "$PKG"
-          else
-            echo "❌ GSAP não encontrado. Abortando build."
-            exit 1
-          fi
 
       - name: 🛠️ Build app
         run: npx vite build && node scripts/prepare-github-pages.mjs
@@ -80,7 +45,7 @@ jobs:
           PLAYWRIGHT_USE_EXISTING_BUILD: "1"
 
       - name: 📤 Upload static site to artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5.0.0
         with:
           path: ./dist
 
@@ -91,4 +56,4 @@ jobs:
 
     steps:
       - name: 🚀 Deploy with GitHub Pages
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5.0.1

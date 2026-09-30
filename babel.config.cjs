@@ -1,6 +1,8 @@
 module.exports = {
+  targets: { node: "current" },
+  parserOpts: { plugins: ["jsx"] },
   presets: [
-    ["@babel/preset-env", { targets: { node: "current" } }],
+    "@babel/preset-env",
     "@babel/preset-typescript",
   ],
 };

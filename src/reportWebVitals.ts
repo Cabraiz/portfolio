@@ -1,4 +1,4 @@
-import { onCLS, onFID, onFCP, onLCP, onTTFB, Metric } from "web-vitals";
+import { onCLS, onINP, onFCP, onLCP, onTTFB, type Metric } from "web-vitals";
 import { useEffect } from "react";
 
 export const useReportWebVitals = (onPerfEntry?: (metric: Metric) => void) => {
@@ -6,7 +6,7 @@ export const useReportWebVitals = (onPerfEntry?: (metric: Metric) => void) => {
     if (onPerfEntry) {
       // Chamar as métricas diretamente
       onCLS(onPerfEntry);
-      onFID(onPerfEntry);
+      onINP(onPerfEntry);
       onFCP(onPerfEntry);
       onLCP(onPerfEntry);
       onTTFB(onPerfEntry);

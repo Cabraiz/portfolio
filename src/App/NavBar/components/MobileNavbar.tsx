@@ -17,8 +17,8 @@ export type MobileNavbarProps = Readonly<{
 	activeSectionId: LandingSectionId | "";
 }>;
 
-const MOBILE_PANEL_TOP = "82px";
-const MOBILE_OVERLAY_TOP = "72px";
+const MOBILE_PANEL_TOP = "calc(var(--app-navbar-height, 72px) + 10px)";
+const MOBILE_OVERLAY_TOP = "var(--app-navbar-height, 72px)";
 const MOBILE_MENU_ID = "primary-navigation-mobile";
 
 const sideSlotStyle: CSSProperties = {
@@ -43,7 +43,11 @@ function getPanelStyle(): CSSProperties {
 		top: MOBILE_PANEL_TOP,
 		left: "50%",
 		transform: "translateX(-50%)",
-		width: "min(560px, calc(100% - 16px))",
+                width: "min(560px, calc(100% - 16px))",
+                maxHeight: "max(0px, calc(100dvh - var(--app-navbar-height, 72px) - 18px - env(safe-area-inset-bottom, 0px)))",
+                overflowY: "auto",
+                overscrollBehavior: "contain",
+                boxSizing: "border-box",
 		padding: "16px",
 		display: "flex",
 		flexDirection: "column",
@@ -135,7 +139,8 @@ const MobileNavbar: React.FC<MobileNavbarProps> = ({
 				<>
 					<nav
 						id={MOBILE_MENU_ID}
-						aria-label="Navegação principal mobile"
+                                                aria-label="Navegação principal mobile"
+                                                data-lenis-prevent=""
 						style={getPanelStyle()}
 					>
 						{LANDING_SECTIONS.map((section) => (

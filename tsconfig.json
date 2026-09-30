@@ -17,12 +17,10 @@
     "noUnusedParameters": false,
     "noFallthroughCasesInSwitch": true,
 
-    "types": ["vite/client", "vitest/globals", "msw"],
+    "types": ["vite/client"],
 
-    "baseUrl": ".",
-    "ignoreDeprecations": "6.0",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["./src/*"]
     },
 
     "forceConsistentCasingInFileNames": true

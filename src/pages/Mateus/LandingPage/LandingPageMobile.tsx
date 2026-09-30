@@ -7,6 +7,7 @@ import React, {
   useState,
 } from "react";
 import { useLocation } from "react-router-dom";
+import { useLenis } from "lenis/react";
 
 import {
   DEFAULT_LANDING_SECTION_ID,
@@ -28,6 +29,7 @@ import useLandingHistorySync from "./hooks/useLandingHistorySync";
 import useLandingSectionMeasurements from "./hooks/useLandingSectionMeasurements";
 import {
   resolveLandingNavbarFallbackOffsetPx,
+  resolveLandingNavbarOffsetPx,
   resolveLandingResponsiveSpacing,
   resolveLandingScrollMarginTop,
   resolveLandingSectionMinHeight,
@@ -145,6 +147,7 @@ function resolveInitialMobileSectionId(pathname: string): LandingSectionId {
 const LandingPageMobile: React.FC = () => {
   const containerRef = useRef<HTMLElement | null>(null);
   const location = useLocation();
+  const lenis = useLenis();
 
   const [navbarOffsetPx, setNavbarOffsetPx] = useState<number>(() =>
     resolveLandingNavbarFallbackOffsetPx("mobile"),
@@ -185,6 +188,7 @@ const LandingPageMobile: React.FC = () => {
   });
 
   const initialRouteTargetIdRef = useRef(routeSectionId);
+  const initialAlignmentInterruptedRef = useRef(false);
 
   useLayoutEffect(() => {
     const container = containerRef.current;
@@ -195,32 +199,54 @@ const LandingPageMobile: React.FC = () => {
       return;
     }
 
-    let userInteracted = false;
+    let disposed = false;
+    let frameId: number | null = null;
+    const previousScrollRestoration = window.history.scrollRestoration;
+    window.history.scrollRestoration = "manual";
     const stopRealignment = () => {
-      userInteracted = true;
+      initialAlignmentInterruptedRef.current = true;
+    };
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (["ArrowUp", "ArrowDown", "PageUp", "PageDown", "Home", "End", " "].includes(event.key)) {
+        stopRealignment();
+      }
     };
     const alignTarget = () => {
-      if (userInteracted) {
+      frameId = null;
+      if (disposed || initialAlignmentInterruptedRef.current) {
         return;
       }
 
       const targetTop = window.scrollY + target.getBoundingClientRect().top;
+      const scrollTop = Math.max(0, targetTop - resolveLandingNavbarOffsetPx("mobile"));
+      lenis?.resize();
+      lenis?.scrollTo(scrollTop, { immediate: true, force: true });
       window.scrollTo({
-        top: Math.max(0, targetTop - navbarOffsetPx),
+        top: scrollTop,
         behavior: "auto",
       });
       refreshActiveSection("refresh");
       setActiveSectionId(targetSectionId);
     };
+    const scheduleAlignment = () => {
+      if (disposed || initialAlignmentInterruptedRef.current) return;
+      if (frameId !== null) window.cancelAnimationFrame(frameId);
+      frameId = window.requestAnimationFrame(alignTarget);
+    };
 
     alignTarget();
-    const frameId = window.requestAnimationFrame(alignTarget);
-    const timerIds =
-      targetSectionId === DEFAULT_LANDING_SECTION_ID
-        ? []
-        : [120, 360, 720, 1200, 1900, 2800, 3900, 5000].map((delay) =>
-            window.setTimeout(alignTarget, delay),
-          );
+    scheduleAlignment();
+    // Reload can settle its viewport, navbar or lazy content after mounting.
+    // Observe geometry instead of guessing a fixed loading window.
+    const observer = new ResizeObserver(scheduleAlignment);
+    observer.observe(target);
+    if (container) observer.observe(container);
+    window.addEventListener("resize", scheduleAlignment);
+    window.visualViewport?.addEventListener("resize", scheduleAlignment);
+    window.addEventListener("pageshow", scheduleAlignment);
+    window.addEventListener("load", scheduleAlignment);
+    document.fonts.addEventListener("loadingdone", scheduleAlignment);
+    void document.fonts.ready.then(scheduleAlignment);
 
     window.addEventListener("wheel", stopRealignment, {
       passive: true,
@@ -234,15 +260,24 @@ const LandingPageMobile: React.FC = () => {
       passive: true,
       once: true,
     });
+    window.addEventListener("keydown", handleKeyDown);
 
     return () => {
-      window.cancelAnimationFrame(frameId);
-      timerIds.forEach((timerId) => window.clearTimeout(timerId));
+      disposed = true;
+      if (frameId !== null) window.cancelAnimationFrame(frameId);
+      observer.disconnect();
+      window.history.scrollRestoration = previousScrollRestoration;
+      window.removeEventListener("resize", scheduleAlignment);
+      window.visualViewport?.removeEventListener("resize", scheduleAlignment);
+      window.removeEventListener("pageshow", scheduleAlignment);
+      window.removeEventListener("load", scheduleAlignment);
+      document.fonts.removeEventListener("loadingdone", scheduleAlignment);
       window.removeEventListener("wheel", stopRealignment);
       window.removeEventListener("pointerdown", stopRealignment);
       window.removeEventListener("touchstart", stopRealignment);
+      window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [navbarOffsetPx, refreshActiveSection, setActiveSectionId]);
+  }, [lenis, navbarOffsetPx, refreshActiveSection, setActiveSectionId]);
 
   const { registerSectionElement, getPlaceholderMinHeight } =
     useLandingSectionMeasurements({

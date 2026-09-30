@@ -31,13 +31,17 @@ for (const viewport of [
 				const bounds = await network.boundingBox();
 				if (!bounds) return null;
 
-				return {
-					top: Math.round(bounds.y),
-					bottom: Math.round(bounds.y + bounds.height),
-					height: Math.round(bounds.height),
-				};
-			})
-			.toEqual({ top: 0, bottom: viewport.height, height: viewport.height });
+                                return {
+                                        top: Math.round(bounds.y),
+                                        bottom: Math.round(bounds.y + bounds.height),
+                                        height: Math.round(bounds.height),
+                                };
+                        })
+                        .toEqual({
+                                top: viewport.width < 992 ? 74 : 0,
+                                bottom: viewport.height,
+                                height: viewport.height - (viewport.width < 992 ? 74 : 0),
+                        });
 		await expect(network).toHaveAttribute("data-cognitive-view", "neural");
 		await expect(network).toHaveAttribute("data-cognitive-thinking", "active");
 		await expect(network).toHaveAttribute(

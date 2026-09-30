@@ -17,6 +17,7 @@ import flagMexico from "../../../assets/Mateus/portfolio/flags/mexico-semicircle
 import flagPortugal from "../../../assets/Mateus/portfolio/flags/portugal-semicircle-realistic-v3.png";
 
 import usePortfolioActiveItem from "./hooks/usePortfolioActiveItem";
+import useMobilePortfolioBrandPush from "./hooks/useMobilePortfolioBrandPush";
 import { defaultPortfolioProjectId, portfolioProjects } from "./portfolio.data";
 import styles from "./Portfolio.module.css";
 import type { PortfolioProjectId } from "./types";
@@ -140,7 +141,8 @@ export default function Portfolio() {
 	const [mobileDetailCardHeight, setMobileDetailCardHeight] = useState(182);
 	const [mobileMapAreaHeight, setMobileMapAreaHeight] = useState(320);
 	const rootRef = useRef<HTMLElement>(null);
-	const mobileDetailCardRef = useRef<HTMLElement>(null);
+        const mobileDetailCardRef = useRef<HTMLElement>(null);
+        useMobilePortfolioBrandPush(rootRef, mobileDetailCardRef);
 	const isMagnetizingRef = useRef(false);
 	const projectListRef = useRef<HTMLDivElement>(null);
 	const mobileProjectListRef = useRef<HTMLDivElement>(null);
@@ -191,7 +193,7 @@ export default function Portfolio() {
 			"(prefers-reduced-motion: reduce)"
 		);
 
-		if (!root || globalThis.innerWidth <= 980 || prefersReducedMotion.matches) {
+                if (!root || globalThis.innerWidth < 992 || prefersReducedMotion.matches) {
 			return undefined;
 		}
 
@@ -210,7 +212,7 @@ export default function Portfolio() {
 			if (
 				isMagnetizingRef.current ||
 				!isScrollingDown ||
-				globalThis.innerWidth <= 980 ||
+                                globalThis.innerWidth < 992 ||
 				prefersReducedMotion.matches
 			) {
 				return;
@@ -326,7 +328,7 @@ export default function Portfolio() {
 
 	useEffect(() => {
 		const projectList = mobileProjectListRef.current ?? projectListRef.current;
-		if (!projectList || globalThis.innerWidth > 720) return;
+                if (!projectList || globalThis.innerWidth >= 992) return;
 
 		const activeButton = projectList.querySelector<HTMLElement>(
 			'[data-project-id][aria-pressed="true"]'

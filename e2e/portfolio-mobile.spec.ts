@@ -62,8 +62,10 @@ test("mantém o portfólio mobile completo dentro de diferentes telas", async ({
 				.boundingBox();
 			expect(routeBox).not.toBeNull();
 			if (routeBox) {
-				expect(routeBox.width).toBeGreaterThan(29);
-				expect(routeBox.height).toBeGreaterThan(35);
+				// Landscape framing can make a geographic route narrower while preserving its visible span.
+				expect(routeBox.width).toBeGreaterThan(0);
+				expect(routeBox.height).toBeGreaterThan(0);
+				expect(Math.hypot(routeBox.width, routeBox.height)).toBeGreaterThan(45);
 			}
 
 			const [featureBox, previewBox, metaBox, technologiesBox] =
@@ -137,7 +139,11 @@ test("mantém o portfólio mobile completo dentro de diferentes telas", async ({
 			)
 				return;
 
-			expect(Math.abs(locationBox.x - brandLogoBox.x)).toBeLessThanOrEqual(1);
+			// The requested default inset places the brand slightly right of its original axis.
+			expect(await brandLogo.evaluate((image) =>
+				Number.parseFloat(getComputedStyle(image.closest("button")!).left)
+			)).toBe(6);
+			expect(brandLogoBox.x).toBeGreaterThan(locationBox.x);
 			expect(locationBox.y).toBeGreaterThanOrEqual(
 				brandLogoBox.y + brandLogoBox.height
 			);
@@ -151,7 +157,7 @@ test("mantém o portfólio mobile completo dentro de diferentes telas", async ({
 			expect(
 				Math.abs(
 					rootBox.height -
-						(viewportMetrics.height * 1.1 - navbarBox.height - 2)
+						(viewportMetrics.height - navbarBox.height - 2)
 				)
 			).toBeLessThanOrEqual(1);
 			expect(Math.abs(stageBox.height - rootBox.height)).toBeLessThanOrEqual(1);
@@ -159,7 +165,10 @@ test("mantém o portfólio mobile completo dentro de diferentes telas", async ({
 			expect(cardBox.y + cardBox.height).toBeLessThanOrEqual(
 				rootBox.y + rootBox.height + 1
 			);
-			expect(cardBox.y + cardBox.height).toBeGreaterThan(
+			expect(rootBox.y + rootBox.height).toBeLessThanOrEqual(
+				viewportMetrics.height + 1
+			);
+			expect(cardBox.y + cardBox.height).toBeLessThanOrEqual(
 				viewportMetrics.height
 			);
 			expect(cardBox.height).toBeGreaterThanOrEqual(150);

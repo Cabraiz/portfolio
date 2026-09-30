@@ -134,7 +134,6 @@ const BrainModel: React.FC<{
 	const gltf = useLoader(GLTFLoader, MODEL_URL, (loader) => {
 		const dracoLoader = new DRACOLoader();
 		dracoLoader.setDecoderPath(DRACO_PATH);
-		dracoLoader.setDecoderConfig({ type: "wasm" });
 		loader.setDRACOLoader(dracoLoader);
 	});
 

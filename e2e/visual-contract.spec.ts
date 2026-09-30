@@ -75,26 +75,17 @@ for (const viewport of referenceViewports) {
 			expect(actionBox!.height).toBeLessThanOrEqual(viewport.height * 0.08);
 		});
 
-		test("keeps the live marquee and animated globe", async ({ page }) => {
+		test("redirects the retired live route to the cognitive network", async ({ page }) => {
 			await page.goto("/live");
+			await expect(page).toHaveURL(/\/technologies$/, { timeout: 15_000 });
 			await expect(page.locator("main[data-landing-viewport]")).toHaveAttribute(
 				"data-active-section",
-				"live",
+				"technologies",
 				{ timeout: 15_000 }
 			);
-
-			await expect(
-				page.locator('[data-live-hero-marquee-viewport="true"]')
-			).toBeVisible();
-			await expect(
-				page.getByText("Rotação viva", { exact: true })
-			).toBeVisible();
-
-			const globeCanvas = page.locator("#live canvas").first();
-			await expect(globeCanvas).toBeVisible();
-			await expect
-				.poll(async () => globeCanvas.evaluate((canvas) => canvas.width))
-				.toBeGreaterThan(100);
+			await expect(page.locator("#live")).toHaveCount(0);
+			await expect(page.locator('[data-live-hero-marquee-viewport="true"]')).toHaveCount(0);
+			await expect(page.locator("#technologies")).toBeVisible();
 		});
 	});
 }

@@ -68,6 +68,9 @@ const BrandButton: React.FC<BrandButtonProps> = ({
       style={{
         all: "unset",
         display: "inline-flex",
+        position: mobile ? "relative" : undefined,
+        left: mobile ? 6 : undefined,
+        top: mobile ? 4 : undefined,
         alignItems: "center",
         justifyContent: "center",
         background: "none",

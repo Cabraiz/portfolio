@@ -1,5 +1,3 @@
-import type { JSX } from "react";
-
 import ConversationCTA from "./components/ConversationCTA";
 import PartnerLogosRow from "./components/PartnerLogosRow";
 import {
@@ -34,7 +32,7 @@ export default function ConversationSection({
   const hasCtaGroup = hasPrimaryAction || hasSecondaryAction;
   const ctaSize = compact ? "compact" : "default";
 
-  const TitleTag = titleAs as keyof JSX.IntrinsicElements;
+  const TitleTag = titleAs;
 
   const sectionClassName = joinClasses(
     styles.section,

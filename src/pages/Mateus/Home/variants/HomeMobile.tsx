@@ -1,9 +1,10 @@
-import { useLayoutEffect, useRef } from "react";
+import { useRef } from "react";
 import { FaLinkedin, FaRegFileAlt, FaWhatsapp } from "react-icons/fa";
-import { SiAnthropic, SiGmail, SiOpenai } from "react-icons/si";
+import { SiAnthropic, SiGmail } from "react-icons/si";
 
 import portrait from "@/assets/Mateus/home/hero-mobile-portrait.png";
-import { ensureGsapRuntime } from "@/features/scroll/gsapRuntime";
+import CodexIcon from "../components/CodexIcon";
+import useMobileHomeBrandMotion from "../hooks/useMobileHomeBrandMotion";
 import { RESUME_HREF, WHATSAPP_HREF } from "../data/home.data";
 import styles from "./HomeMobile.module.css";
 
@@ -11,7 +12,14 @@ const MOBILE_PARTNERS = [
   { label: "LinkedIn", Icon: FaLinkedin },
   { label: "Gmail", Icon: SiGmail },
   { label: "Claude", Icon: SiAnthropic },
-  { label: "Codex", Icon: SiOpenai },
+  { label: "Codex", Icon: CodexIcon },
+] as const;
+const MOBILE_INTRO_LINES = [
+  "Transformando",
+  "ideias em",
+  "produtos reais,",
+  "do código ao",
+  "impacto.",
 ] as const;
 
 function HomeMobile() {
@@ -24,209 +32,7 @@ function HomeMobile() {
   const partnersHeadingRef = useRef<HTMLDivElement>(null);
   const portraitRef = useRef<HTMLImageElement>(null);
 
-  useLayoutEffect(() => {
-    const page = pageRef.current;
-    const portrait = portraitRef.current;
-    const logo = document.querySelector<HTMLElement>(
-      '[data-mobile-brand-pusher="true"]',
-    );
-    const reducedMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
-    const partnerItems = Array.from(
-      partnersRef.current?.querySelectorAll<HTMLElement>(
-        "[data-mobile-partner-item]",
-      ) ?? [],
-    );
-
-    if (!page || !logo || reducedMotion) {
-      return;
-    }
-
-    const { gsap, ScrollTrigger } = ensureGsapRuntime();
-    const landingRoot = page.closest<HTMLElement>(
-      'main[data-landing-viewport="mobile"]',
-    );
-    const blockCandidates: Array<HTMLElement | null> = [
-      eyebrowRef.current,
-      titleRef.current,
-      identityRef.current,
-      introRef.current,
-      partnersHeadingRef.current,
-    ];
-    const textBlocks = blockCandidates.filter(
-      (element): element is HTMLElement => element !== null,
-    );
-
-    let activeSectionObserver: MutationObserver | undefined;
-    const context = gsap.context(() => {
-      gsap.set(logo, {
-        x: -24,
-        autoAlpha: 1,
-        willChange: "transform",
-        force3D: true,
-      });
-      gsap.set([...textBlocks, ...partnerItems], {
-        willChange: "transform",
-        force3D: true,
-      });
-
-      const timeline = gsap.timeline({
-        defaults: { ease: "none" },
-        scrollTrigger: {
-          trigger: page,
-          start: () => {
-            const navbarHeight =
-              logo.closest("nav")?.getBoundingClientRect().height ?? 72;
-
-            return `top top+=${Math.ceil(navbarHeight)}`;
-          },
-          end: () => {
-            const navbarHeight =
-              logo.closest("nav")?.getBoundingClientRect().height ?? 72;
-
-            return `bottom top+=${Math.ceil(navbarHeight)}`;
-          },
-          scrub: 0.45,
-          invalidateOnRefresh: true,
-        },
-      });
-
-      const clampLogoToNavbarOutsideHome = () => {
-        if (landingRoot?.dataset.activeSection === "home") {
-          return;
-        }
-
-        gsap.set(logo, {
-          y: 0,
-          rotation: 0,
-          scale: 1,
-        });
-      };
-
-      timeline.eventCallback("onUpdate", clampLogoToNavbarOutsideHome);
-      if (landingRoot) {
-        activeSectionObserver = new MutationObserver(
-          clampLogoToNavbarOutsideHome,
-        );
-        activeSectionObserver.observe(landingRoot, {
-          attributes: true,
-          attributeFilter: ["data-active-section"],
-        });
-      }
-
-      timeline
-        .to(
-          logo,
-          {
-            y: () => Math.min(380, window.innerHeight * 0.5),
-            rotation: 2,
-            scale: 1.08,
-            duration: 0.74,
-          },
-          0.08,
-        )
-        .to(
-          logo,
-          {
-            y: 0,
-            rotation: 0,
-            scale: 1,
-            duration: 0.18,
-            ease: "power2.in",
-          },
-          0.82,
-        )
-        .to(
-          portrait,
-          {
-            y: -22,
-            scale: 1.018,
-            duration: 1,
-          },
-          0,
-        );
-
-      const pushBlock = (
-        element: HTMLElement | null,
-        start: number,
-        release: number,
-        distance: number,
-        constrainToViewport = false,
-      ) => {
-        if (!element) return;
-
-        const resolveDistance = () => {
-          if (!constrainToViewport) return distance;
-
-          const availableSpace =
-            window.innerWidth - (element.offsetLeft + element.offsetWidth) - 8;
-
-          return Math.max(0, Math.min(distance, availableSpace));
-        };
-
-        timeline
-          .to(
-            element,
-            {
-              x: resolveDistance,
-              skewX: -1.2,
-              duration: 0.09,
-              ease: "power2.out",
-            },
-            start,
-          )
-          .to(
-            element,
-            {
-              x: 0,
-              skewX: 0,
-              duration: 0.13,
-              ease: "power2.inOut",
-            },
-            release,
-          );
-      };
-
-      pushBlock(eyebrowRef.current, 0.015, 0.2, 58, true);
-      pushBlock(titleRef.current, 0.055, 0.36, 72, true);
-      pushBlock(identityRef.current, 0.09, 0.52, 60, true);
-      pushBlock(introRef.current, 0.17, 0.72, 66, true);
-      pushBlock(partnersHeadingRef.current, 0.22, 0.9, 72, true);
-
-      const partnerExitDuration = 0.08;
-      const partnerExitInterval = 0.1;
-
-      partnerItems.forEach((partner, index) => {
-        timeline.to(
-          partner,
-          {
-            x: () =>
-              window.innerWidth - partner.getBoundingClientRect().left + 24,
-            opacity: 0,
-            duration: partnerExitDuration,
-            ease: "power2.in",
-          },
-          index * partnerExitInterval,
-        );
-      });
-
-      clampLogoToNavbarOutsideHome();
-    }, page);
-
-    const refreshFrame = window.requestAnimationFrame(() => {
-      ScrollTrigger.refresh();
-    });
-
-    return () => {
-      window.cancelAnimationFrame(refreshFrame);
-      activeSectionObserver?.disconnect();
-      context.revert();
-      gsap.set([logo, ...textBlocks, ...partnerItems, portrait], {
-        clearProps: "transform,willChange",
-      });
-    };
-  }, []);
+  useMobileHomeBrandMotion({ pageRef, eyebrowRef, titleRef, identityRef, introRef, partnersRef, partnersHeadingRef, portraitRef });
 
   return (
     <main ref={pageRef} className={styles.page} data-mobile-editorial-home>
@@ -249,7 +55,15 @@ function HomeMobile() {
         </div>
 
         <p ref={introRef} className={styles.intro}>
-          Transformando ideias em produtos reais, do código ao impacto.
+          {MOBILE_INTRO_LINES.map((line, index) => (
+            <span
+              key={line}
+              className={styles.introLine}
+              data-mobile-intro-line={index + 1}
+            >
+              {line}{index < MOBILE_INTRO_LINES.length - 1 ? " " : ""}
+            </span>
+          ))}
         </p>
 
         <div
