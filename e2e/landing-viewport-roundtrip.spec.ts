@@ -84,7 +84,7 @@ async function expectSectionToOwnViewport(
 						const previousRect = previous?.getBoundingClientRect();
 						const nextRect = next?.getBoundingClientRect();
 						const portfolioRootRect = portfolioRoot?.getBoundingClientRect();
-						const expectedTop = mobile ? (navbarRect?.bottom ?? 0) : 0;
+						const expectedTop = mobile && sectionId !== "portfolio" ? (navbarRect?.bottom ?? 0) : 0;
 						const serviceOverflow = serviceRoot
 							? getComputedStyle(serviceRoot).overflow
 							: null;

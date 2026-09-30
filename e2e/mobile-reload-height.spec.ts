@@ -28,13 +28,25 @@ for(const viewport of [{width:390,height:844},{width:568,height:320}]){
      const node=document.querySelector(root),navbar=document.querySelector('nav.navbar');
      if(!node||!navbar)return {ready:false};
      const rect=node.getBoundingClientRect(),bar=navbar.getBoundingClientRect();
-     const expectedTop=bar.bottom+(id==='home'?0:2);
+     const expectedTop=id==='portfolio'?0:bar.bottom+(id==='home'?0:2);
      return{path:location.pathname===path,top:Math.abs(rect.top-expectedTop)<=1,bottom:Math.abs(rect.bottom-(visualViewport?.height??innerHeight))<=1};
     },route);
     await expect.poll(measure,{timeout:6000}).toEqual({path:true,top:true,bottom:true});
     // Late font/image mounting and browser restoration must not undo alignment.
     await page.waitForTimeout(1500);
     expect(await measure()).toEqual({path:true,top:true,bottom:true});
+    // Do not let initial load alignment conceal a bad foreground restoration.
+    await page.evaluate(()=>window.dispatchEvent(new Event('touchstart')));
+    const cdp=await context.newCDPSession(page);
+    await page.evaluate(()=>window.dispatchEvent(new Event('blur')));
+    await cdp.send('Page.setWebLifecycleState',{state:'frozen'});
+    await page.setViewportSize({...viewport,height:Math.max(320,viewport.height-60)});
+    await cdp.send('Page.setWebLifecycleState',{state:'active'});
+    await page.evaluate(()=>window.dispatchEvent(new Event('focus')));
+    await expect.poll(measure,{timeout:6000}).toEqual({path:true,top:true,bottom:true});
+    await page.setViewportSize(viewport);
+    await expect.poll(measure,{timeout:6000}).toEqual({path:true,top:true,bottom:true});
+    await cdp.detach();
    });
   }
   await context.close();

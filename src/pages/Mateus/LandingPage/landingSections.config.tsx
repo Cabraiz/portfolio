@@ -216,7 +216,8 @@ function createViewportConfig(
 	behavior: LandingSectionBehavior,
 	options?: Readonly<{
 		sectionRole?: LandingSectionHeightRole;
-		subtractNavbarOffset?: boolean;
+                subtractNavbarOffset?: boolean;
+                preferDynamicViewport?: boolean;
 		sectionStyle?: CSSProperties;
 		contentStyle?: CSSProperties;
 		renderHints?: LandingSectionRenderHints;
@@ -225,7 +226,7 @@ function createViewportConfig(
 	const sectionRole = options?.sectionRole ?? "content";
 
 	const expectedMinHeight = resolveLandingSectionMinHeight(viewportMode, {
-		preferDynamicViewport: viewportMode === "desktop",
+                preferDynamicViewport: options?.preferDynamicViewport ?? viewportMode === "desktop",
 		sectionRole,
 		subtractNavbarOffset: options?.subtractNavbarOffset,
 	});
@@ -398,12 +399,14 @@ export const LANDING_SECTIONS_CONFIG = [
 		mobile: createViewportConfig(
 			"mobile",
 			Portfolio,
-			MOBILE_CONTENT_VIRTUALIZED_BEHAVIOR,
-			{
-				sectionRole: "content",
-				subtractNavbarOffset: true,
-				sectionStyle: {
-					background: "#dcefeb",
+                        MOBILE_CONTENT_VIRTUALIZED_BEHAVIOR,
+                        {
+                                sectionRole: "content",
+                                subtractNavbarOffset: false,
+                                preferDynamicViewport: true,
+                                sectionStyle: {
+                                        scrollMarginTop: 0,
+                                        background: "#dcefeb",
 					backgroundImage: "none",
 				},
 			}

@@ -218,7 +218,8 @@ const LandingPageMobile: React.FC = () => {
       }
 
       const targetTop = window.scrollY + target.getBoundingClientRect().top;
-      const scrollTop = Math.max(0, targetTop - resolveLandingNavbarOffsetPx("mobile"));
+      const offset = targetSectionId === "portfolio" ? 0 : resolveLandingNavbarOffsetPx("mobile");
+      const scrollTop = Math.max(0, targetTop - offset);
       lenis?.resize();
       lenis?.scrollTo(scrollTop, { immediate: true, force: true });
       window.scrollTo({

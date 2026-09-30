@@ -478,7 +478,10 @@ function toViewportHeightMinusNavbar(
     ? ` - ${LANDING_NAVBAR_SCROLL_ALIGNMENT_PX}px`
     : "";
 
-  return `max(0px, calc(${baseMinHeight} - var(${NAVBAR_HEIGHT_CSS_VAR}, ${navbarHeight}px)${alignment}))`;
+  const headerHeight = viewportMode === 'mobile' && sectionRole === 'hero'
+    ? `${navbarHeight}px`
+    : `var(${NAVBAR_HEIGHT_CSS_VAR}, ${navbarHeight}px)`;
+  return `max(0px, calc(${baseMinHeight} - ${headerHeight}${alignment}))`;
 }
 
 export function resolveLandingSectionMinHeight(

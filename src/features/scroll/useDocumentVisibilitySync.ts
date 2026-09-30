@@ -1,7 +1,8 @@
 import { useEffect, useRef } from "react";
 import { useLenis } from "lenis/react";
 
-import { refreshScrollRuntime } from "./gsapRuntime";
+import { refreshScrollRuntime, updateScrollRuntime } from "./gsapRuntime";
+import { captureLandingScrollAnchor, resolveLandingScrollAnchor, type LandingScrollAnchor } from './landingScrollAnchor';
 import {
   clearPendingLandingScrollTarget,
   readPendingLandingScrollTarget,
@@ -12,8 +13,9 @@ type AnimationFrameId = number | null;
 export function useDocumentVisibilitySync(): void {
   const lenis = useLenis();
   const refreshFrameRef = useRef<AnimationFrameId>(null);
-  const preservedScrollYRef = useRef<number | null>(null);
+  const preservedPositionRef = useRef<LandingScrollAnchor | null>(null);
   const pendingLandingTargetRef = useRef<number | null>(null);
+  const pendingPositionRef = useRef<LandingScrollAnchor | null>(null);
 
   useEffect(() => {
     if (!lenis || !("document" in globalThis)) {
@@ -21,6 +23,16 @@ export function useDocumentVisibilitySync(): void {
     }
 
     const currentDocument = globalThis.document;
+    let visiblePosition = captureLandingScrollAnchor();
+    let positionFrame: number | null = null;
+
+    const rememberVisiblePosition = () => {
+      if (positionFrame !== null || preservedPositionRef.current || refreshFrameRef.current !== null) return;
+      positionFrame = requestAnimationFrame(() => {
+        positionFrame = null;
+        if (!preservedPositionRef.current && refreshFrameRef.current === null) visiblePosition = captureLandingScrollAnchor();
+      });
+    };
 
     const cancelPendingRefresh = () => {
       if (
@@ -33,58 +45,43 @@ export function useDocumentVisibilitySync(): void {
       refreshFrameRef.current = null;
     };
 
-    const scheduleRefresh = () => {
-      cancelPendingRefresh();
-
-      if ("requestAnimationFrame" in globalThis) {
-        refreshFrameRef.current = globalThis.requestAnimationFrame(() => {
-          refreshFrameRef.current = null;
-          refreshScrollRuntime();
-        });
-
-        return;
-      }
-
-      refreshScrollRuntime();
-    };
-
     const preserveScrollPosition = () => {
-      if (preservedScrollYRef.current === null) {
-        preservedScrollYRef.current = globalThis.window.scrollY;
+      if (preservedPositionRef.current === null) {
+        preservedPositionRef.current = captureLandingScrollAnchor();
       }
-
-      pendingLandingTargetRef.current = readPendingLandingScrollTarget();
+      const pendingTarget = readPendingLandingScrollTarget();
+      if (pendingTarget !== null) {
+        pendingLandingTargetRef.current = pendingTarget;
+        pendingPositionRef.current = captureLandingScrollAnchor(pendingTarget);
+      }
 
       cancelPendingRefresh();
       lenis.stop();
     };
 
     const restoreScrollPosition = () => {
-      const preservedScrollY = preservedScrollYRef.current;
-      const pendingLandingTarget = pendingLandingTargetRef.current;
-      preservedScrollYRef.current = null;
-      pendingLandingTargetRef.current = null;
-
       lenis.start();
-
-      const restoredScrollY = pendingLandingTarget ?? preservedScrollY;
-
-      if (restoredScrollY !== null) {
-        lenis.scrollTo(restoredScrollY, {
-          immediate: true,
-          force: true,
-        });
-        globalThis.window.scrollTo({
-          top: restoredScrollY,
-          behavior: "auto",
-        });
-      }
-
-      if (pendingLandingTarget !== null) {
-        clearPendingLandingScrollTarget(pendingLandingTarget);
-      }
-
-      scheduleRefresh();
+      // visibilitychange and focus can both fire on return. Consume the same
+      // snapshot once, after layout/GSAP has refreshed, and write scroll last.
+      if (refreshFrameRef.current !== null) return;
+      refreshFrameRef.current = globalThis.requestAnimationFrame(() => {
+        refreshFrameRef.current = null;
+        refreshScrollRuntime();
+        lenis.resize();
+        const position = pendingPositionRef.current ?? preservedPositionRef.current;
+        const pendingTarget = pendingLandingTargetRef.current;
+        preservedPositionRef.current = null;
+        pendingPositionRef.current = null;
+        pendingLandingTargetRef.current = null;
+        if (position) {
+          const restoredScrollY = resolveLandingScrollAnchor(position);
+          lenis.scrollTo(restoredScrollY, {immediate: true, force: true});
+          globalThis.window.scrollTo({top: restoredScrollY, behavior: 'auto'});
+          updateScrollRuntime();
+        }
+        visiblePosition = captureLandingScrollAnchor();
+        if (pendingTarget !== null) clearPendingLandingScrollTarget(pendingTarget);
+      });
     };
 
     const handleVisibilityChange = () => {
@@ -93,6 +90,15 @@ export function useDocumentVisibilitySync(): void {
         return;
       }
 
+      restoreScrollPosition();
+    };
+
+    const handleViewportResize = () => {
+      if (!document.querySelector("main[data-landing-viewport='mobile']")) return;
+      if (currentDocument.hidden || preservedPositionRef.current) return;
+      // CSS has already resized by this event. Keep the snapshot from before
+      // resize, including a user's partial progress rather than snapping to top.
+      preservedPositionRef.current = visiblePosition;
       restoreScrollPosition();
     };
 
@@ -107,6 +113,8 @@ export function useDocumentVisibilitySync(): void {
     currentDocument.addEventListener("visibilitychange", handleVisibilityChange);
     globalThis.window.addEventListener("blur", preserveScrollPosition);
     globalThis.window.addEventListener("focus", restoreScrollPosition);
+    globalThis.window.addEventListener('scroll', rememberVisiblePosition, {passive: true});
+    globalThis.window.addEventListener('resize', handleViewportResize);
 
     return () => {
       currentDocument.removeEventListener(
@@ -115,8 +123,12 @@ export function useDocumentVisibilitySync(): void {
       );
       globalThis.window.removeEventListener("blur", preserveScrollPosition);
       globalThis.window.removeEventListener("focus", restoreScrollPosition);
+      globalThis.window.removeEventListener('scroll', rememberVisiblePosition);
+      globalThis.window.removeEventListener('resize', handleViewportResize);
+      if (positionFrame !== null) cancelAnimationFrame(positionFrame);
       cancelPendingRefresh();
-      preservedScrollYRef.current = null;
+      preservedPositionRef.current = null;
+      pendingPositionRef.current = null;
       pendingLandingTargetRef.current = null;
 
       /**

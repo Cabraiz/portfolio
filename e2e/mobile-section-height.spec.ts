@@ -49,7 +49,8 @@ test("usa a altura contratada em todas as seções mobile", async ({
 					sectionHeight: activeSection.getBoundingClientRect().height,
 				};
 			}, route.id);
-                        const expectedHeight = metrics.viewportHeight - metrics.navbarHeight - (route.id === "home" ? 0 : 2);
+				const expectedHeight = route.id === "portfolio" ? metrics.viewportHeight
+					: metrics.viewportHeight - metrics.navbarHeight - (route.id === "home" ? 0 : 2);
 			expect(Math.abs(metrics.sectionHeight - expectedHeight)).toBeLessThanOrEqual(
 				2
 			);

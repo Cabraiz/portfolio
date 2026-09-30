@@ -653,7 +653,10 @@ export default function useLandingSectionNavigation(
         scrollToSectionTarget({
           target: targetElement,
           lenis,
-          offsetPx: options?.offsetPx ?? getResolvedNavbarOffsetPx(),
+          offsetPx: options?.offsetPx ?? (
+            nextSectionId === "portfolio" && targetElement.closest("main[data-landing-viewport='mobile']")
+              ? 0 : getResolvedNavbarOffsetPx()
+          ),
           duration: options?.duration ?? scrollDuration,
         });
 

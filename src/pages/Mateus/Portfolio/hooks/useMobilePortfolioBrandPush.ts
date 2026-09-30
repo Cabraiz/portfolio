@@ -17,12 +17,15 @@ export default function useMobilePortfolioBrandPush(
     const rows = Array.from(location.children) as HTMLElement[];
     const setters = rows.map(row => gsap.quickSetter(row, "x", "px"));
     const ease = gsap.parseEase("power2.out");
+    const releaseEase = gsap.parseEase("power2.inOut");
     let frame: number | null = null;
-    const contact = (box: DOMRect, logoBox: DOMRect, restingLeft: number, restingRight: number) =>
-      logo.dataset.mobileBrandOwner === "portfolio" &&
-      restingLeft <= logoBox.right + 8 && restingRight >= logoBox.left - 8
-        ? gsap.utils.clamp(0, 1, (logoBox.bottom + 8 - box.top) / 18)
-        : 0;
+    const contactGain = (box: DOMRect, logoBox: DOMRect, restingLeft: number, restingRight: number) => {
+      if (logo.dataset.mobileBrandOwner !== "portfolio" ||
+        restingLeft > logoBox.right + 8 || restingRight < logoBox.left - 8) return 0;
+      const entering = gsap.utils.clamp(0, 1, (logoBox.bottom + 8 - box.top) / 18);
+      const leaving = gsap.utils.clamp(0, 1, (logoBox.top - box.bottom - 8) / 24);
+      return ease(entering) * (1 - releaseEase(leaving));
+    };
     const update = () => {
       frame = null;
       const logoBox = logo.getBoundingClientRect();
@@ -32,19 +35,19 @@ export default function useMobilePortfolioBrandPush(
         const restingLeft = box.left - currentX;
         const restingRight = box.right - currentX;
         const amount = Math.max(0, Math.min(32, window.innerWidth - restingRight - 8));
-        setters[index](amount * ease(contact(box, logoBox, restingLeft, restingRight)));
+        setters[index](amount * contactGain(box, logoBox, restingLeft, restingRight));
       });
       const box = card.getBoundingClientRect();
-      const progress = contact(box, logoBox, 4, root.getBoundingClientRect().right - 4);
+      const gain = contactGain(box, logoBox, 4, root.getBoundingClientRect().right - 4);
       const maxPush = window.innerWidth < 360 ? 20 : 28;
-      const amount = maxPush * ease(progress);
+      const amount = maxPush * gain;
       const style = getComputedStyle(card);
       const currentPush = Number.parseFloat(style.getPropertyValue("--mobile-brand-push")) || 0;
       const currentClearance = Number.parseFloat(style.getPropertyValue("--mobile-brand-clearance")) || 0;
       const padding = Number.parseFloat(style.paddingLeft) - currentClearance;
       const clearance = Math.max(0, logoBox.right + 8 - (box.left - currentPush) - maxPush - padding);
       card.style.setProperty("--mobile-brand-push", `${amount.toFixed(2)}px`);
-      card.style.setProperty("--mobile-brand-clearance", `${(clearance * ease(progress)).toFixed(2)}px`);
+      card.style.setProperty("--mobile-brand-clearance", `${(clearance * gain).toFixed(2)}px`);
       card.dataset.mobileBrandContact = amount > 0.01 ? "true" : "false";
     };
     const schedule = () => {

@@ -10,7 +10,7 @@ for (const viewport of [
 	{ width: 568, height: 320 },
 	{ width: 667, height: 375 },
 ]) {
-        test(`desce livre da Home ao Portfólio sem reiniciar ${viewport.width}x${viewport.height}`, async ({
+		test(`acompanha a entrada do Portfólio sem saltar ${viewport.width}x${viewport.height}`, async ({
 		browser,
 	}) => {
 		const context = await browser.newContext({
@@ -53,8 +53,11 @@ for (const viewport of [
 				return {
 					top: logo.top,
 					bottom: logo.bottom,
+					right: logo.right,
 					restBottom,
 					actionsTop: actions.top,
+					actionsBottom: actions.bottom,
+					actionsLeft: actions.left,
 					navBottom: nav.bottom,
 					owner: el.dataset.mobileBrandOwner,
 					opacity: Number(getComputedStyle(el).opacity),
@@ -63,9 +66,15 @@ for (const viewport of [
 			expect(result.opacity).toBe(1);
 			expect(result.top).toBeGreaterThanOrEqual(0);
 			expect(result.bottom).toBeLessThanOrEqual(viewport.height);
+			if (result.bottom > result.actionsTop && result.top < result.actionsBottom) {
+				expect(result.actionsLeft - result.right).toBeGreaterThanOrEqual(7.5);
+			}
                         const previous = samples.at(-1);
-                        if (previous && p > previous.p) expect(result.top).toBeGreaterThanOrEqual(previous.top - .5);
-                        if (previous && p < previous.p) expect(result.top).toBeLessThanOrEqual(previous.top + .5);
+				// During entry the brand rides the incoming section upward; it
+				// starts descending again only after that section fills the screen.
+				if (previous) expect(Math.abs(result.top - previous.top)).toBeLessThanOrEqual(
+					Math.abs(p - previous.p) * height + 1
+				);
                         if (p >= 1) expect(result.owner).toBe("portfolio");
                         samples.push({p, top: result.top});
                 }

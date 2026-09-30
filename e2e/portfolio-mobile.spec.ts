@@ -151,13 +151,11 @@ test("mantém o portfólio mobile completo dentro de diferentes telas", async ({
 				locationBox.y - (brandLogoBox.y + brandLogoBox.height)
 			).toBeLessThanOrEqual(30);
 
-			expect(stageBox.y).toBeGreaterThanOrEqual(
-				navbarBox.y + navbarBox.height - 1
-			);
+			expect(Math.abs(stageBox.y)).toBeLessThanOrEqual(1);
 			expect(
 				Math.abs(
 					rootBox.height -
-						(viewportMetrics.height - navbarBox.height - 2)
+					viewportMetrics.height
 				)
 			).toBeLessThanOrEqual(1);
 			expect(Math.abs(stageBox.height - rootBox.height)).toBeLessThanOrEqual(1);

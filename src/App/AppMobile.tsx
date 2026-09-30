@@ -10,6 +10,7 @@ import "../pages/Surprise/Surprise.css";
 
 import AppRoutes from "../routes/AppRoutes";
 import AppNavbar from "./NavBar/AppNavbar";
+import { NAVBAR_HEIGHT_MOBILE } from './NavBar/navbar.constants';
 
 import "react-toastify/dist/ReactToastify.css";
 
@@ -202,7 +203,7 @@ function AppMobile() {
             return;
           }
 
-          const navbarOffset = navbar
+          const navbarOffset = sectionId === 'home' ? NAVBAR_HEIGHT_MOBILE : sectionId === "portfolio" ? 0 : navbar
             ? Math.ceil(navbar.getBoundingClientRect().height + 2)
             : 76;
           const targetTop =
@@ -339,7 +340,9 @@ function AppMobile() {
       width: "100%",
       flex: 1,
       minHeight: "0",
-      paddingTop: "var(--app-navbar-height, 72px)",
+      // The portfolio header is an overlay. Its compact height must not resize
+      // Home or shift every scene when the active section changes.
+      paddingTop: `${NAVBAR_HEIGHT_MOBILE}px`,
       paddingBottom: "var(--mobile-safe-bottom, 0px)",
       boxSizing: "border-box",
       background: activePageBackground,

@@ -1,5 +1,6 @@
 // src/pages/Mateus/LandingPage/hooks/useLandingHistorySync.ts
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate } from 'react-router-dom';
 
 import {
   DEFAULT_LANDING_SECTION_ID,
@@ -144,6 +145,9 @@ export default function useLandingHistorySync({
   resolveHistoryMode,
   onRouteSectionChange,
 }: UseLandingHistorySyncParams): UseLandingHistorySyncResult {
+  const navigate = useNavigate();
+  const navigateRef = useRef(navigate);
+  useEffect(() => { navigateRef.current = navigate; }, [navigate]);
   const eligibleSectionIds = useMemo(() => {
     return normalizeEligibleSectionIds(
       urlSyncEligibleSectionIds?.length
@@ -261,6 +265,16 @@ export default function useLandingHistorySync({
         landingSectionId: normalizedSectionId,
       };
 
+      if (viewportMode === 'mobile') {
+        // Mobile's header/layout consumes React Router location. A raw history
+        // write changes the URL while leaving that UI on the previous route.
+        navigateRef.current(normalizedNextPath, {
+          replace: resolvedMode !== 'push',
+          state: { ...browserWindow.history.state?.usr, landingSectionId: normalizedSectionId },
+        });
+        return;
+      }
+
       if (resolvedMode === "push") {
         browserWindow.history.pushState(nextState, "", normalizedNextPath);
         return;
@@ -276,6 +290,7 @@ export default function useLandingHistorySync({
       resolveHistoryMode,
       resolveRoutePath,
       resolvedDefaultSectionId,
+      viewportMode,
     ],
   );
 

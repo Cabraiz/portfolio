@@ -16,11 +16,13 @@ type PartnerState = {
 	right: number;
 	left: number;
 	gap: number;
+	clearance: number;
 };
 
 type PartnerProbe = {
 	firstContact: Record<string, number>;
 	isolatedPushPhases: boolean[];
+	fullPushSeen: boolean[];
 };
 type ProbeWindow = Window & { __mobilePartnerProbe: PartnerProbe };
 
@@ -41,6 +43,7 @@ const readPartnerStates = async (
 				gap:
 					element.getBoundingClientRect().top -
 					logo.getBoundingClientRect().bottom,
+				clearance: logo.getBoundingClientRect().top - element.getBoundingClientRect().bottom,
 			};
 		});
 	});
@@ -77,6 +80,7 @@ for (const viewport of mobileViewports) {
 			const probe: PartnerProbe = {
 				firstContact: {},
 				isolatedPushPhases: [false, false, false, false],
+				fullPushSeen: [false, false, false, false],
 			};
 			(window as ProbeWindow).__mobilePartnerProbe = probe;
 			const sample = () => {
@@ -100,8 +104,9 @@ for (const viewport of mobileViewports) {
 						probe.firstContact[state.id] = state.gap;
 				}
 				states.forEach((state, index) => {
+					if (state.x >= 39.5) probe.fullPushSeen[index] = true;
 					if (
-						states.slice(0, index).every((item) => item.x >= 39.5) &&
+						probe.fullPushSeen.slice(0, index).every(Boolean) &&
 						state.x > 0.5 &&
 						state.x < 39.5 &&
 						states.every((item) => item.opacity >= 0.99) &&
@@ -137,7 +142,8 @@ for (const viewport of mobileViewports) {
 			}
 			for (const state of states) {
 				expect(state.opacity, `${state.id} não pode desaparecer`).toBe(1);
-				expect(state.x).toBeGreaterThanOrEqual(-0.5);
+					expect(state.x).toBeGreaterThanOrEqual(-0.5);
+					if (state.clearance >= 32) expect(Math.abs(state.x)).toBeLessThanOrEqual(.5);
 				expect(
 					state.x,
 					`${state.id} atravessou a tela em vez de receber um pequeno empurrão`
@@ -153,7 +159,7 @@ for (const viewport of mobileViewports) {
 		let finalState = await readPartnerStates(page);
 		for (
 			let step = 0;
-		step < 12 && finalState.some(({ x }) => x < 39.5);
+		step < 12 && finalState.some(({ clearance }) => clearance < 32);
 			step += 1
 		) {
 			await page.mouse.wheel(0, 24);
@@ -164,8 +170,8 @@ for (const viewport of mobileViewports) {
 		expect(finalState.every(({ opacity }) => opacity === 1)).toBe(true);
 		expect(
 			finalState.every(
-				({ x, left, right }) =>
-					x >= 39.5 && x <= 40.5 && left >= 0 && right <= viewport.width
+				({ x, left, right, clearance }) =>
+					clearance >= 32 && Math.abs(x) <= .5 && left >= 0 && right <= viewport.width
 			)
 		).toBe(true);
 		await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));

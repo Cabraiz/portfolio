@@ -35,7 +35,7 @@ for (const viewport of [
           const visibleHeight = visualViewport?.height ?? innerHeight;
           const actions = root.querySelector('nav[aria-label="Ações de contato"]')?.getBoundingClientRect();
           return { top: box.top, bottom: box.bottom, height: box.height, navBottom: nav.bottom,
-            visibleHeight, expectedTop: route.id === "home" ? nav.bottom : nav.bottom + 2,
+            visibleHeight, expectedTop: route.id === "portfolio" ? 0 : route.id === "home" ? nav.bottom : nav.bottom + 2,
             actionsBottom: actions?.bottom, width: innerWidth, scrollWidth: document.documentElement.scrollWidth };
         }, route);
         expect(Math.abs(result.top - result.expectedTop), JSON.stringify(result)).toBeLessThanOrEqual(1);

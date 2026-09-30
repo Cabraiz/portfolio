@@ -7,14 +7,18 @@ for(const viewport of [{width:283,height:500},{width:390,height:844},{width:667,
   const root=page.locator('[data-portfolio-root]');await root.waitFor();
   await page.mouse.wheel(0,1);await page.waitForTimeout(100);
   const height=await page.locator('[data-mobile-editorial-home]').evaluate(e=>e.getBoundingClientRect().height);
+  const entry=await root.evaluate(e=>e.getBoundingClientRect().top+scrollY);
+  const positions=[.4,.55,.64,.655,.67,.685,.7,.715,.73,.75,.77,.79,.81,.85,.9]
+   .map(p=>height*p)
+   .concat(Array.from({length:41},(_,index)=>entry+viewport.height*index/50));
   const samples=[];
-  for(const p of [.4,.55,.64,.655,.67,.685,.7,.715,.73,.75,.77,.79,.81,.85,.9,1,1.1,1.2,1.3,1.4]){
-   await page.evaluate(y=>scrollTo({top:y,behavior:'instant'}),height*p);await page.waitForTimeout(120);
+  for(const position of positions){
+   await page.evaluate(y=>scrollTo({top:y,behavior:'instant'}),position);await page.waitForTimeout(120);
    const data=await page.evaluate(()=>{
     const logo=document.querySelector<HTMLElement>('[data-mobile-brand-pusher]')!,location=document.querySelector('[data-mobile-location]'),card=document.querySelector<HTMLElement>('[data-mobile-detail-card]');
     if(!location||!card)return null;
     const box=logo.getBoundingClientRect(),cardBox=card.getBoundingClientRect();
-    const rows=Array.from(location.children).map(e=>({x:new DOMMatrixReadOnly(getComputedStyle(e).transform).m41,top:e.getBoundingClientRect().top,right:e.getBoundingClientRect().right,opacity:Number(getComputedStyle(e).opacity)}));
+    const rows=Array.from(location.children).map(e=>({x:new DOMMatrixReadOnly(getComputedStyle(e).transform).m41,top:e.getBoundingClientRect().top,bottom:e.getBoundingClientRect().bottom,right:e.getBoundingClientRect().right,opacity:Number(getComputedStyle(e).opacity)}));
     const first=card.querySelector('[data-mobile-project-id]')?.getBoundingClientRect();
     const push=parseFloat(getComputedStyle(card).getPropertyValue('--mobile-brand-push'))||0;
     return{rows,push,logoTop:box.top,logoBottom:box.bottom,logoRight:box.right,cardTop:cardBox.top,cardRight:cardBox.right,cardLeft:cardBox.left,firstLeft:first?.left,overflow:document.documentElement.scrollWidth>innerWidth};
@@ -32,6 +36,7 @@ for(const viewport of [{width:283,height:500},{width:390,height:844},{width:667,
    expect(sample.overflow).toBe(false);expect(sample.cardRight).toBeLessThanOrEqual(viewport.width);
    expect(sample.push).toBeGreaterThanOrEqual(0);expect(sample.push).toBeLessThanOrEqual(28);
    for(const [index,row] of sample.rows.entries()){expect(row.opacity).toBe(samples[0].rows[index].opacity);expect(row.opacity).toBeGreaterThan(.7);expect(row.x).toBeGreaterThanOrEqual(0);expect(row.right).toBeLessThanOrEqual(viewport.width-7);if(row.x>1)expect(sample.logoBottom+8).toBeGreaterThan(row.top);}
+   for(const row of sample.rows){if(sample.logoTop>=row.bottom+32)expect(Math.abs(row.x),'label must return once the logo safely passes').toBeLessThan(.1);}
    if(sample.push>0){expect(sample.logoBottom+8).toBeGreaterThan(sample.cardTop);expect(sample.cardLeft).toBeGreaterThan(samples[0].cardLeft);}
   }
   for(const sample of pushed){expect(sample.firstLeft!).toBeGreaterThanOrEqual(sample.logoRight+6);}

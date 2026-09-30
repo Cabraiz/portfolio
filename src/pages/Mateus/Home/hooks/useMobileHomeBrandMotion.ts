@@ -30,25 +30,24 @@ export default function useMobileHomeBrandMotion({
 
     const { gsap, ScrollTrigger } = ensureGsapRuntime();
     const items = [
-      { element: eyebrowRef.current, distance: 58, releaseAt: .2 },
-      { element: titleRef.current, distance: 72, releaseAt: .54 },
-      { element: identityRef.current, distance: 60, releaseAt: .72 },
+      { element: eyebrowRef.current, distance: 58 },
+      { element: titleRef.current, distance: 72 },
+      { element: identityRef.current, distance: 60 },
       ...Array.from(introRef.current?.querySelectorAll<HTMLElement>("[data-mobile-intro-line]") ?? [])
-        .map(element => ({ element, distance: 66, releaseAt: .84 })),
-      { element: partnersHeadingRef.current, distance: 72, releaseAt: .9 },
+        .map(element => ({ element, distance: 66 })),
+      { element: partnersHeadingRef.current, distance: 72 },
       ...Array.from(partnersRef.current?.querySelectorAll<HTMLElement>("[data-mobile-partner-item]") ?? [])
-        .map(element => ({ element, distance: 40, releaseAt: .9 })),
-    ].filter((item): item is { element: HTMLElement; distance: number; releaseAt: number } => Boolean(item.element));
+        .map(element => ({ element, distance: 40 })),
+    ].filter((item): item is { element: HTMLElement; distance: number } => Boolean(item.element));
     const rows = items.map(item => ({ ...item, x: 0, scale: 1, fitScale: 1, top: 0, bottom: 0,
       left: 0, right: 0, setter: gsap.quickSetter(item.element, "x", "px"),
       fitSetter: item.element === titleRef.current ? gsap.quickSetter(item.element, "scaleX") : null }));
-    const layout = { start: 0, homeEnd: 1, end: 1, portfolioTop: 0, portfolioBottom: 1,
+    const layout = { start: 0, end: 1, portfolioTop: 0, portfolioBottom: 1,
       navHeight: 72, restTop: 0, homeTop: 0, left: 0, width: 44, height: 44,
       viewportWidth: 0, viewportHeight: 0, actionsTop: 0, actionsBottom: 0,
-      actionsLeft: 0, actionsPadding: 0 };
+      actionsLeft: 0 };
     let logoY = 0;
     let actionPush = 0;
-    let actionClearance = 0;
     let refreshFrame: number | null = null;
     let disposed = false;
     const ease = gsap.parseEase("power2.out");
@@ -65,7 +64,6 @@ export default function useMobileHomeBrandMotion({
       layout.start = home.top + scroll - nav.height;
       layout.end = projects.bottom + scroll - nav.height;
       layout.portfolioTop = projects.top + scroll;
-      layout.homeEnd = layout.portfolioTop - nav.height;
       layout.portfolioBottom = projects.bottom + scroll;
       layout.restTop = brand.top - logoY;
       layout.homeTop = layout.restTop + (72 - nav.height) / 2 - (44 - logo.offsetHeight) / 2;
@@ -77,7 +75,6 @@ export default function useMobileHomeBrandMotion({
       layout.actionsTop = bar.top + scroll;
       layout.actionsBottom = bar.bottom + scroll;
       layout.actionsLeft = bar.left - actionPush;
-      layout.actionsPadding = parseFloat(getComputedStyle(actions).paddingLeft) - actionClearance;
       rows.forEach(row => {
         const box = row.element.getBoundingClientRect();
         const parentTransform = getComputedStyle(row.element.parentElement!).transform;
@@ -98,10 +95,16 @@ export default function useMobileHomeBrandMotion({
       const update = (progress: number) => {
         const scroll = window.scrollY;
         const travel = layout.viewportHeight - layout.homeTop - layout.height - 16;
-        // A single path crosses Home's outgoing edge without attaching to its CTA.
-        // Only Portfolio's final edge carries the brand back to the following header.
+        // Join the incoming Portfolio top before starting its own downward phase.
+        // At full entry (section top = viewport top), that phase is still at zero.
+        const portfolioProgress = clamp((scroll - layout.portfolioTop) /
+          Math.max(1, layout.end - layout.portfolioTop));
+        const phaseTop = scroll < layout.portfolioTop
+          ? Math.min(layout.homeTop + progress * travel,
+            layout.portfolioTop - scroll + layout.restTop)
+          : layout.restTop + portfolioProgress * travel;
         const top = Math.max(layout.restTop, Math.min(
-          layout.homeTop + progress * travel,
+          phaseTop,
           layout.portfolioBottom - scroll - layout.height - 12,
         ));
         logoY = top - layout.restTop;
@@ -110,11 +113,10 @@ export default function useMobileHomeBrandMotion({
         const right = layout.left + layout.width;
         logo.dataset.mobileBrandOwner = layout.portfolioBottom - scroll <= layout.navHeight
           ? "roadMap" : bottom + CONTACT_GAP >= layout.portfolioTop - scroll ? "portfolio" : "home";
-        const homeProgress = clamp((scroll - layout.start) / Math.max(1, layout.homeEnd - layout.start));
         rows.forEach(row => {
           const near = row.left <= right + CONTACT_GAP && row.right >= layout.left - CONTACT_GAP;
           const contact = near ? clamp((bottom + CONTACT_GAP - (row.top - scroll)) / 18) : 0;
-          const release = clamp((homeProgress - row.releaseAt) / .13);
+          const release = clamp((top - (row.bottom - scroll) - CONTACT_GAP) / 24);
           const gain = ease(contact) * (1 - releaseEase(release));
           // Reserve room for the brand without letting the long title cross the viewport edge.
           const fittingScale = Math.min(1, Math.max(.88,
@@ -128,14 +130,13 @@ export default function useMobileHomeBrandMotion({
           row.x = distance * gain;
           row.setter(row.x);
         });
-        const contact = clamp((bottom + CONTACT_GAP - (layout.actionsTop - scroll)) / 18);
+        // Finish reserving space before the brand crosses the red container's edge.
+        const contact = clamp((bottom + CONTACT_GAP - (layout.actionsTop - scroll)) / CONTACT_GAP);
         const release = clamp((top - (layout.actionsBottom - scroll) - CONTACT_GAP) / 24);
         const gain = ease(contact) * (1 - releaseEase(release));
-        const maxPush = layout.viewportWidth < 360 ? 20 : 28;
-        actionPush = maxPush * gain;
-        actionClearance = Math.max(0, right + CONTACT_GAP - layout.actionsLeft - maxPush - layout.actionsPadding) * gain;
+        actionPush = Math.max(0, right + CONTACT_GAP - layout.actionsLeft) * gain;
         actions.style.setProperty("--mobile-brand-push", `${actionPush.toFixed(2)}px`);
-        actions.style.setProperty("--mobile-brand-clearance", `${actionClearance.toFixed(2)}px`);
+        actions.style.setProperty("--mobile-brand-contact", gain.toFixed(3));
       };
       ScrollTrigger.create({ trigger: page, start: () => layout.start, end: () => layout.end,
         onRefreshInit: measureLayout, onRefresh: self => update(self.progress),
@@ -162,7 +163,7 @@ export default function useMobileHomeBrandMotion({
       context.revert();
       delete logo.dataset.mobileBrandOwner;
       actions.style.removeProperty("--mobile-brand-push");
-      actions.style.removeProperty("--mobile-brand-clearance");
+      actions.style.removeProperty("--mobile-brand-contact");
     };
   }, [pageRef, eyebrowRef, titleRef, identityRef, introRef, partnersRef, partnersHeadingRef, portraitRef]);
 }
