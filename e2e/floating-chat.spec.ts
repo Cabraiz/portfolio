@@ -247,7 +247,9 @@ test("keeps the open chat and its controls inside short and mobile viewports", a
 
 	for (const viewport of viewports) {
 		await page.setViewportSize(viewport);
-		await page.goto("/");
+		// Mobile Home intentionally hides chat; wait for an eligible route to settle.
+		await page.goto("/contact", { waitUntil: "networkidle" });
+		await expect(page.locator('main[data-active-section="contact"]')).toBeVisible();
 		await page.getByRole("button", { name: "Abrir chat" }).click();
 
 		const closeButton = page.getByRole("button", {
