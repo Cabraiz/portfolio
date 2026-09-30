@@ -55,7 +55,9 @@
     "send": "Enviar",
     "sending": "Enviando...",
     "sendSuccess": "Mensagem enviada. A resposta do Mateus aparecerá aqui.",
+    "sendSuccessShort": "Mensagem enviada.",
     "sendError": "Não foi possível enviar agora. Tente novamente.",
+    "sendErrorShort": "Não enviado. Tente novamente.",
     "close": "Fechar",
     "intro": "Olá, Mateus. Me chamo "
   },

@@ -64,7 +64,9 @@
     "send": "Send",
     "sending": "Sending...",
     "sendSuccess": "Message sent. Mateus' reply will appear here.",
+    "sendSuccessShort": "Message sent.",
     "sendError": "The message could not be sent. Please try again.",
+    "sendErrorShort": "Not sent. Please try again.",
     "close": "Close",
     "intro": "Hey, Mateus. My name is "
   },

@@ -1,5 +1,5 @@
 import type * as React from "react";
-import { useState, useRef, useEffect, useSyncExternalStore } from "react";
+import { useState, useRef, useEffect, useLayoutEffect, useSyncExternalStore } from "react";
 import msgIcon from "../../assets/Mateus/msgIcon.png";
 import mateusChatAvatar from "../../assets/Mateus/mateus-chat-avatar-v2.webp";
 import lagArthurSupport from "../../assets/Mateus/lag-arthur-support-wig-suit-v2.webp";
@@ -14,6 +14,7 @@ import { isLandingPath } from "../../features/navigation/landingSections";
 import { useMateusViewport } from "./Home/hooks/useHomeViewport";
 
 import styles from "./FloatingChat.module.css";
+import useChatVisualViewport from './hooks/useChatVisualViewport';
 
 import {
   isHomeGameRoutePath,
@@ -200,6 +201,7 @@ export default function FloatingChat() {
   const chatRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const messagesScrollRef = useRef<HTMLDivElement>(null);
+  const followLatestRef = useRef(true);
   const mascotRef = useRef<HTMLSpanElement>(null);
   const largeIrisRef = useRef<HTMLImageElement>(null);
   const smallIrisRef = useRef<HTMLImageElement>(null);
@@ -234,6 +236,17 @@ export default function FloatingChat() {
 
   const bottomOffset = isMobile ? "30px" : "3vh";
   const rightOffset = isMobile ? "30px" : "3vw";
+
+  useChatVisualViewport({
+    enabled: isOpen && isMobile && !shouldHideForStandaloneGame && !shouldHideForMobileHome && !shouldHideForPortfolio,
+    hasMessages: messages.length > 0,
+    panelRef: chatRef, inputRef, scrollRef: messagesScrollRef, followLatestRef,
+  });
+
+  useLayoutEffect(() => {
+    const area = messagesScrollRef.current;
+    if (isOpen && area && followLatestRef.current) area.scrollTop = area.scrollHeight;
+  }, [isOpen, messages]);
 
   useEffect(() => {
     storeMessages(conversationId, messages);
@@ -367,8 +380,8 @@ export default function FloatingChat() {
   }, [phrases.length]);
 
   useEffect(() => {
-    if (isOpen) inputRef.current?.focus();
-  }, [isOpen]);
+    if (isOpen && !isMobile) inputRef.current?.focus();
+  }, [isOpen, isMobile]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -845,10 +858,12 @@ export default function FloatingChat() {
             ref={chatRef}
             data-lenis-prevent
             data-chat-panel="true"
-            initial={{ opacity: 0, y: 20 }}
+            data-mobile={String(isMobile)}
+            className={styles.chatPanel}
+            initial={{ opacity: 0, y: isMobile ? 0 : 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={
-              prefersReducedMotion
+              prefersReducedMotion || isMobile
                 ? { opacity: 0, transition: { duration: 0.12 } }
                 : {
                     opacity: [1, 0.9, 0],
@@ -867,7 +882,7 @@ export default function FloatingChat() {
                   }
             }
             transition={
-              prefersReducedMotion
+              prefersReducedMotion || isMobile
                 ? { duration: 0.12 }
                 : { duration: 0.8, ease: [0.23, 1, 0.32, 1] }
             }
@@ -908,6 +923,7 @@ export default function FloatingChat() {
             </button>
 
             <div
+              className={styles.chatHeader}
               style={{
                 display: "flex",
                 alignItems: "center",
@@ -942,6 +958,10 @@ export default function FloatingChat() {
               ref={messagesScrollRef}
               data-chat-scroll-area="true"
               className={styles.chatScrollArea}
+              onScroll={() => {
+                const area = messagesScrollRef.current;
+                if (area) followLatestRef.current = area.scrollHeight - area.scrollTop - area.clientHeight < 48;
+              }}
               style={{
                 flex: 1,
                 fontSize: `${scale(1.05)}rem`,
@@ -1057,6 +1077,7 @@ export default function FloatingChat() {
 
             <div
               aria-live="polite"
+              className={styles.chatStatus}
               style={{
                 minHeight: `${scale(1.25)}rem`,
                 marginTop: `${scale(0.4)}rem`,
@@ -1064,50 +1085,31 @@ export default function FloatingChat() {
                 fontSize: `${scale(0.82)}rem`,
               }}
             >
-              {sendStatus === "sent" && t("floatingChat.sendSuccess")}
-              {sendStatus === "error" && t("floatingChat.sendError")}
+              {sendStatus === "sent" && t(isMobile ? "floatingChat.sendSuccessShort" : "floatingChat.sendSuccess")}
+              {sendStatus === "error" && t(isMobile ? "floatingChat.sendErrorShort" : "floatingChat.sendError")}
             </div>
 
             <div
               data-chat-composer="true"
+              className={styles.chatComposer}
               style={{
                 display: "flex",
                 marginTop: `${scale(0.4)}rem`,
                 gap: `${scale(0.5)}rem`,
               }}
             >
-              <form autoComplete="off" style={{ flex: 1 }}>
-                <input
-                  type="text"
-                  autoComplete="new-password"
-                  style={{
-                    visibility: "hidden",
-                    position: "absolute",
-                    height: 0,
-                    width: 0,
-                  }}
-                />
-                <input
-                  type="password"
-                  autoComplete="new-password"
-                  style={{
-                    visibility: "hidden",
-                    position: "absolute",
-                    height: 0,
-                    width: 0,
-                  }}
-                />
-
+              <form autoComplete="off" style={{ flex: 1, minWidth: 0 }}>
                 <input
                   ref={inputRef}
                   type="text"
                   name="message"
                   inputMode="text"
-                  autoComplete="new-password"
+                  autoComplete="off"
                   autoCorrect="off"
                   spellCheck={false}
                   enterKeyHint="send"
                   placeholder={t("floatingChat.placeholder")}
+                  aria-label={t("floatingChat.placeholder")}
                   value={inputValue}
                   maxLength={1000}
                   onChange={(e) => {
@@ -1123,7 +1125,7 @@ export default function FloatingChat() {
                     outline: "none",
                     backgroundColor: "#2c2c2c",
                     color: "white",
-                    fontSize: `${scale(1)}rem`,
+                    fontSize: isMobile ? '16px' : `${scale(1)}rem`,
                   }}
                 />
               </form>
@@ -1131,6 +1133,9 @@ export default function FloatingChat() {
               <button
                 type="button"
                 onClick={() => void sendMessage()}
+                onPointerDown={(event) => {
+                  if (isMobile && document.activeElement === inputRef.current) event.preventDefault();
+                }}
                 disabled={!inputValue.trim() || sendStatus === "sending"}
                 style={{
                   padding: `0 ${scale(1)}rem`,

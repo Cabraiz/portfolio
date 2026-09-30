@@ -114,6 +114,105 @@
   height: 0;
 }
 
+.chatPanel[data-mobile="true"] {
+  left: calc(var(--chat-visible-left, 0px) + 12px) !important;
+  top: calc(var(--chat-visible-top, 0px) + var(--chat-visible-height, 100dvh) - var(--chat-panel-height, 80dvh) - 12px) !important;
+  bottom: auto !important;
+  right: auto !important;
+  width: calc(var(--chat-visible-width, 100vw) - 24px) !important;
+  height: var(--chat-panel-height, 80dvh) !important;
+  max-height: var(--chat-panel-height, 80dvh) !important;
+  padding: 12px !important;
+  padding-bottom: max(16px, env(safe-area-inset-bottom)) !important;
+  border-radius: 16px !important;
+  background: rgba(22, 25, 29, 0.97) !important;
+  transition: none !important;
+}
+
+.chatPanel[data-mobile="true"] .chatHeader {
+  flex: 0 0 auto;
+  min-height: 44px;
+  gap: 8px !important;
+  margin-bottom: 8px !important;
+  padding-right: 48px !important;
+}
+
+.chatPanel[data-mobile="true"] .chatHeader > img {
+  width: 32px !important;
+  height: 32px !important;
+}
+
+.chatPanel[data-mobile="true"] .chatHeader > div > span:first-child {
+  font-size: max(.875rem, 14px) !important;
+}
+
+.chatPanel[data-mobile="true"] .chatCloseButton {
+  top: 10px;
+  right: 10px;
+  width: 44px;
+  height: 44px;
+  font-size: 30px;
+}
+
+.chatPanel[data-mobile="true"] .chatComposer {
+  flex-shrink: 0;
+  gap: 8px !important;
+}
+
+.chatPanel[data-mobile="true"] .chatComposer input {
+  min-height: 44px;
+  font-size: max(1rem, 16px) !important;
+  padding: 10px !important;
+  box-sizing: border-box;
+}
+
+.chatPanel[data-mobile="true"] .chatComposer button {
+  min-height: 44px;
+  flex-shrink: 0;
+  padding: 0 12px !important;
+  font-size: max(.875rem, 14px) !important;
+}
+
+.chatPanel[data-mobile="true"] .chatStatus:empty {
+  min-height: 0 !important;
+  margin-top: 0 !important;
+}
+
+.chatPanel[data-mobile="true"] .quickActions {
+  grid-template-columns: minmax(0, 1fr) minmax(0, .8fr);
+}
+
+.chatPanel[data-mobile="true"] .botIntroBubble,
+.chatPanel[data-mobile="true"] [data-chat-author] > div {
+  font-size: max(.875rem, 14px) !important;
+  line-height: 1.4;
+}
+
+.chatPanel[data-mobile="true"][data-chat-compact="true"] {
+  padding: 10px !important;
+  border-radius: 12px !important;
+}
+
+.chatPanel[data-mobile="true"][data-chat-compact="true"] .chatHeader > div > span:last-child {
+  display: none;
+}
+
+.chatPanel[data-mobile="true"][data-chat-compact="true"] .chatHeader {
+  min-height: 40px;
+  margin-bottom: 4px !important;
+}
+
+.chatPanel[data-mobile="true"][data-chat-compact="true"] .chatComposer {
+  margin-top: 4px !important;
+}
+
+.chatPanel[data-mobile="true"][data-chat-compact="true"] .chatStatus:not(:empty) {
+  min-height: 0 !important;
+  margin-top: 4px !important;
+  font-size: max(.75rem, 12px) !important;
+  line-height: 1.4;
+}
+
 .chatCloseButton {
   position: absolute;
   top: 14px;

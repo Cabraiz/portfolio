@@ -279,9 +279,13 @@ test("keeps the open chat and its controls inside short and mobile viewports", a
 		expect(panelBox!.y).toBeGreaterThanOrEqual(0);
 		expect(panelBox!.x + panelBox!.width).toBeLessThanOrEqual(viewport.width);
 		expect(panelBox!.y + panelBox!.height).toBeLessThanOrEqual(viewport.height);
-		const heightRatio = panelBox!.height / viewport.height;
-		expect(heightRatio).toBeGreaterThanOrEqual(0.79);
-		expect(heightRatio).toBeLessThanOrEqual(0.81);
+		if (viewport.width < 992) {
+			expect(panelBox!.height).toBeCloseTo(Math.min(360, viewport.height * .8), 0);
+		} else {
+			const heightRatio = panelBox!.height / viewport.height;
+			expect(heightRatio).toBeGreaterThanOrEqual(0.79);
+			expect(heightRatio).toBeLessThanOrEqual(0.81);
+		}
 		const composerBottomInset =
 			panelBox!.y + panelBox!.height - (composerBox!.y + composerBox!.height);
 		expect(composerBottomInset).toBeGreaterThanOrEqual(15);
