@@ -1,0 +1,14 @@
+{
+  "languages": [
+    "pt-BR",
+    "en-US"
+  ],
+  "catalogEntries": 443,
+  "resourceLeaves": 490,
+  "connectedFiles": 36,
+  "neutralLabels": 12,
+  "missing": [],
+  "review": "Idiomatic English reviewed by Codex; no human native-speaker certification",
+  "scope": "Public portfolio and standalone games. Inactive RoadMap/Live/Technologies variants excluded.",
+  "assets": "Proper names, company logos, project screenshots and text baked into artwork retain their original language."
+}

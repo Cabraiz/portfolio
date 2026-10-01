@@ -1,3 +1,4 @@
+import { localizeLabel, useLabelLanguage } from '@/i18n/labels';
 import React, {
   type CSSProperties,
   useEffect,
@@ -142,6 +143,7 @@ function resolveDesktopSectionMinHeight(
 }
 
 const LandingPage: React.FC = () => {
+  useLabelLanguage();
   const containerRef = useRef<HTMLElement | null>(null);
 
   const [navbarOffsetPx, setNavbarOffsetPx] = useState<number>(() =>
@@ -280,7 +282,7 @@ const LandingPage: React.FC = () => {
     <main
       ref={containerRef}
       style={containerStyle}
-      aria-label="Landing page"
+      aria-label={localizeLabel("Landing page")}
       data-active-section={committedSectionId}
       data-observed-section={observedSectionId}
       data-render-anchor-section={renderAnchorSectionId}
@@ -365,7 +367,7 @@ const LandingPage: React.FC = () => {
                 minHeight={resolvedSectionMinHeight}
                 fullHeight={isHeroSection}
               >
-                {section.content}
+                {localizeLabel(section.content)}
               </RoadMapErrorBoundary>
             </div>
           </LandingSectionShell>

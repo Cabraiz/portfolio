@@ -1,3 +1,4 @@
+import { localizeLabel, useLabelLanguage } from '@/i18n/labels';
 import { useLayoutEffect, useRef } from "react";
 
 import workshopBackground from "@/assets/Mateus/services/industrial-workshop-background-v2.png";
@@ -19,6 +20,7 @@ import { shouldDisableScrollFades } from "@/features/scroll/scrollMotionFlags";
 import styles from "./Services.module.css";
 
 export default function Services() {
+  useLabelLanguage();
 	const rootRef = useRef<HTMLElement>(null);
 	const backgroundRef = useRef<HTMLImageElement>(null);
 	const atmosphereRef = useRef<HTMLDivElement>(null);
@@ -461,7 +463,7 @@ export default function Services() {
 					ref={backgroundRef}
 					className={styles.background}
 					src={workshopBackground}
-					alt=""
+					alt={localizeLabel("")}
 					aria-hidden="true"
 					loading="eager"
 					decoding="async"
@@ -480,7 +482,7 @@ export default function Services() {
 						className={styles.title}
 						data-title-treatment="front-wall-rail-amber-sign-2d"
 					>
-						<span className={styles.titleLabel}>Serviços</span>
+						<span className={styles.titleLabel}>{localizeLabel("Serviços")}</span>
 						<picture
 							ref={signRigRef}
 							className={styles.signAnimation}
@@ -495,7 +497,7 @@ export default function Services() {
 							<img
 								className={styles.titleImage}
 								src={servicesSignAnimated}
-								alt=""
+								alt={localizeLabel("")}
 								decoding="async"
 							/>
 						</picture>
@@ -504,7 +506,7 @@ export default function Services() {
 
 				<div className={styles.workbenchStage} aria-hidden="true">
 					<div ref={workbenchRef} className={styles.workbenchRig}>
-						<img className={styles.workbench} src={workbench} alt="" />
+						<img className={styles.workbench} src={workbench} alt={localizeLabel("")} />
 						<div
 							className={styles.deviceRow}
 							data-device-count="3"
@@ -517,7 +519,7 @@ export default function Services() {
 								<img
 									className={styles.deviceImage}
 									src={laptopClubeOff}
-									alt=""
+									alt={localizeLabel("")}
 									decoding="async"
 								/>
 							</picture>
@@ -528,7 +530,7 @@ export default function Services() {
 								<img
 									className={styles.deviceImage}
 									src={phoneClubeOff}
-									alt=""
+									alt={localizeLabel("")}
 									decoding="async"
 								/>
 							</picture>
@@ -542,7 +544,7 @@ export default function Services() {
 										className={styles.robotArmStatic}
 										data-robot-arm-static="true"
 										src={roboticArmStatic}
-										alt=""
+										alt={localizeLabel("")}
 										decoding="async"
 									/>
 									<div className={styles.robotClawAssembly}>
@@ -560,14 +562,14 @@ export default function Services() {
 												ref={robotClawOpenRef}
 												className={`${styles.robotClawLayer} ${styles.robotClawOpen}`}
 												src={roboticClawOpen}
-												alt=""
+												alt={localizeLabel("")}
 												decoding="async"
 											/>
 											<img
 												ref={robotClawClosedRef}
 												className={`${styles.robotClawLayer} ${styles.robotClawClosed}`}
 												src={roboticClawClosed}
-												alt=""
+												alt={localizeLabel("")}
 												decoding="async"
 											/>
 										</div>
@@ -577,7 +579,7 @@ export default function Services() {
 										className={styles.robotBlock}
 										data-robot-block="true"
 										src={roboticArmBlock}
-										alt=""
+										alt={localizeLabel("")}
 										decoding="async"
 									/>
 									<div
@@ -588,7 +590,7 @@ export default function Services() {
 										<img
 											className={styles.robotCharacterLayer}
 											src={lagArthurControllerBody}
-											alt=""
+											alt={localizeLabel("")}
 											decoding="async"
 										/>
 										<div
@@ -599,7 +601,7 @@ export default function Services() {
 											<img
 												className={styles.robotCharacterHeadLayer}
 												src={lagArthurControllerHead}
-												alt=""
+												alt={localizeLabel("")}
 												decoding="async"
 											/>
 											<img
@@ -607,7 +609,7 @@ export default function Services() {
 												className={`${styles.robotCharacterHeadLayer} ${styles.robotCharacterEyes}`}
 												data-robot-character-eyes="true"
 												src={lagArthurControllerEyes}
-												alt=""
+												alt={localizeLabel("")}
 												decoding="async"
 											/>
 										</div>

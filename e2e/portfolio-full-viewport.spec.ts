@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test';
 for (const viewport of [{ width: 283, height: 500 }, { width: 320, height: 568 }, { width: 360, height: 640 }, { width: 390, height: 844 }, { width: 430, height: 932 }, { width: 667, height: 375 }]) {
   test(`Portfólio mobile ocupa a viewport inteira ${viewport.width}x${viewport.height}`, async ({ browser }) => {
     test.setTimeout(60_000);
-    const context = await browser.newContext({ viewport, isMobile: true, hasTouch: true, reducedMotion: 'reduce' });
+    const context = await browser.newContext({locale:'pt-BR', viewport, isMobile: true, hasTouch: true, reducedMotion: 'reduce' });
     const page = await context.newPage();
     const baseURL = test.info().project.use.baseURL as string;
     const check = async () => {

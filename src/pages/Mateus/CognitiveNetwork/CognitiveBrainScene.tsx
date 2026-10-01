@@ -1,3 +1,4 @@
+import { localizeLabel, useLabelLanguage } from '@/i18n/labels';
 import { Canvas, useFrame, useLoader, useThree } from "@react-three/fiber";
 import React, {
 	Suspense,
@@ -373,6 +374,7 @@ const CognitiveScene: React.FC<{
 };
 
 const NeuralCore3D: React.FC<{ mode: CognitiveViewMode }> = ({ mode }) => {
+  useLabelLanguage();
 	const pointerRef = useRef<PointerState>({ x: 0, y: 0, active: false });
 	const [modelReady, setModelReady] = useState(false);
 	const markReady = React.useCallback(() => setModelReady(true), []);
@@ -418,7 +420,7 @@ const NeuralCore3D: React.FC<{ mode: CognitiveViewMode }> = ({ mode }) => {
 			data-visible-triangle-budget="30000"
 			data-optimized-model="brain-optimized.glb"
 			data-render-fps-target="20:18"
-			aria-label="Cérebro anatômico 3D com contornos luminosos nas fissuras corticais"
+			aria-label={localizeLabel("Cérebro anatômico 3D com contornos luminosos nas fissuras corticais")}
 			role="img"
 			onPointerEnter={updatePointer}
 			onPointerMove={updatePointer}
@@ -453,7 +455,7 @@ const NeuralCore3D: React.FC<{ mode: CognitiveViewMode }> = ({ mode }) => {
 					<CognitiveScene mode={mode} pointer={pointerRef} onModelReady={markReady} />
 				</Suspense>
 			</Canvas>
-			{!modelReady && <span className={styles.modelLoader}>CARREGANDO CÉREBRO 3D...</span>}
+			{!modelReady && <span className={styles.modelLoader}>{localizeLabel("CARREGANDO CÉREBRO 3D...")}</span>}
 		</div>
 	);
 };

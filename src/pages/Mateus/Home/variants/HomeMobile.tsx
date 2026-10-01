@@ -1,3 +1,4 @@
+import { localizeLabel, useLabelLanguage } from '@/i18n/labels';
 import { useRef } from "react";
 import { FaLinkedin, FaRegFileAlt, FaWhatsapp } from "react-icons/fa";
 import { SiAnthropic, SiGmail } from "react-icons/si";
@@ -23,6 +24,7 @@ const MOBILE_INTRO_LINES = [
 ] as const;
 
 function HomeMobile() {
+  useLabelLanguage();
   const pageRef = useRef<HTMLElement>(null);
   const eyebrowRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
@@ -38,20 +40,20 @@ function HomeMobile() {
     <main ref={pageRef} className={styles.page} data-mobile-editorial-home>
       <section className={styles.hero} aria-labelledby="mobile-home-title">
         <div ref={eyebrowRef} className={styles.eyebrow}>
-          <span>TECNOLOGIA</span>
-          <span>PESSOAS</span>
-          <span>IMPACTO</span>
+          <span>{localizeLabel("TECNOLOGIA")}</span>
+          <span>{localizeLabel("PESSOAS")}</span>
+          <span>{localizeLabel("IMPACTO")}</span>
         </div>
 
         <h1 ref={titleRef} id="mobile-home-title" className={styles.title}>
-          <span className={styles.titleLead}>Dev</span>
-          <span className={styles.titleAccent}>Back-End &amp; APIs</span>
+          <span className={styles.titleLead}>{localizeLabel("Dev")}</span>
+          <span className={styles.titleAccent}>{localizeLabel("Back-End & APIs")}</span>
         </h1>
 
         <div ref={identityRef} className={styles.identity}>
-          <strong>Mateus Cabral</strong>
-          <span>Engenheiro de Software</span>
-          <span>Fundador</span>
+          <strong>{localizeLabel("Mateus Cabral")}</strong>
+          <span>{localizeLabel("Engenheiro de Software")}</span>
+          <span>{localizeLabel("Fundador")}</span>
         </div>
 
         <p ref={introRef} className={styles.intro}>
@@ -61,7 +63,7 @@ function HomeMobile() {
               className={styles.introLine}
               data-mobile-intro-line={index + 1}
             >
-              {line}{index < MOBILE_INTRO_LINES.length - 1 ? " " : ""}
+              {localizeLabel(line)}{localizeLabel(index < MOBILE_INTRO_LINES.length - 1 ? " " : "")}
             </span>
           ))}
         </p>
@@ -69,15 +71,15 @@ function HomeMobile() {
         <div
           ref={partnersRef}
           className={styles.partners}
-          aria-label="Clientes e parceiros"
+          aria-label={localizeLabel("Clientes e parceiros")}
         >
           <div
             ref={partnersHeadingRef}
             className={styles.partnersHeading}
             data-mobile-partners-heading="true"
           >
-            <span>CLIENTES</span>
-            <span>E PARCEIROS</span>
+            <span>{localizeLabel("CLIENTES")}</span>
+            <span>{localizeLabel("E PARCEIROS")}</span>
           </div>
           <div className={styles.partnerLogos}>
             {MOBILE_PARTNERS.map(({ label, Icon }, index) => (
@@ -88,7 +90,7 @@ function HomeMobile() {
                 data-mobile-partner-order={index + 1}
               >
                 <Icon aria-hidden="true" />
-                <span>{label}</span>
+                <span>{localizeLabel(label)}</span>
               </div>
             ))}
           </div>
@@ -98,19 +100,19 @@ function HomeMobile() {
           ref={portraitRef}
           className={styles.portrait}
           src={portrait}
-          alt="Mateus Cabral"
+          alt={localizeLabel("Mateus Cabral")}
           draggable={false}
         />
 
-        <nav className={styles.actions} aria-label="Ações de contato">
+        <nav className={styles.actions} aria-label={localizeLabel("Ações de contato")}>
           <a href={WHATSAPP_HREF} target="_blank" rel="noreferrer noopener">
             <FaWhatsapp aria-hidden="true" />
-            <span>WhatsApp</span>
+            <span>{localizeLabel("WhatsApp")}</span>
           </a>
           <span className={styles.actionDivider} aria-hidden="true" />
           <a href={RESUME_HREF} target="_blank" rel="noreferrer noopener">
             <FaRegFileAlt aria-hidden="true" />
-            <span>Currículo</span>
+            <span>{localizeLabel("Currículo")}</span>
           </a>
         </nav>
       </section>

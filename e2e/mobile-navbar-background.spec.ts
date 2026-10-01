@@ -14,7 +14,7 @@ test("mantém o cabeçalho transparente sobre o papel da página inicial", async
 
 	for (const viewport of mobileViewports) {
 		await test.step(`${viewport.width}x${viewport.height}`, async () => {
-			const context = await browser.newContext({
+			const context = await browser.newContext({locale:'pt-BR',
 				viewport,
 				deviceScaleFactor: 2,
 				isMobile: true,

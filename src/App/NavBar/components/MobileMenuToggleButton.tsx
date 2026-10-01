@@ -1,3 +1,4 @@
+import { localizeLabel, useLabelLanguage } from '@/i18n/labels';
 import React, { type CSSProperties } from "react";
 
 export type MobileMenuToggleButtonProps = Readonly<{
@@ -58,11 +59,12 @@ const MobileMenuToggleButton: React.FC<MobileMenuToggleButtonProps> = ({
   onToggle,
   lineColor = "#ffffff",
 }) => {
+  useLabelLanguage();
   return (
     <button
       type="button"
       onClick={onToggle}
-      aria-label={menuOpen ? "Fechar menu" : "Abrir menu"}
+      aria-label={localizeLabel(menuOpen ? "Fechar menu" : "Abrir menu")}
       aria-expanded={menuOpen}
       aria-controls="primary-navigation-mobile"
       style={{

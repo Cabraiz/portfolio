@@ -23,7 +23,7 @@ test("usa a altura contratada em todas as seções mobile", async ({
 }) => {
 	test.setTimeout(60_000);
 	const baseURL = test.info().project.use.baseURL as string;
-	const context = await browser.newContext({
+	const context = await browser.newContext({locale:'pt-BR',
 		viewport: { width: 390, height: 844 },
 		isMobile: true,
 		deviceScaleFactor: 1,
@@ -68,7 +68,7 @@ test("remove o header fantasma da Home em retrato e paisagem", async ({
 
 	for (const viewport of homeViewports) {
 		await test.step(`${viewport.width}x${viewport.height}`, async () => {
-			const context = await browser.newContext({
+			const context = await browser.newContext({locale:'pt-BR',
 				viewport,
 				isMobile: true,
 				deviceScaleFactor: 1,

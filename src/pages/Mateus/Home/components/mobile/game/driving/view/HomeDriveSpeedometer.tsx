@@ -1,3 +1,4 @@
+import { localizeLabel, useLabelLanguage } from '@/i18n/labels';
 // src/pages/Mateus/Home/components/mobile/game/driving/view/HomeDriveSpeedometer.tsx
 
 import React, { memo, useMemo, useRef, type CSSProperties } from "react";
@@ -68,6 +69,7 @@ function SpeedometerMinorTick({ valueKmh }: Readonly<{ valueKmh: number }>) {
 function SpeedometerMajorTick({
   tick,
 }: Readonly<{ tick: HomeDriveSpeedometerTick }>) {
+  useLabelLanguage();
   return (
     <span
       aria-hidden="true"
@@ -80,7 +82,7 @@ function SpeedometerMajorTick({
       style={createTickStyle(tick.valueKmh)}
     >
       <span className={styles.majorTickLine} />
-      <span className={styles.majorTickLabel}>{tick.label}</span>
+      <span className={styles.majorTickLabel}>{localizeLabel(tick.label)}</span>
     </span>
   );
 }
@@ -99,6 +101,7 @@ function HomeDriveSpeedometer({
   className,
   label = HOME_DRIVE_SPEEDOMETER_DEFAULT_LABEL,
 }: HomeDriveSpeedometerProps) {
+  useLabelLanguage();
   const impactStateRef = useRef<HomeDriveSpeedometerImpactRuntimeState>(
     createInitialHomeDriveSpeedometerImpactState(),
   );
@@ -148,7 +151,7 @@ function HomeDriveSpeedometer({
       data-home-drive-speedometer-impacting={
         impactResolution.isImpacting ? "true" : "false"
       }
-      aria-label={`Velocímetro analógico: ${needleState.displaySpeedKmh} quilômetros por hora`}
+      aria-label={localizeLabel(`Velocímetro analógico: ${needleState.displaySpeedKmh} quilômetros por hora`)}
       className={getClassName(className)}
       style={rootStyle}
     >
@@ -172,11 +175,11 @@ function HomeDriveSpeedometer({
 
 
           <div className={styles.digitalReadout} aria-hidden="true">
-            {needleState.displaySpeedKmh.toString().padStart(3, "0")}
+            {localizeLabel(needleState.displaySpeedKmh.toString().padStart(3, "0"))}
           </div>
 
           <div className={styles.unitLabel} aria-hidden="true">
-            {label}
+            {localizeLabel(label)}
           </div>
 
           <div className={styles.needlePivot}>

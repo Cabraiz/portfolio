@@ -19,7 +19,7 @@ test("mantém o portfólio mobile completo dentro de diferentes telas", async ({
 
 	for (const viewport of mobileViewports) {
 		await test.step(viewport.name, async () => {
-			const context = await browser.newContext({
+			const context = await browser.newContext({locale:'pt-BR',
 				viewport: { width: viewport.width, height: viewport.height },
 				deviceScaleFactor: 2,
 				isMobile: true,
@@ -80,11 +80,11 @@ test("mantém o portfólio mobile completo dentro de diferentes telas", async ({
 			expect(metaBox).not.toBeNull();
 			expect(technologiesBox).not.toBeNull();
 			if (featureBox && previewBox && metaBox && technologiesBox) {
-				expect(Math.abs(featureBox.y - previewBox.y)).toBeLessThanOrEqual(1);
+                                expect(featureBox.y).toBeGreaterThanOrEqual(previewBox.y - 1);
+                                expect(featureBox.y).toBeLessThanOrEqual(previewBox.y + previewBox.height);
 				expect(Math.abs(metaBox.x - technologiesBox.x)).toBeLessThanOrEqual(1);
-				expect(technologiesBox.y).toBeGreaterThanOrEqual(
-					metaBox.y + metaBox.height
-				);
+                                expect(technologiesBox.y).toBe(metaBox.y);
+                                expect(previewBox.x + previewBox.width).toBeLessThanOrEqual(featureBox.x);
 			}
 
 			const [
@@ -303,7 +303,7 @@ test("mantém o portfólio mobile completo dentro de diferentes telas", async ({
 test("troca o projeto e mantém os controles do mapa funcionais", async ({
 	browser,
 }) => {
-	const context = await browser.newContext({
+	const context = await browser.newContext({locale:'pt-BR',
 		viewport: { width: 390, height: 844 },
 		deviceScaleFactor: 3,
 		isMobile: true,
@@ -393,9 +393,8 @@ test("troca o projeto e mantém os controles do mapa funcionais", async ({
 		expect(metaBox.y - (subtitleBox.y + subtitleBox.height)).toBeLessThanOrEqual(
 			8
 		);
-		expect(
-			projectsHeadingBox.y - (technologiesBox.y + technologiesBox.height)
-		).toBeLessThanOrEqual(12);
+                const previewBox=await page.locator('[data-mobile-project-preview]').boundingBox();
+                expect(projectsHeadingBox.y - Math.max(technologiesBox.y + technologiesBox.height,previewBox!.y + previewBox!.height)).toBeLessThanOrEqual(12);
 	}
 	await context.close();
 });
@@ -403,7 +402,7 @@ test("troca o projeto e mantém os controles do mapa funcionais", async ({
 test("desenha as rotas locais e replica a viagem do desktop no mobile", async ({
 	browser,
 }) => {
-	const context = await browser.newContext({
+	const context = await browser.newContext({locale:'pt-BR',
 		viewport: { width: 381, height: 539 },
 		deviceScaleFactor: 2,
 		isMobile: true,

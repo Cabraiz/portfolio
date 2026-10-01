@@ -8,7 +8,7 @@ for (const viewport of [
 	test(`desce uniformemente e empurra cinco segmentos ${viewport.width}x${viewport.height}`, async ({
 		browser,
 	}) => {
-		const context = await browser.newContext({
+		const context = await browser.newContext({locale:'pt-BR',
 			viewport,
 			isMobile: true,
 			hasTouch: true,

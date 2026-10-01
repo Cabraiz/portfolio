@@ -11,7 +11,7 @@ const routes=[
 for(const viewport of [{width:390,height:844},{width:568,height:320}]){
  test(`reload preserva a seção inteira ${viewport.width}x${viewport.height}`,async({browser})=>{
   test.setTimeout(120_000);
-  const context=await browser.newContext({viewport,isMobile:true,hasTouch:true});
+  const context=await browser.newContext({locale:'pt-BR',viewport,isMobile:true,hasTouch:true});
   const page=await context.newPage();
   await page.goto(new URL('/home',test.info().project.use.baseURL).toString(),{waitUntil:'networkidle'});
   for(const route of routes){
@@ -56,7 +56,7 @@ for(const viewport of [{width:390,height:844},{width:568,height:320}]){
 test('reload realinha após a altura visível mudar e libera a rolagem do usuário',async({browser})=>{
  test.setTimeout(90_000);
  for(const route of routes){
-  const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
+  const context=await browser.newContext({locale:'pt-BR',viewport:{width:390,height:844},isMobile:true,hasTouch:true});
   const page=await context.newPage();
   await page.goto(new URL(route.path,test.info().project.use.baseURL).toString(),{waitUntil:'networkidle'});
   await page.locator(route.root).waitFor();
@@ -79,7 +79,7 @@ test('reload realinha após a altura visível mudar e libera a rolagem do usuár
 });
 
 test('menu cabe na paisagem e rola sem mover a seção',async({browser})=>{
- const context=await browser.newContext({viewport:{width:568,height:320},isMobile:true,hasTouch:true});
+ const context=await browser.newContext({locale:'pt-BR',viewport:{width:568,height:320},isMobile:true,hasTouch:true});
  const page=await context.newPage();
  await page.goto(new URL('/technologies',test.info().project.use.baseURL).toString(),{waitUntil:'networkidle'});
  await page.locator('[data-cognitive-network-root]').waitFor();

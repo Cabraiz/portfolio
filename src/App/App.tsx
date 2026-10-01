@@ -1,4 +1,5 @@
 import React, { Suspense, lazy, useEffect, useMemo, useState } from "react";
+import LoadingStatus from '../i18n/LoadingStatus';
 import { useLocation } from "react-router-dom";
 import { isLandingPath } from "../features/navigation/landingSections";
 import {
@@ -12,13 +13,7 @@ const LANDING_DESKTOP_MEDIA_QUERY = "(min-width: 992px)";
 const AppDesktop = lazy(() => import("./AppDesktop"));
 const AppMobile = lazy(() => import("./AppMobile"));
 
-const appShellFallback = (
-  <div
-    aria-label="Carregando portfólio"
-    role="status"
-    style={{ minHeight: "100dvh", background: "#050505" }}
-  />
-);
+const appShellFallback = <LoadingStatus label="Carregando portfólio" />;
 
 function getIsDesktop(mediaQuery: string): boolean {
   if (typeof globalThis.matchMedia !== "function") {

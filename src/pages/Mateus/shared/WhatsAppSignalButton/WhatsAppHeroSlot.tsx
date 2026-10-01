@@ -1,3 +1,4 @@
+import { localizeLabel, useLabelLanguage } from '@/i18n/labels';
 import { memo, type ReactNode } from "react";
 import styles from "./WhatsAppHeroSlot.module.css";
 import {
@@ -30,6 +31,7 @@ function WhatsAppHeroSlot({
   primaryClassName,
   secondaryClassName,
 }: WhatsAppHeroSlotProps) {
+  useLabelLanguage();
   const density: WhatsAppSignalDensity = compact ? "compact" : "default";
   const hasSecondary = Boolean(secondary);
 
@@ -56,7 +58,7 @@ function WhatsAppHeroSlot({
               primaryClassName
             )}
           >
-            {primary}
+            {localizeLabel(primary)}
           </div>
 
           {hasSecondary ? (
@@ -67,7 +69,7 @@ function WhatsAppHeroSlot({
                 secondaryClassName
               )}
             >
-              {secondary}
+              {localizeLabel(secondary)}
             </div>
           ) : null}
         </div>

@@ -1,3 +1,4 @@
+import { localizeLabel, useLabelLanguage } from '@/i18n/labels';
 import { type CSSProperties, useMemo } from "react";
 import { Col } from "react-bootstrap";
 
@@ -50,6 +51,7 @@ export default function HeroTextColumn({
 	whatsappTopLabel,
 	secondaryLabel,
 }: HeroTextColumnProps) {
+  useLabelLanguage();
 	const seniorTitleStyle = useMemo<CSSProperties>(() => {
 		return {
 			fontSize: isCompactDesktop ? "2.31rem" : "3.08rem",
@@ -143,7 +145,7 @@ export default function HeroTextColumn({
 			return (
 				<WhatsAppSignalButton
 					href={WHATSAPP_HREF}
-					label="WhatsApp"
+					label={localizeLabel("WhatsApp")}
 					topLabel={whatsappTopLabel}
 					bottomLabel="Vamos Nessa?"
 					ariaLabel="Abrir conversa no WhatsApp"
@@ -156,7 +158,7 @@ export default function HeroTextColumn({
 
 		return (
 			<CTAButton
-				label="MEET"
+				label={localizeLabel("MEET")}
 				backLabel="LET'S TALK"
 				ariaLabel="Open meeting link"
 				href={MEET_HREF}
@@ -173,7 +175,7 @@ export default function HeroTextColumn({
 	const secondaryHeroAction = useMemo(() => {
 		return (
 			<ResumeDownloadButton
-				label={secondaryLabel}
+				label={localizeLabel(secondaryLabel)}
 				ariaLabel={secondaryLabel}
 				href={RESUME_HREF}
 				target="_blank"
@@ -185,12 +187,12 @@ export default function HeroTextColumn({
 	}, [isCompactDesktop, secondaryLabel]);
 
 	const primaryHeroActionWithOffset = useMemo(() => {
-		return <div style={primaryActionOffsetStyle}>{primaryHeroAction}</div>;
+		return <div style={primaryActionOffsetStyle}>{localizeLabel(primaryHeroAction)}</div>;
 	}, [primaryActionOffsetStyle, primaryHeroAction]);
 
 	return (
 		<Col md={5} style={heroTextColumnStyle} className="px-0">
-			<div style={seniorTitleStyle}>Desenvolvedor</div>
+			<div style={seniorTitleStyle}>{localizeLabel("Desenvolvedor")}</div>
 
 			<div className="font-sequel" style={roleContainerStyle}>
 				<RoleTitle />
@@ -210,7 +212,7 @@ export default function HeroTextColumn({
 					>
 						<img
 							src={seal.src}
-							alt={seal.alt}
+							alt={localizeLabel(seal.alt)}
 							style={{
 								height: isCompactDesktop ? "32px" : "40px",
 								maxWidth: "100%",

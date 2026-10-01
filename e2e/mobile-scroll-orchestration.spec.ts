@@ -23,7 +23,7 @@ test("mantém a logo visível enquanto ela empurra a Home", async ({
 
   for (const viewport of responsiveViewports) {
     await test.step(`${viewport.width}x${viewport.height}`, async () => {
-      const context = await browser.newContext({
+      const context = await browser.newContext({locale:'pt-BR',
         viewport,
         isMobile: true,
         hasTouch: true,
@@ -183,7 +183,7 @@ test("acompanha a entrada do Portfólio ao alcançar a base da Home", async ({
 
   for (const viewport of responsiveViewports) {
     await test.step(`${viewport.width}x${viewport.height}`, async () => {
-      const context = await browser.newContext({
+      const context = await browser.newContext({locale:'pt-BR',
         viewport,
         isMobile: true,
         hasTouch: true,
@@ -263,7 +263,7 @@ test("mostra o mapa e preserva as ações durante a passagem ao Portfólio", asy
 
   for (const viewport of responsiveViewports) {
     await test.step(`${viewport.width}x${viewport.height}`, async () => {
-      const context = await browser.newContext({
+      const context = await browser.newContext({locale:'pt-BR',
         viewport,
         isMobile: true,
         hasTouch: true,
@@ -360,7 +360,7 @@ test("mantém Contato inteiro e livre do chat em retrato e paisagem", async ({
 
   for (const viewport of responsiveViewports) {
     await test.step(`${viewport.width}x${viewport.height}`, async () => {
-      const context = await browser.newContext({
+      const context = await browser.newContext({locale:'pt-BR',
         viewport,
         isMobile: true,
         hasTouch: true,
@@ -453,7 +453,7 @@ test("recalcula o ScrollTrigger após resize e troca de orientação", async ({
 }) => {
   test.setTimeout(45_000);
   const baseURL = test.info().project.use.baseURL as string;
-  const context = await browser.newContext({
+  const context = await browser.newContext({locale:'pt-BR',
     viewport: { width: 390, height: 844 },
     isMobile: true,
     hasTouch: true,

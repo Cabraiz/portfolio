@@ -1,3 +1,4 @@
+import { localizeLabel, useLabelLanguage } from '@/i18n/labels';
 import {
   memo,
   type CSSProperties,
@@ -189,6 +190,7 @@ function LandingSectionShellComponent({
   contentStyle,
   ...rest
 }: LandingSectionShellProps) {
+  useLabelLanguage();
   const disableScrollFades = shouldDisableScrollFades();
   const resolvedBehavior = resolveLandingSectionBehavior(behavior);
 
@@ -242,7 +244,7 @@ function LandingSectionShellComponent({
         {...rest}
       >
         <div data-section-content="true" style={resolvedStableContentStyle}>
-          {children}
+          {localizeLabel(children)}
         </div>
       </section>
     );
@@ -280,7 +282,7 @@ function LandingSectionShellComponent({
     >
       {shouldMountRealContent ? (
         <div data-section-content="true" style={resolvedDynamicContentStyle}>
-          {children}
+          {localizeLabel(children)}
         </div>
       ) : null}
 

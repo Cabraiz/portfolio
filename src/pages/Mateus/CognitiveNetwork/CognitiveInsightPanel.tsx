@@ -1,3 +1,5 @@
+import { localizeLabel, useLabelLanguage } from '@/i18n/labels';
+import i18n from '@/i18n/i18n';
 import React, { useEffect, useMemo, useRef } from "react";
 
 import type { CognitiveViewMode } from "./cognitiveNetwork.data";
@@ -89,6 +91,9 @@ type AnimatedIntegerProps = Readonly<{
 }>;
 
 const AnimatedInteger: React.FC<AnimatedIntegerProps> = ({ value, suffix = "" }) => {
+  useLabelLanguage();
+        const language = i18n.resolvedLanguage;
+        const translatedSuffix = localizeLabel(suffix);
 	const displayedValueRef = useRef(value);
 	const elementRef = useRef<HTMLSpanElement>(null);
 
@@ -97,7 +102,7 @@ const AnimatedInteger: React.FC<AnimatedIntegerProps> = ({ value, suffix = "" })
 			const element = elementRef.current;
 			if (!element) return;
 			element.dataset.currentValue = String(nextValue);
-			element.textContent = `${formatInteger(nextValue)}${suffix}`;
+                        element.textContent = `${formatInteger(nextValue, language)}${translatedSuffix}`;
 		};
 
 		if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
@@ -106,7 +111,8 @@ const AnimatedInteger: React.FC<AnimatedIntegerProps> = ({ value, suffix = "" })
 			return undefined;
 		}
 
-		const startValue = displayedValueRef.current;
+                const startValue = displayedValueRef.current;
+                renderValue(startValue);
 		const difference = value - startValue;
 		const startedAt = performance.now();
 		const durationMs = 900;
@@ -128,7 +134,7 @@ const AnimatedInteger: React.FC<AnimatedIntegerProps> = ({ value, suffix = "" })
 		const intervalId = window.setInterval(renderFrame, 75);
 		renderFrame();
 		return () => window.clearInterval(intervalId);
-	}, [suffix, value]);
+        }, [language, translatedSuffix, value]);
 
 	return (
 		<span
@@ -138,7 +144,7 @@ const AnimatedInteger: React.FC<AnimatedIntegerProps> = ({ value, suffix = "" })
 			data-current-value={displayedValueRef.current}
 			data-target-value={value}
 		>
-			{formatInteger(displayedValueRef.current)}{suffix}
+			{localizeLabel(formatInteger(displayedValueRef.current))}{localizeLabel(suffix)}
 		</span>
 	);
 };
@@ -164,8 +170,8 @@ function clamp(value: number, minimum: number, maximum: number): number {
 	return Math.min(maximum, Math.max(minimum, value));
 }
 
-function formatInteger(value: number): string {
-	return Math.round(value).toLocaleString("pt-BR");
+function formatInteger(value: number, language = i18n.resolvedLanguage): string {
+        return Math.round(value).toLocaleString(language === 'en' ? 'en-US' : 'pt-BR');
 }
 
 function polarPoint(cx: number, cy: number, radius: number, angle: number) {
@@ -358,6 +364,7 @@ const AttentionWireCanvas: React.FC<{
 };
 
 const AttentionMap: React.FC<CognitiveInsightPanelProps> = ({ mode, tick }) => {
+  useLabelLanguage();
 	const seed = MODE_SEED[mode];
 	const rawValues = ATTENTION_LABELS.map(
 		(_, index) =>
@@ -457,14 +464,14 @@ const AttentionMap: React.FC<CognitiveInsightPanelProps> = ({ mode, tick }) => {
 			data-blink-fraction={attentionBlinkFraction.toFixed(3)}
 		>
 			<header className={styles.insightHeader}>
-				<span>Mapa de atenção</span>
+				<span>{localizeLabel("Mapa de atenção")}</span>
 				<strong><AnimatedInteger value={Math.max(...signalCounts)} suffix=" sinais" /></strong>
 			</header>
 			<div className={styles.attentionLayout}>
 				<div
 					className={styles.attentionGraphic}
 					role="img"
-					aria-label="Distribuição dinâmica da atenção"
+					aria-label={localizeLabel("Distribuição dinâmica da atenção")}
 					data-wire-count={ATTENTION_LINK_COUNT}
 					data-visible-wire-count={ATTENTION_LINK_COUNT}
 					data-active-wire-count={activeAttentionLinkCount}
@@ -495,7 +502,7 @@ const AttentionMap: React.FC<CognitiveInsightPanelProps> = ({ mode, tick }) => {
 					{ATTENTION_LABELS.map((label, index) => (
 						<li key={label}>
 							<i style={{ backgroundColor: ATTENTION_COLORS[index] }} />
-							<span>{label}</span>
+							<span>{localizeLabel(label)}</span>
 							<strong><AnimatedInteger value={signalCounts[index]} /></strong>
 						</li>
 					))}
@@ -506,6 +513,7 @@ const AttentionMap: React.FC<CognitiveInsightPanelProps> = ({ mode, tick }) => {
 };
 
 const LatentActivation: React.FC<CognitiveInsightPanelProps> = ({ mode, tick }) => {
+  useLabelLanguage();
 	const seed = MODE_SEED[mode] ^ 0xa511e9b3;
 	const simulatedSamples = Math.round(
 		4800 +
@@ -563,10 +571,10 @@ const LatentActivation: React.FC<CognitiveInsightPanelProps> = ({ mode, tick }) 
 			data-blink-fraction={scatterBlinkFraction.toFixed(3)}
 		>
 			<header className={styles.insightHeader}>
-				<span>Ativação latente</span>
+				<span>{localizeLabel("Ativação latente")}</span>
 				<strong><AnimatedInteger value={simulatedSamples} suffix=" amostras" /></strong>
 			</header>
-			<svg className={styles.scatterPlot} viewBox="0 0 240 110" aria-label="Ativação por dimensão latente">
+			<svg className={styles.scatterPlot} viewBox="0 0 240 110" aria-label={localizeLabel("Ativação por dimensão latente")}>
 				{[22, 46, 70, 94].map((y) => (
 					<line key={`y-${y}`} className={styles.chartGridLine} x1="14" y1={y} x2="230" y2={y} />
 				))}
@@ -591,14 +599,15 @@ const LatentActivation: React.FC<CognitiveInsightPanelProps> = ({ mode, tick }) 
 						data-blink-state={active ? "active" : "dim"}
 					/>
 				})}
-				<text x="120" y="107">DIMENSÃO LATENTE</text>
-				<text className={styles.verticalChartLabel} x="-54" y="8">ATIVAÇÃO</text>
+				<text x="120" y="107">{localizeLabel("DIMENSÃO LATENTE")}</text>
+				<text className={styles.verticalChartLabel} x="-54" y="8">{localizeLabel("ATIVAÇÃO")}</text>
 			</svg>
 		</section>
 	);
 };
 
 const CognitiveRadar: React.FC<CognitiveInsightPanelProps> = ({ mode, tick }) => {
+  useLabelLanguage();
 	const seed = MODE_SEED[mode] ^ 0x63d83595;
 	const center = { x: 110, y: 59 };
 	const radius = 40;
@@ -634,10 +643,10 @@ const CognitiveRadar: React.FC<CognitiveInsightPanelProps> = ({ mode, tick }) =>
 			data-simulated-value-count={compositeScore}
 		>
 			<header className={styles.insightHeader}>
-				<span>Radar cognitivo</span>
+				<span>{localizeLabel("Radar cognitivo")}</span>
 				<strong><AnimatedInteger value={compositeScore} /></strong>
 			</header>
-			<svg className={styles.radarChart} viewBox="0 0 220 116" aria-label="Equilíbrio das capacidades cognitivas">
+			<svg className={styles.radarChart} viewBox="0 0 220 116" aria-label={localizeLabel("Equilíbrio das capacidades cognitivas")}>
 				{[0.33, 0.66, 1].map((scale) => (
 					<polygon
 						key={scale}
@@ -661,7 +670,7 @@ const CognitiveRadar: React.FC<CognitiveInsightPanelProps> = ({ mode, tick }) =>
 				})}
 				{RADAR_LABELS.map((label, index) => {
 					const point = polarPoint(center.x, center.y, radius + 15, -90 + index * 72);
-					return <text key={label} x={point.x} y={point.y}>{label}</text>;
+					return <text key={label} x={point.x} y={point.y}>{localizeLabel(label)}</text>;
 				})}
 			</svg>
 		</section>
@@ -669,6 +678,7 @@ const CognitiveRadar: React.FC<CognitiveInsightPanelProps> = ({ mode, tick }) =>
 };
 
 const CognitiveInsightPanel: React.FC<CognitiveInsightPanelProps> = (props) => {
+  useLabelLanguage();
 	const signatureSeed = MODE_SEED[props.mode] ^ 0x1b873593;
 	const frameSignature = Array.from({ length: 4 }, (_, index) =>
 		Math.floor(sequenceValue(props.tick, index + 4000, signatureSeed) * 0xffff)
@@ -692,7 +702,7 @@ const CognitiveInsightPanel: React.FC<CognitiveInsightPanelProps> = (props) => {
 			data-signal-blink-range="0.30:0.50"
 			data-sequence="xorshift32-long-cycle"
 			data-motion-profile="continuous-micro-variation-with-signal-flow"
-			aria-label="Leituras cognitivas em transição contínua"
+			aria-label={localizeLabel("Leituras cognitivas em transição contínua")}
 		>
 			<AttentionMap {...props} />
 			<LatentActivation {...props} />

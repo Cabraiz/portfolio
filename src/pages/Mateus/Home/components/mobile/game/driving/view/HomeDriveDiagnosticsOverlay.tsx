@@ -1,3 +1,4 @@
+import { localizeLabel, useLabelLanguage } from '@/i18n/labels';
 // src/pages/Mateus/Home/components/mobile/game/driving/view/HomeDriveDiagnosticsOverlay.tsx
 
 import React from "react";
@@ -80,11 +81,12 @@ function getSegmentStyle(item: WorldBarItem): React.CSSProperties {
 export default function HomeDriveDiagnosticsOverlay({
   snapshot,
 }: HomeDriveDiagnosticsOverlayProps) {
+  useLabelLanguage();
   if (!snapshot) {
     return (
       <aside className={styles.panel} aria-live="polite">
-        <strong className={styles.title}>Diagnóstico HomeDrive</strong>
-        <span className={styles.caption}>coletando primeiros dados…</span>
+        <strong className={styles.title}>{localizeLabel("Diagnóstico HomeDrive")}</strong>
+        <span className={styles.caption}>{localizeLabel("coletando primeiros dados…")}</span>
       </aside>
     );
   }
@@ -94,11 +96,11 @@ export default function HomeDriveDiagnosticsOverlay({
   return (
     <aside className={styles.panel} aria-live="polite">
       <header className={styles.header}>
-        <strong className={styles.title}>Peso atual do frame</strong>
-        <span className={styles.caption}>barra 100% · carros · pedestres · prédios</span>
+        <strong className={styles.title}>{localizeLabel("Peso atual do frame")}</strong>
+        <span className={styles.caption}>{localizeLabel("barra 100% · carros · pedestres · prédios")}</span>
       </header>
 
-      <div className={styles.barShell} aria-label="Distribuição de custo do frame entre carros, pedestres e prédios">
+      <div className={styles.barShell} aria-label={localizeLabel("Distribuição de custo do frame entre carros, pedestres e prédios")}>
         {items.map((item) => (
           <span
             key={item.key}
@@ -106,7 +108,7 @@ export default function HomeDriveDiagnosticsOverlay({
             data-kind={item.key}
             data-enabled={item.enabled ? "true" : "false"}
             style={getSegmentStyle(item)}
-            title={`${item.label}: ${formatPercent(item.normalizedPercent)}%`}
+            title={localizeLabel(`${item.label}: ${formatPercent(item.normalizedPercent)}%`)}
           />
         ))}
       </div>
@@ -121,12 +123,12 @@ export default function HomeDriveDiagnosticsOverlay({
           >
             <span className={styles.legendLeft}>
               <span className={styles.legendDot} aria-hidden="true" />
-              <span className={styles.legendLabel}>{item.label}</span>
+              <span className={styles.legendLabel}>{localizeLabel(item.label)}</span>
             </span>
 
             <span className={styles.legendRight}>
-              <strong>{formatPercent(item.normalizedPercent)}%</strong>
-              <small>{item.enabled ? "on" : "off"}</small>
+              <strong>{localizeLabel(formatPercent(item.normalizedPercent))}%</strong>
+              <small>{localizeLabel(item.enabled ? "on" : "off")}</small>
             </span>
           </li>
         ))}

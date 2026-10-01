@@ -1,3 +1,4 @@
+import { localizeLabel, useLabelLanguage } from '@/i18n/labels';
 import {
 	useCallback,
 	useEffect,
@@ -20,6 +21,7 @@ import usePortfolioActiveItem from "./hooks/usePortfolioActiveItem";
 import useMobilePortfolioBrandPush from "./hooks/useMobilePortfolioBrandPush";
 import { defaultPortfolioProjectId, portfolioProjects } from "./portfolio.data";
 import styles from "./Portfolio.module.css";
+import MobileProjectMeta from "./MobileProjectMeta";
 import type { PortfolioProjectId } from "./types";
 import { worldAtlasTiles } from "./worldAtlasTiles";
 
@@ -135,6 +137,7 @@ function formatCounter(index: number): string {
 }
 
 export default function Portfolio() {
+  useLabelLanguage();
 	const location = useLocation();
 	const [isAutoplayPaused, setIsAutoplayPaused] = useState(false);
 	const [mobileMapZoom, setMobileMapZoom] = useState(1);
@@ -331,13 +334,13 @@ export default function Portfolio() {
                 if (!projectList || globalThis.innerWidth >= 992) return;
 
 		const activeButton = projectList.querySelector<HTMLElement>(
-			'[data-project-id][aria-pressed="true"]'
+                        '[data-mobile-project-id][aria-pressed="true"]'
 		);
 		if (!activeButton) return;
 
 		const nextScrollLeft = Math.max(
 			0,
-			activeButton.offsetLeft -
+                        projectList.scrollLeft + activeButton.getBoundingClientRect().left - projectList.getBoundingClientRect().left -
 				(projectList.clientWidth - activeButton.offsetWidth) / 2
 		);
 
@@ -428,7 +431,7 @@ export default function Portfolio() {
 			ref={rootRef}
 			className={styles.portfolioRoot}
 			style={portfolioRootStyle}
-			aria-label="Portfólio"
+			aria-label={localizeLabel("Portfólio")}
 			data-portfolio-root="true"
 			data-portfolio-active={isPortfolioActive ? "true" : "false"}
 			data-portfolio-autoplay={isAutoplayPaused ? "paused" : "running"}
@@ -447,7 +450,7 @@ export default function Portfolio() {
 						<img
 							key={tile}
 							src={tile}
-							alt=""
+							alt={localizeLabel("")}
 							draggable={false}
 							data-world-tile={index}
 						/>
@@ -514,7 +517,7 @@ export default function Portfolio() {
 									isActive ? styles.mapPointActive : ""
 								}`}
 								style={pointStyle}
-								aria-label={`Selecionar ${project.name}`}
+								aria-label={localizeLabel(`Selecionar ${project.name}`)}
 								aria-pressed={isActive}
 								onClick={() => selectProject(projectIndex)}
 								data-mobile-route-node={point.id}
@@ -524,9 +527,9 @@ export default function Portfolio() {
 								{isActive ? (
 									<span className={styles.mapPointLabel}>
 										<strong>
-											{project.worldLocation?.city ?? project.name}
+											{localizeLabel(project.worldLocation?.city ?? project.name)}
 										</strong>
-										<small>{project.name}</small>
+										<small>{localizeLabel(project.name)}</small>
 									</span>
 								) : null}
 							</button>
@@ -562,13 +565,13 @@ export default function Portfolio() {
 							<span
 								className={`${styles.journeyMarker} ${styles.journeyOrigin}`}
 								style={toGeographicPositionStyle(WORLD_JOURNEY_ORIGIN)}
-								aria-label="Origem: Fortaleza, Brasil"
+								aria-label={localizeLabel("Origem: Fortaleza, Brasil")}
 								data-world-journey-origin="fortaleza"
 							>
 								<span className={styles.journeyMarkerDot} />
 								<span className={styles.journeyMarkerLabel}>
-									<strong>Fortaleza</strong>
-									<small>BRASIL · ORIGEM</small>
+									<strong>{localizeLabel("Fortaleza")}</strong>
+									<small>{localizeLabel("BRASIL · ORIGEM")}</small>
 								</span>
 							</span>
 
@@ -576,15 +579,15 @@ export default function Portfolio() {
 								type="button"
 								className={`${styles.journeyMarker} ${styles.journeyDestination}`}
 								style={toGeographicPositionStyle(worldJourneyDestination)}
-								aria-label={`Destino atual: ${activeLocation?.city}, ${activeLocation?.country}`}
+								aria-label={localizeLabel(`Destino atual: ${activeLocation?.city}, ${activeLocation?.country}`)}
 								aria-pressed="true"
 								onClick={() => setIsAutoplayPaused(true)}
 								data-world-journey-destination={activeProject.id}
 							>
 								<span className={styles.journeyMarkerDot} />
 								<span className={styles.journeyMarkerLabel}>
-									<strong>{activeLocation?.city}</strong>
-									<small>{activeProject.name} · DESTINO</small>
+									<strong>{localizeLabel(activeLocation?.city)}</strong>
+									<small>{localizeLabel(activeProject.name)} {localizeLabel(" · DESTINO")}</small>
 								</span>
 							</button>
 						</div>
@@ -594,26 +597,26 @@ export default function Portfolio() {
 
 			<div className={styles.mobilePortfolio} data-mobile-portfolio="true">
 				<div className={styles.mobileLocation} data-mobile-location="true">
-					<strong>{activeLocation?.country ?? "Brasil"}</strong>
-					<span>{activeLocation?.city ?? "Fortaleza"}</span>
-					<small>{activeLocation?.region}</small>
+					<strong>{localizeLabel(activeLocation?.country ?? "Brasil")}</strong>
+					<span>{localizeLabel(activeLocation?.city ?? "Fortaleza")}</span>
+					<small>{localizeLabel(activeLocation?.region)}</small>
 				</div>
 
 				<div
 					className={styles.mobileMapControls}
 					data-mobile-map-controls="true"
-					aria-label="Controles do mapa"
+					aria-label={localizeLabel("Controles do mapa")}
 				>
 					<button
 						type="button"
-						aria-label="Centralizar mapa"
+						aria-label={localizeLabel("Centralizar mapa")}
 						onClick={() => setMobileMapZoom(1)}
 					>
 						◆
 					</button>
 					<button
 						type="button"
-						aria-label="Aumentar mapa"
+						aria-label={localizeLabel("Aumentar mapa")}
 						onClick={() =>
 							setMobileMapZoom((current) => Math.min(1.16, current + 0.08))
 						}
@@ -622,7 +625,7 @@ export default function Portfolio() {
 					</button>
 					<button
 						type="button"
-						aria-label="Diminuir mapa"
+						aria-label={localizeLabel("Diminuir mapa")}
 						onClick={() =>
 							setMobileMapZoom((current) => Math.max(0.92, current - 0.08))
 						}
@@ -647,28 +650,21 @@ export default function Portfolio() {
 							className={styles.mobileFeatureCopy}
 							data-mobile-feature-copy="true"
 						>
-							<small>{activeProject.projectLabel}</small>
-							<h2>{activeProject.name}</h2>
-							<p>{activeProject.subtitle}</p>
+                                                        <h2>{localizeLabel(activeProject.name)}</h2>
+							<p>{localizeLabel(activeProject.subtitle)}</p>
 						</div>
 
-						<div className={styles.mobileMeta} data-mobile-meta="true">
-							<span>{activeProject.year}</span>
-							<span>{activeProject.subtitle}</span>
-						</div>
-
-						<div
-							className={styles.mobileTechnologies}
-							data-mobile-technologies="true"
-							aria-label="Tecnologias"
+						<MobileProjectMeta year={activeProject.year} technologies={activeProject.technologies} />
+						<button
+							type="button"
+							className={styles.mobileNextProject}
+							aria-label={localizeLabel("Próximo projeto")}
+							onClick={nextProject}
 						>
-							{activeProject.technologies.map((technology) => (
-								<span key={technology}>{technology}</span>
-							))}
-						</div>
+							›
+						</button>
 
-						<h3>Todos os projetos</h3>
-					</div>
+                                        </div>
 
 					<div
 						className={styles.mobileProjectPreview}
@@ -676,13 +672,14 @@ export default function Portfolio() {
 					>
 						<img
 							key={activeProject.id}
-							src={activeProject.imageSrc}
-							alt={activeProject.imageAlt}
+                                                        src={activeProject.mobileImageSrc ?? activeProject.imageSrc}
+							alt={localizeLabel(activeProject.imageAlt)}
 							draggable={false}
 						/>
 					</div>
 
-					<div className={styles.mobileProjectsRow}>
+                                        <h3 className={styles.mobileProjectsHeading}>{localizeLabel("Todos os projetos")}</h3>
+                                        <div className={styles.mobileProjectsRow}>
 						<div
 							ref={mobileProjectListRef}
 							className={styles.mobileProjectList}
@@ -697,7 +694,7 @@ export default function Portfolio() {
 										className={`${styles.mobileProjectButton} ${
 											isActive ? styles.mobileProjectButtonActive : ""
 										}`}
-										aria-label={`Selecionar ${project.name}`}
+										aria-label={localizeLabel(`Selecionar ${project.name}`)}
 										aria-pressed={isActive}
 										data-mobile-project-id={project.id}
 										onClick={() => selectProject(index)}
@@ -712,27 +709,19 @@ export default function Portfolio() {
 											projectPointerStartRef.current = null;
 										}}
 									>
-										<img src={project.logoSrc} alt="" aria-hidden="true" />
-										<span>{project.name}</span>
+										<img src={project.logoSrc} alt={localizeLabel("")} aria-hidden="true" />
+										<span>{localizeLabel(project.name)}</span>
 									</button>
 								);
 							})}
 						</div>
 
-						<button
-							type="button"
-							className={styles.mobileNextProject}
-							aria-label="Próximo projeto"
-							onClick={nextProject}
-						>
-							›
-						</button>
 					</div>
 				</article>
 			</div>
 
 			<div className={styles.atlasFrame}>
-				<aside className={styles.indexPanel} aria-label="Índice de projetos">
+				<aside className={styles.indexPanel} aria-label={localizeLabel("Índice de projetos")}>
 					<div ref={projectListRef} className={styles.projectList}>
 						{portfolioProjects.map((project, index) => {
 							const isActive = index === activeIndex;
@@ -761,26 +750,26 @@ export default function Portfolio() {
 									data-project-id={project.id}
 								>
 									<span className={styles.projectOrdinal}>
-										{formatCounter(index)}
+										{localizeLabel(formatCounter(index))}
 									</span>
 									<img
 										className={styles.projectLogo}
 										src={project.logoSrc}
-										alt=""
+										alt={localizeLabel("")}
 										aria-hidden="true"
 									/>
 									<span className={styles.projectButtonCopy}>
-										<strong>{project.name}</strong>
-										<small>{project.subtitle}</small>
+										<strong>{localizeLabel(project.name)}</strong>
+										<small>{localizeLabel(project.subtitle)}</small>
 									</span>
 									{country && countryFlagSrc ? (
 										<span
 											className={styles.projectCountryBadge}
 											role="img"
-											aria-label={`País do projeto: ${country}`}
-											title={country}
+											aria-label={localizeLabel(`País do projeto: ${country}`)}
+											title={localizeLabel(country)}
 										>
-											<img src={countryFlagSrc} alt="" aria-hidden="true" />
+											<img src={countryFlagSrc} alt={localizeLabel("")} aria-hidden="true" />
 										</span>
 									) : null}
 								</button>
@@ -789,19 +778,19 @@ export default function Portfolio() {
 					</div>
 				</aside>
 
-				<div className={styles.mapPanel} aria-label="Mapa dos projetos">
-					<nav className={styles.atlasPager} aria-label="Paginação de projetos">
+				<div className={styles.mapPanel} aria-label={localizeLabel("Mapa dos projetos")}>
+					<nav className={styles.atlasPager} aria-label={localizeLabel("Paginação de projetos")}>
 						<button
 							type="button"
 							onClick={previousProject}
-							aria-label="Projeto anterior"
+							aria-label={localizeLabel("Projeto anterior")}
 						>
 							←
 						</button>
 						<button
 							type="button"
 							onClick={nextProject}
-							aria-label="Próximo projeto"
+							aria-label={localizeLabel("Próximo projeto")}
 						>
 							→
 						</button>
@@ -810,9 +799,9 @@ export default function Portfolio() {
 
 				<article className={styles.detailCard} aria-live="polite">
 					<header className={styles.locationHeader}>
-						<strong>{activeLocation?.country ?? "Brasil"}</strong>
+						<strong>{localizeLabel(activeLocation?.country ?? "Brasil")}</strong>
 						<span>
-							{activeLocation?.city ?? "Fortaleza"} · {activeLocation?.region}
+							{localizeLabel(activeLocation?.city ?? "Fortaleza")} · {localizeLabel(activeLocation?.region)}
 						</span>
 					</header>
 
@@ -820,29 +809,29 @@ export default function Portfolio() {
 						<img
 							key={activeProject.id}
 							src={activeProject.imageSrc}
-							alt={activeProject.imageAlt}
+							alt={localizeLabel(activeProject.imageAlt)}
 							draggable={false}
 						/>
-						<span className={styles.previewYear}>{activeProject.year}</span>
+						<span className={styles.previewYear}>{localizeLabel(activeProject.year)}</span>
 					</div>
 
 					<div className={styles.detailBody}>
 						<div className={styles.detailTitleRow}>
 							<div className={styles.detailTitleCopy}>
-								<h2>{activeProject.name}</h2>
-								<p>{PROJECT_DESCRIPTIONS[activeProject.id]}</p>
+								<h2>{localizeLabel(activeProject.name)}</h2>
+								<p>{localizeLabel(PROJECT_DESCRIPTIONS[activeProject.id])}</p>
 							</div>
-							<img src={activeProject.logoSrc} alt={activeProject.logoAlt} />
+							<img src={activeProject.logoSrc} alt={localizeLabel(activeProject.logoAlt)} />
 						</div>
 
 						<div className={styles.detailMeta}>
-							<span>{activeProject.year}</span>
-							<span>{activeProject.subtitle}</span>
+							<span>{localizeLabel(activeProject.year)}</span>
+							<span>{localizeLabel(activeProject.subtitle)}</span>
 						</div>
 
-						<div className={styles.technologyList} aria-label="Tecnologias">
+						<div className={styles.technologyList} aria-label={localizeLabel("Tecnologias")}>
 							{activeProject.technologies.map((technology) => (
-								<span key={technology}>{technology}</span>
+								<span key={technology}>{localizeLabel(technology)}</span>
 							))}
 						</div>
 					</div>

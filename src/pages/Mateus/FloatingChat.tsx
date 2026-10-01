@@ -1,3 +1,4 @@
+import { localizeLabel, useLabelLanguage } from '@/i18n/labels';
 import type * as React from "react";
 import { useState, useRef, useEffect, useLayoutEffect, useSyncExternalStore } from "react";
 import msgIcon from "../../assets/Mateus/msgIcon.png";
@@ -178,6 +179,7 @@ function storeMessages(conversationId: string, messages: ChatMessage[]) {
 }
 
 export default function FloatingChat() {
+  useLabelLanguage();
   const prefersReducedMotion = useReducedMotion();
   const location = useLocation();
   const { navigateToSection } = useLandingSectionNavigation();
@@ -628,7 +630,7 @@ export default function FloatingChat() {
             minWidth: "unset",
             maxWidth: isMobile ? "60px" : "none",
           }}
-          aria-label="Abrir chat"
+          aria-label={localizeLabel("Abrir chat")}
         >
           <span
             ref={mascotRef}
@@ -639,14 +641,14 @@ export default function FloatingChat() {
             <img
               className={styles.mascotImage}
               src={lagArthurChat}
-              alt=""
+              alt={localizeLabel("")}
               draggable={false}
             />
             <img
               ref={largeIrisRef}
               className={`${styles.iris} ${styles.largeIris}`}
               src={lagArthurIris}
-              alt=""
+              alt={localizeLabel("")}
               aria-hidden="true"
               draggable={false}
               loading="eager"
@@ -657,7 +659,7 @@ export default function FloatingChat() {
               ref={smallIrisRef}
               className={`${styles.iris} ${styles.smallIris}`}
               src={lagArthurIris}
-              alt=""
+              alt={localizeLabel("")}
               aria-hidden="true"
               draggable={false}
               loading="eager"
@@ -687,7 +689,7 @@ export default function FloatingChat() {
                 >
                   <img
                     src={msgIcon}
-                    alt="Mensagem"
+                    alt={localizeLabel("Mensagem")}
                     style={{
                       width: 20,
                       height: 20,
@@ -730,7 +732,7 @@ export default function FloatingChat() {
                     textOverflow: "ellipsis",
                   }}
                 >
-                  {phrases[currentPhraseIndex]}
+                  {localizeLabel(phrases[currentPhraseIndex])}
                 </div>
               </div>
 
@@ -765,7 +767,7 @@ export default function FloatingChat() {
                       >
                         <img
                           src={item.src}
-                          alt={item.alt}
+                          alt={localizeLabel(item.alt)}
                           style={{
                             width: "100%",
                             height: "100%",
@@ -780,8 +782,8 @@ export default function FloatingChat() {
                   return (
                     <div
                       key={item.ariaLabel}
-                      aria-label={item.ariaLabel}
-                      title={item.ariaLabel}
+                      aria-label={localizeLabel(item.ariaLabel)}
+                      title={localizeLabel(item.ariaLabel)}
                       style={{
                         ...commonStyle,
                         display: "flex",
@@ -801,7 +803,7 @@ export default function FloatingChat() {
                           transform: "translateY(-1px)",
                         }}
                       >
-                        {item.label}
+                        {localizeLabel(item.label)}
                       </span>
                     </div>
                   );
@@ -819,7 +821,7 @@ export default function FloatingChat() {
             >
               <img
                 src={msgIcon}
-                alt="Mensagem"
+                alt={localizeLabel("Mensagem")}
                 style={{
                   width: 24,
                   height: 24,
@@ -915,12 +917,11 @@ export default function FloatingChat() {
             <button
               type="button"
               className={styles.chatCloseButton}
-              aria-label={t("floatingChat.close")}
-              title={t("floatingChat.close")}
+              aria-label={localizeLabel(t("floatingChat.close"))}
+              title={localizeLabel(t("floatingChat.close"))}
               onClick={() => setIsOpen(false)}
             >
-              ×
-            </button>
+              {localizeLabel("×")}</button>
 
             <div
               className={styles.chatHeader}
@@ -934,7 +935,7 @@ export default function FloatingChat() {
             >
               <img
                 src={lagArthurSupport}
-                alt="Lag Arthur, assistente da Cabraiz"
+                alt={localizeLabel("Lag Arthur, assistente da Cabraiz")}
                 style={{
                   width: "42px",
                   height: "42px",
@@ -946,8 +947,7 @@ export default function FloatingChat() {
               />
               <div style={{ display: "flex", flexDirection: "column" }}>
                 <span style={{ fontWeight: 600, fontSize: `${scale(1.1)}rem` }}>
-                  Atendente virtual
-                </span>
+                  {localizeLabel("Atendente virtual")}</span>
                 <span style={{ fontSize: `${scale(0.9)}rem`, color: "#aaa" }}>
                   {t("floatingChat.availability")}
                 </span>
@@ -977,7 +977,7 @@ export default function FloatingChat() {
               <div className={styles.botIntro}>
                 <img
                   src={lagArthurSupport}
-                  alt="Lag Arthur, assistente da Cabraiz"
+                  alt={localizeLabel("Lag Arthur, assistente da Cabraiz")}
                   className={styles.botAvatar}
                 />
                 <div className={styles.botIntroContent}>
@@ -986,7 +986,7 @@ export default function FloatingChat() {
                   </div>
                   <div
                     className={styles.quickActions}
-                    aria-label={t("floatingChat.quickActionsLabel")}
+                    aria-label={localizeLabel(t("floatingChat.quickActionsLabel"))}
                   >
                     <a
                       className={`${styles.quickAction} ${styles.quickActionPrimary}`}
@@ -1030,7 +1030,7 @@ export default function FloatingChat() {
                       className={styles.visitorAvatar}
                       data-chat-avatar="visitor"
                       role="img"
-                      aria-label={t("floatingChat.anonymousVisitor")}
+                      aria-label={localizeLabel(t("floatingChat.anonymousVisitor"))}
                     />
                   </div>
                 ) : (
@@ -1045,7 +1045,7 @@ export default function FloatingChat() {
                   >
                     <img
                       src={mateusChatAvatar}
-                      alt="Mateus Cabral"
+                      alt={localizeLabel("Mateus Cabral")}
                       data-chat-avatar="mateus"
                       style={{
                         width: "30px",
@@ -1085,8 +1085,8 @@ export default function FloatingChat() {
                 fontSize: `${scale(0.82)}rem`,
               }}
             >
-              {sendStatus === "sent" && t(isMobile ? "floatingChat.sendSuccessShort" : "floatingChat.sendSuccess")}
-              {sendStatus === "error" && t(isMobile ? "floatingChat.sendErrorShort" : "floatingChat.sendError")}
+              {localizeLabel(sendStatus === "sent" && t(isMobile ? "floatingChat.sendSuccessShort" : "floatingChat.sendSuccess"))}
+              {localizeLabel(sendStatus === "error" && t(isMobile ? "floatingChat.sendErrorShort" : "floatingChat.sendError"))}
             </div>
 
             <div
@@ -1108,8 +1108,8 @@ export default function FloatingChat() {
                   autoCorrect="off"
                   spellCheck={false}
                   enterKeyHint="send"
-                  placeholder={t("floatingChat.placeholder")}
-                  aria-label={t("floatingChat.placeholder")}
+                  placeholder={localizeLabel(t("floatingChat.placeholder"))}
+                  aria-label={localizeLabel(t("floatingChat.placeholder"))}
                   value={inputValue}
                   maxLength={1000}
                   onChange={(e) => {
@@ -1153,9 +1153,9 @@ export default function FloatingChat() {
                     !inputValue.trim() || sendStatus === "sending" ? 0.65 : 1,
                 }}
               >
-                {sendStatus === "sending"
+                {localizeLabel(sendStatus === "sending"
                   ? t("floatingChat.sending")
-                  : t("floatingChat.send")}
+                  : t("floatingChat.send"))}
               </button>
             </div>
           </motion.div>

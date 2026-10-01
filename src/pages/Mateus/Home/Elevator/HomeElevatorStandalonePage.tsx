@@ -1,3 +1,4 @@
+import { localizeLabel, useLabelLanguage } from '@/i18n/labels';
 // src/pages/Mateus/Home/Elevator/HomeElevatorStandalonePage.tsx
 
 import { useCallback, useEffect, useMemo, type CSSProperties } from "react";
@@ -26,6 +27,7 @@ function getBrowserWindow(): Window | null {
 }
 
 export default function HomeElevatorStandalonePage() {
+  useLabelLanguage();
   const navigate = useNavigate();
   const isStandaloneHost = isHomeElevatorStandaloneHost();
 
@@ -92,7 +94,7 @@ export default function HomeElevatorStandalonePage() {
   return (
     <main
       data-home-elevator-standalone="true"
-      aria-label="Cabraiz Elevator"
+      aria-label={localizeLabel("Cabraiz Elevator")}
       style={rootStyle}
     >
       <HomeElevatorGame onClose={handleClose} />

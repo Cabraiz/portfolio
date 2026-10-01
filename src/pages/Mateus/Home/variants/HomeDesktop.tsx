@@ -1,3 +1,4 @@
+import { localizeLabel, useLabelLanguage } from '@/i18n/labels';
 import { useLayoutEffect, useMemo, useRef, type CSSProperties } from "react";
 import { Container, Row } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
@@ -22,6 +23,7 @@ import { getWhatsAppGreeting } from "../utils/home.utils";
 import { shouldDisableScrollFades } from "../../../../features/scroll/scrollMotionFlags";
 
 function HomeDesktop() {
+  useLabelLanguage();
 	const containerRef = useRef<HTMLDivElement>(null);
 	const backgroundRef = useRef<HTMLImageElement>(null);
 	const overlayRef = useRef<HTMLDivElement>(null);
@@ -443,7 +445,7 @@ function HomeDesktop() {
 				<img
 					ref={backgroundRef}
 					src={selectedHeroBackground}
-					alt=""
+					alt={localizeLabel("")}
 					aria-hidden="true"
 					data-hero-option={selectedHeroOption}
 					data-hero-crop={
@@ -483,22 +485,21 @@ function HomeDesktop() {
 			<div
 				ref={editorialPhraseRef}
 				style={editorialPhraseStyle}
-				aria-label="Histórias também são feitas de código"
+				aria-label={localizeLabel("Histórias também são feitas de código")}
 			>
-				<span>Histórias</span>
-				<span>Também são</span>
-				<span>Feitas de código.</span>
+				<span>{localizeLabel("Histórias")}</span>
+				<span>{localizeLabel("Também são")}</span>
+				<span>{localizeLabel("Feitas de código.")}</span>
 			</div>
 			<div
 				ref={signatureRef}
 				style={signatureStyle}
-				aria-label="Mateus Cabral, Engenheiro de Software, Fundador"
+				aria-label={localizeLabel("Mateus Cabral, Engenheiro de Software, Fundador")}
 			>
 				<strong style={{ fontSize: "1.12em", fontWeight: 700 }}>
-					Mateus Cabral
-				</strong>
-				<span>Engenheiro de Software</span>
-				<span>Fundador</span>
+					{localizeLabel("Mateus Cabral")}</strong>
+				<span>{localizeLabel("Engenheiro de Software")}</span>
+				<span>{localizeLabel("Fundador")}</span>
 			</div>
 
 			<Container fluid className="px-0" style={containerStyle}>

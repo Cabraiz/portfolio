@@ -1,3 +1,4 @@
+import { localizeLabel, useLabelLanguage } from '@/i18n/labels';
 import React, { useLayoutEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -14,6 +15,7 @@ function prefersReducedMotion(): boolean {
 }
 
 const Contact: React.FC = () => {
+  useLabelLanguage();
   const containerRef = useRef<HTMLDivElement>(null);
 
   useLayoutEffect(() => {
@@ -87,10 +89,9 @@ const Contact: React.FC = () => {
         flexDirection: "column",
       }}
     >
-      <h1 style={{ fontSize: "4vw" }}>Contact</h1>
+      <h1 style={{ fontSize: "4vw" }}>{localizeLabel("Contact")}</h1>
       <p style={{ opacity: 0.6, fontSize: "1.2vw" }}>
-        Coloque aqui seus dados de contato, formulário, redes sociais, etc.
-      </p>
+        {localizeLabel("Coloque aqui seus dados de contato, formulário, redes sociais, etc.")}</p>
     </div>
   );
 };

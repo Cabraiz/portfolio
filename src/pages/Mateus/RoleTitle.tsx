@@ -1,3 +1,4 @@
+import { localizeLabel, useLabelLanguage } from '@/i18n/labels';
 import { useEffect, useState } from "react";
 
 const titles = [
@@ -16,6 +17,7 @@ function prefersReducedMotion(): boolean {
 }
 
 export default function RoleTitle() {
+  useLabelLanguage();
   const [index, setIndex] = useState(0);
   const [isVisible, setIsVisible] = useState(true);
 
@@ -80,7 +82,7 @@ export default function RoleTitle() {
           transition: "opacity 140ms ease",
         }}
       >
-        {titles[index]}
+        {localizeLabel(titles[index])}
       </div>
     </div>
   );

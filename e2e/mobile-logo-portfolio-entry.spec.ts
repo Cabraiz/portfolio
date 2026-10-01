@@ -13,7 +13,7 @@ for (const viewport of [
 		test(`acompanha a entrada do Portfólio sem saltar ${viewport.width}x${viewport.height}`, async ({
 		browser,
 	}) => {
-		const context = await browser.newContext({
+		const context = await browser.newContext({locale:'pt-BR',
 			viewport,
 			isMobile: true,
 			hasTouch: true,

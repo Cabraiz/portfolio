@@ -1,3 +1,4 @@
+import { localizeLabel, useLabelLanguage } from '@/i18n/labels';
 import {
   useCallback,
   useEffect,
@@ -90,6 +91,7 @@ export default function ResumeDownloadButton({
   trayLabel,
   onClick,
 }: ResumeDownloadButtonProps) {
+  useLabelLanguage();
   const compact = size === "compact";
   const accessibleLabel = ariaLabel ?? label;
   const resolvedRel = resolveRel(target, rel);
@@ -186,7 +188,7 @@ export default function ResumeDownloadButton({
 
   const content = (
     <>
-      <span className={styles.srOnly}>{accessibleLabel}</span>
+      <span className={styles.srOnly}>{localizeLabel(accessibleLabel)}</span>
 
       <span className={styles.surface} aria-hidden="true">
         <span className={styles.iconRail}>
@@ -201,7 +203,7 @@ export default function ResumeDownloadButton({
             compact && styles.textCompact,
           )}
         >
-          {label}
+          {localizeLabel(label)}
         </span>
       </span>
     </>
@@ -216,11 +218,11 @@ export default function ResumeDownloadButton({
         target={target}
         rel={resolvedRel}
         download={download}
-        aria-label={accessibleLabel}
+        aria-label={localizeLabel(accessibleLabel)}
         data-suspend-motion={suspendMotion ? "true" : "false"}
         onClick={handleClick}
       >
-        {content}
+        {localizeLabel(content)}
       </a>
     );
   }
@@ -230,12 +232,12 @@ export default function ResumeDownloadButton({
       ref={setRootRef}
       type={type}
       className={rootClassName}
-      aria-label={accessibleLabel}
+      aria-label={localizeLabel(accessibleLabel)}
       disabled={disabled}
       data-suspend-motion={suspendMotion ? "true" : "false"}
       onClick={handleClick}
     >
-      {content}
+      {localizeLabel(content)}
     </button>
   );
 }

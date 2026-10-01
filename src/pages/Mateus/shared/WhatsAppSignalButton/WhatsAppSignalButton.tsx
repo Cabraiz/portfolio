@@ -1,3 +1,4 @@
+import { localizeLabel, useLabelLanguage } from '@/i18n/labels';
 import {
   memo,
   useCallback,
@@ -86,13 +87,14 @@ function SignalAction({
   onClick,
   actionRef,
 }: SignalActionProps) {
+  useLabelLanguage();
   if (disabled) {
     return (
       <button
         ref={actionRef}
         type="button"
         className={className}
-        aria-label={ariaLabel}
+        aria-label={localizeLabel(ariaLabel)}
         disabled
         data-wa-signal-hit-area="true"
       />
@@ -105,7 +107,7 @@ function SignalAction({
       href={href}
       target={target}
       rel={rel}
-      aria-label={ariaLabel}
+      aria-label={localizeLabel(ariaLabel)}
       className={className}
       onClick={onClick}
       data-wa-signal-hit-area="true"
@@ -129,6 +131,7 @@ function WhatsAppSignalButton({
   rel,
   onClick,
 }: WhatsAppSignalButtonProps) {
+  useLabelLanguage();
   const density: WhatsAppSignalDensity = compact ? "compact" : "default";
   const resolvedRel =
     target === "_blank" ? rel ?? "noopener noreferrer" : rel;
@@ -228,7 +231,7 @@ function WhatsAppSignalButton({
         data-wa-signal-label-wrap="true"
       >
         <span className={baseStyles.label} data-wa-signal-label="true">
-          {label}
+          {localizeLabel(label)}
         </span>
       </span>
     </span>
@@ -277,7 +280,7 @@ function WhatsAppSignalButton({
           className={baseStyles.button}
           data-wa-signal-button="true"
         >
-          {buttonContent}
+          {localizeLabel(buttonContent)}
         </div>
 
         <WhatsAppSignalCorners />

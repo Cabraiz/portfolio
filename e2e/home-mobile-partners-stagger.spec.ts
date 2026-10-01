@@ -55,7 +55,7 @@ for (const viewport of mobileViewports) {
 		test.setTimeout(60_000);
 		const baseURL = test.info().project.use.baseURL as string;
 
-		const context = await browser.newContext({
+		const context = await browser.newContext({locale:'pt-BR',
 			viewport,
 			deviceScaleFactor: 1,
 			isMobile: true,
@@ -188,7 +188,7 @@ test("mantém os parceiros visíveis quando movimento reduzido está ativo", asy
 	browser,
 }) => {
 	const baseURL = test.info().project.use.baseURL as string;
-	const context = await browser.newContext({
+	const context = await browser.newContext({locale:'pt-BR',
 		viewport: { width: 390, height: 844 },
 		isMobile: true,
 		reducedMotion: "reduce",

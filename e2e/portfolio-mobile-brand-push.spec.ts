@@ -2,7 +2,7 @@ import {expect,test} from '@playwright/test';
 
 for(const viewport of [{width:283,height:500},{width:390,height:844},{width:667,height:375},{width:985,height:430}]){
  test(`logo empurra labels e card por contato ${viewport.width}x${viewport.height}`,async({browser})=>{
-  const context=await browser.newContext({viewport,isMobile:true,hasTouch:true});const page=await context.newPage();
+  const context=await browser.newContext({locale:'pt-BR',viewport,isMobile:true,hasTouch:true});const page=await context.newPage();
   await page.goto(new URL('/home',test.info().project.use.baseURL).toString(),{waitUntil:'networkidle'});
   const root=page.locator('[data-portfolio-root]');await root.waitFor();
   await page.mouse.wheel(0,1);await page.waitForTimeout(100);

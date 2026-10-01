@@ -1,3 +1,4 @@
+import { localizeLabel, useLabelLanguage } from '@/i18n/labels';
 // src/pages/Mateus/Home/components/mobile/game/driving/view/HomeDriveGame.tsx
 
 import React, {
@@ -61,6 +62,7 @@ function isInteractiveOverlayTarget(target: EventTarget | null): boolean {
 }
 
 export default function HomeDriveGame({ onClose }: HomeDriveGameProps) {
+  useLabelLanguage();
   const { rootRef, viewport } = useHomeDriveViewport();
 
   const {
@@ -353,7 +355,7 @@ export default function HomeDriveGame({ onClose }: HomeDriveGameProps) {
             <img
               className={styles.cockpitImage}
               src={HOME_DRIVE_COCKPIT_ASSETS.cockpitSrc}
-              alt=""
+              alt={localizeLabel("")}
               draggable={false}
             />
             <span className={styles.cockpitShade} />

@@ -1,4 +1,5 @@
 import { Suspense, lazy } from "react";
+import LoadingStatus from '../i18n/LoadingStatus';
 import { Navigate, Route, Routes } from "react-router-dom";
 import {
   getHomeGameLandingRedirectPath,
@@ -33,13 +34,7 @@ const HomeElevatorStandalonePage = lazy(
   () => import("../pages/Mateus/Home/Elevator/HomeElevatorStandalonePage"),
 );
 
-const routeFallback = (
-  <div
-    aria-label="Carregando página"
-    role="status"
-    style={{ minHeight: "100dvh", background: "#050505" }}
-  />
-);
+const routeFallback = <LoadingStatus label="Carregando página" />;
 
 const AppRoutes = () => {
   const landingElement = isHomeDriveStandaloneHost() ? (

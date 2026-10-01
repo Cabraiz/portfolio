@@ -1,3 +1,4 @@
+import { localizeLabel, useLabelLanguage } from '@/i18n/labels';
 import { type FC } from "react";
 import { Image } from "react-bootstrap";
 
@@ -12,6 +13,7 @@ const CONTACT_ITEMS = [
 ] as const;
 
 const ContactMobile: FC = () => {
+  useLabelLanguage();
   return (
     <div className={styles.root} data-mobile-contact="true">
       <div className={styles.profileFrame}>
@@ -20,16 +22,16 @@ const ContactMobile: FC = () => {
           roundedCircle
           loading="lazy"
           className={styles.profileImage}
-          alt="Mateus Cabraiz"
+          alt={localizeLabel("Mateus Cabraiz")}
         />
       </div>
 
-      <h1 className={styles.name}>Mateus Cabraiz</h1>
+      <h1 className={styles.name}>{localizeLabel("Mateus Cabraiz")}</h1>
 
       <div className={styles.contactList}>
         {CONTACT_ITEMS.map((item) => (
           <div key={item} className={styles.contactItem}>
-            {item}
+            {localizeLabel(item)}
           </div>
         ))}
       </div>

@@ -1,3 +1,4 @@
+import { localizeLabel, useLabelLanguage } from '@/i18n/labels';
 import React, {
   type CSSProperties,
   useEffect,
@@ -24,7 +25,7 @@ import {
   LANDING_SECTION_ORDER,
   getLandingSectionDefinitions,
 } from "./landingSections.config";
-import useLandingActiveSection from "./hooks/useLandingActiveSection";
+import useLandingSectionNavigation from "../../../features/navigation/useLandingSectionNavigation";
 import useLandingHistorySync from "./hooks/useLandingHistorySync";
 import useLandingSectionMeasurements from "./hooks/useLandingSectionMeasurements";
 import {
@@ -145,6 +146,7 @@ function resolveInitialMobileSectionId(pathname: string): LandingSectionId {
 }
 
 const LandingPageMobile: React.FC = () => {
+  useLabelLanguage();
   const containerRef = useRef<HTMLElement | null>(null);
   const location = useLocation();
   const lenis = useLenis();
@@ -170,7 +172,7 @@ const LandingPageMobile: React.FC = () => {
   }, []);
 
   const { activeSectionId, refreshActiveSection, setActiveSectionId } =
-    useLandingActiveSection({
+    useLandingSectionNavigation({
       containerRef,
       defaultSectionId: initialSectionId,
       sectionIds: LANDING_SECTION_ORDER,
@@ -178,6 +180,7 @@ const LandingPageMobile: React.FC = () => {
       viewportMode: "mobile",
       navbarOffsetPx,
       activationViewportRatio: 0.42,
+      syncUrl: false,
     });
 
   const { routeSectionId } = useLandingHistorySync({
@@ -305,7 +308,7 @@ const LandingPageMobile: React.FC = () => {
     <main
       ref={containerRef}
       style={containerStyle}
-      aria-label="Landing page mobile"
+      aria-label={localizeLabel("Landing page mobile")}
       data-active-section={activeSectionId}
       data-route-section={routeSectionId}
       data-landing-viewport="mobile"
@@ -381,7 +384,7 @@ const LandingPageMobile: React.FC = () => {
                 minHeight={resolvedSectionMinHeight}
                 fullHeight
               >
-                {section.content}
+                {localizeLabel(section.content)}
               </RoadMapErrorBoundary>
             </div>
           </LandingSectionShell>

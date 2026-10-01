@@ -1,3 +1,5 @@
+import { localizeLabel, useLabelLanguage } from '@/i18n/labels';
+import i18n from '@/i18n/i18n';
 // src/pages/Mateus/Home/components/mobile/game/driving/view/HomeDriveCompass.tsx
 
 import { memo, useMemo, type CSSProperties } from "react";
@@ -106,8 +108,12 @@ function HomeDriveCompass({
   headingRad,
   className,
   target,
-  cardinalMode = HOME_DRIVE_COMPASS_DEFAULT_CARDINAL_MODE,
+  cardinalMode: configuredCardinalMode,
 }: HomeDriveCompassProps) {
+  useLabelLanguage();
+  const cardinalMode = configuredCardinalMode ?? (
+    i18n.resolvedLanguage === 'en' ? 'international' : HOME_DRIVE_COMPASS_DEFAULT_CARDINAL_MODE
+  );
   const headingDegrees = homeDriveCompassRadiansToDegrees(headingRad);
 
   const marks = useMemo(() => {
@@ -148,7 +154,7 @@ function HomeDriveCompass({
   return (
     <div
       className={cx(styles.root, className)}
-      aria-label={ariaLabel}
+      aria-label={localizeLabel(ariaLabel)}
       role="status"
     >
       <div className={styles.frame}>
@@ -176,7 +182,7 @@ function HomeDriveCompass({
                 style={markStyle}
               >
                 {mark.label ? (
-                  <span className={styles.label}>{mark.label}</span>
+                  <span className={styles.label}>{localizeLabel(mark.label)}</span>
                 ) : (
                   <span className={styles.tick} />
                 )}
@@ -205,18 +211,18 @@ function HomeDriveCompass({
                   <img
                     className={styles.targetImage}
                     src={target.imageSrc}
-                    alt=""
+                    alt={localizeLabel("")}
                     draggable={false}
                     decoding="async"
                   />
                 </span>
 
                 <span className={styles.targetText}>
-                  <span className={styles.targetLabel}>{target.label}</span>
+                  <span className={styles.targetLabel}>{localizeLabel(target.label)}</span>
                   <span className={styles.targetDistance}>
-                    {target.isInsideCheckInRadius
+                    {localizeLabel(target.isInsideCheckInRadius
                       ? "check-in"
-                      : target.distanceLabel}
+                      : target.distanceLabel)}
                   </span>
                 </span>
 

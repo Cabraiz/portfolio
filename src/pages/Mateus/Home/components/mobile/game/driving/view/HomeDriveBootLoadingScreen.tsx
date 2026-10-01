@@ -1,3 +1,4 @@
+import { localizeLabel, useLabelLanguage } from '@/i18n/labels';
 // src/pages/Mateus/Home/components/mobile/game/driving/view/HomeDriveBootLoadingScreen.tsx
 
 import React, { memo, useMemo } from "react";
@@ -121,6 +122,7 @@ function HomeDriveBootLoadingScreen({
   snapshot,
   onRetry,
 }: HomeDriveBootLoadingScreenProps) {
+  useLabelLanguage();
   const percentLabel = useMemo(() => {
     return formatPercent(snapshot.progress);
   }, [snapshot.progress]);
@@ -151,46 +153,45 @@ function HomeDriveBootLoadingScreen({
 
       <div className={styles.panel}>
         <header className={styles.header}>
-          <span className={styles.brand}>CABRAIZ DRIVE</span>
-          <span className={styles.version}>FLASH MODE</span>
+          <span className={styles.brand}>{localizeLabel("CABRAIZ DRIVE")}</span>
+          <span className={styles.version}>{localizeLabel("FLASH MODE")}</span>
         </header>
 
         <div className={styles.mainRow}>
-          <div className={styles.percentBox}>{percentLabel}</div>
+          <div className={styles.percentBox}>{localizeLabel(percentLabel)}</div>
           <div className={styles.copyBlock}>
             <h1 className={styles.title}>
-              {isError ? "LOAD ERROR" : snapshot.label}
+              {localizeLabel(isError ? "LOAD ERROR" : snapshot.label)}
             </h1>
-            <p className={styles.detail}>{publicDetail}</p>
+            <p className={styles.detail}>{localizeLabel(publicDetail)}</p>
           </div>
         </div>
 
-        <div className={styles.progressTrack} aria-label={percentLabel}>
+        <div className={styles.progressTrack} aria-label={localizeLabel(percentLabel)}>
           <span className={styles.progressFill} style={barStyle} />
         </div>
 
-        <div className={styles.steps} aria-label="Etapas do carregamento">
+        <div className={styles.steps} aria-label={localizeLabel("Etapas do carregamento")}>
           {BOOT_STEPS.map((step) => (
             <span
               key={step.phase}
               className={styles.step}
               data-state={getStepState(step, snapshot.phase)}
             >
-              {step.label}
+              {localizeLabel(step.label)}
             </span>
           ))}
         </div>
 
         <footer className={styles.footer}>
-          <span>LOADING</span>
-          <span>NO CLICK</span>
-          <span>WAIT</span>
+          <span>{localizeLabel("LOADING")}</span>
+          <span>{localizeLabel("NO CLICK")}</span>
+          <span>{localizeLabel("WAIT")}</span>
         </footer>
 
         {isError ? (
           <button className={styles.retryButton} type="button" onClick={onRetry}>
-            RELOAD
-          </button>
+            {localizeLabel("RELOAD")}</button>
         ) : null}
       </div>
     </section>

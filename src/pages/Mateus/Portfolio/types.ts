@@ -62,6 +62,7 @@ export type PortfolioProject = Readonly<{
   year: string;
   imageSrc: string;
   imageAlt: string;
+  mobileImageSrc?: string;
   logoSrc: string;
   logoAlt: string;
   projectLabel: string;

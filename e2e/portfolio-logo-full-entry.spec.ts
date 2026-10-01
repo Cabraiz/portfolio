@@ -9,7 +9,7 @@ for (const viewport of [
   { width: 667, height: 375 },
 ]) {
   test(`logo começa a descida só após entrada completa ${viewport.width}x${viewport.height}`, async ({ browser }) => {
-    const context = await browser.newContext({ viewport, isMobile: true, hasTouch: true });
+    const context = await browser.newContext({locale:'pt-BR', viewport, isMobile: true, hasTouch: true });
     const page = await context.newPage();
     const root = page.locator("[data-portfolio-root]");
     const brand = page.locator('[data-mobile-brand-pusher="true"]');

@@ -1,3 +1,4 @@
+import { localizeLabel, useLabelLanguage } from '@/i18n/labels';
 // src/pages/Mateus/Home/Drive/HomeDriveStandalonePage.tsx
 
 import { useCallback, useEffect, useMemo, type CSSProperties } from "react";
@@ -26,6 +27,7 @@ function getBrowserWindow(): Window | null {
 }
 
 export default function HomeDriveStandalonePage() {
+  useLabelLanguage();
   const navigate = useNavigate();
   const isStandaloneHost = isHomeDriveStandaloneHost();
 
@@ -92,7 +94,7 @@ export default function HomeDriveStandalonePage() {
   return (
     <main
       data-home-drive-standalone="true"
-      aria-label="Cabraiz Drive"
+      aria-label={localizeLabel("Cabraiz Drive")}
       style={rootStyle}
     >
       <HomeDriveGame onClose={handleClose} />

@@ -82,7 +82,10 @@
     "test:e2e": "playwright test",
     "test:e2e:landing": "playwright test e2e/cognitive-network.spec.ts e2e/floating-chat.spec.ts e2e/floating-chat-keyboard.spec.ts e2e/github-pages-fallback.spec.ts e2e/landing-navigation.spec.ts e2e/landing-viewport-roundtrip.spec.ts e2e/viewport-lifecycle.spec.ts e2e/mobile-reload-height.spec.ts e2e/mobile-visible-section-height.spec.ts e2e/portfolio-full-viewport.spec.ts e2e/mobile-logo-portfolio-entry.spec.ts e2e/portfolio-logo-full-entry.spec.ts e2e/portfolio-mobile-brand-push.spec.ts e2e/home-mobile-partners-stagger.spec.ts e2e/portfolio-mobile.spec.ts",
     "test:e2e:viewport": "playwright test e2e/floating-chat-keyboard.spec.ts e2e/landing-viewport-roundtrip.spec.ts e2e/viewport-lifecycle.spec.ts e2e/mobile-reload-height.spec.ts e2e/mobile-visible-section-height.spec.ts e2e/portfolio-full-viewport.spec.ts e2e/mobile-logo-portfolio-entry.spec.ts e2e/portfolio-logo-full-entry.spec.ts e2e/portfolio-mobile-brand-push.spec.ts e2e/home-mobile-partners-stagger.spec.ts e2e/portfolio-mobile.spec.ts",
-    "test:relay": "node --test services/telegram-relay/test/*.test.mjs"
+    "test:relay": "node --test services/telegram-relay/test/*.test.mjs",
+    "check:labels": "node scripts/audit-labels.mjs",
+    "sync:labels": "node scripts/sync-label-catalog.mjs",
+    "test:e2e:labels": "playwright test --config playwright.labels.config.ts"
   },
   "eslintConfig": {
     "extends": [

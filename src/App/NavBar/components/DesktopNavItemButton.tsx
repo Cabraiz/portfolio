@@ -1,3 +1,4 @@
+import { localizeLabel, useLabelLanguage } from '@/i18n/labels';
 import React, { useState, type CSSProperties } from "react";
 
 import type { LandingSectionId } from "../../../features/navigation/landingSections";
@@ -79,6 +80,7 @@ const DesktopNavItemButton: React.FC<DesktopNavItemButtonProps> = ({
   leadingVisual,
   lightTheme = false,
 }) => {
+  useLabelLanguage();
   const [isHovered, setIsHovered] = useState(false);
 
   const isRaised = isActive || isHovered;
@@ -115,8 +117,8 @@ const DesktopNavItemButton: React.FC<DesktopNavItemButtonProps> = ({
       }}
     >
       <span style={contentStyle}>
-        {leadingVisual}
-        <span style={getLabelStyle(isRaised)}>{label}</span>
+        {localizeLabel(leadingVisual)}
+        <span style={getLabelStyle(isRaised)}>{localizeLabel(label)}</span>
       </span>
     </button>
   );

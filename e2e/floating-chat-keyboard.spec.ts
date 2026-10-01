@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test';
 const sizes = [{width:320,height:640},{width:360,height:800},{width:390,height:844},{width:430,height:932},{width:667,height:375}];
 for (const viewport of sizes) {
   test(`chat acompanha teclado e mantém a conversa ${viewport.width}x${viewport.height}`, async ({browser}) => {
-    const context=await browser.newContext({viewport,isMobile:true,hasTouch:true,reducedMotion:'reduce'});
+    const context=await browser.newContext({locale:'pt-BR',viewport,isMobile:true,hasTouch:true,reducedMotion:'reduce'});
     const page=await context.newPage();
     await page.addInitScript(() => {
       const id='16b7d6c2-6d4d-4a0f-9d88-12ef8ac25f41';
@@ -72,7 +72,7 @@ for (const viewport of sizes) {
 }
 
 test('chat compacto responde a resize real, rotação e erro sem perder o rascunho',async({browser})=>{
-  const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,reducedMotion:'reduce'});
+  const context=await browser.newContext({locale:'pt-BR',viewport:{width:390,height:844},isMobile:true,hasTouch:true,reducedMotion:'reduce'});
   const page=await context.newPage();let attempts=0;
   await page.route('**/api/contact*',async route=>{
     if(route.request().method()==='GET')await route.fulfill({json:{ok:true,cursor:0,replies:[]}});

@@ -1,3 +1,4 @@
+import { localizeLabel, useLabelLanguage } from '@/i18n/labels';
 import React, { type CSSProperties, useCallback } from "react";
 
 import logo from "../../../assets/icones/logo.svg";
@@ -84,6 +85,7 @@ const MobileNavbar: React.FC<MobileNavbarProps> = ({
 	onNavigateToSection,
 	activeSectionId,
 }) => {
+  useLabelLanguage();
 	const usesLightBackground =
 		activeSectionId === "home" ||
 		activeSectionId === "portfolio" ||
@@ -113,7 +115,7 @@ const MobileNavbar: React.FC<MobileNavbarProps> = ({
 			<BrandButton
 				onClick={handleBrandClick}
 				mobile
-				invertMobileLogo={usesLightBackground}
+                                sectionId={activeSectionId}
 				logoSrc={logo}
 				logoAlt="Cabraiz"
 				mobileLogoSize={activeSectionId === "portfolio" ? 36 : 44}
@@ -139,14 +141,14 @@ const MobileNavbar: React.FC<MobileNavbarProps> = ({
 				<>
 					<nav
 						id={MOBILE_MENU_ID}
-                                                aria-label="Navegação principal mobile"
+                                                aria-label={localizeLabel("Navegação principal mobile")}
                                                 data-lenis-prevent=""
 						style={getPanelStyle()}
 					>
 						{LANDING_SECTIONS.map((section) => (
 							<MobileNavItemButton
 								key={section.id}
-								label={section.label}
+								label={localizeLabel(section.label)}
 								isActive={activeSectionId === section.id}
 								onClick={() => handleNavigate(section.id)}
 							/>
@@ -155,7 +157,7 @@ const MobileNavbar: React.FC<MobileNavbarProps> = ({
 
 					<button
 						type="button"
-						aria-label="Fechar menu"
+						aria-label={localizeLabel("Fechar menu")}
 						onClick={onToggle}
 						style={getOverlayStyle()}
 					/>

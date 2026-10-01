@@ -1,3 +1,4 @@
+import { localizeLabel, useLabelLanguage } from '@/i18n/labels';
 import React from "react";
 
 export type MobileNavItemButtonProps = Readonly<{
@@ -11,6 +12,7 @@ const MobileNavItemButton: React.FC<MobileNavItemButtonProps> = ({
   isActive,
   onClick,
 }) => {
+  useLabelLanguage();
   return (
     <button
       type="button"
@@ -38,7 +40,7 @@ const MobileNavItemButton: React.FC<MobileNavItemButtonProps> = ({
           "background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease",
       }}
     >
-      {label}
+      {localizeLabel(label)}
     </button>
   );
 };

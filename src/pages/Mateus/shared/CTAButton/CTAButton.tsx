@@ -1,3 +1,4 @@
+import { localizeLabel, useLabelLanguage } from '@/i18n/labels';
 import type {
   CSSProperties,
   MouseEvent,
@@ -121,6 +122,7 @@ function ButtonFaceContent({
   align: CTAButtonAlign;
   compact: boolean;
 }>) {
+  useLabelLanguage();
   return (
     <span
       className={joinClasses(
@@ -137,7 +139,7 @@ function ButtonFaceContent({
             )}
             aria-hidden="true"
           >
-            {leadingIcon}
+            {localizeLabel(leadingIcon)}
           </span>
         ) : null}
 
@@ -147,7 +149,7 @@ function ButtonFaceContent({
             compact && styles.labelCompact,
           )}
         >
-          {label}
+          {localizeLabel(label)}
         </span>
       </span>
 
@@ -159,7 +161,7 @@ function ButtonFaceContent({
           )}
           aria-hidden="true"
         >
-          {trailingIcon}
+          {localizeLabel(trailingIcon)}
         </span>
       ) : null}
     </span>
@@ -192,6 +194,7 @@ export default function CTAButton({
   backTrailingIcon,
   onClick,
 }: CTAButtonProps) {
+  useLabelLanguage();
   const compact = size === "compact";
   const accessibleLabel = resolveAccessibleLabel({
     ariaLabel,
@@ -231,12 +234,12 @@ export default function CTAButton({
 
   const track = (
     <>
-      <span className={styles.srOnly}>{accessibleLabel}</span>
+      <span className={styles.srOnly}>{localizeLabel(accessibleLabel)}</span>
 
       <span className={styles.track} aria-hidden="true">
         <span className={joinClasses(styles.face, styles.faceFront)}>
           <ButtonFaceContent
-            label={label}
+            label={localizeLabel(label)}
             leadingIcon={leadingIcon}
             trailingIcon={trailingIcon}
             align={align}
@@ -246,7 +249,7 @@ export default function CTAButton({
 
         <span className={joinClasses(styles.face, styles.faceBack)}>
           <ButtonFaceContent
-            label={resolvedBackContent}
+            label={localizeLabel(resolvedBackContent)}
             leadingIcon={backLeadingIcon ?? leadingIcon}
             trailingIcon={backTrailingIcon ?? trailingIcon}
             align={align}
@@ -265,13 +268,13 @@ export default function CTAButton({
         target={target}
         rel={resolvedRel}
         download={download}
-        aria-label={accessibleLabel}
+        aria-label={localizeLabel(accessibleLabel)}
         aria-busy={loading ? "true" : undefined}
         style={inlineStyle}
         onClick={onClick}
         {...commonDataAttributes}
       >
-        {track}
+        {localizeLabel(track)}
       </a>
     );
   }
@@ -280,14 +283,14 @@ export default function CTAButton({
     <button
       type={type}
       className={rootClassName}
-      aria-label={accessibleLabel}
+      aria-label={localizeLabel(accessibleLabel)}
       aria-busy={loading ? "true" : undefined}
       disabled={disabled}
       style={inlineStyle}
       onClick={onClick}
       {...commonDataAttributes}
     >
-      {track}
+      {localizeLabel(track)}
     </button>
   );
 }

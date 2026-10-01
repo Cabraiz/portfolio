@@ -1,3 +1,4 @@
+import { localizeLabel, useLabelLanguage } from '@/i18n/labels';
 // src/pages/Mateus/Home/components/mobile/game/driving/view/HomeDriveSteeringWheel.tsx
 
 import React, {
@@ -19,6 +20,7 @@ export type HomeDriveSteeringWheelProps = Readonly<{
 function HomeDriveSteeringWheel({
   controller,
 }: HomeDriveSteeringWheelProps) {
+  useLabelLanguage();
   const [imageFailed, setImageFailed] = useState(false);
 
   const rootClassName = useMemo(() => {
@@ -55,7 +57,7 @@ function HomeDriveSteeringWheel({
         ref={controller.wheelRef}
         className={styles.touchTarget}
         style={wheelStyle}
-        aria-label="Volante"
+        aria-label={localizeLabel("Volante")}
         role="slider"
         aria-valuemin={-1}
         aria-valuemax={1}
@@ -68,7 +70,7 @@ function HomeDriveSteeringWheel({
             <img
               className={styles.wheelImage}
               src={HOME_DRIVE_COCKPIT_ASSETS.steeringWheelSrc}
-              alt=""
+              alt={localizeLabel("")}
               draggable={false}
               decoding="async"
               onError={handleImageError}

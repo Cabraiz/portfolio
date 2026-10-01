@@ -1,3 +1,4 @@
+import { localizeLabel, useLabelLanguage } from '@/i18n/labels';
 // src/pages/Mateus/Home/components/mobile/game/elevator/HomeElevatorGame.tsx
 
 import {
@@ -96,6 +97,7 @@ function getStatusText(state: HomeElevatorRuntimeState): string {
 }
 
 export default function HomeElevatorGame({ onClose }: HomeElevatorGameProps) {
+  useLabelLanguage();
   const [runtime, setRuntime] = useState<HomeElevatorRuntimeState>(() =>
     createHomeElevatorInitialState(),
   );
@@ -242,41 +244,40 @@ export default function HomeElevatorGame({ onClose }: HomeElevatorGameProps) {
   const statusText = getStatusText(runtime);
 
   return (
-    <section className={styles.root} aria-label="Jogo do elevador">
+    <section className={styles.root} aria-label={localizeLabel("Jogo do elevador")}>
       <header className={styles.topBar}>
         <div className={styles.titleBlock}>
-          <span className={styles.kicker}>Cabraiz Arcade</span>
-          <h1 className={styles.title}>Elevator Control</h1>
+          <span className={styles.kicker}>{localizeLabel("Cabraiz Arcade")}</span>
+          <h1 className={styles.title}>{localizeLabel("Elevator Control")}</h1>
         </div>
 
         <button
           type="button"
           className={styles.closeButton}
           onClick={onClose}
-          aria-label="Fechar jogo do elevador"
+          aria-label={localizeLabel("Fechar jogo do elevador")}
         >
-          ×
-        </button>
+          {localizeLabel("×")}</button>
       </header>
 
-      <div className={styles.hud} aria-label="Indicadores do elevador">
+      <div className={styles.hud} aria-label={localizeLabel("Indicadores do elevador")}>
         <div className={styles.hudCard}>
-          <span className={styles.hudLabel}>Score</span>
-          <span className={styles.hudValue}>{formatScore(runtime.score)}</span>
+          <span className={styles.hudLabel}>{localizeLabel("Score")}</span>
+          <span className={styles.hudValue}>{localizeLabel(formatScore(runtime.score))}</span>
         </div>
         <div className={styles.hudCard}>
-          <span className={styles.hudLabel}>Entregas</span>
-          <span className={styles.hudValue}>{runtime.delivered}</span>
+          <span className={styles.hudLabel}>{localizeLabel("Entregas")}</span>
+          <span className={styles.hudValue}>{localizeLabel(runtime.delivered)}</span>
         </div>
         <div className={styles.hudCard}>
-          <span className={styles.hudLabel}>Cabine</span>
+          <span className={styles.hudLabel}>{localizeLabel("Cabine")}</span>
           <span className={styles.hudValue}>
-            {runtime.cabin.onboard.length}/{HOME_ELEVATOR_CAPACITY}
+            {localizeLabel(runtime.cabin.onboard.length)}/{localizeLabel(HOME_ELEVATOR_CAPACITY)}
           </span>
         </div>
         <div className={styles.hudCard}>
-          <span className={styles.hudLabel}>Energia</span>
-          <span className={styles.hudValue}>{Math.round(runtime.energy)}%</span>
+          <span className={styles.hudLabel}>{localizeLabel("Energia")}</span>
+          <span className={styles.hudValue}>{localizeLabel(Math.round(runtime.energy))}%</span>
           <span className={styles.energyMeter} aria-hidden="true">
             <span
               className={styles.energyFill}
@@ -287,7 +288,7 @@ export default function HomeElevatorGame({ onClose }: HomeElevatorGameProps) {
       </div>
 
       <div className={styles.stage}>
-        <div className={styles.building} aria-label="Prédio com andares">
+        <div className={styles.building} aria-label={localizeLabel("Prédio com andares")}>
           <div className={styles.floorGrid}>
             {FLOOR_NUMBERS.map((floor) => {
               const waiting = waitingByFloor.get(floor) ?? [];
@@ -297,8 +298,8 @@ export default function HomeElevatorGame({ onClose }: HomeElevatorGameProps) {
 
               return (
                 <div key={floor} className={styles.floorRow}>
-                  <span className={styles.floorNumber}>{floor}</span>
-                  <span className={styles.floorWaiting} aria-label={`${waiting.length} passageiros aguardando no ${floor}º andar`}>
+                  <span className={styles.floorNumber}>{localizeLabel(floor)}</span>
+                  <span className={styles.floorWaiting} aria-label={localizeLabel(`${waiting.length} passageiros aguardando no ${floor}º andar`)}>
                     {visiblePassengers.map((passenger) => (
                       <span
                         key={passenger.id}
@@ -306,16 +307,16 @@ export default function HomeElevatorGame({ onClose }: HomeElevatorGameProps) {
                         style={{
                           "--passenger-hue": passenger.hue,
                         } as CSSProperties}
-                        title={`${passenger.originFloor} → ${passenger.destinationFloor}`}
+                        title={localizeLabel(`${passenger.originFloor} → ${passenger.destinationFloor}`)}
                       />
                     ))}
                     {remainingCount > 0 ? (
-                      <span className={styles.callMeta}>+{remainingCount}</span>
+                      <span className={styles.callMeta}>+{localizeLabel(remainingCount)}</span>
                     ) : null}
                   </span>
                   {floorSnapshot && floorSnapshot.waitingCount > 0 ? (
                     <span className={styles.callMeta} aria-hidden="true">
-                      ↑{floorSnapshot.upCount} ↓{floorSnapshot.downCount}
+                      ↑{localizeLabel(floorSnapshot.upCount)} ↓{localizeLabel(floorSnapshot.downCount)}
                     </span>
                   ) : null}
                   <span className={styles.patienceBar} aria-hidden="true">
@@ -353,7 +354,7 @@ export default function HomeElevatorGame({ onClose }: HomeElevatorGameProps) {
           </div>
         </div>
 
-        <nav className={styles.panel} aria-label="Painel de andares">
+        <nav className={styles.panel} aria-label={localizeLabel("Painel de andares")}>
           {FLOOR_NUMBERS.map((floor) => {
             const isActive = runtime.cabin.targetFloor === floor;
             const isCurrent = runtime.cabin.currentFloor === floor;
@@ -371,9 +372,9 @@ export default function HomeElevatorGame({ onClose }: HomeElevatorGameProps) {
                   .filter(Boolean)
                   .join(" ")}
                 onClick={() => handleSelectFloor(floor)}
-                aria-label={`Ir para o ${floor}º andar`}
+                aria-label={localizeLabel(`Ir para o ${floor}º andar`)}
               >
-                {floor}
+                {localizeLabel(floor)}
               </button>
             );
           })}
@@ -386,18 +387,16 @@ export default function HomeElevatorGame({ onClose }: HomeElevatorGameProps) {
             type="button"
             className={styles.controlButton}
             onClick={() => handleMoveRelative(1)}
-            aria-label="Subir um andar"
+            aria-label={localizeLabel("Subir um andar")}
           >
-            Subir
-          </button>
+            {localizeLabel("Subir")}</button>
           <button
             type="button"
             className={styles.controlButton}
             onClick={() => handleMoveRelative(-1)}
-            aria-label="Descer um andar"
+            aria-label={localizeLabel("Descer um andar")}
           >
-            Descer
-          </button>
+            {localizeLabel("Descer")}</button>
         </div>
 
         <div className={`${styles.controlCluster} ${styles.controlClusterTall}`}>
@@ -405,18 +404,17 @@ export default function HomeElevatorGame({ onClose }: HomeElevatorGameProps) {
             type="button"
             className={`${styles.controlButton} ${styles.controlButtonPrimary}`}
             onClick={handleDoorToggle}
-            aria-label={`${doorLabel} portas`}
+            aria-label={localizeLabel(`${doorLabel} portas`)}
           >
-            {doorLabel}
+            {localizeLabel(doorLabel)}
           </button>
           <button
             type="button"
             className={styles.controlButton}
             onClick={handleForceSpawn}
-            aria-label="Adicionar nova chamada"
+            aria-label={localizeLabel("Adicionar nova chamada")}
           >
-            Chamada
-          </button>
+            {localizeLabel("Chamada")}</button>
         </div>
 
         <div className={styles.controlCluster}>
@@ -424,21 +422,19 @@ export default function HomeElevatorGame({ onClose }: HomeElevatorGameProps) {
             type="button"
             className={styles.controlButton}
             onClick={handleRestart}
-            aria-label="Reiniciar jogo do elevador"
+            aria-label={localizeLabel("Reiniciar jogo do elevador")}
           >
-            Reiniciar
-          </button>
+            {localizeLabel("Reiniciar")}</button>
           <button
             type="button"
             className={styles.controlButton}
             onClick={onClose}
-            aria-label="Sair do jogo do elevador"
+            aria-label={localizeLabel("Sair do jogo do elevador")}
           >
-            Sair
-          </button>
+            {localizeLabel("Sair")}</button>
         </div>
 
-        <p className={styles.statusLine}>{statusText}</p>
+        <p className={styles.statusLine}>{localizeLabel(statusText)}</p>
       </footer>
     </section>
   );

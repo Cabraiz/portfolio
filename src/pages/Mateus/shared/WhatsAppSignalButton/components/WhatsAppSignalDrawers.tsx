@@ -1,3 +1,4 @@
+import { localizeLabel, useLabelLanguage } from '@/i18n/labels';
 import { memo, type ReactNode } from "react";
 import styles from "./WhatsAppSignalDrawers.module.css";
 
@@ -32,6 +33,7 @@ function WhatsAppSignalDrawers({
   hideTopWhenEmpty = true,
   hideBottomWhenEmpty = true,
 }: WhatsAppSignalDrawersProps) {
+  useLabelLanguage();
   const shouldRenderTop = hideTopWhenEmpty
     ? hasRenderableContent(topLabel)
     : true;
@@ -47,7 +49,7 @@ function WhatsAppSignalDrawers({
           className={joinClasses(styles.drawer, styles.drawerTop)}
           aria-hidden="true"
         >
-          {topLabel}
+          {localizeLabel(topLabel)}
         </span>
       ) : null}
 
@@ -56,7 +58,7 @@ function WhatsAppSignalDrawers({
           className={joinClasses(styles.drawer, styles.drawerBottom)}
           aria-hidden="true"
         >
-          {bottomLabel}
+          {localizeLabel(bottomLabel)}
         </span>
       ) : null}
     </>

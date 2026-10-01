@@ -1,3 +1,4 @@
+import { localizeLabel, useLabelLanguage } from '@/i18n/labels';
 import React, { useEffect, useState } from "react";
 
 import { type CognitiveViewMode } from "./cognitiveNetwork.data";
@@ -87,6 +88,7 @@ const THOUGHT_STEPS: Readonly<
 };
 
 const CognitiveNetwork: React.FC = () => {
+  useLabelLanguage();
 	const viewMode: CognitiveViewMode = "neural";
 	const [telemetryTick, setTelemetryTick] = useState(0);
 	const readout = MODE_READOUT[viewMode];
@@ -122,16 +124,15 @@ const CognitiveNetwork: React.FC = () => {
 			data-thought-phase={currentThought.verb.toLowerCase()}
 		>
 			<h2 id="cognitive-network-title" className={styles.srOnly}>
-				Cérebro artificial em funcionamento
-			</h2>
+				{localizeLabel("Cérebro artificial em funcionamento")}</h2>
 			<div className={styles.scanline} aria-hidden="true" />
 
 			<header className={styles.commandBar}>
 				<div className={styles.commandIdentity}>
-					<span>CÉREBRO ARTIFICIAL EM ATIVIDADE</span>
+					<span>{localizeLabel("CÉREBRO ARTIFICIAL EM ATIVIDADE")}</span>
 					<i aria-hidden="true" />
-					<span>CICLO 24C</span>
-					<strong>ETAPA 37</strong>
+					<span>{localizeLabel("CICLO 24C")}</span>
+					<strong>{localizeLabel("ETAPA 37")}</strong>
 				</div>
 
 			</header>
@@ -142,23 +143,22 @@ const CognitiveNetwork: React.FC = () => {
 					<NeuralCore3D mode={viewMode} />
 
 					<div className={styles.axisLabels} aria-hidden="true">
-						<span className={styles.axisY}>NÍVEL DE ATIVAÇÃO</span>
+						<span className={styles.axisY}>{localizeLabel("NÍVEL DE ATIVAÇÃO")}</span>
 					</div>
 
 					<div className={styles.routeCard} aria-hidden="true">
-						<span>{currentThought.verb} · PENSAMENTO ATUAL</span>
+						<span>{localizeLabel(currentThought.verb)} {localizeLabel(" · PENSAMENTO ATUAL")}</span>
 						<strong>
-							{currentThought.target} → {currentThought.result}
+							{localizeLabel(currentThought.target)} → {localizeLabel(currentThought.result)}
 						</strong>
 						<small>
-							etapa {thoughtIndex + 1} de 5 · {liveLatency} MS
-						</small>
+							{localizeLabel("etapa ")}{localizeLabel(thoughtIndex + 1)} {localizeLabel(" de 5 · ")}{localizeLabel(liveLatency)} {localizeLabel(" MS")}</small>
 					</div>
 
 					<div className={styles.thoughtLog} aria-hidden="true">
 						<header>
-							<span>{"// RACIOCÍNIO AGORA"}</span>
-							<strong>{String(telemetryTick + 8211).padStart(6, "0")}</strong>
+							<span>{localizeLabel("// RACIOCÍNIO AGORA")}</span>
+							<strong>{localizeLabel(String(telemetryTick + 8211).padStart(6, "0"))}</strong>
 						</header>
 						{thoughtSteps.map((step, index) => (
 							<div
@@ -167,12 +167,12 @@ const CognitiveNetwork: React.FC = () => {
 									index === thoughtIndex ? styles.activeThought : undefined
 								}
 							>
-								<i>{String(index + 1).padStart(2, "0")}</i>
+								<i>{localizeLabel(String(index + 1).padStart(2, "0"))}</i>
 								<span>
-									{step.verb.toLowerCase()} · {step.target.toLowerCase()}
+									{localizeLabel(step.verb.toLowerCase())} · {localizeLabel(step.target.toLowerCase())}
 								</span>
 								<strong>
-									{index <= thoughtIndex ? step.result : "AGUARDA"}
+									{localizeLabel(index <= thoughtIndex ? step.result : "AGUARDA")}
 								</strong>
 							</div>
 						))}
@@ -180,9 +180,9 @@ const CognitiveNetwork: React.FC = () => {
 
 					<div className={styles.coreCaption}>
 						<span className={styles.thinkingStatus}>
-							<i aria-hidden="true" /> PENSANDO · {readout.status}
+							<i aria-hidden="true" /> {localizeLabel(" PENSANDO · ")}{localizeLabel(readout.status)}
 						</span>
-						<strong>CÉREBRO IA</strong>
+						<strong>{localizeLabel("CÉREBRO IA")}</strong>
 					</div>
 				</div>
 
@@ -191,8 +191,8 @@ const CognitiveNetwork: React.FC = () => {
 
 			<footer className={styles.timeline}>
 				<div className={styles.timelineLabels}>
-					<span>ENTENDER</span>
-					<span>DECIDIR</span>
+					<span>{localizeLabel("ENTENDER")}</span>
+					<span>{localizeLabel("DECIDIR")}</span>
 				</div>
 				<svg
 					viewBox="0 0 1200 46"
@@ -213,8 +213,7 @@ const CognitiveNetwork: React.FC = () => {
 					/>
 				</svg>
 				<span className={styles.simulationNote}>
-					SIMULAÇÃO VISUAL DO CÉREBRO ARTIFICIAL
-				</span>
+					{localizeLabel("SIMULAÇÃO VISUAL DO CÉREBRO ARTIFICIAL")}</span>
 			</footer>
 		</section>
 	);

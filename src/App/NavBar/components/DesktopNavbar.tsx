@@ -1,3 +1,4 @@
+import { localizeLabel, useLabelLanguage } from '@/i18n/labels';
 import React, {
   type CSSProperties,
   type ReactNode,
@@ -72,6 +73,7 @@ const DesktopNavbar: React.FC<DesktopNavbarProps> = ({
   goldTheme = false,
   redAccent = false,
 }) => {
+  useLabelLanguage();
   const brandSlotWidth = getBrandSlotWidth(isCompactDesktop);
 
   const brandSlotStyle: CSSProperties = {
@@ -121,7 +123,7 @@ const DesktopNavbar: React.FC<DesktopNavbarProps> = ({
           onClick={onBrandClick}
           compactDesktop={isCompactDesktop}
           logoSrc={logoSrc}
-          invertLogo={lightTheme}
+          sectionId={activeSectionId}
         />
       </div>
 
@@ -131,7 +133,7 @@ const DesktopNavbar: React.FC<DesktopNavbarProps> = ({
             <DesktopNavItemButton
               key={sectionId}
               link={sectionId}
-              label={getLabel(sectionId)}
+              label={localizeLabel(getLabel(sectionId))}
               isActive={activeSectionId === sectionId}
               onClick={() => onNavigateToSection(sectionId)}
               navRef={(element) => {

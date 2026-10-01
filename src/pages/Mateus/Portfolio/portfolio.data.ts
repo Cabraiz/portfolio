@@ -2,9 +2,16 @@ import imagemNexovare from "../../../assets/Mateus/portfolio/nexovare-dashboard-
 import imagem2 from "../../../assets/Mateus/portfolio/innomof-banking-app-premium-v2.webp";
 import imagemGuineBissauCommerce from "../../../assets/Mateus/portfolio/bideiras-marketplace-preview-v1.webp";
 import imagem3 from "../../../assets/Mateus/portfolio/imagem3-barbearia-v3.webp";
-import imagemCentralClube from "../../../assets/Mateus/portfolio/imagem4-central-clube-livro-v1.webp";
+import imagemCentralClube from "../../../assets/Mateus/portfolio/entre-paginas-home-preview-v2.webp";
 import imagem4 from "../../../assets/Mateus/portfolio/imagem4-wagner-v2.webp";
 import imagem5 from "../../../assets/Mateus/portfolio/imagem5-fran-v2.webp";
+import mobileNexovare from "../../../assets/Mateus/portfolio/mobile-summary/nexovare-mobile-summary-v1.webp";
+import mobileBank from "../../../assets/Mateus/portfolio/mobile-summary/app-banco-mobile-summary-v1.webp";
+import mobileBideiras from "../../../assets/Mateus/portfolio/mobile-summary/bideiras-mobile-summary-v1.webp";
+import mobileBarber from "../../../assets/Mateus/portfolio/mobile-summary/app-barbearia-mobile-summary-v1.webp";
+import mobileEntrePaginas from "../../../assets/Mateus/portfolio/mobile-summary/entre-paginas-mobile-summary-v2.webp";
+import mobileWalter from "../../../assets/Mateus/portfolio/mobile-summary/walter-adv-mobile-summary-v1.webp";
+import mobileFran from "../../../assets/Mateus/portfolio/mobile-summary/fran-studio-mobile-summary-v1.webp";
 
 import logoNexovare from "../../../assets/Mateus/portfolio/logos/refined/nexovare-nx-mark-v2.png";
 import logo2 from "../../../assets/Mateus/portfolio/logos/logo2.webp";
@@ -40,6 +47,7 @@ export const portfolioProjects: ReadonlyArray<PortfolioProject> = [
     name: "NEXOVARE",
     year: "2021",
     imageSrc: imagemNexovare,
+    mobileImageSrc: mobileNexovare,
     imageAlt: "Preview do painel de gestão Nexovare",
     logoSrc: logoNexovare,
     logoAlt: "Monograma NX do ecossistema Nexovare",
@@ -67,6 +75,7 @@ export const portfolioProjects: ReadonlyArray<PortfolioProject> = [
     name: "APP BANCO",
     year: "2022",
     imageSrc: imagem2,
+    mobileImageSrc: mobileBank,
     imageAlt: "Preview do projeto APP BANCO",
     logoSrc: logo2,
     logoAlt: "Logo do projeto APP BANCO",
@@ -94,6 +103,7 @@ export const portfolioProjects: ReadonlyArray<PortfolioProject> = [
     name: "BIDEIRAS",
     year: "2024",
     imageSrc: imagemGuineBissauCommerce,
+    mobileImageSrc: mobileBideiras,
     imageAlt: "Preview do marketplace Bideiras em Guiné-Bissau",
     logoSrc: logoGuineBissauCommerce,
     logoAlt: "Ícone da Bideiras em forma de sacola nas cores da Guiné-Bissau",
@@ -121,6 +131,7 @@ export const portfolioProjects: ReadonlyArray<PortfolioProject> = [
     name: "APP BARBEARIA",
     year: "2023",
     imageSrc: imagem3,
+    mobileImageSrc: mobileBarber,
     imageAlt: "Preview do projeto APP BARBEARIA",
     logoSrc: logo3,
     logoAlt: "Logo do projeto APP BARBEARIA",
@@ -148,6 +159,7 @@ export const portfolioProjects: ReadonlyArray<PortfolioProject> = [
     name: "Entre Paginas",
     year: "2026",
     imageSrc: imagemCentralClube,
+    mobileImageSrc: mobileEntrePaginas,
     imageAlt: "Página inicial do projeto Entre Paginas",
     logoSrc: logoCentralClube,
     logoAlt: "Logo Entre Paginas",
@@ -175,6 +187,7 @@ export const portfolioProjects: ReadonlyArray<PortfolioProject> = [
     name: "Walter Adv",
     year: "2020",
     imageSrc: imagem4,
+    mobileImageSrc: mobileWalter,
     imageAlt: "Preview do projeto Walter Adv",
     logoSrc: logo4,
     logoAlt: "Logo do projeto Walter Adv",
@@ -202,6 +215,7 @@ export const portfolioProjects: ReadonlyArray<PortfolioProject> = [
     name: "Fran Studio",
     year: "2021",
     imageSrc: imagem5,
+    mobileImageSrc: mobileFran,
     imageAlt: "Preview do projeto Fran Studio",
     logoSrc: logo5,
     logoAlt: "Logo do projeto Fran Studio",

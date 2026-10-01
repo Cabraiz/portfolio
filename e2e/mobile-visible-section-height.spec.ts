@@ -21,7 +21,7 @@ for (const viewport of [
 ]) {
   test(`componentes reais cabem na tela ${viewport.width}x${viewport.height}`, async ({ browser }) => {
     test.setTimeout(90_000);
-    const context = await browser.newContext({ viewport, isMobile: true, hasTouch: true, reducedMotion: "reduce" });
+    const context = await browser.newContext({locale:'pt-BR', viewport, isMobile: true, hasTouch: true, reducedMotion: "reduce" });
     const page = await context.newPage();
     for (const route of routes) {
       await test.step(route.id, async () => {

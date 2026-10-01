@@ -40,7 +40,7 @@ async function expectScene(page: Page, id: 'home' | 'portfolio') {
 
 for (const id of ['home','portfolio'] as const) {
   test(`rotação e F5 preservam a cena ${id}`, async ({browser}) => {
-    const context = await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
+    const context = await browser.newContext({locale:'pt-BR',viewport:{width:390,height:844},isMobile:true,hasTouch:true});
     const page = await context.newPage();
     await page.goto(new URL(`/${id}`,test.info().project.use.baseURL).toString(),{waitUntil:'networkidle'});
     await expectScene(page,id);
@@ -57,7 +57,7 @@ for (const id of ['home','portfolio'] as const) {
 }
 
 test('resize e retorno preservam o progresso da rolagem livre', async ({browser}) => {
-  const context = await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
+  const context = await browser.newContext({locale:'pt-BR',viewport:{width:390,height:844},isMobile:true,hasTouch:true});
   const page = await context.newPage();
   await page.goto(new URL('/home',test.info().project.use.baseURL).toString(),{waitUntil:'networkidle'});
   await expectScene(page,'home');
@@ -81,7 +81,7 @@ test('resize e retorno preservam o progresso da rolagem livre', async ({browser}
 for (const viewport of [{width:283,height:500},{width:320,height:568},{width:390,height:694},{width:390,height:844},{width:430,height:932},{width:667,height:375}]) {
   test(`F5 e ciclo de foco mantêm conteúdo inteiro ${viewport.width}x${viewport.height}`, async ({browser}) => {
     test.setTimeout(120_000);
-    const context = await browser.newContext({viewport,isMobile:true,hasTouch:true});
+    const context = await browser.newContext({locale:'pt-BR',viewport,isMobile:true,hasTouch:true});
     const page = await context.newPage();
     const errors: string[] = []; page.on('pageerror', e => errors.push(e.message));
     await page.goto(new URL('/home',test.info().project.use.baseURL).toString(), {waitUntil:'networkidle'});

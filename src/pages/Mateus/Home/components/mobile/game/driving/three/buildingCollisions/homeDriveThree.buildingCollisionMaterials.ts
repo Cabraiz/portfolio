@@ -8,6 +8,7 @@ import {
   MeshBasicMaterial,
   SRGBColorSpace,
 } from "three";
+import { localizeLabel } from '@/i18n/labels';
 
 export type HomeDriveThreeBuildingCollisionMaterialSet = Readonly<{
   crack: MeshBasicMaterial;
@@ -380,7 +381,7 @@ function drawBentSignTexture(
   context.font = `900 ${Math.round(height * 0.22)}px system-ui, sans-serif`;
   context.textAlign = "center";
   context.textBaseline = "middle";
-  context.fillText("NÃO ERA", 0, -height * 0.035);
+  context.fillText(localizeLabel("NÃO ERA"), 0, -height * 0.035);
   context.fillText("DRIVE-THRU", 0, height * 0.15);
 
   context.restore();
@@ -478,7 +479,7 @@ export function createHomeDriveThreeBuildingCollisionComicMaterial(
       context.textAlign = "center";
       context.textBaseline = "middle";
 
-      const normalizedMessage = message.toUpperCase();
+      const normalizedMessage = localizeLabel(message).toUpperCase();
       const fittedMessage =
         normalizedMessage.length > 20
           ? `${normalizedMessage.slice(0, 18)}…`
