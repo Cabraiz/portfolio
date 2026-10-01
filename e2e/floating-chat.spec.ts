@@ -258,7 +258,7 @@ test("keeps the open chat and its controls inside short and mobile viewports", a
 		});
 		await expect(closeButton).toBeVisible();
 		await expect(closeButton).toHaveText("×");
-		await expect(page.getByText("Atendente virtual", { exact: true })).toBeVisible();
+		await expect(page.getByText("Atendente", { exact: true })).toBeVisible();
 		await expect(page.getByText("Online", { exact: true })).toBeVisible();
 		const closeButtonBox = await closeButton.boundingBox();
 		expect(closeButtonBox, `${viewport.width}x${viewport.height}`).not.toBeNull();

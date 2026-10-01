@@ -57,7 +57,7 @@ for(const viewport of [{width:390,height:844},{width:1366,height:720}]){
     await page.screenshot({path:test.info().outputPath('brain-en.png')});
     await page.goto('/contact',{waitUntil:'networkidle'});
     await page.getByRole('button',{name:'Open chat',exact:true}).click();
-    await expect(page.getByText('Virtual assistant',{exact:true})).toBeVisible();
+    await expect(page.getByText('Assistant',{exact:true})).toBeVisible();
     await expect(page.getByRole('button',{name:'Send',exact:true})).toBeVisible();
     await page.screenshot({path:test.info().outputPath('chat-en.png')});
     await page.locator('input[name="message"]').fill('Mensagem pessoal sem tradução');
@@ -68,7 +68,7 @@ for(const viewport of [{width:390,height:844},{width:1366,height:720}]){
     await page.reload({waitUntil:'networkidle'});
     await expect(page.locator('html')).toHaveAttribute('lang','pt');
     await page.getByRole('button',{name:'Abrir chat',exact:true}).click();
-    await expect(page.getByText('Atendente virtual',{exact:true})).toBeVisible();
+    await expect(page.getByText('Atendente',{exact:true})).toBeVisible();
     await page.screenshot({path:test.info().outputPath('labels-pt.png')});
     expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBe(0);
     await context.close();
