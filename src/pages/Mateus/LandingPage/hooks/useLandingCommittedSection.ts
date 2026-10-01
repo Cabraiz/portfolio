@@ -74,6 +74,11 @@ function buildObservationLookup(
   );
 }
 
+function observationClockNow(): number {
+  // Observations and syncs before the first measurement must share a clock.
+  return globalThis.performance?.now?.() ?? globalThis.Date.now();
+}
+
 function resolveElapsedSinceLastCommit(
   timestamp: number,
   lastCommitAt: number,
@@ -205,7 +210,7 @@ export default function useLandingCommittedSection({
           null;
 
         lastCommitAtRef.current =
-          nextObservation?.timestamp ?? globalThis.Date.now();
+          nextObservation?.timestamp ?? observationClockNow();
 
         onCommittedSectionChange?.(nextSectionId, {
           previousSectionId,
@@ -227,7 +232,7 @@ export default function useLandingCommittedSection({
         }
 
         const observation = observationLookupRef.current.get(sectionId) ?? null;
-        lastCommitAtRef.current = observation?.timestamp ?? globalThis.Date.now();
+        lastCommitAtRef.current = observation?.timestamp ?? observationClockNow();
         onCommittedSectionChangeRef.current?.(sectionId, {
           previousSectionId,
           reason: "sync",
@@ -274,7 +279,7 @@ export default function useLandingCommittedSection({
         );
       } else if (lastCommitAtRef.current <= 0) {
         lastCommitAtRef.current =
-          observedObservation.timestamp ?? globalThis.Date.now();
+          observedObservation.timestamp ?? observationClockNow();
       }
       return;
     }
@@ -282,33 +287,40 @@ export default function useLandingCommittedSection({
     if (currentCommittedSectionId === observedObservation.sectionId) {
       if (lastCommitAtRef.current <= 0) {
         lastCommitAtRef.current =
-          observedObservation.timestamp ?? globalThis.Date.now();
+          observedObservation.timestamp ?? observationClockNow();
       }
       return;
     }
 
-    const shouldCommit = shouldCommitObservedSection({
-      observedObservation,
-      committedObservation: currentCommittedObservation,
-      tokens: resolvedTokens,
-      lastCommitAt: lastCommitAtRef.current,
-    });
+    const tryCommit = (timestamp: number): boolean => {
+      const decisionObservation = { ...observedObservation, timestamp };
+      if (!shouldCommitObservedSection({
+        observedObservation: decisionObservation,
+        committedObservation: currentCommittedObservation,
+        tokens: resolvedTokens,
+        lastCommitAt: lastCommitAtRef.current,
+      })) return false;
 
-    if (!shouldCommit) {
-      return;
-    }
+      const nextReason: LandingCommittedSectionReason =
+        currentCommittedObservation.visibilityRatio <= resolvedTokens.releaseVisibilityThreshold
+          ? "release" : "swap";
+      commitSection(observedObservation.sectionId, nextReason, decisionObservation);
+      return true;
+    };
 
-    const nextReason: LandingCommittedSectionReason =
-      currentCommittedObservation.visibilityRatio <=
-      resolvedTokens.releaseVisibilityThreshold
-        ? "release"
-        : "swap";
+    const now = observationClockNow();
+    if (tryCommit(now)) return;
+    const remaining = resolvedTokens.commitIdleMs -
+      resolveElapsedSinceLastCommit(now, lastCommitAtRef.current);
+    if (remaining <= 0) return;
 
-    commitSection(
-      observedObservation.sectionId,
-      nextReason,
-      observedObservation,
-    );
+    // Geometry can stop changing before cooldown ends. Recheck once without
+    // waiting for another gesture; newer observations/disposal cancel this.
+    const timer = globalThis.setTimeout(() => {
+      if (committedSectionIdRef.current !== currentCommittedSectionId) return;
+      tryCommit(observationClockNow());
+    }, Math.ceil(remaining));
+    return () => globalThis.clearTimeout(timer);
   }, [
     commitSection,
     defaultSectionId,
