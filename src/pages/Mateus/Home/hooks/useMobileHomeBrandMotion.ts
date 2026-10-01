@@ -1,5 +1,6 @@
 import { useLayoutEffect, type RefObject } from "react";
 import { ensureGsapRuntime } from "@/features/scroll/gsapRuntime";
+import usePrefersReducedMotion from "@/features/scroll/usePrefersReducedMotion";
 
 type ElementRef = RefObject<HTMLElement | null>;
 type MotionRefs = {
@@ -19,14 +20,15 @@ export default function useMobileHomeBrandMotion({
   pageRef, eyebrowRef, titleRef, identityRef, introRef, partnersRef,
   partnersHeadingRef, portraitRef,
 }: MotionRefs) {
+  const prefersReducedMotion = usePrefersReducedMotion();
   useLayoutEffect(() => {
     const page = pageRef.current;
     const logo = document.querySelector<HTMLElement>('[data-mobile-brand-pusher="true"]');
     const navbar = logo?.closest("nav");
     const portfolio = page?.closest("main[data-landing-viewport='mobile']")?.querySelector<HTMLElement>("#portfolio");
-    const actions = page?.querySelector<HTMLElement>('nav[aria-label="Ações de contato"]');
+    const actions = page?.querySelector<HTMLElement>('[data-mobile-contact-actions]');
     if (!page || !logo || !navbar || !portfolio || !actions ||
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      prefersReducedMotion) return;
 
     const { gsap, ScrollTrigger } = ensureGsapRuntime();
     const items = [
@@ -165,5 +167,5 @@ export default function useMobileHomeBrandMotion({
       actions.style.removeProperty("--mobile-brand-push");
       actions.style.removeProperty("--mobile-brand-contact");
     };
-  }, [pageRef, eyebrowRef, titleRef, identityRef, introRef, partnersRef, partnersHeadingRef, portraitRef]);
+  }, [pageRef, eyebrowRef, titleRef, identityRef, introRef, partnersRef, partnersHeadingRef, portraitRef, prefersReducedMotion]);
 }

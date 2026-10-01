@@ -115,7 +115,7 @@ function HomeMobile() {
           draggable={false}
         />
 
-        <nav className={styles.actions} aria-label={localizeLabel("Ações de contato")}>
+        <nav className={styles.actions} data-mobile-contact-actions aria-label={localizeLabel("Ações de contato")}>
           <a href={WHATSAPP_HREF} target="_blank" rel="noreferrer noopener">
             <FaWhatsapp aria-hidden="true" />
             <span>{localizeLabel("WhatsApp")}</span>

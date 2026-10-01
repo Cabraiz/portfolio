@@ -1,17 +1,19 @@
 import { useLayoutEffect, type RefObject } from "react";
 import { ensureGsapRuntime } from "@/features/scroll/gsapRuntime";
+import usePrefersReducedMotion from "@/features/scroll/usePrefersReducedMotion";
 
 export default function useMobilePortfolioBrandPush(
   rootRef: RefObject<HTMLElement | null>,
   cardRef: RefObject<HTMLElement | null>,
 ) {
+  const prefersReducedMotion = usePrefersReducedMotion();
   useLayoutEffect(() => {
     const root = rootRef.current;
     const card = cardRef.current;
     const logo = document.querySelector<HTMLElement>('[data-mobile-brand-pusher="true"]');
     const location = root?.querySelector<HTMLElement>('[data-mobile-location="true"]');
     if (!root || !card || !logo || !location || window.innerWidth >= 992 ||
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      prefersReducedMotion) return;
 
     const { gsap } = ensureGsapRuntime();
     const rows = Array.from(location.children) as HTMLElement[];
@@ -74,5 +76,5 @@ export default function useMobilePortfolioBrandPush(
       card.style.removeProperty("--mobile-brand-clearance");
       delete card.dataset.mobileBrandContact;
     };
-  }, [rootRef, cardRef]);
+  }, [rootRef, cardRef, prefersReducedMotion]);
 }
