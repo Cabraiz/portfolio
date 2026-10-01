@@ -27,6 +27,7 @@ import {
 } from "./landingSections.config";
 import useLandingSectionNavigation from "../../../features/navigation/useLandingSectionNavigation";
 import useLandingHistorySync from "./hooks/useLandingHistorySync";
+import useMobileSectionMagnet from "./hooks/useMobileSectionMagnet";
 import useLandingSectionMeasurements from "./hooks/useLandingSectionMeasurements";
 import {
   resolveLandingNavbarFallbackOffsetPx,
@@ -166,6 +167,7 @@ const LandingPageMobile: React.FC = () => {
 
   useLenisEngine();
   useDocumentVisibilitySync();
+  useMobileSectionMagnet(containerRef);
 
   useEffect(() => {
     return subscribeToLandingNavbarOffset("mobile", setNavbarOffsetPx);

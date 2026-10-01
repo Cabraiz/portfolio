@@ -214,7 +214,8 @@ export default function HeroTextColumn({
 							src={seal.src}
 							alt={localizeLabel(seal.alt)}
 							style={{
-								height: isCompactDesktop ? "32px" : "40px",
+height: "auto",
+maxHeight: isCompactDesktop ? "32px" : "40px",
 								maxWidth: "100%",
 								width: "auto",
 								display: "block",

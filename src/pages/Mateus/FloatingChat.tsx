@@ -947,7 +947,7 @@ export default function FloatingChat() {
               />
               <div style={{ display: "flex", flexDirection: "column" }}>
                 <span style={{ fontWeight: 600, fontSize: `${scale(1.1)}rem` }}>
-                  {localizeLabel("Atendente virtual")}</span>
+                  {localizeLabel("Atendente")}</span>
                 <span style={{ fontSize: `${scale(0.9)}rem`, color: "#aaa" }}>
                   {t("floatingChat.availability")}
                 </span>

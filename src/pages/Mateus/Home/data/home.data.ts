@@ -10,8 +10,8 @@ import whatsappQrSvg from "@/assets/Mateus/QRCode/whatsapp-contact-qr.svg";
 
 import bnbSeal from "@/assets/Mateus/Selos/BNB.svg";
 import uniforSeal from "@/assets/Mateus/Selos/UNIFOR.svg";
-import sanaSeal from "@/assets/Mateus/Selos/SANA.svg";
-import sedihSeal from "@/assets/Mateus/Selos/SEDIH.svg";
+import awsCertificationSeal from "@/assets/Mateus/Selos/aws-cloud-practitioner-horizontal-v2.svg";
+import claudeCertificationSeal from "@/assets/Mateus/Selos/claude-certified-associate-horizontal-v2.svg";
 
 import cat1Icon from "@/assets/Mateus/cutieIcons/Cat1.png";
 import cat2Icon from "@/assets/Mateus/cutieIcons/Cat2.png";
@@ -148,19 +148,15 @@ export const seals: readonly SealItem[] = [
     cat: cat2Icon,
   },
   {
-    key: "SANA",
-    src: sanaSeal,
-    alt: "SANA",
+    key: "AWS_CERTIFIED",
+    src: awsCertificationSeal,
+    alt: "AWS Certified Cloud Practitioner",
     cat: cat3Icon,
-    style: {
-      scale: "0.75",
-      marginTop: "5px",
-    },
   },
   {
-    key: "SEDIH",
-    src: sedihSeal,
-    alt: "SEDIH",
+    key: "CLAUDE_CERTIFIED",
+    src: claudeCertificationSeal,
+    alt: "Claude Certified Associate",
     cat: cat4Icon,
   },
 ];

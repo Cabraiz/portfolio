@@ -158,7 +158,7 @@ const MOBILE_DEFAULT_RENDER_HINTS: LandingSectionRenderHints = {
 };
 
 function renderSuspenseFallback(
-	variant: "hero" | "portfolio" | "roadmap" | "content",
+	variant: "hero" | "hero-mobile" | "portfolio" | "roadmap" | "content",
 	minHeight: CSSProperties["minHeight"] = "100%"
 ) {
 	return (
@@ -299,7 +299,7 @@ function toLandingSectionDefinition(
 			<Suspense
 				fallback={renderSuspenseFallback(
 					config.id === "home"
-						? "hero"
+						? viewportMode === "mobile" ? "hero-mobile" : "hero"
 						: config.id === "portfolio"
 							? "portfolio"
 							: config.id === "roadMap"

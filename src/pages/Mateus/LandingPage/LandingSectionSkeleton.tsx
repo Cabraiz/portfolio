@@ -1,9 +1,11 @@
 import { JSX, memo, type CSSProperties } from "react";
 
 import styles from "./LandingSectionSkeleton.module.css";
+import HomeMobileSkeleton from '../Home/variants/HomeMobileSkeleton';
 
 export type LandingSectionSkeletonVariant =
   | "hero"
+  | "hero-mobile"
   | "portfolio"
   | "roadmap"
   | "content";
@@ -287,6 +289,7 @@ function LandingSectionSkeletonComponent({
   minHeight,
   fullHeight = true,
 }: LandingSectionSkeletonProps): JSX.Element {
+  if (variant === 'hero-mobile') return <HomeMobileSkeleton className={className} minHeight={minHeight}/>;
   return (
     <div
       className={joinClassNames(

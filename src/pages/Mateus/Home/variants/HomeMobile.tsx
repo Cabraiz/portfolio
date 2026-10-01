@@ -1,5 +1,5 @@
 import { localizeLabel, useLabelLanguage } from '@/i18n/labels';
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { FaLinkedin, FaRegFileAlt, FaWhatsapp } from "react-icons/fa";
 import { SiAnthropic, SiGmail } from "react-icons/si";
 
@@ -8,6 +8,7 @@ import CodexIcon from "../components/CodexIcon";
 import useMobileHomeBrandMotion from "../hooks/useMobileHomeBrandMotion";
 import { RESUME_HREF, WHATSAPP_HREF } from "../data/home.data";
 import styles from "./HomeMobile.module.css";
+import { HomeMobilePortraitSkeleton } from './HomeMobileSkeleton';
 
 const MOBILE_PARTNERS = [
   { label: "LinkedIn", Icon: FaLinkedin },
@@ -25,6 +26,7 @@ const MOBILE_INTRO_LINES = [
 
 function HomeMobile() {
   useLabelLanguage();
+  const [portraitLoaded, setPortraitLoaded] = useState(false);
   const pageRef = useRef<HTMLElement>(null);
   const eyebrowRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
@@ -96,11 +98,20 @@ function HomeMobile() {
           </div>
         </div>
 
+        {!portraitLoaded && <HomeMobilePortraitSkeleton/>}
         <img
           ref={portraitRef}
           className={styles.portrait}
           src={portrait}
           alt={localizeLabel("Mateus Cabral")}
+          width={1024}
+          height={1536}
+          onLoad={(event) => {
+            const image = event.currentTarget;
+            void image.decode().catch(() => undefined).then(() => {
+              if (image.isConnected) setPortraitLoaded(true);
+            });
+          }}
           draggable={false}
         />
 

@@ -1,9 +1,10 @@
 import { localizeLabel, useLabelLanguage } from '@/i18n/labels';
-import React from "react";
+import React, { useRef } from "react";
 import { Image } from "react-bootstrap";
 import type { LandingSectionId } from '../../../features/navigation/landingSections';
-import symbolMask from '../../../assets/icones/brand-textures/symbol-mask-v1.svg';
+import symbolMask from '../../../assets/icones/brand-textures/symbol-mask-v2.svg';
 import { getBrandMaterial } from '../brandTheme';
+import useBrandSectionContact from '../hooks/useBrandSectionContact';
 
 export type BrandButtonProps = Readonly<{
   onClick: () => void;
@@ -54,7 +55,9 @@ const BrandButton: React.FC<BrandButtonProps> = ({
   compactDesktopLogoSize = 46,
 }) => {
   useLabelLanguage();
-  const material = getBrandMaterial(sectionId);
+  const symbolRef = useRef<HTMLSpanElement | null>(null);
+  const contactSectionId = useBrandSectionContact(symbolRef, sectionId);
+  const material = getBrandMaterial(contactSectionId, mobile);
   const logoSize = resolveLogoSize({
     mobile,
     compactDesktop,
@@ -85,16 +88,19 @@ const BrandButton: React.FC<BrandButtonProps> = ({
       }}
     >
       <span
+        ref={symbolRef}
         data-brand-symbol="true"
+        data-brand-section={contactSectionId}
         data-brand-material={material.name}
-        style={{ position: 'relative', display: 'inline-flex', flex: '0 0 auto', filter: material.shadow }}
+        style={{ position: 'relative', display: 'inline-flex', flex: '0 0 auto' }}
       >
         <span aria-hidden="true" style={{
           position: 'absolute', inset: 0,
-          borderRadius: '18px',
           backgroundColor: material.color,
           backgroundImage: `url("${material.texture}")`,
-          backgroundSize: '100% 100%',
+          backgroundSize: '180% 180%',
+          backgroundPosition: 'center',
+          filter: `brightness(${material.brightness})`,
           maskImage: `url("${symbolMask}")`, WebkitMaskImage: `url("${symbolMask}")`,
           maskSize: 'contain', WebkitMaskSize: 'contain',
           maskRepeat: 'no-repeat', WebkitMaskRepeat: 'no-repeat',

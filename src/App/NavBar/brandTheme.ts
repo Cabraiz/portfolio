@@ -1,19 +1,23 @@
 import type { LandingSectionId } from '../../features/navigation/landingSections';
-import homePaper from '../../assets/icones/brand-textures/home-paper-v1.svg';
-import portfolioMineral from '../../assets/icones/brand-textures/portfolio-mineral-v1.svg';
-import servicesBrass from '../../assets/icones/brand-textures/services-brass-v1.svg';
-import networkBlue from '../../assets/icones/brand-textures/network-blue-v1.svg';
-import photosSilver from '../../assets/icones/brand-textures/photos-silver-v1.svg';
+import homeCotton from '../../assets/icones/brand-textures/home-cotton-v2.webp';
+import homeWhiteCotton from '../../assets/icones/brand-textures/home-white-cotton-v3.webp';
+import portfolioCarpet from '../../assets/icones/brand-textures/portfolio-carpet-v2.webp';
+import servicesSuede from '../../assets/icones/brand-textures/services-suede-v2.webp';
+import networkDenim from '../../assets/icones/brand-textures/network-denim-v2.webp';
+import photosFelt from '../../assets/icones/brand-textures/photos-felt-v2.webp';
 
 const materials = {
-  home: { name: 'paper', texture: homePaper, color: '#962b43', shadow: 'drop-shadow(0 0 .45px rgba(255, 229, 214, .8))' },
-  portfolio: { name: 'mineral', texture: portfolioMineral, color: '#3c8078', shadow: 'drop-shadow(0 1px .6px rgba(17, 62, 57, .15))' },
-  roadMap: { name: 'brass', texture: servicesBrass, color: '#bf9444', shadow: 'drop-shadow(0 1px .6px rgba(0, 0, 0, .2))' },
-  technologies: { name: 'blue', texture: networkBlue, color: '#2b527d', shadow: 'drop-shadow(0 1px .6px rgba(20, 45, 73, .15))' },
-  contact: { name: 'silver', texture: photosSilver, color: '#bbc9cc', shadow: 'drop-shadow(0 1px .6px rgba(0, 0, 0, .2))' },
+  home: { name: 'cotton', texture: homeCotton, color: '#a84b60', brightness: 1.4 },
+  portfolio: { name: 'carpet', texture: portfolioCarpet, color: '#367b71', brightness: 1 },
+  roadMap: { name: 'suede', texture: servicesSuede, color: '#bc862c', brightness: 1 },
+  technologies: { name: 'denim', texture: networkDenim, color: '#30597f', brightness: 1 },
+  contact: { name: 'felt', texture: photosFelt, color: '#b4bcc0', brightness: 1 },
 };
 
-/** Both navigation variants use the same material, keeping the original mark. */
-export function getBrandMaterial(sectionId: LandingSectionId | '') {
+const desktopHomeMaterial = { name: 'cotton', texture: homeWhiteCotton, color: '#f1f1ee', brightness: 1 };
+
+/** Section textiles share the original mark; desktop Home uses white cotton. */
+export function getBrandMaterial(sectionId: LandingSectionId | '', mobile = false) {
+  if (!mobile && (!sectionId || sectionId === 'home')) return desktopHomeMaterial;
   return materials[sectionId === 'live' ? 'contact' : sectionId || 'home'];
 }

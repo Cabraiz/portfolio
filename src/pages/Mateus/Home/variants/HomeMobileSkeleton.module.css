@@ -1,0 +1,48 @@
+.root {
+  pointer-events: none;
+  user-select: none;
+}
+
+.text {
+  position: relative;
+  color: transparent !important;
+}
+
+.text::after {
+  position: absolute;
+  inset: 20% 0;
+  content: "";
+  border-radius: 3px;
+  background: rgba(52, 99, 92, 0.14);
+  animation: breathe 1.8s ease-in-out infinite alternate;
+}
+
+.lead::after {
+  width: 1.7em;
+  max-width: 100%;
+}
+
+.root svg {
+  fill: rgba(52, 99, 92, 0.14);
+}
+
+.portrait {
+  fill: rgba(52, 99, 92, 0.14);
+  animation: breathe 1.8s ease-in-out infinite alternate;
+  filter: none;
+}
+
+.root nav .text::after,
+.root nav svg {
+  background: rgba(255, 248, 240, 0.3);
+  fill: rgba(255, 248, 240, 0.3);
+}
+
+@keyframes breathe {
+  to { opacity: 0.55; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .text::after,
+  .portrait { animation: none; }
+}
