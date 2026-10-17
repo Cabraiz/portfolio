@@ -6,6 +6,7 @@
 	--atlas-navbar-overlap: 0px;
 	--atlas-camera-x: -37.5%;
 	--atlas-camera-y: -57.2222%;
+	--atlas-scale: 1;
 	position: relative;
 	isolation: isolate;
 	width: 100%;
@@ -130,13 +131,17 @@
 			350px,
 			410px
 		);
-	gap: clamp(14px, 1.6vw, 26px);
+	/* Unidades de viewport já compensadas pelo zoom do atlas. */
+	--atlas-vw: calc(1vw / var(--atlas-scale));
+	--atlas-vh: calc(1dvh / var(--atlas-scale));
+	gap: clamp(14px, calc(1.6 * var(--atlas-vw)), 26px);
 	align-items: center;
 	width: min(100%, 1560px);
-	min-height: 100dvh;
+	min-height: calc(100 * var(--atlas-vh));
 	margin: 0 auto;
-	padding: clamp(28px, 4dvh, 48px) clamp(22px, 3vw, 48px)
-		clamp(18px, 3dvh, 34px);
+	padding: clamp(28px, calc(4 * var(--atlas-vh)), 48px)
+		clamp(22px, calc(3 * var(--atlas-vw)), 48px)
+		clamp(18px, calc(3 * var(--atlas-vh)), 34px);
 	box-sizing: border-box;
 }
 
@@ -147,7 +152,7 @@
 	flex-direction: column;
 	justify-content: center;
 	min-width: 0;
-	height: min(590px, calc(100dvh - 112px));
+	height: min(590px, calc(100 * var(--atlas-vh) - 112px));
 	min-height: 520px;
 }
 
@@ -157,7 +162,10 @@
 	gap: 7px;
 }
 
-@media (min-width: 992px) and (max-height: 820px) {
+/* Com o atlas escalado (ver .atlasFrame), a altura efetiva fica <= 820px
+   sempre que a viewport for mais larga que 1280/820. */
+@media (min-width: 992px) and (max-height: 820px),
+	(min-width: 992px) and (min-aspect-ratio: 64 / 41) {
 	.projectList {
 		transform: translateY(56px);
 	}
@@ -287,7 +295,7 @@
 	z-index: 2;
 	align-self: stretch;
 	min-width: 0;
-	height: min(650px, calc(100dvh - 142px));
+	height: min(650px, calc(100 * var(--atlas-vh) - 142px));
 	min-height: 550px;
 }
 
@@ -616,9 +624,35 @@
 }
 
 @media (min-width: 992px) {
+	/* O layout desktop é desenhado para 1280×600 (720p). Em telas maiores o
+	   atlas inteiro cresce na mesma proporção em vez de sobrar espaço vazio.
+	   tan(atan2(a, b)) devolve a razão a/b sem unidade. */
+	.portfolioRoot {
+		--atlas-scale: max(
+			1,
+			min(tan(atan2(100vw, 1280px)), tan(atan2(100dvh, 600px)))
+		);
+	}
+
+	/* Marcadores e rotas do mapa ficam em % da viewport; o zoom só aumenta
+	   o tamanho deles, sem mudar a posição. */
+	.atlasFrame,
+	.journeyRoute,
+	.journeyTraveler,
+	.journeyMarker,
+	.routeLine,
+	.routeHub,
+	.mapPoint {
+		zoom: var(--atlas-scale);
+	}
+
 	.indexPanel {
 		transform: translateY(
-			clamp(-84px, calc(-84px + (720px - 100dvh) * 0.3), -20px)
+			clamp(
+				-84px,
+				calc(-84px + (720px - 100 * var(--atlas-vh)) * 0.3),
+				-20px
+			)
 		);
 	}
 
@@ -637,7 +671,7 @@
 
 .locationHeader strong {
 	font-family: "Arial Narrow", "Roboto Condensed", sans-serif;
-	font-size: clamp(22px, 2vw, 30px);
+	font-size: clamp(22px, calc(2 * var(--atlas-vw)), 30px);
 	font-weight: 900;
 	line-height: 0.95;
 	text-transform: uppercase;
@@ -708,7 +742,7 @@
 	margin: 0;
 	color: #082f31;
 	font-family: "Arial Narrow", "Roboto Condensed", sans-serif;
-	font-size: clamp(20px, 1.8vw, 28px);
+	font-size: clamp(20px, calc(1.8 * var(--atlas-vw)), 28px);
 	font-weight: 900;
 	line-height: 0.96;
 	letter-spacing: -0.025em;
