@@ -10,6 +10,7 @@ import {
 import { useLocation } from "react-router-dom";
 
 import useLandingSectionNavigation from "@/features/navigation/useLandingSectionNavigation";
+import { readPendingLandingScrollTarget } from "@/features/scroll/landingScrollTarget";
 
 import flagBrazil from "../../../assets/Mateus/portfolio/flags/brasil-semicircle-realistic-v4.webp";
 import flagUnitedStates from "../../../assets/Mateus/portfolio/flags/estados-unidos-semicircle-realistic-v3.webp";
@@ -215,6 +216,7 @@ export default function Portfolio() {
 			if (
 				isMagnetizingRef.current ||
 				!isScrollingDown ||
+				readPendingLandingScrollTarget() !== null ||
                                 globalThis.innerWidth < 992 ||
 				prefersReducedMotion.matches
 			) {
@@ -239,8 +241,9 @@ export default function Portfolio() {
 			}
 
 			isMagnetizingRef.current = true;
+			// Mesmo alinhamento do menu: a seção ocupa a viewport inteira (top 0).
 			navigateToSection("portfolio", {
-				offsetPx: navbarHeight,
+				offsetPx: 0,
 				duration: PORTFOLIO_MAGNET_DURATION_SECONDS,
 				replace: true,
 				syncUrl: true,

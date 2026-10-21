@@ -297,7 +297,9 @@ function LandingSectionSkeletonComponent({
         fullHeight && styles.fullHeight,
         className
       )}
-      style={{ minHeight }}
+      // O skeleton ocupa exatamente a seção: em telas baixas o layout falso
+      // não pode crescer além dela (e virar a altura medida da seção).
+      style={{ minHeight, maxHeight: minHeight }}
       aria-hidden="true"
       data-skeleton-variant={variant}
     >

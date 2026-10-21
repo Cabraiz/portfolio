@@ -25,9 +25,12 @@ export function useDocumentVisibilitySync(): void {
     const currentDocument = globalThis.document;
     let visiblePosition = captureLandingScrollAnchor();
     let positionFrame: number | null = null;
+    let desktopResizeAnchor: LandingScrollAnchor | null = null;
+    let desktopResizeFrame: number | null = null;
+    let desktopResizeSettleTimer: number | null = null;
 
     const rememberVisiblePosition = () => {
-      if (positionFrame !== null || preservedPositionRef.current || refreshFrameRef.current !== null) return;
+      if (positionFrame !== null || preservedPositionRef.current || refreshFrameRef.current !== null || desktopResizeAnchor) return;
       positionFrame = requestAnimationFrame(() => {
         positionFrame = null;
         if (!preservedPositionRef.current && refreshFrameRef.current === null) visiblePosition = captureLandingScrollAnchor();
@@ -93,7 +96,58 @@ export function useDocumentVisibilitySync(): void {
       restoreScrollPosition();
     };
 
+    const cancelDesktopResizeRestore = () => {
+      if (desktopResizeFrame !== null) cancelAnimationFrame(desktopResizeFrame);
+      if (desktopResizeSettleTimer !== null) globalThis.clearTimeout(desktopResizeSettleTimer);
+      desktopResizeFrame = null;
+      desktopResizeSettleTimer = null;
+      desktopResizeAnchor = null;
+    };
+
+    const restoreDesktopResizeAnchor = () => {
+      if (!desktopResizeAnchor) return;
+      // A navigation started after the resize owns the scroll position now.
+      if (readPendingLandingScrollTarget() !== null) {
+        cancelDesktopResizeRestore();
+        return;
+      }
+      lenis.resize();
+      const restoredScrollY = resolveLandingScrollAnchor(desktopResizeAnchor);
+      lenis.scrollTo(restoredScrollY, {immediate: true, force: true});
+      globalThis.window.scrollTo({top: restoredScrollY, behavior: 'auto'});
+      updateScrollRuntime();
+    };
+
+    // Desktop sections are exactly one viewport tall, so a resize moves every
+    // section boundary. Keep the scene position from before the resize (a
+    // pending navigation target wins) and reapply it until layout settles.
+    const handleDesktopViewportResize = () => {
+      if (currentDocument.hidden || preservedPositionRef.current) return;
+      if (!desktopResizeAnchor) {
+        const pendingTarget = readPendingLandingScrollTarget();
+        desktopResizeAnchor = pendingTarget === null ? visiblePosition : captureLandingScrollAnchor(pendingTarget);
+        if (pendingTarget !== null) clearPendingLandingScrollTarget(pendingTarget);
+      }
+      if (desktopResizeFrame !== null) cancelAnimationFrame(desktopResizeFrame);
+      desktopResizeFrame = requestAnimationFrame(() => {
+        desktopResizeFrame = null;
+        restoreDesktopResizeAnchor();
+      });
+      if (desktopResizeSettleTimer !== null) globalThis.clearTimeout(desktopResizeSettleTimer);
+      desktopResizeSettleTimer = globalThis.window.setTimeout(() => {
+        desktopResizeSettleTimer = null;
+        refreshScrollRuntime();
+        restoreDesktopResizeAnchor();
+        desktopResizeAnchor = null;
+        visiblePosition = captureLandingScrollAnchor();
+      }, 220);
+    };
+
     const handleViewportResize = () => {
+      if (document.querySelector("main[data-landing-viewport='desktop']")) {
+        handleDesktopViewportResize();
+        return;
+      }
       if (!document.querySelector("main[data-landing-viewport='mobile']")) return;
       if (currentDocument.hidden || preservedPositionRef.current) return;
       // CSS has already resized by this event. Keep the snapshot from before
@@ -115,6 +169,11 @@ export function useDocumentVisibilitySync(): void {
     globalThis.window.addEventListener("focus", restoreScrollPosition);
     globalThis.window.addEventListener('scroll', rememberVisiblePosition, {passive: true});
     globalThis.window.addEventListener('resize', handleViewportResize);
+    // A user gesture during a resize wins over the preserved position.
+    globalThis.window.addEventListener('wheel', cancelDesktopResizeRestore, {passive: true});
+    globalThis.window.addEventListener('touchstart', cancelDesktopResizeRestore, {passive: true});
+    globalThis.window.addEventListener('keydown', cancelDesktopResizeRestore);
+    globalThis.window.addEventListener('pointerdown', cancelDesktopResizeRestore, {passive: true});
 
     return () => {
       currentDocument.removeEventListener(
@@ -125,7 +184,12 @@ export function useDocumentVisibilitySync(): void {
       globalThis.window.removeEventListener("focus", restoreScrollPosition);
       globalThis.window.removeEventListener('scroll', rememberVisiblePosition);
       globalThis.window.removeEventListener('resize', handleViewportResize);
+      globalThis.window.removeEventListener('wheel', cancelDesktopResizeRestore);
+      globalThis.window.removeEventListener('touchstart', cancelDesktopResizeRestore);
+      globalThis.window.removeEventListener('keydown', cancelDesktopResizeRestore);
+      globalThis.window.removeEventListener('pointerdown', cancelDesktopResizeRestore);
       if (positionFrame !== null) cancelAnimationFrame(positionFrame);
+      cancelDesktopResizeRestore();
       cancelPendingRefresh();
       preservedPositionRef.current = null;
       pendingPositionRef.current = null;

@@ -297,10 +297,37 @@ function scrollToSectionTarget(params: Readonly<{
   }
 
   if (targetScrollTop !== null && lenis) {
+    const browserWindow = globalThis.window;
+    const interruptionEvents = ["wheel", "touchstart", "pointerdown", "keydown"] as const;
+
+    // O Lenis não chama onComplete quando o usuário interrompe a animação;
+    // sem isso o alvo antigo ficaria pendente e seria reaplicado depois.
+    // Nem toda conclusão passa pelo onComplete (ex.: rolagem nativa do teclado
+    // em andamento), então a duração conhecida também libera o alvo.
+    let releaseTimerId: number | undefined;
+    const releaseTarget = () => {
+      interruptionEvents.forEach((eventName) => {
+        browserWindow?.removeEventListener(eventName, releaseTarget, true);
+      });
+      browserWindow?.clearTimeout(releaseTimerId);
+      clearPendingLandingScrollTarget(targetScrollTop);
+    };
+
+    interruptionEvents.forEach((eventName) => {
+      browserWindow?.addEventListener(eventName, releaseTarget, {
+        capture: true,
+        passive: true,
+      });
+    });
+    releaseTimerId = browserWindow?.setTimeout(
+      releaseTarget,
+      Math.max(250, duration * 1000 + 250),
+    );
+
     lenis.scrollTo(targetScrollTop, {
       duration,
       easing: createEaseOutCubic,
-      onComplete: () => clearPendingLandingScrollTarget(targetScrollTop),
+      onComplete: releaseTarget,
     });
     return;
   }
