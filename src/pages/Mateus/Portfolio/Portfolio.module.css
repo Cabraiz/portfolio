@@ -4,6 +4,9 @@
 	--atlas-teal: #0b6662;
 	--atlas-paper: #edf7f4;
 	--atlas-navbar-overlap: 0px;
+	/* O mapa fica enquadrado sob o navbar sem invadir a seção anterior:
+	   antes o fundo crescia 78px para cima ao ativar e a borda pulava. */
+	--atlas-center-shift: calc((var(--app-navbar-height, 70px) + 8px) / 2);
 	--atlas-camera-x: -37.5%;
 	--atlas-camera-y: -57.2222%;
 	--atlas-scale: 1;
@@ -16,10 +19,6 @@
 	background: #dcefeb;
 	font-family: "Inter", Arial, sans-serif;
 	content-visibility: visible;
-}
-
-.portfolioRoot[data-portfolio-active="true"] {
-	--atlas-navbar-overlap: calc(var(--app-navbar-height, 70px) + 8px);
 }
 
 .portfolioRoot[data-map-view="app-bank"] {
@@ -54,7 +53,7 @@
 
 .worldSurface {
 	position: absolute;
-	top: 50%;
+	top: calc(50% - var(--atlas-center-shift));
 	left: 50%;
 	width: 401.7857%;
 	aspect-ratio: 2 / 1;
@@ -944,11 +943,6 @@
 }
 
 @media (max-width: 991px) {
-        /* Mobile already includes the header in its full viewport scene. */
-        .portfolioRoot[data-portfolio-active="true"] {
-                --atlas-navbar-overlap: 0px;
-        }
-
         .portfolioRoot {
                 --mobile-portfolio-height: 100dvh;
 		width: 100%;
