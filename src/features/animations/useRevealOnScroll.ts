@@ -4,7 +4,7 @@ import type { RefObject } from "react";
 import {
   createScrollTrigger,
   gsap,
-  refreshScrollRuntime,
+  scheduleScrollRuntimeRefresh,
 } from "../scroll/gsapRuntime";
 import { shouldDisableScrollFades } from "../scroll/scrollMotionFlags";
 
@@ -225,7 +225,7 @@ export function useRevealOnScroll({
     });
 
     if (refreshOnMount) {
-      refreshScrollRuntime();
+      scheduleScrollRuntimeRefresh();
     }
 
     return () => {

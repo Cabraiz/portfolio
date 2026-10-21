@@ -463,7 +463,7 @@ export default function Services() {
 		}, root);
 
 		const refreshFrame = window.requestAnimationFrame(() => {
-			ScrollTrigger.refresh();
+			ScrollTrigger.refresh(true);
 		});
 
 		return () => {

@@ -425,7 +425,7 @@ function HomeDesktop() {
 		}, container);
 
 		const refreshFrame = window.requestAnimationFrame(() => {
-			ScrollTrigger.refresh();
+			ScrollTrigger.refresh(true);
 		});
 
 		return () => {
