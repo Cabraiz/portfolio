@@ -4,6 +4,16 @@ html {
   margin: 0;
 }
 
+/*
+ * O Bootstrap liga scroll-behavior: smooth no :root. Com isso todo scrollTo
+ * "instantâneo" (alinhamento de rota, medição do ScrollTrigger, restauração
+ * após resize) virava uma animação nativa e a página pulava sozinha. A
+ * suavização da roda é do Lenis; as navegações animam por conta própria.
+ */
+:root {
+  scroll-behavior: auto;
+}
+
 body {
   font-family: var(--font-family-base);
   -webkit-font-smoothing: antialiased;

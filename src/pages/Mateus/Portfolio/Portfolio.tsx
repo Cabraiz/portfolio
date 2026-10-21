@@ -33,6 +33,18 @@ const PORTFOLIO_MAGNET_ENTRY_RATIO = 0.1;
 // Um gesto rápido de roda pode atravessar o topo do portfólio antes de parar;
 // até esta fração da tela além da borda o ímã ainda traz a seção de volta.
 const PORTFOLIO_MAGNET_OVERSHOOT_RATIO = 0.35;
+// Só gestos do usuário acionam o ímã: rolagens programáticas (menu,
+// realinhamento após resize) não podem ser confundidas com uma entrada.
+const PORTFOLIO_MAGNET_USER_INPUT_WINDOW_MS = 1200;
+const PORTFOLIO_MAGNET_SCROLL_KEYS = new Set([
+	"ArrowDown",
+	"ArrowUp",
+	"PageDown",
+	"PageUp",
+	" ",
+	"Home",
+	"End",
+]);
 
 const COUNTRY_FLAGS: Readonly<Record<string, string>> = {
 	Brasil: flagBrazil,
@@ -210,6 +222,17 @@ export default function Portfolio() {
 		let isScrollingDown = false;
 		let gestureStartTop: number | null = null;
 		let lastMagnetWasDownward = true;
+		let lastUserScrollInputAt = Number.NEGATIVE_INFINITY;
+
+		const rememberUserScrollInput = () => {
+			lastUserScrollInputAt = performance.now();
+		};
+		const rememberUserScrollKey = (event: KeyboardEvent) => {
+			if (PORTFOLIO_MAGNET_SCROLL_KEYS.has(event.key)) rememberUserScrollInput();
+		};
+		const hasRecentUserScrollInput = () =>
+			performance.now() - lastUserScrollInputAt <
+			PORTFOLIO_MAGNET_USER_INPUT_WINDOW_MS;
 
 		const releaseMagnet = () => {
 			isMagnetizingRef.current = false;
@@ -229,6 +252,7 @@ export default function Portfolio() {
 
 			if (
 				isMagnetizingRef.current ||
+				!hasRecentUserScrollInput() ||
 				readPendingLandingScrollTarget() !== null ||
                                 globalThis.innerWidth < 992 ||
 				prefersReducedMotion.matches
@@ -315,6 +339,14 @@ export default function Portfolio() {
 
 			if (isMagnetizingRef.current) return;
 
+			// Rolagem sem gesto do usuário (menu, resize): encerra qualquer gesto.
+			if (!hasRecentUserScrollInput()) {
+				globalThis.clearTimeout(idleTimerId);
+				idleTimerId = undefined;
+				gestureStartTop = null;
+				return;
+			}
+
 			// Primeiro evento depois de uma pausa: registra onde o gesto começou.
 			if (idleTimerId === undefined) {
 				gestureStartTop = root.getBoundingClientRect().top + scrollDelta;
@@ -328,9 +360,21 @@ export default function Portfolio() {
 		};
 
 		globalThis.addEventListener("scroll", scheduleMagnet, { passive: true });
+		globalThis.addEventListener("wheel", rememberUserScrollInput, {
+			capture: true,
+			passive: true,
+		});
+		globalThis.addEventListener("touchmove", rememberUserScrollInput, {
+			capture: true,
+			passive: true,
+		});
+		globalThis.addEventListener("keydown", rememberUserScrollKey, true);
 
 		return () => {
 			globalThis.removeEventListener("scroll", scheduleMagnet);
+			globalThis.removeEventListener("wheel", rememberUserScrollInput, true);
+			globalThis.removeEventListener("touchmove", rememberUserScrollInput, true);
+			globalThis.removeEventListener("keydown", rememberUserScrollKey, true);
 			globalThis.clearTimeout(idleTimerId);
 			globalThis.clearTimeout(releaseTimerId);
 			isMagnetizingRef.current = false;
