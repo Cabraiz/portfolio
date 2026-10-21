@@ -193,6 +193,35 @@ async function wheel(page: Page, deltaY: number, times = 1): Promise<void> {
 	}
 }
 
+/**
+ * Gesto de roda com ritmo fixo, disparado na própria página: o ritmo dos
+ * eventos do Playwright varia com a carga do runner.
+ */
+async function wheelGesture(
+	page: Page,
+	notches: number,
+	deltaY: number,
+	gapMs = 40
+): Promise<void> {
+	await page.evaluate(
+		async ([count, delta, gap]) => {
+			for (let index = 0; index < count; index += 1) {
+				document.elementFromPoint(640, 300)?.dispatchEvent(
+					new WheelEvent("wheel", {
+						deltaY: delta,
+						bubbles: true,
+						cancelable: true,
+						clientX: 640,
+						clientY: 300,
+					})
+				);
+				await new Promise((resolve) => setTimeout(resolve, gap));
+			}
+		},
+		[notches, deltaY, gapMs] as const
+	);
+}
+
 const RESIZE_ROUND_TRIPS: readonly (readonly [Size, Size])[] = [
 	[SIZES[0], SIZES[3]],
 	[SIZES[3], SIZES[1]],
@@ -331,25 +360,28 @@ for (const size of [SIZES[3], SIZES[0]]) {
 	}) => {
 		await openLanding(page, size);
 		// Cliques de 100px a cada 40ms (um gesto rápido): passa ~10% do topo.
-		// Disparados na página para o ritmo não depender da carga do runner.
-		const notches = Math.floor(size.height / 100) + 2;
-		await page.evaluate(async (count) => {
-			for (let index = 0; index < count; index += 1) {
-				document.elementFromPoint(640, 300)?.dispatchEvent(
-					new WheelEvent("wheel", {
-						deltaY: 100,
-						bubbles: true,
-						cancelable: true,
-						clientX: 640,
-						clientY: 300,
-					})
-				);
-				await new Promise((resolve) => setTimeout(resolve, 40));
-			}
-		}, notches);
+		await wheelGesture(page, Math.floor(size.height / 100) + 2, 100);
 		await expectSettled(page, "ímã depois de passar do portfólio", "portfolio");
 	});
 }
+
+test("descer até serviços e voltar subindo encaixa no portfólio", async ({
+	page,
+}) => {
+	await openLanding(page, SIZES[3], "portfolio");
+
+	for (const notchesUp of [5, 8]) {
+		await wheelGesture(page, 12, 100);
+		await expectSettled(page, "desceu até serviços");
+		await wheelGesture(page, notchesUp, -100);
+		await expectSettled(page, `subiu ${notchesUp} cliques`, "portfolio");
+	}
+
+	await wheelGesture(page, 6, 100);
+	await expectSettled(page, "desceu até o meio de serviços");
+	await wheelGesture(page, 2, -100, 300);
+	await expectSettled(page, "subiu devagar", "portfolio");
+});
 
 test("descer devagar a partir do portfólio alinhado não é puxado de volta", async ({
 	page,
