@@ -209,13 +209,14 @@ export default function Portfolio() {
 		let previousScrollY = globalThis.scrollY;
 		let isScrollingDown = false;
 		let gestureStartTop: number | null = null;
+		let lastMagnetWasDownward = true;
 
 		const releaseMagnet = () => {
 			isMagnetizingRef.current = false;
 			// Um clique de roda que chegue logo após o encaixe ainda faz parte do
 			// mesmo gesto: confere de novo quando a rolagem parar.
-			gestureStartTop = 5;
-			isScrollingDown = true;
+			gestureStartTop = lastMagnetWasDownward ? 5 : -5;
+			isScrollingDown = lastMagnetWasDownward;
 			globalThis.clearTimeout(idleTimerId);
 			idleTimerId = globalThis.window.setTimeout(
 				magnetizePortfolio,
@@ -228,7 +229,6 @@ export default function Portfolio() {
 
 			if (
 				isMagnetizingRef.current ||
-				!isScrollingDown ||
 				readPendingLandingScrollTarget() !== null ||
                                 globalThis.innerWidth < 992 ||
 				prefersReducedMotion.matches
@@ -247,20 +247,46 @@ export default function Portfolio() {
 					Math.max(rect.top, navbarHeight)
 			);
 			const visibleRatio = visibleHeight / Math.max(globalThis.innerHeight, 1);
-			const isEnteringFromHome = rect.top > navbarHeight + 4;
-			const startedBelowTop = gestureStartTop !== null && gestureStartTop > 4;
-			const overshotFromHome =
-				startedBelowTop &&
-				rect.top < -2 &&
-				rect.top > -globalThis.innerHeight * PORTFOLIO_MAGNET_OVERSHOOT_RATIO;
+			const overshootLimit =
+				globalThis.innerHeight * PORTFOLIO_MAGNET_OVERSHOOT_RATIO;
+			const startTop = gestureStartTop;
 			gestureStartTop = null;
 
+			// Descendo da home: entrou na tela ou passou um pouco do topo.
+			const isEnteringFromHome =
+				isScrollingDown && rect.top > navbarHeight + 4;
+			const overshotFromHome =
+				isScrollingDown &&
+				startTop !== null &&
+				startTop > 4 &&
+				rect.top < -2 &&
+				rect.top > -overshootLimit;
+			// Subindo de serviços: voltou a aparecer ou passou um pouco do topo.
+			const isEnteringFromServices =
+				!isScrollingDown &&
+				startTop !== null &&
+				startTop < rect.top - 1 &&
+				rect.top < -2;
+			const overshotFromServices =
+				!isScrollingDown &&
+				startTop !== null &&
+				startTop < -2 &&
+				rect.top > 2 &&
+				rect.top < overshootLimit;
+
 			if (
-				!(isEnteringFromHome || overshotFromHome) ||
+				!(
+					isEnteringFromHome ||
+					overshotFromHome ||
+					isEnteringFromServices ||
+					overshotFromServices
+				) ||
 				visibleRatio < PORTFOLIO_MAGNET_ENTRY_RATIO
 			) {
 				return;
 			}
+
+			lastMagnetWasDownward = isScrollingDown;
 
 			isMagnetizingRef.current = true;
 			// Mesmo alinhamento do menu: a seção ocupa a viewport inteira (top 0).
