@@ -218,6 +218,44 @@ export default function useLandingSectionMeasurements<
     };
   }, [commitMeasurement, measureElement]);
 
+  useEffect(() => {
+    if (typeof globalThis.window === "undefined") {
+      return;
+    }
+
+    const browserWindow = globalThis.window;
+    let viewportWidth = browserWindow.innerWidth;
+    let viewportHeight = browserWindow.innerHeight;
+
+    /**
+     * Alturas medidas valem só para o tamanho de viewport em que foram lidas.
+     * Sem isso, uma seção desmontada mantém como placeholder a altura de
+     * outra janela (ex.: 1080px numa tela de 720px) e desalinha a landing.
+     */
+    const handleResize = (): void => {
+      if (
+        browserWindow.innerWidth === viewportWidth &&
+        browserWindow.innerHeight === viewportHeight
+      ) {
+        return;
+      }
+
+      viewportWidth = browserWindow.innerWidth;
+      viewportHeight = browserWindow.innerHeight;
+
+      setMeasurementState({});
+      sectionElementsRef.current.forEach((element, sectionId) => {
+        measureElement(sectionId, element);
+      });
+    };
+
+    browserWindow.addEventListener("resize", handleResize, { passive: true });
+
+    return () => {
+      browserWindow.removeEventListener("resize", handleResize);
+    };
+  }, [measureElement]);
+
   const measurements = useMemo<LandingSectionMeasurementsMap<SectionId>>(() => {
     const nextMap = new Map<SectionId, LandingSectionMeasurement<SectionId>>();
 

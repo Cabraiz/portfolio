@@ -15,9 +15,7 @@ function alignmentOffset(section: HTMLElement): number {
 
 /** Store a position in the scene, rather than pixels from a previous viewport. */
 export function captureLandingScrollAnchor(scrollY = window.scrollY): LandingScrollAnchor {
-  // Desktop has pinned scenes whose document geometry can change during a GSAP
-  // refresh. Preserve its existing absolute restoration; mobile uses scene anchors.
-  const sections = Array.from(document.querySelectorAll<HTMLElement>("main[data-landing-viewport='mobile'] > section[data-page-section='true']"));
+  const sections = Array.from(document.querySelectorAll<HTMLElement>("main[data-landing-viewport] > section[data-page-section='true']"));
   let section = sections[0] ?? null;
   for (const candidate of sections) {
     const start = candidate.getBoundingClientRect().top + window.scrollY - alignmentOffset(candidate);
