@@ -337,6 +337,97 @@ test("interromper uma navegação com a roda não deixa alvo pendente", async ({
   ).toBeLessThanOrEqual(2);
 });
 
+for (const size of [SIZES[3], SIZES[0]]) {
+  test(`nenhuma seção pinta por cima da anterior ao rolar devagar em ${size.width}x${size.height}`, async ({
+    page,
+  }) => {
+    test.setTimeout(120_000);
+    await openLanding(page, size);
+
+    // Desce e sobe em passos curtos, esperando a seção ativa assentar: a
+    // borda visível entre duas seções tem que acompanhar o scroll, sem
+    // camadas (fundo, textura, mapa) invadindo a seção de cima.
+    const intrusions = await page.evaluate(async () => {
+      const sections = Array.from(
+        document.querySelectorAll<HTMLElement>(
+          "main[data-landing-viewport='desktop'] > section[data-page-section='true']",
+        ),
+      );
+      const paints = (element: Element): boolean => {
+        const style = getComputedStyle(element);
+        if (
+          style.visibility === "hidden" ||
+          style.display === "none" ||
+          Number(style.opacity) === 0
+        ) {
+          return false;
+        }
+        return (
+          element.tagName === "IMG" ||
+          element.tagName === "CANVAS" ||
+          style.backgroundImage !== "none" ||
+          !/rgba\(0, 0, 0, 0\)|transparent/.test(style.backgroundColor)
+        );
+      };
+      const isClippedAbove = (
+        element: Element,
+        section: HTMLElement,
+        edge: number,
+      ): boolean => {
+        for (
+          let parent = element.parentElement;
+          parent && parent !== section.parentElement;
+          parent = parent.parentElement
+        ) {
+          const style = getComputedStyle(parent);
+          if (
+            style.overflowY !== "visible" &&
+            parent.getBoundingClientRect().top >= edge - 2
+          ) {
+            return true;
+          }
+        }
+        return false;
+      };
+
+      const found = new Set<string>();
+      const maxScroll =
+        document.documentElement.scrollHeight - window.innerHeight;
+      const step = Math.round(window.innerHeight / 12);
+      const positions: number[] = [];
+      for (let y = 0; y <= maxScroll; y += step) positions.push(y);
+      for (let y = maxScroll; y >= 0; y -= step) positions.push(y);
+
+      for (const y of positions) {
+        window.scrollTo(0, y);
+        await new Promise((resolve) => setTimeout(resolve, 260));
+
+        sections.slice(1).forEach((section) => {
+          const edge = section.getBoundingClientRect().top;
+          if (edge < 4 || edge > window.innerHeight - 4) return;
+
+          section.querySelectorAll("*").forEach((element) => {
+            const rect = element.getBoundingClientRect();
+            if (rect.width < 40 || rect.top >= edge - 2 || rect.bottom <= edge - 2) {
+              return;
+            }
+            if (!paints(element) || isClippedAbove(element, section, edge)) {
+              return;
+            }
+            found.add(
+              `${section.id}: ${element.tagName}.${String(element.className).split(" ")[0]} invade ${Math.round(edge - rect.top)}px`,
+            );
+          });
+        });
+      }
+
+      return Array.from(found);
+    });
+
+    expect(intrusions).toEqual([]);
+  });
+}
+
 function createRandom(seed: number): () => number {
   let state = seed;
   return () => {

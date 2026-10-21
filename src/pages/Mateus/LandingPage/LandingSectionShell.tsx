@@ -124,10 +124,12 @@ function getDynamicContentVisualStyle(
         visibility: "visible",
       };
 
+    // A seção vizinha já aparece na borda durante o scroll; qualquer
+    // deslocamento aqui faria a borda pular quando ela vira ativa.
     case "near":
       return {
-        opacity: 0.98,
-        transform: "translate3d(0, 2px, 0)",
+        opacity: 1,
+        transform: "translate3d(0, 0, 0)",
         pointerEvents: "none",
         visibility: "visible",
       };
