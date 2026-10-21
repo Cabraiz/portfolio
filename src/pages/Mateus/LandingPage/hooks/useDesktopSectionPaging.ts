@@ -7,7 +7,7 @@ import type { LandingSectionNavigationNavigateOptions } from "../../../../featur
  * Paginação por seção no desktop: cada tique da roda (ou tecla de rolagem)
  * leva exatamente à tela seguinte/anterior e para nela.
  *
- * - Enquanto a animação roda, os tiques seguintes são ignorados.
+ * - Enquanto qualquer navegação anima (tique, menu), os tiques são ignorados.
  * - Depois dela, tiques do mesmo giro (sem pausa de NEW_GESTURE_GAP_MS, sem
  *   aceleração) e a inércia do trackpad continuam ignorados; um tique após
  *   uma pausa, ou um novo empurrão no trackpad, avança mais uma tela.
@@ -21,8 +21,6 @@ export const DESKTOP_SECTION_PAGING_DURATION_SECONDS = 2.25;
 // próximo tique contar: um giro contínuo (de qualquer duração) anda uma tela.
 const NEW_GESTURE_GAP_MS = 200;
 const TRACKPAD_DELTA_THRESHOLD_PX = 24;
-// Só por segurança: a trava normalmente cai quando a animação conclui.
-const LOCK_FALLBACK_MARGIN_MS = 400;
 
 const NATIVE_WHEEL_SELECTOR =
 	"[data-lenis-prevent], [data-lenis-prevent-wheel], [data-chat-panel], [role='dialog']";
@@ -79,6 +77,12 @@ function canScrollInside(
 	return false;
 }
 
+// Qualquer navegação em curso (tique, menu, chat) mantém o alvo pendente até
+// a animação terminar: enquanto isso a roda não pagina de novo.
+function isNavigationAnimating(): boolean {
+	return document.documentElement.hasAttribute("data-landing-scroll-target");
+}
+
 function resolveTargetSection(
 	sections: readonly HTMLElement[],
 	direction: Direction
@@ -117,7 +121,6 @@ export default function useDesktopSectionPaging({
 			return undefined;
 		}
 
-		let lockedUntil = 0;
 		let lastWheelAt = Number.NEGATIVE_INFINITY;
 		let lastWheelDelta = 0;
 		let gestureConsumed = false;
@@ -140,21 +143,11 @@ export default function useDesktopSectionPaging({
 				return;
 			}
 
-			const lockToken = performance.now();
-			lockedUntil =
-				lockToken +
-				DESKTOP_SECTION_PAGING_DURATION_SECONDS * 1000 +
-				LOCK_FALLBACK_MARGIN_MS;
-
 			navigateRef.current(target.id as LandingSectionId, {
 				replace: true,
 				syncUrl: true,
 				offsetPx: 0,
 				duration: DESKTOP_SECTION_PAGING_DURATION_SECONDS,
-				// A tela parou: o próximo tique já pode andar.
-				onScrollComplete: () => {
-					if (lockedUntil > lockToken) lockedUntil = 0;
-				},
 			});
 		};
 
@@ -187,7 +180,7 @@ export default function useDesktopSectionPaging({
 				pendingTrackpadDelta = 0;
 			}
 
-			if (now < lockedUntil) return;
+			if (isNavigationAnimating()) return;
 			if (gestureConsumed && !accelerating) return;
 
 			// Trackpads mandam deltas pequenos: acumula até um empurrão claro.
@@ -232,7 +225,7 @@ export default function useDesktopSectionPaging({
 
 			event.preventDefault();
 
-			if (performance.now() < lockedUntil || event.repeat) return;
+			if (isNavigationAnimating() || event.repeat) return;
 
 			page(direction);
 		};
