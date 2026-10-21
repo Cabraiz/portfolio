@@ -8,7 +8,7 @@ const projects = [
   {id:'guine-bissau-commerce',name:'BIDEIRAS',subtitle:'Comércio digital internacional',year:'2024',asset:'bideiras'},
   {id:'app-barber',name:'APP BARBEARIA',subtitle:'Agenda e recorrência',year:'2023',asset:'app-barbearia'},
   {id:'central-clube-livro',name:'Entre Paginas',subtitle:'Comunidade editorial',year:'2026',asset:'entre-paginas',assetVersion:2},
-  {id:'site-adv',name:'Walter Adv',subtitle:'Presença institucional',year:'2020',asset:'walter-adv'},
+  {id:'site-adv',name:'Wagner Adv',subtitle:'Presença institucional',year:'2020',asset:'walter-adv'},
   {id:'site-cabeleireira',name:'Fran Studio',subtitle:'Marca e captação local',year:'2021',asset:'fran-studio'},
 ];
 const viewports = [{width:283,height:500},{width:320,height:568},{width:360,height:640},

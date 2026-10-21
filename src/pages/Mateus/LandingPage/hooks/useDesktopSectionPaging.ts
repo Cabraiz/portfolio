@@ -8,18 +8,21 @@ import type { LandingSectionNavigationNavigateOptions } from "../../../../featur
  * leva exatamente à tela seguinte/anterior e para nela.
  *
  * - Enquanto a animação roda, os tiques seguintes são ignorados.
- * - Depois dela, tiques do mesmo giro (intervalo curto, sem aceleração) e a
- *   inércia do trackpad continuam ignorados; um tique após uma pausa curta, ou
- *   um novo empurrão no trackpad, avança mais uma tela.
+ * - Depois dela, tiques do mesmo giro (sem pausa de NEW_GESTURE_GAP_MS, sem
+ *   aceleração) e a inércia do trackpad continuam ignorados; um tique após
+ *   uma pausa, ou um novo empurrão no trackpad, avança mais uma tela.
  * - Áreas com rolagem própria (chat, lista do portfólio, painéis) continuam
  *   rolando normalmente enquanto tiverem para onde rolar.
  */
 
 export const DESKTOP_SECTION_PAGING_DURATION_SECONDS = 0.75;
 
-const NEW_GESTURE_GAP_MS = 110;
+// Depois de um encaixe, a roda precisa ficar parada este tempo para o
+// próximo tique contar: um giro contínuo (de qualquer duração) anda uma tela.
+const NEW_GESTURE_GAP_MS = 200;
 const TRACKPAD_DELTA_THRESHOLD_PX = 24;
-const LOCK_RELEASE_MARGIN_MS = 60;
+// Só por segurança: a trava normalmente cai quando a animação conclui.
+const LOCK_FALLBACK_MARGIN_MS = 400;
 
 const NATIVE_WHEEL_SELECTOR =
 	"[data-lenis-prevent], [data-lenis-prevent-wheel], [data-chat-panel], [role='dialog']";
@@ -137,16 +140,21 @@ export default function useDesktopSectionPaging({
 				return;
 			}
 
+			const lockToken = performance.now();
 			lockedUntil =
-				performance.now() +
+				lockToken +
 				DESKTOP_SECTION_PAGING_DURATION_SECONDS * 1000 +
-				LOCK_RELEASE_MARGIN_MS;
+				LOCK_FALLBACK_MARGIN_MS;
 
 			navigateRef.current(target.id as LandingSectionId, {
 				replace: true,
 				syncUrl: true,
 				offsetPx: 0,
 				duration: DESKTOP_SECTION_PAGING_DURATION_SECONDS,
+				// A tela parou: o próximo tique já pode andar.
+				onScrollComplete: () => {
+					if (lockedUntil > lockToken) lockedUntil = 0;
+				},
 			});
 		};
 

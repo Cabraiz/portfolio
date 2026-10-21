@@ -84,7 +84,7 @@ test('mapeamento preserva nomes e resolve parâmetros, singular e plural',async(
   expect(await check('en','1 passageiros aguardando no 2º andar')).toBe('1 passenger waiting on floor 2');
   expect(await check('en','3 passageiros aguardando no 2º andar')).toBe('3 passengers waiting on floor 2');
   expect(await check('pt','1 passageiros aguardando no 2º andar')).toBe('1 passageiro aguardando no 2º andar');
-  expect(await check('en','Walter Adv')).toBe('Walter Adv');
+  expect(await check('en','Wagner Adv')).toBe('Wagner Adv');
   expect(await check('en','Fran Studio')).toBe('Fran Studio');
   expect(await check('en','Entre Paginas')).toBe('Entre Paginas');
   expect(await check('en','\n   sinais ')).toBe('\n   signals ');
