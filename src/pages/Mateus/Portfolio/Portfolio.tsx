@@ -10,7 +10,6 @@ import {
 import { useLocation } from "react-router-dom";
 
 import useLandingSectionNavigation from "@/features/navigation/useLandingSectionNavigation";
-import { readPendingLandingScrollTarget } from "@/features/scroll/landingScrollTarget";
 
 import flagBrazil from "../../../assets/Mateus/portfolio/flags/brasil-semicircle-realistic-v4.webp";
 import flagUnitedStates from "../../../assets/Mateus/portfolio/flags/estados-unidos-semicircle-realistic-v3.webp";
@@ -27,25 +26,6 @@ import type { PortfolioProjectId } from "./types";
 import { worldAtlasTiles } from "./worldAtlasTiles";
 
 const PORTFOLIO_AUTOPLAY_INTERVAL_MS = 6200;
-const PORTFOLIO_MAGNET_IDLE_MS = 120;
-const PORTFOLIO_MAGNET_DURATION_SECONDS = 0.62;
-const PORTFOLIO_MAGNET_ENTRY_RATIO = 0.1;
-// Um gesto rápido de roda pode atravessar o topo do portfólio antes de parar;
-// até esta fração da tela além da borda o ímã ainda traz a seção de volta.
-const PORTFOLIO_MAGNET_OVERSHOOT_RATIO = 0.35;
-// Só gestos do usuário acionam o ímã: rolagens programáticas (menu,
-// realinhamento após resize) não podem ser confundidas com uma entrada.
-const PORTFOLIO_MAGNET_USER_INPUT_WINDOW_MS = 1200;
-const PORTFOLIO_MAGNET_SCROLL_KEYS = new Set([
-	"ArrowDown",
-	"ArrowUp",
-	"PageDown",
-	"PageUp",
-	" ",
-	"Home",
-	"End",
-]);
-
 const COUNTRY_FLAGS: Readonly<Record<string, string>> = {
 	Brasil: flagBrazil,
 	México: flagMexico,
@@ -162,7 +142,6 @@ export default function Portfolio() {
 	const rootRef = useRef<HTMLElement>(null);
         const mobileDetailCardRef = useRef<HTMLElement>(null);
         useMobilePortfolioBrandPush(rootRef, mobileDetailCardRef);
-	const isMagnetizingRef = useRef(false);
 	const projectListRef = useRef<HTMLDivElement>(null);
 	const mobileProjectListRef = useRef<HTMLDivElement>(null);
 	const projectPointerStartRef = useRef<{
@@ -175,7 +154,7 @@ export default function Portfolio() {
 			projects: portfolioProjects,
 			defaultProjectId: defaultPortfolioProjectId,
 		});
-	const { activeSectionId, navigateToSection } = useLandingSectionNavigation();
+	const { activeSectionId } = useLandingSectionNavigation();
 	const isPortfolioRoute = location.pathname === "/portfolio";
 	const isPortfolioActive = activeSectionId === "portfolio" || isPortfolioRoute;
 	const wasPortfolioActiveRef = useRef(false);
@@ -205,191 +184,6 @@ export default function Portfolio() {
 
 		return () => observer.disconnect();
 	}, []);
-
-	useEffect(() => {
-		const root = rootRef.current;
-		const prefersReducedMotion = globalThis.matchMedia(
-			"(prefers-reduced-motion: reduce)"
-		);
-
-                if (!root || globalThis.innerWidth < 992 || prefersReducedMotion.matches) {
-			return undefined;
-		}
-
-		let idleTimerId: number | undefined;
-		let releaseTimerId: number | undefined;
-		let previousScrollY = globalThis.scrollY;
-		let isScrollingDown = false;
-		let gestureStartTop: number | null = null;
-		let lastMagnetWasDownward = true;
-		let lastUserScrollInputAt = Number.NEGATIVE_INFINITY;
-
-		const rememberUserScrollInput = () => {
-			lastUserScrollInputAt = performance.now();
-		};
-		const rememberUserScrollKey = (event: KeyboardEvent) => {
-			if (PORTFOLIO_MAGNET_SCROLL_KEYS.has(event.key)) rememberUserScrollInput();
-		};
-		// Redimensionar muda toda a geometria e o realinhamento do resize decide
-		// a posição: o gesto anterior deixa de valer.
-		const forgetUserScrollGesture = () => {
-			lastUserScrollInputAt = Number.NEGATIVE_INFINITY;
-			globalThis.clearTimeout(idleTimerId);
-			idleTimerId = undefined;
-			gestureStartTop = null;
-		};
-		const hasRecentUserScrollInput = () =>
-			performance.now() - lastUserScrollInputAt <
-			PORTFOLIO_MAGNET_USER_INPUT_WINDOW_MS;
-
-		const releaseMagnet = () => {
-			isMagnetizingRef.current = false;
-			// Um clique de roda que chegue logo após o encaixe ainda faz parte do
-			// mesmo gesto: confere de novo quando a rolagem parar.
-			gestureStartTop = lastMagnetWasDownward ? 5 : -5;
-			isScrollingDown = lastMagnetWasDownward;
-			globalThis.clearTimeout(idleTimerId);
-			idleTimerId = globalThis.window.setTimeout(
-				magnetizePortfolio,
-				PORTFOLIO_MAGNET_IDLE_MS
-			);
-		};
-
-		const magnetizePortfolio = () => {
-			idleTimerId = undefined;
-
-			if (
-				isMagnetizingRef.current ||
-				!hasRecentUserScrollInput() ||
-				readPendingLandingScrollTarget() !== null ||
-                                globalThis.innerWidth < 992 ||
-				prefersReducedMotion.matches
-			) {
-				return;
-			}
-
-			const rect = root.getBoundingClientRect();
-			const navbarHeight =
-				Number.parseFloat(
-					getComputedStyle(root).getPropertyValue("--app-navbar-height")
-				) || 70;
-			const visibleHeight = Math.max(
-				0,
-				Math.min(rect.bottom, globalThis.innerHeight) -
-					Math.max(rect.top, navbarHeight)
-			);
-			const visibleRatio = visibleHeight / Math.max(globalThis.innerHeight, 1);
-			const overshootLimit =
-				globalThis.innerHeight * PORTFOLIO_MAGNET_OVERSHOOT_RATIO;
-			const startTop = gestureStartTop;
-			gestureStartTop = null;
-
-			// Descendo da home: entrou na tela ou passou um pouco do topo.
-			const isEnteringFromHome =
-				isScrollingDown && rect.top > navbarHeight + 4;
-			const overshotFromHome =
-				isScrollingDown &&
-				startTop !== null &&
-				startTop > 4 &&
-				rect.top < -2 &&
-				rect.top > -overshootLimit;
-			// Subindo de serviços: voltou a aparecer ou passou um pouco do topo.
-			const isEnteringFromServices =
-				!isScrollingDown &&
-				startTop !== null &&
-				startTop < rect.top - 1 &&
-				rect.top < -2;
-			const overshotFromServices =
-				!isScrollingDown &&
-				startTop !== null &&
-				startTop < -2 &&
-				rect.top > 2 &&
-				rect.top < overshootLimit;
-
-			if (
-				!(
-					isEnteringFromHome ||
-					overshotFromHome ||
-					isEnteringFromServices ||
-					overshotFromServices
-				) ||
-				visibleRatio < PORTFOLIO_MAGNET_ENTRY_RATIO
-			) {
-				return;
-			}
-
-			lastMagnetWasDownward = isScrollingDown;
-
-			isMagnetizingRef.current = true;
-			// Mesmo alinhamento do menu: a seção ocupa a viewport inteira (top 0).
-			navigateToSection("portfolio", {
-				offsetPx: 0,
-				duration: PORTFOLIO_MAGNET_DURATION_SECONDS,
-				replace: true,
-				syncUrl: true,
-				// Cliques de roda que chegam durante o encaixe não podem levar a
-				// página além do portfólio.
-				lockUserScroll: true,
-			});
-
-			globalThis.clearTimeout(releaseTimerId);
-			releaseTimerId = globalThis.window.setTimeout(
-				releaseMagnet,
-				PORTFOLIO_MAGNET_DURATION_SECONDS * 1000 + 180
-			);
-		};
-
-		const scheduleMagnet = () => {
-			const nextScrollY = globalThis.scrollY;
-			const scrollDelta = nextScrollY - previousScrollY;
-			isScrollingDown = scrollDelta > 0;
-			previousScrollY = nextScrollY;
-
-			if (isMagnetizingRef.current) return;
-
-			// Rolagem sem gesto do usuário (menu, resize): encerra qualquer gesto.
-			if (!hasRecentUserScrollInput()) {
-				globalThis.clearTimeout(idleTimerId);
-				idleTimerId = undefined;
-				gestureStartTop = null;
-				return;
-			}
-
-			// Primeiro evento depois de uma pausa: registra onde o gesto começou.
-			if (idleTimerId === undefined) {
-				gestureStartTop = root.getBoundingClientRect().top + scrollDelta;
-			}
-
-			globalThis.clearTimeout(idleTimerId);
-			idleTimerId = globalThis.window.setTimeout(
-				magnetizePortfolio,
-				PORTFOLIO_MAGNET_IDLE_MS
-			);
-		};
-
-		globalThis.addEventListener("scroll", scheduleMagnet, { passive: true });
-		globalThis.addEventListener("wheel", rememberUserScrollInput, {
-			capture: true,
-			passive: true,
-		});
-		globalThis.addEventListener("touchmove", rememberUserScrollInput, {
-			capture: true,
-			passive: true,
-		});
-		globalThis.addEventListener("keydown", rememberUserScrollKey, true);
-		globalThis.addEventListener("resize", forgetUserScrollGesture);
-
-		return () => {
-			globalThis.removeEventListener("scroll", scheduleMagnet);
-			globalThis.removeEventListener("wheel", rememberUserScrollInput, true);
-			globalThis.removeEventListener("touchmove", rememberUserScrollInput, true);
-			globalThis.removeEventListener("keydown", rememberUserScrollKey, true);
-			globalThis.removeEventListener("resize", forgetUserScrollGesture);
-			globalThis.clearTimeout(idleTimerId);
-			globalThis.clearTimeout(releaseTimerId);
-			isMagnetizingRef.current = false;
-		};
-	}, [navigateToSection]);
 
 	useEffect(() => {
 		const hasJustEnteredPortfolio =

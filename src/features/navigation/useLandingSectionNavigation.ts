@@ -38,7 +38,6 @@ type LenisLike =
           offset?: number;
           duration?: number;
           easing?: (value: number) => number;
-          lock?: boolean;
           force?: boolean;
           onComplete?: () => void;
         }>,
@@ -53,8 +52,6 @@ export type LandingSectionNavigationNavigateOptions = Readonly<{
   forceScroll?: boolean;
   offsetPx?: number;
   duration?: number;
-  /** Ignora a roda até a animação terminar (usado pelo ímã das seções). */
-  lockUserScroll?: boolean;
 }>;
 
 export type UseLandingSectionNavigationParams = Readonly<{
@@ -291,9 +288,8 @@ function scrollToSectionTarget(params: Readonly<{
   lenis: LenisLike;
   offsetPx: number;
   duration: number;
-  lockUserScroll?: boolean;
 }>): void {
-  const { target, lenis, offsetPx, duration, lockUserScroll = false } = params;
+  const { target, lenis, offsetPx, duration } = params;
 
   const targetScrollTop = resolveExactWindowScrollTop(target, offsetPx);
 
@@ -318,14 +314,12 @@ function scrollToSectionTarget(params: Readonly<{
       clearPendingLandingScrollTarget(targetScrollTop);
     };
 
-    if (!lockUserScroll) {
-      interruptionEvents.forEach((eventName) => {
-        browserWindow?.addEventListener(eventName, releaseTarget, {
-          capture: true,
-          passive: true,
-        });
+    interruptionEvents.forEach((eventName) => {
+      browserWindow?.addEventListener(eventName, releaseTarget, {
+        capture: true,
+        passive: true,
       });
-    }
+    });
     releaseTimerId = browserWindow?.setTimeout(
       releaseTarget,
       Math.max(250, duration * 1000 + 250),
@@ -334,10 +328,8 @@ function scrollToSectionTarget(params: Readonly<{
     lenis.scrollTo(targetScrollTop, {
       duration,
       easing: createEaseOutCubic,
-      lock: lockUserScroll,
-      // Um clique no menu precisa vencer o encaixe travado do ímã; sem force
-      // o Lenis descarta o scrollTo enquanto está travado.
-      force: !lockUserScroll,
+      // Uma navegação nova sempre vence a anterior, mesmo com o Lenis parado.
+      force: true,
       onComplete: releaseTarget,
     });
     return;
@@ -696,7 +688,6 @@ export default function useLandingSectionNavigation(
               ? 0 : getResolvedNavbarOffsetPx()
           ),
           duration: options?.duration ?? scrollDuration,
-          lockUserScroll: options?.lockUserScroll,
         });
 
         if (shouldSyncUrl) {

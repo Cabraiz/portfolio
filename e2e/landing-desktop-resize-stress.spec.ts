@@ -288,40 +288,28 @@ test("redimensionamento contínuo (arrastar a janela) termina alinhado", async (
 	}
 });
 
-test("posição parcial da roda é preservada ao redimensionar", async ({
+test("posição parcial (barra de rolagem) é preservada ao redimensionar", async ({
 	page,
 }) => {
 	await openLanding(page, SIZES[0]);
 	await clickSection(page, "roadMap");
 	await expectSettled(page, "clique em serviços", "roadMap");
 
-	// Para no meio do caminho entre serviços e a rede IA, rolando como o
-	// usuário (a suavização do Lenis decide onde exatamente).
+	// A roda pagina por seção; uma posição parcial só vem de arrastar a barra.
 	const readProgress = () =>
 		page.evaluate(
 			() =>
 				-document.getElementById("roadMap")!.getBoundingClientRect().top /
 				window.innerHeight
 		);
-	await wheel(page, 120, 2);
-	let progress = -1;
-	await expect
-		.poll(
-			async () => {
-				const next = await readProgress();
-				const settled = Math.abs(next - progress) < 0.001;
-				progress = next;
-				return settled;
-			},
-			{ intervals: [250], message: "rolagem parcial assentar" }
-		)
-		.toBe(true);
-	expect(progress).toBeGreaterThan(0.1);
-	expect(progress).toBeLessThan(0.9);
+	await page.evaluate(() =>
+		window.scrollTo(0, window.scrollY + window.innerHeight * 0.4)
+	);
+	await expect.poll(readProgress).toBeCloseTo(0.4, 2);
 
 	await page.setViewportSize(SIZES[3]);
 	await expect
-		.poll(async () => Math.abs((await readProgress()) - progress), {
+		.poll(async () => Math.abs((await readProgress()) - 0.4), {
 			message: "progresso dentro de serviços após redimensionar",
 		})
 		.toBeLessThan(0.01);
@@ -346,44 +334,103 @@ test("clique no menu depois de rolar com a roda chega exatamente na seção", as
 	expect(errors).toEqual([]);
 });
 
-test("entrar no portfólio pela roda alinha a seção no topo da tela", async ({
-	page,
-}) => {
-	await openLanding(page, SIZES[1]);
-	await wheel(page, 120, 2);
-	await expectSettled(page, "ímã do portfólio", "portfolio");
-});
-
 for (const size of [SIZES[3], SIZES[0]]) {
-	test(`gesto rápido da home que passa do topo do portfólio volta para ele em ${size.width}x${size.height}`, async ({
+	test(`cada tique da roda anda exatamente uma seção em ${size.width}x${size.height}`, async ({
 		page,
 	}) => {
-		await openLanding(page, size);
-		// Cliques de 100px a cada 40ms (um gesto rápido): passa ~10% do topo.
-		await wheelGesture(page, Math.floor(size.height / 100) + 2, 100);
-		await expectSettled(page, "ímã depois de passar do portfólio", "portfolio");
+		test.setTimeout(90_000);
+		const errors = await openLanding(page, size);
+
+		for (const sectionId of SECTION_IDS.slice(1)) {
+			await wheelGesture(page, 1, 100);
+			await expectSettled(
+				page,
+				`um tique para baixo até ${sectionId}`,
+				sectionId
+			);
+		}
+
+		// Na última seção um tique a mais não sai do lugar.
+		await wheelGesture(page, 1, 100);
+		await expectSettled(page, "tique além do fim", "contact");
+
+		for (const sectionId of [...SECTION_IDS].reverse().slice(1)) {
+			await wheelGesture(page, 1, -100);
+			await expectSettled(
+				page,
+				`um tique para cima até ${sectionId}`,
+				sectionId
+			);
+		}
+
+		expect(errors).toEqual([]);
 	});
 }
 
-test("descer até serviços e voltar subindo encaixa no portfólio", async ({
-	page,
-}) => {
-	await openLanding(page, SIZES[3], "portfolio");
+test("giro rápido ou swipe de trackpad anda uma seção só", async ({ page }) => {
+	await openLanding(page, SIZES[3]);
 
-	for (const notchesUp of [5, 8]) {
-		await wheelGesture(page, 12, 100);
-		await expectSettled(page, "desceu até serviços");
-		await wheelGesture(page, notchesUp, -100);
-		await expectSettled(page, `subiu ${notchesUp} cliques`, "portfolio");
-	}
+	// Giro rápido: vários tiques seguidos contam como um só.
+	await wheelGesture(page, 12, 100);
+	await expectSettled(page, "giro rápido para baixo", "portfolio");
+	await wheelGesture(page, 12, -100);
+	await expectSettled(page, "giro rápido para cima", "home");
 
-	await wheelGesture(page, 6, 100);
-	await expectSettled(page, "desceu até o meio de serviços");
-	await wheelGesture(page, 2, -100, 300);
-	await expectSettled(page, "subiu devagar", "portfolio");
+	// Swipe de trackpad: deltas pequenos com inércia.
+	await page.evaluate(async () => {
+		const deltas = [2, 4, 8, 14, 22, 30, 34, 32, 28, 24, 20, 17, 14, 12, 10];
+		for (const deltaY of [...deltas, 8, 6, 5, 4, 3, 2, 2, 1, 1, 1, 1]) {
+			document
+				.elementFromPoint(640, 300)
+				?.dispatchEvent(
+					new WheelEvent("wheel", { deltaY, bubbles: true, cancelable: true })
+				);
+			await new Promise((resolve) => setTimeout(resolve, 16));
+		}
+	});
+	await expectSettled(page, "swipe de trackpad", "portfolio");
+
+	// Tiques espaçados depois do encaixe voltam a andar uma seção cada.
+	await page.waitForTimeout(300);
+	await wheelGesture(page, 1, 100);
+	await expectSettled(page, "tique depois de uma pausa", "roadMap");
 });
 
-test("clicar no menu durante o encaixe do ímã navega mesmo assim", async ({
+test("teclado anda uma seção por tecla", async ({ page }) => {
+	await openLanding(page, SIZES[1]);
+
+	const steps = [
+		["PageDown", "portfolio"],
+		["ArrowDown", "roadMap"],
+		["Space", "technologies"],
+		["ArrowUp", "roadMap"],
+		["PageUp", "portfolio"],
+		["Shift+Space", "home"],
+	] as const;
+
+	for (const [key, sectionId] of steps) {
+		await page.keyboard.press(key);
+		await expectSettled(page, `tecla ${key}`, sectionId);
+	}
+});
+
+test("rolar dentro do chat não pagina a landing", async ({ page }) => {
+	await openLanding(page, SIZES[3], "contact");
+	await page.getByRole("button", { name: "Abrir chat" }).click();
+	const panel = page.locator("[data-chat-panel]");
+	await expect(panel).toBeVisible();
+
+	// Para cima a landing sairia de Contato se a roda vazasse do painel.
+	const box = (await panel.boundingBox())!;
+	await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+	await page.mouse.wheel(0, -300);
+	await page.mouse.wheel(0, 300);
+	await page.mouse.wheel(0, -300);
+	await page.waitForTimeout(1_000);
+	await expectSettled(page, "landing parada com o chat aberto", "contact");
+});
+
+test("clicar no menu durante a paginação navega mesmo assim", async ({
 	page,
 }) => {
 	await openLanding(page, SIZES[3]);
@@ -393,8 +440,7 @@ test("clicar no menu durante o encaixe do ímã navega mesmo assim", async ({
 			await clickSection(page, "home");
 			await expectSettled(page, "volta para o início", "home");
 		}
-		await wheel(page, 120, 2);
-		// O ímã trava a roda enquanto encaixa; o menu precisa vencer a trava.
+		await wheelGesture(page, 1, 100);
 		await page.waitForFunction(
 			() => document.documentElement.hasAttribute("data-landing-scroll-target"),
 			null,
@@ -402,28 +448,11 @@ test("clicar no menu durante o encaixe do ímã navega mesmo assim", async ({
 		);
 		await page.waitForTimeout(150);
 		await clickSection(page, target);
-		await expectSettled(page, `clique em ${target} durante o ímã`, target);
-	}
-});
-
-test("descer devagar a partir do portfólio alinhado não é puxado de volta", async ({
-	page,
-}) => {
-	await openLanding(page, SIZES[3]);
-	// Chega pelo próprio ímã e espera o encaixe terminar.
-	await wheel(page, 120, 2);
-	await expectSettled(page, "ímã do portfólio", "portfolio");
-	await page.waitForTimeout(1_000);
-	await page.mouse.move(640, 300);
-	for (let notch = 1; notch <= 3; notch += 1) {
-		await page.mouse.wheel(0, 100);
-		await page.waitForTimeout(700);
-		const top = await page.evaluate(() =>
-			Math.round(
-				document.getElementById("portfolio")!.getBoundingClientRect().top
-			)
+		await expectSettled(
+			page,
+			`clique em ${target} durante a paginação`,
+			target
 		);
-		expect(top).toBeLessThan(-notch * 100 + 20);
 	}
 });
 
