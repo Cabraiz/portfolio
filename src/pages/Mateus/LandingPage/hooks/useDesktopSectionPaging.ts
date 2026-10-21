@@ -15,7 +15,7 @@ import type { LandingSectionNavigationNavigateOptions } from "../../../../featur
  *   rolando normalmente enquanto tiverem para onde rolar.
  */
 
-export const DESKTOP_SECTION_PAGING_DURATION_SECONDS = 0.75;
+export const DESKTOP_SECTION_PAGING_DURATION_SECONDS = 2.25;
 
 // Depois de um encaixe, a roda precisa ficar parada este tempo para o
 // próximo tique contar: um giro contínuo (de qualquer duração) anda uma tela.
