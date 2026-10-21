@@ -28,9 +28,31 @@ export function useDocumentVisibilitySync(): void {
     let desktopResizeAnchor: LandingScrollAnchor | null = null;
     let desktopResizeFrame: number | null = null;
     let desktopResizeSettleTimer: number | null = null;
+    // Desktop: cada seção mede exatamente uma viewport. Guardar scrollY com a
+    // altura em que ele foi lido permite achar seção + progresso de antes do
+    // resize sem depender da ordem dos eventos de scroll e resize.
+    let desktopStableHeight = globalThis.window.innerHeight;
+    let desktopStableScrollY = globalThis.window.scrollY;
+
+    const anchorFromStableGeometry = (scrollY: number): LandingScrollAnchor => {
+      const sections = Array.from(document.querySelectorAll<HTMLElement>("main[data-landing-viewport='desktop'] > section[data-page-section='true']"));
+      const position = Math.max(0, scrollY) / Math.max(1, desktopStableHeight);
+      const index = Math.min(sections.length - 1, Math.floor(position + 0.001));
+      return {scrollY, section: sections[index] ?? null, progress: index >= 0 ? position - index : 0};
+    };
 
     const rememberVisiblePosition = () => {
-      if (positionFrame !== null || preservedPositionRef.current || refreshFrameRef.current !== null || desktopResizeAnchor) return;
+      if (!desktopResizeAnchor && globalThis.window.innerHeight === desktopStableHeight) {
+        desktopStableScrollY = globalThis.window.scrollY;
+      }
+      if (preservedPositionRef.current || refreshFrameRef.current !== null || desktopResizeAnchor) return;
+      // Desktop: um resize logo depois do scroll precisa da posição atual, não
+      // da do quadro anterior (o CI pegava a seção ainda no topo).
+      if (document.querySelector("main[data-landing-viewport='desktop']")) {
+        visiblePosition = captureLandingScrollAnchor();
+        return;
+      }
+      if (positionFrame !== null) return;
       positionFrame = requestAnimationFrame(() => {
         positionFrame = null;
         if (!preservedPositionRef.current && refreshFrameRef.current === null) visiblePosition = captureLandingScrollAnchor();
@@ -102,6 +124,8 @@ export function useDocumentVisibilitySync(): void {
       desktopResizeFrame = null;
       desktopResizeSettleTimer = null;
       desktopResizeAnchor = null;
+      desktopStableHeight = globalThis.window.innerHeight;
+      desktopStableScrollY = globalThis.window.scrollY;
     };
 
     const restoreDesktopResizeAnchor = () => {
@@ -125,7 +149,13 @@ export function useDocumentVisibilitySync(): void {
       if (currentDocument.hidden || preservedPositionRef.current) return;
       if (!desktopResizeAnchor) {
         const pendingTarget = readPendingLandingScrollTarget();
-        desktopResizeAnchor = pendingTarget === null ? visiblePosition : captureLandingScrollAnchor(pendingTarget);
+        // O resize chega antes do evento de scroll do último quadro: o scrollY ao
+        // vivo ainda é o de antes do resize, a não ser que a página tenha
+        // encolhido e o navegador limitado o scroll no fim do documento.
+        const liveScrollY = globalThis.window.scrollY;
+        const maxScrollY = document.documentElement.scrollHeight - globalThis.window.innerHeight;
+        const wasClamped = liveScrollY >= maxScrollY - 1 && desktopStableScrollY > liveScrollY;
+        desktopResizeAnchor = anchorFromStableGeometry(pendingTarget ?? (wasClamped ? desktopStableScrollY : liveScrollY));
         if (pendingTarget !== null) clearPendingLandingScrollTarget(pendingTarget);
       }
       if (desktopResizeFrame !== null) cancelAnimationFrame(desktopResizeFrame);
@@ -139,6 +169,8 @@ export function useDocumentVisibilitySync(): void {
         refreshScrollRuntime();
         restoreDesktopResizeAnchor();
         desktopResizeAnchor = null;
+        desktopStableHeight = globalThis.window.innerHeight;
+        desktopStableScrollY = globalThis.window.scrollY;
         visiblePosition = captureLandingScrollAnchor();
       }, 220);
     };
