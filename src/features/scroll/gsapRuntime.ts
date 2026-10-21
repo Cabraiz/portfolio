@@ -69,6 +69,21 @@ export function refreshScrollRuntime(): void {
   ScrollTrigger.refresh();
 }
 
+/**
+ * Recalcula os gatilhos só quando a rolagem parar. O refresh forçado leva a
+ * página ao topo para medir; disparado no meio de um scroll (por exemplo ao
+ * montar uma seção vizinha) isso aparece como a tela pulando sozinha.
+ */
+export function scheduleScrollRuntimeRefresh(): void {
+  ensureRuntimeRegistered();
+
+  if (!getBrowserWindow()) {
+    return;
+  }
+
+  ScrollTrigger.refresh(true);
+}
+
 export function addGsapTicker(callback: TickerCallback): void {
   ensureRuntimeRegistered();
   gsapLib.ticker.add(callback);

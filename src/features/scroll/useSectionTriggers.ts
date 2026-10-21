@@ -1,7 +1,7 @@
 import { useLayoutEffect } from "react";
 import type { RefObject } from "react";
 
-import { createScrollTrigger, refreshScrollRuntime } from "./gsapRuntime";
+import { createScrollTrigger, scheduleScrollRuntimeRefresh } from "./gsapRuntime";
 
 type SectionElement = HTMLElement;
 type SectionTriggerInstance = ReturnType<typeof createScrollTrigger>;
@@ -126,7 +126,7 @@ export function useSectionTriggers({
     }
 
     if (refreshOnMount) {
-      refreshScrollRuntime();
+      scheduleScrollRuntimeRefresh();
     }
 
     return () => {

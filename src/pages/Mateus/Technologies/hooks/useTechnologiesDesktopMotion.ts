@@ -3,6 +3,7 @@ import { RefObject, useLayoutEffect } from "react";
 import {
   ensureGsapRuntime,
   refreshScrollRuntime,
+  scheduleScrollRuntimeRefresh,
 } from "../../../../features/scroll/gsapRuntime";
 import { shouldDisableScrollFades } from "../../../../features/scroll/scrollMotionFlags";
 
@@ -346,7 +347,7 @@ export function useTechnologiesDesktopMotion({
       });
 
       ScrollTrigger.sort();
-      refreshScrollRuntime();
+      scheduleScrollRuntimeRefresh();
     }, root);
 
     const handleResize = () => {

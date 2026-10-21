@@ -13,6 +13,7 @@ import {
   createScrollTrigger,
   gsap,
   refreshScrollRuntime,
+  scheduleScrollRuntimeRefresh,
 } from "@/features/scroll/gsapRuntime";
 
 import { useLiveReducedMotion } from "./useLiveReducedMotion";
@@ -330,7 +331,7 @@ export function useLiveGsapScene({
     }, root);
 
     if (refreshOnMount) {
-      refreshScrollRuntime();
+      scheduleScrollRuntimeRefresh();
     }
 
     return () => {
