@@ -1,4 +1,4 @@
-import imagemNexovare from "../../../assets/Mateus/portfolio/nexovare-dashboard-preview-v3.png";
+import imagemNexovare from "../../../assets/Mateus/portfolio/nexovare-dashboard-preview-v3.webp";
 import imagem2 from "../../../assets/Mateus/portfolio/innomof-banking-app-premium-v2.webp";
 import imagemGuineBissauCommerce from "../../../assets/Mateus/portfolio/bideiras-marketplace-preview-v1.webp";
 import imagem3 from "../../../assets/Mateus/portfolio/imagem3-barbearia-v3.webp";
@@ -13,13 +13,13 @@ import mobileEntrePaginas from "../../../assets/Mateus/portfolio/mobile-summary/
 import mobileWalter from "../../../assets/Mateus/portfolio/mobile-summary/walter-adv-mobile-summary-v1.webp";
 import mobileFran from "../../../assets/Mateus/portfolio/mobile-summary/fran-studio-mobile-summary-v1.webp";
 
-import logoNexovare from "../../../assets/Mateus/portfolio/logos/refined/nexovare-nx-mark-v2.png";
+import logoNexovare from "../../../assets/Mateus/portfolio/logos/refined/nexovare-nx-mark-v2.webp";
 import logo2 from "../../../assets/Mateus/portfolio/logos/logo2.webp";
-import logoGuineBissauCommerce from "../../../assets/Mateus/portfolio/logos/refined/bideiras-market-bag-icon-v1.png";
-import logo3 from "../../../assets/Mateus/portfolio/logos/refined/pessoa-barbearia-lockup-v3.png";
-import logoCentralClube from "../../../assets/Mateus/portfolio/logos/refined/entre-paginas-mark-v3.png";
-import logo4 from "../../../assets/Mateus/portfolio/logos/refined/wagner-advocacia-lockup-v3.png";
-import logo5 from "../../../assets/Mateus/portfolio/logos/refined/fran-site-lockup-v4.png";
+import logoGuineBissauCommerce from "../../../assets/Mateus/portfolio/logos/refined/bideiras-market-bag-icon-v1.webp";
+import logo3 from "../../../assets/Mateus/portfolio/logos/refined/pessoa-barbearia-lockup-v3.webp";
+import logoCentralClube from "../../../assets/Mateus/portfolio/logos/refined/entre-paginas-mark-v3.webp";
+import logo4 from "../../../assets/Mateus/portfolio/logos/refined/wagner-advocacia-lockup-v3.webp";
+import logo5 from "../../../assets/Mateus/portfolio/logos/refined/fran-site-lockup-v4.webp";
 
 import type {
   PortfolioProject,

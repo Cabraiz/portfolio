@@ -3,7 +3,7 @@ import { useRef, useState } from "react";
 import { FaLinkedin, FaRegFileAlt, FaWhatsapp } from "react-icons/fa";
 import { SiAnthropic, SiGmail } from "react-icons/si";
 
-import portrait from "@/assets/Mateus/home/hero-mobile-portrait.png";
+import portrait from "@/assets/Mateus/home/hero-mobile-portrait.webp";
 import CodexIcon from "../components/CodexIcon";
 import useMobileHomeBrandMotion from "../hooks/useMobileHomeBrandMotion";
 import { RESUME_HREF, WHATSAPP_HREF } from "../data/home.data";

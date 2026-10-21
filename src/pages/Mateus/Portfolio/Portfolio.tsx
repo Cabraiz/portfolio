@@ -11,11 +11,11 @@ import { useLocation } from "react-router-dom";
 
 import useLandingSectionNavigation from "@/features/navigation/useLandingSectionNavigation";
 
-import flagBrazil from "../../../assets/Mateus/portfolio/flags/brasil-semicircle-realistic-v4.png";
-import flagUnitedStates from "../../../assets/Mateus/portfolio/flags/estados-unidos-semicircle-realistic-v3.png";
-import flagGuineaBissau from "../../../assets/Mateus/portfolio/flags/guine-bissau-semicircle-realistic-v3.png";
-import flagMexico from "../../../assets/Mateus/portfolio/flags/mexico-semicircle-realistic-v3.png";
-import flagPortugal from "../../../assets/Mateus/portfolio/flags/portugal-semicircle-realistic-v3.png";
+import flagBrazil from "../../../assets/Mateus/portfolio/flags/brasil-semicircle-realistic-v4.webp";
+import flagUnitedStates from "../../../assets/Mateus/portfolio/flags/estados-unidos-semicircle-realistic-v3.webp";
+import flagGuineaBissau from "../../../assets/Mateus/portfolio/flags/guine-bissau-semicircle-realistic-v3.webp";
+import flagMexico from "../../../assets/Mateus/portfolio/flags/mexico-semicircle-realistic-v3.webp";
+import flagPortugal from "../../../assets/Mateus/portfolio/flags/portugal-semicircle-realistic-v3.webp";
 
 import usePortfolioActiveItem from "./hooks/usePortfolioActiveItem";
 import useMobilePortfolioBrandPush from "./hooks/useMobilePortfolioBrandPush";

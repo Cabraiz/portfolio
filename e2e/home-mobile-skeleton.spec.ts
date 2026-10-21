@@ -61,7 +61,7 @@ for(const viewport of [{width:390,height:844},{width:667,height:375}])test(`port
   const page=await context.newPage();
   let release!:()=>void;
   const gate=new Promise<void>(resolve=>{release=resolve;});
-  await page.route(/hero-mobile-portrait[^/]*\.png(?:\?.*)?$/,async route=>{
+  await page.route(/hero-mobile-portrait[^/]*\.webp(?:\?.*)?$/,async route=>{
     if(route.request().resourceType()==='image')await gate;
     await route.continue();
   });
