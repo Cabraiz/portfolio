@@ -230,6 +230,14 @@ export default function Portfolio() {
 		const rememberUserScrollKey = (event: KeyboardEvent) => {
 			if (PORTFOLIO_MAGNET_SCROLL_KEYS.has(event.key)) rememberUserScrollInput();
 		};
+		// Redimensionar muda toda a geometria e o realinhamento do resize decide
+		// a posição: o gesto anterior deixa de valer.
+		const forgetUserScrollGesture = () => {
+			lastUserScrollInputAt = Number.NEGATIVE_INFINITY;
+			globalThis.clearTimeout(idleTimerId);
+			idleTimerId = undefined;
+			gestureStartTop = null;
+		};
 		const hasRecentUserScrollInput = () =>
 			performance.now() - lastUserScrollInputAt <
 			PORTFOLIO_MAGNET_USER_INPUT_WINDOW_MS;
@@ -369,12 +377,14 @@ export default function Portfolio() {
 			passive: true,
 		});
 		globalThis.addEventListener("keydown", rememberUserScrollKey, true);
+		globalThis.addEventListener("resize", forgetUserScrollGesture);
 
 		return () => {
 			globalThis.removeEventListener("scroll", scheduleMagnet);
 			globalThis.removeEventListener("wheel", rememberUserScrollInput, true);
 			globalThis.removeEventListener("touchmove", rememberUserScrollInput, true);
 			globalThis.removeEventListener("keydown", rememberUserScrollKey, true);
+			globalThis.removeEventListener("resize", forgetUserScrollGesture);
 			globalThis.clearTimeout(idleTimerId);
 			globalThis.clearTimeout(releaseTimerId);
 			isMagnetizingRef.current = false;
