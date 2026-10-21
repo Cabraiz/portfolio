@@ -39,6 +39,7 @@ type LenisLike =
           duration?: number;
           easing?: (value: number) => number;
           lock?: boolean;
+          force?: boolean;
           onComplete?: () => void;
         }>,
       ) => void;
@@ -334,6 +335,9 @@ function scrollToSectionTarget(params: Readonly<{
       duration,
       easing: createEaseOutCubic,
       lock: lockUserScroll,
+      // Um clique no menu precisa vencer o encaixe travado do ímã; sem force
+      // o Lenis descarta o scrollTo enquanto está travado.
+      force: !lockUserScroll,
       onComplete: releaseTarget,
     });
     return;

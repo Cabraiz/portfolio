@@ -383,6 +383,29 @@ test("descer até serviços e voltar subindo encaixa no portfólio", async ({
 	await expectSettled(page, "subiu devagar", "portfolio");
 });
 
+test("clicar no menu durante o encaixe do ímã navega mesmo assim", async ({
+	page,
+}) => {
+	await openLanding(page, SIZES[3]);
+
+	for (const target of ["home", "roadMap", "contact"] as const) {
+		if (target !== "home") {
+			await clickSection(page, "home");
+			await expectSettled(page, "volta para o início", "home");
+		}
+		await wheel(page, 120, 2);
+		// O ímã trava a roda enquanto encaixa; o menu precisa vencer a trava.
+		await page.waitForFunction(
+			() => document.documentElement.hasAttribute("data-landing-scroll-target"),
+			null,
+			{ timeout: 3_000 }
+		);
+		await page.waitForTimeout(150);
+		await clickSection(page, target);
+		await expectSettled(page, `clique em ${target} durante o ímã`, target);
+	}
+});
+
 test("descer devagar a partir do portfólio alinhado não é puxado de volta", async ({
 	page,
 }) => {
