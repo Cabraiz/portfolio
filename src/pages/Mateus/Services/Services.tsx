@@ -1,19 +1,19 @@
 import { localizeLabel, useLabelLanguage } from '@/i18n/labels';
-import { useLayoutEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
-import workshopBackground from "@/assets/Mateus/services/industrial-workshop-background-v2.png";
-import workbench from "@/assets/Mateus/services/industrial-workbench-base-robot-interaction-v5.png";
-import laptopClubeOff from "@/assets/Mateus/services/devices/laptop-workshop-off-v4.png";
-import phoneClubeOff from "@/assets/Mateus/services/devices/phone-workshop-stand-off-v6.png";
-import roboticArmStatic from "@/assets/Mateus/services/devices/robotic-arm-workshop-static-v4.png";
-import roboticClawOpen from "@/assets/Mateus/services/devices/robotic-claw-telescopic-open-v1.png";
-import roboticClawClosed from "@/assets/Mateus/services/devices/robotic-claw-telescopic-closed-v1.png";
-import roboticArmBlock from "@/assets/Mateus/services/devices/robotic-arm-metal-block-v2.png";
-import lagArthurControllerBody from "@/assets/Mateus/services/lag-arthur-controller-body-follow-v5.png";
-import lagArthurControllerEyes from "@/assets/Mateus/services/lag-arthur-controller-eyes-gaze-v6.png";
-import lagArthurControllerHead from "@/assets/Mateus/services/lag-arthur-controller-head-gaze-base-v6.png";
+import workshopBackground from "@/assets/Mateus/services/industrial-workshop-background-v2.webp";
+import workbench from "@/assets/Mateus/services/industrial-workbench-base-robot-interaction-v5.webp";
+import laptopClubeOff from "@/assets/Mateus/services/devices/laptop-workshop-off-v4.webp";
+import phoneClubeOff from "@/assets/Mateus/services/devices/phone-workshop-stand-off-v6.webp";
+import roboticArmStatic from "@/assets/Mateus/services/devices/robotic-arm-workshop-static-v4.webp";
+import roboticClawOpen from "@/assets/Mateus/services/devices/robotic-claw-telescopic-open-v1.webp";
+import roboticClawClosed from "@/assets/Mateus/services/devices/robotic-claw-telescopic-closed-v1.webp";
+import roboticArmBlock from "@/assets/Mateus/services/devices/robotic-arm-metal-block-v2.webp";
+import lagArthurControllerBody from "@/assets/Mateus/services/lag-arthur-controller-body-follow-v5.webp";
+import lagArthurControllerEyes from "@/assets/Mateus/services/lag-arthur-controller-eyes-gaze-v6.webp";
+import lagArthurControllerHead from "@/assets/Mateus/services/lag-arthur-controller-head-gaze-base-v6.webp";
 import servicesSignAnimated from "@/assets/Mateus/services/services-front-wall-rail-lag-arthur-104frames-v22.webp";
-import servicesSignStatic from "@/assets/Mateus/services/services-front-wall-rail-static-v21.png";
+import servicesSignStatic from "@/assets/Mateus/services/services-front-wall-rail-static-v21.webp";
 import { ensureGsapRuntime } from "@/features/scroll/gsapRuntime";
 import { shouldDisableScrollFades } from "@/features/scroll/scrollMotionFlags";
 
@@ -37,6 +37,32 @@ export default function Services() {
 	const robotCharacterRef = useRef<HTMLDivElement>(null);
 	const robotCharacterHeadRef = useRef<HTMLDivElement>(null);
 	const robotCharacterEyesRef = useRef<HTMLImageElement>(null);
+	// A placa animada tem ~6 MB; até a seção se aproximar da tela mostramos o
+	// quadro estático (idêntico ao primeiro quadro) para não competir com a home.
+	const [signAnimationEnabled, setSignAnimationEnabled] = useState(false);
+
+	useEffect(() => {
+		const root = rootRef.current;
+
+		if (!root || typeof IntersectionObserver === "undefined") {
+			setSignAnimationEnabled(true);
+			return;
+		}
+
+		const observer = new IntersectionObserver(
+			(entries) => {
+				if (entries.some((entry) => entry.isIntersecting)) {
+					setSignAnimationEnabled(true);
+					observer.disconnect();
+				}
+			},
+			{ rootMargin: "25% 0px" },
+		);
+
+		observer.observe(root);
+
+		return () => observer.disconnect();
+	}, []);
 
 	useLayoutEffect(() => {
 		const root = rootRef.current;
@@ -496,8 +522,11 @@ export default function Services() {
 							/>
 							<img
 								className={styles.titleImage}
-								src={servicesSignAnimated}
+								src={
+									signAnimationEnabled ? servicesSignAnimated : servicesSignStatic
+								}
 								alt={localizeLabel("")}
+								data-sign-animation-enabled={signAnimationEnabled}
 								decoding="async"
 							/>
 						</picture>

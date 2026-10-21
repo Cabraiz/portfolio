@@ -5,7 +5,7 @@ import msgIcon from "../../assets/Mateus/msgIcon.png";
 import mateusChatAvatar from "../../assets/Mateus/mateus-chat-avatar-v2.webp";
 import lagArthurSupport from "../../assets/Mateus/lag-arthur-support-wig-suit-v2.webp";
 import lagArthurChat from "../../assets/Mateus/lag-arthur-chat-blank-eyes-closed-mouth-v3.webp";
-import lagArthurIris from "../../assets/Mateus/lag-arthur-iris-anime-handpainted-v9.png";
+import lagArthurIris from "../../assets/Mateus/lag-arthur-iris-anime-handpainted-v9.webp";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { useLocation } from "react-router-dom";
