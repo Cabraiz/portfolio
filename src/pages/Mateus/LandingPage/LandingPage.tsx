@@ -18,6 +18,7 @@ import RoadMapErrorBoundary from "../RoadMap/ui/chrome/RoadMapErrorBoundary";
 
 import LandingSectionShell from "./LandingSectionShell";
 import { resolveLandingDesktopScrollPolicy } from "./landingDesktopScrollPolicy";
+import useDesktopSectionPaging from "./hooks/useDesktopSectionPaging";
 import useLandingHistorySync from "./hooks/useLandingHistorySync";
 import useLandingSectionMeasurements from "./hooks/useLandingSectionMeasurements";
 import { getLandingSectionDefinitions } from "./landingSections.config";
@@ -172,6 +173,7 @@ const LandingPage: React.FC = () => {
     committedSectionId,
     refreshActiveSection,
     setActiveSectionId,
+    navigateToSection,
   } = useLandingSectionNavigation({
     containerRef,
     defaultSectionId: desktopScrollPolicy.defaultSectionId,
@@ -194,6 +196,8 @@ const LandingPage: React.FC = () => {
     urlSyncEligibleSectionIds: desktopScrollPolicy.url.eligibleSectionIds,
     historyMode: desktopScrollPolicy.url.historyMode,
   });
+
+  useDesktopSectionPaging({ containerRef, navigateToSection });
 
   const initialRouteTargetIdRef = useRef(routeSectionId);
 

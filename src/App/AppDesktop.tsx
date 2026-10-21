@@ -196,6 +196,13 @@ export default function AppDesktop() {
         lerp: smoothOptions.lerp,
         wheelMultiplier: smoothOptions.wheelMultiplier,
         touchMultiplier: smoothOptions.touchMultiplier,
+        // Na landing a roda pagina por seção (useDesktopSectionPaging); o
+        // Lenis não pode somar os mesmos tiques como rolagem livre.
+        virtualScroll: (data) =>
+          !(
+            data.event.type === "wheel" &&
+            document.querySelector("main[data-landing-viewport='desktop']")
+          ),
       }}
     >
       <TitleWebsite
