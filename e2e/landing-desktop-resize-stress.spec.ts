@@ -396,6 +396,45 @@ test("giro rápido ou swipe de trackpad anda uma seção só", async ({ page }) 
 	await expectSettled(page, "tique depois de uma pausa", "roadMap");
 });
 
+test("Firefox (linhas) e mouse de alta resolução andam uma seção por tique", async ({
+	page,
+}) => {
+	await openLanding(page, SIZES[3], "portfolio");
+
+	const dispatch = (
+		events: readonly (readonly [number, number])[],
+		gap: number
+	) =>
+		page.evaluate(
+			async ([list, delay]) => {
+				for (const [deltaY, deltaMode] of list) {
+					document.elementFromPoint(640, 300)?.dispatchEvent(
+						new WheelEvent("wheel", {
+							deltaY,
+							deltaMode,
+							bubbles: true,
+							cancelable: true,
+						})
+					);
+					await new Promise((resolve) => setTimeout(resolve, delay));
+				}
+			},
+			[events, gap] as const
+		);
+
+	// Firefox: um tique = 3 linhas (deltaMode 1).
+	await dispatch([[3, 1]], 0);
+	await expectSettled(page, "tique em linhas", "roadMap");
+
+	// Mouse de alta resolução: vários deltas pequenos por tique.
+	await page.waitForTimeout(300);
+	await dispatch(
+		Array.from({ length: 10 }, () => [-12, 0] as const),
+		16
+	);
+	await expectSettled(page, "tique de alta resolução", "portfolio");
+});
+
 test("teclado anda uma seção por tecla", async ({ page }) => {
 	await openLanding(page, SIZES[1]);
 

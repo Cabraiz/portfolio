@@ -52,6 +52,8 @@ export type LandingSectionNavigationNavigateOptions = Readonly<{
   forceScroll?: boolean;
   offsetPx?: number;
   duration?: number;
+  /** Chamado quando a animação chega ao destino (não quando é interrompida). */
+  onScrollComplete?: () => void;
 }>;
 
 export type UseLandingSectionNavigationParams = Readonly<{
@@ -288,8 +290,9 @@ function scrollToSectionTarget(params: Readonly<{
   lenis: LenisLike;
   offsetPx: number;
   duration: number;
+  onScrollComplete?: () => void;
 }>): void {
-  const { target, lenis, offsetPx, duration } = params;
+  const { target, lenis, offsetPx, duration, onScrollComplete } = params;
 
   const targetScrollTop = resolveExactWindowScrollTop(target, offsetPx);
 
@@ -330,7 +333,10 @@ function scrollToSectionTarget(params: Readonly<{
       easing: createEaseOutCubic,
       // Uma navegação nova sempre vence a anterior, mesmo com o Lenis parado.
       force: true,
-      onComplete: releaseTarget,
+      onComplete: () => {
+        releaseTarget();
+        onScrollComplete?.();
+      },
     });
     return;
   }
@@ -688,6 +694,7 @@ export default function useLandingSectionNavigation(
               ? 0 : getResolvedNavbarOffsetPx()
           ),
           duration: options?.duration ?? scrollDuration,
+          onScrollComplete: options?.onScrollComplete,
         });
 
         if (shouldSyncUrl) {
