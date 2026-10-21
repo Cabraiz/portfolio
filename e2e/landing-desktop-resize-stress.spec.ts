@@ -330,13 +330,23 @@ for (const size of [SIZES[3], SIZES[0]]) {
 		page,
 	}) => {
 		await openLanding(page, size);
-		// Cliques de 100px seguidos: o gesto atravessa a borda e para ~10% além.
+		// Cliques de 100px a cada 40ms (um gesto rápido): passa ~10% do topo.
+		// Disparados na página para o ritmo não depender da carga do runner.
 		const notches = Math.floor(size.height / 100) + 2;
-		await page.mouse.move(640, 300);
-		for (let index = 0; index < notches; index += 1) {
-			await page.mouse.wheel(0, 100);
-			await page.waitForTimeout(40);
-		}
+		await page.evaluate(async (count) => {
+			for (let index = 0; index < count; index += 1) {
+				document.elementFromPoint(640, 300)?.dispatchEvent(
+					new WheelEvent("wheel", {
+						deltaY: 100,
+						bubbles: true,
+						cancelable: true,
+						clientX: 640,
+						clientY: 300,
+					})
+				);
+				await new Promise((resolve) => setTimeout(resolve, 40));
+			}
+		}, notches);
 		await expectSettled(page, "ímã depois de passar do portfólio", "portfolio");
 	});
 }
