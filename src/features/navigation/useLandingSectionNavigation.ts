@@ -52,8 +52,6 @@ export type LandingSectionNavigationNavigateOptions = Readonly<{
   forceScroll?: boolean;
   offsetPx?: number;
   duration?: number;
-  /** Chamado quando a animação chega ao destino (não quando é interrompida). */
-  onScrollComplete?: () => void;
 }>;
 
 export type UseLandingSectionNavigationParams = Readonly<{
@@ -290,9 +288,8 @@ function scrollToSectionTarget(params: Readonly<{
   lenis: LenisLike;
   offsetPx: number;
   duration: number;
-  onScrollComplete?: () => void;
 }>): void {
-  const { target, lenis, offsetPx, duration, onScrollComplete } = params;
+  const { target, lenis, offsetPx, duration } = params;
 
   const targetScrollTop = resolveExactWindowScrollTop(target, offsetPx);
 
@@ -302,7 +299,14 @@ function scrollToSectionTarget(params: Readonly<{
 
   if (targetScrollTop !== null && lenis) {
     const browserWindow = globalThis.window;
-    const interruptionEvents = ["wheel", "touchstart", "pointerdown", "keydown"] as const;
+    // Na landing desktop a roda e o teclado só paginam (useDesktopSectionPaging)
+    // e não movem a página no meio da animação: lá eles não a interrompem, e
+    // o alvo pendente marca a navegação em curso até ela terminar.
+    const interruptionEvents = document.querySelector(
+      "main[data-landing-viewport='desktop']",
+    )
+      ? (["touchstart", "pointerdown"] as const)
+      : (["wheel", "touchstart", "pointerdown", "keydown"] as const);
 
     // O Lenis não chama onComplete quando o usuário interrompe a animação;
     // sem isso o alvo antigo ficaria pendente e seria reaplicado depois.
@@ -333,10 +337,7 @@ function scrollToSectionTarget(params: Readonly<{
       easing: createEaseOutCubic,
       // Uma navegação nova sempre vence a anterior, mesmo com o Lenis parado.
       force: true,
-      onComplete: () => {
-        releaseTarget();
-        onScrollComplete?.();
-      },
+      onComplete: releaseTarget,
     });
     return;
   }
@@ -694,7 +695,6 @@ export default function useLandingSectionNavigation(
               ? 0 : getResolvedNavbarOffsetPx()
           ),
           duration: options?.duration ?? scrollDuration,
-          onScrollComplete: options?.onScrollComplete,
         });
 
         if (shouldSyncUrl) {
