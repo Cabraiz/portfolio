@@ -30,6 +30,9 @@ const PORTFOLIO_AUTOPLAY_INTERVAL_MS = 6200;
 const PORTFOLIO_MAGNET_IDLE_MS = 120;
 const PORTFOLIO_MAGNET_DURATION_SECONDS = 0.62;
 const PORTFOLIO_MAGNET_ENTRY_RATIO = 0.1;
+// Um gesto rápido de roda pode atravessar o topo do portfólio antes de parar;
+// até esta fração da tela além da borda o ímã ainda traz a seção de volta.
+const PORTFOLIO_MAGNET_OVERSHOOT_RATIO = 0.35;
 
 const COUNTRY_FLAGS: Readonly<Record<string, string>> = {
 	Brasil: flagBrazil,
@@ -205,9 +208,19 @@ export default function Portfolio() {
 		let releaseTimerId: number | undefined;
 		let previousScrollY = globalThis.scrollY;
 		let isScrollingDown = false;
+		let gestureStartTop: number | null = null;
 
 		const releaseMagnet = () => {
 			isMagnetizingRef.current = false;
+			// Um clique de roda que chegue logo após o encaixe ainda faz parte do
+			// mesmo gesto: confere de novo quando a rolagem parar.
+			gestureStartTop = 5;
+			isScrollingDown = true;
+			globalThis.clearTimeout(idleTimerId);
+			idleTimerId = globalThis.window.setTimeout(
+				magnetizePortfolio,
+				PORTFOLIO_MAGNET_IDLE_MS
+			);
 		};
 
 		const magnetizePortfolio = () => {
@@ -235,8 +248,17 @@ export default function Portfolio() {
 			);
 			const visibleRatio = visibleHeight / Math.max(globalThis.innerHeight, 1);
 			const isEnteringFromHome = rect.top > navbarHeight + 4;
+			const startedBelowTop = gestureStartTop !== null && gestureStartTop > 4;
+			const overshotFromHome =
+				startedBelowTop &&
+				rect.top < -2 &&
+				rect.top > -globalThis.innerHeight * PORTFOLIO_MAGNET_OVERSHOOT_RATIO;
+			gestureStartTop = null;
 
-			if (!isEnteringFromHome || visibleRatio < PORTFOLIO_MAGNET_ENTRY_RATIO) {
+			if (
+				!(isEnteringFromHome || overshotFromHome) ||
+				visibleRatio < PORTFOLIO_MAGNET_ENTRY_RATIO
+			) {
 				return;
 			}
 
@@ -247,6 +269,9 @@ export default function Portfolio() {
 				duration: PORTFOLIO_MAGNET_DURATION_SECONDS,
 				replace: true,
 				syncUrl: true,
+				// Cliques de roda que chegam durante o encaixe não podem levar a
+				// página além do portfólio.
+				lockUserScroll: true,
 			});
 
 			globalThis.clearTimeout(releaseTimerId);
@@ -258,10 +283,16 @@ export default function Portfolio() {
 
 		const scheduleMagnet = () => {
 			const nextScrollY = globalThis.scrollY;
-			isScrollingDown = nextScrollY > previousScrollY;
+			const scrollDelta = nextScrollY - previousScrollY;
+			isScrollingDown = scrollDelta > 0;
 			previousScrollY = nextScrollY;
 
 			if (isMagnetizingRef.current) return;
+
+			// Primeiro evento depois de uma pausa: registra onde o gesto começou.
+			if (idleTimerId === undefined) {
+				gestureStartTop = root.getBoundingClientRect().top + scrollDelta;
+			}
 
 			globalThis.clearTimeout(idleTimerId);
 			idleTimerId = globalThis.window.setTimeout(

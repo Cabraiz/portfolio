@@ -325,6 +325,43 @@ test("entrar no portfólio pela roda alinha a seção no topo da tela", async ({
 	await expectSettled(page, "ímã do portfólio", "portfolio");
 });
 
+for (const size of [SIZES[3], SIZES[0]]) {
+	test(`gesto rápido da home que passa do topo do portfólio volta para ele em ${size.width}x${size.height}`, async ({
+		page,
+	}) => {
+		await openLanding(page, size);
+		// Cliques de 100px seguidos: o gesto atravessa a borda e para ~10% além.
+		const notches = Math.floor(size.height / 100) + 2;
+		await page.mouse.move(640, 300);
+		for (let index = 0; index < notches; index += 1) {
+			await page.mouse.wheel(0, 100);
+			await page.waitForTimeout(40);
+		}
+		await expectSettled(page, "ímã depois de passar do portfólio", "portfolio");
+	});
+}
+
+test("descer devagar a partir do portfólio alinhado não é puxado de volta", async ({
+	page,
+}) => {
+	await openLanding(page, SIZES[3]);
+	// Chega pelo próprio ímã e espera o encaixe terminar.
+	await wheel(page, 120, 2);
+	await expectSettled(page, "ímã do portfólio", "portfolio");
+	await page.waitForTimeout(1_000);
+	await page.mouse.move(640, 300);
+	for (let notch = 1; notch <= 3; notch += 1) {
+		await page.mouse.wheel(0, 100);
+		await page.waitForTimeout(700);
+		const top = await page.evaluate(() =>
+			Math.round(
+				document.getElementById("portfolio")!.getBoundingClientRect().top
+			)
+		);
+		expect(top).toBeLessThan(-notch * 100 + 20);
+	}
+});
+
 test("interromper uma navegação com a roda não deixa alvo pendente", async ({
 	page,
 }) => {
