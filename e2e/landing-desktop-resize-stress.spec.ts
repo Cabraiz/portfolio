@@ -335,30 +335,36 @@ test("clique no menu depois de rolar com a roda chega exatamente na seção", as
 });
 
 for (const size of [SIZES[3], SIZES[0]]) {
-	test(`cada tique da roda anda exatamente uma seção em ${size.width}x${size.height}`, async ({
+	test(`quatro tiques da roda andam exatamente uma seção em ${size.width}x${size.height}`, async ({
 		page,
 	}) => {
-		test.setTimeout(90_000);
+		test.setTimeout(120_000);
 		const errors = await openLanding(page, size);
 
+		// Menos de quatro tiques empurram a página e ela volta para onde estava.
+		for (const ticks of [1, 2, 3]) {
+			await wheelGesture(page, ticks, 100, 120);
+			await expectSettled(page, `${ticks} tique(s) e para`, "home");
+		}
+
 		for (const sectionId of SECTION_IDS.slice(1)) {
-			await wheelGesture(page, 1, 100);
+			await wheelGesture(page, 4, 100, 120);
 			await expectSettled(
 				page,
-				`um tique para baixo até ${sectionId}`,
+				`quatro tiques para baixo até ${sectionId}`,
 				sectionId
 			);
 		}
 
-		// Na última seção um tique a mais não sai do lugar.
-		await wheelGesture(page, 1, 100);
-		await expectSettled(page, "tique além do fim", "contact");
+		// Na última seção tiques a mais não saem do lugar.
+		await wheelGesture(page, 4, 100, 120);
+		await expectSettled(page, "tiques além do fim", "contact");
 
 		for (const sectionId of [...SECTION_IDS].reverse().slice(1)) {
-			await wheelGesture(page, 1, -100);
+			await wheelGesture(page, 4, -100, 120);
 			await expectSettled(
 				page,
-				`um tique para cima até ${sectionId}`,
+				`quatro tiques para cima até ${sectionId}`,
 				sectionId
 			);
 		}
@@ -378,8 +384,8 @@ test("giro rápido ou swipe de trackpad anda uma seção só", async ({ page }) 
 
 	// Swipe de trackpad: deltas pequenos com inércia.
 	await page.evaluate(async () => {
-		const deltas = [2, 4, 8, 14, 22, 30, 34, 32, 28, 24, 20, 17, 14, 12, 10];
-		for (const deltaY of [...deltas, 8, 6, 5, 4, 3, 2, 2, 1, 1, 1, 1]) {
+		const deltas = [4, 8, 16, 28, 44, 60, 68, 64, 56, 48, 40, 34, 28, 24, 20];
+		for (const deltaY of [...deltas, 16, 12, 10, 8, 6, 4, 4, 2, 2, 2, 2]) {
 			document
 				.elementFromPoint(640, 300)
 				?.dispatchEvent(
@@ -390,13 +396,13 @@ test("giro rápido ou swipe de trackpad anda uma seção só", async ({ page }) 
 	});
 	await expectSettled(page, "swipe de trackpad", "portfolio");
 
-	// Tiques espaçados depois do encaixe voltam a andar uma seção cada.
+	// Depois de uma pausa, mais quatro tiques andam mais uma seção.
 	await page.waitForTimeout(300);
-	await wheelGesture(page, 1, 100);
+	await wheelGesture(page, 4, 100, 120);
 	await expectSettled(page, "tique depois de uma pausa", "roadMap");
 });
 
-test("Firefox (linhas) e mouse de alta resolução andam uma seção por tique", async ({
+test("Firefox (linhas) e mouse de alta resolução andam uma seção a cada quatro tiques", async ({
 	page,
 }) => {
 	await openLanding(page, SIZES[3], "portfolio");
@@ -423,16 +429,19 @@ test("Firefox (linhas) e mouse de alta resolução andam uma seção por tique",
 		);
 
 	// Firefox: um tique = 3 linhas (deltaMode 1).
-	await dispatch([[3, 1]], 0);
-	await expectSettled(page, "tique em linhas", "roadMap");
+	await dispatch(
+		Array.from({ length: 4 }, () => [3, 1] as const),
+		120
+	);
+	await expectSettled(page, "quatro tiques em linhas", "roadMap");
 
 	// Mouse de alta resolução: vários deltas pequenos por tique.
 	await page.waitForTimeout(300);
 	await dispatch(
-		Array.from({ length: 10 }, () => [-12, 0] as const),
+		Array.from({ length: 40 }, () => [-12, 0] as const),
 		16
 	);
-	await expectSettled(page, "tique de alta resolução", "portfolio");
+	await expectSettled(page, "quatro tiques de alta resolução", "portfolio");
 });
 
 test("teclado anda uma seção por tecla", async ({ page }) => {
@@ -479,7 +488,7 @@ test("clicar no menu durante a paginação navega mesmo assim", async ({
 			await clickSection(page, "home");
 			await expectSettled(page, "volta para o início", "home");
 		}
-		await wheelGesture(page, 1, 100);
+		await wheelGesture(page, 4, 100, 60);
 		await page.waitForFunction(
 			() => document.documentElement.hasAttribute("data-landing-scroll-target"),
 			null,
