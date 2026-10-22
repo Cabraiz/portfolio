@@ -496,6 +496,30 @@ for (const size of [SIZES[3], SIZES[7], SIZES[0]]) {
 	});
 }
 
+// Escala do Windows ou zoom: o Chrome manda tiques menores (100px / escala).
+for (const deviceScaleFactor of [1.25, 2]) {
+	test.describe(`escala ${deviceScaleFactor * 100}%`, () => {
+		test.use({ deviceScaleFactor });
+
+		test("quatro tiques reais da roda andam uma seção", async ({ page }) => {
+			await openLanding(page, SIZES[7], "portfolio");
+			await page.mouse.move(640, 300);
+
+			for (let tick = 0; tick < 3; tick += 1) {
+				await page.mouse.wheel(0, 100);
+				await page.waitForTimeout(80);
+			}
+			await expectSettled(page, "três tiques e para", "portfolio");
+
+			for (let tick = 0; tick < 4; tick += 1) {
+				await page.mouse.wheel(0, 100);
+				await page.waitForTimeout(80);
+			}
+			await expectSettled(page, "quatro tiques", "roadMap");
+		});
+	});
+}
+
 test("teclado anda uma seção por tecla", async ({ page }) => {
 	await openLanding(page, SIZES[1]);
 

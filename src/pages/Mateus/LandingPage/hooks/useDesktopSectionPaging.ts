@@ -63,7 +63,9 @@ function normalizeWheelDelta(event: WheelEvent): number {
 	if (event.deltaMode === WheelEvent.DOM_DELTA_PAGE) {
 		return event.deltaY * window.innerHeight;
 	}
-	return event.deltaY;
+	// Com escala do Windows ou zoom (125%, 150%, 200%), o Chrome divide o tique
+	// pela escala (80px, 67px, 50px): volta para o tamanho de um tique inteiro.
+	return event.deltaY * Math.max(1, window.devicePixelRatio || 1);
 }
 
 function canScrollInside(
