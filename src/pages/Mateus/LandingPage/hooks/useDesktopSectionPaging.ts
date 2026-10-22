@@ -8,26 +8,33 @@ import type { LandingSectionNavigationNavigateOptions } from "../../../../featur
  * Paginação por seção no desktop com resistência: são precisos
  * TICKS_PER_SECTION tiques da roda para trocar de tela.
  *
- * - Cada tique empurra a página 1/TICKS_PER_SECTION do caminho até a seção
- *   vizinha; ao completar, a página termina a passagem e para nela.
- * - Se a roda parar antes, a página volta para a seção de onde saiu: nunca
- *   fica parada entre duas telas.
- * - Enquanto qualquer navegação anima (troca de seção, menu), a roda espera.
- * - Depois de uma troca, o resto do mesmo giro (sem pausa de
- *   NEW_GESTURE_GAP_MS) e a inércia do trackpad são ignorados.
+ * - Cada tique leva a página, suavemente, 1/TICKS_PER_SECTION do caminho até
+ *   a seção vizinha; ao completar, a página termina a passagem e para nela.
+ * - Se a roda parar antes, a página desliza de volta para a seção de onde
+ *   saiu. Tiques dados durante essa volta continuam contando de onde ela
+ *   está: o empurrão nunca é perdido.
+ * - Fora do alinhamento (barra de rolagem, resize) o empurrão parte da seção
+ *   mais próxima, e o resize no meio de um empurrão realinha a seção.
+ * - Enquanto a passagem para outra seção anima, a roda espera; depois dela,
+ *   o resto do mesmo giro (sem pausa de NEW_GESTURE_GAP_MS) e a inércia do
+ *   trackpad são ignorados.
  * - Teclas de rolagem trocam de seção direto.
  * - Áreas com rolagem própria (chat, lista do portfólio, painéis) continuam
  *   rolando normalmente enquanto tiverem para onde rolar.
  */
 
-export const DESKTOP_SECTION_PAGING_DURATION_SECONDS = 0.75;
+export const DESKTOP_SECTION_PAGING_DURATION_SECONDS = 1.1;
 
 const TICKS_PER_SECTION = 4;
-// Um tique de mouse comum (Chrome/Windows) rola 100px.
+// Um tique de mouse comum (Chrome/Windows) rola 100px; tiques maiores
+// (Windows com mais linhas por tique) contam como um tique só.
 const TICK_DELTA_PX = 100;
-const NUDGE_DURATION_SECONDS = 0.3;
-const SNAP_BACK_DELAY_MS = 650;
-const SNAP_BACK_DURATION_SECONDS = 0.45;
+// Suavização dos empurrões e da volta (mesma escala do lerp do Lenis).
+const PUSH_LERP = 0.06;
+const SNAP_BACK_DELAY_MS = 900;
+const RESIZE_REALIGN_DELAY_MS = 400;
+const REALIGN_WINDOW_MS = 1500;
+const SNAP_BACK_RESIZE_DURATION_SECONDS = 0.5;
 // Depois de uma troca, a roda precisa ficar parada este tempo para voltar a
 // contar tiques: um giro contínuo (de qualquer duração) troca uma tela só.
 const NEW_GESTURE_GAP_MS = 200;
@@ -57,10 +64,6 @@ function normalizeWheelDelta(event: WheelEvent): number {
 		return event.deltaY * window.innerHeight;
 	}
 	return event.deltaY;
-}
-
-function easeOutCubic(value: number): number {
-	return 1 - (1 - value) ** 3;
 }
 
 function canScrollInside(
@@ -144,10 +147,16 @@ export default function useDesktopSectionPaging({
 		let lastWheelAt = Number.NEGATIVE_INFINITY;
 		let lastWheelDelta = 0;
 		let gestureConsumed = false;
-		// Seção de onde o empurrão saiu e quanto (em px de roda) já acumulou.
+		let pointerIsDown = false;
+		// Seção de onde o empurrão saiu e quantos tiques ele acumula (pode ser
+		// fracionário: mouse de alta resolução e trackpad mandam pedaços).
 		let anchorIndex: number | null = null;
-		let accumulatedDelta = 0;
+		let pushTicks = 0;
 		let snapBackTimerId: number | undefined;
+		let resizeTimerId: number | undefined;
+		// Seção a realinhar depois de um resize que pegou um empurrão no meio.
+		let realignIndex: number | null = null;
+		let realignExpiryTimerId: number | undefined;
 
 		const getSections = () =>
 			Array.from(
@@ -156,11 +165,34 @@ export default function useDesktopSectionPaging({
 				)
 			);
 
+		const sectionTop = (section: HTMLElement) =>
+			window.scrollY + section.getBoundingClientRect().top;
+
+		const glideTo = (top: number, onComplete?: () => void) => {
+			const activeLenis = lenisRef.current;
+
+			if (activeLenis) {
+				activeLenis.scrollTo(top, {
+					lerp: PUSH_LERP,
+					force: true,
+					onComplete,
+				});
+				return;
+			}
+
+			window.scrollTo({ top, behavior: "auto" });
+			onComplete?.();
+		};
+
 		const resetPush = () => {
 			window.clearTimeout(snapBackTimerId);
+			window.clearTimeout(resizeTimerId);
 			snapBackTimerId = undefined;
+			resizeTimerId = undefined;
 			anchorIndex = null;
-			accumulatedDelta = 0;
+			pushTicks = 0;
+			// Roda ou teclado assumiram: um resize não volta mais para a seção antiga.
+			realignIndex = null;
 		};
 
 		const navigateTo = (section: HTMLElement, duration: number) => {
@@ -182,48 +214,78 @@ export default function useDesktopSectionPaging({
 
 		const snapBack = () => {
 			snapBackTimerId = undefined;
-			const sections = getSections();
-			const anchor = anchorIndex === null ? null : sections[anchorIndex];
+			const anchor = anchorIndex === null ? null : getSections()[anchorIndex];
 
-			resetPush();
-
-			if (anchor && !isNavigationAnimating()) {
-				navigateTo(anchor, SNAP_BACK_DURATION_SECONDS);
+			// Menu, teclado ou a barra de rolagem assumiram a posição.
+			if (!anchor || isNavigationAnimating() || pointerIsDown) {
+				resetPush();
+				return;
 			}
+
+			pushTicks = 0;
+			glideTo(sectionTop(anchor), () => {
+				// Um tique durante a volta reabre o empurrão desta mesma seção.
+				if (pushTicks === 0) anchorIndex = null;
+			});
 		};
 
-		const push = (delta: number): void => {
-			const sections = getSections();
+		const scheduleSnapBack = () => {
+			window.clearTimeout(snapBackTimerId);
+			snapBackTimerId = window.setTimeout(snapBack, SNAP_BACK_DELAY_MS);
+		};
 
-			if (anchorIndex === null) {
-				const alignedIndex = sections.findIndex(
-					(section) => Math.abs(section.getBoundingClientRect().top) <= 2
-				);
+		const ensureAnchor = (sections: readonly HTMLElement[]) => {
+			const height = window.innerHeight;
+			const current = anchorIndex === null ? null : sections[anchorIndex];
 
-				// Fora do alinhamento (barra de rolagem): vai direto para a seção.
-				if (alignedIndex < 0) {
-					page(delta > 0 ? 1 : -1);
-					return;
-				}
-
-				anchorIndex = alignedIndex;
+			if (
+				current &&
+				Math.abs(current.getBoundingClientRect().top) < height * 1.05
+			) {
+				return;
 			}
 
-			accumulatedDelta += delta;
+			// Começa da seção mais próxima, contando o quanto a página já está
+			// fora dela (barra de rolagem, resize, volta interrompida).
+			let nearest = 0;
+			sections.forEach((section, index) => {
+				if (
+					Math.abs(section.getBoundingClientRect().top) <
+					Math.abs(sections[nearest].getBoundingClientRect().top)
+				) {
+					nearest = index;
+				}
+			});
+
+			anchorIndex = nearest;
+			pushTicks =
+				(-sections[nearest].getBoundingClientRect().top / height) *
+				TICKS_PER_SECTION;
+		};
+
+		const push = (ticks: number): void => {
+			const sections = getSections();
+			if (sections.length === 0) return;
+
+			// A roda assumiu depois de um resize: o realinhamento pendente sai.
+			window.clearTimeout(resizeTimerId);
+			realignIndex = null;
+
+			ensureAnchor(sections);
+			if (anchorIndex === null) return;
+
+			pushTicks += ticks;
 
 			// Não há para onde empurrar além da primeira/última seção.
 			if (
-				(anchorIndex === 0 && accumulatedDelta < 0) ||
-				(anchorIndex === sections.length - 1 && accumulatedDelta > 0)
+				(anchorIndex === 0 && pushTicks < 0) ||
+				(anchorIndex === sections.length - 1 && pushTicks > 0)
 			) {
-				accumulatedDelta = 0;
+				pushTicks = 0;
 			}
 
-			const progress =
-				accumulatedDelta / (TICKS_PER_SECTION * TICK_DELTA_PX);
-
-			if (Math.abs(progress) >= 1) {
-				const target = sections[anchorIndex + Math.sign(progress)];
+			if (Math.abs(pushTicks) >= TICKS_PER_SECTION - 0.001) {
+				const target = sections[anchorIndex + Math.sign(pushTicks)];
 				resetPush();
 				gestureConsumed = true;
 				if (target) navigateTo(target, DESKTOP_SECTION_PAGING_DURATION_SECONDS);
@@ -231,22 +293,11 @@ export default function useDesktopSectionPaging({
 			}
 
 			const anchor = sections[anchorIndex];
-			const anchorTop = window.scrollY + anchor.getBoundingClientRect().top;
-			const nudgeTop = anchorTop + progress * window.innerHeight;
-			const activeLenis = lenisRef.current;
-
-			if (activeLenis) {
-				activeLenis.scrollTo(nudgeTop, {
-					duration: NUDGE_DURATION_SECONDS,
-					easing: easeOutCubic,
-					force: true,
-				});
-			} else {
-				window.scrollTo({ top: nudgeTop, behavior: "auto" });
-			}
-
-			window.clearTimeout(snapBackTimerId);
-			snapBackTimerId = window.setTimeout(snapBack, SNAP_BACK_DELAY_MS);
+			glideTo(
+				sectionTop(anchor) +
+					(pushTicks / TICKS_PER_SECTION) * window.innerHeight
+			);
+			scheduleSnapBack();
 		};
 
 		const handleWheel = (event: WheelEvent): void => {
@@ -264,7 +315,9 @@ export default function useDesktopSectionPaging({
 
 			event.preventDefault();
 
-			const now = performance.now();
+			// Hora em que o navegador criou o evento: com a página ocupada, a hora do
+			// processamento espaçaria tiques de um mesmo giro.
+			const now = event.timeStamp || performance.now();
 			const gap = now - lastWheelAt;
 			const sameDirection = Math.sign(lastWheelDelta) === direction;
 			const accelerating =
@@ -280,7 +333,9 @@ export default function useDesktopSectionPaging({
 			if (isNavigationAnimating()) return;
 			if (gestureConsumed && !accelerating) return;
 
-			push(delta);
+			// Um tique vale no máximo um: tiques maiores (mais linhas por tique)
+			// não pulam etapas; deltas pequenos somam frações.
+			push(direction * Math.min(1, Math.abs(delta) / TICK_DELTA_PX));
 		};
 
 		const handleKeyDown = (event: KeyboardEvent): void => {
@@ -323,9 +378,38 @@ export default function useDesktopSectionPaging({
 			page(direction);
 		};
 
-		// Um clique (menu, chat) assume a posição: o empurrão em curso acaba.
 		const handlePointerDown = (): void => {
-			resetPush();
+			pointerIsDown = true;
+		};
+
+		const handlePointerUp = (): void => {
+			pointerIsDown = false;
+		};
+
+		// Resize no meio de um empurrão: espera a janela assentar e realinha a
+		// seção de onde ele saiu (sem isso a página ficava entre duas telas).
+		// Resizes seguidos (ir para outra tela e voltar) refazem o alinhamento.
+		const handleResize = (): void => {
+			if (anchorIndex !== null) {
+				realignIndex = anchorIndex;
+				window.clearTimeout(snapBackTimerId);
+				snapBackTimerId = undefined;
+				anchorIndex = null;
+				pushTicks = 0;
+			}
+
+			if (realignIndex === null) return;
+
+			window.clearTimeout(realignExpiryTimerId);
+			window.clearTimeout(resizeTimerId);
+			resizeTimerId = window.setTimeout(() => {
+				const anchor =
+					realignIndex === null ? null : getSections()[realignIndex];
+				if (anchor) navigateTo(anchor, SNAP_BACK_RESIZE_DURATION_SECONDS);
+				realignExpiryTimerId = window.setTimeout(() => {
+					realignIndex = null;
+				}, REALIGN_WINDOW_MS);
+			}, RESIZE_REALIGN_DELAY_MS);
 		};
 
 		window.addEventListener("wheel", handleWheel, {
@@ -337,12 +421,25 @@ export default function useDesktopSectionPaging({
 			capture: true,
 			passive: true,
 		});
+		window.addEventListener("pointerup", handlePointerUp, {
+			capture: true,
+			passive: true,
+		});
+		window.addEventListener("pointercancel", handlePointerUp, {
+			capture: true,
+			passive: true,
+		});
+		window.addEventListener("resize", handleResize);
 
 		return () => {
 			resetPush();
+			window.clearTimeout(realignExpiryTimerId);
 			window.removeEventListener("wheel", handleWheel, true);
 			window.removeEventListener("keydown", handleKeyDown);
 			window.removeEventListener("pointerdown", handlePointerDown, true);
+			window.removeEventListener("pointerup", handlePointerUp, true);
+			window.removeEventListener("pointercancel", handlePointerUp, true);
+			window.removeEventListener("resize", handleResize);
 		};
 	}, [containerRef]);
 }

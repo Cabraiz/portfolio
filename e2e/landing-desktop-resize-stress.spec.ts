@@ -444,6 +444,58 @@ test("Firefox (linhas) e mouse de alta resolução andam uma seção a cada quat
 	await expectSettled(page, "quatro tiques de alta resolução", "portfolio");
 });
 
+for (const size of [SIZES[3], SIZES[7], SIZES[0]]) {
+	test(`tique quebrado no meio sempre termina alinhado em ${size.width}x${size.height}`, async ({
+		page,
+	}) => {
+		test.setTimeout(120_000);
+		const errors = await openLanding(page, size, "portfolio");
+
+		// Ida e volta no meio do empurrão: não sai da seção.
+		for (const deltaY of [100, -100, 100, -100]) {
+			await wheelGesture(page, 1, deltaY);
+			await page.waitForTimeout(80);
+		}
+		await expectSettled(page, "vai-e-volta", "portfolio");
+
+		// Tiques durante a volta continuam contando de onde a página está.
+		await wheelGesture(page, 3, 100, 120);
+		await page.waitForTimeout(1_000);
+		await wheelGesture(page, 4, 100, 120);
+		await expectSettled(page, "quatro tiques durante a volta", "roadMap");
+
+		// Tiques lentos (meio segundo entre eles) ainda somam.
+		await wheelGesture(page, 4, 100, 500);
+		await expectSettled(page, "quatro tiques lentos", "technologies");
+
+		// Tique grande (Windows com mais linhas por tique) vale um só.
+		await wheelGesture(page, 3, -300, 120);
+		await expectSettled(page, "três tiques grandes", "technologies");
+
+		// Clique fora do menu no meio do empurrão: a página volta.
+		await wheelGesture(page, 2, 100, 120);
+		await page.mouse.click(5, size.height - 5);
+		await expectSettled(page, "clique fora no meio", "technologies");
+
+		// Tecla no meio do empurrão anda a partir da seção certa.
+		await wheelGesture(page, 2, -100, 120);
+		await page.keyboard.press("PageUp");
+		await expectSettled(page, "PageUp no meio", "roadMap");
+
+		// Resize no meio do empurrão realinha a seção.
+		await wheelGesture(page, 3, 100, 120);
+		await page.setViewportSize({
+			width: Math.round(size.width * 0.8),
+			height: Math.round(size.height * 0.85),
+		});
+		await page.waitForTimeout(300);
+		await page.setViewportSize(size);
+		await expectSettled(page, "resize no meio", "roadMap");
+
+		expect(errors).toEqual([]);
+	});
+}
+
 test("teclado anda uma seção por tecla", async ({ page }) => {
 	await openLanding(page, SIZES[1]);
 
