@@ -8,8 +8,7 @@ for (const viewport of [
 	{ name: "desktop", width: 1366, height: 720 },
 	{ name: "desktop baixo", width: 1366, height: 631 },
 	{ name: "desktop full hd", width: 1920, height: 1080 },
-	{ name: "mobile", width: 390, height: 844 },
-	{ name: "mobile compacto", width: 360, height: 640 },
+	// A Rede IA não existe no celular (só Início e Portfólio).
 ]) {
 	test(`${viewport.name}: mostra a rede cognitiva pública sem montar Skills`, async ({
 		page,

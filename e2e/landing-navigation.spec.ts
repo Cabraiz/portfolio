@@ -17,7 +17,15 @@ for (const viewport of [
 	test.describe(viewport.name, () => {
 		test.use({ viewport });
 
-		for (const [route, sectionId] of routes) {
+		for (const [route, desktopSectionId] of routes) {
+			// No celular só existem Início e Portfólio; as outras rotas abrem o Início.
+			const sectionId =
+				viewport.name === "mobile" &&
+				desktopSectionId !== "home" &&
+				desktopSectionId !== "portfolio"
+					? "home"
+					: desktopSectionId;
+
 			test(`${route} opens its section without mounting the whole site`, async ({
 				page,
 			}) => {
@@ -41,6 +49,15 @@ for (const viewport of [
 					)
 					.count();
 				expect(mountedCount).toBeLessThan(routes.length);
+
+				if (viewport.name === "mobile") {
+					await expect(page).toHaveURL(
+						sectionId === "portfolio" ? /\/portfolio$/ : /\/home$/
+					);
+					await expect(
+						page.locator("main[data-landing-viewport] > section")
+					).toHaveCount(2);
+				}
 			});
 		}
 
@@ -50,7 +67,7 @@ for (const viewport of [
 			await page.goto("/technologies");
 			await expect(page.locator("main[data-landing-viewport]")).toHaveAttribute(
 				"data-active-section",
-				"technologies",
+				viewport.name === "mobile" ? "home" : "technologies",
 				{ timeout: 15_000 }
 			);
 			await expect(page.locator("section#live")).toHaveCount(0);

@@ -57,11 +57,14 @@ for (const viewport of [
     await page.waitForTimeout(150);
     const start = await measure();
     await page.screenshot({ path: test.info().outputPath("portfolio-entry.png") });
+    // O Portfólio é a última seção no celular: não há rolagem depois dele e o
+    // logo fica em repouso no fim da página.
     await page.evaluate(y => scrollTo({ top: y, behavior: "instant" }), entry + viewport.height * .18);
     await page.waitForTimeout(200);
-    const descending = await measure();
-    expect(descending.top).toBeGreaterThan(start.top + 20);
-    expect(descending.opacity).toBe(1);
+    const end = await measure();
+    expect(end.scroll).toBeCloseTo(start.scroll, 0);
+    expect(end.top).toBeCloseTo(start.top, 0);
+    expect(end.opacity).toBe(1);
     await expect(brand).toBeVisible();
     // Coming back must restore the same beginning of the Portfolio phase.
     await page.evaluate(y => scrollTo({ top: y, behavior: "instant" }), entry);

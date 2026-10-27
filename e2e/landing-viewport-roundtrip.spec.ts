@@ -15,6 +15,8 @@ const sections: readonly LandingSection[] = [
 ] as const;
 
 const roundTrip = [...sections, ...sections.slice(0, -1).reverse()] as const;
+// No celular a landing tem só Início e Portfólio.
+const mobileRoundTrip = [sections[0], sections[1], sections[0]] as const;
 
 const viewports = [
 	{ name: "desktop-1280x720", width: 1280, height: 720, mobile: false },
@@ -186,8 +188,9 @@ for (const viewport of viewports) {
 		});
 		await page.goto("/home", { waitUntil: "networkidle" });
 
-		for (let index = 0; index < roundTrip.length; index += 1) {
-			const section = roundTrip[index];
+		const trip = viewport.mobile ? mobileRoundTrip : roundTrip;
+		for (let index = 0; index < trip.length; index += 1) {
+			const section = trip[index];
 			if (index > 0) {
 				await navigateToSection(page, section, viewport.mobile);
 			}
