@@ -12,6 +12,7 @@ import { useLenis } from "lenis/react";
 
 import {
   DEFAULT_LANDING_SECTION_ID,
+  MOBILE_LANDING_SECTION_IDS,
   getSectionIdByPath,
   isLandingPath,
   type LandingSectionId,
@@ -21,10 +22,7 @@ import useLenisEngine from "../../../features/scroll/useLenisEngine";
 import RoadMapErrorBoundary from "../RoadMap/ui/chrome/RoadMapErrorBoundary";
 
 import LandingSectionShell from "./LandingSectionShell";
-import {
-  LANDING_SECTION_ORDER,
-  getLandingSectionDefinitions,
-} from "./landingSections.config";
+import { getLandingSectionDefinitions } from "./landingSections.config";
 import useLandingSectionNavigation from "../../../features/navigation/useLandingSectionNavigation";
 import useLandingHistorySync from "./hooks/useLandingHistorySync";
 import useMobileSectionMagnet from "./hooks/useMobileSectionMagnet";
@@ -143,7 +141,12 @@ function resolveInitialMobileSectionId(pathname: string): LandingSectionId {
     return DEFAULT_LANDING_SECTION_ID;
   }
 
-  return getSectionIdByPath(pathname) ?? DEFAULT_LANDING_SECTION_ID;
+  const sectionId = getSectionIdByPath(pathname);
+
+  // Rotas de seções que só existem no desktop abrem o Início.
+  return sectionId && MOBILE_LANDING_SECTION_IDS.includes(sectionId)
+    ? sectionId
+    : DEFAULT_LANDING_SECTION_ID;
 }
 
 const LandingPageMobile: React.FC = () => {
@@ -177,7 +180,7 @@ const LandingPageMobile: React.FC = () => {
     useLandingSectionNavigation({
       containerRef,
       defaultSectionId: initialSectionId,
-      sectionIds: LANDING_SECTION_ORDER,
+      sectionIds: MOBILE_LANDING_SECTION_IDS,
       sectionSelector: ":scope > section[data-page-section='true']",
       viewportMode: "mobile",
       navbarOffsetPx,
