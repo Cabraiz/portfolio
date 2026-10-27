@@ -1,11 +1,9 @@
 import {expect,test} from '@playwright/test';
 
+// No celular a landing tem só Início e Portfólio.
 const routes=[
  {id:'home',path:'/home',label:'Início',root:'[data-mobile-editorial-home]'},
  {id:'portfolio',path:'/portfolio',label:'Portfólio',root:'[data-portfolio-root]'},
- {id:'roadMap',path:'/servicos',label:'Serviços',root:'[data-services-root]'},
- {id:'technologies',path:'/technologies',label:'Rede IA',root:'[data-cognitive-network-root]'},
- {id:'contact',path:'/contact',label:'Contato',root:'[data-mobile-contact]'},
 ];
 
 for(const viewport of [{width:390,height:844},{width:568,height:320}]){
@@ -78,19 +76,18 @@ test('reload realinha após a altura visível mudar e libera a rolagem do usuár
  }
 });
 
-test('menu cabe na paisagem e rola sem mover a seção',async({browser})=>{
+test('menu cabe na paisagem e não move a seção',async({browser})=>{
  const context=await browser.newContext({locale:'pt-BR',viewport:{width:568,height:320},isMobile:true,hasTouch:true});
  const page=await context.newPage();
- await page.goto(new URL('/technologies',test.info().project.use.baseURL).toString(),{waitUntil:'networkidle'});
- await page.locator('[data-cognitive-network-root]').waitFor();
+ await page.goto(new URL('/home',test.info().project.use.baseURL).toString(),{waitUntil:'networkidle'});
+ await page.locator('[data-mobile-editorial-home]').waitFor();
  await page.getByRole('button',{name:'Abrir menu',exact:true}).click();
  const panel=page.getByRole('navigation',{name:'Navegação principal mobile'});
  const rect=await panel.boundingBox();expect(rect).not.toBeNull();expect(rect!.y+rect!.height).toBeLessThanOrEqual(320);
  const before=await page.evaluate(()=>scrollY);
- await panel.hover();await page.mouse.wheel(0,300);
- await expect.poll(()=>panel.evaluate(e=>e.scrollTop)).toBeGreaterThan(0);
+ await panel.hover();await page.mouse.wheel(0,300);await page.waitForTimeout(300);
  expect(await page.evaluate(()=>scrollY)).toBe(before);
- await page.getByRole('button',{name:'Contato',exact:true}).click();
- await expect(page).toHaveURL(/\/contact$/);
+ await page.getByRole('button',{name:'Portfólio',exact:true}).click();
+ await expect(page).toHaveURL(/\/portfolio$/);
  await context.close();
 });

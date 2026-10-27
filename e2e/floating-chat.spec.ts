@@ -233,13 +233,12 @@ test("prevents duplicate delivery from two immediate clicks", async ({ page }) =
 	expect(postAttempts).toBe(1);
 });
 
-test("keeps the open chat and its controls inside short and mobile viewports", async ({
+test("keeps the open chat and its controls inside short viewports", async ({
 	page,
 }) => {
 	test.setTimeout(60_000);
+	// O celular não mostra o chat (floating-chat-keyboard.spec.ts).
 	const viewports = [
-		{ width: 320, height: 640 },
-		{ width: 360, height: 640 },
 		{ width: 1366, height: 600 },
 		{ width: 1366, height: 720 },
 		{ width: 1920, height: 1080 },
@@ -247,7 +246,6 @@ test("keeps the open chat and its controls inside short and mobile viewports", a
 
 	for (const viewport of viewports) {
 		await page.setViewportSize(viewport);
-		// Mobile Home intentionally hides chat; wait for an eligible route to settle.
 		await page.goto("/contact", { waitUntil: "networkidle" });
 		await expect(page.locator('main[data-active-section="contact"]')).toBeVisible();
 		await page.getByRole("button", { name: "Abrir chat" }).click();
@@ -279,13 +277,9 @@ test("keeps the open chat and its controls inside short and mobile viewports", a
 		expect(panelBox!.y).toBeGreaterThanOrEqual(0);
 		expect(panelBox!.x + panelBox!.width).toBeLessThanOrEqual(viewport.width);
 		expect(panelBox!.y + panelBox!.height).toBeLessThanOrEqual(viewport.height);
-		if (viewport.width < 992) {
-			expect(panelBox!.height).toBeCloseTo(Math.min(360, viewport.height * .8), 0);
-		} else {
-			const heightRatio = panelBox!.height / viewport.height;
-			expect(heightRatio).toBeGreaterThanOrEqual(0.79);
-			expect(heightRatio).toBeLessThanOrEqual(0.81);
-		}
+		const heightRatio = panelBox!.height / viewport.height;
+		expect(heightRatio).toBeGreaterThanOrEqual(0.79);
+		expect(heightRatio).toBeLessThanOrEqual(0.81);
 		const composerBottomInset =
 			panelBox!.y + panelBox!.height - (composerBox!.y + composerBox!.height);
 		expect(composerBottomInset).toBeGreaterThanOrEqual(15);
@@ -299,7 +293,7 @@ test("opens services and minimizes the chat from the pricing action", async ({
 	test.setTimeout(45_000);
 	for (const scenario of [
 		{ viewport: { width: 1366, height: 600 }, startPath: "/home" },
-		{ viewport: { width: 390, height: 844 }, startPath: "/contact" },
+		{ viewport: { width: 1920, height: 1080 }, startPath: "/contact" },
 	]) {
 		await page.setViewportSize(scenario.viewport);
 		await page.goto(scenario.startPath);

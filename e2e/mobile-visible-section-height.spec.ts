@@ -1,11 +1,9 @@
 import { expect, test } from "@playwright/test";
 
+// No celular a landing tem só Início e Portfólio.
 const routes = [
   { id: "home", path: "/home", root: "[data-mobile-editorial-home]" },
   { id: "portfolio", path: "/portfolio", root: "[data-portfolio-root]" },
-  { id: "roadMap", path: "/servicos", root: "[data-services-root]" },
-  { id: "technologies", path: "/technologies", root: "[data-cognitive-network-root]" },
-  { id: "contact", path: "/contact", root: "[data-mobile-contact]" },
 ];
 
 for (const viewport of [

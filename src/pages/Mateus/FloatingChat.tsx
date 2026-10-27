@@ -232,7 +232,8 @@ export default function FloatingChat() {
   const isHomeSectionActive = activeLandingSection
     ? activeLandingSection === "home"
     : isHome;
-  const shouldHideForMobileHome = isMobile && isHome;
+  // No celular o chat não aparece: o contato fica pelos botões do Início.
+  const shouldHideForMobile = isMobile;
   const shouldHideForPortfolio = location.pathname === "/portfolio";
   const scale = (value: number) => (isMobile ? value * 0.8 : value);
 
@@ -240,7 +241,7 @@ export default function FloatingChat() {
   const rightOffset = isMobile ? "30px" : "3vw";
 
   useChatVisualViewport({
-    enabled: isOpen && isMobile && !shouldHideForStandaloneGame && !shouldHideForMobileHome && !shouldHideForPortfolio,
+    enabled: isOpen && isMobile && !shouldHideForStandaloneGame && !shouldHideForMobile && !shouldHideForPortfolio,
     hasMessages: messages.length > 0,
     panelRef: chatRef, inputRef, scrollRef: messagesScrollRef, followLatestRef,
   });
@@ -590,7 +591,7 @@ export default function FloatingChat() {
 
   if (
     shouldHideForStandaloneGame ||
-    shouldHideForMobileHome ||
+    shouldHideForMobile ||
     shouldHideForPortfolio
   ) {
     return null;

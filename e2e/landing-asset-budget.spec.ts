@@ -88,6 +88,33 @@ for (const viewport of viewports) {
 		await context.close();
 	});
 
+	if (viewport.isMobile) {
+		test("services never load on mobile (only Home and Portfolio)", async ({
+			browser,
+		}) => {
+			const context = await browser.newContext({
+				viewport: { width: viewport.width, height: viewport.height },
+				isMobile: true,
+				hasTouch: true,
+				locale: "pt-BR",
+				serviceWorkers: "block",
+			});
+			const page = await context.newPage();
+			const images = trackImages(page);
+
+			await page.goto("/home", { waitUntil: "load" });
+			await showSection(page, "portfolio");
+			await page.waitForLoadState("networkidle");
+
+			await expect(page.locator("[data-services-root]")).toHaveCount(0);
+			expect(images.filter((image) => ANIMATED_SIGN.test(image.url))).toEqual(
+				[]
+			);
+			await context.close();
+		});
+		continue;
+	}
+
 	test(`services sign animates only once the section is near on ${viewport.name}`, async ({
 		browser,
 	}) => {
