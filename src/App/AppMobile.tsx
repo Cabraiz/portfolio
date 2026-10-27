@@ -40,12 +40,7 @@ const MOBILE_HOME_BACKGROUND =
   "radial-gradient(circle at 78% 22%, rgba(255, 255, 255, 0.78), transparent 34%), linear-gradient(115deg, rgba(255, 255, 255, 0.42), transparent 42%), #f4efe5";
 const MOBILE_PORTFOLIO_BACKGROUND = "#dcefeb";
 
-const links: readonly LandingSectionId[] = [
-  "portfolio",
-  "roadMap",
-  "technologies",
-  "contact",
-];
+const links: readonly LandingSectionId[] = ["portfolio"];
 
 function getBrowserWindow(): Window | null {
   if (globalThis.window === undefined) {
