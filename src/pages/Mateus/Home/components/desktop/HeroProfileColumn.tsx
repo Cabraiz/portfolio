@@ -151,7 +151,7 @@ export default function HeroProfileColumn({
 
 					<div style={iconSlotStyle}>
 						<SocialButton
-							href="mailto:mateusccabr@gmail.com?subject=Freelance."
+							href="mailto:contact@cabraiz.com?subject=Freelance."
 							icon={SOCIAL_ICONS.gmail}
 							alt="Gmail"
 						/>

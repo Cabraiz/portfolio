@@ -74,16 +74,16 @@ export const LANDING_SECTIONS: readonly LandingSectionDefinition[] =
     ? LEGACY_LANDING_SECTIONS
     : LEGACY_LANDING_SECTIONS.filter((section) => section.id !== "live");
 
-// No celular a landing mostra só Início e Portfólio; as outras seções (e
-// suas rotas) existem apenas no desktop.
-export const MOBILE_LANDING_SECTION_IDS: readonly LandingSectionId[] = [
+// A landing (celular e desktop) mostra só Início e Portfólio. As rotas das
+// outras seções continuam reconhecidas e abrem o Início.
+export const VISIBLE_LANDING_SECTION_IDS: readonly LandingSectionId[] = [
   "home",
   "portfolio",
 ];
 
-export const MOBILE_LANDING_SECTIONS: readonly LandingSectionDefinition[] =
+export const VISIBLE_LANDING_SECTIONS: readonly LandingSectionDefinition[] =
   LANDING_SECTIONS.filter((section) =>
-    MOBILE_LANDING_SECTION_IDS.includes(section.id),
+    VISIBLE_LANDING_SECTION_IDS.includes(section.id),
   );
 
 const LANDING_SECTION_IDS = new Set<LandingSectionId>(

@@ -25,13 +25,7 @@ import "../pages/Mateus/Mateus.css";
 
 import "react-toastify/dist/ReactToastify.css";
 
-const links: readonly LandingSectionId[] = [
-  "home",
-  "portfolio",
-  "roadMap",
-  "technologies",
-  "contact",
-];
+const links: readonly LandingSectionId[] = ["home", "portfolio"];
 
 function getBrowserWindow(): Window | null {
   if (typeof globalThis.window === "undefined") {

@@ -7,7 +7,7 @@ import {
 } from "react";
 
 import {
-	MOBILE_LANDING_SECTION_IDS,
+	VISIBLE_LANDING_SECTION_IDS,
 	SHOW_LEGACY_LIVE_SECTION,
 	type LandingSectionId,
 } from "@/features/navigation/landingSections";
@@ -597,11 +597,7 @@ export function getLandingSectionDefinitions(
 	const normalizedViewportMode = normalizeConfigViewportMode(viewportMode);
 
 	return getLandingSectionsConfig()
-		.filter(
-			(section) =>
-				normalizedViewportMode !== "mobile" ||
-				MOBILE_LANDING_SECTION_IDS.includes(section.id)
-		)
+		.filter((section) => VISIBLE_LANDING_SECTION_IDS.includes(section.id))
 		.sort((left, right) => left.order - right.order)
 		.map((section) =>
 			toLandingSectionDefinition(section, normalizedViewportMode)
