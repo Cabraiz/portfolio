@@ -100,7 +100,7 @@ export const HOME_MOBILE_SOCIAL_LINKS: readonly HomeMobileSocialLink[] = [
     id: "email",
     label: "Email",
     ariaLabel: "Enviar email",
-    href: "mailto:mateuscabrals@gmail.com",
+    href: "mailto:contact@cabraiz.com",
     iconKey: "gmail",
     target: "_self",
     rel: "noopener noreferrer",

@@ -44,6 +44,10 @@ type ContactReply = {
   text: string;
 };
 
+// O lagarto (Lag Arthur) em cima do botão do chat está escondido; sem ele o
+// botão abre o chat direto e os efeitos de olhar/fuga não rodam.
+const SHOW_CHAT_MASCOT = false;
+
 type MascotReaction = "idle" | "fleeing" | "hidden" | "returning";
 
 const CHAT_CONVERSATION_STORAGE_KEY = "cabraiz-chat-conversation-id";
@@ -622,41 +626,43 @@ export default function FloatingChat() {
           }}
           aria-label={localizeLabel("Abrir chat")}
         >
-          <span
-            ref={mascotRef}
-            className={styles.mascot}
-            data-mascot-reaction={mascotReaction}
-            aria-hidden="true"
-          >
-            <img
-              className={styles.mascotImage}
-              src={lagArthurChat}
-              alt={localizeLabel("")}
-              draggable={false}
-            />
-            <img
-              ref={largeIrisRef}
-              className={`${styles.iris} ${styles.largeIris}`}
-              src={lagArthurIris}
-              alt={localizeLabel("")}
+          {SHOW_CHAT_MASCOT && (
+            <span
+              ref={mascotRef}
+              className={styles.mascot}
+              data-mascot-reaction={mascotReaction}
               aria-hidden="true"
-              draggable={false}
-              loading="eager"
-              decoding="sync"
-              fetchPriority="high"
-            />
-            <img
-              ref={smallIrisRef}
-              className={`${styles.iris} ${styles.smallIris}`}
-              src={lagArthurIris}
-              alt={localizeLabel("")}
-              aria-hidden="true"
-              draggable={false}
-              loading="eager"
-              decoding="sync"
-              fetchPriority="high"
-            />
-          </span>
+            >
+              <img
+                className={styles.mascotImage}
+                src={lagArthurChat}
+                alt={localizeLabel("")}
+                draggable={false}
+              />
+              <img
+                ref={largeIrisRef}
+                className={`${styles.iris} ${styles.largeIris}`}
+                src={lagArthurIris}
+                alt={localizeLabel("")}
+                aria-hidden="true"
+                draggable={false}
+                loading="eager"
+                decoding="sync"
+                fetchPriority="high"
+              />
+              <img
+                ref={smallIrisRef}
+                className={`${styles.iris} ${styles.smallIris}`}
+                src={lagArthurIris}
+                alt={localizeLabel("")}
+                aria-hidden="true"
+                draggable={false}
+                loading="eager"
+                decoding="sync"
+                fetchPriority="high"
+              />
+            </span>
+          )}
 
           {!isMobile ? (
             <>
