@@ -70,9 +70,10 @@ for (const viewport of [
 			await expect(page.getByRole("button", { name: "Ao Vivo" })).toHaveCount(
 				0
 			);
+			// A Rede IA saiu da barra, junto com o indicador ao vivo.
 			await expect(
 				page.locator('[data-rede-ia-live-indicator="true"]')
-			).toHaveCount(viewport.name === "desktop" ? 1 : 0);
+			).toHaveCount(0);
 		});
 	});
 }
