@@ -14,9 +14,8 @@ const sections: readonly LandingSection[] = [
 	{ id: "contact", label: "Contato", path: "/contact" },
 ] as const;
 
-const roundTrip = [...sections, ...sections.slice(0, -1).reverse()] as const;
-// No celular a landing tem só Início e Portfólio.
-const mobileRoundTrip = [sections[0], sections[1], sections[0]] as const;
+// A landing tem só Início e Portfólio; as outras rotas abrem o Início.
+const roundTrip = [sections[0], sections[1], sections[0]] as const;
 
 const viewports = [
 	{ name: "desktop-1280x720", width: 1280, height: 720, mobile: false },
@@ -86,7 +85,10 @@ async function expectSectionToOwnViewport(
 						const previousRect = previous?.getBoundingClientRect();
 						const nextRect = next?.getBoundingClientRect();
 						const portfolioRootRect = portfolioRoot?.getBoundingClientRect();
-						const expectedTop = mobile && sectionId !== "portfolio" ? (navbarRect?.bottom ?? 0) : 0;
+						const expectedTop =
+							mobile && sectionId !== "portfolio"
+								? (navbarRect?.bottom ?? 0)
+								: 0;
 						const serviceOverflow = serviceRoot
 							? getComputedStyle(serviceRoot).overflow
 							: null;
@@ -103,18 +105,19 @@ async function expectSectionToOwnViewport(
 							),
 							exactDesktopHeight: Boolean(
 								mobile ||
-								(currentRect && Math.abs(currentRect.height - window.innerHeight) <= 1)
+								(currentRect &&
+									Math.abs(currentRect.height - window.innerHeight) <= 1)
 							),
 							coversViewport: Boolean(
 								currentRect && currentRect.bottom >= window.innerHeight - 1
 							),
 							portfolioVisualRootCoversViewport: Boolean(
 								mobile ||
-									sectionId !== "portfolio" ||
-									(portfolioRootRect &&
-										Math.abs(portfolioRootRect.top) <= 1 &&
-										portfolioRootRect.bottom >= window.innerHeight - 1 &&
-										Math.abs(portfolioRootRect.height - window.innerHeight) <= 1)
+								sectionId !== "portfolio" ||
+								(portfolioRootRect &&
+									Math.abs(portfolioRootRect.top) <= 1 &&
+									portfolioRootRect.bottom >= window.innerHeight - 1 &&
+									Math.abs(portfolioRootRect.height - window.innerHeight) <= 1)
 							),
 							previousIsOutsideContent: Boolean(
 								!previousRect ||
@@ -188,9 +191,8 @@ for (const viewport of viewports) {
 		});
 		await page.goto("/home", { waitUntil: "networkidle" });
 
-		const trip = viewport.mobile ? mobileRoundTrip : roundTrip;
-		for (let index = 0; index < trip.length; index += 1) {
-			const section = trip[index];
+		for (let index = 0; index < roundTrip.length; index += 1) {
+			const section = roundTrip[index];
 			if (index > 0) {
 				await navigateToSection(page, section, viewport.mobile);
 			}
@@ -209,9 +211,9 @@ for (const viewport of [
 		page,
 	}) => {
 		await page.setViewportSize(viewport);
-		await page.goto("/portfolio", { waitUntil: "networkidle" });
+		await page.goto("/home", { waitUntil: "networkidle" });
 
-		for (const target of [sections[2], sections[3], sections[2]]) {
+		for (const target of [sections[1], sections[0], sections[1]]) {
 			await page.locator(`button[data-nav-link="${target.id}"]`).click();
 			await page.waitForTimeout(180);
 			await page.evaluate(() => window.dispatchEvent(new Event("blur")));

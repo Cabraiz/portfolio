@@ -10,7 +10,6 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { useLocation } from "react-router-dom";
 
-import useLandingSectionNavigation from "../../features/navigation/useLandingSectionNavigation";
 import { isLandingPath } from "../../features/navigation/landingSections";
 import { useMateusViewport } from "./Home/hooks/useHomeViewport";
 
@@ -182,7 +181,6 @@ export default function FloatingChat() {
   useLabelLanguage();
   const prefersReducedMotion = useReducedMotion();
   const location = useLocation();
-  const { navigateToSection } = useLandingSectionNavigation();
   const shouldHideForStandaloneGame =
     isHomeGameStandaloneHost() || isHomeGameRoutePath(location.pathname);
 
@@ -472,15 +470,6 @@ export default function FloatingChat() {
     chatOpenedAtRef.current = Date.now();
     setSendStatus("idle");
     setIsOpen(true);
-  };
-
-  const showServices = () => {
-    setIsOpen(false);
-    navigateToSection("roadMap", {
-      replace: true,
-      syncUrl: true,
-      offsetPx: 0,
-    });
   };
 
   const sendMessage = async () => {
@@ -997,13 +986,6 @@ export default function FloatingChat() {
                     >
                       {t("floatingChat.whatsappAction")}
                     </a>
-                    <button
-                      className={styles.quickAction}
-                      type="button"
-                      onClick={showServices}
-                    >
-                      {t("floatingChat.showPrices")}
-                    </button>
                   </div>
                 </div>
               </div>

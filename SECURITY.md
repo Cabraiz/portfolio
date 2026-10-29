@@ -19,7 +19,7 @@ We take security seriously and encourage responsible disclosure of vulnerabiliti
 
 To report a vulnerability, please follow these steps:
 
-1. **Submit a Report**: Create a detailed report of the vulnerability and its potential impact. You can send this report via email to mateusccabr@gmail.com.
+1. **Submit a Report**: Create a detailed report of the vulnerability and its potential impact. You can send this report via email to contact@cabraiz.com.
 2. **Encryption**: If your report contains sensitive information or exploits, please encrypt the report using our PGP key (available on our website or in our repository).
 3. **Acknowledgement**: We will acknowledge the receipt of your report within 48 hours and provide an estimated timeline for the assessment.
 4. **Assessment**: Our security team will assess the vulnerability's impact and validity. We may reach out to you for additional information during this process.
@@ -49,5 +49,5 @@ We kindly request that you follow responsible disclosure practices by not public
 
 At this time, we do not have a formal bug bounty program. However, we greatly appreciate your contributions to the security of our project and may provide rewards or recognition on a case-by-case basis for responsible disclosure.
 Thank you for your efforts in keeping our project and its users safe. Your assistance in identifying and disclosing security vulnerabilities is invaluable to us.
-For any questions or clarifications related to security or this policy, feel free to reach out to our security team at mateusccabr@gmail.com.
+For any questions or clarifications related to security or this policy, feel free to reach out to our security team at contact@cabraiz.com.
 **Note**: This Security Policy is subject to change without notice. Please refer to the latest version available in our repository.

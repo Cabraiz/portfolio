@@ -67,9 +67,7 @@ test("sends a portfolio chat message through the contact API", async ({
 
 	await expect
 		.poll(() =>
-			page.evaluate(() =>
-				window.localStorage.getItem("cabraiz-chat-messages")
-			)
+			page.evaluate(() => window.localStorage.getItem("cabraiz-chat-messages"))
 		)
 		.toContain("Olá, quero conversar sobre um projeto.");
 	await page.reload();
@@ -137,7 +135,9 @@ test("keeps the message after a delivery error and allows a successful retry", a
 			/Mensagem enviada\. A resposta do Mateus aparecerá aqui|Message sent\. Mateus' reply will appear here/
 		)
 	).toBeVisible();
-	await expect(page.locator('[data-chat-author="visitor"]')).toHaveText(message);
+	await expect(page.locator('[data-chat-author="visitor"]')).toHaveText(
+		message
+	);
 	expect(postAttempts).toBe(2);
 });
 
@@ -188,7 +188,9 @@ test("resumes reply polling after a reload for a recent conversation", async ({
 	expect(requestedConversationId).toBe(conversationId);
 });
 
-test("prevents duplicate delivery from two immediate clicks", async ({ page }) => {
+test("prevents duplicate delivery from two immediate clicks", async ({
+	page,
+}) => {
 	let postAttempts = 0;
 
 	await page.route("**/api/contact*", async (route) => {
@@ -246,8 +248,10 @@ test("keeps the open chat and its controls inside short viewports", async ({
 
 	for (const viewport of viewports) {
 		await page.setViewportSize(viewport);
-		await page.goto("/contact", { waitUntil: "networkidle" });
-		await expect(page.locator('main[data-active-section="contact"]')).toBeVisible();
+		await page.goto("/home", { waitUntil: "networkidle" });
+		await expect(
+			page.locator('main[data-active-section="home"]')
+		).toBeVisible();
 		await page.getByRole("button", { name: "Abrir chat" }).click();
 
 		const closeButton = page.getByRole("button", {
@@ -259,7 +263,10 @@ test("keeps the open chat and its controls inside short viewports", async ({
 		await expect(page.getByText("Atendente", { exact: true })).toBeVisible();
 		await expect(page.getByText("Online", { exact: true })).toBeVisible();
 		const closeButtonBox = await closeButton.boundingBox();
-		expect(closeButtonBox, `${viewport.width}x${viewport.height}`).not.toBeNull();
+		expect(
+			closeButtonBox,
+			`${viewport.width}x${viewport.height}`
+		).not.toBeNull();
 		expect(closeButtonBox!.width).toBeGreaterThanOrEqual(41);
 		expect(closeButtonBox!.height).toBeGreaterThanOrEqual(41);
 		await expect(page.locator('input[name="message"]')).toBeVisible();
@@ -287,30 +294,22 @@ test("keeps the open chat and its controls inside short viewports", async ({
 	}
 });
 
-test("opens services and minimizes the chat from the pricing action", async ({
+test("offers WhatsApp but no pricing action now that Services is gone", async ({
 	page,
 }) => {
-	test.setTimeout(45_000);
-	for (const scenario of [
-		{ viewport: { width: 1366, height: 600 }, startPath: "/home" },
-		{ viewport: { width: 1920, height: 1080 }, startPath: "/contact" },
-	]) {
-		await page.setViewportSize(scenario.viewport);
-		await page.goto(scenario.startPath);
-		await page.getByRole("button", { name: "Abrir chat" }).click();
-
-		const panel = page.locator('[data-chat-panel="true"]');
-		await expect(panel).toBeVisible();
-
-		await page.getByRole("button", { name: /Ver valores|View pricing/ }).click();
-		await expect(page).toHaveURL(/\/servicos$/);
-		await expect(panel).toHaveCount(0, { timeout: 1200 });
-		await expect(page.locator('[data-services-root="true"]')).toBeVisible();
-		await expect(page.getByRole("button", { name: "Abrir chat" })).toBeVisible();
-	}
+	await page.setViewportSize({ width: 1366, height: 600 });
+	await page.goto("/home");
+	await page.getByRole("button", { name: "Abrir chat" }).click();
+	await expect(page.locator('[data-chat-panel="true"]')).toBeVisible();
+	await expect(page.getByText(/WhatsApp/).first()).toBeVisible();
+	await expect(
+		page.getByRole("button", { name: /Ver valores|View pricing/ })
+	).toHaveCount(0);
 });
 
-test("shrinks the chat toward its trigger before removing it", async ({ page }) => {
+test("shrinks the chat toward its trigger before removing it", async ({
+	page,
+}) => {
 	await page.setViewportSize({ width: 1280, height: 720 });
 	await page.goto("/home");
 	await page.getByRole("button", { name: "Abrir chat" }).click();

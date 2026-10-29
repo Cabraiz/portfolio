@@ -7,22 +7,14 @@ import { expect, test, type Page } from "@playwright/test";
  * teclado, cliques no menu e redimensionamentos (720p <-> 1080p etc.).
  */
 
-const SECTION_IDS = [
-	"home",
-	"portfolio",
-	"roadMap",
-	"technologies",
-	"contact",
-] as const;
+// A landing tem só Início e Portfólio.
+const SECTION_IDS = ["home", "portfolio"] as const;
 
 type SectionId = (typeof SECTION_IDS)[number];
 
 const SECTION_PATHS: Record<SectionId, string> = {
 	home: "/home",
 	portfolio: "/portfolio",
-	roadMap: "/servicos",
-	technologies: "/technologies",
-	contact: "/contact",
 };
 
 const SIZES = [
@@ -264,7 +256,7 @@ test("redimensionamento contínuo (arrastar a janela) termina alinhado", async (
 	test.setTimeout(60_000);
 	await openLanding(page, SIZES[3]);
 
-	for (const sectionId of ["technologies", "portfolio"] as const) {
+	for (const sectionId of ["home", "portfolio"] as const) {
 		await clickSection(page, sectionId);
 		await expectSettled(page, `clique em ${sectionId}`, sectionId);
 
@@ -292,14 +284,14 @@ test("posição parcial (barra de rolagem) é preservada ao redimensionar", asyn
 	page,
 }) => {
 	await openLanding(page, SIZES[0]);
-	await clickSection(page, "roadMap");
-	await expectSettled(page, "clique em serviços", "roadMap");
+	await clickSection(page, "home");
+	await expectSettled(page, "clique no início", "home");
 
 	// A roda pagina por seção; uma posição parcial só vem de arrastar a barra.
 	const readProgress = () =>
 		page.evaluate(
 			() =>
-				-document.getElementById("roadMap")!.getBoundingClientRect().top /
+				-document.getElementById("home")!.getBoundingClientRect().top /
 				window.innerHeight
 		);
 	await page.evaluate(() =>
@@ -310,7 +302,7 @@ test("posição parcial (barra de rolagem) é preservada ao redimensionar", asyn
 	await page.setViewportSize(SIZES[3]);
 	await expect
 		.poll(async () => Math.abs((await readProgress()) - 0.4), {
-			message: "progresso dentro de serviços após redimensionar",
+			message: "progresso dentro do início após redimensionar",
 		})
 		.toBeLessThan(0.01);
 	await expectSettled(page, "geometria após redimensionar parcialmente");
@@ -358,7 +350,7 @@ for (const size of [SIZES[3], SIZES[0]]) {
 
 		// Na última seção tiques a mais não saem do lugar.
 		await wheelGesture(page, 4, 100, 120);
-		await expectSettled(page, "tiques além do fim", "contact");
+		await expectSettled(page, "tiques além do fim", "portfolio");
 
 		for (const sectionId of [...SECTION_IDS].reverse().slice(1)) {
 			await wheelGesture(page, 4, -100, 120);
@@ -398,14 +390,14 @@ test("giro rápido ou swipe de trackpad anda uma seção só", async ({ page }) 
 
 	// Depois de uma pausa, mais quatro tiques andam mais uma seção.
 	await page.waitForTimeout(300);
-	await wheelGesture(page, 4, 100, 120);
-	await expectSettled(page, "tique depois de uma pausa", "roadMap");
+	await wheelGesture(page, 4, -100, 120);
+	await expectSettled(page, "tique depois de uma pausa", "home");
 });
 
 test("Firefox (linhas) e mouse de alta resolução andam uma seção a cada quatro tiques", async ({
 	page,
 }) => {
-	await openLanding(page, SIZES[3], "portfolio");
+	await openLanding(page, SIZES[3]);
 
 	const dispatch = (
 		events: readonly (readonly [number, number])[],
@@ -433,7 +425,7 @@ test("Firefox (linhas) e mouse de alta resolução andam uma seção a cada quat
 		Array.from({ length: 4 }, () => [3, 1] as const),
 		120
 	);
-	await expectSettled(page, "quatro tiques em linhas", "roadMap");
+	await expectSettled(page, "quatro tiques em linhas", "portfolio");
 
 	// Mouse de alta resolução: vários deltas pequenos por tique.
 	await page.waitForTimeout(300);
@@ -441,7 +433,7 @@ test("Firefox (linhas) e mouse de alta resolução andam uma seção a cada quat
 		Array.from({ length: 40 }, () => [-12, 0] as const),
 		16
 	);
-	await expectSettled(page, "quatro tiques de alta resolução", "portfolio");
+	await expectSettled(page, "quatro tiques de alta resolução", "home");
 });
 
 for (const size of [SIZES[3], SIZES[7], SIZES[0]]) {
@@ -449,48 +441,48 @@ for (const size of [SIZES[3], SIZES[7], SIZES[0]]) {
 		page,
 	}) => {
 		test.setTimeout(120_000);
-		const errors = await openLanding(page, size, "portfolio");
+		const errors = await openLanding(page, size);
 
 		// Ida e volta no meio do empurrão: não sai da seção.
 		for (const deltaY of [100, -100, 100, -100]) {
 			await wheelGesture(page, 1, deltaY);
 			await page.waitForTimeout(80);
 		}
-		await expectSettled(page, "vai-e-volta", "portfolio");
+		await expectSettled(page, "vai-e-volta", "home");
 
 		// Tiques durante a volta continuam contando de onde a página está.
 		await wheelGesture(page, 3, 100, 120);
 		await page.waitForTimeout(1_000);
 		await wheelGesture(page, 4, 100, 120);
-		await expectSettled(page, "quatro tiques durante a volta", "roadMap");
+		await expectSettled(page, "quatro tiques durante a volta", "portfolio");
 
 		// Tiques lentos (meio segundo entre eles) ainda somam.
-		await wheelGesture(page, 4, 100, 500);
-		await expectSettled(page, "quatro tiques lentos", "technologies");
+		await wheelGesture(page, 4, -100, 500);
+		await expectSettled(page, "quatro tiques lentos", "home");
 
 		// Tique grande (Windows com mais linhas por tique) vale um só.
-		await wheelGesture(page, 3, -300, 120);
-		await expectSettled(page, "três tiques grandes", "technologies");
+		await wheelGesture(page, 3, 300, 120);
+		await expectSettled(page, "três tiques grandes", "home");
 
 		// Clique fora do menu no meio do empurrão: a página volta.
 		await wheelGesture(page, 2, 100, 120);
 		await page.mouse.click(5, size.height - 5);
-		await expectSettled(page, "clique fora no meio", "technologies");
+		await expectSettled(page, "clique fora no meio", "home");
 
 		// Tecla no meio do empurrão anda a partir da seção certa.
-		await wheelGesture(page, 2, -100, 120);
-		await page.keyboard.press("PageUp");
-		await expectSettled(page, "PageUp no meio", "roadMap");
+		await wheelGesture(page, 2, 100, 120);
+		await page.keyboard.press("PageDown");
+		await expectSettled(page, "PageDown no meio", "portfolio");
 
 		// Resize no meio do empurrão realinha a seção.
-		await wheelGesture(page, 3, 100, 120);
+		await wheelGesture(page, 3, -100, 120);
 		await page.setViewportSize({
 			width: Math.round(size.width * 0.8),
 			height: Math.round(size.height * 0.85),
 		});
 		await page.waitForTimeout(300);
 		await page.setViewportSize(size);
-		await expectSettled(page, "resize no meio", "roadMap");
+		await expectSettled(page, "resize no meio", "portfolio");
 
 		expect(errors).toEqual([]);
 	});
@@ -503,14 +495,14 @@ for (const deviceScaleFactor of [1.25, 2]) {
 		test.use({ deviceScaleFactor });
 
 		test("quatro tiques da roda andam uma seção", async ({ page }) => {
-			await openLanding(page, SIZES[7], "portfolio");
+			await openLanding(page, SIZES[7]);
 			const tickPx = await page.evaluate(() => 100 / window.devicePixelRatio);
 
 			await wheelGesture(page, 3, tickPx, 120);
-			await expectSettled(page, "três tiques e para", "portfolio");
+			await expectSettled(page, "três tiques e para", "home");
 
 			await wheelGesture(page, 4, tickPx, 120);
-			await expectSettled(page, "quatro tiques", "roadMap");
+			await expectSettled(page, "quatro tiques", "portfolio");
 		});
 	});
 }
@@ -520,11 +512,12 @@ test("teclado anda uma seção por tecla", async ({ page }) => {
 
 	const steps = [
 		["PageDown", "portfolio"],
-		["ArrowDown", "roadMap"],
-		["Space", "technologies"],
-		["ArrowUp", "roadMap"],
-		["PageUp", "portfolio"],
+		["ArrowDown", "portfolio"],
+		["ArrowUp", "home"],
+		["Space", "portfolio"],
 		["Shift+Space", "home"],
+		["ArrowDown", "portfolio"],
+		["PageUp", "home"],
 	] as const;
 
 	for (const [key, sectionId] of steps) {
@@ -534,19 +527,19 @@ test("teclado anda uma seção por tecla", async ({ page }) => {
 });
 
 test("rolar dentro do chat não pagina a landing", async ({ page }) => {
-	await openLanding(page, SIZES[3], "contact");
+	await openLanding(page, SIZES[3]);
 	await page.getByRole("button", { name: "Abrir chat" }).click();
 	const panel = page.locator("[data-chat-panel]");
 	await expect(panel).toBeVisible();
 
-	// Para cima a landing sairia de Contato se a roda vazasse do painel.
+	// Para baixo a landing sairia do Início se a roda vazasse do painel.
 	const box = (await panel.boundingBox())!;
 	await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
-	await page.mouse.wheel(0, -300);
-	await page.mouse.wheel(0, 300);
-	await page.mouse.wheel(0, -300);
+	for (let tick = 0; tick < 6; tick += 1) {
+		await page.mouse.wheel(0, tick % 2 ? -300 : 300);
+	}
 	await page.waitForTimeout(1_000);
-	await expectSettled(page, "landing parada com o chat aberto", "contact");
+	await expectSettled(page, "landing parada com o chat aberto", "home");
 });
 
 test("clicar no menu durante a paginação navega mesmo assim", async ({
@@ -554,12 +547,13 @@ test("clicar no menu durante a paginação navega mesmo assim", async ({
 }) => {
 	await openLanding(page, SIZES[3]);
 
-	for (const target of ["home", "roadMap", "contact"] as const) {
-		if (target !== "home") {
-			await clickSection(page, "home");
-			await expectSettled(page, "volta para o início", "home");
-		}
-		await wheelGesture(page, 4, 100, 60);
+	// Quatro tiques começam a passagem e o clique no menu a substitui.
+	for (const [direction, target] of [
+		[100, "home"],
+		[100, "portfolio"],
+		[-100, "home"],
+	] as const) {
+		await wheelGesture(page, 4, direction, 60);
 		await page.waitForFunction(
 			() => document.documentElement.hasAttribute("data-landing-scroll-target"),
 			null,
@@ -579,7 +573,7 @@ test("interromper uma navegação com a roda não deixa alvo pendente", async ({
 	page,
 }) => {
 	await openLanding(page, SIZES[1]);
-	await clickSection(page, "contact");
+	await clickSection(page, "portfolio");
 	await page.waitForTimeout(150);
 	await wheel(page, -200, 2);
 	await expect(page.locator("html")).not.toHaveAttribute(
@@ -594,7 +588,7 @@ test("interromper uma navegação com a roda não deixa alvo pendente", async ({
 	await page.evaluate(() => window.dispatchEvent(new Event("focus")));
 	await page.waitForTimeout(500);
 
-	// Voltar o foco não pode reaplicar o alvo antigo (contato).
+	// Voltar o foco não pode reaplicar o alvo antigo (portfólio).
 	expect(
 		Math.abs((await page.evaluate(() => window.scrollY)) - scrollBeforeBlur)
 	).toBeLessThanOrEqual(2);

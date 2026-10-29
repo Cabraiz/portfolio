@@ -88,74 +88,26 @@ for (const viewport of viewports) {
 		await context.close();
 	});
 
-	if (viewport.isMobile) {
-		test("services never load on mobile (only Home and Portfolio)", async ({
-			browser,
-		}) => {
-			const context = await browser.newContext({
-				viewport: { width: viewport.width, height: viewport.height },
-				isMobile: true,
-				hasTouch: true,
-				locale: "pt-BR",
-				serviceWorkers: "block",
-			});
-			const page = await context.newPage();
-			const images = trackImages(page);
-
-			await page.goto("/home", { waitUntil: "load" });
-			await showSection(page, "portfolio");
-			await page.waitForLoadState("networkidle");
-
-			await expect(page.locator("[data-services-root]")).toHaveCount(0);
-			expect(images.filter((image) => ANIMATED_SIGN.test(image.url))).toEqual(
-				[]
-			);
-			await context.close();
-		});
-		continue;
-	}
-
-	test(`services sign animates only once the section is near on ${viewport.name}`, async ({
+	// A landing tem só Início e Portfólio: Serviços nunca carrega.
+	test(`services never load on ${viewport.name} (only Home and Portfolio)`, async ({
 		browser,
 	}) => {
-		test.setTimeout(60_000);
 		const context = await browser.newContext({
 			viewport: { width: viewport.width, height: viewport.height },
 			isMobile: viewport.isMobile,
 			hasTouch: viewport.isMobile,
 			locale: "pt-BR",
-			reducedMotion: "no-preference",
 			serviceWorkers: "block",
 		});
 		const page = await context.newPage();
-		const errors: string[] = [];
-		page.on("pageerror", (error) => errors.push(error.message));
 		const images = trackImages(page);
 
 		await page.goto("/home", { waitUntil: "load" });
+		await showSection(page, "portfolio");
 		await page.waitForLoadState("networkidle");
 
-		// No mobile a seção de serviços já fica montada a partir da home.
-		const sign = page.locator(
-			"[data-services-root] img[data-sign-animation-enabled]"
-		);
-		if ((await sign.count()) > 0) {
-			await expect(sign).toHaveAttribute(
-				"data-sign-animation-enabled",
-				"false"
-			);
-		}
+		await expect(page.locator("[data-services-root]")).toHaveCount(0);
 		expect(images.filter((image) => ANIMATED_SIGN.test(image.url))).toEqual([]);
-
-		await showSection(page, "roadMap");
-		await expect(sign).toHaveAttribute("data-sign-animation-enabled", "true");
-		await expect
-			.poll(() => images.some((image) => ANIMATED_SIGN.test(image.url)), {
-				timeout: 15_000,
-			})
-			.toBe(true);
-		expect(errors).toEqual([]);
-
 		await context.close();
 	});
 }

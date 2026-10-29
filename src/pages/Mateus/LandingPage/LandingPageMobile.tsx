@@ -12,7 +12,7 @@ import { useLenis } from "lenis/react";
 
 import {
   DEFAULT_LANDING_SECTION_ID,
-  MOBILE_LANDING_SECTION_IDS,
+  VISIBLE_LANDING_SECTION_IDS,
   getSectionIdByPath,
   isLandingPath,
   type LandingSectionId,
@@ -143,8 +143,8 @@ function resolveInitialMobileSectionId(pathname: string): LandingSectionId {
 
   const sectionId = getSectionIdByPath(pathname);
 
-  // Rotas de seções que só existem no desktop abrem o Início.
-  return sectionId && MOBILE_LANDING_SECTION_IDS.includes(sectionId)
+  // Rotas de seções que não aparecem mais abrem o Início.
+  return sectionId && VISIBLE_LANDING_SECTION_IDS.includes(sectionId)
     ? sectionId
     : DEFAULT_LANDING_SECTION_ID;
 }
@@ -180,7 +180,7 @@ const LandingPageMobile: React.FC = () => {
     useLandingSectionNavigation({
       containerRef,
       defaultSectionId: initialSectionId,
-      sectionIds: MOBILE_LANDING_SECTION_IDS,
+      sectionIds: VISIBLE_LANDING_SECTION_IDS,
       sectionSelector: ":scope > section[data-page-section='true']",
       viewportMode: "mobile",
       navbarOffsetPx,

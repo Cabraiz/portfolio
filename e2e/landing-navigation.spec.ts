@@ -18,11 +18,9 @@ for (const viewport of [
 		test.use({ viewport });
 
 		for (const [route, desktopSectionId] of routes) {
-			// No celular só existem Início e Portfólio; as outras rotas abrem o Início.
+			// Só existem Início e Portfólio; as outras rotas abrem o Início.
 			const sectionId =
-				viewport.name === "mobile" &&
-				desktopSectionId !== "home" &&
-				desktopSectionId !== "portfolio"
+				desktopSectionId !== "home" && desktopSectionId !== "portfolio"
 					? "home"
 					: desktopSectionId;
 
@@ -50,14 +48,12 @@ for (const viewport of [
 					.count();
 				expect(mountedCount).toBeLessThan(routes.length);
 
-				if (viewport.name === "mobile") {
-					await expect(page).toHaveURL(
-						sectionId === "portfolio" ? /\/portfolio$/ : /\/home$/
-					);
-					await expect(
-						page.locator("main[data-landing-viewport] > section")
-					).toHaveCount(2);
-				}
+				await expect(page).toHaveURL(
+					sectionId === "portfolio" ? /\/portfolio$/ : /\/home$/
+				);
+				await expect(
+					page.locator("main[data-landing-viewport] > section")
+				).toHaveCount(2);
 			});
 		}
 
@@ -67,11 +63,13 @@ for (const viewport of [
 			await page.goto("/technologies");
 			await expect(page.locator("main[data-landing-viewport]")).toHaveAttribute(
 				"data-active-section",
-				viewport.name === "mobile" ? "home" : "technologies",
+				"home",
 				{ timeout: 15_000 }
 			);
 			await expect(page.locator("section#live")).toHaveCount(0);
-			await expect(page.getByRole("button", { name: "Ao Vivo" })).toHaveCount(0);
+			await expect(page.getByRole("button", { name: "Ao Vivo" })).toHaveCount(
+				0
+			);
 			await expect(
 				page.locator('[data-rede-ia-live-indicator="true"]')
 			).toHaveCount(viewport.name === "desktop" ? 1 : 0);
@@ -79,24 +77,15 @@ for (const viewport of [
 	});
 }
 
-test("legacy pricing route points to technologies", async ({ page }) => {
-	await page.goto("/pricing");
-	await expect(page).toHaveURL(/\/technologies$/, { timeout: 15_000 });
-	await expect(page.locator("main[data-landing-viewport]")).toHaveAttribute(
-		"data-active-section",
-		"technologies",
-		{ timeout: 15_000 }
-	);
-});
-
-test("legacy live stays hidden and redirects to technologies", async ({
-	page,
-}) => {
-	await page.goto("/live");
-	await expect(page).toHaveURL(/\/technologies$/, { timeout: 15_000 });
-	await expect(page.locator("main[data-landing-viewport]")).toHaveAttribute(
-		"data-active-section",
-		"technologies",
-		{ timeout: 15_000 }
-	);
-});
+for (const route of ["/pricing", "/live"]) {
+	test(`legacy ${route} opens Home`, async ({ page }) => {
+		await page.goto(route);
+		await expect(page).toHaveURL(/\/home$/, { timeout: 15_000 });
+		await expect(page.locator("main[data-landing-viewport]")).toHaveAttribute(
+			"data-active-section",
+			"home",
+			{ timeout: 15_000 }
+		);
+		await expect(page.locator("section#live")).toHaveCount(0);
+	});
+}

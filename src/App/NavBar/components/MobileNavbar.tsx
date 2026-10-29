@@ -4,7 +4,7 @@ import React, { type CSSProperties, useCallback } from "react";
 import logo from "../../../assets/icones/logo.svg";
 import {
 	DEFAULT_LANDING_SECTION_ID,
-	MOBILE_LANDING_SECTIONS,
+	VISIBLE_LANDING_SECTIONS,
 	type LandingSectionId,
 } from "../../../features/navigation/landingSections";
 import BrandButton from "./BrandButton";
@@ -145,7 +145,7 @@ const MobileNavbar: React.FC<MobileNavbarProps> = ({
                                                 data-lenis-prevent=""
 						style={getPanelStyle()}
 					>
-						{MOBILE_LANDING_SECTIONS.map((section) => (
+						{VISIBLE_LANDING_SECTIONS.map((section) => (
 							<MobileNavItemButton
 								key={section.id}
 								label={localizeLabel(section.label)}
