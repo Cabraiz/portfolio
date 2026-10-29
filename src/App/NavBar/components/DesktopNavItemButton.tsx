@@ -8,6 +8,8 @@ export type DesktopNavItemButtonProps = Readonly<{
   label: string;
   isActive: boolean;
   onClick: () => void;
+  // Seção fora da landing: aparece na barra, mas não é clicável.
+  disabled?: boolean;
   navRef?: (element: HTMLButtonElement | null) => void;
   onHoverStart?: (element: HTMLButtonElement) => void;
   onHoverEnd?: (element: HTMLButtonElement) => void;
@@ -79,11 +81,12 @@ const DesktopNavItemButton: React.FC<DesktopNavItemButtonProps> = ({
   onHoverEnd,
   leadingVisual,
   lightTheme = false,
+  disabled = false,
 }) => {
   useLabelLanguage();
   const [isHovered, setIsHovered] = useState(false);
 
-  const isRaised = isActive || isHovered;
+  const isRaised = isActive || (isHovered && !disabled);
 
   const handleMouseEnter = (event: React.MouseEvent<HTMLButtonElement>) => {
     setIsHovered(true);
@@ -101,11 +104,13 @@ const DesktopNavItemButton: React.FC<DesktopNavItemButtonProps> = ({
       ref={navRef}
       data-nav-link={link}
       aria-current={isActive ? "page" : undefined}
-      onClick={onClick}
+      disabled={disabled}
+      onClick={disabled ? undefined : onClick}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       style={{
         ...baseButtonStyle,
+        ...(disabled ? { cursor: "default" } : null),
         ...(isRaised ? emphasizedButtonStyle : null),
         color: lightTheme
           ? isRaised

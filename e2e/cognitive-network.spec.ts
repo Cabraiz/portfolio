@@ -23,8 +23,12 @@ for (const viewport of [
 		await expect(
 			page.locator('[data-cognitive-network-root="true"]')
 		).toHaveCount(0);
-		await expect(
-			page.locator('button[data-nav-link="technologies"]')
-		).toHaveCount(0);
+		// No desktop a Rede IA continua na barra, mas sem clique.
+		const navLink = page.locator('button[data-nav-link="technologies"]');
+		if (viewport.name.startsWith("desktop")) {
+			await expect(navLink).toBeDisabled();
+		} else {
+			await expect(navLink).toHaveCount(0);
+		}
 	});
 }

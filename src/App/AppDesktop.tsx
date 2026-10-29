@@ -25,7 +25,15 @@ import "../pages/Mateus/Mateus.css";
 
 import "react-toastify/dist/ReactToastify.css";
 
-const links: readonly LandingSectionId[] = ["home", "portfolio"];
+// A barra e os pontos laterais mostram todas as seções; as que saíram da
+// landing aparecem sem ser clicáveis (VISIBLE_LANDING_SECTION_IDS).
+const links: readonly LandingSectionId[] = [
+  "home",
+  "portfolio",
+  "roadMap",
+  "technologies",
+  "contact",
+];
 
 function getBrowserWindow(): Window | null {
   if (typeof globalThis.window === "undefined") {
