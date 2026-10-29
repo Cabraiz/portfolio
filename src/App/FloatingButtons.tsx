@@ -1,6 +1,7 @@
 import React, { useMemo, type CSSProperties } from "react";
 
 import {
+  VISIBLE_LANDING_SECTION_IDS,
   getLandingOrderedSectionIds,
   getLandingSectionsByIds,
   type LandingSectionId,
@@ -105,6 +106,8 @@ const FloatingButtons: React.FC<FloatingButtonsProps> = ({
     >
       {resolvedItems.map((section) => {
         const isActive = activeSectionId === section.id;
+        // Seções fora da landing continuam como pontos, mas sem clique.
+        const disabled = !VISIBLE_LANDING_SECTION_IDS.includes(section.id);
 
         return (
           <button
@@ -113,8 +116,12 @@ const FloatingButtons: React.FC<FloatingButtonsProps> = ({
             aria-label={section.label}
             aria-current={isActive ? "page" : undefined}
             title={section.label}
-            onClick={() => onNavigateToSection(section.id)}
-            style={getButtonStyle(isActive, activeSectionId === "portfolio")}
+            disabled={disabled}
+            onClick={disabled ? undefined : () => onNavigateToSection(section.id)}
+            style={{
+              ...getButtonStyle(isActive, activeSectionId === "portfolio"),
+              ...(disabled ? { cursor: "default" } : null),
+            }}
           />
         );
       })}

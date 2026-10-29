@@ -5,7 +5,10 @@ import React, {
   type RefObject,
 } from "react";
 
-import type { LandingSectionId } from "../../../features/navigation/landingSections";
+import {
+  VISIBLE_LANDING_SECTION_IDS,
+  type LandingSectionId,
+} from "../../../features/navigation/landingSections";
 import BrandButton from "./BrandButton";
 import DesktopNavItemButton from "./DesktopNavItemButton";
 
@@ -136,6 +139,7 @@ const DesktopNavbar: React.FC<DesktopNavbarProps> = ({
               label={localizeLabel(getLabel(sectionId))}
               isActive={activeSectionId === sectionId}
               onClick={() => onNavigateToSection(sectionId)}
+              disabled={!VISIBLE_LANDING_SECTION_IDS.includes(sectionId)}
               navRef={(element) => {
                 setNavRef(sectionId, element);
               }}

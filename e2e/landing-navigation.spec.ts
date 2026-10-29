@@ -70,10 +70,11 @@ for (const viewport of [
 			await expect(page.getByRole("button", { name: "Ao Vivo" })).toHaveCount(
 				0
 			);
-			// A Rede IA saiu da barra, junto com o indicador ao vivo.
+			// No desktop a Rede IA continua na barra (sem clique), com o
+			// indicador ao vivo.
 			await expect(
 				page.locator('[data-rede-ia-live-indicator="true"]')
-			).toHaveCount(0);
+			).toHaveCount(viewport.name === "desktop" ? 1 : 0);
 		});
 	});
 }
@@ -90,3 +91,42 @@ for (const route of ["/pricing", "/live"]) {
 		await expect(page.locator("section#live")).toHaveCount(0);
 	});
 }
+
+test("desktop keeps every section in the navbar and side dots, but only Home and Portfolio are clickable", async ({
+	page,
+}) => {
+	await page.setViewportSize({ width: 1366, height: 720 });
+	await page.goto("/home");
+	const landing = page.locator("main[data-landing-viewport]");
+	await expect(landing).toHaveAttribute("data-active-section", "home", {
+		timeout: 15_000,
+	});
+
+	for (const id of ["home", "portfolio"]) {
+		await expect(page.locator(`button[data-nav-link="${id}"]`)).toBeEnabled();
+	}
+	const dots = page.locator(
+		"aside[aria-label='Navegação lateral por seções'] button"
+	);
+	await expect(dots).toHaveCount(5);
+
+	for (const [id, label] of [
+		["roadMap", "Serviços"],
+		["technologies", "Rede IA"],
+		["contact", "Contato"],
+	] as const) {
+		await expect(page.locator(`button[data-nav-link="${id}"]`)).toBeDisabled();
+		const dot = dots.and(page.getByLabel(label, { exact: true }));
+		await expect(dot).toBeDisabled();
+		await page.locator(`button[data-nav-link="${id}"]`).click({ force: true });
+		await dot.click({ force: true });
+	}
+	await page.waitForTimeout(500);
+	await expect(landing).toHaveAttribute("data-active-section", "home");
+	await expect(page).toHaveURL(/\/home$/);
+
+	await dots.and(page.getByLabel("Portfólio", { exact: true })).click();
+	await expect(landing).toHaveAttribute("data-active-section", "portfolio", {
+		timeout: 6_000,
+	});
+});
