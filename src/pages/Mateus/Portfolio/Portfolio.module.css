@@ -133,14 +133,14 @@
 	/* Unidades de viewport já compensadas pelo zoom do atlas. */
 	--atlas-vw: calc(1vw / var(--atlas-scale));
 	--atlas-vh: calc(1dvh / var(--atlas-scale));
+	--atlas-pad-inline: clamp(22px, calc(3 * var(--atlas-vw)), 48px);
 	gap: clamp(14px, calc(1.6 * var(--atlas-vw)), 26px);
 	align-items: center;
 	width: min(100%, 1560px);
 	min-height: calc(100 * var(--atlas-vh));
 	margin: 0 auto;
 	padding: clamp(28px, calc(4 * var(--atlas-vh)), 48px)
-		clamp(22px, calc(3 * var(--atlas-vw)), 48px)
-		clamp(18px, calc(3 * var(--atlas-vh)), 34px);
+		var(--atlas-pad-inline) clamp(18px, calc(3 * var(--atlas-vh)), 34px);
 	box-sizing: border-box;
 }
 
@@ -655,8 +655,24 @@
 		);
 	}
 
+	/* O card fica ancorado embaixo e à esquerda: não sobe para baixo da barra
+	   e encolhe pela direita só o necessário para liberar os pontos laterais
+	   (FloatingButtons: right clamp(14px, 2vw, 28px), 38px de largura) com
+	   14px de folga. Valores em unidades do atlas (divididos pelo zoom). */
 	.detailCard {
-		transform: translateY(-44px);
+		align-self: end;
+		margin-right: max(
+			0px,
+			calc(
+				clamp(
+						14px / var(--atlas-scale),
+						2 * var(--atlas-vw),
+						28px / var(--atlas-scale)
+					) +
+					52px / var(--atlas-scale) - var(--atlas-pad-inline)
+			)
+		);
+		margin-bottom: clamp(4px, calc(1.5 * var(--atlas-vh)), 14px);
 	}
 }
 
@@ -886,10 +902,11 @@
 
 @media (max-width: 1180px) {
 	.atlasFrame {
-		grid-template-columns: 250px minmax(360px, 1fr) 340px;
+		/* Mínimos somam até 976px: entre 992px e 1016px a grade transbordava
+		   para baixo dos pontos laterais. */
+		grid-template-columns: 250px minmax(320px, 1fr) 340px;
+		--atlas-pad-inline: 20px;
 		gap: 13px;
-		padding-right: 20px;
-		padding-left: 20px;
 	}
 
 	.projectButton {
