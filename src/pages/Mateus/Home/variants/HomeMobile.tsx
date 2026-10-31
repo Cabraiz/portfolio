@@ -6,6 +6,7 @@ import { SiAnthropic, SiGmail } from "react-icons/si";
 import portrait from "@/assets/Mateus/home/hero-mobile-portrait.webp";
 import CodexIcon from "../components/CodexIcon";
 import useMobileHomeBrandMotion from "../hooks/useMobileHomeBrandMotion";
+import useHomeMobileMotion from "../hooks/useHomeMobileMotion";
 import { RESUME_HREF, WHATSAPP_HREF } from "../data/home.data";
 import styles from "./HomeMobile.module.css";
 import { HomeMobilePortraitSkeleton } from './HomeMobileSkeleton';
@@ -37,6 +38,7 @@ function HomeMobile() {
   const portraitRef = useRef<HTMLImageElement>(null);
 
   useMobileHomeBrandMotion({ pageRef, eyebrowRef, titleRef, identityRef, introRef, partnersRef, partnersHeadingRef, portraitRef });
+  useHomeMobileMotion(pageRef);
 
   return (
     <main ref={pageRef} className={styles.page} data-mobile-editorial-home>
@@ -52,7 +54,7 @@ function HomeMobile() {
           <span className={styles.titleAccent}>{localizeLabel("Back-End & APIs")}</span>
         </h1>
 
-        <div ref={identityRef} className={styles.identity}>
+        <div ref={identityRef} className={styles.identity} data-home-motion="identity">
           <strong>{localizeLabel("Mateus Cabral")}</strong>
           <span>{localizeLabel("Engenheiro de Software")}</span>
         </div>

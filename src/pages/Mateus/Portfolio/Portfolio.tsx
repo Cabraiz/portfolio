@@ -20,6 +20,7 @@ import flagPortugal from "../../../assets/Mateus/portfolio/flags/portugal-semici
 import usePortfolioActiveItem from "./hooks/usePortfolioActiveItem";
 import useMobilePortfolioBrandPush from "./hooks/useMobilePortfolioBrandPush";
 import useDesktopDetailCardFit from "./hooks/useDesktopDetailCardFit";
+import usePortfolioMotion from "./hooks/usePortfolioMotion";
 import { defaultPortfolioProjectId, portfolioProjects } from "./portfolio.data";
 import styles from "./Portfolio.module.css";
 import MobileProjectMeta from "./MobileProjectMeta";
@@ -264,6 +265,8 @@ export default function Portfolio() {
 				: "smooth",
 		});
 	}, [activeIndex]);
+
+	usePortfolioMotion(rootRef, activeProject.id);
 
 	const activeLocation = activeProject.worldLocation;
 	const worldJourneyDestination = WORLD_JOURNEY_DESTINATIONS[activeProject.id];
