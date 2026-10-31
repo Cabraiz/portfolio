@@ -1583,10 +1583,6 @@
 		animation-delay: -2.3s;
 	}
 
-	.portfolioRoot[data-motion-idle="on"] .routeLineActive {
-		animation: atlasRouteGlow 2.6s ease-in-out infinite;
-	}
-
 	.portfolioRoot[data-motion-idle="on"] .routeHub span {
 		animation: atlasHubPulse 2.8s ease-in-out infinite;
 	}
@@ -1634,7 +1630,14 @@
 	}
 
 	.portfolioRoot[data-motion-idle="on"] .paperTexture {
-		animation: atlasPaperDrift 28s ease-in-out infinite alternate;
+		animation: atlasPaperBreath 14s ease-in-out infinite alternate;
+	}
+}
+
+/* No celular a rota ativa já tem a animação de desenho (journeyRouteDraw). */
+@media (min-width: 992px) and (prefers-reduced-motion: no-preference) {
+	.portfolioRoot[data-motion-idle="on"] .routeLineActive {
+		animation: atlasRouteGlow 2.6s ease-in-out infinite;
 	}
 }
 
@@ -1795,15 +1798,11 @@
 	}
 }
 
-@keyframes atlasPaperDrift {
+@keyframes atlasPaperBreath {
 	from {
-		translate: 0 0;
-		scale: 1.04;
 		opacity: 1;
 	}
 	to {
-		translate: -16px 10px;
-		scale: 1.04;
-		opacity: 0.84;
+		opacity: 0.78;
 	}
 }
