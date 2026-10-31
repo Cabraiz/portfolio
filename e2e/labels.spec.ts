@@ -12,7 +12,7 @@ async function connectLanguageTest(page: Page) {
 }
 
 for(const viewport of [{width:390,height:844},{width:1366,height:720}]){
-  test(`PT/EN completam a Home, mapa, Rede IA e chat ${viewport.width}`,async({browser})=>{
+  test(`PT/EN completam a Home, mapa e chat ${viewport.width}`,async({browser})=>{
     test.setTimeout(90_000);
     const context=await browser.newContext({viewport,locale:'en-US',isMobile:viewport.width<992,hasTouch:viewport.width<992,reducedMotion:'reduce'});
     const page=await context.newPage();
@@ -46,30 +46,31 @@ for(const viewport of [{width:390,height:844},{width:1366,height:720}]){
     await expect(page.getByText('Mobile banking experience',{exact:true}).filter({visible:true}).first()).toBeVisible();
     await next.click();
     await expect(page.getByText('Cross-border e-commerce',{exact:true}).filter({visible:true}).first()).toBeVisible();
-    await page.goto('/servicos',{waitUntil:'networkidle'});
-    await expect(page.locator('#roadMap').getByText('Services',{exact:true})).toBeVisible();
-    await page.goto('/technologies',{waitUntil:'networkidle'});
-    await expect(page.getByText(viewport.width<992?'AI BRAIN':'ARTIFICIAL BRAIN AT WORK',{exact:true})).toBeVisible();
-    await expect(page.getByText('THINKING ·',{exact:false}).first()).toBeVisible();
-    const brainText=await page.locator('#technologies').innerText();
-    expect(brainText).not.toMatch(/PENSANDO|CÉREBRO|LEMBRANÇAS|Raciocínio|Criatividade|Estabilidade|sinais/);
-    await expect(page.locator('#technologies [data-animated-number]').filter({hasText:'signals'})).toHaveCount(1);
-    await page.screenshot({path:test.info().outputPath('brain-en.png')});
-    await page.goto('/contact',{waitUntil:'networkidle'});
-    await page.getByRole('button',{name:'Open chat',exact:true}).click();
-    await expect(page.getByText('Assistant',{exact:true})).toBeVisible();
-    await expect(page.getByRole('button',{name:'Send',exact:true})).toBeVisible();
-    await page.screenshot({path:test.info().outputPath('chat-en.png')});
-    await page.locator('input[name="message"]').fill('Mensagem pessoal sem tradução');
-    await connectLanguageTest(page);
-    await page.evaluate(()=>Reflect.get(window,'labelTest').changeLanguage('pt'));
-    await expect(page.getByRole('button',{name:'Enviar',exact:true})).toBeVisible();
-    await expect(page.locator('input[name="message"]')).toHaveValue('Mensagem pessoal sem tradução');
-    await page.reload({waitUntil:'networkidle'});
-    await expect(page.locator('html')).toHaveAttribute('lang','pt');
-    await page.getByRole('button',{name:'Abrir chat',exact:true}).click();
-    await expect(page.getByText('Atendente',{exact:true})).toBeVisible();
-    await page.screenshot({path:test.info().outputPath('labels-pt.png')});
+    // Serviços e Rede IA saíram da landing: as rotas abrem o Início.
+    for(const path of ['/servicos','/technologies']){
+      await page.goto(path,{waitUntil:'networkidle'});
+      await expect(page.locator('#roadMap, #technologies')).toHaveCount(0);
+      await expect(page.locator('main[data-landing-viewport]')).toHaveAttribute('data-active-section','home');
+    }
+    if(viewport.width<992){
+      // No celular não há chat.
+      await expect(page.getByRole('button',{name:'Open chat',exact:true})).toHaveCount(0);
+    }else{
+      await page.getByRole('button',{name:'Open chat',exact:true}).click();
+      await expect(page.getByText('Assistant',{exact:true})).toBeVisible();
+      await expect(page.getByRole('button',{name:'Send',exact:true})).toBeVisible();
+      await page.screenshot({path:test.info().outputPath('chat-en.png')});
+      await page.locator('input[name="message"]').fill('Mensagem pessoal sem tradução');
+      await connectLanguageTest(page);
+      await page.evaluate(()=>Reflect.get(window,'labelTest').changeLanguage('pt'));
+      await expect(page.getByRole('button',{name:'Enviar',exact:true})).toBeVisible();
+      await expect(page.locator('input[name="message"]')).toHaveValue('Mensagem pessoal sem tradução');
+      await page.reload({waitUntil:'networkidle'});
+      await expect(page.locator('html')).toHaveAttribute('lang','pt');
+      await page.getByRole('button',{name:'Abrir chat',exact:true}).click();
+      await expect(page.getByText('Atendente',{exact:true})).toBeVisible();
+      await page.screenshot({path:test.info().outputPath('labels-pt.png')});
+    }
     expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBe(0);
     await context.close();
   });
