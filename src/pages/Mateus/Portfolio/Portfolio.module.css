@@ -655,24 +655,11 @@
 		);
 	}
 
-	/* O card fica ancorado embaixo e à esquerda: não sobe para baixo da barra
-	   e encolhe pela direita só o necessário para liberar os pontos laterais
-	   (FloatingButtons: right clamp(14px, 2vw, 28px), 38px de largura) com
-	   14px de folga. Valores em unidades do atlas (divididos pelo zoom). */
+	/* Sem a subida antiga de 44px: a posição e o tamanho finais do card são
+	   ajustados por useDesktopDetailCardFit (entre a barra, o chat e os
+	   pontos laterais). */
 	.detailCard {
 		align-self: end;
-		margin-right: max(
-			0px,
-			calc(
-				clamp(
-						14px / var(--atlas-scale),
-						2 * var(--atlas-vw),
-						28px / var(--atlas-scale)
-					) +
-					52px / var(--atlas-scale) - var(--atlas-pad-inline)
-			)
-		);
-		margin-bottom: clamp(4px, calc(1.5 * var(--atlas-vh)), 14px);
 	}
 }
 

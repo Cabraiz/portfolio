@@ -19,6 +19,7 @@ import flagPortugal from "../../../assets/Mateus/portfolio/flags/portugal-semici
 
 import usePortfolioActiveItem from "./hooks/usePortfolioActiveItem";
 import useMobilePortfolioBrandPush from "./hooks/useMobilePortfolioBrandPush";
+import useDesktopDetailCardFit from "./hooks/useDesktopDetailCardFit";
 import { defaultPortfolioProjectId, portfolioProjects } from "./portfolio.data";
 import styles from "./Portfolio.module.css";
 import MobileProjectMeta from "./MobileProjectMeta";
@@ -143,6 +144,9 @@ export default function Portfolio() {
         const mobileDetailCardRef = useRef<HTMLElement>(null);
         useMobilePortfolioBrandPush(rootRef, mobileDetailCardRef);
 	const projectListRef = useRef<HTMLDivElement>(null);
+	const indexPanelRef = useRef<HTMLElement>(null);
+	const detailCardRef = useRef<HTMLElement>(null);
+	useDesktopDetailCardFit(detailCardRef, indexPanelRef);
 	const mobileProjectListRef = useRef<HTMLDivElement>(null);
 	const projectPointerStartRef = useRef<{
 		index: number;
@@ -629,7 +633,7 @@ export default function Portfolio() {
 			</div>
 
 			<div className={styles.atlasFrame}>
-				<aside className={styles.indexPanel} aria-label={localizeLabel("Índice de projetos")}>
+				<aside ref={indexPanelRef} className={styles.indexPanel} aria-label={localizeLabel("Índice de projetos")}>
 					<div ref={projectListRef} className={styles.projectList}>
 						{portfolioProjects.map((project, index) => {
 							const isActive = index === activeIndex;
@@ -705,7 +709,7 @@ export default function Portfolio() {
 					</nav>
 				</div>
 
-				<article className={styles.detailCard} aria-live="polite">
+				<article ref={detailCardRef} className={styles.detailCard} aria-live="polite">
 					<header className={styles.locationHeader}>
 						<strong>{localizeLabel(activeLocation?.country ?? "Brasil")}</strong>
 						<span>
