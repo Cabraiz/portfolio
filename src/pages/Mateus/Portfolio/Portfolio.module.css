@@ -1660,7 +1660,13 @@
 	}
 
 	.detailCard {
-		translate: 0 calc(var(--card-enter-y, 0px) + var(--card-float-y, 0px));
+		/* A flutuação é em px reais (dividida pelo zoom do atlas) para não
+		   comer a folga até a barra e o chat em telas grandes. */
+		translate: 0
+			calc(
+				var(--card-enter-y, 0px) + var(--card-float-y, 0px) /
+					var(--atlas-scale, 1)
+			);
 		rotate: y var(--card-turn, 0deg);
 		opacity: var(--card-enter-o, 1);
 	}

@@ -193,14 +193,19 @@ export default function usePortfolioMotion(
 					0.1
 				);
 
-				// Card flutuando devagar (só enquanto a seção está visível).
-				const float = gsap.to(card, {
-					"--card-float-y": "-5px",
-					duration: 3.4,
-					ease: "sine.inOut",
-					yoyo: true,
-					repeat: -1,
-				});
+				// Card flutuando devagar em volta do repouso (±3px reais, dentro da
+				// folga de 12px até a barra e o chat); só com a seção visível.
+				const float = gsap.fromTo(
+					card,
+					{ "--card-float-y": "3px" },
+					{
+						"--card-float-y": "-3px",
+						duration: 3.4,
+						ease: "sine.inOut",
+						yoyo: true,
+						repeat: -1,
+					}
+				);
 				const idleObserver = new IntersectionObserver(([entry]) => {
 					if (entry?.isIntersecting) float.play();
 					else float.pause();
