@@ -192,9 +192,9 @@ export default function HeroTextColumn({
 
 	return (
 		<Col md={5} style={heroTextColumnStyle} className="px-0">
-			<div style={seniorTitleStyle}>{localizeLabel("Desenvolvedor")}</div>
+			<div style={seniorTitleStyle} data-home-motion="eyebrow">{localizeLabel("Desenvolvedor")}</div>
 
-			<div className="font-sequel" style={roleContainerStyle}>
+			<div className="font-sequel" style={roleContainerStyle} data-home-motion="role">
 				<RoleTitle />
 			</div>
 
@@ -202,6 +202,7 @@ export default function HeroTextColumn({
 				{seals.map((seal) => (
 					<div
 						key={seal.key}
+						data-home-motion="seal"
 						style={{
 							minWidth: 0,
 							maxWidth: "100%",
@@ -228,7 +229,7 @@ maxHeight: isCompactDesktop ? "32px" : "40px",
 				))}
 			</div>
 
-			<div style={heroActionsWrapperStyle}>
+			<div style={heroActionsWrapperStyle} data-home-motion="actions">
 				<WhatsAppHeroSlot
 					compact={isCompactDesktop}
 					preserveDesktopOffset={!isCompactDesktop}

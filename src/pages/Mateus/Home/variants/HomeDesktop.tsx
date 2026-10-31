@@ -17,6 +17,7 @@ import heroCinemaVote5 from "@/assets/Mateus/home/hero-cinema-vote-5.webp";
 import heroCinemaVote6 from "@/assets/Mateus/home/hero-cinema-vote-6.webp";
 import heroCinemaVote7 from "@/assets/Mateus/home/hero-cinema-vote-7.webp";
 import { ensureGsapRuntime } from "@/features/scroll/gsapRuntime";
+import useHomeDesktopMotion from "../hooks/useHomeDesktopMotion";
 import HeroTextColumn from "../components/desktop/HeroTextColumn";
 import { useHomeHeroLayout } from "../hooks/useHomeHeroLayout";
 import { getWhatsAppGreeting } from "../utils/home.utils";
@@ -314,6 +315,8 @@ function HomeDesktop() {
 		return style;
 	}, [isCompactDesktop]);
 
+	useHomeDesktopMotion(containerRef);
+
 	useLayoutEffect(() => {
 		const container = containerRef.current;
 
@@ -441,7 +444,7 @@ function HomeDesktop() {
 			data-mateus-hero-root="true"
 			data-mateus-hero-mobile="false"
 		>
-			<div style={backgroundFrameStyle} data-hero-crop-frame="true">
+			<div style={backgroundFrameStyle} data-hero-crop-frame="true" data-home-motion="photo-frame">
 				<img
 					ref={backgroundRef}
 					src={selectedHeroBackground}
@@ -487,9 +490,9 @@ function HomeDesktop() {
 				style={editorialPhraseStyle}
 				aria-label={localizeLabel("Histórias também são feitas de código")}
 			>
-				<span>{localizeLabel("Histórias")}</span>
-				<span>{localizeLabel("Também são")}</span>
-				<span>{localizeLabel("Feitas de código.")}</span>
+				<span data-home-motion="phrase-line">{localizeLabel("Histórias")}</span>
+				<span data-home-motion="phrase-line">{localizeLabel("Também são")}</span>
+				<span data-home-motion="phrase-line">{localizeLabel("Feitas de código.")}</span>
 			</div>
 			<div
 				ref={signatureRef}
