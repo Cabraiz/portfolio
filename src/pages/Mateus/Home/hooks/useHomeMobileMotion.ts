@@ -6,9 +6,9 @@ const MOTION_QUERY = "(prefers-reduced-motion: no-preference)";
 
 /**
  * Movimento do Início no celular. O logo empurra título, identidade e
- * introdução (useMobileHomeBrandMotion) e mede a posição deles, então esses
- * textos só entram por opacidade e recorte; a foto e os botões de contato
- * ganham o idle (CSS) e a saída atrelada à rolagem (--home-exit).
+ * introdução (useMobileHomeBrandMotion) e mede a posição deles e da barra de
+ * contato, então nada disso muda de posição aqui: os textos entram por
+ * opacidade e recorte, e a foto e os ícones da barra ganham o idle (CSS).
  */
 export default function useHomeMobileMotion(
 	pageRef: RefObject<HTMLElement | null>
@@ -66,23 +66,6 @@ export default function useHomeMobileMotion(
 					{ autoAlpha: 0, duration: 0.5, stagger: 0.12, clearProps: "opacity,visibility" },
 					0.55
 				);
-
-			// Saída: a foto sobe e esmaece e os botões descem ao rolar para o Portfólio.
-			gsap.fromTo(
-				page,
-				{ "--home-exit": 0 },
-				{
-					"--home-exit": 1,
-					ease: "none",
-					scrollTrigger: {
-						trigger: page,
-						start: "top top",
-						end: "bottom top",
-						scrub: 0.5,
-						invalidateOnRefresh: true,
-					},
-				}
-			);
 
 			return undefined;
 		});

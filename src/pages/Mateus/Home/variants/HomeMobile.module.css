@@ -402,18 +402,10 @@
   }
 }
 
-/* Movimento do Início no celular (useHomeMobileMotion). Os textos que o logo
-   empurra (título, identidade, introdução) só mudam de opacidade/recorte;
-   foto, botões de contato e a saída na rolagem fazem os movimentos maiores. */
-.portrait {
-  translate: 0 calc(var(--home-exit, 0) * -26px);
-  opacity: calc(1 - var(--home-exit, 0) * 0.3);
-}
-
-.actions {
-  translate: 0 calc(var(--home-exit, 0) * 22px);
-}
-
+/* Movimento do Início no celular (useHomeMobileMotion). O logo empurra os
+   textos e mede título, identidade, introdução e a barra de contato; nenhum
+   deles muda de posição aqui (só opacidade, recorte e os ícones da barra).
+   A foto já sobe com a rolagem em useMobileHomeBrandMotion. */
 @media (prefers-reduced-motion: no-preference) {
   .page[data-motion-idle="on"] .portrait {
     transform-origin: 50% 100%;
