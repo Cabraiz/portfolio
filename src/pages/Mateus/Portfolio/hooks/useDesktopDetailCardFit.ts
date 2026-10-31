@@ -34,8 +34,19 @@ export default function useDesktopDetailCardFit(
 			card.style.transformOrigin = "";
 			if (!desktopQuery.matches) return;
 
+			// Mede sem o deslocamento das animações (entrada, flutuação e giro
+			// usam translate/rotate separados): o encaixe vale para o repouso.
+			card.style.translate = "none";
+			card.style.rotate = "none";
 			const natural = card.getBoundingClientRect();
-			if (natural.width === 0 || natural.height === 0) return;
+			const releaseMotion = () => {
+				card.style.translate = "";
+				card.style.rotate = "";
+			};
+			if (natural.width === 0 || natural.height === 0) {
+				releaseMotion();
+				return;
+			}
 			// O atlas usa CSS zoom: transformações do card são em unidades dele.
 			const zoom = natural.width / Math.max(1, card.offsetWidth);
 
@@ -49,8 +60,13 @@ export default function useDesktopDetailCardFit(
 				window.innerHeight * (1 - CHAT_BOTTOM_VIEWPORT_RATIO) -
 				CHAT_TRIGGER_HEIGHT_PX;
 
-			const top = navbarBottom + FIT_GAP_PX;
-			const bottom = chatTop - FIT_GAP_PX;
+			// A barra e o chat são fixos na tela; o card é do Portfólio. A faixa é
+			// calculada para quando o Portfólio estiver alinhado no topo, seja qual
+			// for a rolagem agora (o ajuste também roda com o Início na tela).
+			const sectionTop =
+				card.closest("[data-portfolio-root]")?.getBoundingClientRect().top ?? 0;
+			const top = sectionTop + navbarBottom + FIT_GAP_PX;
+			const bottom = sectionTop + chatTop - FIT_GAP_PX;
 			const right = dotsLeft - FIT_GAP_PX;
 			const leftLimit =
 				(leftBoundaryRef.current?.getBoundingClientRect().right ?? 0) +
@@ -60,7 +76,10 @@ export default function useDesktopDetailCardFit(
 				(bottom - top) / natural.height,
 				(right - leftLimit) / natural.width
 			);
-			if (!(scale > 0)) return;
+			if (!(scale > 0)) {
+				releaseMotion();
+				return;
+			}
 
 			const width = natural.width * scale;
 			const height = natural.height * scale;
@@ -79,6 +98,7 @@ export default function useDesktopDetailCardFit(
 			translateX += (targetLeft - placed.left) / zoom;
 			translateY += (targetTop - placed.top) / zoom;
 			apply();
+			releaseMotion();
 		};
 
 		const schedule = () => {
