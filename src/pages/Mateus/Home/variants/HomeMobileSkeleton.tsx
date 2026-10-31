@@ -26,7 +26,7 @@ export default function HomeMobileSkeleton({className='',minHeight}:{className?:
       </div>
       <div className={home.identity} data-home-skeleton-part="identity">
         <strong><Text text="Mateus Cabral"/></strong>
-        <Text text="Engenheiro de Software"/><Text text="Fundador"/>
+        <Text text="Engenheiro de Software"/>
       </div>
       <p className={home.intro} data-home-skeleton-part="intro">
         {['Transformando','ideias em','produtos reais,','do código ao','impacto.'].map(text=><Text key={text} text={text} className={home.introLine}/>)}

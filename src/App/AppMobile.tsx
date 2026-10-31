@@ -361,7 +361,7 @@ function AppMobile() {
       <div className="app-lenis-content" style={mobileLayoutStyle}>
         {!isGameStandaloneSurface ? (
           <TitleWebsite
-            title1="Mateus Cardoso Cabral | Fundador e Investidor em IA"
+            title1="Mateus Cardoso Cabral | Investidor em IA"
             title2="Cabraiz | IA, Tecnologia e Software"
           />
         ) : null}

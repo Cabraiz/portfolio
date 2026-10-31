@@ -21,7 +21,7 @@ for(const viewport of [{width:390,height:844},{width:1366,height:720}]){
     await expect(page.locator('html')).toHaveAttribute('lang','en');
     if(viewport.width<992){
       await expect(page.getByText('Software Engineer',{exact:true})).toBeVisible();
-      await expect(page.getByText('Founder',{exact:true})).toBeVisible();
+      await expect(page.getByText('Founder',{exact:true})).toHaveCount(0);
       await expect(page.getByText('Résumé',{exact:true})).toBeVisible();
       await expect(page.getByText('TECHNOLOGY',{exact:true})).toBeVisible();
     }else await expect(page.getByText('Developer',{exact:true})).toBeVisible();

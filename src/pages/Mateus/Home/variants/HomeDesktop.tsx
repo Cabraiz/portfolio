@@ -494,12 +494,11 @@ function HomeDesktop() {
 			<div
 				ref={signatureRef}
 				style={signatureStyle}
-				aria-label={localizeLabel("Mateus Cabral, Engenheiro de Software, Fundador")}
+				aria-label={localizeLabel("Mateus Cabral, Engenheiro de Software")}
 			>
 				<strong style={{ fontSize: "1.12em", fontWeight: 700 }}>
 					{localizeLabel("Mateus Cabral")}</strong>
 				<span>{localizeLabel("Engenheiro de Software")}</span>
-				<span>{localizeLabel("Fundador")}</span>
 			</div>
 
 			<Container fluid className="px-0" style={containerStyle}>

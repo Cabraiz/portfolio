@@ -55,7 +55,6 @@ function HomeMobile() {
         <div ref={identityRef} className={styles.identity}>
           <strong>{localizeLabel("Mateus Cabral")}</strong>
           <span>{localizeLabel("Engenheiro de Software")}</span>
-          <span>{localizeLabel("Fundador")}</span>
         </div>
 
         <p ref={introRef} className={styles.intro}>
