@@ -5,7 +5,7 @@ import ts from 'typescript';
 
 const catalog=JSON.parse(fs.readFileSync('src/i18n/label-catalog.json','utf8'));
 const keys=JSON.parse(fs.readFileSync('src/i18n/label-keys.json','utf8'));
-const resources=Object.fromEntries(['pt','en'].map(language=>[language,JSON.parse(fs.readFileSync(`public/locales/${language}/translation.json`,'utf8'))]));
+const resources=Object.fromEntries(['pt','en','es'].map(language=>[language,JSON.parse(fs.readFileSync(`public/locales/${language}/translation.json`,'utf8'))]));
 const failures=[];
 const normal=value=>value.replace(/\s+/g,' ').trim();
 const tokens=value=>[...value.matchAll(/{{\s*(\w+)\s*}}/g)].map(m=>m[1]).sort().join(',');
@@ -16,6 +16,11 @@ function leaves(value,prefix=''){
  }return output;
 }
 const pt=leaves(resources.pt),en=leaves(resources.en);
+const es=leaves(resources.es);
+for(const key of new Set([...Object.keys(en),...Object.keys(es)])){
+ if(typeof es[key]!=='string'||!es[key].trim())failures.push(`${key}: missing Spanish translation`);
+ else if(typeof en[key]==='string'&&tokens(es[key])!==tokens(en[key]))failures.push(`${key}: Spanish interpolation mismatch`);
+}
 for(const key of new Set([...Object.keys(pt),...Object.keys(en)])){
  if(typeof pt[key]!=='string'||typeof en[key]!=='string'||!pt[key].trim()||!en[key].trim())failures.push(`${key}: missing/non-text translation`);
  else if(tokens(pt[key])!==tokens(en[key]))failures.push(`${key}: interpolation mismatch`);
@@ -67,7 +72,7 @@ for(const resourceKey of Object.keys(pt).filter(key=>!mappedKeys.has(key))){
 const csv=rows.map(row=>row.map(cell=>`"${String(cell).replaceAll('"','""')}"`).join(',')).join('\n')+'\n';
 fs.mkdirSync('reports',{recursive:true});
 fs.writeFileSync('reports/label-map.csv','\uFEFF'+csv);
-const summary={languages:['pt-BR','en-US'],catalogEntries:catalog.length,resourceLeaves:Object.keys(pt).length,connectedFiles:connectedFiles.length,neutralLabels:neutral.size,missing:failures,review:'Idiomatic English reviewed by Codex; no human native-speaker certification',scope:'Public portfolio and standalone games. Inactive RoadMap/Live/Technologies variants excluded.',assets:'Proper names, company logos, project screenshots and text baked into artwork retain their original language.'};
+const summary={languages:['pt-BR','en-US','es'],catalogEntries:catalog.length,resourceLeaves:Object.keys(pt).length,connectedFiles:connectedFiles.length,neutralLabels:neutral.size,missing:failures,review:'Idiomatic English and Latin-American Spanish reviewed by AI; no human native-speaker certification',scope:'Public portfolio and standalone games. Inactive RoadMap/Live/Technologies variants excluded.',assets:'Proper names, company logos, project screenshots and text baked into artwork retain their original language.'};
 fs.writeFileSync('reports/label-map-summary.json',JSON.stringify(summary,null,2)+'\n');
 console.log(JSON.stringify(summary));
 if(failures.length)process.exitCode=1;

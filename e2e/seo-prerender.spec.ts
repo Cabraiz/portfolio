@@ -21,8 +21,18 @@ const visibleText = (html: string) =>
 		.replace(/\s+/g, " ");
 const decode = (value: string | undefined) => (value ?? "").replace(/&amp;/g, "&");
 
+const LANGUAGES = ["en", "pt", "es"] as const;
+const HTML_LANG = { en: "en", pt: "pt-BR", es: "es" } as const;
+const HREFLANG = { en: "en", pt: "pt-BR", es: "es" } as const;
+const TITLE_TEXT = { en: /Senior AI Engineer/, pt: /Engenheiro de IA Sênior/, es: /Ingeniero de IA Senior/ } as const;
+const PORTRAIT_ALT = {
+	en: "Portrait of Mateus Cardoso Cabral",
+	pt: "Retrato de Mateus Cardoso Cabral",
+	es: "Retrato de Mateus Cardoso Cabral",
+} as const;
+
 for (const pageId of ["home", "portfolio"] as const) {
-	for (const language of ["pt", "en"] as const) {
+	for (const language of LANGUAGES) {
 		const page = seo.pages[pageId][language];
 
 		test(`HTML sem JavaScript de ${page.path} tem cabeçalho e conteúdo`, async ({ request }) => {
@@ -30,11 +40,15 @@ for (const pageId of ["home", "portfolio"] as const) {
 			expect(response.status()).toBe(200);
 			const html = await response.text();
 
-			expect(html).toContain(`<html lang="${language === "en" ? "en" : "pt-BR"}">`);
+			expect(html).toContain(`<html lang="${HTML_LANG[language]}">`);
 			expect(decode(html.match(/<title>([^<]*)<\/title>/)?.[1])).toBe(page.title);
 			expect(html).toContain(`<link rel="canonical" href="${seo.siteUrl}${page.path}" />`);
-			expect(html).toContain(`hreflang="pt-BR" href="${seo.siteUrl}${seo.pages[pageId].pt.path}"`);
-			expect(html).toContain(`hreflang="en" href="${seo.siteUrl}${seo.pages[pageId].en.path}"`);
+			for (const alternate of LANGUAGES) {
+				expect(html).toContain(
+					`hreflang="${HREFLANG[alternate]}" href="${seo.siteUrl}${seo.pages[pageId][alternate].path}"`
+				);
+			}
+			expect(html).toContain(`hreflang="x-default" href="${seo.siteUrl}${seo.pages[pageId].en.path}"`);
 
 			const jsonLd = JSON.parse(
 				html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)![1]
@@ -47,7 +61,11 @@ for (const pageId of ["home", "portfolio"] as const) {
 			const text = visibleText(html);
 			expect(text.split(" ").length).toBeGreaterThan(120);
 			for (const project of PROJECTS) expect(text.toLowerCase()).toContain(project.toLowerCase());
-			expect(text).toMatch(language === "en" ? /Software Engineer/ : /Engenheiro de Software/);
+			expect(text).toMatch(TITLE_TEXT[language]);
+			// Links visíveis para as outras versões (seletor de idioma).
+			for (const alternate of LANGUAGES) {
+				expect(body).toContain(`href="${seo.pages[pageId][alternate].path}"`);
+			}
 		});
 	}
 }
@@ -62,16 +80,12 @@ test("foto oficial é publicada e ligada ao nome", async ({ request }) => {
 		expect(response.headers()["content-type"]).toContain("image/jpeg");
 	}
 
-	for (const language of ["pt", "en"] as const) {
+	for (const language of LANGUAGES) {
 		const html = await (await request.get(seo.pages.home[language].path)).text();
 		expect(html).toContain(`<meta property="og:image" content="${seo.shareImage.url}" />`);
 		expect(html).toContain(`<link rel="image_src" href="${seo.portrait.url}" />`);
 		const body = html.slice(html.indexOf("<body"));
-		expect(body).toMatch(
-			language === "pt"
-				? /<img alt="Retrato de Mateus Cardoso Cabral"/
-				: /<img alt="Portrait of Mateus Cardoso Cabral"/
-		);
+		expect(body).toContain(`<img alt="${PORTRAIT_ALT[language]}"`);
 		const graph = JSON.parse(
 			html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)![1]
 		)["@graph"];
@@ -91,7 +105,8 @@ test("foto oficial é publicada e ligada ao nome", async ({ request }) => {
 test("sitemap, robots, llms.txt e rotas antigas", async ({ request }) => {
 	const sitemap = await (await request.get("/sitemap.xml")).text();
 	const locations = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map((match) => match[1]);
-	expect(locations).toHaveLength(5);
+	// 2 páginas × 3 idiomas + 3 currículos.
+	expect(locations).toHaveLength(9);
 	for (const location of locations) {
 		expect((await request.get(location.replace(seo.siteUrl, ""))).status()).toBe(200);
 	}
@@ -102,6 +117,15 @@ test("sitemap, robots, llms.txt e rotas antigas", async ({ request }) => {
 
 	const llms = await (await request.get("/llms.txt")).text();
 	for (const project of PROJECTS) expect(llms).toContain(project);
+	for (const language of LANGUAGES) {
+		expect(llms).toContain(seo.person.jobTitle[language]);
+		expect(llms).toContain(`${seo.siteUrl}${seo.resume[language]}`);
+	}
+
+	// A raiz entrega o inglês (x-default) para quem não executa JavaScript.
+	const root = await (await request.get("/")).text();
+	expect(root).toContain('<html lang="en">');
+	expect(root).toContain(`<link rel="canonical" href="${seo.siteUrl}/en/home/" />`);
 
 	for (const retired of seo.retiredPaths) {
 		const html = await (await request.get(`/${retired}/`)).text();
@@ -133,4 +157,32 @@ test("português continua em português com navegador automatizado em inglês", 
 	await expect(page).toHaveURL(/\/home\/?$/);
 	await expect(page).toHaveTitle(seo.pages.home.pt.title);
 	await context.close();
+});
+
+for (const [locale, path] of [
+	["en-US", "/en/home/"],
+	["es-MX", "/es/home/"],
+	["pt-BR", "/home/"],
+	["de-DE", "/en/home/"],
+] as const) {
+	test(`raiz leva o navegador ${locale} para ${path}`, async ({ browser }) => {
+		const context = await browser.newContext({ locale });
+		const page = await context.newPage();
+		await page.goto("/");
+		await expect(page).toHaveURL(new RegExp(`${path.replaceAll("/", "\\/")}$`));
+		await context.close();
+	});
+}
+
+test("seletor de idioma troca para o espanhol e lembra a escolha", async ({ page }) => {
+	await page.setViewportSize({ width: 1366, height: 768 });
+	await page.goto("/en/portfolio/");
+	const switcher = page.locator("nav[data-language-switcher]").filter({ visible: true });
+	await expect(switcher.getByRole("link", { name: "English" })).toHaveAttribute("aria-current", "page");
+	await switcher.getByRole("link", { name: "Español (Latinoamérica)" }).click();
+	await expect(page).toHaveURL(/\/es\/portfolio\/$/);
+	await expect(page.locator("html")).toHaveAttribute("lang", "es");
+	await expect(page).toHaveTitle(seo.pages.portfolio.es.title);
+	await page.goto("/");
+	await expect(page).toHaveURL(/\/es\/home\/$/);
 });

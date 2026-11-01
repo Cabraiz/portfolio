@@ -440,5 +440,18 @@
   ["Carregando portfólio", "Loading portfolio"],
   ["NÃO ERA", "IT WASN'T"],
   ["{{label}}: {{percent}}%", "{{label}}: {{percent}}%"],
-  ["AGUARDA", "WAITING"]
+  ["AGUARDA", "WAITING"],
+  ["Engenheiro de IA Sênior", "Senior AI Engineer"],
+  ["Mateus Cabral, Engenheiro de IA Sênior", "Mateus Cabral, Senior AI Engineer"],
+  ["Engenheiro de IA", "AI Engineer"],
+  ["LLMs, RAG e Agentes", "LLMs, RAG & Agents"],
+  ["Sênior", "Senior"],
+  ["Engenheiro", "Engineer"],
+  ["IA & Full Stack", "AI & Full Stack"],
+  ["VAMOS CONVERSAR", "LET'S TALK"],
+  ["Abrir link da reunião", "Open meeting link"],
+  ["E-MAIL", "EMAIL"],
+  ["Enviar e-mail para Mateus", "Email Mateus"],
+  ["Idioma", "Language"],
+  ["Navegação lateral por seções", "Section side navigation"]
 ]

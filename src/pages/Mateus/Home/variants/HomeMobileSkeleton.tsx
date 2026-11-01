@@ -1,4 +1,7 @@
 import type { CSSProperties } from 'react';
+import useProgressiveSource from '@/features/media/useProgressiveSource';
+import portraitPreview from '@/assets/Mateus/home/hero-mobile-portrait-preview.webp';
+import { MOBILE_PORTRAIT_LQIP } from '../data/heroPlaceholders';
 import { localizeLabel } from '@/i18n/labels';
 import home from './HomeMobile.module.css';
 import styles from './HomeMobileSkeleton.module.css';
@@ -7,11 +10,14 @@ function Text({text,className=''}:{text:string;className?:string}){
   return <span className={`${styles.text} ${className}`}>{localizeLabel(text)}</span>;
 }
 
+/**
+ * Foto progressiva: a miniatura embutida aparece na hora (desfocada), troca
+ * pela prévia pequena assim que ela chega e some quando a foto final entra.
+ */
 export function HomeMobilePortraitSkeleton(){
-  return <svg className={`${home.portrait} ${styles.portrait}`} viewBox="0 0 1024 1536" aria-hidden="true" data-home-portrait-skeleton="true">
-    <ellipse cx="560" cy="380" rx="220" ry="290" />
-    <path d="M430 620H690L730 730C915 795 995 925 1024 1130V1536H115L190 1020C235 865 315 770 410 735Z" />
-  </svg>;
+  const {src,stage}=useProgressiveSource(MOBILE_PORTRAIT_LQIP,portraitPreview);
+  return <img className={`${home.portrait} ${styles.portrait}`} src={src} alt="" aria-hidden="true" width={1024} height={1536}
+    draggable={false} data-home-portrait-skeleton="true" data-stage={stage}/>;
 }
 
 export default function HomeMobileSkeleton({className='',minHeight}:{className?:string;minHeight?:CSSProperties['minHeight']}){
@@ -21,12 +27,12 @@ export default function HomeMobileSkeleton({className='',minHeight}:{className?:
         {['TECNOLOGIA','PESSOAS','IMPACTO'].map(text=><Text key={text} text={text}/>)}
       </div>
       <div className={home.title} data-home-skeleton-part="title">
-        <Text text="Dev" className={`${home.titleLead} ${styles.lead}`}/>
-        <Text text="Back-End & APIs" className={home.titleAccent}/>
+        <Text text="Engenheiro" className={`${home.titleLead} ${styles.lead}`}/>
+        <Text text="IA & Full Stack" className={home.titleAccent}/>
       </div>
       <div className={home.identity} data-home-skeleton-part="identity">
         <strong><Text text="Mateus Cabral"/></strong>
-        <Text text="Engenheiro de Software"/>
+        <Text text="Engenheiro de IA Sênior"/>
       </div>
       <p className={home.intro} data-home-skeleton-part="intro">
         {['Transformando','ideias em','produtos reais,','do código ao','impacto.'].map(text=><Text key={text} text={text} className={home.introLine}/>)}

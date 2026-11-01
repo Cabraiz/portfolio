@@ -1,49 +1,66 @@
 import {
-  ENGLISH_PATH_PREFIX,
-  getLanguageFromPath,
-  isLandingPath,
-  stripLanguagePrefix,
+  getLanguagePath,
+  LANDING_LANGUAGES,
+  type LandingLanguage,
 } from "../features/navigation/landingSections";
+import {
+  isHomeDriveStandaloneHost,
+  isHomeElevatorStandaloneHost,
+} from "../App/appHostRouting";
 
-const LANGUAGE_REDIRECT_KEY = "cabraiz-language-redirected";
-// Robôs (buscadores, IAs, prévias de link) e navegadores automatizados não são
-// redirecionados: cada idioma precisa ser rastreado no próprio endereço.
-const AUTOMATED_AGENT_PATTERN =
-  /bot|crawl|spider|slurp|bingpreview|facebookexternalhit|embedly|preview|lighthouse|headless|inspectiontool|chrome-lighthouse|gptbot|claude|perplexity/i;
+// Idioma escolhido no seletor (EN · PT · ES); vale para as próximas visitas à raiz.
+export const PREFERRED_LANGUAGE_KEY = "cabraiz-preferred-language";
+
+function isLandingLanguage(value: unknown): value is LandingLanguage {
+  return LANDING_LANGUAGES.includes(value as LandingLanguage);
+}
+
+export function rememberPreferredLanguage(language: LandingLanguage): void {
+  try {
+    globalThis.window?.localStorage.setItem(PREFERRED_LANGUAGE_KEY, language);
+  } catch {
+    // Sem armazenamento (aba anônima, bloqueio): a escolha vale só agora.
+  }
+}
+
+function readPreferredLanguage(): LandingLanguage | null {
+  try {
+    const stored = globalThis.window?.localStorage.getItem(PREFERRED_LANGUAGE_KEY);
+    return isLandingLanguage(stored) ? stored : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Primeiro idioma do navegador que o site tem; o padrão é inglês (foco internacional). */
+export function resolveBrowserLanguage(
+  languages: readonly string[] | undefined,
+): LandingLanguage {
+  for (const value of languages ?? []) {
+    const base = value.toLowerCase().split("-")[0];
+    if (isLandingLanguage(base)) return base;
+  }
+  return "en";
+}
 
 /**
- * Antes o idioma vinha do navegador. Para manter a experiência de quem usa o
- * navegador em inglês, a primeira visita a uma página em português leva para
- * a versão /en uma única vez (a escolha fica salva; voltar para o português
- * depois é respeitado).
+ * Só a raiz (cabraiz.com/) escolhe o idioma: a escolha salva no seletor ou o
+ * idioma do navegador, com inglês como padrão. As páginas de cada idioma
+ * (/home, /en/home, /es/home) nunca redirecionam, como pede o Google para
+ * sites multilíngues; a troca é pelos links visíveis do seletor.
  */
-export function redirectFirstEnglishVisit(): boolean {
+export function redirectRootToLanguage(): boolean {
   const browserWindow = globalThis.window;
   if (!browserWindow) return false;
 
   const { pathname, search, hash } = browserWindow.location;
-  if (getLanguageFromPath(pathname) === "en" || !isLandingPath(pathname)) {
-    return false;
-  }
+  if (pathname !== "/" && pathname !== "/index.html") return false;
+  if (isHomeDriveStandaloneHost() || isHomeElevatorStandaloneHost()) return false;
 
-  const navigatorLanguage = browserWindow.navigator.language?.toLowerCase() ?? "";
-  if (
-    !navigatorLanguage.startsWith("en") ||
-    AUTOMATED_AGENT_PATTERN.test(browserWindow.navigator.userAgent) ||
-    browserWindow.navigator.webdriver
-  ) {
-    return false;
-  }
-
-  try {
-    if (browserWindow.localStorage.getItem(LANGUAGE_REDIRECT_KEY)) return false;
-    browserWindow.localStorage.setItem(LANGUAGE_REDIRECT_KEY, "1");
-  } catch {
-    return false;
-  }
-
-  const sectionPath = stripLanguagePrefix(pathname);
-  const target = `${ENGLISH_PATH_PREFIX}${sectionPath === "/" ? "/home" : sectionPath}`;
-  browserWindow.location.replace(`${target}${search}${hash}`);
+  const navigatorLanguages = browserWindow.navigator.languages?.length
+    ? browserWindow.navigator.languages
+    : [browserWindow.navigator.language];
+  const language = readPreferredLanguage() ?? resolveBrowserLanguage(navigatorLanguages);
+  browserWindow.location.replace(`${getLanguagePath(language, "/")}${search}${hash}`);
   return true;
 }

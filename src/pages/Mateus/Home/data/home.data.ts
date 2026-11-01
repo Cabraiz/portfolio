@@ -53,10 +53,45 @@ export type HomeMobileSocialLink = Readonly<{
 export const COMPACT_DESKTOP_MEDIA_QUERY =
   "(max-height: 1080px) and (min-width: 961px)";
 
-export const WHATSAPP_HREF =
-  "https://wa.me/5585998575707?text=Ol%C3%A1%20Mateus%2C%20vi%20seu%20portf%C3%B3lio%20e%20gostaria%20de%20conversar.";
-export const MEET_HREF = "https://meet.google.com/SEULINK";
-export const RESUME_HREF = "/files/mateus-cabral-resume.pdf";
+// Contatos por idioma da página: a mensagem pronta do WhatsApp, o e-mail e o
+// currículo seguem o idioma (pt Brasil, en internacional, es América Latina).
+export type ContactLanguage = "pt" | "en" | "es";
+
+export function resolveContactLanguage(language: string | undefined): ContactLanguage {
+  const base = (language ?? "pt").toLowerCase().split("-")[0];
+  return base === "en" || base === "es" ? base : "pt";
+}
+
+const WHATSAPP_NUMBER_URL = "https://wa.me/5585998575707";
+const WHATSAPP_MESSAGES: Readonly<Record<ContactLanguage, string>> = {
+  pt: "Olá Mateus, vi seu portfólio e gostaria de conversar.",
+  en: "Hi Mateus, I saw your portfolio and would like to talk.",
+  es: "Hola Mateus, vi su portafolio y me gustaría conversar.",
+};
+
+export function getWhatsAppHref(language: ContactLanguage): string {
+  return `${WHATSAPP_NUMBER_URL}?text=${encodeURIComponent(WHATSAPP_MESSAGES[language])}`;
+}
+
+export const CONTACT_EMAIL = "contact@cabraiz.com";
+const EMAIL_SUBJECTS: Readonly<Record<ContactLanguage, string>> = {
+  pt: "Oportunidade para Mateus Cabral",
+  en: "Opportunity for Mateus Cabral",
+  es: "Oportunidad para Mateus Cabral",
+};
+
+export function getContactEmailHref(language: ContactLanguage): string {
+  return `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(EMAIL_SUBJECTS[language])}`;
+}
+
+export const RESUME_HREFS: Readonly<Record<ContactLanguage, string>> = {
+  pt: "/files/mateus-cabral-resume.pdf",
+  en: "/files/mateus-cabral-resume-en.pdf",
+  es: "/files/mateus-cabral-resume-es.pdf",
+};
+
+export const WHATSAPP_HREF = getWhatsAppHref("pt");
+export const RESUME_HREF = RESUME_HREFS.pt;
 
 export const WHATSAPP_QR_SRC = whatsappQrSvg;
 export const WHATSAPP_QR_ALT =

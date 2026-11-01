@@ -49,7 +49,7 @@ for (const viewport of [
 				expect(mountedCount).toBeLessThan(routes.length);
 
 				await expect(page).toHaveURL(
-					sectionId === "portfolio" ? /\/portfolio$/ : /\/home$/
+					sectionId === "portfolio" ? /\/portfolio\/?$/ : /\/home\/?$/
 				);
 				await expect(
 					page.locator("main[data-landing-viewport] > section")
@@ -82,7 +82,7 @@ for (const viewport of [
 for (const route of ["/pricing", "/live"]) {
 	test(`legacy ${route} opens Home`, async ({ page }) => {
 		await page.goto(route);
-		await expect(page).toHaveURL(/\/home$/, { timeout: 15_000 });
+		await expect(page).toHaveURL(/\/home\/?$/, { timeout: 15_000 });
 		await expect(page.locator("main[data-landing-viewport]")).toHaveAttribute(
 			"data-active-section",
 			"home",
@@ -106,7 +106,7 @@ test("desktop keeps every section in the navbar and side dots, but only Home and
 		await expect(page.locator(`button[data-nav-link="${id}"]`)).toBeEnabled();
 	}
 	const dots = page.locator(
-		"aside[aria-label='Navegação lateral por seções'] button"
+		"aside[data-section-dots] button"
 	);
 	await expect(dots).toHaveCount(5);
 
@@ -123,7 +123,7 @@ test("desktop keeps every section in the navbar and side dots, but only Home and
 	}
 	await page.waitForTimeout(500);
 	await expect(landing).toHaveAttribute("data-active-section", "home");
-	await expect(page).toHaveURL(/\/home$/);
+	await expect(page).toHaveURL(/\/home\/?$/);
 
 	await dots.and(page.getByLabel("Portfólio", { exact: true })).click();
 	await expect(landing).toHaveAttribute("data-active-section", "portfolio", {

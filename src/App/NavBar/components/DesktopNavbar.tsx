@@ -11,6 +11,7 @@ import {
 } from "../../../features/navigation/landingSections";
 import BrandButton from "./BrandButton";
 import DesktopNavItemButton from "./DesktopNavItemButton";
+import LanguageSwitcher from "./LanguageSwitcher";
 
 export type DesktopNavbarProps = Readonly<{
   items: ReadonlyArray<LandingSectionId>;
@@ -99,11 +100,16 @@ const DesktopNavbar: React.FC<DesktopNavbarProps> = ({
     overflow: "visible",
   };
 
-  const trailingSpacerStyle: CSSProperties = {
+  // Mesma largura da marca à esquerda: o menu continua centralizado.
+  const trailingSlotStyle: CSSProperties = {
     flex: "0 0 auto",
     width: brandSlotWidth,
     minWidth: brandSlotWidth,
     maxWidth: brandSlotWidth,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "flex-end",
+    paddingRight: "clamp(2px, 0.5vw, 8px)",
   };
 
   const navContainerStyle: CSSProperties = {
@@ -174,7 +180,12 @@ const DesktopNavbar: React.FC<DesktopNavbarProps> = ({
         </div>
       </div>
 
-      <div aria-hidden="true" style={trailingSpacerStyle} />
+      <div style={trailingSlotStyle}>
+        <LanguageSwitcher
+          tone={lightTheme ? "light" : "dark"}
+          size={isCompactDesktop ? "compact" : "default"}
+        />
+      </div>
     </>
   );
 };

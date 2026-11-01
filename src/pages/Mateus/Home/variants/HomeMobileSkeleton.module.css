@@ -26,10 +26,15 @@
   fill: rgba(52, 99, 92, 0.14);
 }
 
-.portrait {
-  fill: rgba(52, 99, 92, 0.14);
-  animation: breathe 1.8s ease-in-out infinite alternate;
-  filter: none;
+/* Foto em baixa qualidade que vai ficando nítida: miniatura bem desfocada,
+   depois a prévia quase nítida; a foto final entra por cima. */
+img.portrait {
+  filter: blur(10px) saturate(1.05);
+  transition: filter 420ms ease;
+}
+
+img.portrait[data-stage="preview"] {
+  filter: blur(2px);
 }
 
 .root nav .text::after,
@@ -43,6 +48,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .text::after,
-  .portrait { animation: none; }
+  .text::after { animation: none; }
+  img.portrait { transition: none; }
 }

@@ -7,7 +7,8 @@ import portrait from "@/assets/Mateus/home/hero-mobile-portrait.webp";
 import CodexIcon from "../components/CodexIcon";
 import useMobileHomeBrandMotion from "../hooks/useMobileHomeBrandMotion";
 import useHomeMobileMotion from "../hooks/useHomeMobileMotion";
-import { RESUME_HREF, WHATSAPP_HREF } from "../data/home.data";
+import { getWhatsAppHref, RESUME_HREFS, resolveContactLanguage } from "../data/home.data";
+import i18n from "@/i18n/i18n";
 import styles from "./HomeMobile.module.css";
 import { HomeMobilePortraitSkeleton } from './HomeMobileSkeleton';
 
@@ -25,8 +26,14 @@ const MOBILE_INTRO_LINES = [
   "impacto.",
 ] as const;
 
+const PORTRAIT_REVEAL_MS = 700;
+
 function HomeMobile() {
   useLabelLanguage();
+  const contactLanguage = resolveContactLanguage(i18n.resolvedLanguage);
+  // Foto progressiva: a final entra por cima da prévia, perdendo o desfoque;
+  // a prévia sai quando a transição termina.
+  const [portraitRevealed, setPortraitRevealed] = useState(false);
   const [portraitLoaded, setPortraitLoaded] = useState(false);
   const pageRef = useRef<HTMLElement>(null);
   const eyebrowRef = useRef<HTMLDivElement>(null);
@@ -50,13 +57,13 @@ function HomeMobile() {
         </div>
 
         <h1 ref={titleRef} id="mobile-home-title" className={styles.title}>
-          <span className={styles.titleLead}>{localizeLabel("Dev")}</span>
-          <span className={styles.titleAccent}>{localizeLabel("Back-End & APIs")}</span>
+          <span className={styles.titleLead}>{localizeLabel("Engenheiro")}</span>
+          <span className={styles.titleAccent}>{localizeLabel("IA & Full Stack")}</span>
         </h1>
 
         <div ref={identityRef} className={styles.identity} data-home-motion="identity">
           <strong>{localizeLabel("Mateus Cabral")}</strong>
-          <span>{localizeLabel("Engenheiro de Software")}</span>
+          <span>{localizeLabel("Engenheiro de IA Sênior")}</span>
         </div>
 
         <p ref={introRef} className={styles.intro}>
@@ -107,22 +114,26 @@ function HomeMobile() {
           alt={localizeLabel("Retrato de Mateus Cardoso Cabral")}
           width={1024}
           height={1536}
+          data-reveal={portraitRevealed ? "done" : "pending"}
           onLoad={(event) => {
             const image = event.currentTarget;
             void image.decode().catch(() => undefined).then(() => {
-              if (image.isConnected) setPortraitLoaded(true);
+              if (!image.isConnected) return;
+              setPortraitRevealed(true);
+              const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+              window.setTimeout(() => setPortraitLoaded(true), reduceMotion ? 0 : PORTRAIT_REVEAL_MS);
             });
           }}
           draggable={false}
         />
 
         <nav className={styles.actions} data-mobile-contact-actions aria-label={localizeLabel("Ações de contato")}>
-          <a href={WHATSAPP_HREF} target="_blank" rel="noreferrer noopener">
+          <a href={getWhatsAppHref(contactLanguage)} target="_blank" rel="noreferrer noopener">
             <FaWhatsapp aria-hidden="true" />
             <span>{localizeLabel("WhatsApp")}</span>
           </a>
           <span className={styles.actionDivider} aria-hidden="true" />
-          <a href={RESUME_HREF} target="_blank" rel="noreferrer noopener">
+          <a href={RESUME_HREFS[contactLanguage]} target="_blank" rel="noreferrer noopener">
             <FaRegFileAlt aria-hidden="true" />
             <span>{localizeLabel("Currículo")}</span>
           </a>
