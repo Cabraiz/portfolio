@@ -1,4 +1,4 @@
-# cabraiz.com: portfólio de Mateus Cardoso Cabral, Engenheiro de Software Full Stack.
+# cabraiz.com: portfólio de Mateus Cabral, Senior AI Engineer.
 # Buscadores e assistentes de IA são bem-vindos (resumo em /llms.txt).
 User-agent: *
 Allow: /

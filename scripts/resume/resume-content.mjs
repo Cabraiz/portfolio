@@ -2,7 +2,7 @@
 // `node scripts/resume/build-resumes.mjs` para gerar os PDFs.
 
 const contact = {
-	name: "Mateus Cardoso Cabral",
+	name: "Mateus Cabral",
 	email: "contact@cabraiz.com",
 	phone: "+55 85 99857-5707",
 	whatsapp: "https://wa.me/5585998575707",

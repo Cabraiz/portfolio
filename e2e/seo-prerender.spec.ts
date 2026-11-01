@@ -26,9 +26,9 @@ const HTML_LANG = { en: "en", pt: "pt-BR", es: "es" } as const;
 const HREFLANG = { en: "en", pt: "pt-BR", es: "es" } as const;
 const TITLE_TEXT = { en: /Senior AI Engineer/, pt: /Senior AI Engineer/, es: /Ingeniero de IA Senior/ } as const;
 const PORTRAIT_ALT = {
-	en: "Portrait of Mateus Cardoso Cabral",
-	pt: "Retrato de Mateus Cardoso Cabral",
-	es: "Retrato de Mateus Cardoso Cabral",
+	en: "Portrait of Mateus Cabral",
+	pt: "Retrato de Mateus Cabral",
+	es: "Retrato de Mateus Cabral",
 } as const;
 
 for (const pageId of ["home", "portfolio"] as const) {
