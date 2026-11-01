@@ -167,9 +167,20 @@ for (const [locale, path] of [
 ] as const) {
 	test(`raiz leva o navegador ${locale} para ${path}`, async ({ browser }) => {
 		const context = await browser.newContext({ locale });
+		// Registra se o aviso de erro global chegou a aparecer, mesmo por um
+		// instante, em qualquer documento aberto durante o redirecionamento.
+		await context.addInitScript(() => {
+			new MutationObserver(() => {
+				if (document.getElementById("global-runtime-fallback")) {
+					sessionStorage.setItem("saw-runtime-fallback", location.pathname);
+				}
+			}).observe(document, { childList: true, subtree: true });
+		});
 		const page = await context.newPage();
 		await page.goto("/");
 		await expect(page).toHaveURL(new RegExp(`${path.replaceAll("/", "\\/")}$`));
+		expect(await page.evaluate(() => sessionStorage.getItem("saw-runtime-fallback"))).toBeNull();
+		await expect(page.locator("#global-runtime-fallback")).toHaveCount(0);
 		await context.close();
 	});
 }
