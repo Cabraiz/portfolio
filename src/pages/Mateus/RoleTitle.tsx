@@ -2,7 +2,7 @@ import { localizeLabel, useLabelLanguage } from '@/i18n/labels';
 import { useEffect, useState } from "react";
 
 const titles = [
-  "Engenheiro de IA",
+  "AI Engineer",
   "Dev Full Stack",
   "LLMs, RAG e Agentes",
   "Back-End e APIs",

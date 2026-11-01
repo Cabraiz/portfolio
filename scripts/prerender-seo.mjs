@@ -190,6 +190,17 @@ function personNode(language) {
 			addressCountry: person.address.country,
 		},
 		knowsAbout: person.knowsAbout,
+		worksFor: { "@type": "Organization", name: person.worksFor.name, url: person.worksFor.url },
+		alumniOf: person.alumniOf.map((school) => ({
+			"@type": "CollegeOrUniversity",
+			name: school.name,
+			url: school.url,
+		})),
+		hasCredential: person.credentials.map((name) => ({
+			"@type": "EducationalOccupationalCredential",
+			name,
+			credentialCategory: "certification",
+		})),
 		sameAs: person.sameAs,
 	};
 }
@@ -437,6 +448,22 @@ ${LANGUAGES.map((code) => `> ${person.description[code]}`).join("\n>\n")}
 
 Site: ${seo.siteUrl} — English at /en/home/ (main version), Português (Brasil) at /home/, Español (Latinoamérica) at /es/home/.
 Location: Fortaleza, Brazil (UTC-3). Works remotely with teams in the Americas and Europe.
+
+## Availability / Disponibilidade / Disponibilidad
+
+${LANGUAGES.map((code) => `- ${person.availability[code]}`).join("\n")}
+
+## Experience highlights
+
+${person.highlights.en.map((item) => `- ${item}`).join("\n")}
+
+## Destaques (português)
+
+${person.highlights.pt.map((item) => `- ${item}`).join("\n")}
+
+## Destacados (español)
+
+${person.highlights.es.map((item) => `- ${item}`).join("\n")}
 
 ## Pages
 

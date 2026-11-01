@@ -3,7 +3,7 @@ import {expect,test} from '@playwright/test';
 for(const language of ['pt','en'])test(`mobile metadata returns after resize ${language}`,async({browser})=>{
  const context=await browser.newContext({viewport:{width:283,height:500},locale:language==='pt'?'pt-BR':'en-US',isMobile:true,hasTouch:true,reducedMotion:'reduce'});
  const page=await context.newPage();
- await page.goto('/portfolio',{waitUntil:'networkidle'});
+ await page.goto(language==='pt'?'/portfolio':'/en/portfolio',{waitUntil:'networkidle'});
  const card=page.locator('[data-mobile-detail-card]');
  for(let index=0;index<5;index++)await card.getByRole('button',{name:language==='pt'?'Próximo projeto':'Next project',exact:true}).click();
  await expect(card.locator('h2')).toHaveText('Wagner Adv');

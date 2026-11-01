@@ -130,6 +130,18 @@
   transform-origin: left center;
 }
 
+/* Disponibilidade (remoto, fuso e forma de contratação) abaixo do cargo. */
+.availability {
+  margin-top: 2px;
+  font-family: "Arial Narrow", "Roboto Condensed", "Brutal", sans-serif;
+  font-size: calc(var(--home-identity-size) * 0.78);
+  font-stretch: condensed;
+  letter-spacing: 0.04em;
+  line-height: 1.25;
+  color: rgba(52, 40, 34, 0.72);
+  white-space: nowrap;
+}
+
 .intro {
   position: relative;
   z-index: 3;

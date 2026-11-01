@@ -37,7 +37,7 @@ function HomeDesktop() {
 	const ambientLightRef = useRef<HTMLDivElement>(null);
 	const kineticFieldRef = useRef<HTMLDivElement>(null);
 	const editorialPhraseRef = useRef<HTMLDivElement>(null);
-	const signatureRef = useRef<HTMLHeadingElement>(null);
+	const signatureRef = useRef<HTMLDivElement>(null);
 	const innerContainerRef = useRef<HTMLDivElement>(null);
 	const contentRailRef = useRef<HTMLDivElement>(null);
 	const heroBackgrounds = useMemo(
@@ -215,6 +215,26 @@ function HomeDesktop() {
 			transformOrigin: "right bottom",
 			whiteSpace: "nowrap",
 			pointerEvents: "none",
+		};
+	}, [isCompactDesktop]);
+
+	const signatureHeadingStyle = useMemo<CSSProperties>(() => {
+		return {
+			display: "flex",
+			flexDirection: "column",
+			alignItems: "flex-start",
+			gap: isCompactDesktop ? "1px" : "2px",
+			margin: 0,
+			font: "inherit",
+			letterSpacing: "inherit",
+		};
+	}, [isCompactDesktop]);
+
+	const availabilityStyle = useMemo<CSSProperties>(() => {
+		return {
+			margin: isCompactDesktop ? "3px 0 0" : "5px 0 0",
+			color: "rgba(255, 255, 255, 0.62)",
+			fontSize: "0.92em",
 		};
 	}, [isCompactDesktop]);
 
@@ -549,16 +569,21 @@ function HomeDesktop() {
 				<span data-home-motion="phrase-line">{localizeLabel("Feitas de código.")}</span>
 			</div>
 			{/* H1 da página: nome e cargo (mesma identidade do título e dos dados
-			    estruturados), com o visual de assinatura de sempre. */}
-			<h1
-				ref={signatureRef}
-				style={signatureStyle}
-				aria-label={localizeLabel("Mateus Cabral, Engenheiro de IA Sênior")}
-			>
-				<strong style={{ fontSize: "1.12em", fontWeight: 700 }}>
-					{localizeLabel("Mateus Cabral")}</strong>
-				<span>{localizeLabel("Engenheiro de IA Sênior")}</span>
-			</h1>
+			    estruturados), com o visual de assinatura de sempre; abaixo, a
+			    disponibilidade no formato que cada mercado procura. */}
+			<div ref={signatureRef} style={signatureStyle}>
+				<h1
+					style={signatureHeadingStyle}
+					aria-label={localizeLabel("Mateus Cabral, Senior AI Engineer")}
+				>
+					<strong style={{ fontSize: "1.12em", fontWeight: 700 }}>
+						{localizeLabel("Mateus Cabral")}</strong>
+					<span>{localizeLabel("Senior AI Engineer")}</span>
+				</h1>
+				<p style={availabilityStyle} data-home-availability="">
+					{localizeLabel("Remoto · CLT ou PJ")}
+				</p>
+			</div>
 
 			<Container fluid className="px-0" style={containerStyle}>
 				<div ref={innerContainerRef} style={innerContainerStyle}>

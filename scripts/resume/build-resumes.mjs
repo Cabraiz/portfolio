@@ -1,5 +1,5 @@
 /**
- * Gera os currículos em inglês e espanhol (public/files/*.pdf) a partir de
+ * Gera os currículos em inglês, português e espanhol (public/files/*.pdf) a partir de
  * resume-content.mjs, num layout de uma coluna legível por ATS (texto real,
  * sem foto, como é o padrão nos EUA). Uso:
  *   node scripts/resume/build-resumes.mjs
@@ -21,6 +21,9 @@ const escapeHtml = (value) =>
 		.replaceAll(">", "&gt;")
 		.replaceAll('"', "&quot;");
 
+// Brasil usa A4; EUA e boa parte da América Latina, Carta.
+const pageFormat = (resume) => (resume.lang === "pt-BR" ? "A4" : "Letter");
+
 function resumeHtml(resume) {
 	const { contact, headings } = resume;
 	const link = (href, text) => `<a href="${escapeHtml(href)}">${escapeHtml(text)}</a>`;
@@ -31,7 +34,7 @@ function resumeHtml(resume) {
 <title>${escapeHtml(contact.name)} — ${escapeHtml(resume.title)}</title>
 <meta name="author" content="${escapeHtml(contact.name)}" />
 <style>
-  @page { size: Letter; margin: 0.55in 0.6in; }
+  @page { size: ${pageFormat(resume)}; margin: 0.55in 0.6in; }
   * { box-sizing: border-box; }
   body { margin: 0; font: 10.2pt/1.42 "Helvetica Neue", Arial, sans-serif; color: #1b1f24; }
   a { color: #0b5c55; text-decoration: none; }
@@ -39,6 +42,7 @@ function resumeHtml(resume) {
   h1 { margin: 0; font-size: 21pt; letter-spacing: 0.01em; }
   .title { margin: 2px 0 6px; font-size: 12pt; font-weight: 700; color: #0b665f; }
   .contact { font-size: 9.3pt; color: #3b434c; }
+  .availability { margin: -3px 0 5px; font-size: 9.3pt; font-weight: 600; color: #3b434c; }
   .contact span + span::before { content: " · "; color: #9aa3ab; }
   h2 { margin: 12px 0 5px; font-size: 10.5pt; text-transform: uppercase; letter-spacing: 0.12em; color: #0b665f; }
   p { margin: 0; }
@@ -59,6 +63,7 @@ function resumeHtml(resume) {
 <header>
   <h1>${escapeHtml(contact.name)}</h1>
   <p class="title">${escapeHtml(resume.title)}</p>
+  <p class="availability">${escapeHtml(resume.availability)}</p>
   <p class="contact">
     <span>${escapeHtml(resume.location)}</span>
     <span>${link(`mailto:${contact.email}`, contact.email)}</span>
@@ -114,7 +119,7 @@ try {
 	for (const resume of Object.values(RESUMES)) {
 		await page.setContent(resumeHtml(resume), { waitUntil: "load" });
 		const output = path.join(projectRoot, "public/files", resume.file);
-		await page.pdf({ path: output, format: "Letter", printBackground: true });
+		await page.pdf({ path: output, format: pageFormat(resume), printBackground: true });
 		console.log(`Currículo gerado: ${path.relative(projectRoot, output)}`);
 	}
 } finally {

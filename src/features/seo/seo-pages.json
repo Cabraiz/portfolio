@@ -8,7 +8,7 @@
     "height": 1024,
     "caption": {
       "en": "Mateus Cardoso Cabral, Senior AI Engineer and full stack developer in Fortaleza, Brazil",
-      "pt": "Mateus Cardoso Cabral, Engenheiro de IA Sênior e desenvolvedor full stack em Fortaleza (CE)",
+      "pt": "Mateus Cardoso Cabral, Senior AI Engineer e desenvolvedor full stack em Fortaleza (CE)",
       "es": "Mateus Cardoso Cabral, Ingeniero de IA Senior y desarrollador full stack en Fortaleza, Brasil"
     }
   },
@@ -18,21 +18,27 @@
     "height": 630,
     "alt": {
       "en": "Photo of Mateus Cardoso Cabral, Senior AI Engineer",
-      "pt": "Foto de Mateus Cardoso Cabral, Engenheiro de IA Sênior",
+      "pt": "Foto de Mateus Cardoso Cabral, Senior AI Engineer",
       "es": "Foto de Mateus Cardoso Cabral, Ingeniero de IA Senior"
     }
   },
   "person": {
     "name": "Mateus Cardoso Cabral",
-    "alternateName": ["Mateus Cabral", "Cabraiz"],
+    "alternateName": [
+      "Mateus Cabral",
+      "Cabraiz"
+    ],
     "givenName": "Mateus",
     "familyName": "Cardoso Cabral",
     "email": "contact@cabraiz.com",
-    "address": { "locality": "Fortaleza", "region": "CE", "country": "BR" },
+    "address": {
+      "locality": "Fortaleza",
+      "region": "CE",
+      "country": "BR"
+    },
     "sameAs": [
       "https://www.linkedin.com/in/cabraiz/",
-      "https://github.com/Cabraiz",
-      "https://www.instagram.com/cabraiz/"
+      "https://github.com/Cabraiz"
     ],
     "knowsAbout": [
       "Applied AI",
@@ -50,16 +56,58 @@
       "REST APIs",
       "CI/CD"
     ],
-    "knowsLanguage": ["pt-BR", "en"],
+    "knowsLanguage": [
+      "pt-BR",
+      "en"
+    ],
     "jobTitle": {
       "en": "Senior AI Engineer",
-      "pt": "Engenheiro de IA Sênior",
+      "pt": "Senior AI Engineer",
       "es": "Ingeniero de IA Senior"
     },
     "description": {
       "en": "Mateus Cardoso Cabral is a Senior AI Engineer and full stack developer with 13 years of experience, based in Fortaleza, Brazil (UTC-3) and working remotely. He builds LLM, RAG and multi-agent features on top of React, TypeScript, Node.js, Java/Spring Boot and AWS, and has worked for SkipTheDishes (Canada), Qualicorp and Banco do Nordeste.",
-      "pt": "Mateus Cardoso Cabral é Engenheiro de IA Sênior e desenvolvedor full stack com 13 anos de experiência, em Fortaleza (CE) e trabalhando remoto. Cria soluções com LLMs, RAG e sistemas multiagente sobre React, TypeScript, Node.js, Java/Spring Boot e AWS, com passagens pela SkipTheDishes (Canadá), Qualicorp e Banco do Nordeste.",
+      "pt": "Mateus Cardoso Cabral é Senior AI Engineer e desenvolvedor full stack com 13 anos de experiência, em Fortaleza (CE) e trabalhando remoto. Cria soluções com LLMs, RAG e sistemas multiagente sobre React, TypeScript, Node.js, Java/Spring Boot e AWS, com passagens pela SkipTheDishes (Canadá), Qualicorp e Banco do Nordeste.",
       "es": "Mateus Cardoso Cabral es Ingeniero de IA Senior y desarrollador full stack con 13 años de experiencia, en Fortaleza, Brasil (UTC-3), trabajando en remoto. Construye soluciones con LLMs, RAG y sistemas multiagente sobre React, TypeScript, Node.js, Java/Spring Boot y AWS, y ha trabajado para SkipTheDishes (Canadá), Qualicorp y Banco do Nordeste."
+    },
+    "availability": {
+      "en": "Open to remote roles from Fortaleza, Brazil (UTC-3): full-time via EOR (Deel, Remote) or as a contractor (B2B).",
+      "pt": "Disponível para trabalho remoto a partir de Fortaleza (CE): CLT ou PJ.",
+      "es": "Disponible para trabajo remoto desde Fortaleza, Brasil (UTC-3): contrato internacional (Deel/EOR) o contractor, con pagos en USD."
+    },
+    "worksFor": {
+      "name": "Qualicorp",
+      "url": "https://www.qualicorp.com.br/"
+    },
+    "alumniOf": [
+      {
+        "name": "Universidade de Fortaleza (UNIFOR)",
+        "url": "https://www.unifor.br/"
+      }
+    ],
+    "credentials": [
+      "AWS Certified Cloud Practitioner",
+      "Claude Certified Associate"
+    ],
+    "highlights": {
+      "en": [
+        "Qualicorp (2025–present): AI solutions with LLM/agent orchestration, RAG and an AI coding harness enabled 3–4 parallel workstreams and up to 4x more weekly deliveries for the squad.",
+        "SkipTheDishes, Canada (2021–2025, remote): new React Native module and critical features cut main-flow navigation time by 31%, initial load by 38% and abandonment by 11%.",
+        "SkipTheDishes: AI-assisted service migration reduced operational effort by 36% and sped up technical modernization by 28%.",
+        "Banco do Nordeste (2017–2021): modernized bank slip, credit card and transfer flows and a GraphQL BFF over the legacy core banking system."
+      ],
+      "pt": [
+        "Qualicorp (2025–atual): soluções de IA com orquestração de agentes/LLMs, RAG e AI coding harness permitiram 3–4 frentes em paralelo e até 4x mais entregas semanais na squad.",
+        "SkipTheDishes, Canadá (2021–2025, remoto): novo módulo React Native e funcionalidades críticas reduziram em 31% o tempo de navegação do fluxo principal, 38% o carregamento inicial e 11% o abandono.",
+        "SkipTheDishes: migração de serviços com automação de IA reduziu em 36% o esforço operacional e acelerou em 28% a modernização técnica.",
+        "Banco do Nordeste (2017–2021): modernização de boletos, cartões e transferências e de uma camada BFF GraphQL sobre o core bancário legado."
+      ],
+      "es": [
+        "Qualicorp (2025–actual): soluciones de IA con orquestación de agentes/LLMs, RAG y AI coding harness permitieron 3–4 frentes en paralelo y hasta 4x más entregas semanales del equipo.",
+        "SkipTheDishes, Canadá (2021–2025, remoto): nuevo módulo React Native y funcionalidades críticas redujeron 31% el tiempo de navegación del flujo principal, 38% la carga inicial y 11% el abandono.",
+        "SkipTheDishes: migración de servicios con automatización de IA redujo 36% el esfuerzo operativo y aceleró 28% la modernización técnica.",
+        "Banco do Nordeste (2017–2021): modernización de boletos, tarjetas y transferencias, y de una capa BFF GraphQL sobre el core bancario legado."
+      ]
     }
   },
   "hiddenTabTitle": {
@@ -76,8 +124,8 @@
       },
       "pt": {
         "path": "/home/",
-        "title": "Mateus Cardoso Cabral | Engenheiro de IA Sênior & Full Stack",
-        "description": "Engenheiro de IA Sênior e desenvolvedor full stack com 13 anos de experiência: LLMs, RAG e sistemas multiagente em produção, React, Node.js, Java e AWS. Em Fortaleza (CE), disponível para trabalho remoto."
+        "title": "Mateus Cardoso Cabral | Senior AI Engineer & Full Stack",
+        "description": "Senior AI Engineer e desenvolvedor full stack com 13 anos de experiência: LLMs, RAG e sistemas multiagente em produção, React, Node.js, Java e AWS. Em Fortaleza (CE), disponível para trabalho remoto."
       },
       "es": {
         "path": "/es/home/",
@@ -94,7 +142,7 @@
       "pt": {
         "path": "/portfolio/",
         "title": "Portfólio de projetos de IA e software | Mateus Cardoso Cabral",
-        "description": "Portfólio de Mateus Cardoso Cabral, Engenheiro de IA Sênior: 7 projetos de software, entre ERP comercial, app bancário, e-commerce internacional, agenda para barbearias e sites, no Brasil, México, EUA, Guiné-Bissau e Portugal."
+        "description": "Portfólio de Mateus Cardoso Cabral, Senior AI Engineer: 7 projetos de software, entre ERP comercial, app bancário, e-commerce internacional, agenda para barbearias e sites, no Brasil, México, EUA, Guiné-Bissau e Portugal."
       },
       "es": {
         "path": "/es/portfolio/",

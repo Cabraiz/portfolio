@@ -24,7 +24,7 @@ const decode = (value: string | undefined) => (value ?? "").replace(/&amp;/g, "&
 const LANGUAGES = ["en", "pt", "es"] as const;
 const HTML_LANG = { en: "en", pt: "pt-BR", es: "es" } as const;
 const HREFLANG = { en: "en", pt: "pt-BR", es: "es" } as const;
-const TITLE_TEXT = { en: /Senior AI Engineer/, pt: /Engenheiro de IA Sênior/, es: /Ingeniero de IA Senior/ } as const;
+const TITLE_TEXT = { en: /Senior AI Engineer/, pt: /Senior AI Engineer/, es: /Ingeniero de IA Senior/ } as const;
 const PORTRAIT_ALT = {
 	en: "Portrait of Mateus Cardoso Cabral",
 	pt: "Retrato de Mateus Cardoso Cabral",

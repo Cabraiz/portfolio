@@ -19,7 +19,7 @@ for (const viewport of viewports) for (const language of ['pt','en']) {
     test.setTimeout(90_000);
     const context=await browser.newContext({viewport,locale:language==='pt'?'pt-BR':'en-US',isMobile:true,hasTouch:true,reducedMotion:'reduce'});
     const page=await context.newPage();
-    await page.goto('/portfolio',{waitUntil:'networkidle'});
+    await page.goto(language==='pt'?'/portfolio':'/en/portfolio',{waitUntil:'networkidle'});
     const card=page.locator('[data-mobile-detail-card]');
     for (const project of projects) {
       if(project.id!=='erp-varejo')await card.getByRole('button',{name:language==='pt'?'Próximo projeto':'Next project',exact:true}).click();
