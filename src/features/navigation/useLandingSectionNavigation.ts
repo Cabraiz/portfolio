@@ -12,6 +12,7 @@ import {
   DEFAULT_LANDING_SECTION_ID,
   LANDING_SECTIONS,
   getPathBySectionId,
+  getSectionIdByPath,
   isLandingPath,
   normalizeLandingSectionId,
   type LandingSectionId,
@@ -241,16 +242,8 @@ function resolveRouteSectionIdFromPathname(params: Readonly<{
     return fallbackSectionId;
   }
 
-  const nextSectionId =
-    normalizeLandingSectionId(
-      pathname
-        ? pathname
-            .split("?")[0]
-            ?.split("#")[0]
-            ?.replace(/^\/+/, "")
-            ?.replace(/\/+$/, "")
-        : null,
-    ) ?? null;
+  // getSectionIdByPath desconta o prefixo de idioma (/en, /es).
+  const nextSectionId = getSectionIdByPath(pathname);
 
   if (nextSectionId && eligibleSectionIds.includes(nextSectionId)) {
     return nextSectionId;

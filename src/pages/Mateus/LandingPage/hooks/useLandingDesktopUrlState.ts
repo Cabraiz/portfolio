@@ -101,6 +101,10 @@ function resolveSectionIdFromPathname(params: Readonly<{
   return nextSectionId;
 }
 
+function withoutTrailingSlash(pathname: string): string {
+  return pathname.length > 1 ? pathname.replace(/\/+$/, "") : pathname;
+}
+
 export default function useLandingDesktopUrlState({
   defaultSectionId = DEFAULT_LANDING_SECTION_ID,
   urlSyncEligibleSectionIds,
@@ -205,8 +209,10 @@ export default function useLandingDesktopUrlState({
       const currentPath = browserWindow.location.pathname;
       const previousSectionId = routeSectionIdRef.current;
 
+      // /en/portfolio/ e /en/portfolio são o mesmo endereço (a versão com
+      // barra é a canônica, servida pelo HTML pré-renderizado).
       if (
-        currentPath !== nextPath &&
+        withoutTrailingSlash(currentPath) !== withoutTrailingSlash(nextPath) &&
         lastKnownPathRef.current !== nextPath
       ) {
         browserWindow.history.replaceState(
