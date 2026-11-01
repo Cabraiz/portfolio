@@ -5,7 +5,7 @@ import { ReactLenis } from "lenis/react";
 
 import AppRoutes from "../routes/AppRoutes";
 import AppNavbar from "./NavBar/AppNavbar";
-import TitleWebsite from "../pages/PrincipalPage/TitleWebsite/title_website";
+import useLandingSeoHead from "../features/seo/useLandingSeoHead";
 import FloatingButtons from "./FloatingButtons";
 import { useSectionVisibility } from "../hooks/useSectionVisibility";
 import { getLenisScrollSettings } from "../features/scroll/getLenisScrollSettings";
@@ -136,6 +136,8 @@ export default function AppDesktop() {
     routeSectionId,
   ]);
 
+  useLandingSeoHead(resolvedActiveSectionId === "portfolio" ? "portfolio" : "home");
+
   const handleNavigateToSection = useCallback(
     (sectionId: LandingSectionId) => {
       navigateToSection(sectionId, {
@@ -207,10 +209,6 @@ export default function AppDesktop() {
           ),
       }}
     >
-      <TitleWebsite
-        title1="Mateus Cardoso Cabral | Investidor em IA"
-        title2="Cabraiz | IA, Tecnologia e Software"
-      />
 
       {!isNavHidden && (
         <AppNavbar

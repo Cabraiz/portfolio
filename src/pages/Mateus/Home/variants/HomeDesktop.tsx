@@ -31,7 +31,7 @@ function HomeDesktop() {
 	const ambientLightRef = useRef<HTMLDivElement>(null);
 	const kineticFieldRef = useRef<HTMLDivElement>(null);
 	const editorialPhraseRef = useRef<HTMLDivElement>(null);
-	const signatureRef = useRef<HTMLDivElement>(null);
+	const signatureRef = useRef<HTMLHeadingElement>(null);
 	const innerContainerRef = useRef<HTMLDivElement>(null);
 	const contentRailRef = useRef<HTMLDivElement>(null);
 	const heroBackgrounds = useMemo(
@@ -180,6 +180,7 @@ function HomeDesktop() {
 			textAlign: "left",
 			textTransform: "uppercase",
 			textShadow: "0 2px 10px rgba(0, 0, 0, 0.72)",
+			margin: 0,
 			transform: "scaleX(0.78) scaleY(1.12)",
 			transformOrigin: "right bottom",
 			whiteSpace: "nowrap",
@@ -494,7 +495,9 @@ function HomeDesktop() {
 				<span data-home-motion="phrase-line">{localizeLabel("Também são")}</span>
 				<span data-home-motion="phrase-line">{localizeLabel("Feitas de código.")}</span>
 			</div>
-			<div
+			{/* H1 da página: nome e cargo (mesma identidade do título e dos dados
+			    estruturados), com o visual de assinatura de sempre. */}
+			<h1
 				ref={signatureRef}
 				style={signatureStyle}
 				aria-label={localizeLabel("Mateus Cabral, Engenheiro de Software")}
@@ -502,7 +505,7 @@ function HomeDesktop() {
 				<strong style={{ fontSize: "1.12em", fontWeight: 700 }}>
 					{localizeLabel("Mateus Cabral")}</strong>
 				<span>{localizeLabel("Engenheiro de Software")}</span>
-			</div>
+			</h1>
 
 			<Container fluid className="px-0" style={containerStyle}>
 				<div ref={innerContainerRef} style={innerContainerStyle}>
