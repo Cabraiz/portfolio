@@ -294,7 +294,13 @@ const MainApp: React.FC = () => {
 
 const rootElement = globalThis.document.getElementById("root");
 
-if (rootElement && !redirectRootToLanguage()) {
+// Na raiz (cabraiz.com/) a página vai para o idioma certo; nada é montado
+// enquanto o navegador troca de endereço.
+const isRedirectingToLanguage = redirectRootToLanguage();
+
+if (isRedirectingToLanguage) {
+  // Sem montar nem mostrar erro: o navegador já está carregando /…/home/.
+} else if (rootElement) {
   try {
     ReactDOM.createRoot(rootElement).render(<MainApp />);
   } catch (error) {
