@@ -321,10 +321,19 @@ test("shrinks the chat toward its trigger before removing it", async ({
 
 	await page.getByRole("button", { name: /Fechar|Close/, exact: true }).click();
 	await expect(panel).toBeAttached();
-	await page.waitForTimeout(220);
-	const during = await panel.boundingBox();
+	// Acompanha o fechamento em vez de medir num instante fixo: com a máquina
+	// carregada a animação pode começar alguns quadros depois.
+	let during: Awaited<ReturnType<typeof panel.boundingBox>> = null;
+	await expect
+		.poll(
+			async () => {
+				during = await panel.boundingBox().catch(() => null);
+				return during ? during.width : before!.width;
+			},
+			{ timeout: 1000, intervals: [16] }
+		)
+		.toBeLessThan(before!.width * 0.92);
 	expect(during).not.toBeNull();
-	expect(during!.width).toBeLessThan(before!.width * 0.92);
 	expect(during!.height).toBeLessThan(before!.height * 0.98);
 	expect(during!.x).toBeGreaterThan(before!.x);
 	expect(during!.y).toBeGreaterThan(before!.y);
