@@ -15,6 +15,13 @@ type MotionRefs = {
 };
 const REST_X = -24;
 const CONTACT_GAP = 8;
+// A barra de contato abre espaço para o logo ao longo destes px de descida
+// dele (e volta ao longo dos mesmos px depois que ele passa). Com poucos px
+// ela andava 40–60px num único quadro, como um salto.
+const ACTION_RAMP = 192;
+// A barra persegue a posição-alvo com uma pequena inércia, para não acompanhar
+// cada tranco da rolagem; a rampa começa cedo o bastante para cobrir o atraso.
+const ACTION_SMOOTHING_S = 0.24;
 
 export default function useMobileHomeBrandMotion({
   pageRef, eyebrowRef, titleRef, identityRef, introRef, partnersRef,
@@ -50,10 +57,16 @@ export default function useMobileHomeBrandMotion({
       actionsLeft: 0 };
     let logoY = 0;
     let actionPush = 0;
+    const actionState = { push: 0, contact: 0 };
+    const actionTarget = { push: 0, contact: 0 };
+    // Espaço mínimo enquanto o logo está na altura da barra: numa rolagem
+    // rápida a inércia não pode deixar a barra por baixo dele.
+    let actionFloor = 0;
     let refreshFrame: number | null = null;
     let disposed = false;
     const ease = gsap.parseEase("power2.out");
     const releaseEase = gsap.parseEase("power2.inOut");
+    const actionEase = gsap.parseEase("sine.inOut");
     const clamp = (value: number) => Math.max(0, Math.min(1, value));
     const measureLayout = () => {
       const scroll = window.scrollY;
@@ -93,6 +106,17 @@ export default function useMobileHomeBrandMotion({
       gsap.set(rows.map(row => row.element), { autoAlpha: 1, willChange: "transform", force3D: true });
       gsap.set(titleRef.current, { transformOrigin: "left center" });
       const setLogoY = gsap.quickSetter(logo, "y", "px");
+      const applyActions = () => {
+        const push = Math.max(actionState.push, actionFloor);
+        const contactValue = actionFloor > 0 ? Math.max(actionState.contact, 1) : actionState.contact;
+        actionPush = push;
+        actions.style.setProperty("--mobile-brand-push", `${push.toFixed(2)}px`);
+        actions.style.setProperty("--mobile-brand-contact", Math.min(1, contactValue).toFixed(3));
+      };
+      const pushTo = gsap.quickTo(actionState, "push", {
+        duration: ACTION_SMOOTHING_S, ease: "power2.out", onUpdate: applyActions });
+      const contactTo = gsap.quickTo(actionState, "contact", {
+        duration: ACTION_SMOOTHING_S, ease: "power2.out", onUpdate: applyActions });
       measureLayout();
       const update = (progress: number) => {
         const scroll = window.scrollY;
@@ -132,13 +156,20 @@ export default function useMobileHomeBrandMotion({
           row.x = distance * gain;
           row.setter(row.x);
         });
-        // Finish reserving space before the brand crosses the red container's edge.
-        const contact = clamp((bottom + CONTACT_GAP - (layout.actionsTop - scroll)) / CONTACT_GAP);
-        const release = clamp((top - (layout.actionsBottom - scroll) - CONTACT_GAP) / 24);
-        const gain = ease(contact) * (1 - releaseEase(release));
-        actionPush = Math.max(0, right + CONTACT_GAP - layout.actionsLeft) * gain;
-        actions.style.setProperty("--mobile-brand-push", `${actionPush.toFixed(2)}px`);
-        actions.style.setProperty("--mobile-brand-contact", gain.toFixed(3));
+        // Starts ACTION_RAMP px early and finishes reserving space before the
+        // brand crosses the red container's edge.
+        const contact = clamp((bottom + CONTACT_GAP + ACTION_RAMP - (layout.actionsTop - scroll)) / ACTION_RAMP);
+        const release = clamp((top - (layout.actionsBottom - scroll) - CONTACT_GAP) / ACTION_RAMP);
+        const gain = actionEase(contact) * (1 - actionEase(release));
+        const fullPush = Math.max(0, right + CONTACT_GAP - layout.actionsLeft);
+        const besideBar = bottom + CONTACT_GAP > layout.actionsTop - scroll &&
+          top < layout.actionsBottom - scroll + CONTACT_GAP;
+        actionFloor = besideBar ? fullPush : 0;
+        actionTarget.push = fullPush * gain;
+        actionTarget.contact = gain;
+        pushTo(actionTarget.push);
+        contactTo(actionTarget.contact);
+        applyActions();
       };
       ScrollTrigger.create({ trigger: page, start: () => layout.start, end: () => layout.end,
         onRefreshInit: measureLayout, onRefresh: self => update(self.progress),
