@@ -8,6 +8,7 @@ import {
 	type LandingSectionId,
 } from "../../../features/navigation/landingSections";
 import BrandButton from "./BrandButton";
+import LanguageSwitcher from "./LanguageSwitcher";
 import MobileMenuToggleButton from "./MobileMenuToggleButton";
 import MobileNavItemButton from "./MobileNavItemButton";
 
@@ -153,6 +154,7 @@ const MobileNavbar: React.FC<MobileNavbarProps> = ({
 								onClick={() => handleNavigate(section.id)}
 							/>
 						))}
+						<LanguageSwitcher style={{ alignSelf: "center", marginTop: "6px" }} />
 					</nav>
 
 					<button

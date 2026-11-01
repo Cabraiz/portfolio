@@ -20,7 +20,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "lenis/dist/lenis.css";
 import "./index.css";
 import "./i18n/i18n";
-import { redirectFirstEnglishVisit } from "./i18n/languageRedirect";
+import { redirectRootToLanguage } from "./i18n/languageRedirect";
 
 const GLOBAL_RUNTIME_FALLBACK_ID = "global-runtime-fallback";
 
@@ -294,7 +294,7 @@ const MainApp: React.FC = () => {
 
 const rootElement = globalThis.document.getElementById("root");
 
-if (rootElement && !redirectFirstEnglishVisit()) {
+if (rootElement && !redirectRootToLanguage()) {
   try {
     ReactDOM.createRoot(rootElement).render(<MainApp />);
   } catch (error) {

@@ -1,3 +1,4 @@
+import { localizeLabel, useLabelLanguage } from "@/i18n/labels";
 import React, { useMemo, type CSSProperties } from "react";
 
 import {
@@ -80,6 +81,7 @@ const FloatingButtons: React.FC<FloatingButtonsProps> = ({
   onNavigateToSection,
   items,
 }) => {
+  useLabelLanguage();
   const resolvedItems = useMemo(() => {
     const ids = items?.length ? items : getLandingOrderedSectionIds();
 
@@ -92,7 +94,8 @@ const FloatingButtons: React.FC<FloatingButtonsProps> = ({
 
   return (
     <aside
-      aria-label="Navegação lateral por seções"
+      aria-label={localizeLabel("Navegação lateral por seções")}
+      data-section-dots=""
       style={
         activeSectionId === "portfolio"
           ? {
@@ -113,9 +116,9 @@ const FloatingButtons: React.FC<FloatingButtonsProps> = ({
           <button
             key={section.id}
             type="button"
-            aria-label={section.label}
+            aria-label={localizeLabel(section.label)}
             aria-current={isActive ? "page" : undefined}
-            title={section.label}
+            title={localizeLabel(section.label)}
             disabled={disabled}
             onClick={disabled ? undefined : () => onNavigateToSection(section.id)}
             style={{

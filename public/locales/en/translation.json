@@ -14,8 +14,8 @@
     "contact": "Photos"
   },
   "buttons": {
-    "hireMe": "Google Meet",
-    "downloadCV": "DOWNLOAD RÉSUMÉ"
+    "hireMe": "Email",
+    "downloadCV": "RÉSUMÉ"
   },
   "floatingChat": {
     "phrases": [
@@ -508,6 +508,19 @@
     "ui_7dafb472b353": "Loading portfolio",
     "ui_e6224d9d2bc8": "IT WASN'T",
     "ui_8171ad561c51": "{{label}}: {{percent}}%",
-    "ui_df2ce508d81e": "WAITING"
+    "ui_df2ce508d81e": "WAITING",
+    "ui_9e2c8e15bbc2": "Senior AI Engineer",
+    "ui_f68700c0fb7c": "Mateus Cabral, Senior AI Engineer",
+    "ui_e201422f9689": "AI Engineer",
+    "ui_60ddc2f8bc04": "LLMs, RAG & Agents",
+    "ui_0d123686620e": "Senior",
+    "ui_f255a1926dc4": "Engineer",
+    "ui_2c69b92312ee": "AI & Full Stack",
+    "ui_101d3a89e717": "LET'S TALK",
+    "ui_58c6359f0aaa": "Open meeting link",
+    "ui_04515fc99cbd": "EMAIL",
+    "ui_aa3ce70443cd": "Email Mateus",
+    "ui_7ae9d418353b": "Language",
+    "ui_f51969d5f42a": "Section side navigation"
   }
 }

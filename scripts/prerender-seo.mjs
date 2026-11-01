@@ -5,9 +5,10 @@
  * executam JavaScript (GPTBot, ClaudeBot, PerplexityBot...) não leem nada.
  * Depois do build (e de prepare-github-pages), este script abre cada página
  * num Chromium, captura o conteúdo renderizado e grava em dist/:
- * - /home/, /portfolio/, /en/home/, /en/portfolio/ (e / e /en/) com título,
- *   descrição, canonical, hreflang, Open Graph e JSON-LD próprios, e o
- *   conteúdo real dentro de #root (escondido até o React montar);
+ * - Início e Portfólio em inglês (/en/, idioma principal e x-default),
+ *   português (/home/, /portfolio/) e espanhol (/es/), mais / , /en/ e /es/,
+ *   com título, descrição, canonical, hreflang, Open Graph e JSON-LD
+ *   próprios, e o conteúdo real dentro de #root (escondido até o React montar);
  * - páginas estáticas de redirecionamento para as rotas que saíram do site;
  * - sitemap.xml com as versões de idioma e llms.txt com o resumo do site.
  * Os textos de SEO vêm de src/features/seo/seo-pages.json (o mesmo arquivo
@@ -31,12 +32,17 @@ if (shellHtml.includes('data-prerendered="true"')) {
 	throw new Error("dist já foi pré-renderizado: rode o build (vite build) de novo antes.");
 }
 const buildDate = new Date().toISOString().slice(0, 10);
-const LANGUAGES = ["pt", "en"];
+// Inglês primeiro: é o idioma principal (x-default e raiz do site).
+const LANGUAGES = ["en", "pt", "es"];
+const DEFAULT_LANGUAGE = seo.defaultLanguage;
 const PAGE_IDS = ["home", "portfolio"];
-const HTML_LANG = { pt: "pt-BR", en: "en" };
-const OG_LOCALE = { pt: "pt_BR", en: "en_US" };
+const HTML_LANG = { en: "en", pt: "pt-BR", es: "es" };
+const OG_LOCALE = { en: "en_US", pt: "pt_BR", es: "es_LA" };
+// Valores aceitos pelo Google (es-419 não é aceito).
+const HREFLANG = { en: "en", pt: "pt-BR", es: "es" };
+const BROWSER_LOCALE = { en: "en-US", pt: "pt-BR", es: "es-MX" };
+const LANGUAGE_NAMES = { en: "English", pt: "Português (Brasil)", es: "Español (Latinoamérica)" };
 const WHATSAPP_URL = "https://wa.me/5585998575707";
-const RESUME_PATH = "/files/mateus-cabral-resume.pdf";
 // Card do projeto no desktop (o do celular é outro elemento, escondido aqui).
 const DESKTOP_CARD = "[data-portfolio-root] article[class*='_detailCard_']";
 
@@ -94,7 +100,7 @@ async function startStaticServer() {
 async function openPage(browser, baseUrl, pathname, language) {
 	const context = await browser.newContext({
 		viewport: { width: 1366, height: 768 },
-		locale: language === "en" ? "en-US" : "pt-BR",
+		locale: BROWSER_LOCALE[language],
 		reducedMotion: "reduce",
 	});
 	const page = await context.newPage();
@@ -175,6 +181,7 @@ function personNode(language) {
 		description: person.description[language],
 		url: absolute(seo.pages.home[language].path),
 		image: { "@id": `${seo.siteUrl}/#portrait` },
+		knowsLanguage: person.knowsLanguage,
 		email: `mailto:${person.email}`,
 		address: {
 			"@type": "PostalAddress",
@@ -216,10 +223,10 @@ function structuredData(pageId, language, projects) {
 		{
 			"@type": "WebSite",
 			"@id": `${seo.siteUrl}/#website`,
-			url: absolute(seo.pages.home.pt.path),
+			url: `${seo.siteUrl}/`,
 			name: seo.siteName,
 			alternateName: `${seo.person.name} — ${seo.person.jobTitle[language]}`,
-			inLanguage: ["pt-BR", "en"],
+			inLanguage: LANGUAGES.map((code) => HTML_LANG[code]),
 			publisher: { "@id": `${seo.siteUrl}/#person` },
 		},
 		personNode(language),
@@ -281,10 +288,20 @@ function structuredData(pageId, language, projects) {
 	);
 }
 
+/** hreflang de todas as versões, mais x-default (inglês). */
+function alternateLinks(pageId, prefix) {
+	const pages = seo.pages[pageId];
+	return [
+		...LANGUAGES.map(
+			(code) => `${prefix} rel="alternate" hreflang="${HREFLANG[code]}" href="${absolute(pages[code].path)}" />`
+		),
+		`${prefix} rel="alternate" hreflang="x-default" href="${absolute(pages[DEFAULT_LANGUAGE].path)}" />`,
+	].join("\n");
+}
+
 function headBlock(pageId, language, projects, preloads) {
 	const page = seo.pages[pageId][language];
 	const url = absolute(page.path);
-	const other = language === "pt" ? "en" : "pt";
 	const title = escapeHtml(page.title);
 	const description = escapeHtml(page.description);
 	const share = seo.shareImage;
@@ -295,14 +312,15 @@ function headBlock(pageId, language, projects, preloads) {
     <title>${title}</title>
     <meta name="description" content="${description}" />
     <link rel="canonical" href="${url}" />
-    <link rel="alternate" hreflang="pt-BR" href="${absolute(seo.pages[pageId].pt.path)}" />
-    <link rel="alternate" hreflang="en" href="${absolute(seo.pages[pageId].en.path)}" />
-    <link rel="alternate" hreflang="x-default" href="${absolute(seo.pages[pageId].pt.path)}" />
+${alternateLinks(pageId, "    <link")}
+    <meta http-equiv="content-language" content="${HTML_LANG[language]}" />
     <link rel="alternate" type="text/plain" href="${seo.siteUrl}/llms.txt" title="llms.txt" />
     <meta property="og:type" content="${pageId === "home" ? "profile" : "website"}" />
     <meta property="og:site_name" content="${escapeHtml(seo.siteName)}" />
     <meta property="og:locale" content="${OG_LOCALE[language]}" />
-    <meta property="og:locale:alternate" content="${OG_LOCALE[other]}" />
+${LANGUAGES.filter((code) => code !== language)
+	.map((code) => `    <meta property="og:locale:alternate" content="${OG_LOCALE[code]}" />`)
+	.join("\n")}
     <meta property="og:url" content="${url}" />
     <meta property="og:title" content="${title}" />
     <meta property="og:description" content="${description}" />
@@ -372,9 +390,7 @@ function sitemapXml() {
 			(language) => `  <url>
     <loc>${absolute(seo.pages[pageId][language].path)}</loc>
     <lastmod>${buildDate}</lastmod>
-    <xhtml:link rel="alternate" hreflang="pt-BR" href="${absolute(seo.pages[pageId].pt.path)}" />
-    <xhtml:link rel="alternate" hreflang="en" href="${absolute(seo.pages[pageId].en.path)}" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="${absolute(seo.pages[pageId].pt.path)}" />${
+${alternateLinks(pageId, "    <xhtml:link")}${
 				pageId === "home"
 					? `
     <image:image><image:loc>${seo.portrait.url}</image:loc></image:image>
@@ -384,16 +400,24 @@ function sitemapXml() {
   </url>`
 		)
 	);
-	entries.push(`  <url>
-    <loc>${absolute(RESUME_PATH)}</loc>
+	for (const language of LANGUAGES) {
+		entries.push(`  <url>
+    <loc>${absolute(seo.resume[language])}</loc>
     <lastmod>${buildDate}</lastmod>
   </url>`);
+	}
 	return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
 ${entries.join("\n")}
 </urlset>
 `;
 }
+
+const LLMS_HEADINGS = {
+	en: { location: "Location", technologies: "Technologies", projects: "Projects (English)" },
+	pt: { location: "Local", technologies: "Tecnologias", projects: "Projetos (português)" },
+	es: { location: "Ubicación", technologies: "Tecnologías", projects: "Proyectos (español)" },
+};
 
 function llmsTxt(projectsByLanguage) {
 	const { person } = seo;
@@ -402,48 +426,45 @@ function llmsTxt(projectsByLanguage) {
 			.map(
 				(project) =>
 					`### ${project.name} — ${project.category} (${project.year})\n` +
-					`${language === "pt" ? "Local" : "Location"}: ${project.place}, ${project.country}\n` +
+					`${LLMS_HEADINGS[language].location}: ${project.place}, ${project.country}\n` +
 					`${project.description}\n` +
-					`${language === "pt" ? "Tecnologias" : "Technologies"}: ${project.technologies.join(", ")}\n`
+					`${LLMS_HEADINGS[language].technologies}: ${project.technologies.join(", ")}\n`
 			)
 			.join("\n");
-	return `# ${person.name} — ${person.jobTitle.pt} / ${person.jobTitle.en}
+	return `# ${person.name} — ${LANGUAGES.map((code) => person.jobTitle[code]).join(" / ")}
 
-> ${person.description.pt}
->
-> ${person.description.en}
+${LANGUAGES.map((code) => `> ${person.description[code]}`).join("\n>\n")}
 
-Site: ${seo.siteUrl} (português em /home/, inglês em /en/home/).
+Site: ${seo.siteUrl} — English at /en/home/ (main version), Português (Brasil) at /home/, Español (Latinoamérica) at /es/home/.
+Location: Fortaleza, Brazil (UTC-3). Works remotely with teams in the Americas and Europe.
 
-## Páginas / Pages
+## Pages
 
-- [Início](${absolute(seo.pages.home.pt.path)}): ${seo.pages.home.pt.description}
-- [Portfólio](${absolute(seo.pages.portfolio.pt.path)}): ${seo.pages.portfolio.pt.description}
-- [Home (English)](${absolute(seo.pages.home.en.path)}): ${seo.pages.home.en.description}
-- [Portfolio (English)](${absolute(seo.pages.portfolio.en.path)}): ${seo.pages.portfolio.en.description}
-- [Currículo / Résumé (PDF)](${absolute(RESUME_PATH)})
+${LANGUAGES.flatMap((code) => [
+	`- [${LANGUAGE_NAMES[code]} — Home](${absolute(seo.pages.home[code].path)}): ${seo.pages.home[code].description}`,
+	`- [${LANGUAGE_NAMES[code]} — Portfolio](${absolute(seo.pages.portfolio[code].path)}): ${seo.pages.portfolio[code].description}`,
+]).join("\n")}
 
-## Foto / Photo
+## Résumé / Currículo / Currículum (PDF)
 
-- [Foto oficial de ${person.name} / Official photo](${seo.portrait.url}): ${seo.portrait.caption.pt}
-- [Foto horizontal / Wide photo](${seo.shareImage.url})
+${LANGUAGES.map((code) => `- [${LANGUAGE_NAMES[code]}](${absolute(seo.resume[code])})`).join("\n")}
 
-## Contato / Contact
+## Photo / Foto
 
-- E-mail: ${person.email}
+- [Official photo of ${person.name}](${seo.portrait.url}): ${seo.portrait.caption.en}
+- [Wide photo](${seo.shareImage.url})
+
+## Contact
+
+- Email: ${person.email}
 - WhatsApp: ${WHATSAPP_URL}
 ${person.sameAs.map((url) => `- ${url}`).join("\n")}
 
-## Áreas / Expertise
+## Expertise
 
 ${person.knowsAbout.map((item) => `- ${item}`).join("\n")}
 
-## Projetos (português)
-
-${projectLines("pt")}
-## Projects (English)
-
-${projectLines("en")}`;
+${LANGUAGES.map((code) => `## ${LLMS_HEADINGS[code].projects}\n\n${projectLines(code)}`).join("\n")}`;
 }
 
 async function findAsset(prefix) {
@@ -499,9 +520,14 @@ try {
 			const html = renderPage(pageId, language, capture.html, projects, preloads);
 			const pagePath = seo.pages[pageId][language].path;
 			await writeDist(path.join(pagePath, "index.html"), html);
-			// / e /en/ entregam o Início (canonical aponta para /home/ e /en/home/).
-			if (pageId === "home") {
-				await writeDist(language === "pt" ? "index.html" : "en/index.html", html);
+			// /en/ e /es/ entregam o Início do idioma; a raiz / entrega o inglês
+			// (x-default) para robôs, e quem tem JavaScript vai para o idioma do
+			// navegador (languageRedirect). O canonical aponta para /…/home/.
+			if (pageId === "home" && language !== "pt") {
+				await writeDist(`${language}/index.html`, html);
+			}
+			if (pageId === "home" && language === DEFAULT_LANGUAGE) {
+				await writeDist("index.html", html);
 			}
 		}
 	}
@@ -516,7 +542,7 @@ try {
 	console.log(
 		`Pré-renderização SEO: ${PAGE_IDS.length * LANGUAGES.length} páginas, ` +
 			`${seo.retiredPaths.length} redirecionamentos, sitemap.xml e llms.txt ` +
-			`(${projectsByLanguage.pt.length} projetos).`
+			`(${projectsByLanguage.en.length} projetos, ${LANGUAGES.length} idiomas).`
 	);
 } finally {
 	await browser.close();

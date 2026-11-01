@@ -1,14 +1,15 @@
 {
   "languages": [
     "pt-BR",
-    "en-US"
+    "en-US",
+    "es"
   ],
-  "catalogEntries": 442,
-  "resourceLeaves": 489,
-  "connectedFiles": 36,
-  "neutralLabels": 12,
+  "catalogEntries": 455,
+  "resourceLeaves": 502,
+  "connectedFiles": 37,
+  "neutralLabels": 10,
   "missing": [],
-  "review": "Idiomatic English reviewed by Codex; no human native-speaker certification",
+  "review": "Idiomatic English and Latin-American Spanish reviewed by AI; no human native-speaker certification",
   "scope": "Public portfolio and standalone games. Inactive RoadMap/Live/Technologies variants excluded.",
   "assets": "Proper names, company logos, project screenshots and text baked into artwork retain their original language."
 }

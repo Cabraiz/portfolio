@@ -36,7 +36,7 @@ for(const viewport of viewports)test(`home skeleton ${viewport.width}x${viewport
     const loaded=page.locator('[data-mobile-editorial-home]');
     await expect(loaded).toBeVisible();
     await expect(skeleton).toHaveCount(0);
-    await expect.poll(()=>loaded.locator('img').evaluate(image=>(image as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
+    await expect.poll(()=>loaded.locator('img:not([data-home-portrait-skeleton])').evaluate(image=>(image as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
     await expect(loaded.locator('[data-home-portrait-skeleton]')).toHaveCount(0);
     const final=await loaded.evaluate(element=>{
       const selectors={eyebrow:'section > [class*="eyebrow"]',title:'section > [class*="title"]',identity:'section > [class*="identity"]',intro:'section > p',partners:'section > [class*="partners"]',actions:'nav'};
@@ -70,7 +70,7 @@ for(const viewport of [{width:390,height:844},{width:667,height:375}])test(`port
   const placeholder=home.locator('[data-home-portrait-skeleton]');
   await expect(placeholder).toBeVisible();
   const shape=await placeholder.boundingBox();
-  const image=home.locator('img');
+  const image=home.locator('img:not([data-home-portrait-skeleton])');
   const imageBox=await image.boundingBox();
   expect(shape!.width).toBeCloseTo(imageBox!.width,0);
   expect(shape!.height).toBeCloseTo(imageBox!.height,0);

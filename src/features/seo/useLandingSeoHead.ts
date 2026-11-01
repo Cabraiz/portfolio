@@ -2,6 +2,7 @@ import { useEffect } from "react";
 
 import {
 	getLanguageFromPath,
+	LANDING_LANGUAGES,
 	type LandingLanguage,
 } from "@/features/navigation/landingSections";
 
@@ -9,8 +10,23 @@ import seo from "./seo-pages.json";
 
 export type LandingSeoPageId = keyof typeof seo.pages;
 
-const OG_LOCALE: Record<LandingLanguage, string> = { pt: "pt_BR", en: "en_US" };
-const HTML_LANG: Record<LandingLanguage, string> = { pt: "pt-BR", en: "en" };
+export const OG_LOCALE: Record<LandingLanguage, string> = {
+	en: "en_US",
+	pt: "pt_BR",
+	es: "es_LA",
+};
+export const HTML_LANG: Record<LandingLanguage, string> = {
+	en: "en",
+	pt: "pt-BR",
+	es: "es",
+};
+// Valores de hreflang aceitos pelo Google (es-419 não é aceito).
+export const HREFLANG: Record<LandingLanguage, string> = {
+	en: "en",
+	pt: "pt-BR",
+	es: "es",
+};
+const DEFAULT_LANGUAGE = seo.defaultLanguage as LandingLanguage;
 
 function upsertMeta(attribute: "name" | "property", key: string, content: string): void {
 	let element = document.head.querySelector<HTMLMetaElement>(`meta[${attribute}="${key}"]`);
@@ -43,7 +59,8 @@ export default function useLandingSeoHead(
 	useEffect(() => {
 		if (!enabled) return undefined;
 		const language = getLanguageFromPath(globalThis.window?.location.pathname);
-		const page = seo.pages[pageId][language];
+		const pages = seo.pages[pageId];
+		const page = pages[language];
 		const url = `${seo.siteUrl}${page.path}`;
 		const hiddenTitle = seo.hiddenTabTitle[language];
 
@@ -58,23 +75,21 @@ export default function useLandingSeoHead(
 		upsertMeta("property", "og:description", page.description);
 		upsertMeta("property", "og:url", url);
 		upsertMeta("property", "og:locale", OG_LOCALE[language]);
+		upsertMeta("property", "og:image:alt", seo.shareImage.alt[language]);
 		upsertMeta("name", "twitter:title", page.title);
 		upsertMeta("name", "twitter:description", page.description);
 		upsertLink('link[rel="canonical"]', { rel: "canonical", href: url });
-		upsertLink('link[rel="alternate"][hreflang="pt-BR"]', {
-			rel: "alternate",
-			hreflang: "pt-BR",
-			href: `${seo.siteUrl}${seo.pages[pageId].pt.path}`,
-		});
-		upsertLink('link[rel="alternate"][hreflang="en"]', {
-			rel: "alternate",
-			hreflang: "en",
-			href: `${seo.siteUrl}${seo.pages[pageId].en.path}`,
+		LANDING_LANGUAGES.forEach((alternate) => {
+			upsertLink(`link[rel="alternate"][hreflang="${HREFLANG[alternate]}"]`, {
+				rel: "alternate",
+				hreflang: HREFLANG[alternate],
+				href: `${seo.siteUrl}${pages[alternate].path}`,
+			});
 		});
 		upsertLink('link[rel="alternate"][hreflang="x-default"]', {
 			rel: "alternate",
 			hreflang: "x-default",
-			href: `${seo.siteUrl}${seo.pages[pageId].pt.path}`,
+			href: `${seo.siteUrl}${pages[DEFAULT_LANGUAGE].path}`,
 		});
 
 		document.addEventListener("visibilitychange", applyTitle);

@@ -11,12 +11,11 @@ import {
 const languageDetector = new LanguageDetector();
 languageDetector.addDetector({
   name: "languageFromPath",
-  // Na landing (/home, /portfolio, /en/...) o idioma é o da URL; nas outras
+  // Na landing (/home, /en/..., /es/...) o idioma é o da URL; nas outras
   // páginas (jogos, páginas privadas) segue o navegador, como antes.
   lookup: () => {
     const pathname = globalThis.window?.location.pathname;
-    if (getLanguageFromPath(pathname) === "en") return "en";
-    return isLandingPath(pathname) ? "pt" : undefined;
+    return isLandingPath(pathname) ? getLanguageFromPath(pathname) : undefined;
   },
 });
 
@@ -25,8 +24,9 @@ i18n
   .use(languageDetector)
   .use(initReactI18next)
   .init({
-    fallbackLng: "pt",
-    supportedLngs: ["pt", "en"],
+    // Espanhol sem tradução cai no inglês; o resto, no português.
+    fallbackLng: { es: ["en"], default: ["pt"] },
+    supportedLngs: ["pt", "en", "es"],
     nonExplicitSupportedLngs: true,
     load: "languageOnly",
     debug: import.meta.env.DEV,
@@ -36,17 +36,18 @@ i18n
     backend: {
       loadPath: "/locales/{{lng}}/translation.json",
     },
-    // Na landing o idioma vem da URL (/en/... é inglês, o resto é português),
-    // para que cada idioma tenha endereço próprio para o Google e as IAs. A
-    // ida automática de navegadores em inglês para /en fica em languageRedirect.
+    // Na landing o idioma vem da URL (/en inglês, /es espanhol, o resto
+    // português), para que cada idioma tenha endereço próprio para o Google e
+    // as IAs. A raiz escolhe o idioma em languageRedirect.
     detection: {
       order: ["languageFromPath", "localStorage", "navigator", "htmlTag"],
       caches: [],
     },
   });
 
+const DOCUMENT_LANGUAGE: Record<string, string> = { en: 'en', es: 'es', pt: 'pt-BR' };
 const updateDocumentLanguage = () => {
-  document.documentElement.lang = i18n.resolvedLanguage === 'en' ? 'en' : 'pt-BR';
+  document.documentElement.lang = DOCUMENT_LANGUAGE[i18n.resolvedLanguage ?? 'pt'] ?? 'pt-BR';
 };
 i18n.on('initialized', updateDocumentLanguage);
 i18n.on('languageChanged', updateDocumentLanguage);

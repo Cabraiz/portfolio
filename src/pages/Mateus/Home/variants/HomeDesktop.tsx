@@ -1,5 +1,5 @@
 import { localizeLabel, useLabelLanguage } from '@/i18n/labels';
-import { useLayoutEffect, useMemo, useRef, type CSSProperties } from "react";
+import { useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { Container, Row } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import i18n from "@/i18n/i18n";
@@ -16,12 +16,18 @@ import heroCinemaVote4 from "@/assets/Mateus/home/hero-cinema-vote-4.webp";
 import heroCinemaVote5 from "@/assets/Mateus/home/hero-cinema-vote-5.webp";
 import heroCinemaVote6 from "@/assets/Mateus/home/hero-cinema-vote-6.webp";
 import heroCinemaVote7 from "@/assets/Mateus/home/hero-cinema-vote-7.webp";
+import heroCinemaVote6Preview from "@/assets/Mateus/home/hero-cinema-vote-6-preview.webp";
+import useProgressiveSource from "@/features/media/useProgressiveSource";
+import { DESKTOP_HERO_LQIP } from "../data/heroPlaceholders";
 import { ensureGsapRuntime } from "@/features/scroll/gsapRuntime";
 import useHomeDesktopMotion from "../hooks/useHomeDesktopMotion";
 import HeroTextColumn from "../components/desktop/HeroTextColumn";
 import { useHomeHeroLayout } from "../hooks/useHomeHeroLayout";
 import { getWhatsAppGreeting } from "../utils/home.utils";
+import { resolveContactLanguage } from "../data/home.data";
 import { shouldDisableScrollFades } from "../../../../features/scroll/scrollMotionFlags";
+
+const HERO_REVEAL_MS = 800;
 
 function HomeDesktop() {
   useLabelLanguage();
@@ -56,15 +62,22 @@ function HomeDesktop() {
 			: 6;
 	}, [heroBackgrounds.length]);
 	const selectedHeroBackground = heroBackgrounds[selectedHeroOption - 1];
+	// Foto progressiva (só a foto padrão tem miniatura): miniatura desfocada,
+	// prévia e a foto final entrando por cima, perdendo o desfoque.
+	const hasHeroPlaceholder = selectedHeroOption === 6;
+	const heroPlaceholder = useProgressiveSource(
+		DESKTOP_HERO_LQIP,
+		hasHeroPlaceholder ? heroCinemaVote6Preview : null
+	);
+	const [heroRevealed, setHeroRevealed] = useState(false);
+	const [heroPlaceholderDone, setHeroPlaceholderDone] = useState(!hasHeroPlaceholder);
 
 	const { t } = useTranslation();
 	const { sectionStyle, isCompactDesktop } = useHomeHeroLayout();
 
 	const currentLanguage = i18n.resolvedLanguage ?? i18n.language ?? "pt";
 
-	const isPT = useMemo(() => {
-		return currentLanguage === "pt" || currentLanguage.startsWith("pt");
-	}, [currentLanguage]);
+	const contactLanguage = resolveContactLanguage(currentLanguage);
 
 	const secondaryLabel = useMemo(() => {
 		return t("buttons.downloadCV");
@@ -91,6 +104,23 @@ function HomeDesktop() {
 			transformOrigin: usesPortraitNeckCrop ? "72% 22%" : "center center",
 		};
 	}, [isCompactDesktop, selectedHeroOption]);
+
+	const heroRevealStyle = useMemo<CSSProperties>(() => {
+		return {
+			...backgroundImageStyle,
+			opacity: heroRevealed ? 1 : 0,
+			filter: heroRevealed ? "blur(0px)" : "blur(14px)",
+			transition: "opacity 420ms ease, filter 800ms ease",
+		};
+	}, [backgroundImageStyle, heroRevealed]);
+
+	const heroPlaceholderStyle = useMemo<CSSProperties>(() => {
+		return {
+			...backgroundImageStyle,
+			filter: heroPlaceholder.stage === "preview" ? "blur(3px)" : "blur(14px)",
+			transition: "filter 420ms ease",
+		};
+	}, [backgroundImageStyle, heroPlaceholder.stage]);
 
 	const backgroundFrameStyle = useMemo<CSSProperties>(() => {
 		return {
@@ -446,6 +476,15 @@ function HomeDesktop() {
 			data-mateus-hero-mobile="false"
 		>
 			<div style={backgroundFrameStyle} data-hero-crop-frame="true" data-home-motion="photo-frame">
+				{!heroPlaceholderDone ? (
+					<img
+						src={heroPlaceholder.src}
+						alt=""
+						aria-hidden="true"
+						data-hero-placeholder={heroPlaceholder.stage}
+						style={heroPlaceholderStyle}
+					/>
+				) : null}
 				<img
 					ref={backgroundRef}
 					src={selectedHeroBackground}
@@ -458,7 +497,22 @@ function HomeDesktop() {
 					loading="eager"
 					decoding="async"
 					fetchPriority="high"
-					style={backgroundImageStyle}
+					data-reveal={heroRevealed ? "done" : "pending"}
+					onLoad={(event) => {
+						const image = event.currentTarget;
+						void image.decode().catch(() => undefined).then(() => {
+							if (!image.isConnected) return;
+							setHeroRevealed(true);
+							const reduceMotion = window.matchMedia(
+								"(prefers-reduced-motion: reduce)"
+							).matches;
+							window.setTimeout(
+								() => setHeroPlaceholderDone(true),
+								reduceMotion ? 0 : HERO_REVEAL_MS
+							);
+						});
+					}}
+					style={heroRevealStyle}
 				/>
 			</div>
 			<div ref={overlayRef} aria-hidden="true" style={backgroundOverlayStyle} />
@@ -499,11 +553,11 @@ function HomeDesktop() {
 			<h1
 				ref={signatureRef}
 				style={signatureStyle}
-				aria-label={localizeLabel("Mateus Cabral, Engenheiro de Software")}
+				aria-label={localizeLabel("Mateus Cabral, Engenheiro de IA Sênior")}
 			>
 				<strong style={{ fontSize: "1.12em", fontWeight: 700 }}>
 					{localizeLabel("Mateus Cabral")}</strong>
-				<span>{localizeLabel("Engenheiro de Software")}</span>
+				<span>{localizeLabel("Engenheiro de IA Sênior")}</span>
 			</h1>
 
 			<Container fluid className="px-0" style={containerStyle}>
@@ -512,7 +566,7 @@ function HomeDesktop() {
 						<div ref={contentRailRef} style={contentRailStyle}>
 							<HeroTextColumn
 								isCompactDesktop={isCompactDesktop}
-								isPT={isPT}
+								language={contactLanguage}
 								whatsappTopLabel={whatsappTopLabel}
 								secondaryLabel={secondaryLabel}
 							/>

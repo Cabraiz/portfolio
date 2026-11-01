@@ -1,13 +1,15 @@
 {
   "siteUrl": "https://cabraiz.com",
   "siteName": "Cabraiz",
+  "defaultLanguage": "en",
   "portrait": {
     "url": "https://cabraiz.com/images/mateus-cardoso-cabral.jpg",
     "width": 1024,
     "height": 1024,
     "caption": {
-      "pt": "Mateus Cardoso Cabral, Engenheiro de Software Full Stack em Fortaleza (CE)",
-      "en": "Mateus Cardoso Cabral, Full Stack Software Engineer in Fortaleza, Brazil"
+      "en": "Mateus Cardoso Cabral, Senior AI Engineer and full stack developer in Fortaleza, Brazil",
+      "pt": "Mateus Cardoso Cabral, Engenheiro de IA Sênior e desenvolvedor full stack em Fortaleza (CE)",
+      "es": "Mateus Cardoso Cabral, Ingeniero de IA Senior y desarrollador full stack en Fortaleza, Brasil"
     }
   },
   "shareImage": {
@@ -15,8 +17,9 @@
     "width": 1200,
     "height": 630,
     "alt": {
-      "pt": "Foto de Mateus Cardoso Cabral, Engenheiro de Software Full Stack",
-      "en": "Photo of Mateus Cardoso Cabral, Full Stack Software Engineer"
+      "en": "Photo of Mateus Cardoso Cabral, Senior AI Engineer",
+      "pt": "Foto de Mateus Cardoso Cabral, Engenheiro de IA Sênior",
+      "es": "Foto de Mateus Cardoso Cabral, Ingeniero de IA Senior"
     }
   },
   "person": {
@@ -32,58 +35,78 @@
       "https://www.instagram.com/cabraiz/"
     ],
     "knowsAbout": [
-      "Engenharia de software full stack",
+      "Applied AI",
+      "Large language models (LLMs)",
+      "Retrieval-augmented generation (RAG)",
+      "Multi-agent systems",
+      "Full stack development",
       "React",
       "TypeScript",
       "Node.js",
       "Java",
       "Spring Boot",
       "AWS",
-      "Microsserviços",
-      "APIs REST",
-      "CI/CD",
-      "IA aplicada a produtos",
-      "LLMs e sistemas multiagente",
-      "RAG"
+      "Microservices",
+      "REST APIs",
+      "CI/CD"
     ],
+    "knowsLanguage": ["pt-BR", "en"],
     "jobTitle": {
-      "pt": "Engenheiro de Software Full Stack",
-      "en": "Full Stack Software Engineer"
+      "en": "Senior AI Engineer",
+      "pt": "Engenheiro de IA Sênior",
+      "es": "Ingeniero de IA Senior"
     },
     "description": {
-      "pt": "Mateus Cardoso Cabral é Engenheiro de Software Full Stack sênior em Fortaleza (CE), com 13 anos de experiência em frontend, backend, cloud, DevOps e IA aplicada a produtos.",
-      "en": "Mateus Cardoso Cabral is a senior Full Stack Software Engineer based in Fortaleza, Brazil, with 13 years of experience across frontend, backend, cloud, DevOps and applied AI."
+      "en": "Mateus Cardoso Cabral is a Senior AI Engineer and full stack developer with 13 years of experience, based in Fortaleza, Brazil (UTC-3) and working remotely. He builds LLM, RAG and multi-agent features on top of React, TypeScript, Node.js, Java/Spring Boot and AWS, and has worked for SkipTheDishes (Canada), Qualicorp and Banco do Nordeste.",
+      "pt": "Mateus Cardoso Cabral é Engenheiro de IA Sênior e desenvolvedor full stack com 13 anos de experiência, em Fortaleza (CE) e trabalhando remoto. Cria soluções com LLMs, RAG e sistemas multiagente sobre React, TypeScript, Node.js, Java/Spring Boot e AWS, com passagens pela SkipTheDishes (Canadá), Qualicorp e Banco do Nordeste.",
+      "es": "Mateus Cardoso Cabral es Ingeniero de IA Senior y desarrollador full stack con 13 años de experiencia, en Fortaleza, Brasil (UTC-3), trabajando en remoto. Construye soluciones con LLMs, RAG y sistemas multiagente sobre React, TypeScript, Node.js, Java/Spring Boot y AWS, y ha trabajado para SkipTheDishes (Canadá), Qualicorp y Banco do Nordeste."
     }
   },
   "hiddenTabTitle": {
-    "pt": "Cabraiz | IA, Tecnologia e Software",
-    "en": "Cabraiz | AI, Technology & Software"
+    "en": "Cabraiz | AI Engineering & Software",
+    "pt": "Cabraiz | Engenharia de IA e Software",
+    "es": "Cabraiz | Ingeniería de IA y Software"
   },
   "pages": {
     "home": {
-      "pt": {
-        "path": "/home/",
-        "title": "Mateus Cardoso Cabral | Engenheiro de Software Full Stack & IA",
-        "description": "Mateus Cardoso Cabral é Engenheiro de Software Full Stack com 13 anos de experiência em frontend, backend, cloud e IA aplicada a produtos. Veja projetos no Brasil, México, EUA, Guiné-Bissau e Portugal."
-      },
       "en": {
         "path": "/en/home/",
-        "title": "Mateus Cardoso Cabral | Full Stack Software Engineer & AI",
-        "description": "Mateus Cardoso Cabral is a Full Stack Software Engineer with 13 years of experience across frontend, backend, cloud and applied AI. See projects in Brazil, Mexico, the USA, Guinea-Bissau and Portugal."
+        "title": "Mateus Cardoso Cabral | Senior AI Engineer & Full Stack Developer",
+        "description": "Senior AI Engineer and full stack developer with 13 years of experience: LLMs, RAG and multi-agent systems in production, React, Node.js, Java and AWS. Based in Brazil (UTC-3), available for remote work."
+      },
+      "pt": {
+        "path": "/home/",
+        "title": "Mateus Cardoso Cabral | Engenheiro de IA Sênior & Full Stack",
+        "description": "Engenheiro de IA Sênior e desenvolvedor full stack com 13 anos de experiência: LLMs, RAG e sistemas multiagente em produção, React, Node.js, Java e AWS. Em Fortaleza (CE), disponível para trabalho remoto."
+      },
+      "es": {
+        "path": "/es/home/",
+        "title": "Mateus Cardoso Cabral | Ingeniero de IA Senior & Full Stack",
+        "description": "Ingeniero de IA Senior y desarrollador full stack con 13 años de experiencia: LLMs, RAG y sistemas multiagente en producción, React, Node.js, Java y AWS. En Brasil (UTC-3), disponible para trabajo remoto."
       }
     },
     "portfolio": {
-      "pt": {
-        "path": "/portfolio/",
-        "title": "Portfólio de projetos | Mateus Cardoso Cabral, Engenheiro de Software",
-        "description": "Portfólio de Mateus Cardoso Cabral: 7 projetos de software, entre ERP comercial, app bancário, e-commerce internacional, agenda para barbearias e sites, no Brasil, México, EUA, Guiné-Bissau e Portugal."
-      },
       "en": {
         "path": "/en/portfolio/",
-        "title": "Project portfolio | Mateus Cardoso Cabral, Software Engineer",
-        "description": "Portfolio of Mateus Cardoso Cabral: 7 software projects, including a commercial ERP, a mobile banking app, cross-border e-commerce, a barbershop booking app and websites, in Brazil, Mexico, the USA, Guinea-Bissau and Portugal."
+        "title": "AI & Software Project Portfolio | Mateus Cardoso Cabral",
+        "description": "Portfolio of Mateus Cardoso Cabral, Senior AI Engineer: 7 software projects, including a commercial ERP, a mobile banking app, cross-border e-commerce, a barbershop booking app and websites, in Brazil, Mexico, the USA, Guinea-Bissau and Portugal."
+      },
+      "pt": {
+        "path": "/portfolio/",
+        "title": "Portfólio de projetos de IA e software | Mateus Cardoso Cabral",
+        "description": "Portfólio de Mateus Cardoso Cabral, Engenheiro de IA Sênior: 7 projetos de software, entre ERP comercial, app bancário, e-commerce internacional, agenda para barbearias e sites, no Brasil, México, EUA, Guiné-Bissau e Portugal."
+      },
+      "es": {
+        "path": "/es/portfolio/",
+        "title": "Portafolio de proyectos de IA y software | Mateus Cardoso Cabral",
+        "description": "Portafolio de Mateus Cardoso Cabral, Ingeniero de IA Senior: 7 proyectos de software, entre ellos un ERP comercial, una app bancaria, e-commerce internacional, una agenda para barberías y sitios web, en Brasil, México, Estados Unidos, Guinea-Bisáu y Portugal."
       }
     }
+  },
+  "resume": {
+    "en": "/files/mateus-cabral-resume-en.pdf",
+    "pt": "/files/mateus-cabral-resume.pdf",
+    "es": "/files/mateus-cabral-resume-es.pdf"
   },
   "retiredPaths": [
     "servicos",

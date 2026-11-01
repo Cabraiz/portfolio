@@ -9,10 +9,11 @@ import WhatsAppSignalButton from "../../../shared/WhatsAppSignalButton/WhatsAppS
 import WhatsAppHeroSlot from "../../../shared/WhatsAppSignalButton/WhatsAppHeroSlot";
 
 import {
-	MEET_HREF,
-	RESUME_HREF,
+	type ContactLanguage,
+	getContactEmailHref,
+	getWhatsAppHref,
+	RESUME_HREFS,
 	seals,
-	WHATSAPP_HREF,
 } from "../../data/home.data";
 
 const polishedGoldGradient =
@@ -20,7 +21,7 @@ const polishedGoldGradient =
 
 type HeroTextColumnProps = Readonly<{
 	isCompactDesktop: boolean;
-	isPT: boolean;
+	language: ContactLanguage;
 	whatsappTopLabel: string;
 	secondaryLabel: string;
 }>;
@@ -47,7 +48,7 @@ const heroActionsWrapperStyle: CSSProperties = {
 
 export default function HeroTextColumn({
 	isCompactDesktop,
-	isPT,
+	language,
 	whatsappTopLabel,
 	secondaryLabel,
 }: HeroTextColumnProps) {
@@ -141,10 +142,11 @@ export default function HeroTextColumn({
 	}, [isCompactDesktop]);
 
 	const primaryHeroAction = useMemo(() => {
-		if (isPT) {
+		// Brasil e América Latina falam por WhatsApp; para a gringa, e-mail.
+		if (language !== "en") {
 			return (
 				<WhatsAppSignalButton
-					href={WHATSAPP_HREF}
+					href={getWhatsAppHref(language)}
 					label={localizeLabel("WhatsApp")}
 					topLabel={whatsappTopLabel}
 					bottomLabel="Vamos Nessa?"
@@ -158,33 +160,31 @@ export default function HeroTextColumn({
 
 		return (
 			<CTAButton
-				label={localizeLabel("MEET")}
-				backLabel="LET'S TALK"
-				ariaLabel="Open meeting link"
-				href={MEET_HREF}
-				target="_blank"
-				rel="noopener noreferrer"
+				label={localizeLabel("E-MAIL")}
+				backLabel={localizeLabel("VAMOS CONVERSAR")}
+				ariaLabel={localizeLabel("Enviar e-mail para Mateus")}
+				href={getContactEmailHref(language)}
 				variant="heroPrimary"
 				size={isCompactDesktop ? "compact" : "default"}
 				align="center"
 				fullWidth
 			/>
 		);
-	}, [isCompactDesktop, isPT, whatsappTopLabel]);
+	}, [isCompactDesktop, language, whatsappTopLabel]);
 
 	const secondaryHeroAction = useMemo(() => {
 		return (
 			<ResumeDownloadButton
 				label={localizeLabel(secondaryLabel)}
 				ariaLabel={secondaryLabel}
-				href={RESUME_HREF}
+				href={RESUME_HREFS[language]}
 				target="_blank"
 				rel="noopener noreferrer"
 				size={isCompactDesktop ? "compact" : "default"}
 				fullWidth
 			/>
 		);
-	}, [isCompactDesktop, secondaryLabel]);
+	}, [isCompactDesktop, language, secondaryLabel]);
 
 	const primaryHeroActionWithOffset = useMemo(() => {
 		return <div style={primaryActionOffsetStyle}>{localizeLabel(primaryHeroAction)}</div>;
@@ -192,7 +192,7 @@ export default function HeroTextColumn({
 
 	return (
 		<Col md={5} style={heroTextColumnStyle} className="px-0">
-			<div style={seniorTitleStyle} data-home-motion="eyebrow">{localizeLabel("Desenvolvedor")}</div>
+			<div style={seniorTitleStyle} data-home-motion="eyebrow">{localizeLabel("Sênior")}</div>
 
 			<div className="font-sequel" style={roleContainerStyle} data-home-motion="role">
 				<RoleTitle />

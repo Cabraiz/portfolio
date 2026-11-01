@@ -21,17 +21,21 @@ for(const viewport of [{width:390,height:844},{width:1366,height:720}]){
     await page.goto('/en/home',{waitUntil:'networkidle'});
     await expect(page.locator('html')).toHaveAttribute('lang','en');
     if(viewport.width<992){
-      await expect(page.getByText('Software Engineer',{exact:true})).toBeVisible();
+      await expect(page.getByText('Senior AI Engineer',{exact:true})).toBeVisible();
       await expect(page.getByText('Founder',{exact:true})).toHaveCount(0);
       await expect(page.getByText('Résumé',{exact:true})).toBeVisible();
       await expect(page.getByText('TECHNOLOGY',{exact:true})).toBeVisible();
-    }else await expect(page.getByText('Developer',{exact:true})).toBeVisible();
+    }else await expect(page.getByText('Senior',{exact:true})).toBeVisible();
     await page.screenshot({path:test.info().outputPath('home-en.png')});
     await connectLanguageTest(page);
     await page.evaluate(()=>Reflect.get(window,'labelTest').changeLanguage('pt'));
     await expect(page.locator('html')).toHaveAttribute('lang','pt-BR');
-    if(viewport.width<992)await expect(page.getByText('Engenheiro de Software',{exact:true})).toBeVisible();
-    else await expect(page.getByText('Desenvolvedor',{exact:true})).toBeVisible();
+    if(viewport.width<992)await expect(page.getByText('Engenheiro de IA Sênior',{exact:true})).toBeVisible();
+    else await expect(page.getByText('Sênior',{exact:true})).toBeVisible();
+    await page.evaluate(()=>Reflect.get(window,'labelTest').changeLanguage('es'));
+    await expect(page.locator('html')).toHaveAttribute('lang','es');
+    if(viewport.width<992)await expect(page.getByText('Ingeniero de IA Senior',{exact:true})).toBeVisible();
+    else await expect(page.getByText('Ingeniero de IA',{exact:true}).filter({visible:true}).first()).toBeVisible();
     await page.evaluate(()=>Reflect.get(window,'labelTest').changeLanguage('en'));
     await page.goto('/en/portfolio',{waitUntil:'networkidle'});
     if(viewport.width<992)await expect(page.locator('[data-mobile-feature-copy] h2')).toHaveText('NEXOVARE');

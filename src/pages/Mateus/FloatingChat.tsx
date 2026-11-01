@@ -1,4 +1,5 @@
 import { localizeLabel, useLabelLanguage } from '@/i18n/labels';
+import appI18n from "@/i18n/i18n";
 import type * as React from "react";
 import { useState, useRef, useEffect, useLayoutEffect, useSyncExternalStore } from "react";
 import msgIcon from "../../assets/Mateus/msgIcon.png";
@@ -65,8 +66,17 @@ const LOCAL_CONTACT_API_URL =
 const CONTACT_API_URL =
   import.meta.env.VITE_CONTACT_API_URL?.trim() ||
   (import.meta.env.DEV ? LOCAL_CONTACT_API_URL : "/api/contact");
-const WHATSAPP_SUPPORT_URL =
-  "https://wa.me/5585998575707?text=Ol%C3%A1%20Mateus%2C%20vim%20pelo%20atendimento%2024%2F7%20da%20Cabraiz%20e%20quero%20falar%20sobre%20um%20projeto.";
+const WHATSAPP_SUPPORT_MESSAGES: Readonly<Record<string, string>> = {
+  pt: "Olá Mateus, vim pelo atendimento 24/7 da Cabraiz e quero falar sobre um projeto.",
+  en: "Hi Mateus, I came from the Cabraiz 24/7 chat and would like to talk about a project.",
+  es: "Hola Mateus, vengo del chat 24/7 de Cabraiz y me gustaría hablar sobre un proyecto.",
+};
+
+function getWhatsAppSupportUrl(): string {
+  const language = (appI18n.resolvedLanguage ?? "pt").split("-")[0];
+  const message = WHATSAPP_SUPPORT_MESSAGES[language] ?? WHATSAPP_SUPPORT_MESSAGES.pt;
+  return `https://wa.me/5585998575707?text=${encodeURIComponent(message)}`;
+}
 
 function getActiveLandingSectionSnapshot(): string | null {
   if (typeof document === "undefined") return null;
@@ -989,7 +999,7 @@ export default function FloatingChat() {
                   >
                     <a
                       className={`${styles.quickAction} ${styles.quickActionPrimary}`}
-                      href={WHATSAPP_SUPPORT_URL}
+                      href={getWhatsAppSupportUrl()}
                       target="_blank"
                       rel="noreferrer"
                     >

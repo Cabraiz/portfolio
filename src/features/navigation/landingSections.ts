@@ -183,26 +183,40 @@ export function getLandingUrlSyncEligibleSectionIds(): readonly LandingSectionId
     .map((section) => section.id);
 }
 
-// Versão em inglês: as mesmas seções sob /en (ex.: /en/home, /en/portfolio).
-// O idioma vem da URL para que cada idioma tenha endereço próprio no Google.
-export const ENGLISH_PATH_PREFIX = "/en";
-const ENGLISH_PATH_PATTERN = /^\/en(?=\/|$)/;
-
-export type LandingLanguage = "pt" | "en";
+// Idiomas com endereço próprio para o Google e as IAs: português sem prefixo
+// (/home, /portfolio), inglês sob /en e espanhol (América Latina) sob /es.
+export type LandingLanguage = "pt" | "en" | "es";
+export const LANDING_LANGUAGES: readonly LandingLanguage[] = ["en", "pt", "es"];
+export const LANGUAGE_PATH_PREFIX: Readonly<Record<LandingLanguage, string>> = {
+  pt: "",
+  en: "/en",
+  es: "/es",
+};
+const LANGUAGE_PATH_PATTERN = /^\/(en|es)(?=\/|$)/;
 
 export function getLanguageFromPath(
   pathname: string | null | undefined,
 ): LandingLanguage {
-  return ENGLISH_PATH_PATTERN.test(normalizePathname(pathname)) ? "en" : "pt";
+  const match = normalizePathname(pathname).match(LANGUAGE_PATH_PATTERN);
+  return (match?.[1] as LandingLanguage | undefined) ?? "pt";
 }
 
-export function getCurrentLanguagePathPrefix(): "" | typeof ENGLISH_PATH_PREFIX {
+export function getCurrentLanguagePathPrefix(): string {
   const pathname = globalThis.window?.location.pathname;
-  return getLanguageFromPath(pathname) === "en" ? ENGLISH_PATH_PREFIX : "";
+  return LANGUAGE_PATH_PREFIX[getLanguageFromPath(pathname)];
 }
 
 export function stripLanguagePrefix(pathname: string | null | undefined): string {
-  return normalizePathname(normalizePathname(pathname).replace(ENGLISH_PATH_PATTERN, ""));
+  return normalizePathname(normalizePathname(pathname).replace(LANGUAGE_PATH_PATTERN, ""));
+}
+
+/** Mesmo endereço em outro idioma (a raiz vira o Início). */
+export function getLanguagePath(
+  language: LandingLanguage,
+  pathname: string | null | undefined,
+): string {
+  const sectionPath = stripLanguagePrefix(pathname);
+  return `${LANGUAGE_PATH_PREFIX[language]}${sectionPath === "/" ? "/home" : sectionPath}/`;
 }
 
 export function getPathBySectionId(

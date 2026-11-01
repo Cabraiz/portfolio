@@ -229,7 +229,20 @@
   max-width: none;
   user-select: none;
   pointer-events: none;
-  filter: drop-shadow(-12px 5px 16px rgba(68, 41, 31, 0.16));
+  filter: blur(0) drop-shadow(-12px 5px 16px rgba(68, 41, 31, 0.16));
+  transition:
+    opacity 360ms ease,
+    filter 700ms ease;
+}
+
+/* Até a foto final decodificar, a prévia desfocada fica no lugar dela. */
+.portrait[data-reveal="pending"] {
+  opacity: 0;
+  filter: blur(8px) drop-shadow(-12px 5px 16px rgba(68, 41, 31, 0));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .portrait { transition: none; }
 }
 
 .actions {

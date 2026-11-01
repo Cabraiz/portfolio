@@ -9,7 +9,7 @@ const CHAT_BOTTOM_VIEWPORT_RATIO = 0.03;
 const CHAT_TRIGGER_HEIGHT_PX = 62;
 const NAVBAR_FALLBACK_BOTTOM_PX = 70;
 const DOTS_FALLBACK_RIGHT_INSET_PX = 66;
-const DOTS_SELECTOR = "aside[aria-label='Navegação lateral por seções']";
+const DOTS_SELECTOR = "aside[data-section-dots]";
 
 /**
  * No desktop o card do projeto ocupa exatamente a faixa entre a barra (em

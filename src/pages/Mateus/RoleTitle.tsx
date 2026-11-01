@@ -2,11 +2,11 @@ import { localizeLabel, useLabelLanguage } from '@/i18n/labels';
 import { useEffect, useState } from "react";
 
 const titles = [
-  "Engenheiro de Software",
+  "Engenheiro de IA",
   "Dev Full Stack",
+  "LLMs, RAG e Agentes",
   "Back-End e APIs",
   "Cloud e DevOps",
-  "Dev Mobile",
 ];
 
 function prefersReducedMotion(): boolean {
