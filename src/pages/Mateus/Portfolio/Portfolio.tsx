@@ -77,8 +77,9 @@ const WORLD_JOURNEY_DESTINATIONS: Partial<
 	"guine-bissau-commerce": { x: 45.6673, y: 43.4091 },
 	// Ajuste visual do atlas ilustrado: Salt Lake fica ao sudeste do Great Salt Lake.
 	"app-barber": { x: 19.05, y: 25.15 },
-	// Ajuste visual do atlas ilustrado: Lisboa fica na costa oeste de Portugal.
-	"central-clube-livro": { x: 48.05, y: 28.4876 },
+	// Coimbra (Região Centro): projeção direta de 40,2033°N 8,4103°O. A costa
+	// do atlas bate com a real (~0,1°), então não precisa de ajuste.
+	"central-clube-livro": { x: 47.6638, y: 27.6648 },
 };
 const WORLD_ASPECT_RATIO = 2;
 

@@ -176,10 +176,10 @@ export const portfolioProjects: ReadonlyArray<PortfolioProject> = [
     },
     worldLocation: {
       country: "Portugal",
-      city: "Lisboa",
-      region: "Europa",
-      lat: 38.7223,
-      lng: -9.1393,
+      city: "Coimbra",
+      region: "Região Centro",
+      lat: 40.2033,
+      lng: -8.4103,
     },
   },
   {
