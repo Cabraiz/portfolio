@@ -14,7 +14,7 @@ export default defineConfig({
   webServer: {
     command: process.env.PLAYWRIGHT_USE_EXISTING_BUILD
       ? "npx serve dist -l 4174"
-      : "npx vite build && node scripts/prepare-github-pages.mjs && npx serve dist -l 4174",
+      : "npx vite build && node scripts/prepare-github-pages.mjs && node scripts/prerender-seo.mjs && npx serve dist -l 4174",
     url: "http://127.0.0.1:4174",
     reuseExistingServer: false,
     timeout: 120_000,

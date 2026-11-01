@@ -183,21 +183,44 @@ export function getLandingUrlSyncEligibleSectionIds(): readonly LandingSectionId
     .map((section) => section.id);
 }
 
+// Versão em inglês: as mesmas seções sob /en (ex.: /en/home, /en/portfolio).
+// O idioma vem da URL para que cada idioma tenha endereço próprio no Google.
+export const ENGLISH_PATH_PREFIX = "/en";
+const ENGLISH_PATH_PATTERN = /^\/en(?=\/|$)/;
+
+export type LandingLanguage = "pt" | "en";
+
+export function getLanguageFromPath(
+  pathname: string | null | undefined,
+): LandingLanguage {
+  return ENGLISH_PATH_PATTERN.test(normalizePathname(pathname)) ? "en" : "pt";
+}
+
+export function getCurrentLanguagePathPrefix(): "" | typeof ENGLISH_PATH_PREFIX {
+  const pathname = globalThis.window?.location.pathname;
+  return getLanguageFromPath(pathname) === "en" ? ENGLISH_PATH_PREFIX : "";
+}
+
+export function stripLanguagePrefix(pathname: string | null | undefined): string {
+  return normalizePathname(normalizePathname(pathname).replace(ENGLISH_PATH_PATTERN, ""));
+}
+
 export function getPathBySectionId(
   sectionId: LandingSectionId,
   fallbackSectionId: LandingSectionId = DEFAULT_LANDING_SECTION_ID,
 ): string {
-  return (
+  const path =
     LANDING_SECTION_ID_TO_PATH.get(sectionId) ??
     LANDING_SECTION_ID_TO_PATH.get(fallbackSectionId) ??
-    "/home"
-  );
+    "/home";
+
+  return `${getCurrentLanguagePathPrefix()}${path}`;
 }
 
 export function getSectionIdByPath(
   pathname: string | null | undefined,
 ): LandingSectionId | null {
-  const normalizedPathname = normalizePathname(pathname);
+  const normalizedPathname = stripLanguagePrefix(pathname);
 
   if (normalizedPathname === "/") {
     return DEFAULT_LANDING_SECTION_ID;

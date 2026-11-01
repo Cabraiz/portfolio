@@ -17,7 +17,8 @@ for(const viewport of [{width:390,height:844},{width:1366,height:720}]){
     const context=await browser.newContext({viewport,locale:'en-US',isMobile:viewport.width<992,hasTouch:viewport.width<992,reducedMotion:'reduce'});
     const page=await context.newPage();
     await page.route('**/api/contact*',route=>route.fulfill({json:{ok:true,cursor:0,replies:[]}}));
-    await page.goto('/home',{waitUntil:'networkidle'});
+    // O idioma vem da URL: inglês em /en/...
+    await page.goto('/en/home',{waitUntil:'networkidle'});
     await expect(page.locator('html')).toHaveAttribute('lang','en');
     if(viewport.width<992){
       await expect(page.getByText('Software Engineer',{exact:true})).toBeVisible();
@@ -28,11 +29,11 @@ for(const viewport of [{width:390,height:844},{width:1366,height:720}]){
     await page.screenshot({path:test.info().outputPath('home-en.png')});
     await connectLanguageTest(page);
     await page.evaluate(()=>Reflect.get(window,'labelTest').changeLanguage('pt'));
-    await expect(page.locator('html')).toHaveAttribute('lang','pt');
+    await expect(page.locator('html')).toHaveAttribute('lang','pt-BR');
     if(viewport.width<992)await expect(page.getByText('Engenheiro de Software',{exact:true})).toBeVisible();
     else await expect(page.getByText('Desenvolvedor',{exact:true})).toBeVisible();
     await page.evaluate(()=>Reflect.get(window,'labelTest').changeLanguage('en'));
-    await page.goto('/portfolio',{waitUntil:'networkidle'});
+    await page.goto('/en/portfolio',{waitUntil:'networkidle'});
     if(viewport.width<992)await expect(page.locator('[data-mobile-feature-copy] h2')).toHaveText('NEXOVARE');
     await expect(page.getByText('Business management platform',{exact:true}).filter({visible:true}).first()).toBeVisible();
     if(viewport.width<992){
@@ -52,6 +53,7 @@ for(const viewport of [{width:390,height:844},{width:1366,height:720}]){
       await expect(page.locator('#roadMap, #technologies')).toHaveCount(0);
       await expect(page.locator('main[data-landing-viewport]')).toHaveAttribute('data-active-section','home');
     }
+    await page.goto('/en/home',{waitUntil:'networkidle'});
     if(viewport.width<992){
       // No celular não há chat.
       await expect(page.getByRole('button',{name:'Open chat',exact:true})).toHaveCount(0);
@@ -65,8 +67,9 @@ for(const viewport of [{width:390,height:844},{width:1366,height:720}]){
       await page.evaluate(()=>Reflect.get(window,'labelTest').changeLanguage('pt'));
       await expect(page.getByRole('button',{name:'Enviar',exact:true})).toBeVisible();
       await expect(page.locator('input[name="message"]')).toHaveValue('Mensagem pessoal sem tradução');
-      await page.reload({waitUntil:'networkidle'});
-      await expect(page.locator('html')).toHaveAttribute('lang','pt');
+      // O idioma vem da URL: a versão em português fica em /home.
+      await page.goto('/home',{waitUntil:'networkidle'});
+      await expect(page.locator('html')).toHaveAttribute('lang','pt-BR');
       await page.getByRole('button',{name:'Abrir chat',exact:true}).click();
       await expect(page.getByText('Atendente',{exact:true})).toBeVisible();
       await page.screenshot({path:test.info().outputPath('labels-pt.png')});

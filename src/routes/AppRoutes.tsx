@@ -68,6 +68,12 @@ const AppRoutes = () => {
       <Route path="/live" element={<Navigate to="/technologies" replace />} />
       <Route path="/contact" element={landingElement} />
 
+      {/* Versão em inglês com endereço próprio (hreflang en). */}
+      <Route path="/en" element={<Navigate to="/en/home" replace />} />
+      <Route path="/en/home" element={landingElement} />
+      <Route path="/en/portfolio" element={landingElement} />
+      <Route path="/en/*" element={<Navigate to="/en/home" replace />} />
+
       <Route path="/enigma" element={<Enigma />} />
 
       <Route

@@ -10,7 +10,10 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { useLocation } from "react-router-dom";
 
-import { isLandingPath } from "../../features/navigation/landingSections";
+import {
+  getSectionIdByPath,
+  isLandingPath,
+} from "../../features/navigation/landingSections";
 import { useMateusViewport } from "./Home/hooks/useHomeViewport";
 
 import styles from "./FloatingChat.module.css";
@@ -230,13 +233,13 @@ export default function FloatingChat() {
   const isMobile = isLandingPath(location.pathname)
     ? isMobileLanding
     : typeof window !== "undefined" && window.innerWidth < 768;
-  const isHome = location.pathname === "/home";
+  const isHome = getSectionIdByPath(location.pathname) === "home";
   const isHomeSectionActive = activeLandingSection
     ? activeLandingSection === "home"
     : isHome;
   // No celular o chat não aparece: o contato fica pelos botões do Início.
   const shouldHideForMobile = isMobile;
-  const shouldHideForPortfolio = location.pathname === "/portfolio";
+  const shouldHideForPortfolio = getSectionIdByPath(location.pathname) === "portfolio";
   const scale = (value: number) => (isMobile ? value * 0.8 : value);
 
   const bottomOffset = isMobile ? "30px" : "3vh";

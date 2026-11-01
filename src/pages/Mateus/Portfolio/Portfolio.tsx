@@ -9,6 +9,7 @@ import {
 } from "react";
 import { useLocation } from "react-router-dom";
 
+import { getSectionIdByPath } from "@/features/navigation/landingSections";
 import useLandingSectionNavigation from "@/features/navigation/useLandingSectionNavigation";
 
 import flagBrazil from "../../../assets/Mateus/portfolio/flags/brasil-semicircle-realistic-v4.webp";
@@ -160,7 +161,7 @@ export default function Portfolio() {
 			defaultProjectId: defaultPortfolioProjectId,
 		});
 	const { activeSectionId } = useLandingSectionNavigation();
-	const isPortfolioRoute = location.pathname === "/portfolio";
+	const isPortfolioRoute = getSectionIdByPath(location.pathname) === "portfolio";
 	const isPortfolioActive = activeSectionId === "portfolio" || isPortfolioRoute;
 	const wasPortfolioActiveRef = useRef(false);
 
@@ -368,6 +369,11 @@ export default function Portfolio() {
 							alt={localizeLabel("")}
 							draggable={false}
 							data-world-tile={index}
+							// Os ladrilhos do mapa são o maior peso do site: não competem com a
+							// foto do Início (LCP) e só baixam perto do Portfólio.
+							loading="lazy"
+							decoding="async"
+							fetchPriority="low"
 						/>
 					))}
 				</div>

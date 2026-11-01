@@ -20,6 +20,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "lenis/dist/lenis.css";
 import "./index.css";
 import "./i18n/i18n";
+import { redirectFirstEnglishVisit } from "./i18n/languageRedirect";
 
 const GLOBAL_RUNTIME_FALLBACK_ID = "global-runtime-fallback";
 
@@ -263,6 +264,12 @@ if (typeof globalThis.window !== "undefined") {
 }
 
 const MainApp: React.FC = () => {
+  // O HTML pré-renderizado (para buscadores e IAs) fica escondido até o
+  // primeiro commit do React, que substitui o conteúdo da raiz.
+  React.useLayoutEffect(() => {
+    globalThis.document.getElementById("root")?.removeAttribute("data-prerendered");
+  }, []);
+
   return (
     <React.StrictMode>
       <Provider store={store}>
@@ -287,7 +294,7 @@ const MainApp: React.FC = () => {
 
 const rootElement = globalThis.document.getElementById("root");
 
-if (rootElement) {
+if (rootElement && !redirectFirstEnglishVisit()) {
   try {
     ReactDOM.createRoot(rootElement).render(<MainApp />);
   } catch (error) {

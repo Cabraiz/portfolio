@@ -14,7 +14,7 @@ import { NAVBAR_HEIGHT_MOBILE } from './NavBar/navbar.constants';
 
 import "react-toastify/dist/ReactToastify.css";
 
-import TitleWebsite from "../pages/PrincipalPage/TitleWebsite/title_website";
+import useLandingSeoHead from "../features/seo/useLandingSeoHead";
 import { getLenisScrollSettings } from "../features/scroll/getLenisScrollSettings";
 import {
   getPathBySectionId,
@@ -154,6 +154,11 @@ function AppMobile() {
   const activeSectionId = useMemo<LandingSectionId | "">(() => {
     return getSectionIdByPath(location.pathname) ?? "";
   }, [location.pathname]);
+
+  useLandingSeoHead(
+    activeSectionId === "portfolio" ? "portfolio" : "home",
+    !isGameStandaloneSurface,
+  );
 
   const handleNavigateToSection = useCallback(
     (sectionId: LandingSectionId) => {
@@ -359,12 +364,6 @@ function AppMobile() {
       }}
     >
       <div className="app-lenis-content" style={mobileLayoutStyle}>
-        {!isGameStandaloneSurface ? (
-          <TitleWebsite
-            title1="Mateus Cardoso Cabral | Investidor em IA"
-            title2="Cabraiz | IA, Tecnologia e Software"
-          />
-        ) : null}
 
         {!isNavHidden && (
           <AppNavbar
