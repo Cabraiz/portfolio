@@ -1,13 +1,5 @@
 import type { CSSProperties } from "react";
 
-import profileImage from "@/assets/Mateus/home/hero-mobile-portrait.webp";
-import gmailIcon from "@/assets/Mateus/Icon/IconGmail.png";
-import instagramIcon from "@/assets/Mateus/Icon/IconInsta.png";
-import linkedInIcon from "@/assets/Mateus/Icon/IconLinkedIn.png";
-import whatsAppIcon from "@/assets/Mateus/Icon/IconWhatsApp.png";
-import meetIcon from "@/assets/Mateus/Icon/IconMeet.png";
-import whatsappQrSvg from "@/assets/Mateus/QRCode/whatsapp-contact-qr.svg";
-
 import bnbSeal from "@/assets/Mateus/Selos/BNB.svg";
 import uniforSeal from "@/assets/Mateus/Selos/UNIFOR.svg";
 import awsCertificationSeal from "@/assets/Mateus/Selos/aws-cloud-practitioner-horizontal-v2.svg";
@@ -24,30 +16,6 @@ export type SealItem = Readonly<{
   alt: string;
   cat: string;
   style?: CSSProperties;
-}>;
-
-export type SocialIconKey =
-  | "gmail"
-  | "instagram"
-  | "linkedin"
-  | "whatsapp"
-  | "meet";
-
-export type HomeMobileSocialLink = Readonly<{
-  id: string;
-  label: string;
-  ariaLabel: string;
-  href: string;
-  iconKey: SocialIconKey;
-  target?: "_self" | "_blank";
-  rel?: string;
-  gameOrbit?: Readonly<{
-    x: number;
-    y: number;
-    scale?: number;
-    delayMs?: number;
-    durationMs?: number;
-  }>;
 }>;
 
 export const COMPACT_DESKTOP_MEDIA_QUERY =
@@ -84,6 +52,10 @@ export function getContactEmailHref(language: ContactLanguage): string {
   return `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(EMAIL_SUBJECTS[language])}`;
 }
 
+// Link de agendamento (Calendly, Cal.com...). Preenchido, o botão principal
+// em inglês vira "BOOK A CALL"; vazio, continua o e-mail.
+export const BOOKING_URL = "";
+
 export const RESUME_HREFS: Readonly<Record<ContactLanguage, string>> = {
   pt: "/files/mateus-cabral-resume.pdf",
   en: "/files/mateus-cabral-resume-en.pdf",
@@ -92,78 +64,6 @@ export const RESUME_HREFS: Readonly<Record<ContactLanguage, string>> = {
 
 export const WHATSAPP_HREF = getWhatsAppHref("pt");
 export const RESUME_HREF = RESUME_HREFS.pt;
-
-export const WHATSAPP_QR_SRC = whatsappQrSvg;
-export const WHATSAPP_QR_ALT =
-  "QR Code para abrir conversa com Mateus no WhatsApp";
-
-export const MEET_QR_POPOVER_TITLE = "Escaneie e fale comigo no WhatsApp";
-export const MEET_QR_POPOVER_SUBTITLE =
-  "Aponte a câmera para o QR Code ou abra a conversa diretamente pelo botão abaixo.";
-export const MEET_QR_POPOVER_CTA_LABEL = "Abrir conversa";
-
-export const PROFILE_IMAGE = profileImage;
-export const PROFILE_IMAGE_ALT =
-  "Retrato de Mateus Cardoso Cabral";
-
-export const SOCIAL_ICONS = {
-  gmail: gmailIcon,
-  instagram: instagramIcon,
-  linkedin: linkedInIcon,
-  whatsapp: whatsAppIcon,
-  meet: meetIcon,
-} as const;
-
-export const HOME_MOBILE_SOCIAL_LINKS: readonly HomeMobileSocialLink[] = [
-  {
-    id: "linkedin",
-    label: "LinkedIn",
-    ariaLabel: "Abrir LinkedIn",
-    href: "https://www.linkedin.com/in/cabraiz/",
-    iconKey: "linkedin",
-    target: "_blank",
-    rel: "noreferrer noopener",
-    gameOrbit: {
-      x: 18,
-      y: 28,
-      scale: 1,
-      delayMs: 0,
-      durationMs: 6200,
-    },
-  },
-  {
-    id: "email",
-    label: "Email",
-    ariaLabel: "Enviar email",
-    href: "mailto:contact@cabraiz.com",
-    iconKey: "gmail",
-    target: "_self",
-    rel: "noopener noreferrer",
-    gameOrbit: {
-      x: 82,
-      y: 28,
-      scale: 1.04,
-      delayMs: 420,
-      durationMs: 6900,
-    },
-  },
-  {
-    id: "instagram",
-    label: "Instagram",
-    ariaLabel: "Abrir Instagram",
-    href: "https://www.instagram.com/cabraiz/",
-    iconKey: "instagram",
-    target: "_blank",
-    rel: "noreferrer noopener",
-    gameOrbit: {
-      x: 50,
-      y: 16,
-      scale: 0.98,
-      delayMs: 880,
-      durationMs: 6600,
-    },
-  },
-] as const;
 
 export const seals: readonly SealItem[] = [
   {

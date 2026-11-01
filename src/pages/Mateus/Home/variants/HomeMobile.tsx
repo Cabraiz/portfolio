@@ -57,13 +57,15 @@ function HomeMobile() {
         </div>
 
         <h1 ref={titleRef} id="mobile-home-title" className={styles.title}>
-          <span className={styles.titleLead}>{localizeLabel("Engenheiro")}</span>
-          <span className={styles.titleAccent}>{localizeLabel("IA & Full Stack")}</span>
+          {/* Português e inglês usam o título de mercado em inglês. */}
+          <span className={styles.titleLead}>{localizeLabel(contactLanguage === "es" ? "Engenheiro" : "Senior")}</span>
+          <span className={styles.titleAccent}>{localizeLabel(contactLanguage === "es" ? "IA & Full Stack" : "AI Engineer")}</span>
         </h1>
 
         <div ref={identityRef} className={styles.identity} data-home-motion="identity">
           <strong>{localizeLabel("Mateus Cabral")}</strong>
-          <span>{localizeLabel("Engenheiro de IA Sênior")}</span>
+          <span>{localizeLabel("Senior AI Engineer")}</span>
+          <span className={styles.availability} data-home-availability="">{localizeLabel("Remoto · CLT ou PJ")}</span>
         </div>
 
         <p ref={introRef} className={styles.intro}>

@@ -1,5 +1,4 @@
-// Conteúdo dos currículos em inglês e espanhol (mesmos fatos do currículo em
-// português, public/files/mateus-cabral-resume.pdf). Edite aqui e rode
+// Conteúdo dos currículos em inglês, português e espanhol (os mesmos fatos). Edite aqui e rode
 // `node scripts/resume/build-resumes.mjs` para gerar os PDFs.
 
 const contact = {
@@ -32,6 +31,7 @@ export const RESUMES = {
 		contact,
 		title: "Senior AI Engineer · Full Stack",
 		location: "Fortaleza, Brazil (UTC-3) · Remote",
+		availability: "Open to full-time roles via EOR (Deel, Remote) or contract work (B2B)",
 		headings: {
 			summary: "Summary",
 			experience: "Experience",
@@ -91,12 +91,99 @@ export const RESUMES = {
 		skills,
 		languages: "Portuguese — native · English — B2 (written corporate communication and technical presentations)",
 	},
+	pt: {
+		file: "mateus-cabral-resume.pdf",
+		lang: "pt-BR",
+		contact,
+		title: "Senior AI Engineer · Full Stack",
+		location: "Fortaleza (CE) · Remoto",
+		availability: "Disponível para CLT ou PJ, em regime remoto",
+		headings: {
+			summary: "Resumo",
+			experience: "Experiência profissional",
+			education: "Formação",
+			skills: "Competências técnicas",
+			languages: "Idiomas",
+		},
+		summary:
+			"Senior AI Engineer e desenvolvedor full stack com 13 anos de experiência em frontend, backend, cloud e DevOps, atuando em sistemas críticos, produtos SaaS e integrações complexas. Leva IA aplicada para produção — LLMs, sistemas multiagente, RAG e automação inteligente — com foco em confiabilidade, segurança e impacto de negócio. Experiência em micro-frontends, microsserviços, APIs e CI/CD, e em trabalho remoto para empresa canadense.",
+		experience: [
+			{
+				period: "2025 — Atual",
+				company: "Qualicorp",
+				place: "São Paulo, SP (remoto)",
+				role: "Senior Full Stack Software Engineer",
+				bullets: [
+					"Concepção e implementação de soluções de IA, com orquestração de agentes/LLMs, RAG, AI Coding Harness e Git Worktree, viabilizando 3–4 demandas em paralelo e aumento de até 4x nas entregas semanais na squad.",
+					"Criação e evolução de 3+ iniciativas com IA/LLMs e sustentação de mais de 60% do portfólio em produção com React, TypeScript, Node.js, Java/Spring Boot e AWS, abrangendo APIs REST, microsserviços, CI/CD, troubleshooting, gestão de incidentes e correções críticas.",
+				],
+			},
+			{
+				period: "2021 — 2025",
+				company: "SkipTheDishes",
+				place: "Winnipeg, Canadá (remoto)",
+				role: "Senior Software Developer",
+				bullets: [
+					"Desenvolvimento end-to-end e deploy de serviços backend, APIs REST e integrações para um novo módulo mobile com React Native, além da evolução de funcionalidades críticas, reduzindo em 31% o tempo de navegação do fluxo principal, 38% o carregamento inicial e 11% a taxa de abandono das telas modernizadas.",
+					"Migração e modernização de serviços com automação de IA aplicada, reduzindo em 36% o esforço operacional, acelerando em 28% a modernização técnica e aumentando a estabilidade das integrações em produção.",
+				],
+			},
+			{
+				period: "2017 — 2021",
+				company: "Banco do Nordeste (BNB)",
+				place: "Fortaleza, CE",
+				role: "Desenvolvedor Full Stack",
+				bullets: [
+					"Modernizei fluxos de boletos, cartões de crédito e transferências bancárias com React, Node.js e Java 11/Spring Boot, reforçando a estabilidade das jornadas financeiras e a confiabilidade dos serviços críticos.",
+					"Evolução de uma camada BFF com GraphQL, integrada ao core bancário legado via API Gateway, com RabbitMQ, Redis e Docker/Kubernetes/OpenShift, ampliando a integração entre sistemas, a resiliência e a eficiência operacional.",
+					"Laboratório de Novas Tecnologias: modernização de interfaces com Angular e React em ambiente legado Java 8 + JSF (PrimeFaces).",
+				],
+			},
+			{
+				period: "2015 — 2017",
+				company: "Konvix Tecnologia",
+				place: "São José do Rio Preto, SP",
+				role: "Desenvolvedor Full Stack",
+				bullets: [
+					"Modernizei módulos do ERP SaaS multiempresa com React, Java e Node.js, aprimorando fluxos de PDV, estoque e fiscal, performance e consistência operacional.",
+					"Evoluí o backend para arquitetura stateless e multi-tenant, com APIs REST autenticadas por JWT e operação em AWS (Docker, ECS/EKS, RDS/PostgreSQL, S3), melhorando escalabilidade, deploys e consultas.",
+				],
+			},
+		],
+		education: [
+			["Mestrado em Informática Aplicada", "UNIFOR", "2023 — 2025"],
+			["Bacharelado em Ciência da Computação", "UNIFOR", "2015 — 2020"],
+		],
+		skills: skills.map(([area, value]) => [
+			{
+				AI: "IA",
+				Cloud: "Cloud",
+				Containers: "Contêineres",
+				Frontend: "Frontend",
+				Mobile: "Mobile",
+				Backend: "Backend",
+				Data: "Dados",
+				Messaging: "Mensageria",
+				Testing: "Testes",
+				Observability: "Observabilidade",
+			}[area],
+			value
+				.replaceAll(" yrs", " anos")
+				.replace(
+					"LLMs, multi-agent systems, RAG, agent orchestration, AI coding harnesses",
+					"LLMs, sistemas multiagente, RAG, orquestração de agentes, AI coding harness"
+				)
+				.replace("Docker and Kubernetes", "Docker e Kubernetes"),
+		]),
+		languages: "Português — nativo · Inglês — B2 (comunicação escrita em ambiente corporativo e apresentações técnicas)",
+	},
 	es: {
 		file: "mateus-cabral-resume-es.pdf",
 		lang: "es",
 		contact,
 		title: "Ingeniero de IA Senior · Full Stack",
 		location: "Fortaleza, Brasil (UTC-3) · Remoto",
+		availability: "Disponible para contrato internacional (Deel/EOR) o como contractor, con pagos en USD",
 		headings: {
 			summary: "Perfil",
 			experience: "Experiencia",

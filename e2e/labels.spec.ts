@@ -30,8 +30,8 @@ for(const viewport of [{width:390,height:844},{width:1366,height:720}]){
     await connectLanguageTest(page);
     await page.evaluate(()=>Reflect.get(window,'labelTest').changeLanguage('pt'));
     await expect(page.locator('html')).toHaveAttribute('lang','pt-BR');
-    if(viewport.width<992)await expect(page.getByText('Engenheiro de IA Sênior',{exact:true})).toBeVisible();
-    else await expect(page.getByText('Sênior',{exact:true})).toBeVisible();
+    if(viewport.width<992)await expect(page.getByText('Senior AI Engineer',{exact:true})).toBeVisible();
+    else await expect(page.getByText('Senior',{exact:true})).toBeVisible();
     await page.evaluate(()=>Reflect.get(window,'labelTest').changeLanguage('es'));
     await expect(page.locator('html')).toHaveAttribute('lang','es');
     if(viewport.width<992)await expect(page.getByText('Ingeniero de IA Senior',{exact:true})).toBeVisible();

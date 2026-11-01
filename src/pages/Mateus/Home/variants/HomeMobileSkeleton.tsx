@@ -3,6 +3,7 @@ import useProgressiveSource from '@/features/media/useProgressiveSource';
 import portraitPreview from '@/assets/Mateus/home/hero-mobile-portrait-preview.webp';
 import { MOBILE_PORTRAIT_LQIP } from '../data/heroPlaceholders';
 import { localizeLabel } from '@/i18n/labels';
+import i18n from '@/i18n/i18n';
 import home from './HomeMobile.module.css';
 import styles from './HomeMobileSkeleton.module.css';
 
@@ -21,18 +22,20 @@ export function HomeMobilePortraitSkeleton(){
 }
 
 export default function HomeMobileSkeleton({className='',minHeight}:{className?:string;minHeight?:CSSProperties['minHeight']}){
+  const isSpanish=(i18n.resolvedLanguage??'').startsWith('es');
   return <div className={`${home.page} ${styles.root} ${className}`} style={{minHeight}} aria-hidden="true" data-skeleton-variant="hero-mobile">
     <section className={home.hero}>
       <div className={home.eyebrow} data-home-skeleton-part="eyebrow">
         {['TECNOLOGIA','PESSOAS','IMPACTO'].map(text=><Text key={text} text={text}/>)}
       </div>
       <div className={home.title} data-home-skeleton-part="title">
-        <Text text="Engenheiro" className={`${home.titleLead} ${styles.lead}`}/>
-        <Text text="IA & Full Stack" className={home.titleAccent}/>
+        <Text text={isSpanish?'Engenheiro':'Senior'} className={`${home.titleLead} ${styles.lead}`}/>
+        <Text text={isSpanish?'IA & Full Stack':'AI Engineer'} className={home.titleAccent}/>
       </div>
       <div className={home.identity} data-home-skeleton-part="identity">
         <strong><Text text="Mateus Cabral"/></strong>
-        <Text text="Engenheiro de IA Sênior"/>
+        <Text text="Senior AI Engineer"/>
+        <Text text="Remoto · CLT ou PJ" className={home.availability}/>
       </div>
       <p className={home.intro} data-home-skeleton-part="intro">
         {['Transformando','ideias em','produtos reais,','do código ao','impacto.'].map(text=><Text key={text} text={text} className={home.introLine}/>)}

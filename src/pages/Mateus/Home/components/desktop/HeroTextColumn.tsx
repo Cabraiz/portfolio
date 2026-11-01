@@ -9,6 +9,7 @@ import WhatsAppSignalButton from "../../../shared/WhatsAppSignalButton/WhatsAppS
 import WhatsAppHeroSlot from "../../../shared/WhatsAppSignalButton/WhatsAppHeroSlot";
 
 import {
+	BOOKING_URL,
 	type ContactLanguage,
 	getContactEmailHref,
 	getWhatsAppHref,
@@ -160,10 +161,12 @@ export default function HeroTextColumn({
 
 		return (
 			<CTAButton
-				label={localizeLabel("E-MAIL")}
+				label={localizeLabel(BOOKING_URL ? "AGENDAR CONVERSA" : "E-MAIL")}
 				backLabel={localizeLabel("VAMOS CONVERSAR")}
-				ariaLabel={localizeLabel("Enviar e-mail para Mateus")}
-				href={getContactEmailHref(language)}
+				ariaLabel={localizeLabel(BOOKING_URL ? "AGENDAR CONVERSA" : "Enviar e-mail para Mateus")}
+				href={BOOKING_URL || getContactEmailHref(language)}
+				target={BOOKING_URL ? "_blank" : undefined}
+				rel={BOOKING_URL ? "noopener noreferrer" : undefined}
 				variant="heroPrimary"
 				size={isCompactDesktop ? "compact" : "default"}
 				align="center"
@@ -192,7 +195,7 @@ export default function HeroTextColumn({
 
 	return (
 		<Col md={5} style={heroTextColumnStyle} className="px-0">
-			<div style={seniorTitleStyle} data-home-motion="eyebrow">{localizeLabel("Sênior")}</div>
+			<div style={seniorTitleStyle} data-home-motion="eyebrow">{localizeLabel("Senior")}</div>
 
 			<div className="font-sequel" style={roleContainerStyle} data-home-motion="role">
 				<RoleTitle />

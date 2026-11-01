@@ -13,7 +13,7 @@ for(const viewport of viewports)test(`home skeleton ${viewport.width}x${viewport
     const gate=new Promise<void>(resolve=>{release=resolve;});
     await page.route(/\/HomeMobile(?:-[\w-]+)?\.(?:tsx|js)(?:\?.*)?$/,async route=>{await gate;await route.continue();});
     if(attempt)await page.reload({waitUntil:'domcontentloaded'});
-    else await page.goto('/home',{waitUntil:'domcontentloaded'});
+    else await page.goto(viewport.language==='en'?'/en/home':'/home',{waitUntil:'domcontentloaded'});
     const skeleton=page.locator('#home [data-skeleton-variant]');
     await expect(skeleton).toBeVisible();
     await page.evaluate(()=>document.fonts.ready);
