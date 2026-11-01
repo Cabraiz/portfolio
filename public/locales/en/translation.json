@@ -136,7 +136,6 @@
     "ui_bfccce4e64ed": "West Africa",
     "ui_20d1a5eb0b1a": "United States",
     "ui_150a1552e712": "UNITED STATES",
-    "ui_37b030b12460": "Lisbon",
     "ui_fc30e2a579cd": "Europe",
     "ui_c69880c17af6": "Nexovare management dashboard preview",
     "ui_6ece9b11844d": "NX monogram for the Nexovare platform",
@@ -520,6 +519,7 @@
     "ui_ace51a8119a5": "AI Engineer",
     "ui_92613a8f4340": "Senior",
     "ui_b3c10e7cda15": "Remote · UTC-3 · EOR or B2B",
-    "ui_3901571f8940": "BOOK A CALL"
+    "ui_3901571f8940": "BOOK A CALL",
+    "ui_90c8664a3f6a": "Centro Region"
   }
 }

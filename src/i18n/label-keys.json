@@ -70,7 +70,6 @@
   "África Ocidental": "ui_bfccce4e64ed",
   "Estados Unidos": "ui_20d1a5eb0b1a",
   "ESTADOS UNIDOS": "ui_150a1552e712",
-  "Lisboa": "ui_37b030b12460",
   "Europa": "ui_fc30e2a579cd",
   "Preview do painel de gestão Nexovare": "ui_c69880c17af6",
   "Monograma NX do ecossistema Nexovare": "ui_6ece9b11844d",
@@ -452,5 +451,6 @@
   "AI Engineer": "ui_ace51a8119a5",
   "Senior": "ui_92613a8f4340",
   "Remoto · CLT ou PJ": "ui_b3c10e7cda15",
-  "AGENDAR CONVERSA": "ui_3901571f8940"
+  "AGENDAR CONVERSA": "ui_3901571f8940",
+  "Região Centro": "ui_90c8664a3f6a"
 }

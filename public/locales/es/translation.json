@@ -136,7 +136,6 @@
     "ui_bfccce4e64ed": "África Occidental",
     "ui_20d1a5eb0b1a": "Estados Unidos",
     "ui_150a1552e712": "ESTADOS UNIDOS",
-    "ui_37b030b12460": "Lisboa",
     "ui_fc30e2a579cd": "Europa",
     "ui_c69880c17af6": "Vista previa del panel de gestión de Nexovare",
     "ui_6ece9b11844d": "Monograma NX de la plataforma Nexovare",
@@ -520,6 +519,7 @@
     "ui_ace51a8119a5": "Ingeniero de IA",
     "ui_92613a8f4340": "Senior",
     "ui_b3c10e7cda15": "Remoto · UTC-3 · USD",
-    "ui_3901571f8940": "AGENDAR LLAMADA"
+    "ui_3901571f8940": "AGENDAR LLAMADA",
+    "ui_90c8664a3f6a": "Región Centro"
   }
 }

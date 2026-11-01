@@ -70,7 +70,6 @@
   ["África Ocidental", "West Africa"],
   ["Estados Unidos", "United States"],
   ["ESTADOS UNIDOS", "UNITED STATES"],
-  ["Lisboa", "Lisbon"],
   ["Europa", "Europe"],
   ["Preview do painel de gestão Nexovare", "Nexovare management dashboard preview"],
   ["Monograma NX do ecossistema Nexovare", "NX monogram for the Nexovare platform"],
@@ -452,5 +451,6 @@
   ["AI Engineer", "AI Engineer"],
   ["Senior", "Senior"],
   ["Remoto · CLT ou PJ", "Remote · UTC-3 · EOR or B2B"],
-  ["AGENDAR CONVERSA", "BOOK A CALL"]
+  ["AGENDAR CONVERSA", "BOOK A CALL"],
+  ["Região Centro", "Centro Region"]
 ]
