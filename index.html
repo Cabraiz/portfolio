@@ -45,11 +45,81 @@
       #root[data-prerendered] {
         visibility: hidden;
       }
+
+      /* Cortina de espera: cobre a tela desde o primeiro quadro até o app
+         montar a estrutura da página (o esqueleto e a foto progressiva
+         assumem dali em diante) e então sobe. */
+      #boot-curtain {
+        position: fixed;
+        inset: 0;
+        z-index: 2147483000;
+        display: grid;
+        place-items: center;
+        background: #050505;
+        pointer-events: none;
+        transition: transform 720ms cubic-bezier(0.76, 0, 0.24, 1);
+      }
+
+      #boot-curtain[data-lifted] {
+        transform: translateY(-100%);
+      }
+
+      #boot-curtain .boot-curtain__mark {
+        display: grid;
+        justify-items: center;
+        gap: 18px;
+      }
+
+      #boot-curtain img {
+        width: 64px;
+        height: 64px;
+        mix-blend-mode: lighten;
+        animation: boot-curtain-breathe 1.6s ease-in-out infinite alternate;
+      }
+
+      #boot-curtain .boot-curtain__bar {
+        position: relative;
+        width: 96px;
+        height: 2px;
+        overflow: hidden;
+        border-radius: 2px;
+        background: rgba(255, 255, 255, 0.12);
+      }
+
+      #boot-curtain .boot-curtain__bar::after {
+        position: absolute;
+        inset: 0;
+        width: 40%;
+        content: "";
+        border-radius: 2px;
+        background: #f41112;
+        animation: boot-curtain-progress 1.1s ease-in-out infinite;
+      }
+
+      @keyframes boot-curtain-breathe {
+        to { opacity: 0.62; transform: scale(0.96); }
+      }
+
+      @keyframes boot-curtain-progress {
+        from { transform: translateX(-100%); }
+        to { transform: translateX(250%); }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        #boot-curtain { transition: opacity 240ms ease; }
+        #boot-curtain[data-lifted] { transform: none; opacity: 0; }
+        #boot-curtain img,
+        #boot-curtain .boot-curtain__bar::after { animation: none; }
+      }
     </style>
     <noscript>
       <style>
         #root[data-prerendered] {
           visibility: visible;
+        }
+
+        #boot-curtain {
+          display: none;
         }
       </style>
     </noscript>
@@ -78,7 +148,53 @@
     <noscript>
       Mateus Cardoso Cabral is a Senior AI Engineer and full stack developer based in Fortaleza, Brazil (UTC-3), with 13 years of experience across frontend, backend, cloud and applied AI. Enable JavaScript to browse the full portfolio at cabraiz.com.
     </noscript>
+    <div id="boot-curtain" aria-hidden="true">
+      <div class="boot-curtain__mark">
+        <img src="/android-chrome-192x192.png" alt="" width="64" height="64" />
+        <div class="boot-curtain__bar"></div>
+      </div>
+    </div>
     <div id="root"></div>
+    <script>
+      // Sobe a cortina quando o React já substituiu o HTML pré-renderizado e
+      // montou a estrutura da página (na landing, o <main> das seções; nas
+      // outras rotas, qualquer conteúdo). Limite de segurança: 15 s.
+      (function () {
+        var curtain = document.getElementById("boot-curtain");
+        var root = document.getElementById("root");
+        if (!curtain || !root) return;
+        var landing = /^\/(?:(?:en|es)(?:\/(?:home|portfolio))?|home|portfolio|servicos|technologies|contact)?\/?$/;
+        var lifted = false;
+        function lift() {
+          if (lifted) return;
+          lifted = true;
+          curtain.setAttribute("data-lifted", "");
+          setTimeout(function () {
+            if (curtain.parentNode) curtain.parentNode.removeChild(curtain);
+          }, 900);
+        }
+        function ready() {
+          if (root.hasAttribute("data-prerendered")) return false;
+          if (root.querySelector("main[data-landing-viewport]")) return true;
+          return !landing.test(location.pathname) && root.childElementCount > 0;
+        }
+        var observer = new MutationObserver(function () {
+          if (!ready()) return;
+          observer.disconnect();
+          lift();
+        });
+        observer.observe(root, {
+          childList: true,
+          subtree: true,
+          attributes: true,
+          attributeFilter: ["data-prerendered"],
+        });
+        setTimeout(function () {
+          observer.disconnect();
+          lift();
+        }, 15000);
+      })();
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
