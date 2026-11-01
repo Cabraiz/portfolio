@@ -33,21 +33,29 @@ test("GitHub Pages fallback redirects without painting the old 404 screen", asyn
   expect(await deployedFallback.text()).toBe(rootFallback);
 });
 
-for (const route of [
-  "/home",
-  "/portfolio",
-  "/servicos",
-  "/roadmap",
-  "/technologies",
-  "/live",
-  "/contact",
-]) {
+// Início e Portfólio (pt e en) chegam pré-renderizados, com o conteúdo
+// legível por buscadores e IAs antes do JavaScript.
+for (const route of ["/home", "/portfolio", "/en/home", "/en/portfolio"]) {
   test(`${route} has a direct GitHub Pages document for refresh`, async ({
     request,
   }) => {
     const response = await request.get(route);
     expect(response.status()).toBe(200);
     expect(response.url()).toMatch(new RegExp(`${route}/?$`));
-    expect(await response.text()).toContain('<div id="root"></div>');
+    expect(await response.text()).toContain('<div id="root" data-prerendered="true">');
+  });
+}
+
+// Rotas aposentadas respondem com um documento que leva ao Início e não é
+// indexado.
+for (const route of ["/servicos", "/roadmap", "/technologies", "/live", "/contact"]) {
+  test(`${route} redirects to the home document without being indexed`, async ({
+    request,
+  }) => {
+    const response = await request.get(route);
+    expect(response.status()).toBe(200);
+    const html = await response.text();
+    expect(html).toContain('<meta name="robots" content="noindex,follow" />');
+    expect(html).toMatch(/<meta http-equiv="refresh" content="0; url=[^"]*\/home\/" \/>/);
   });
 }

@@ -1,7 +1,24 @@
 {
   "siteUrl": "https://cabraiz.com",
   "siteName": "Cabraiz",
-  "image": "https://cabraiz.com/assets/Mateus/mateus-cardoso-cabral-perfil-seo.png",
+  "portrait": {
+    "url": "https://cabraiz.com/images/mateus-cardoso-cabral.jpg",
+    "width": 1024,
+    "height": 1024,
+    "caption": {
+      "pt": "Mateus Cardoso Cabral, Engenheiro de Software Full Stack em Fortaleza (CE)",
+      "en": "Mateus Cardoso Cabral, Full Stack Software Engineer in Fortaleza, Brazil"
+    }
+  },
+  "shareImage": {
+    "url": "https://cabraiz.com/images/mateus-cardoso-cabral-og.jpg",
+    "width": 1200,
+    "height": 630,
+    "alt": {
+      "pt": "Foto de Mateus Cardoso Cabral, Engenheiro de Software Full Stack",
+      "en": "Photo of Mateus Cardoso Cabral, Full Stack Software Engineer"
+    }
+  },
   "person": {
     "name": "Mateus Cardoso Cabral",
     "alternateName": ["Mateus Cabral", "Cabraiz"],
