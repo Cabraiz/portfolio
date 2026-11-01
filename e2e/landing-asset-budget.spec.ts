@@ -40,16 +40,21 @@ function sumBytes(images: readonly LoadedImage[]): number {
 }
 
 async function showSection(page: Page, sectionId: string): Promise<void> {
-	await page
-		.locator(`section[data-page-section='true']#${sectionId}`)
-		.evaluate((element) => {
-			element.scrollIntoView({ behavior: "instant", block: "start" });
-		});
-	await expect(page.locator("main[data-landing-viewport]")).toHaveAttribute(
-		"data-active-section",
-		sectionId,
-		{ timeout: 6_000 }
-	);
+	// Rola de novo se a primeira rolagem aconteceu antes de o app ligar o
+	// detector de seção (no CI lento a página ainda está montando); falha se
+	// a seção nunca ficar ativa.
+	await expect(async () => {
+		await page
+			.locator(`section[data-page-section='true']#${sectionId}`)
+			.evaluate((element) => {
+				element.scrollIntoView({ behavior: "instant", block: "start" });
+			});
+		await expect(page.locator("main[data-landing-viewport]")).toHaveAttribute(
+			"data-active-section",
+			sectionId,
+			{ timeout: 3_000 }
+		);
+	}).toPass({ timeout: 15_000 });
 }
 
 for (const viewport of viewports) {
