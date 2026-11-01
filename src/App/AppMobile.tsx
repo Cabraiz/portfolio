@@ -40,6 +40,41 @@ const MOBILE_HOME_BACKGROUND =
   "radial-gradient(circle at 78% 22%, rgba(255, 255, 255, 0.78), transparent 34%), linear-gradient(115deg, rgba(255, 255, 255, 0.42), transparent 42%), #f4efe5";
 const MOBILE_PORTFOLIO_BACKGROUND = "#dcefeb";
 
+/** Se alguma parte da seção do Início está visível na tela. */
+function useHomeSectionOnScreen(activeSectionId: string): boolean {
+  const [onScreen, setOnScreen] = useState(true);
+
+  useEffect(() => {
+    if (typeof IntersectionObserver === "undefined") return undefined;
+    let observer: IntersectionObserver | null = null;
+    let frameId = 0;
+    let attempts = 0;
+
+    const attach = () => {
+      const home = document.getElementById("home");
+      if (!home) {
+        // A seção monta depois do primeiro quadro (rota carregada sob demanda).
+        if (attempts++ < 120) frameId = requestAnimationFrame(attach);
+        return;
+      }
+      observer = new IntersectionObserver(
+        ([entry]) => setOnScreen(Boolean(entry?.isIntersecting)),
+        // Encostar na borda da tela não conta como visível.
+        { threshold: 0, rootMargin: "-1px 0px -1px 0px" }
+      );
+      observer.observe(home);
+    };
+    attach();
+
+    return () => {
+      cancelAnimationFrame(frameId);
+      observer?.disconnect();
+    };
+  }, [activeSectionId]);
+
+  return onScreen;
+}
+
 const links: readonly LandingSectionId[] = ["portfolio"];
 
 function getBrowserWindow(): Window | null {
@@ -327,9 +362,15 @@ function AppMobile() {
     } as React.CSSProperties;
   }, []);
 
+  // O Portfólio pinta o próprio fundo; o do Início vem daqui. Enquanto
+  // qualquer parte do Início estiver na tela, o fundo continua o dele, para a
+  // cor não mudar de repente no meio da rolagem (a URL já vira /portfolio
+  // antes do logo chegar ao mapa).
+  const isHomeOnScreen = useHomeSectionOnScreen(activeSectionId);
+
   const mobilePageContentStyle = useMemo<React.CSSProperties>(() => {
     const activePageBackground =
-      activeSectionId === "home"
+      activeSectionId === "home" || (activeSectionId === "portfolio" && isHomeOnScreen)
         ? MOBILE_HOME_BACKGROUND
         : activeSectionId === "portfolio"
           ? MOBILE_PORTFOLIO_BACKGROUND
@@ -347,7 +388,7 @@ function AppMobile() {
       boxSizing: "border-box",
       background: activePageBackground,
     };
-  }, [activeSectionId]);
+  }, [activeSectionId, isHomeOnScreen]);
 
   return (
     <ReactLenis
