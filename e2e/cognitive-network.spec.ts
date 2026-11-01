@@ -18,7 +18,7 @@ for (const viewport of [
 			"home",
 			{ timeout: 15_000 }
 		);
-		await expect(page).toHaveURL(/\/home$/);
+		await expect(page).toHaveURL(/\/home\/?$/);
 		await expect(page.locator("section#technologies")).toHaveCount(0);
 		await expect(
 			page.locator('[data-cognitive-network-root="true"]')

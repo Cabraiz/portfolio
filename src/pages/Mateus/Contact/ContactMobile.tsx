@@ -2,7 +2,7 @@ import { localizeLabel, useLabelLanguage } from '@/i18n/labels';
 import { type FC } from "react";
 import { Image } from "react-bootstrap";
 
-import perfil from "../../../assets/Mateus/perfil.webp";
+import perfil from "../../../assets/Mateus/home/hero-mobile-portrait.webp";
 import styles from "./ContactMobile.module.css";
 
 const CONTACT_ITEMS = [

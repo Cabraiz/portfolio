@@ -449,8 +449,7 @@ function HomeDesktop() {
 				<img
 					ref={backgroundRef}
 					src={selectedHeroBackground}
-					alt={localizeLabel("")}
-					aria-hidden="true"
+					alt={localizeLabel("Retrato de Mateus Cardoso Cabral")}
 					data-hero-option={selectedHeroOption}
 					data-hero-crop={
 						selectedHeroOption === 6 ? "css-neck-reduction" : "source-frame"

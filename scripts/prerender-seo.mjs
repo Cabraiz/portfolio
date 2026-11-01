@@ -27,6 +27,9 @@ const seo = JSON.parse(
 	await readFile(path.join(projectRoot, "src/features/seo/seo-pages.json"), "utf8")
 );
 const shellHtml = await readFile(path.join(distDirectory, "index.html"), "utf8");
+if (shellHtml.includes('data-prerendered="true"')) {
+	throw new Error("dist já foi pré-renderizado: rode o build (vite build) de novo antes.");
+}
 const buildDate = new Date().toISOString().slice(0, 10);
 const LANGUAGES = ["pt", "en"];
 const PAGE_IDS = ["home", "portfolio"];
@@ -171,7 +174,7 @@ function personNode(language) {
 		jobTitle: person.jobTitle[language],
 		description: person.description[language],
 		url: absolute(seo.pages.home[language].path),
-		image: seo.image,
+		image: { "@id": `${seo.siteUrl}/#portrait` },
 		email: `mailto:${person.email}`,
 		address: {
 			"@type": "PostalAddress",
@@ -181,6 +184,28 @@ function personNode(language) {
 		},
 		knowsAbout: person.knowsAbout,
 		sameAs: person.sameAs,
+	};
+}
+
+// Foto oficial: a mesma URL em Person.image, no sitemap de imagens e no
+// llms.txt, para buscadores e assistentes ligarem o rosto ao nome.
+function portraitNode(language) {
+	const { portrait, person } = seo;
+	return {
+		"@type": "ImageObject",
+		"@id": `${seo.siteUrl}/#portrait`,
+		url: portrait.url,
+		contentUrl: portrait.url,
+		width: portrait.width,
+		height: portrait.height,
+		encodingFormat: "image/jpeg",
+		caption: portrait.caption[language],
+		name: person.name,
+		representativeOfPage: true,
+		creator: { "@id": `${seo.siteUrl}/#person` },
+		creditText: person.name,
+		copyrightNotice: `© ${person.name}`,
+		about: { "@id": `${seo.siteUrl}/#person` },
 	};
 }
 
@@ -198,6 +223,7 @@ function structuredData(pageId, language, projects) {
 			publisher: { "@id": `${seo.siteUrl}/#person` },
 		},
 		personNode(language),
+		portraitNode(language),
 	];
 
 	if (pageId === "home") {
@@ -211,6 +237,8 @@ function structuredData(pageId, language, projects) {
 			dateModified: buildDate,
 			isPartOf: { "@id": `${seo.siteUrl}/#website` },
 			mainEntity: { "@id": `${seo.siteUrl}/#person` },
+			primaryImageOfPage: { "@id": `${seo.siteUrl}/#portrait` },
+			image: { "@id": `${seo.siteUrl}/#portrait` },
 		});
 	} else {
 		graph.push({
@@ -259,7 +287,8 @@ function headBlock(pageId, language, projects, preloads) {
 	const other = language === "pt" ? "en" : "pt";
 	const title = escapeHtml(page.title);
 	const description = escapeHtml(page.description);
-	const imageAlt = escapeHtml(language === "pt" ? `Retrato de ${seo.person.name}` : `Portrait of ${seo.person.name}`);
+	const share = seo.shareImage;
+	const imageAlt = escapeHtml(share.alt[language]);
 	return `<!-- seo:start (gerado por scripts/prerender-seo.mjs) -->
     <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
     <meta name="author" content="${escapeHtml(seo.person.name)}" />
@@ -277,15 +306,19 @@ function headBlock(pageId, language, projects, preloads) {
     <meta property="og:url" content="${url}" />
     <meta property="og:title" content="${title}" />
     <meta property="og:description" content="${description}" />
-    <meta property="og:image" content="${seo.image}" />
-    <meta property="og:image:type" content="image/png" />
+    <link rel="image_src" href="${seo.portrait.url}" />
+    <meta property="og:image" content="${share.url}" />
+    <meta property="og:image:secure_url" content="${share.url}" />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:width" content="${share.width}" />
+    <meta property="og:image:height" content="${share.height}" />
     <meta property="og:image:alt" content="${imageAlt}" />
     <meta property="profile:first_name" content="${escapeHtml(seo.person.givenName)}" />
     <meta property="profile:last_name" content="${escapeHtml(seo.person.familyName)}" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="${title}" />
     <meta name="twitter:description" content="${description}" />
-    <meta name="twitter:image" content="${seo.image}" />
+    <meta name="twitter:image" content="${share.url}" />
     <meta name="twitter:image:alt" content="${imageAlt}" />
 ${preloads
 	.map(
@@ -341,7 +374,13 @@ function sitemapXml() {
     <lastmod>${buildDate}</lastmod>
     <xhtml:link rel="alternate" hreflang="pt-BR" href="${absolute(seo.pages[pageId].pt.path)}" />
     <xhtml:link rel="alternate" hreflang="en" href="${absolute(seo.pages[pageId].en.path)}" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="${absolute(seo.pages[pageId].pt.path)}" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="${absolute(seo.pages[pageId].pt.path)}" />${
+				pageId === "home"
+					? `
+    <image:image><image:loc>${seo.portrait.url}</image:loc></image:image>
+    <image:image><image:loc>${seo.shareImage.url}</image:loc></image:image>`
+					: ""
+			}
   </url>`
 		)
 	);
@@ -350,7 +389,7 @@ function sitemapXml() {
     <lastmod>${buildDate}</lastmod>
   </url>`);
 	return `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
 ${entries.join("\n")}
 </urlset>
 `;
@@ -383,6 +422,11 @@ Site: ${seo.siteUrl} (português em /home/, inglês em /en/home/).
 - [Home (English)](${absolute(seo.pages.home.en.path)}): ${seo.pages.home.en.description}
 - [Portfolio (English)](${absolute(seo.pages.portfolio.en.path)}): ${seo.pages.portfolio.en.description}
 - [Currículo / Résumé (PDF)](${absolute(RESUME_PATH)})
+
+## Foto / Photo
+
+- [Foto oficial de ${person.name} / Official photo](${seo.portrait.url}): ${seo.portrait.caption.pt}
+- [Foto horizontal / Wide photo](${seo.shareImage.url})
 
 ## Contato / Contact
 

@@ -104,7 +104,7 @@ function HomeMobile() {
           ref={portraitRef}
           className={styles.portrait}
           src={portrait}
-          alt={localizeLabel("Mateus Cabral")}
+          alt={localizeLabel("Retrato de Mateus Cardoso Cabral")}
           width={1024}
           height={1536}
           onLoad={(event) => {

@@ -1,6 +1,6 @@
 import type { CSSProperties } from "react";
 
-import profileImage from "@/assets/Mateus/perfil.webp";
+import profileImage from "@/assets/Mateus/home/hero-mobile-portrait.webp";
 import gmailIcon from "@/assets/Mateus/Icon/IconGmail.png";
 import instagramIcon from "@/assets/Mateus/Icon/IconInsta.png";
 import linkedInIcon from "@/assets/Mateus/Icon/IconLinkedIn.png";

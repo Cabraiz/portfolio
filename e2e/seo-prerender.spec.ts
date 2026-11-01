@@ -52,6 +52,42 @@ for (const pageId of ["home", "portfolio"] as const) {
 	}
 }
 
+// A foto oficial precisa existir e estar ligada ao nome em todo lugar que
+// buscadores e assistentes leem: <img alt>, og:image, JSON-LD, sitemap e llms.txt.
+test("foto oficial é publicada e ligada ao nome", async ({ request }) => {
+	const local = (url: string) => url.replace(seo.siteUrl, "");
+	for (const image of [seo.portrait, seo.shareImage]) {
+		const response = await request.get(local(image.url));
+		expect(response.status()).toBe(200);
+		expect(response.headers()["content-type"]).toContain("image/jpeg");
+	}
+
+	for (const language of ["pt", "en"] as const) {
+		const html = await (await request.get(seo.pages.home[language].path)).text();
+		expect(html).toContain(`<meta property="og:image" content="${seo.shareImage.url}" />`);
+		expect(html).toContain(`<link rel="image_src" href="${seo.portrait.url}" />`);
+		const body = html.slice(html.indexOf("<body"));
+		expect(body).toMatch(
+			language === "pt"
+				? /<img alt="Retrato de Mateus Cardoso Cabral"/
+				: /<img alt="Portrait of Mateus Cardoso Cabral"/
+		);
+		const graph = JSON.parse(
+			html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)![1]
+		)["@graph"];
+		const portrait = graph.find((node: { "@type": string }) => node["@type"] === "ImageObject");
+		expect(portrait.contentUrl).toBe(seo.portrait.url);
+		expect(portrait.creditText).toBe(seo.person.name);
+		const person = graph.find((node: { "@type": string }) => node["@type"] === "Person");
+		expect(person.image["@id"]).toBe(portrait["@id"]);
+	}
+
+	const sitemap = await (await request.get("/sitemap.xml")).text();
+	expect(sitemap).toContain(`<image:loc>${seo.portrait.url}</image:loc>`);
+	const llms = await (await request.get("/llms.txt")).text();
+	expect(llms).toContain(seo.portrait.url);
+});
+
 test("sitemap, robots, llms.txt e rotas antigas", async ({ request }) => {
 	const sitemap = await (await request.get("/sitemap.xml")).text();
 	const locations = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map((match) => match[1]);
