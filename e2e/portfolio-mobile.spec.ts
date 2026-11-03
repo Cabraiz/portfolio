@@ -15,6 +15,9 @@ const mobileViewports = [
 test("mantém o portfólio mobile completo dentro de diferentes telas", async ({
 	browser,
 }) => {
+	// Percorre todas as telas de mobileViewports em sequência; 30 s ficava no
+	// limite (≈29 s quando passa).
+	test.setTimeout(90_000);
 	const baseURL = test.info().project.use.baseURL as string;
 
 	for (const viewport of mobileViewports) {
