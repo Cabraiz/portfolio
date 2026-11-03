@@ -5,7 +5,7 @@ const catalog=JSON.parse(readFileSync('src/i18n/label-catalog.json','utf8')) as 
 const projects = [
   {id:'erp-varejo',name:'NEXOVARE',subtitle:'Ecossistema comercial',year:'2021',asset:'nexovare'},
   {id:'app-bank',name:'APP BANCO',subtitle:'Experiência bancária mobile',year:'2022',asset:'app-banco'},
-  {id:'guine-bissau-commerce',name:'BIDEIRAS',subtitle:'Comércio digital internacional',year:'2024',asset:'bideiras'},
+  {id:'guine-bissau-commerce',name:'BIDEIRAS',subtitle:'Comércio digital internacional',year:'2024',asset:'bideiras',assetVersion:2},
   {id:'app-barber',name:'APP BARBEARIA',subtitle:'Agenda e recorrência',year:'2023',asset:'app-barbearia'},
   {id:'central-clube-livro',name:'Entre Paginas',subtitle:'Comunidade editorial',year:'2026',asset:'entre-paginas',assetVersion:2},
   {id:'site-adv',name:'Wagner Adv',subtitle:'Presença institucional',year:'2020',asset:'walter-adv'},
