@@ -1,14 +1,14 @@
 import imagemNexovare from "../../../assets/Mateus/portfolio/nexovare-dashboard-preview-v3.webp";
 import imagem2 from "../../../assets/Mateus/portfolio/innomof-banking-app-premium-v2.webp";
 import imagemGuineBissauCommerce from "../../../assets/Mateus/portfolio/bideiras-marketplace-preview-v2.webp";
-import imagem3 from "../../../assets/Mateus/portfolio/imagem3-barbearia-v3.webp";
+import imagemClockRight from "../../../assets/Mateus/portfolio/clockright-home-preview-v1.webp";
 import imagemCentralClube from "../../../assets/Mateus/portfolio/entre-paginas-home-preview-v2.webp";
 import imagem4 from "../../../assets/Mateus/portfolio/imagem4-wagner-v2.webp";
 import imagem5 from "../../../assets/Mateus/portfolio/imagem5-fran-v3.webp";
 import mobileNexovare from "../../../assets/Mateus/portfolio/mobile-summary/nexovare-mobile-summary-v1.webp";
 import mobileBank from "../../../assets/Mateus/portfolio/mobile-summary/app-banco-mobile-summary-v1.webp";
 import mobileBideiras from "../../../assets/Mateus/portfolio/mobile-summary/bideiras-mobile-summary-v2.webp";
-import mobileBarber from "../../../assets/Mateus/portfolio/mobile-summary/app-barbearia-mobile-summary-v1.webp";
+import mobileClockRight from "../../../assets/Mateus/portfolio/mobile-summary/clockright-mobile-summary-v1.webp";
 import mobileEntrePaginas from "../../../assets/Mateus/portfolio/mobile-summary/entre-paginas-mobile-summary-v2.webp";
 import mobileWalter from "../../../assets/Mateus/portfolio/mobile-summary/walter-adv-mobile-summary-v1.webp";
 import mobileFran from "../../../assets/Mateus/portfolio/mobile-summary/fran-studio-mobile-summary-v2.webp";
@@ -16,7 +16,7 @@ import mobileFran from "../../../assets/Mateus/portfolio/mobile-summary/fran-stu
 import logoNexovare from "../../../assets/Mateus/portfolio/logos/refined/nexovare-nx-mark-v2.webp";
 import logo2 from "../../../assets/Mateus/portfolio/logos/logo2.webp";
 import logoGuineBissauCommerce from "../../../assets/Mateus/portfolio/logos/refined/bideiras-market-bag-icon-v1.webp";
-import logo3 from "../../../assets/Mateus/portfolio/logos/refined/pessoa-barbearia-lockup-v3.webp";
+import logoClockRight from "../../../assets/Mateus/portfolio/logos/refined/clockright-time-clock-icon-v1.webp";
 import logoCentralClube from "../../../assets/Mateus/portfolio/logos/refined/entre-paginas-mark-v3.webp";
 import logo4 from "../../../assets/Mateus/portfolio/logos/refined/wagner-advocacia-lockup-v3.webp";
 import logo5 from "../../../assets/Mateus/portfolio/logos/refined/fran-site-lockup-v4.webp";
@@ -127,24 +127,24 @@ export const portfolioProjects: ReadonlyArray<PortfolioProject> = [
     },
   },
   {
-    id: "app-barber",
-    name: "APP BARBEARIA",
-    year: "2023",
-    imageSrc: imagem3,
-    mobileImageSrc: mobileBarber,
-    imageAlt: "Preview do projeto APP BARBEARIA",
-    logoSrc: logo3,
-    logoAlt: "Logo do projeto APP BARBEARIA",
+    id: "clockright",
+    name: "ClockRight",
+    year: "2026",
+    imageSrc: imagemClockRight,
+    mobileImageSrc: mobileClockRight,
+    imageAlt: "Tela inicial do ClockRight, ponto eletrônico por reconhecimento facial",
+    logoSrc: logoClockRight,
+    logoAlt: "Ícone do ClockRight: relógio de ponto",
     projectLabel: "Projeto em destaque",
-    subtitle: "Agenda e recorrência",
+    subtitle: "Ponto por biometria facial",
     statusLabel: "SELECIONAR",
     counterLabel: "04",
     accent: "orange",
-    tags: ["Booking", "UX", "Serviços"],
-    technologies: ["React", "Node.js", "MongoDB"],
+    tags: ["Ponto eletrônico", "Reconhecimento facial", "LGPD"],
+    technologies: ["React", "GSAP", "Cloudflare"],
     media: {
       ...defaultProjectMedia,
-      position: "50% 12%",
+      position: "center 30%",
     },
     worldLocation: {
       country: "Estados Unidos",

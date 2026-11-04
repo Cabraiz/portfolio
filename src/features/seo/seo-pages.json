@@ -136,17 +136,17 @@
       "en": {
         "path": "/en/portfolio/",
         "title": "AI & Software Project Portfolio | Mateus Cabral",
-        "description": "Portfolio of Mateus Cabral, Senior AI Engineer: 7 software projects, including a commercial ERP, a mobile banking app, cross-border e-commerce, a barbershop booking app and websites, in Brazil, Mexico, the USA, Guinea-Bissau and Portugal."
+        "description": "Portfolio of Mateus Cabral, Senior AI Engineer: 7 software projects, including a commercial ERP, a mobile banking app, cross-border e-commerce, a face-recognition time clock and websites, in Brazil, Mexico, the USA, Guinea-Bissau and Portugal."
       },
       "pt": {
         "path": "/portfolio/",
         "title": "Portfólio de projetos de IA e software | Mateus Cabral",
-        "description": "Portfólio de Mateus Cabral, Senior AI Engineer: 7 projetos de software, entre ERP comercial, app bancário, e-commerce internacional, agenda para barbearias e sites, no Brasil, México, EUA, Guiné-Bissau e Portugal."
+        "description": "Portfólio de Mateus Cabral, Senior AI Engineer: 7 projetos de software, entre ERP comercial, app bancário, e-commerce internacional, ponto eletrônico com reconhecimento facial e sites, no Brasil, México, EUA, Guiné-Bissau e Portugal."
       },
       "es": {
         "path": "/es/portfolio/",
         "title": "Portafolio de proyectos de IA y software | Mateus Cabral",
-        "description": "Portafolio de Mateus Cabral, Ingeniero de IA Senior: 7 proyectos de software, entre ellos un ERP comercial, una app bancaria, e-commerce internacional, una agenda para barberías y sitios web, en Brasil, México, Estados Unidos, Guinea-Bisáu y Portugal."
+        "description": "Portafolio de Mateus Cabral, Ingeniero de IA Senior: 7 proyectos de software, entre ellos un ERP comercial, una app bancaria, e-commerce internacional, un control de asistencia con reconocimiento facial y sitios web, en Brasil, México, Estados Unidos, Guinea-Bisáu y Portugal."
       }
     }
   },
