@@ -25,6 +25,7 @@ import usePortfolioMotion from "./hooks/usePortfolioMotion";
 import { defaultPortfolioProjectId, portfolioProjects } from "./portfolio.data";
 import styles from "./Portfolio.module.css";
 import MobileProjectMeta from "./MobileProjectMeta";
+import ProjectImageLightbox from "./ProjectImageLightbox";
 import type { PortfolioProjectId } from "./types";
 import { worldAtlasTiles } from "./worldAtlasTiles";
 
@@ -218,6 +219,8 @@ export default function Portfolio() {
 	useEffect(() => {
 		function handleKeyDown(event: KeyboardEvent) {
 			if (!isPortfolioActive) return;
+			// Com o print ampliado aberto, as setas não trocam de projeto.
+			if (document.querySelector("[data-project-lightbox]")) return;
 
 			const target = event.target;
 			if (
@@ -279,6 +282,18 @@ export default function Portfolio() {
 		},
 		[setActiveIndex]
 	);
+
+	// Print do projeto ampliado (celular): abre ao tocar na imagem do resumo.
+	const [previewProjectId, setPreviewProjectId] =
+		useState<PortfolioProjectId | null>(null);
+	const previewProject = previewProjectId
+		? portfolioProjects.find((project) => project.id === previewProjectId)
+		: undefined;
+	const openPreview = useCallback((projectId: PortfolioProjectId) => {
+		setIsAutoplayPaused(true);
+		setPreviewProjectId(projectId);
+	}, []);
+	const closePreview = useCallback(() => setPreviewProjectId(null), []);
 
 	const handleProjectPointerDown = useCallback(
 		(index: number, event: ReactPointerEvent<HTMLButtonElement>) => {
@@ -592,13 +607,30 @@ export default function Portfolio() {
 						className={styles.mobileProjectPreview}
 						data-mobile-project-preview="true"
 					>
-						<img
-							key={activeProject.id}
-                                                        src={activeProject.mobileImageSrc ?? activeProject.imageSrc}
-							alt={localizeLabel(activeProject.imageAlt)}
-							draggable={false}
-						/>
+						<button
+							type="button"
+							className={styles.mobileProjectPreviewButton}
+							aria-label={localizeLabel("Ampliar imagem do projeto")}
+							aria-haspopup="dialog"
+							data-mobile-project-preview-open="true"
+							onClick={() => openPreview(activeProject.id)}
+						>
+							<img
+								key={activeProject.id}
+								src={activeProject.mobileImageSrc ?? activeProject.imageSrc}
+								alt={localizeLabel(activeProject.imageAlt)}
+								draggable={false}
+							/>
+						</button>
 					</div>
+					{previewProject ? (
+						<ProjectImageLightbox
+							projectName={localizeLabel(previewProject.name)}
+							imageSrc={previewProject.imageSrc}
+							imageAlt={localizeLabel(previewProject.imageAlt)}
+							onClose={closePreview}
+						/>
+					) : null}
 
                                         <h3 className={styles.mobileProjectsHeading}>{localizeLabel("Todos os projetos")}</h3>
                                         <div className={styles.mobileProjectsRow}>
