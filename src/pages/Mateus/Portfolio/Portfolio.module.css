@@ -264,6 +264,10 @@
 	letter-spacing: -0.01em;
 	text-overflow: ellipsis;
 	white-space: nowrap;
+	/* O overflow das reticências cortava a perna do "g"/"p" (ClockRight,
+	   Paginas, Wagner): folga embaixo sem mudar o layout. */
+	padding-bottom: 0.18em;
+	margin-bottom: -0.18em;
 }
 
 .projectButton[data-project-id="central-clube-livro"]
