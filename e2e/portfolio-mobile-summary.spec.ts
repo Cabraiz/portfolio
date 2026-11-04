@@ -9,7 +9,7 @@ const projects = [
   {id:'app-barber',name:'APP BARBEARIA',subtitle:'Agenda e recorrência',year:'2023',asset:'app-barbearia'},
   {id:'central-clube-livro',name:'Entre Paginas',subtitle:'Comunidade editorial',year:'2026',asset:'entre-paginas',assetVersion:2},
   {id:'site-adv',name:'Wagner Adv',subtitle:'Presença institucional',year:'2020',asset:'walter-adv'},
-  {id:'site-cabeleireira',name:'Fran Studio',subtitle:'Marca e captação local',year:'2021',asset:'fran-studio'},
+  {id:'site-cabeleireira',name:'Fran Studio',subtitle:'Marca e captação local',year:'2021',asset:'fran-studio',assetVersion:2},
 ];
 const viewports = [{width:283,height:500},{width:320,height:568},{width:360,height:640},
   {width:390,height:844},{width:430,height:932},{width:667,height:375}];

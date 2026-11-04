@@ -4,14 +4,14 @@ import imagemGuineBissauCommerce from "../../../assets/Mateus/portfolio/bideiras
 import imagem3 from "../../../assets/Mateus/portfolio/imagem3-barbearia-v3.webp";
 import imagemCentralClube from "../../../assets/Mateus/portfolio/entre-paginas-home-preview-v2.webp";
 import imagem4 from "../../../assets/Mateus/portfolio/imagem4-wagner-v2.webp";
-import imagem5 from "../../../assets/Mateus/portfolio/imagem5-fran-v2.webp";
+import imagem5 from "../../../assets/Mateus/portfolio/imagem5-fran-v3.webp";
 import mobileNexovare from "../../../assets/Mateus/portfolio/mobile-summary/nexovare-mobile-summary-v1.webp";
 import mobileBank from "../../../assets/Mateus/portfolio/mobile-summary/app-banco-mobile-summary-v1.webp";
 import mobileBideiras from "../../../assets/Mateus/portfolio/mobile-summary/bideiras-mobile-summary-v2.webp";
 import mobileBarber from "../../../assets/Mateus/portfolio/mobile-summary/app-barbearia-mobile-summary-v1.webp";
 import mobileEntrePaginas from "../../../assets/Mateus/portfolio/mobile-summary/entre-paginas-mobile-summary-v2.webp";
 import mobileWalter from "../../../assets/Mateus/portfolio/mobile-summary/walter-adv-mobile-summary-v1.webp";
-import mobileFran from "../../../assets/Mateus/portfolio/mobile-summary/fran-studio-mobile-summary-v1.webp";
+import mobileFran from "../../../assets/Mateus/portfolio/mobile-summary/fran-studio-mobile-summary-v2.webp";
 
 import logoNexovare from "../../../assets/Mateus/portfolio/logos/refined/nexovare-nx-mark-v2.webp";
 import logo2 from "../../../assets/Mateus/portfolio/logos/logo2.webp";
