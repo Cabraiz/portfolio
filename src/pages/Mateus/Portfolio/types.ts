@@ -2,7 +2,7 @@ export type PortfolioProjectId =
   | "erp-varejo"
   | "app-bank"
   | "guine-bissau-commerce"
-  | "app-barber"
+  | "clockright"
   | "central-clube-livro"
   | "site-adv"
   | "site-cabeleireira";

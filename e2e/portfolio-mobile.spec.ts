@@ -377,9 +377,9 @@ test("troca o projeto e mantém os controles do mapa funcionais", async ({
 		"BIDEIRAS"
 	);
 
-	await page.locator('[data-mobile-project-id="app-barber"]').click();
+	await page.locator('[data-mobile-project-id="clockright"]').click();
 	await expect(page.locator('[data-mobile-feature-copy="true"] p')).toHaveText(
-		"Agenda e recorrência"
+		"Ponto por biometria facial"
 	);
 	const [subtitleBox, metaBox, technologiesBox, projectsHeadingBox] =
 		await Promise.all([

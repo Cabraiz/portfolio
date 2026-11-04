@@ -44,8 +44,8 @@ const PROJECT_DESCRIPTIONS: Record<PortfolioProjectId, string> = {
 		"Experiência bancária mobile desenhada para tornar consultas, movimentações e decisões financeiras mais simples.",
 	"guine-bissau-commerce":
 		"Loja virtual com catálogo, carrinho e checkout para conectar produtos locais a clientes em Guiné-Bissau.",
-	"app-barber":
-		"Agenda digital com recorrência, organização de serviços e uma jornada direta para clientes e profissionais.",
+	"clockright":
+		"Ponto eletrônico por reconhecimento facial em quiosque, com gestão de equipe e jornada, ausências e correções, em conformidade com a LGPD.",
 	"central-clube-livro":
 		"Experiência editorial para um clube de leitura, com narrativas imersivas, encontros e descoberta de livros.",
 	"site-adv":
@@ -76,7 +76,7 @@ const WORLD_JOURNEY_DESTINATIONS: Partial<
 	// Bissau, na costa oeste da Guiné-Bissau.
 	"guine-bissau-commerce": { x: 45.6673, y: 43.4091 },
 	// Ajuste visual do atlas ilustrado: Salt Lake fica ao sudeste do Great Salt Lake.
-	"app-barber": { x: 19.05, y: 25.15 },
+	"clockright": { x: 19.05, y: 25.15 },
 	// Coimbra (Região Centro): projeção direta de 40,2033°N 8,4103°O. A costa
 	// do atlas bate com a real (~0,1°), então não precisa de ajuste.
 	"central-clube-livro": { x: 47.6638, y: 27.6648 },

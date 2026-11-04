@@ -10,7 +10,7 @@ const seo: typeof seoPages = JSON.parse(
 
 // HTML entregue antes do JavaScript: é o que buscadores e assistentes de IA
 // (GPTBot, ClaudeBot, PerplexityBot...) leem. Gerado por scripts/prerender-seo.mjs.
-const PROJECTS = ["NEXOVARE", "APP BANCO", "BIDEIRAS", "APP BARBEARIA", "Entre Paginas", "Wagner Adv", "Fran Studio"];
+const PROJECTS = ["NEXOVARE", "APP BANCO", "BIDEIRAS", "ClockRight", "Entre Paginas", "Wagner Adv", "Fran Studio"];
 const visibleText = (html: string) =>
 	html
 		.replace(/<head[\s\S]*?<\/head>/, " ")

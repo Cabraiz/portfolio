@@ -31,7 +31,7 @@ const compactObjectPositionByProjectId: Partial<
 > = {
   "erp-varejo": "center 6%",
   "app-bank": "50% 10%",
-  "app-barber": "50% 8%",
+  "clockright": "50% 8%",
   "site-adv": "50% 6%",
   "site-cabeleireira": "58% 10%",
 };
