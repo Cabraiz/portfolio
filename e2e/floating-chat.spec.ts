@@ -274,10 +274,29 @@ test("keeps the open chat and its controls inside short viewports", async ({
 			page.getByRole("button", { name: /Enviar|Send/, exact: true })
 		).toBeVisible();
 
-		const panelBox = await closeButton.locator("..").boundingBox();
-		const composerBox = await page
-			.locator('[data-chat-composer="true"]')
-			.boundingBox();
+		// O painel sobe 20px em 0,8s ao abrir: medir painel e campo em leituras
+		// separadas durante a subida mistura posições de quadros diferentes (no CI
+		// lento já deu 31px). Espera a subida acabar e mede os dois juntos.
+		const panel = page.locator('[data-chat-panel="true"]');
+		await expect
+			.poll(() =>
+				panel.evaluate((element) => {
+					const transform = getComputedStyle(element).transform;
+					return transform === "none" || transform === "matrix(1, 0, 0, 1, 0, 0)";
+				})
+			)
+			.toBe(true);
+		const { panelBox, composerBox } = await panel.evaluate((element) => {
+			const box = (node: Element | null) => {
+				if (!node) return null;
+				const { x, y, width, height } = node.getBoundingClientRect();
+				return { x, y, width, height };
+			};
+			return {
+				panelBox: box(element),
+				composerBox: box(element.querySelector('[data-chat-composer="true"]')),
+			};
+		});
 		expect(panelBox, `${viewport.width}x${viewport.height}`).not.toBeNull();
 		expect(composerBox, `${viewport.width}x${viewport.height}`).not.toBeNull();
 		expect(panelBox!.x).toBeGreaterThanOrEqual(0);
