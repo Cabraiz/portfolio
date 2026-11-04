@@ -452,5 +452,8 @@
   ["Senior", "Senior"],
   ["Remoto · CLT ou PJ", "Remote · UTC-3 · EOR or B2B"],
   ["AGENDAR CONVERSA", "BOOK A CALL"],
-  ["Região Centro", "Centro Region"]
+  ["Região Centro", "Centro Region"],
+  ["Ampliar imagem do projeto", "Enlarge project image"],
+  ["Fechar imagem ampliada", "Close enlarged image"],
+  ["Toque na imagem para aproximar ou afastar", "Tap the image to zoom in or out"]
 ]
