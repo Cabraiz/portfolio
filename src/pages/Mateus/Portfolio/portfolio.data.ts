@@ -4,19 +4,19 @@ import imagemGuineBissauCommerce from "../../../assets/Mateus/portfolio/bideiras
 import imagemClockRight from "../../../assets/Mateus/portfolio/clockright-home-preview-v1.webp";
 import imagemCentralClube from "../../../assets/Mateus/portfolio/entre-paginas-home-preview-v2.webp";
 import imagem4 from "../../../assets/Mateus/portfolio/imagem4-wagner-v2.webp";
-import imagem5 from "../../../assets/Mateus/portfolio/imagem5-fran-v3.webp";
+import imagem5 from "../../../assets/Mateus/portfolio/imagem5-fran-v4.webp";
 import mobileNexovare from "../../../assets/Mateus/portfolio/mobile-summary/nexovare-mobile-summary-v1.webp";
 import mobileBank from "../../../assets/Mateus/portfolio/mobile-summary/app-banco-mobile-summary-v1.webp";
 import mobileBideiras from "../../../assets/Mateus/portfolio/mobile-summary/bideiras-mobile-summary-v2.webp";
-import mobileClockRight from "../../../assets/Mateus/portfolio/mobile-summary/clockright-mobile-summary-v1.webp";
+import mobileClockRight from "../../../assets/Mateus/portfolio/mobile-summary/clockright-mobile-summary-v2.webp";
 import mobileEntrePaginas from "../../../assets/Mateus/portfolio/mobile-summary/entre-paginas-mobile-summary-v2.webp";
 import mobileWalter from "../../../assets/Mateus/portfolio/mobile-summary/walter-adv-mobile-summary-v1.webp";
 import mobileFran from "../../../assets/Mateus/portfolio/mobile-summary/fran-studio-mobile-summary-v2.webp";
 
 import logoNexovare from "../../../assets/Mateus/portfolio/logos/refined/nexovare-nx-mark-v2.webp";
 import logo2 from "../../../assets/Mateus/portfolio/logos/logo2.webp";
-import logoGuineBissauCommerce from "../../../assets/Mateus/portfolio/logos/refined/bideiras-market-bag-icon-v1.webp";
-import logoClockRight from "../../../assets/Mateus/portfolio/logos/refined/clockright-time-clock-icon-v1.webp";
+import logoGuineBissauCommerce from "../../../assets/Mateus/portfolio/logos/refined/bideiras-turban-icon-v1.webp";
+import logoClockRight from "../../../assets/Mateus/portfolio/logos/refined/clockright-app-icon-v2.webp";
 import logoCentralClube from "../../../assets/Mateus/portfolio/logos/refined/entre-paginas-mark-v3.webp";
 import logo4 from "../../../assets/Mateus/portfolio/logos/refined/wagner-advocacia-lockup-v3.webp";
 import logo5 from "../../../assets/Mateus/portfolio/logos/refined/fran-site-lockup-v4.webp";
@@ -106,7 +106,7 @@ export const portfolioProjects: ReadonlyArray<PortfolioProject> = [
     mobileImageSrc: mobileBideiras,
     imageAlt: "Preview do marketplace Bideiras em Guiné-Bissau",
     logoSrc: logoGuineBissauCommerce,
-    logoAlt: "Ícone da Bideiras em forma de sacola nas cores da Guiné-Bissau",
+    logoAlt: "Ícone da Bideiras: mulher com turbante amarelo",
     projectLabel: "Projeto em destaque",
     subtitle: "Comércio digital internacional",
     statusLabel: "SELECIONAR",
@@ -134,7 +134,7 @@ export const portfolioProjects: ReadonlyArray<PortfolioProject> = [
     mobileImageSrc: mobileClockRight,
     imageAlt: "Tela inicial do ClockRight, ponto eletrônico por reconhecimento facial",
     logoSrc: logoClockRight,
-    logoAlt: "Ícone do ClockRight: relógio de ponto",
+    logoAlt: "Ícone do ClockRight: relógio",
     projectLabel: "Projeto em destaque",
     subtitle: "Ponto por biometria facial",
     statusLabel: "SELECIONAR",
