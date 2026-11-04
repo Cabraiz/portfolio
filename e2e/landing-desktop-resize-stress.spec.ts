@@ -336,6 +336,14 @@ for (const size of [SIZES[3], SIZES[0]]) {
 		// Menos de quatro tiques empurram a página e ela volta para onde estava.
 		for (const ticks of [1, 2, 3]) {
 			await wheelGesture(page, ticks, 100, 120);
+			// O empurrão só é desfeito 900ms depois do último tique (SNAP_BACK_DELAY_MS
+			// em useDesktopSectionPaging); antes disso os tiques seguintes somam a ele
+			// de propósito. No CI lento a página ainda nem tinha saído do topo, a
+			// checagem passava na hora e 2 + 3 tiques viravam uma troca de seção.
+			// O timer da página dispara antes deste, que vence depois.
+			await page.evaluate(
+				() => new Promise((resolve) => setTimeout(resolve, 1_100))
+			);
 			await expectSettled(page, `${ticks} tique(s) e para`, "home");
 		}
 
