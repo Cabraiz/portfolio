@@ -11,7 +11,8 @@ test("desktop: foto do card abre o site do projeto", async ({ browser }) => {
 	await page.goto("/portfolio", { waitUntil: "networkidle" });
 
 	await page.locator('aside button[data-project-id="clockright"]').click();
-	const link = page.locator('[data-project-site-link="clockright"]').first();
+	// O link do celular também está no DOM (escondido no desktop).
+	const link = page.locator('a[data-project-site-link="clockright"]:visible');
 	await expect(link).toBeVisible();
 	await expect(link).toHaveAttribute("href", "https://clockright.cabraiz.com/");
 	await expect(link).toHaveAttribute("target", "_blank");
@@ -19,7 +20,9 @@ test("desktop: foto do card abre o site do projeto", async ({ browser }) => {
 	await expect(link).toContainText("Abrir site");
 	const [linkBox, imageBox] = await Promise.all([
 		link.boundingBox(),
-		page.locator("article img[alt^='Tela inicial do ClockRight']").boundingBox(),
+		page
+			.locator("article img[alt^='Tela inicial do ClockRight']:visible")
+			.boundingBox(),
 	]);
 	expect(Math.abs(linkBox!.width - imageBox!.width)).toBeLessThan(2);
 	expect(Math.abs(linkBox!.height - imageBox!.height)).toBeLessThan(2);
@@ -28,7 +31,7 @@ test("desktop: foto do card abre o site do projeto", async ({ browser }) => {
 		.locator('aside button[data-project-id="guine-bissau-commerce"]')
 		.click();
 	await expect(
-		page.locator('[data-project-site-link="guine-bissau-commerce"]').first()
+		page.locator('a[data-project-site-link="guine-bissau-commerce"]:visible')
 	).toHaveAttribute("href", "https://ecommerce.cabraiz.com/");
 
 	// Sem site no ar: sem link.
