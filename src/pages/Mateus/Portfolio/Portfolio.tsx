@@ -87,6 +87,24 @@ const WORLD_JOURNEY_DESTINATIONS: Partial<
 };
 const WORLD_ASPECT_RATIO = 2;
 
+/** Onde o projeto fica no mapa (destino no exterior ou ponto no Brasil). */
+function getProjectMapPosition(
+	projectId: PortfolioProjectId
+): Readonly<{ x: number; y: number }> {
+	return (
+		WORLD_JOURNEY_DESTINATIONS[projectId] ??
+		WORLD_MAP_POINTS.find((point) => point.id === projectId) ??
+		FORTALEZA_MAP_POSITION
+	);
+}
+
+function isSameMapPosition(
+	a: Readonly<{ x: number; y: number }>,
+	b: Readonly<{ x: number; y: number }>
+): boolean {
+	return Math.abs(a.x - b.x) < 0.01 && Math.abs(a.y - b.y) < 0.01;
+}
+
 type MapPointStyle = CSSProperties & {
 	"--point-x": string;
 	"--point-y": string;
@@ -278,6 +296,31 @@ export default function Portfolio() {
 
 	const activeLocation = activeProject.worldLocation;
 	const worldJourneyDestination = WORLD_JOURNEY_DESTINATIONS[activeProject.id];
+	// Voo de conexão: ao trocar de projeto, o avião sai de onde estava (destino
+	// anterior ou ponto no Brasil) por uma linha temporária; a rota que fica é
+	// sempre Fortaleza → destino. Ajuste de estado durante o render (padrão do
+	// React para estado derivado da troca de projeto).
+	const [flight, setFlight] = useState<
+		Readonly<{
+			projectId: PortfolioProjectId;
+			origin: Readonly<{ x: number; y: number }> | null;
+		}>
+	>({ projectId: activeProject.id, origin: null });
+	if (flight.projectId !== activeProject.id) {
+		setFlight({
+			projectId: activeProject.id,
+			origin: getProjectMapPosition(flight.projectId),
+		});
+	}
+	const transferOrigin =
+		flight.projectId === activeProject.id &&
+		flight.origin &&
+		worldJourneyDestination &&
+		!isSameMapPosition(flight.origin, WORLD_JOURNEY_ORIGIN) &&
+		!isSameMapPosition(flight.origin, worldJourneyDestination)
+			? flight.origin
+			: null;
+	const travelerOrigin = transferOrigin ?? WORLD_JOURNEY_ORIGIN;
 	const selectProject = useCallback(
 		(index: number) => {
 			setActiveIndex(index);
@@ -490,16 +533,36 @@ export default function Portfolio() {
 								aria-hidden="true"
 								data-world-journey-route={activeProject.id}
 							/>
+							{transferOrigin ? (
+								<span
+									className={styles.journeyTransferRoute}
+									style={toRouteStyle(transferOrigin, worldJourneyDestination)}
+									aria-hidden="true"
+									data-world-journey-transfer-route={activeProject.id}
+								/>
+							) : null}
 							<span
 								className={styles.journeyTraveler}
-								style={toRouteStyle(
-									WORLD_JOURNEY_ORIGIN,
-									worldJourneyDestination
-								)}
+								style={toRouteStyle(travelerOrigin, worldJourneyDestination)}
 								aria-hidden="true"
 								data-world-journey-traveler={activeProject.id}
+								data-world-journey-from={transferOrigin ? "previous" : "fortaleza"}
 							>
-								<span data-world-journey-traveler-dot="true">
+								<span
+									data-world-journey-traveler-dot="true"
+									onAnimationEnd={(event) => {
+										// Pousou: a linha da conexão sai e as voltas seguintes
+										// (loop) passam a usar a rota Fortaleza → destino.
+										if (
+											event.target === event.currentTarget &&
+											event.animationName.includes("journeyTravelerMove")
+										) {
+											setFlight((current) =>
+												current.origin ? { ...current, origin: null } : current
+											);
+										}
+									}}
+								>
 									<span className={styles.journeyPlane}>
 										<img
 											className={styles.journeyPlaneShadow}
