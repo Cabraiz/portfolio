@@ -1708,11 +1708,8 @@
 		animation-delay: -3.2s;
 	}
 
-	.portfolioRoot[data-motion-idle="on"] .projectPreview img {
-		animation:
-			previewReveal 420ms cubic-bezier(0.22, 1, 0.36, 1) both,
-			atlasPreviewDrift 16s 420ms ease-in-out infinite alternate;
-	}
+	/* Sem zoom contínuo no print do projeto: o "drift" ampliava 7% e cortava
+	   as bordas (logo, menu e busca da NEXOVARE) e ainda borrava a imagem. */
 
 	.portfolioRoot[data-motion-idle="on"] .atlasPager button:first-child {
 		animation: atlasNudgeLeft 5.2s ease-in-out infinite;
@@ -1891,17 +1888,6 @@
 	}
 	75% {
 		transform: skewY(2.4deg) scaleX(0.985);
-	}
-}
-
-@keyframes atlasPreviewDrift {
-	from {
-		scale: 1;
-		translate: 0 0;
-	}
-	to {
-		scale: 1.07;
-		translate: -1.4% -1%;
 	}
 }
 
