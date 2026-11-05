@@ -57,11 +57,7 @@
         place-items: center;
         background: #050505;
         pointer-events: none;
-        transition: transform 720ms cubic-bezier(0.76, 0, 0.24, 1);
-      }
-
-      #boot-curtain[data-lifted] {
-        transform: translateY(-100%);
+        will-change: transform;
       }
 
       #boot-curtain .boot-curtain__mark {
@@ -106,8 +102,6 @@
       }
 
       @media (prefers-reduced-motion: reduce) {
-        #boot-curtain { transition: opacity 240ms ease; }
-        #boot-curtain[data-lifted] { transform: none; opacity: 0; }
         #boot-curtain img,
         #boot-curtain .boot-curtain__bar::after { animation: none; }
       }
@@ -165,13 +159,46 @@
         if (!curtain || !root) return;
         var landing = /^\/(?:(?:en|es)(?:\/(?:home|portfolio))?|home|portfolio|servicos|technologies|contact)?\/?$/;
         var lifted = false;
+        function remove() {
+          if (curtain.parentNode) curtain.parentNode.removeChild(curtain);
+        }
+        // Subida suave: o símbolo sobe e some, e a cortina sobe logo depois.
+        // Espera o app terminar o trabalho da montagem (ocioso) e usa a Web
+        // Animations API, que só começa a contar no primeiro quadro pintado:
+        // com transição CSS a subida acontecia durante a montagem e a tela
+        // pulava direto para o fim.
+        function animateLift() {
+          curtain.setAttribute("data-lifted", "");
+          var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+          if (!curtain.animate) return remove();
+          var mark = curtain.querySelector(".boot-curtain__mark");
+          if (reduce) {
+            curtain.animate([{ opacity: 1 }, { opacity: 0 }], {
+              duration: 240, easing: "ease", fill: "forwards",
+            }).onfinish = remove;
+            return;
+          }
+          if (mark) {
+            mark.animate([
+              { transform: "translateY(0)", opacity: 1 },
+              { transform: "translateY(-28px)", opacity: 0 },
+            ], { duration: 420, easing: "cubic-bezier(0.4, 0, 0.2, 1)", fill: "forwards" });
+          }
+          curtain.animate([
+            { transform: "translateY(0)" },
+            { transform: "translateY(-100%)" },
+          ], {
+            duration: 950, delay: 160, easing: "cubic-bezier(0.65, 0, 0.35, 1)",
+            fill: "forwards",
+          }).onfinish = remove;
+          setTimeout(remove, 2500);
+        }
         function lift() {
           if (lifted) return;
           lifted = true;
-          curtain.setAttribute("data-lifted", "");
-          setTimeout(function () {
-            if (curtain.parentNode) curtain.parentNode.removeChild(curtain);
-          }, 900);
+          var start = function () { requestAnimationFrame(animateLift); };
+          if (window.requestIdleCallback) requestIdleCallback(start, { timeout: 700 });
+          else setTimeout(start, 120);
         }
         function ready() {
           if (root.hasAttribute("data-prerendered")) return false;

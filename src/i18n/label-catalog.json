@@ -454,6 +454,8 @@
   ["AGENDAR CONVERSA", "BOOK A CALL"],
   ["Região Centro", "Centro Region"],
   ["Ampliar imagem do projeto", "Enlarge project image"],
+  ["Abrir site", "Visit site"],
+  ["abre em nova aba", "opens in a new tab"],
   ["Fechar imagem ampliada", "Close enlarged image"],
   ["Toque na imagem para aproximar ou afastar", "Tap the image to zoom in or out"]
 ]

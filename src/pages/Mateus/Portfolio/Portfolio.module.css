@@ -345,7 +345,6 @@
 }
 
 .journeyRoute,
-.journeyTransferRoute,
 .journeyTraveler {
 	position: absolute;
 	top: var(--route-y);
@@ -368,18 +367,6 @@
    1 s mais devagar para não chegar ao destino muito antes dele. */
 .journeyRoute[data-world-journey-route-pace="connection"] {
 	animation-duration: calc(var(--atlas-camera-duration) + 1s);
-}
-
-/* Linha da conexão (de onde o avião estava até o novo destino): mais leve,
-   aparece inteira e vai se apagando atrás do avião. O recorte usa a mesma
-   duração, atraso e curva de journeyTravelerMove, então a borda apagada
-   acompanha o centro do avião até o pouso. */
-.journeyTransferRoute {
-	z-index: 2;
-	border-top: 2px dashed rgba(4, 82, 79, 0.5);
-	transform: rotate(var(--route-angle));
-	animation: journeyTransferRoute var(--atlas-camera-duration)
-		var(--atlas-camera-ease) both;
 }
 
 .journeyTraveler {
@@ -716,7 +703,6 @@
 	   o tamanho deles, sem mudar a posição. */
 	.atlasFrame,
 	.journeyRoute,
-	.journeyTransferRoute,
 	.journeyTraveler,
 	.journeyMarker,
 	.routeLine,
@@ -797,6 +783,98 @@
 	font-size: 9px;
 	font-weight: 800;
 	letter-spacing: 0.08em;
+}
+
+/* Link para o site do projeto: cobre a foto do card (desktop) e mostra o
+   selo "Abrir site ↗" no canto inferior direito. */
+.projectSiteLink {
+	position: absolute;
+	inset: 0;
+	z-index: 2;
+	display: flex;
+	align-items: flex-end;
+	justify-content: flex-end;
+	padding: 13px;
+	border-radius: inherit;
+	color: inherit;
+	text-decoration: none;
+	cursor: pointer;
+}
+
+.projectSiteLink:focus-visible {
+	outline: 3px solid rgba(2, 78, 75, 0.55);
+	outline-offset: -3px;
+}
+
+.projectSiteBadge {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 9px 14px 9px 16px;
+	border-radius: 999px;
+	color: #f8f8ed;
+	background: rgba(4, 64, 62, 0.92);
+	box-shadow: 0 8px 20px rgba(3, 42, 41, 0.28);
+	font-size: 13px;
+	font-weight: 800;
+	letter-spacing: 0.01em;
+	line-height: 1;
+	white-space: nowrap;
+	transition:
+		transform 220ms ease,
+		background 220ms ease;
+}
+
+.projectSiteBadge svg {
+	width: 15px;
+	height: 15px;
+	transition: transform 220ms ease;
+}
+
+.projectSiteLink:hover .projectSiteBadge,
+.projectSiteLink:focus-visible .projectSiteBadge {
+	transform: translateY(-2px);
+	background: #04403e;
+}
+
+.projectSiteLink:hover .projectSiteBadge svg,
+.projectSiteLink:focus-visible .projectSiteBadge svg {
+	transform: translate(2px, -2px);
+}
+
+/* No celular o toque na miniatura amplia a imagem; o selo é um link próprio
+   no canto, com área de toque de 40px. */
+.mobileProjectSiteLink {
+	position: absolute;
+	right: -4px;
+	bottom: -6px;
+	z-index: 2;
+	display: none;
+	min-width: 40px;
+	min-height: 40px;
+	align-items: center;
+	justify-content: flex-end;
+	color: inherit;
+	text-decoration: none;
+	-webkit-tap-highlight-color: transparent;
+}
+
+.mobileProjectSiteLink:focus-visible {
+	outline: 2px solid #04403e;
+	outline-offset: 2px;
+	border-radius: 999px;
+}
+
+.projectSiteBadgeMobile {
+	gap: 4px;
+	padding: 6px 9px 6px 10px;
+	font-size: 11px;
+	box-shadow: 0 4px 12px rgba(3, 42, 41, 0.3);
+}
+
+.projectSiteBadgeMobile svg {
+	width: 12px;
+	height: 12px;
 }
 
 .detailBody {
@@ -913,20 +991,6 @@
 	to {
 		opacity: 1;
 		transform: rotate(var(--route-angle)) scaleX(1);
-	}
-}
-
-@keyframes journeyTransferRoute {
-	0% {
-		opacity: 0;
-		clip-path: inset(0 0 0 0%);
-	}
-	6% {
-		opacity: 1;
-	}
-	100% {
-		opacity: 1;
-		clip-path: inset(0 0 0 100%);
 	}
 }
 
@@ -1412,11 +1476,16 @@
 	}
 
         .mobileProjectPreview {
+                position: relative;
                 grid-column: 1;
 		grid-row: 1;
                 height: clamp(88px, 12svh, 100px);
 		align-self: start;
                 min-width: 0;
+	}
+
+	.mobileProjectSiteLink {
+		display: flex;
 	}
 
 	.mobileProjectPreviewButton {
@@ -1692,8 +1761,7 @@
 		animation: none;
 	}
 
-	.journeyTraveler > span,
-	.journeyTransferRoute {
+	.journeyTraveler > span {
 		display: none;
 		animation: none;
 	}
