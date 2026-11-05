@@ -18,14 +18,18 @@ test("desktop: foto do card abre o site do projeto", async ({ browser }) => {
 	await expect(link).toHaveAttribute("target", "_blank");
 	await expect(link).toHaveAttribute("rel", /noopener/);
 	await expect(link).toContainText("Abrir site");
-	const [linkBox, imageBox] = await Promise.all([
-		link.boundingBox(),
-		page
-			.locator("article img[alt^='Tela inicial do ClockRight']:visible")
-			.boundingBox(),
-	]);
-	expect(Math.abs(linkBox!.width - imageBox!.width)).toBeLessThan(2);
-	expect(Math.abs(linkBox!.height - imageBox!.height)).toBeLessThan(2);
+	// O link cobre a área da foto (o contêiner; a <img> entra com uma
+	// animação de escala e mudaria de tamanho durante a medida).
+	const cover = await link.evaluate((element) => {
+		const linkBox = element.getBoundingClientRect();
+		const frame = element.parentElement!.getBoundingClientRect();
+		return {
+			width: Math.abs(linkBox.width - frame.width),
+			height: Math.abs(linkBox.height - frame.height),
+			hasImage: Boolean(element.parentElement!.querySelector("img")),
+		};
+	});
+	expect(cover).toEqual({ width: 0, height: 0, hasImage: true });
 
 	await page
 		.locator('aside button[data-project-id="guine-bissau-commerce"]')
