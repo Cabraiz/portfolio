@@ -1,13 +1,15 @@
 # Avião da rota do portfólio
 
-`src/assets/Mateus/portfolio/journey-plane-v1.webp` é um render de cima do modelo
+`src/assets/Mateus/portfolio/journey-plane-v2.webp` é um render de cima do modelo
 **"Jet Airplane"** de OpenGameArt (licença **CC0**, domínio público: pode ser usado
 em projetos comerciais, sem atribuição obrigatória):
 https://opengameart.org/content/jet-airplane (arquivo `passengerjet_gear_up.blend`,
 2.264 triângulos).
 
-A pintura original (companhias aéreas de brincadeira) não é usada: o script troca os
-materiais por fuselagem branca, asas cinza-claro, cauda e motores no verde do site.
+A pintura original (companhias aéreas de brincadeira) não é usada: o script pinta por
+zonas (coordenadas do modelo) fuselagem branca brilhante com faixa verde no dorso,
+cauda, estabilizadores e motores no verde do site, asas cinza-azulado claro, pontas
+das asas em laranja e para-brisa escuro.
 
 Para renderizar de novo (Blender como módulo Python, `pip install bpy==5.2.3`):
 

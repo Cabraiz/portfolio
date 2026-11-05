@@ -19,7 +19,7 @@ import flagMexico from "../../../assets/Mateus/portfolio/flags/mexico-semicircle
 import flagPortugal from "../../../assets/Mateus/portfolio/flags/portugal-semicircle-realistic-v3.webp";
 // Avião da rota: "Jet Airplane" (CC0, https://opengameart.org/content/jet-airplane),
 // pintado nas cores do site e renderizado de cima no Blender.
-import journeyPlane from "../../../assets/Mateus/portfolio/journey-plane-v1.webp";
+import journeyPlane from "../../../assets/Mateus/portfolio/journey-plane-v2.webp";
 
 import usePortfolioActiveItem from "./hooks/usePortfolioActiveItem";
 import useMobilePortfolioBrandPush from "./hooks/useMobilePortfolioBrandPush";
