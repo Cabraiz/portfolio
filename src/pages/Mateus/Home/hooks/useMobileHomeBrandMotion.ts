@@ -15,6 +15,8 @@ type MotionRefs = {
 };
 const REST_X = -24;
 const CONTACT_GAP = 8;
+// Folga mínima entre a caixa do logo e a do texto empurrado.
+const MIN_BOX_GAP = 4;
 // A barra de contato abre espaço para o logo ao longo destes px de descida
 // dele (e volta ao longo dos mesmos px depois que ele passa). Com poucos px
 // ela andava 40–60px num único quadro, como um salto.
@@ -38,16 +40,20 @@ export default function useMobileHomeBrandMotion({
       prefersReducedMotion) return;
 
     const { gsap, ScrollTrigger } = ensureGsapRuntime();
+    // Quanto cada linha anda para dar lugar ao logo. Ajustado para que o
+    // espaço visível entre o logo e o texto fique em ~15-26px (metade do que
+    // era: o título chegava a 52px de vão).
     const items = [
-      { element: eyebrowRef.current, distance: 58 },
-      { element: titleRef.current, distance: 72 },
-      { element: identityRef.current, distance: 60 },
+      { element: eyebrowRef.current, distance: 41 },
+      { element: titleRef.current, distance: 46 },
+      { element: identityRef.current, distance: 42 },
       ...Array.from(introRef.current?.querySelectorAll<HTMLElement>("[data-mobile-intro-line]") ?? [])
-        .map(element => ({ element, distance: 66 })),
-      { element: partnersHeadingRef.current, distance: 72 },
+        .map(element => ({ element, distance: 47 })),
+      { element: partnersHeadingRef.current, distance: 48 },
       ...Array.from(partnersRef.current?.querySelectorAll<HTMLElement>("[data-mobile-partner-item]") ?? [])
-        .map(element => ({ element, distance: 40 })),
-    ].filter((item): item is { element: HTMLElement; distance: number } => Boolean(item.element));
+        .map(element => ({ element, distance: 40, keepClear: false })),
+    ].filter((item): item is { element: HTMLElement; distance: number; keepClear?: boolean } =>
+      Boolean(item.element));
     const rows = items.map(item => ({ ...item, x: 0, scale: 1, fitScale: 1, top: 0, bottom: 0,
       left: 0, right: 0, setter: gsap.quickSetter(item.element, "x", "px"),
       fitSetter: item.element === titleRef.current ? gsap.quickSetter(item.element, "scaleX") : null }));
@@ -151,7 +157,10 @@ export default function useMobileHomeBrandMotion({
           row.fitScale = row.fitSetter ? 1 - (1 - fittingScale) * gain : 1;
           row.fitSetter?.(row.fitScale);
           const fittedRight = row.left + (row.right - row.left) * row.fitScale;
-          const distance = Math.max(0, Math.min(row.distance,
+          // Nunca menos que o necessário para a caixa do texto não encostar no
+          // logo (telas estreitas têm o texto mais perto da borda).
+          const clearance = row.keepClear === false ? 0 : (right + MIN_BOX_GAP - row.left) / row.scale;
+          const distance = Math.max(0, Math.min(Math.max(row.distance, clearance),
             (layout.viewportWidth - fittedRight - 8) / row.scale));
           row.x = distance * gain;
           row.setter(row.x);
