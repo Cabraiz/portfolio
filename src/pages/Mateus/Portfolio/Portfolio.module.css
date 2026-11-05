@@ -358,6 +358,12 @@
 	animation: journeyRouteDraw 2350ms 120ms cubic-bezier(0.4, 0, 0.2, 1) both;
 }
 
+/* Em voo de conexão o avião sai de outro país: a linha de Fortaleza desenha
+   1 s mais devagar para não chegar ao destino muito antes dele. */
+.journeyRoute[data-world-journey-route-pace="connection"] {
+	animation-duration: 3350ms;
+}
+
 /* Linha da conexão (de onde o avião estava até o novo destino): mais leve,
    aparece inteira e vai se apagando atrás do avião. O recorte usa a mesma
    duração, atraso e curva de journeyTravelerMove, então a borda apagada

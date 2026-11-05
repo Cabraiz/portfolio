@@ -308,15 +308,17 @@ export default function Portfolio() {
 		Readonly<{
 			projectId: PortfolioProjectId;
 			origin: Readonly<{ x: number; y: number }> | null;
+			landed: boolean;
 		}>
-	>({ projectId: activeProject.id, origin: null });
+	>({ projectId: activeProject.id, origin: null, landed: false });
 	if (flight.projectId !== activeProject.id) {
 		setFlight({
 			projectId: activeProject.id,
 			origin: getProjectMapPosition(flight.projectId),
+			landed: false,
 		});
 	}
-	const transferOrigin =
+	const connectionOrigin =
 		flight.projectId === activeProject.id &&
 		flight.origin &&
 		worldJourneyDestination &&
@@ -324,6 +326,7 @@ export default function Portfolio() {
 		!isSameMapPosition(flight.origin, worldJourneyDestination)
 			? flight.origin
 			: null;
+	const transferOrigin = flight.landed ? null : connectionOrigin;
 	const travelerOrigin = transferOrigin ?? WORLD_JOURNEY_ORIGIN;
 	const selectProject = useCallback(
 		(index: number) => {
@@ -536,6 +539,12 @@ export default function Portfolio() {
 								)}
 								aria-hidden="true"
 								data-world-journey-route={activeProject.id}
+								// Em voo de conexão a rota de Fortaleza desenha mais devagar,
+								// esperando o avião. Fica fixo até a próxima troca para não
+								// mudar a duração no meio da animação.
+								data-world-journey-route-pace={
+									connectionOrigin ? "connection" : "direct"
+								}
 							/>
 							{transferOrigin ? (
 								<span
@@ -562,7 +571,7 @@ export default function Portfolio() {
 											event.animationName.includes("journeyTravelerMove")
 										) {
 											setFlight((current) =>
-												current.origin ? { ...current, origin: null } : current
+												current.landed ? current : { ...current, landed: true }
 											);
 										}
 									}}

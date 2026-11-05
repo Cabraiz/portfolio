@@ -464,7 +464,9 @@ test("desenha as rotas locais e replica a viagem do desktop no mobile", async ({
 			})),
 		]);
 	expect(routeAnimation.name).toContain("journeyRouteDraw");
-	expect(routeAnimation.duration).toBe(2350);
+	// Vem de site-adv (outro ponto do Brasil): voo de conexão, então a rota de
+	// Fortaleza desenha 1 s mais devagar, esperando o avião.
+	expect(routeAnimation.duration).toBe(3350);
 	expect(routeAnimation.delay).toBe(120);
 	expect(travelerAnimation.name).toContain("journeyTravelerMove");
 	expect(travelerAnimation.duration).toBe(2350);

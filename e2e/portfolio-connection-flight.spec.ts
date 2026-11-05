@@ -7,13 +7,16 @@ const journeyState = (page: Page) =>
 		const traveler = document.querySelector<HTMLElement>(
 			"[data-world-journey-traveler]"
 		);
+		const route = document.querySelector(
+			'[data-world-journey-route="central-clube-livro"]'
+		);
 		return {
 			from: traveler?.dataset.worldJourneyFrom ?? null,
 			transfer: document.querySelectorAll("[data-world-journey-transfer-route]")
 				.length,
-			route: document.querySelectorAll(
-				'[data-world-journey-route="central-clube-livro"]'
-			).length,
+			route: route ? 1 : 0,
+			// Duração do desenho da rota de Fortaleza (1 s mais lenta na conexão).
+			routeDuration: route ? getComputedStyle(route).animationDuration : null,
 		};
 	});
 
@@ -48,10 +51,16 @@ for (const [name, viewport, selector] of [
 			.poll(() => journeyState(page), { timeout: 8_000 })
 			.toMatchObject({ from: "fortaleza", transfer: 0 });
 
+
 		await page.locator(selector("central-clube-livro")).click();
 		await expect
 			.poll(() => journeyState(page))
-			.toEqual({ from: "previous", transfer: 1, route: 1 });
+			.toEqual({
+				from: "previous",
+				transfer: 1,
+				route: 1,
+				routeDuration: "3.35s",
+			});
 		const angles = await page.evaluate(() => ({
 			transfer: Number.parseFloat(
 				getComputedStyle(
@@ -72,7 +81,13 @@ for (const [name, viewport, selector] of [
 		// Depois do pouso a linha da conexão sai e fica só Fortaleza → Coimbra.
 		await expect
 			.poll(() => journeyState(page), { timeout: 8_000 })
-			.toEqual({ from: "fortaleza", transfer: 0, route: 1 });
+			.toEqual({
+				from: "fortaleza",
+				transfer: 0,
+				route: 1,
+				// A duração não muda no pouso (senão a animação pularia).
+				routeDuration: "3.35s",
+			});
 		await context.close();
 	});
 }
