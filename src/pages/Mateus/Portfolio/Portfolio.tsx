@@ -29,6 +29,7 @@ import { defaultPortfolioProjectId, portfolioProjects } from "./portfolio.data";
 import styles from "./Portfolio.module.css";
 import MobileProjectMeta from "./MobileProjectMeta";
 import ProjectImageLightbox from "./ProjectImageLightbox";
+import { ProjectSiteBadge, toSiteLinkLabel } from "./ProjectSiteLink";
 import type { PortfolioProjectId } from "./types";
 import { worldAtlasTiles } from "./worldAtlasTiles";
 
@@ -301,8 +302,8 @@ export default function Portfolio() {
 	const activeLocation = activeProject.worldLocation;
 	const worldJourneyDestination = WORLD_JOURNEY_DESTINATIONS[activeProject.id];
 	// Voo de conexão: ao trocar de projeto, o avião sai de onde estava (destino
-	// anterior ou ponto no Brasil) por uma linha temporária; a rota que fica é
-	// sempre Fortaleza → destino. Ajuste de estado durante o render (padrão do
+	// anterior ou ponto no Brasil), sem linha própria; a única rota desenhada é
+	// Fortaleza → destino. Ajuste de estado durante o render (padrão do
 	// React para estado derivado da troca de projeto).
 	const [flight, setFlight] = useState<
 		Readonly<{
@@ -546,14 +547,6 @@ export default function Portfolio() {
 									connectionOrigin ? "connection" : "direct"
 								}
 							/>
-							{transferOrigin ? (
-								<span
-									className={styles.journeyTransferRoute}
-									style={toRouteStyle(transferOrigin, worldJourneyDestination)}
-									aria-hidden="true"
-									data-world-journey-transfer-route={activeProject.id}
-								/>
-							) : null}
 							<span
 								className={styles.journeyTraveler}
 								style={toRouteStyle(travelerOrigin, worldJourneyDestination)}
@@ -564,7 +557,7 @@ export default function Portfolio() {
 								<span
 									data-world-journey-traveler-dot="true"
 									onAnimationEnd={(event) => {
-										// Pousou: a linha da conexão sai e as voltas seguintes
+										// Pousou: as voltas seguintes
 										// (loop) passam a usar a rota Fortaleza → destino.
 										if (
 											event.target === event.currentTarget &&
@@ -717,6 +710,21 @@ export default function Portfolio() {
 								draggable={false}
 							/>
 						</button>
+						{activeProject.siteUrl ? (
+							<a
+								className={styles.mobileProjectSiteLink}
+								href={activeProject.siteUrl}
+								target="_blank"
+								rel="noopener noreferrer"
+								aria-label={toSiteLinkLabel(
+									localizeLabel(activeProject.name),
+									activeProject.siteUrl
+								)}
+								data-project-site-link={activeProject.id}
+							>
+								<ProjectSiteBadge variant="mobile" />
+							</a>
+						) : null}
 					</div>
 					{previewProject ? (
 						<ProjectImageLightbox
@@ -868,6 +876,22 @@ export default function Portfolio() {
 							draggable={false}
 						/>
 						<span className={styles.previewYear}>{localizeLabel(activeProject.year)}</span>
+						{/* Projeto no ar: a foto inteira abre o site em nova aba. */}
+						{activeProject.siteUrl ? (
+							<a
+								className={styles.projectSiteLink}
+								href={activeProject.siteUrl}
+								target="_blank"
+								rel="noopener noreferrer"
+								aria-label={toSiteLinkLabel(
+									localizeLabel(activeProject.name),
+									activeProject.siteUrl
+								)}
+								data-project-site-link={activeProject.id}
+							>
+								<ProjectSiteBadge variant="desktop" />
+							</a>
+						) : null}
 					</div>
 
 					<div className={styles.detailBody}>

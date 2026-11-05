@@ -1,7 +1,8 @@
 import { expect, test, type Page } from "@playwright/test";
 
-// Ao trocar de destino, o avião sai de onde estava por uma linha temporária;
-// a rota que fica no mapa é sempre Fortaleza → novo destino.
+// Ao trocar de destino, o avião sai de onde estava, sem linha própria (a
+// linha temporária da conexão foi removida); a única rota desenhada é
+// Fortaleza → novo destino.
 const journeyState = (page: Page) =>
 	page.evaluate(() => {
 		const traveler = document.querySelector<HTMLElement>(
@@ -12,8 +13,8 @@ const journeyState = (page: Page) =>
 		);
 		return {
 			from: traveler?.dataset.worldJourneyFrom ?? null,
-			transfer: document.querySelectorAll("[data-world-journey-transfer-route]")
-				.length,
+			// Só existe uma linha tracejada: a de Fortaleza.
+			routes: document.querySelectorAll("[data-world-journey-route]").length,
 			route: route ? 1 : 0,
 			// Duração do desenho da rota de Fortaleza (1 s mais lenta na conexão).
 			routeDuration: route ? getComputedStyle(route).animationDuration : null,
@@ -49,21 +50,21 @@ for (const [name, viewport, selector] of [
 		// Pousou em Salt Lake City: as voltas usam a rota de Fortaleza.
 		await expect
 			.poll(() => journeyState(page), { timeout: 8_000 })
-			.toMatchObject({ from: "fortaleza", transfer: 0 });
+			.toMatchObject({ from: "fortaleza", routes: 1 });
 
 		await page.locator(selector("central-clube-livro")).click();
 		await expect
 			.poll(() => journeyState(page))
 			.toEqual({
 				from: "previous",
-				transfer: 1,
+				routes: 1,
 				route: 1,
 				routeDuration: "3.8s",
 			});
 		const angles = await page.evaluate(() => ({
-			transfer: Number.parseFloat(
+			flight: Number.parseFloat(
 				getComputedStyle(
-					document.querySelector("[data-world-journey-transfer-route]")!
+					document.querySelector("[data-world-journey-traveler]")!
 				).getPropertyValue("--route-angle")
 			),
 			route: Number.parseFloat(
@@ -73,16 +74,16 @@ for (const [name, viewport, selector] of [
 			),
 		}));
 		// De Salt Lake City para Coimbra o avião vai para o leste (quase 0°); a
-		// rota que fica, de Fortaleza, sobe para o nordeste.
-		expect(Math.abs(angles.transfer)).toBeLessThan(15);
+		// rota desenhada, de Fortaleza, sobe para o nordeste.
+		expect(Math.abs(angles.flight)).toBeLessThan(15);
 		expect(angles.route).toBeLessThan(-30);
 
-		// Depois do pouso a linha da conexão sai e fica só Fortaleza → Coimbra.
+		// Depois do pouso as voltas usam a rota Fortaleza → Coimbra.
 		await expect
 			.poll(() => journeyState(page), { timeout: 8_000 })
 			.toEqual({
 				from: "fortaleza",
-				transfer: 0,
+				routes: 1,
 				route: 1,
 				// A duração não muda no pouso (senão a animação pularia).
 				routeDuration: "3.8s",
@@ -105,12 +106,14 @@ test("avião acompanha a câmera no voo de conexão (desktop)", async ({
 	await page.locator('aside button[data-project-id="clockright"]').click();
 	await expect
 		.poll(() => journeyState(page), { timeout: 8_000 })
-		.toMatchObject({ from: "fortaleza", transfer: 0 });
+		.toMatchObject({ from: "fortaleza", routes: 1 });
 
 	await page
 		.locator('aside button[data-project-id="central-clube-livro"]')
 		.click();
-	await expect.poll(() => journeyState(page)).toMatchObject({ transfer: 1 });
+	await expect
+		.poll(() => journeyState(page))
+		.toMatchObject({ from: "previous" });
 	const samples = await page.evaluate(
 		() =>
 			new Promise<number[][]>((resolve) => {

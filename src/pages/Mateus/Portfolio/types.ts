@@ -67,6 +67,8 @@ export type PortfolioProject = Readonly<{
   /** Largura ÷ altura do logo (arquivo sem margens): base do tamanho equilibrado. */
   logoAspect: number;
   logoAlt: string;
+  /** Site do projeto no ar (abre em nova aba pelo card). */
+  siteUrl?: string;
   projectLabel: string;
   subtitle?: string;
   statusLabel?: string;
