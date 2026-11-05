@@ -17,6 +17,9 @@ import flagUnitedStates from "../../../assets/Mateus/portfolio/flags/estados-uni
 import flagGuineaBissau from "../../../assets/Mateus/portfolio/flags/guine-bissau-semicircle-realistic-v3.webp";
 import flagMexico from "../../../assets/Mateus/portfolio/flags/mexico-semicircle-realistic-v3.webp";
 import flagPortugal from "../../../assets/Mateus/portfolio/flags/portugal-semicircle-realistic-v3.webp";
+// Avião da rota: "Jet Airplane" (CC0, https://opengameart.org/content/jet-airplane),
+// pintado nas cores do site e renderizado de cima no Blender.
+import journeyPlane from "../../../assets/Mateus/portfolio/journey-plane-v1.webp";
 
 import usePortfolioActiveItem from "./hooks/usePortfolioActiveItem";
 import useMobilePortfolioBrandPush from "./hooks/useMobilePortfolioBrandPush";
@@ -496,7 +499,23 @@ export default function Portfolio() {
 								aria-hidden="true"
 								data-world-journey-traveler={activeProject.id}
 							>
-								<span data-world-journey-traveler-dot="true" />
+								<span data-world-journey-traveler-dot="true">
+									<span className={styles.journeyPlane}>
+										<img
+											className={styles.journeyPlaneShadow}
+											src={journeyPlane}
+											alt=""
+											draggable={false}
+										/>
+										<img
+											className={styles.journeyPlaneBody}
+											src={journeyPlane}
+											alt=""
+											draggable={false}
+											data-world-journey-plane="true"
+										/>
+									</span>
+								</span>
 							</span>
 
 							<span

@@ -353,20 +353,57 @@
 	pointer-events: none;
 }
 
+/* Avião que voa a rota (renderizado de cima a partir de um modelo 3D). O
+   portador anda pela rota; dentro dele, --plane-lift (0 no chão, 1 em
+   cruzeiro) faz o avião crescer e a sombra se afastar e borrar. */
 .journeyTraveler > span {
+	--plane-w: 44px;
+	--plane-h: 35px;
 	position: absolute;
-	top: -7px;
+	top: calc(var(--plane-h) / -2);
 	left: 0;
-	width: 14px;
-	height: 14px;
-	border: 3px solid rgba(255, 255, 245, 0.96);
-	border-radius: 50%;
-	box-sizing: border-box;
-	background: #075c59;
-	box-shadow:
-		0 0 0 5px rgba(255, 255, 245, 0.42),
-		0 7px 18px rgba(2, 60, 58, 0.28);
+	width: var(--plane-w);
+	height: var(--plane-h);
+	margin-left: calc(var(--plane-w) / -2);
 	animation: journeyTravelerMove 2350ms 180ms cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+@property --plane-lift {
+	syntax: "<number>";
+	inherits: true;
+	initial-value: 1;
+}
+
+.journeyPlane {
+	position: absolute;
+	inset: 0;
+	--plane-lift: 1;
+	animation: journeyPlaneAltitude 2350ms 180ms cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+.journeyPlane img {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	object-fit: contain;
+	user-select: none;
+	pointer-events: none;
+}
+
+.journeyPlaneBody {
+	transform: scale(calc(0.72 + 0.28 * var(--plane-lift)));
+	filter: drop-shadow(0 0 0.6px rgba(2, 48, 46, 0.55));
+}
+
+/* A sombra cai sempre para baixo e para a direita na tela, qualquer que seja
+   o rumo: desfaz a rotação da rota, desloca e volta a girar. */
+.journeyPlaneShadow {
+	transform: rotate(calc(-1 * var(--route-angle)))
+		translate(calc(1px + 7px * var(--plane-lift)), calc(1px + 10px * var(--plane-lift)))
+		rotate(var(--route-angle)) scale(calc(0.7 + 0.12 * var(--plane-lift)));
+	filter: brightness(0) blur(calc(0.6px + 1.6px * var(--plane-lift)));
+	opacity: calc(0.42 - 0.18 * var(--plane-lift));
 }
 
 .journeyMarker {
@@ -833,7 +870,6 @@
 	0% {
 		left: 0;
 		opacity: 0;
-		transform: scale(0.7);
 	}
 	12% {
 		opacity: 1;
@@ -842,9 +878,8 @@
 		opacity: 1;
 	}
 	100% {
-		left: calc(100% - 14px);
+		left: 100%;
 		opacity: 0;
-		transform: scale(1.15);
 	}
 }
 
@@ -1619,6 +1654,12 @@
 			journeyTravelerLoop 4.4s 2.9s cubic-bezier(0.45, 0, 0.25, 1) infinite;
 	}
 
+	.portfolioRoot[data-motion-idle="on"] .journeyPlane {
+		animation:
+			journeyPlaneAltitude 2350ms 180ms cubic-bezier(0.4, 0, 0.2, 1) both,
+			journeyPlaneAltitudeLoop 4.4s 2.9s cubic-bezier(0.45, 0, 0.25, 1) infinite;
+	}
+
 	.portfolioRoot[data-motion-idle="on"] .projectButtonActive .projectOrdinal {
 		animation: atlasOrdinalPulse 2.4s ease-in-out infinite;
 	}
@@ -1744,7 +1785,6 @@
 	0% {
 		left: 0;
 		opacity: 0;
-		transform: scale(0.7);
 	}
 	8% {
 		opacity: 1;
@@ -1754,9 +1794,46 @@
 	}
 	66%,
 	100% {
-		left: calc(100% - 14px);
+		left: 100%;
 		opacity: 0;
-		transform: scale(1.15);
+	}
+}
+
+/* Decola em Fortaleza, sobe, cruza e desce no destino. */
+@keyframes journeyPlaneAltitude {
+	0% {
+		--plane-lift: 0;
+	}
+	28%,
+	70% {
+		--plane-lift: 1;
+	}
+	100% {
+		--plane-lift: 0.1;
+	}
+}
+
+/* Na volta em loop: mesma decolagem/pouso, com o avião subindo e descendo
+   de leve em cruzeiro. Segue o ritmo de journeyTravelerLoop (viaja até 66%). */
+@keyframes journeyPlaneAltitudeLoop {
+	0% {
+		--plane-lift: 0;
+	}
+	16% {
+		--plane-lift: 0.95;
+	}
+	28% {
+		--plane-lift: 1.12;
+	}
+	40% {
+		--plane-lift: 0.9;
+	}
+	52% {
+		--plane-lift: 1.06;
+	}
+	66%,
+	100% {
+		--plane-lift: 0.1;
 	}
 }
 
