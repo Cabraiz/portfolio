@@ -13,13 +13,13 @@ import mobileEntrePaginas from "../../../assets/Mateus/portfolio/mobile-summary/
 import mobileWalter from "../../../assets/Mateus/portfolio/mobile-summary/walter-adv-mobile-summary-v1.webp";
 import mobileFran from "../../../assets/Mateus/portfolio/mobile-summary/fran-studio-mobile-summary-v2.webp";
 
-import logoNexovare from "../../../assets/Mateus/portfolio/logos/refined/nexovare-nx-mark-v2.webp";
-import logo2 from "../../../assets/Mateus/portfolio/logos/logo2.webp";
-import logoGuineBissauCommerce from "../../../assets/Mateus/portfolio/logos/refined/bideiras-turban-icon-v1.webp";
-import logoClockRight from "../../../assets/Mateus/portfolio/logos/refined/clockright-app-icon-v2.webp";
-import logoCentralClube from "../../../assets/Mateus/portfolio/logos/refined/entre-paginas-mark-v3.webp";
-import logo4 from "../../../assets/Mateus/portfolio/logos/refined/wagner-advocacia-lockup-v3.webp";
-import logo5 from "../../../assets/Mateus/portfolio/logos/refined/fran-site-lockup-v4.webp";
+import logoNexovare from "../../../assets/Mateus/portfolio/logos/refined/nexovare-nx-mark-v2-trim.webp";
+import logo2 from "../../../assets/Mateus/portfolio/logos/logo2-trim.webp";
+import logoGuineBissauCommerce from "../../../assets/Mateus/portfolio/logos/refined/bideiras-turban-icon-v1-trim.webp";
+import logoClockRight from "../../../assets/Mateus/portfolio/logos/refined/clockright-app-icon-v2-trim.webp";
+import logoCentralClube from "../../../assets/Mateus/portfolio/logos/refined/entre-paginas-mark-v3-trim.webp";
+import logo4 from "../../../assets/Mateus/portfolio/logos/refined/wagner-advocacia-lockup-v3-trim.webp";
+import logo5 from "../../../assets/Mateus/portfolio/logos/refined/fran-site-lockup-v4-trim.webp";
 
 import type {
   PortfolioProject,
@@ -50,6 +50,7 @@ export const portfolioProjects: ReadonlyArray<PortfolioProject> = [
     mobileImageSrc: mobileNexovare,
     imageAlt: "Preview do painel de gestão Nexovare",
     logoSrc: logoNexovare,
+    logoAspect: 1.443,
     logoAlt: "Monograma NX do ecossistema Nexovare",
     projectLabel: "Projeto em destaque",
     subtitle: "Ecossistema comercial",
@@ -78,6 +79,7 @@ export const portfolioProjects: ReadonlyArray<PortfolioProject> = [
     mobileImageSrc: mobileBank,
     imageAlt: "Preview do projeto APP BANCO",
     logoSrc: logo2,
+    logoAspect: 1.024,
     logoAlt: "Logo do projeto APP BANCO",
     projectLabel: "Projeto em destaque",
     subtitle: "Experiência bancária mobile",
@@ -106,6 +108,7 @@ export const portfolioProjects: ReadonlyArray<PortfolioProject> = [
     mobileImageSrc: mobileBideiras,
     imageAlt: "Preview do marketplace Bideiras em Guiné-Bissau",
     logoSrc: logoGuineBissauCommerce,
+    logoAspect: 0.675,
     logoAlt: "Ícone da Bideiras: mulher com turbante amarelo",
     projectLabel: "Projeto em destaque",
     subtitle: "Comércio digital internacional",
@@ -134,6 +137,7 @@ export const portfolioProjects: ReadonlyArray<PortfolioProject> = [
     mobileImageSrc: mobileClockRight,
     imageAlt: "Tela inicial do ClockRight, ponto eletrônico por reconhecimento facial",
     logoSrc: logoClockRight,
+    logoAspect: 1.0,
     logoAlt: "Ícone do ClockRight: relógio",
     projectLabel: "Projeto em destaque",
     subtitle: "Ponto por biometria facial",
@@ -162,6 +166,7 @@ export const portfolioProjects: ReadonlyArray<PortfolioProject> = [
     mobileImageSrc: mobileEntrePaginas,
     imageAlt: "Página inicial do projeto Entre Paginas",
     logoSrc: logoCentralClube,
+    logoAspect: 1.902,
     logoAlt: "Logo Entre Paginas",
     projectLabel: "Projeto em destaque",
     subtitle: "Comunidade editorial",
@@ -190,6 +195,7 @@ export const portfolioProjects: ReadonlyArray<PortfolioProject> = [
     mobileImageSrc: mobileWalter,
     imageAlt: "Preview do projeto Wagner Adv",
     logoSrc: logo4,
+    logoAspect: 1.015,
     logoAlt: "Logo do projeto Wagner Adv",
     projectLabel: "Projeto em destaque",
     subtitle: "Presença institucional",
@@ -218,6 +224,7 @@ export const portfolioProjects: ReadonlyArray<PortfolioProject> = [
     mobileImageSrc: mobileFran,
     imageAlt: "Preview do projeto Fran Studio",
     logoSrc: logo5,
+    logoAspect: 2.99,
     logoAlt: "Logo do projeto Fran Studio",
     projectLabel: "Projeto em destaque",
     subtitle: "Marca e captação local",

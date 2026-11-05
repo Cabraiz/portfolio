@@ -105,6 +105,10 @@ function isSameMapPosition(
 	return Math.abs(a.x - b.x) < 0.01 && Math.abs(a.y - b.y) < 0.01;
 }
 
+type LogoStyle = CSSProperties & { "--logo-aspect": number };
+
+const toLogoStyle = (aspect: number): LogoStyle => ({ "--logo-aspect": aspect });
+
 type MapPointStyle = CSSProperties & {
 	"--point-x": string;
 	"--point-y": string;
@@ -745,7 +749,12 @@ export default function Portfolio() {
 											projectPointerStartRef.current = null;
 										}}
 									>
-										<img src={project.logoSrc} alt={localizeLabel("")} aria-hidden="true" />
+										<img
+											src={project.logoSrc}
+											alt={localizeLabel("")}
+											aria-hidden="true"
+											style={toLogoStyle(project.logoAspect)}
+										/>
 										<span>{localizeLabel(project.name)}</span>
 									</button>
 								);
@@ -790,6 +799,7 @@ export default function Portfolio() {
 									</span>
 									<img
 										className={styles.projectLogo}
+										style={toLogoStyle(project.logoAspect)}
 										src={project.logoSrc}
 										alt={localizeLabel("")}
 										aria-hidden="true"
@@ -857,7 +867,13 @@ export default function Portfolio() {
 								<h2>{localizeLabel(activeProject.name)}</h2>
 								<p>{localizeLabel(PROJECT_DESCRIPTIONS[activeProject.id])}</p>
 							</div>
-							<img src={activeProject.logoSrc} alt={localizeLabel(activeProject.logoAlt)} />
+							<span className={styles.detailLogo}>
+								<img
+									src={activeProject.logoSrc}
+									alt={localizeLabel(activeProject.logoAlt)}
+									style={toLogoStyle(activeProject.logoAspect)}
+								/>
+							</span>
 						</div>
 
 						<div className={styles.detailMeta}>
