@@ -241,10 +241,19 @@
 	opacity: 0.82;
 }
 
+/* Logos com o mesmo peso visual: todos ocupam a mesma área (um quadrado de
+   --logo-unit de lado), com largura e altura tiradas da proporção do arquivo
+   (--logo-aspect, sem margens). Os largos ficam mais largos e baixos, os
+   altos mais estreitos; nenhum passa de --logo-max-w × --logo-max-h, o que
+   deixa folga até as bordas. */
 .projectLogo {
-	width: 70px;
-	height: 42px;
-	border-radius: 7px;
+	--logo-unit: 34px;
+	--logo-max-w: 62px;
+	--logo-max-h: 36px;
+	justify-self: center;
+	align-self: center;
+	width: min(calc(var(--logo-unit) * sqrt(var(--logo-aspect, 1))), var(--logo-max-w));
+	height: min(calc(var(--logo-unit) / sqrt(var(--logo-aspect, 1))), var(--logo-max-h));
 	object-fit: contain;
 	background: transparent;
 }
@@ -802,11 +811,22 @@
 	letter-spacing: -0.025em;
 }
 
-.detailTitleRow img {
+/* Espaço fixo do logo no card (o texto não muda de largura entre projetos);
+   dentro dele, o mesmo equilíbrio de área da lista. */
+.detailLogo {
+	display: grid;
+	flex: 0 0 100px;
 	width: 100px;
 	height: 60px;
-	flex: 0 0 100px;
-	border-radius: 8px;
+	place-items: center;
+}
+
+.detailLogo img {
+	--logo-unit: 48px;
+	--logo-max-w: 94px;
+	--logo-max-h: 54px;
+	width: min(calc(var(--logo-unit) * sqrt(var(--logo-aspect, 1))), var(--logo-max-w));
+	height: min(calc(var(--logo-unit) / sqrt(var(--logo-aspect, 1))), var(--logo-max-h));
 	object-fit: contain;
 	background: transparent;
 	box-shadow: none;
@@ -974,8 +994,9 @@
 	}
 
 	.projectLogo {
-		width: 62px;
-		height: 40px;
+		--logo-unit: 31px;
+		--logo-max-w: 56px;
+		--logo-max-h: 34px;
 	}
 
 	.mapPointLabel {
@@ -1479,6 +1500,9 @@
 		width: 54px;
 		min-width: 54px;
 		height: 52px;
+		/* Linha fixa para o logo: os nomes ficam alinhados, seja qual for a
+		   altura de cada logo. */
+		grid-template-rows: 26px auto;
 		place-items: center;
 		align-content: center;
 		gap: 2px;
@@ -1498,9 +1522,12 @@
 	}
 
 	.mobileProjectButton img {
+		--logo-unit: 23px;
+		--logo-max-w: 40px;
+		--logo-max-h: 26px;
 		display: block;
-		width: 34px;
-		height: 28px;
+		width: min(calc(var(--logo-unit) * sqrt(var(--logo-aspect, 1))), var(--logo-max-w));
+		height: min(calc(var(--logo-unit) / sqrt(var(--logo-aspect, 1))), var(--logo-max-h));
 		object-fit: contain;
 	}
 
@@ -1600,9 +1627,14 @@
 		min-width: 46px;
 	}
 
+	.mobileProjectButton {
+		grid-template-rows: 22px auto;
+	}
+
 	.mobileProjectButton img {
-		width: 29px;
-		height: 24px;
+		--logo-unit: 20px;
+		--logo-max-w: 34px;
+		--logo-max-h: 22px;
 	}
 }
 

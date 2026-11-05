@@ -64,6 +64,8 @@ export type PortfolioProject = Readonly<{
   imageAlt: string;
   mobileImageSrc?: string;
   logoSrc: string;
+  /** Largura ÷ altura do logo (arquivo sem margens): base do tamanho equilibrado. */
+  logoAspect: number;
   logoAlt: string;
   projectLabel: string;
   subtitle?: string;
