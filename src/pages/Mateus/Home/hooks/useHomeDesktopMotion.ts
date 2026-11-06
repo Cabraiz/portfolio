@@ -80,10 +80,15 @@ export default function useHomeDesktopMotion(
 				idle.add(sealCycle, 1.2);
 			}
 
-			const visibility = new IntersectionObserver(([entry]) => {
-				if (entry?.isIntersecting) idle.play();
-				else idle.pause();
-			});
+			const visibility = new IntersectionObserver(
+				([entry]) => {
+					if (entry?.isIntersecting) idle.play();
+					else idle.pause();
+				},
+				// Encostar na borda da tela não conta como visível (interseção de área
+				// zero): sem a margem o idle seguia rodando com o Portfólio na tela.
+				{ rootMargin: "-1px 0px -1px 0px" }
+			);
 			visibility.observe(container);
 
 			// Profundidade com o mouse: a foto se desloca ao contrário do cursor e

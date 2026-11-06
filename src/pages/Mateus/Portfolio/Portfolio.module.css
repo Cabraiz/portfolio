@@ -1,3 +1,49 @@
+/* Variáveis animadas pelo GSAP (usePortfolioMotion) a cada quadro.
+   Registradas sem herança: sem isso, cada mudança (a flutuação do card roda
+   o tempo todo) recalculava o estilo de todo o card e dos filhos, ocupando a
+   thread principal e travando as animações do mapa. */
+@property --card-float-y {
+	syntax: "<length>";
+	inherits: false;
+	initial-value: 0px;
+}
+
+@property --card-enter-y {
+	syntax: "<length>";
+	inherits: false;
+	initial-value: 0px;
+}
+
+@property --card-turn {
+	syntax: "<angle>";
+	inherits: false;
+	initial-value: 0deg;
+}
+
+@property --card-enter-o {
+	syntax: "<number>";
+	inherits: false;
+	initial-value: 1;
+}
+
+@property --enter-x {
+	syntax: "<length>";
+	inherits: false;
+	initial-value: 0px;
+}
+
+@property --enter-o {
+	syntax: "<number>";
+	inherits: false;
+	initial-value: 1;
+}
+
+@property --enter-s {
+	syntax: "<number>";
+	inherits: false;
+	initial-value: 1;
+}
+
 .portfolioRoot {
 	--atlas-ink: #073c3d;
 	--atlas-deep: #064f4d;
@@ -374,34 +420,34 @@
 	pointer-events: none;
 }
 
-/* Avião que voa a rota (renderizado de cima a partir de um modelo 3D). O
-   portador anda pela rota; dentro dele, --plane-lift (0 no chão, 1 em
-   cruzeiro) faz o avião crescer e a sombra se afastar e borrar. */
+/* Avião que voa a rota (renderizado de cima a partir de um modelo 3D).
+   Tudo aqui anima só transform e opacity, que o navegador roda na GPU (no
+   compositor), sem depender da thread principal: a troca de projeto anima o
+   card ao mesmo tempo e, com `left` e uma variável CSS animada, o avião
+   travava a cada quadro em que o card ocupava a thread.
+
+   O portador tem o comprimento da rota e o avião fica na ponta direita dele;
+   o voo é translateX(-100% → 0), em % do próprio portador. */
 .journeyTraveler > span {
 	--plane-w: 51px;
 	--plane-h: 40px;
 	position: absolute;
 	top: calc(var(--plane-h) / -2);
 	left: 0;
-	width: var(--plane-w);
+	width: 100%;
 	height: var(--plane-h);
-	margin-left: calc(var(--plane-w) / -2);
+	transform: translateX(0);
+	will-change: transform, opacity;
 	animation: journeyTravelerMove var(--atlas-camera-duration)
 		var(--atlas-camera-ease) both;
 }
 
-@property --plane-lift {
-	syntax: "<number>";
-	inherits: true;
-	initial-value: 1;
-}
-
 .journeyPlane {
 	position: absolute;
-	inset: 0;
-	--plane-lift: 1;
-	animation: journeyPlaneAltitude var(--atlas-camera-duration)
-		var(--atlas-camera-ease) both;
+	top: 0;
+	right: calc(var(--plane-w) / -2);
+	width: var(--plane-w);
+	height: var(--plane-h);
 }
 
 .journeyPlane img {
@@ -414,19 +460,27 @@
 	pointer-events: none;
 }
 
+/* Altitude (decola, cruza, pousa): o avião cresce e a sombra se afasta e
+   clareia. Valores de repouso = em cruzeiro. */
 .journeyPlaneBody {
-	transform: scale(calc(0.72 + 0.28 * var(--plane-lift)));
+	transform: scale(1);
 	filter: drop-shadow(0 0 0.6px rgba(2, 48, 46, 0.55));
+	will-change: transform;
+	animation: journeyPlaneBodyAltitude var(--atlas-camera-duration)
+		var(--atlas-camera-ease) both;
 }
 
 /* A sombra cai sempre para baixo e para a direita na tela, qualquer que seja
-   o rumo: desfaz a rotação da rota, desloca e volta a girar. */
+   o rumo: desfaz a rotação da rota, desloca e volta a girar. O desfoque é
+   fixo (animar filter redesenha a cada quadro). */
 .journeyPlaneShadow {
-	transform: rotate(calc(-1 * var(--route-angle)))
-		translate(calc(1px + 7px * var(--plane-lift)), calc(1px + 10px * var(--plane-lift)))
-		rotate(var(--route-angle)) scale(calc(0.7 + 0.12 * var(--plane-lift)));
-	filter: brightness(0) blur(calc(0.6px + 1.6px * var(--plane-lift)));
-	opacity: calc(0.42 - 0.18 * var(--plane-lift));
+	transform: rotate(calc(-1 * var(--route-angle))) translate(8px, 11px)
+		rotate(var(--route-angle)) scale(0.82);
+	filter: brightness(0) blur(1.6px);
+	opacity: 0.24;
+	will-change: transform, opacity;
+	animation: journeyPlaneShadowAltitude var(--atlas-camera-duration)
+		var(--atlas-camera-ease) both;
 }
 
 .journeyMarker {
@@ -996,7 +1050,7 @@
 
 @keyframes journeyTravelerMove {
 	0% {
-		left: 0;
+		transform: translateX(-100%);
 		opacity: 0;
 	}
 	12% {
@@ -1006,7 +1060,7 @@
 		opacity: 1;
 	}
 	100% {
-		left: 100%;
+		transform: translateX(0);
 		opacity: 0;
 	}
 }
@@ -1800,11 +1854,20 @@
 			journeyTravelerLoop 4.4s 3.2s cubic-bezier(0.45, 0, 0.25, 1) infinite;
 	}
 
-	.portfolioRoot[data-motion-idle="on"] .journeyPlane {
+	.portfolioRoot[data-motion-idle="on"] .journeyPlaneBody {
 		animation:
-			journeyPlaneAltitude var(--atlas-camera-duration) var(--atlas-camera-ease)
-				both,
-			journeyPlaneAltitudeLoop 4.4s 3.2s cubic-bezier(0.45, 0, 0.25, 1) infinite;
+			journeyPlaneBodyAltitude var(--atlas-camera-duration)
+				var(--atlas-camera-ease) both,
+			journeyPlaneBodyAltitudeLoop 4.4s 3.2s cubic-bezier(0.45, 0, 0.25, 1)
+				infinite;
+	}
+
+	.portfolioRoot[data-motion-idle="on"] .journeyPlaneShadow {
+		animation:
+			journeyPlaneShadowAltitude var(--atlas-camera-duration)
+				var(--atlas-camera-ease) both,
+			journeyPlaneShadowAltitudeLoop 4.4s 3.2s cubic-bezier(0.45, 0, 0.25, 1)
+				infinite;
 	}
 
 	.portfolioRoot[data-motion-idle="on"] .projectButtonActive .projectOrdinal {
@@ -1927,7 +1990,7 @@
 
 @keyframes journeyTravelerLoop {
 	0% {
-		left: 0;
+		transform: translateX(-100%);
 		opacity: 0;
 	}
 	8% {
@@ -1938,46 +2001,109 @@
 	}
 	66%,
 	100% {
-		left: 100%;
+		transform: translateX(0);
 		opacity: 0;
 	}
 }
 
-/* Decola em Fortaleza, sobe, cruza e desce no destino. */
-@keyframes journeyPlaneAltitude {
+/* Decola em Fortaleza, sobe, cruza e desce no destino (altitude 0 → 1 →
+   0,1): o avião cresce até o tamanho de cruzeiro e a sombra se afasta. */
+@keyframes journeyPlaneBodyAltitude {
 	0% {
-		--plane-lift: 0;
+		transform: scale(0.72);
 	}
 	28%,
 	70% {
-		--plane-lift: 1;
+		transform: scale(1);
 	}
 	100% {
-		--plane-lift: 0.1;
+		transform: scale(0.748);
+	}
+}
+
+@keyframes journeyPlaneShadowAltitude {
+	0% {
+		transform: rotate(calc(-1 * var(--route-angle)))
+			translate(1px, 1px) rotate(var(--route-angle))
+			scale(0.7);
+		opacity: 0.42;
+	}
+	28%,
+	70% {
+		transform: rotate(calc(-1 * var(--route-angle)))
+			translate(8px, 11px) rotate(var(--route-angle))
+			scale(0.82);
+		opacity: 0.24;
+	}
+	100% {
+		transform: rotate(calc(-1 * var(--route-angle)))
+			translate(1.7px, 2px) rotate(var(--route-angle))
+			scale(0.712);
+		opacity: 0.402;
 	}
 }
 
 /* Na volta em loop: mesma decolagem/pouso, com o avião subindo e descendo
    de leve em cruzeiro. Segue o ritmo de journeyTravelerLoop (viaja até 66%). */
-@keyframes journeyPlaneAltitudeLoop {
+@keyframes journeyPlaneBodyAltitudeLoop {
 	0% {
-		--plane-lift: 0;
+		transform: scale(0.72);
 	}
 	16% {
-		--plane-lift: 0.95;
+		transform: scale(0.986);
 	}
 	28% {
-		--plane-lift: 1.12;
+		transform: scale(1.034);
 	}
 	40% {
-		--plane-lift: 0.9;
+		transform: scale(0.972);
 	}
 	52% {
-		--plane-lift: 1.06;
+		transform: scale(1.017);
 	}
 	66%,
 	100% {
-		--plane-lift: 0.1;
+		transform: scale(0.748);
+	}
+}
+
+@keyframes journeyPlaneShadowAltitudeLoop {
+	0% {
+		transform: rotate(calc(-1 * var(--route-angle)))
+			translate(1px, 1px) rotate(var(--route-angle))
+			scale(0.7);
+		opacity: 0.42;
+	}
+	16% {
+		transform: rotate(calc(-1 * var(--route-angle)))
+			translate(7.65px, 10.5px) rotate(var(--route-angle))
+			scale(0.814);
+		opacity: 0.249;
+	}
+	28% {
+		transform: rotate(calc(-1 * var(--route-angle)))
+			translate(8.84px, 12.2px) rotate(var(--route-angle))
+			scale(0.8344);
+		opacity: 0.2184;
+	}
+	40% {
+		transform: rotate(calc(-1 * var(--route-angle)))
+			translate(7.3px, 10px) rotate(var(--route-angle))
+			scale(0.808);
+		opacity: 0.258;
+	}
+	52% {
+		transform: rotate(calc(-1 * var(--route-angle)))
+			translate(8.42px, 11.6px) rotate(var(--route-angle))
+			scale(0.8272);
+		opacity: 0.2292;
+	}
+	66%,
+	100% {
+		transform: rotate(calc(-1 * var(--route-angle)))
+			translate(1.7px, 2px) rotate(var(--route-angle))
+			scale(0.712);
+		opacity: 0.402;
 	}
 }
 

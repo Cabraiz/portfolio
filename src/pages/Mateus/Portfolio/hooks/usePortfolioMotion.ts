@@ -83,7 +83,9 @@ export default function usePortfolioMotion(
 			([entry]) => {
 				root.dataset.motionIdle = entry?.isIntersecting ? "on" : "off";
 			},
-			{ threshold: 0.12 }
+			// Encostar na borda da tela não conta como visível (interseção de
+			// área zero): sem a margem, o idle seguia ligado com o Início na tela.
+			{ threshold: 0.12, rootMargin: "-1px 0px -1px 0px" }
 		);
 		observer.observe(root);
 
@@ -206,10 +208,13 @@ export default function usePortfolioMotion(
 						repeat: -1,
 					}
 				);
-				const idleObserver = new IntersectionObserver(([entry]) => {
-					if (entry?.isIntersecting) float.play();
-					else float.pause();
-				});
+				const idleObserver = new IntersectionObserver(
+					([entry]) => {
+						if (entry?.isIntersecting) float.play();
+						else float.pause();
+					},
+					{ rootMargin: "-1px 0px -1px 0px" }
+				);
 				idleObserver.observe(root);
 
 				// A imagem do projeto inclina em 3D seguindo o mouse sobre o card.

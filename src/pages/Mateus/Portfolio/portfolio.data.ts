@@ -170,6 +170,7 @@ export const portfolioProjects: ReadonlyArray<PortfolioProject> = [
     logoSrc: logoCentralClube,
     logoAspect: 1.902,
     logoAlt: "Logo Entre Paginas",
+    siteUrl: "https://entrepaginas.cabraiz.com/",
     projectLabel: "Projeto em destaque",
     subtitle: "Comunidade editorial",
     statusLabel: "SELECIONAR",
