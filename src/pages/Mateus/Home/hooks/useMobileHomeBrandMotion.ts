@@ -24,6 +24,58 @@ const ACTION_RAMP = 192;
 // A barra persegue a posição-alvo com uma pequena inércia, para não acompanhar
 // cada tranco da rolagem; a rampa começa cedo o bastante para cobrir o atraso.
 const ACTION_SMOOTHING_S = 0.24;
+// Amostragem da curva do logo/textos para a ScrollTimeline (px de rolagem) e
+// tolerância da simplificação (px de desvio máximo da curva original).
+const SAMPLE_STEP = 2;
+const SIMPLIFY_PX = 0.15;
+const SIMPLIFY_SCALE = 0.0005;
+
+type Sample = readonly [scroll: number, value: number];
+
+/** Ramer–Douglas–Peucker: menos keyframes, desvio máximo `tolerance`. */
+function simplify(points: readonly Sample[], tolerance: number): Sample[] {
+  if (points.length < 3) return [...points];
+  const keep = new Uint8Array(points.length);
+  keep[0] = 1;
+  keep[points.length - 1] = 1;
+  const stack: Array<[number, number]> = [[0, points.length - 1]];
+  while (stack.length > 0) {
+    const [first, last] = stack.pop()!;
+    const [x0, y0] = points[first];
+    const [x1, y1] = points[last];
+    let worst = -1;
+    let worstError = tolerance;
+    for (let index = first + 1; index < last; index += 1) {
+      const [x, y] = points[index];
+      const expected = y0 + ((y1 - y0) * (x - x0)) / Math.max(1e-9, x1 - x0);
+      const error = Math.abs(y - expected);
+      if (error > worstError) {
+        worstError = error;
+        worst = index;
+      }
+    }
+    if (worst > 0) {
+      keep[worst] = 1;
+      stack.push([first, worst], [worst, last]);
+    }
+  }
+  return points.filter((_, index) => keep[index] === 1);
+}
+
+/** Une duas séries simplificadas nos mesmos pontos de rolagem. */
+function mergeScrolls(...series: Sample[][]): number[] {
+  return [...new Set(series.flatMap((points) => points.map(([scroll]) => scroll)))]
+    .sort((a, b) => a - b);
+}
+
+function valueAt(points: readonly Sample[], scroll: number): number {
+  let index = 1;
+  while (index < points.length - 1 && points[index][0] < scroll) index += 1;
+  const [x0, y0] = points[index - 1];
+  const [x1, y1] = points[index];
+  if (x1 === x0) return y1;
+  return y0 + ((y1 - y0) * (scroll - x0)) / (x1 - x0);
+}
 
 export default function useMobileHomeBrandMotion({
   pageRef, eyebrowRef, titleRef, identityRef, introRef, partnersRef,
@@ -40,6 +92,18 @@ export default function useMobileHomeBrandMotion({
       prefersReducedMotion) return;
 
     const { gsap, ScrollTrigger } = ensureGsapRuntime();
+    // Com Scroll-driven Animations o navegador move o logo e os textos no
+    // compositor, no mesmo quadro da rolagem (a rolagem do celular é nativa e
+    // roda fora da thread principal). Pelo onUpdate do ScrollTrigger eles
+    // chegavam um quadro depois do conteúdo e, quando a thread engasgava,
+    // ficavam parados e saltavam. Sem suporte, segue o caminho por JS.
+    const scrollDriven = "ScrollTimeline" in window &&
+      typeof CSS !== "undefined" && typeof CSS.px === "function";
+    let scrollAnimations: Animation[] = [];
+    const cancelScrollAnimations = () => {
+      scrollAnimations.forEach((animation) => animation.cancel());
+      scrollAnimations = [];
+    };
     // Quanto cada linha anda para dar lugar ao logo. Ajustado para que o
     // espaço visível entre o logo e o texto fique em ~15-26px (metade do que
     // era: o título chegava a 52px de vão).
@@ -75,6 +139,8 @@ export default function useMobileHomeBrandMotion({
     const actionEase = gsap.parseEase("sine.inOut");
     const clamp = (value: number) => Math.max(0, Math.min(1, value));
     const measureLayout = () => {
+      // Mede a geometria sem as animações da rolagem aplicadas.
+      cancelScrollAnimations();
       const scroll = window.scrollY;
       const nav = navbar.getBoundingClientRect();
       const brand = logo.getBoundingClientRect();
@@ -124,8 +190,10 @@ export default function useMobileHomeBrandMotion({
       const contactTo = gsap.quickTo(actionState, "contact", {
         duration: ACTION_SMOOTHING_S, ease: "power2.out", onUpdate: applyActions });
       measureLayout();
-      const update = (progress: number) => {
-        const scroll = window.scrollY;
+      const progressAt = (scroll: number) =>
+        clamp((scroll - layout.start) / Math.max(1, layout.end - layout.start));
+      /** Posição do logo e de cada linha para uma rolagem (sem efeitos). */
+      const frameAt = (scroll: number, progress = progressAt(scroll)) => {
         const travel = layout.viewportHeight - layout.homeTop - layout.height - 16;
         // Join the incoming Portfolio top before starting its own downward phase.
         // At full entry (section top = viewport top), that phase is still at zero.
@@ -139,13 +207,9 @@ export default function useMobileHomeBrandMotion({
           phaseTop,
           layout.portfolioBottom - scroll - layout.height - 12,
         ));
-        logoY = top - layout.restTop;
-        setLogoY(logoY);
         const bottom = top + layout.height;
         const right = layout.left + layout.width;
-        logo.dataset.mobileBrandOwner = layout.portfolioBottom - scroll <= layout.navHeight
-          ? "roadMap" : bottom + CONTACT_GAP >= layout.portfolioTop - scroll ? "portfolio" : "home";
-        rows.forEach(row => {
+        const rowFrames = rows.map(row => {
           const near = row.left <= right + CONTACT_GAP && row.right >= layout.left - CONTACT_GAP;
           const contact = near ? clamp((bottom + CONTACT_GAP - (row.top - scroll)) / 18) : 0;
           const release = clamp((top - (row.bottom - scroll) - CONTACT_GAP) / 24);
@@ -154,17 +218,70 @@ export default function useMobileHomeBrandMotion({
           const fittingScale = Math.min(1, Math.max(.88,
             (layout.viewportWidth - 8 - Math.max(row.left, right + CONTACT_GAP)) /
             Math.max(1, row.right - row.left)));
-          row.fitScale = row.fitSetter ? 1 - (1 - fittingScale) * gain : 1;
-          row.fitSetter?.(row.fitScale);
-          const fittedRight = row.left + (row.right - row.left) * row.fitScale;
+          const fitScale = row.fitSetter ? 1 - (1 - fittingScale) * gain : 1;
+          const fittedRight = row.left + (row.right - row.left) * fitScale;
           // Nunca menos que o necessário para a caixa do texto não encostar no
           // logo (telas estreitas têm o texto mais perto da borda).
           const clearance = row.keepClear === false ? 0 : (right + MIN_BOX_GAP - row.left) / row.scale;
           const distance = Math.max(0, Math.min(Math.max(row.distance, clearance),
             (layout.viewportWidth - fittedRight - 8) / row.scale));
-          row.x = distance * gain;
-          row.setter(row.x);
+          return { x: distance * gain, fitScale };
         });
+        return { top, bottom, right, logoY: top - layout.restTop, rows: rowFrames };
+      };
+      /** Curva amostrada → animações ligadas à rolagem (compositor). */
+      const buildScrollAnimations = () => {
+        cancelScrollAnimations();
+        if (!scrollDriven) return;
+        const scroller = document.scrollingElement ?? document.documentElement;
+        const maxScroll = Math.max(1, scroller.scrollHeight - window.innerHeight);
+        const scrolls: number[] = [];
+        for (let scroll = 0; scroll < maxScroll; scroll += SAMPLE_STEP) scrolls.push(scroll);
+        scrolls.push(maxScroll);
+        const frames = scrolls.map(scroll => frameAt(scroll));
+        const timeline = new ScrollTimeline({ source: scroller, axis: "block" });
+        // Faixa em px (não em %): a barra de endereço do celular muda o
+        // tamanho total da rolagem e deslocaria a curva.
+        const options = {
+          timeline, fill: "both", easing: "linear", duration: "auto",
+          rangeStart: { offset: CSS.px(0) }, rangeEnd: { offset: CSS.px(maxScroll) },
+        } as unknown as Parameters<Element["animate"]>[1];
+        const logoCurve = simplify(scrolls.map((scroll, index) => [scroll, frames[index].logoY] as const), SIMPLIFY_PX);
+        scrollAnimations.push(logo.animate(logoCurve.map(([scroll, y]) => ({
+          offset: scroll / maxScroll,
+          transform: `translate3d(${REST_X}px, ${y.toFixed(3)}px, 0px)`,
+        })), options));
+        rows.forEach((row, rowIndex) => {
+          const xCurve = simplify(scrolls.map((scroll, index) =>
+            [scroll, frames[index].rows[rowIndex].x] as const), SIMPLIFY_PX);
+          const scaleCurve = row.fitSetter
+            ? simplify(scrolls.map((scroll, index) =>
+              [scroll, frames[index].rows[rowIndex].fitScale] as const), SIMPLIFY_SCALE)
+            : null;
+          const points = scaleCurve ? mergeScrolls(xCurve, scaleCurve) : xCurve.map(([scroll]) => scroll);
+          scrollAnimations.push(row.element.animate(points.map(scroll => ({
+            offset: scroll / maxScroll,
+            transform: `translate3d(${valueAt(xCurve, scroll).toFixed(3)}px, 0px, 0px)` +
+              (scaleCurve ? ` scaleX(${valueAt(scaleCurve, scroll).toFixed(4)})` : ""),
+          })), options));
+        });
+      };
+      const update = (progress: number) => {
+        const scroll = window.scrollY;
+        const frame = frameAt(scroll, progress);
+        const { top, bottom, right } = frame;
+        if (!scrollDriven) {
+          logoY = frame.logoY;
+          setLogoY(logoY);
+          rows.forEach((row, index) => {
+            row.fitScale = frame.rows[index].fitScale;
+            row.fitSetter?.(row.fitScale);
+            row.x = frame.rows[index].x;
+            row.setter(row.x);
+          });
+        }
+        logo.dataset.mobileBrandOwner = layout.portfolioBottom - scroll <= layout.navHeight
+          ? "roadMap" : bottom + CONTACT_GAP >= layout.portfolioTop - scroll ? "portfolio" : "home";
         // Starts ACTION_RAMP px early and finishes reserving space before the
         // brand crosses the red container's edge.
         const contact = clamp((bottom + CONTACT_GAP + ACTION_RAMP - (layout.actionsTop - scroll)) / ACTION_RAMP);
@@ -181,7 +298,8 @@ export default function useMobileHomeBrandMotion({
         applyActions();
       };
       ScrollTrigger.create({ trigger: page, start: () => layout.start, end: () => layout.end,
-        onRefreshInit: measureLayout, onRefresh: self => update(self.progress),
+        onRefreshInit: measureLayout,
+        onRefresh: self => { buildScrollAnimations(); update(self.progress); },
         onUpdate: self => update(self.progress) });
       gsap.to(portraitRef.current, { y: -22, scale: 1.018, ease: "none",
         scrollTrigger: { trigger: page, start: () => `top top+=${layout.navHeight}`,
@@ -202,6 +320,7 @@ export default function useMobileHomeBrandMotion({
       if (refreshFrame !== null) cancelAnimationFrame(refreshFrame);
       observer.disconnect();
       document.fonts.removeEventListener("loadingdone", scheduleRefresh);
+      cancelScrollAnimations();
       context.revert();
       delete logo.dataset.mobileBrandOwner;
       actions.style.removeProperty("--mobile-brand-push");
