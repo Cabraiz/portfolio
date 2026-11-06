@@ -1846,30 +1846,6 @@
 		animation: atlasDestinationBeat 2.4s 3.2s ease-in-out infinite;
 	}
 
-	/* Depois da primeira viagem, o viajante refaz a rota em loop. */
-	.portfolioRoot[data-motion-idle="on"] .journeyTraveler > span {
-		animation:
-			journeyTravelerMove var(--atlas-camera-duration) var(--atlas-camera-ease)
-				both,
-			journeyTravelerLoop 4.4s 3.2s cubic-bezier(0.45, 0, 0.25, 1) infinite;
-	}
-
-	.portfolioRoot[data-motion-idle="on"] .journeyPlaneBody {
-		animation:
-			journeyPlaneBodyAltitude var(--atlas-camera-duration)
-				var(--atlas-camera-ease) both,
-			journeyPlaneBodyAltitudeLoop 4.4s 3.2s cubic-bezier(0.45, 0, 0.25, 1)
-				infinite;
-	}
-
-	.portfolioRoot[data-motion-idle="on"] .journeyPlaneShadow {
-		animation:
-			journeyPlaneShadowAltitude var(--atlas-camera-duration)
-				var(--atlas-camera-ease) both,
-			journeyPlaneShadowAltitudeLoop 4.4s 3.2s cubic-bezier(0.45, 0, 0.25, 1)
-				infinite;
-	}
-
 	.portfolioRoot[data-motion-idle="on"] .projectButtonActive .projectOrdinal {
 		animation: atlasOrdinalPulse 2.4s ease-in-out infinite;
 	}
@@ -1988,24 +1964,6 @@
 	}
 }
 
-@keyframes journeyTravelerLoop {
-	0% {
-		transform: translateX(-100%);
-		opacity: 0;
-	}
-	8% {
-		opacity: 1;
-	}
-	58% {
-		opacity: 1;
-	}
-	66%,
-	100% {
-		transform: translateX(0);
-		opacity: 0;
-	}
-}
-
 /* Decola em Fortaleza, sobe, cruza e desce no destino (altitude 0 → 1 →
    0,1): o avião cresce até o tamanho de cruzeiro e a sombra se afasta. */
 @keyframes journeyPlaneBodyAltitude {
@@ -2035,70 +1993,6 @@
 			scale(0.82);
 		opacity: 0.24;
 	}
-	100% {
-		transform: rotate(calc(-1 * var(--route-angle)))
-			translate(1.7px, 2px) rotate(var(--route-angle))
-			scale(0.712);
-		opacity: 0.402;
-	}
-}
-
-/* Na volta em loop: mesma decolagem/pouso, com o avião subindo e descendo
-   de leve em cruzeiro. Segue o ritmo de journeyTravelerLoop (viaja até 66%). */
-@keyframes journeyPlaneBodyAltitudeLoop {
-	0% {
-		transform: scale(0.72);
-	}
-	16% {
-		transform: scale(0.986);
-	}
-	28% {
-		transform: scale(1.034);
-	}
-	40% {
-		transform: scale(0.972);
-	}
-	52% {
-		transform: scale(1.017);
-	}
-	66%,
-	100% {
-		transform: scale(0.748);
-	}
-}
-
-@keyframes journeyPlaneShadowAltitudeLoop {
-	0% {
-		transform: rotate(calc(-1 * var(--route-angle)))
-			translate(1px, 1px) rotate(var(--route-angle))
-			scale(0.7);
-		opacity: 0.42;
-	}
-	16% {
-		transform: rotate(calc(-1 * var(--route-angle)))
-			translate(7.65px, 10.5px) rotate(var(--route-angle))
-			scale(0.814);
-		opacity: 0.249;
-	}
-	28% {
-		transform: rotate(calc(-1 * var(--route-angle)))
-			translate(8.84px, 12.2px) rotate(var(--route-angle))
-			scale(0.8344);
-		opacity: 0.2184;
-	}
-	40% {
-		transform: rotate(calc(-1 * var(--route-angle)))
-			translate(7.3px, 10px) rotate(var(--route-angle))
-			scale(0.808);
-		opacity: 0.258;
-	}
-	52% {
-		transform: rotate(calc(-1 * var(--route-angle)))
-			translate(8.42px, 11.6px) rotate(var(--route-angle))
-			scale(0.8272);
-		opacity: 0.2292;
-	}
-	66%,
 	100% {
 		transform: rotate(calc(-1 * var(--route-angle)))
 			translate(1.7px, 2px) rotate(var(--route-angle))

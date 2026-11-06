@@ -557,8 +557,8 @@ export default function Portfolio() {
 								<span
 									data-world-journey-traveler-dot="true"
 									onAnimationEnd={(event) => {
-										// Pousou: as voltas seguintes
-										// (loop) passam a usar a rota Fortaleza → destino.
+										// Pousou: o avião some (sem voltas em loop) e o voo
+										// de conexão termina.
 										if (
 											event.target === event.currentTarget &&
 											event.animationName.includes("journeyTravelerMove")
