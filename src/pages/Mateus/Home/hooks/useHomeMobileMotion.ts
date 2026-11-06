@@ -22,7 +22,8 @@ export default function useHomeMobileMotion(
 			([entry]) => {
 				page.dataset.motionIdle = entry?.isIntersecting ? "on" : "off";
 			},
-			{ threshold: 0.12 }
+			// Encostar na borda da tela não conta como visível.
+			{ threshold: 0.12, rootMargin: "-1px 0px -1px 0px" }
 		);
 		observer.observe(page);
 

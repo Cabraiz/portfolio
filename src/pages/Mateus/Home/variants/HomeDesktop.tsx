@@ -410,6 +410,7 @@ function HomeDesktop() {
 		}
 
 		const { gsap: runtimeGsap, ScrollTrigger } = ensureGsapRuntime();
+		let ambientObserver: IntersectionObserver | null = null;
 		const ctx = gsap.context(() => {
 			runtimeGsap.set(animatedElements, {
 				willChange: "transform, opacity",
@@ -432,8 +433,11 @@ function HomeDesktop() {
 				}
 			);
 
+			// Brilhos e luz ambiente em loop: só com o Início na tela (fora dela
+			// ocupavam a thread principal e travavam as animações do Portfólio).
+			const ambientIdle = runtimeGsap.timeline({ paused: true });
 			glints.forEach((glint, index) => {
-				runtimeGsap.to(glint, {
+				ambientIdle.to(glint, {
 					x: index % 2 === 0 ? 14 : -11,
 					y: index === 1 ? -13 : 10,
 					scale: index === 1 ? 1.7 : 1.45,
@@ -442,11 +446,11 @@ function HomeDesktop() {
 					ease: "sine.inOut",
 					repeat: -1,
 					yoyo: true,
-				});
+				}, 0);
 			});
 
 			if (ambientLight) {
-				runtimeGsap.to(ambientLight, {
+				ambientIdle.to(ambientLight, {
 					xPercent: 2.4,
 					yPercent: -1.6,
 					scale: 1.035,
@@ -455,8 +459,17 @@ function HomeDesktop() {
 					ease: "sine.inOut",
 					repeat: -1,
 					yoyo: true,
-				});
+				}, 0);
 			}
+			ambientObserver = new IntersectionObserver(
+				([entry]) => {
+					if (entry?.isIntersecting) ambientIdle.play();
+					else ambientIdle.pause();
+				},
+				// Encostar na borda da tela não conta como visível.
+				{ rootMargin: "-1px 0px -1px 0px" }
+			);
+			ambientObserver.observe(container);
 
 			const scrollTimeline = runtimeGsap.timeline({
 				defaults: { ease: "none" },
@@ -484,6 +497,7 @@ function HomeDesktop() {
 
 		return () => {
 			window.cancelAnimationFrame(refreshFrame);
+			ambientObserver?.disconnect();
 			ctx.revert();
 		};
 	}, [isCompactDesktop]);
