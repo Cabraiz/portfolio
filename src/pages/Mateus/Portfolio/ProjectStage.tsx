@@ -20,7 +20,6 @@ import entreTela2 from "../../../assets/Mateus/portfolio/stage/entrepaginas-tela
 import franPessoa from "../../../assets/Mateus/portfolio/stage/fran-pessoa.webp";
 import franCena from "../../../assets/Mateus/portfolio/stage/fran-cena.webp";
 import franTela1 from "../../../assets/Mateus/portfolio/stage/fran-tela1.webp";
-import franTela2 from "../../../assets/Mateus/portfolio/stage/fran-tela2.webp";
 
 import { ProjectSiteBadge, toSiteLinkLabel } from "./ProjectSiteLink";
 import styles from "./ProjectStage.module.css";
@@ -37,7 +36,17 @@ import type { PortfolioProject, PortfolioProjectId } from "./types";
  */
 
 type Box = Readonly<{ x: number; y: number }>;
-type Screen = Box & Readonly<{ src: string; w: number; rot?: number; alt: string }>;
+type Screen = Box &
+	Readonly<{
+		src: string;
+		w: number;
+		rot?: number;
+		alt: string;
+		/** Raio da moldura, igual ao da peça gerada. */
+		radius?: number;
+		/** Peça recortada (fundo transparente): sem moldura nem fundo. */
+		bare?: boolean;
+	}>;
 type Person = Readonly<{
 	src: string;
 	h: number;
@@ -54,6 +63,8 @@ type StageConfig = Readonly<{
 	person: Person;
 	screens: readonly Screen[];
 	caption: Box & Readonly<{ w: number }>;
+	/** false: o nome já é a marca, então o logo não aparece em cima. */
+	logo?: boolean;
 }>;
 
 const STAGES: Partial<Record<PortfolioProjectId, StageConfig>> = {
@@ -61,49 +72,49 @@ const STAGES: Partial<Record<PortfolioProjectId, StageConfig>> = {
 		circle: { x: 196, y: 70, d: 290 },
 		scene: nexovareCena,
 		person: { src: nexovarePessoa, right: 20, top: 96, h: 560 },
-		screens: [{ src: nexovareTela1, x: 16, y: 338, w: 432, alt: "Painel do Nexovare" }],
+		screens: [{ src: nexovareTela1, x: 120, y: 336, w: 302, alt: "Painel do Nexovare" }],
 		caption: { x: 22, y: 100, w: 160 },
 	},
 	"app-bank": {
 		circle: { x: 204, y: 150, d: 286 },
 		scene: bancoCena,
 		person: { src: bancoPessoa, right: -8, bottom: 112, h: 330 },
-		screens: [{ src: bancoTela1, x: 16, y: 84, w: 300, rot: -3, alt: "Saldo no App Banco" }],
+		screens: [{ src: bancoTela1, x: 16, y: 84, w: 300, rot: -3, radius: 18, alt: "Saldo no App Banco" }],
 		caption: { x: 22, y: 300, w: 170 },
 	},
 	"guine-bissau-commerce": {
 		circle: { x: 186, y: 84, d: 300 },
 		scene: bideirasCena,
 		person: { src: bideirasPessoa, right: -6, bottom: 150, h: 380 },
-		screens: [{ src: bideirasTela1, x: 16, y: 408, w: 380, alt: "Página inicial da Bideiras" }],
+		screens: [{ src: bideirasTela1, x: 16, y: 350, w: 380, alt: "Página inicial da Bideiras" }],
 		caption: { x: 22, y: 96, w: 152 },
 	},
 	clockright: {
 		circle: { x: 236, y: 80, d: 250 },
 		scene: clockrightCena,
 		person: { src: clockrightPessoa, right: 34, top: 96, h: 392, full: true },
-		screens: [{ src: clockrightTela1, x: 14, y: 90, w: 236, alt: "Menu do ClockRight" }],
-		caption: { x: 22, y: 316, w: 210 },
+		screens: [{ src: clockrightTela1, x: 14, y: 300, w: 280, radius: 14, alt: "Menu do ClockRight" }],
+		caption: { x: 22, y: 96, w: 210 },
 	},
 	"central-clube-livro": {
-		circle: { x: 246, y: 226, d: 222 },
+		circle: { x: 246, y: 250, d: 222 },
 		scene: entreCena,
-		person: { src: entrePessoa, right: 28, top: 296, h: 190, full: true },
+		person: { src: entrePessoa, right: 28, top: 320, h: 190, full: true },
 		screens: [
-			{ src: entreTela1, x: 14, y: 86, w: 472, alt: "Página inicial do Entre Paginas" },
-			{ src: entreTela2, x: 22, y: 478, w: 164, alt: "Planos do Entre Paginas" },
+			{ src: entreTela1, x: 14, y: 80, w: 472, alt: "Página inicial do Entre Paginas" },
+			{ src: entreTela2, x: 10, y: 418, w: 264, bare: true, alt: "Planos do Entre Paginas" },
 		],
-		caption: { x: 22, y: 230, w: 200 },
+		caption: { x: 22, y: 262, w: 200 },
+		logo: false,
 	},
 	"site-cabeleireira": {
 		circle: { x: 226, y: 96, d: 262 },
 		scene: franCena,
 		person: { src: franPessoa, right: 30, top: 104, h: 384, full: true },
 		screens: [
-			{ src: franTela1, x: 14, y: 92, w: 250, rot: -4, alt: "Página inicial do Fran Studio" },
-			{ src: franTela2, x: 22, y: 186, w: 230, rot: -4, alt: "Galeria do Fran Studio" },
+			{ src: franTela1, x: 14, y: 80, w: 270, rot: -3, alt: "Página inicial do Fran Studio" },
 		],
-		caption: { x: 22, y: 380, w: 200 },
+		caption: { x: 22, y: 404, w: 200 },
 	},
 };
 
@@ -158,8 +169,9 @@ export default function ProjectStage({ project }: Readonly<{ project: PortfolioP
 			{stage.screens.map((screen, index) => (
 				<div
 					key={screen.src}
-					className={styles.screen}
+					className={`${styles.screen} ${screen.bare ? styles.screenBare : ""}`}
 					style={{
+						borderRadius: screen.radius ? px(screen.radius) : undefined,
 						left: px(screen.x),
 						top: px(screen.y),
 						width: px(screen.w),
@@ -188,7 +200,9 @@ export default function ProjectStage({ project }: Readonly<{ project: PortfolioP
 				className={styles.caption}
 				style={{ left: px(caption.x), top: px(caption.y), width: px(caption.w) }}
 			>
-				<img className={styles.captionLogo} src={project.logoSrc} alt={localizeLabel(project.logoAlt)} />
+				{stage.logo === false ? null : (
+						<img className={styles.captionLogo} src={project.logoSrc} alt={localizeLabel(project.logoAlt)} />
+					)}
 				<h2>{localizeLabel(project.name)}</h2>
 				<i aria-hidden="true" />
 				<p>{localizeLabel(project.subtitle)}</p>
