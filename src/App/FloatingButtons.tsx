@@ -103,6 +103,10 @@ const FloatingButtons: React.FC<FloatingButtonsProps> = ({
               background: "rgba(239, 248, 245, 0.78)",
               border: "1px solid rgba(11, 102, 95, 0.14)",
               boxShadow: "0 12px 28px rgba(18, 70, 65, 0.1)",
+              // No Portfólio o painel em camadas usa a direita inteira.
+              opacity: 0,
+              visibility: "hidden",
+              pointerEvents: "none",
             }
           : railStyle
       }

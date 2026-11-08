@@ -28,6 +28,7 @@ import usePortfolioMotion from "./hooks/usePortfolioMotion";
 import { defaultPortfolioProjectId, portfolioProjects } from "./portfolio.data";
 import styles from "./Portfolio.module.css";
 import MobileProjectMeta from "./MobileProjectMeta";
+import ProjectStage, { hasProjectStage } from "./ProjectStage";
 import ProjectImageLightbox from "./ProjectImageLightbox";
 import { ProjectSiteBadge, toSiteLinkLabel } from "./ProjectSiteLink";
 import type { PortfolioProjectId } from "./types";
@@ -860,7 +861,14 @@ export default function Portfolio() {
 					</nav>
 				</div>
 
-				<article ref={detailCardRef} className={styles.detailCard} aria-live="polite">
+				{/* Com painel em camadas (ProjectStage), o card antigo só guarda o
+				    lugar na grade; o Wagner Adv continua com o card. */}
+				<article
+					ref={detailCardRef}
+					className={styles.detailCard}
+					aria-live="polite"
+					data-stage={hasProjectStage(activeProject.id) ? "on" : undefined}
+				>
 					<header className={styles.locationHeader}>
 						<strong>{localizeLabel(activeLocation?.country ?? "Brasil")}</strong>
 						<span>
@@ -922,6 +930,8 @@ export default function Portfolio() {
 					</div>
 				</article>
 			</div>
+
+			<ProjectStage project={activeProject} />
 		</section>
 	);
 }

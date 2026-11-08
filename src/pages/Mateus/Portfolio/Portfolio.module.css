@@ -781,6 +781,11 @@
 	.detailCard {
 		align-self: end;
 	}
+
+	/* O painel em camadas (ProjectStage.module.css) toma o lugar do card. */
+	.detailCard[data-stage="on"] {
+		visibility: hidden;
+	}
 }
 
 .locationHeader {
