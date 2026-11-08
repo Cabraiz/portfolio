@@ -92,6 +92,11 @@
 	--atlas-camera-y: -27.6648%;
 }
 
+.portfolioRoot[data-map-view="site-adv"] {
+	--atlas-camera-x: -81.7137%;
+	--atlas-camera-y: -37.6004%;
+}
+
 .backdropViewport {
 	position: absolute;
 	inset: 0;
@@ -325,7 +330,7 @@
 	text-overflow: ellipsis;
 	white-space: nowrap;
 	/* O overflow das reticências cortava a perna do "g"/"p" (ClockRight,
-	   Paginas, Wagner): folga embaixo sem mudar o layout. */
+	   Paginas, Gemarium): folga embaixo sem mudar o layout. */
 	padding-bottom: 0.18em;
 	margin-bottom: -0.18em;
 }

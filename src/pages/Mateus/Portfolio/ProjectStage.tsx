@@ -17,6 +17,9 @@ import entrePessoa from "../../../assets/Mateus/portfolio/stage/entrepaginas-pes
 import entreCena from "../../../assets/Mateus/portfolio/stage/entrepaginas-cena.webp";
 import entreTela1 from "../../../assets/Mateus/portfolio/stage/entrepaginas-tela1.webp";
 import entreTela2 from "../../../assets/Mateus/portfolio/stage/entrepaginas-tela2.webp";
+import gemariumPessoa from "../../../assets/Mateus/portfolio/stage/gemarium-pessoa.webp";
+import gemariumCena from "../../../assets/Mateus/portfolio/stage/gemarium-cena.webp";
+import gemariumTela1 from "../../../assets/Mateus/portfolio/stage/gemarium-tela1.webp";
 import franPessoa from "../../../assets/Mateus/portfolio/stage/fran-pessoa.webp";
 import franCena from "../../../assets/Mateus/portfolio/stage/fran-cena.webp";
 import franTela1 from "../../../assets/Mateus/portfolio/stage/fran-tela1.webp";
@@ -106,6 +109,13 @@ const STAGES: Partial<Record<PortfolioProjectId, StageConfig>> = {
 		],
 		caption: { x: 22, y: 262, w: 200 },
 		logo: false,
+	},
+	"site-adv": {
+		circle: { x: 216, y: 80, d: 268 },
+		scene: gemariumCena,
+		person: { src: gemariumPessoa, right: 44, top: 92, h: 452, full: true },
+		screens: [{ src: gemariumTela1, x: 34, y: 286, w: 146, bare: true, alt: "Aplicativo do Gemarium" }],
+		caption: { x: 22, y: 96, w: 190 },
 	},
 	"site-cabeleireira": {
 		circle: { x: 226, y: 96, d: 262 },

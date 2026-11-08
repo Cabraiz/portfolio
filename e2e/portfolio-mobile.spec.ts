@@ -57,8 +57,8 @@ test("mantém o portfólio mobile completo dentro de diferentes telas", async ({
 				await expect(element).toBeVisible();
 			}
 			await expect(page.locator('[data-mobile-route-network="true"]')).toBeVisible();
-			await expect(page.locator("[data-mobile-route-base]")).toHaveCount(2);
-			await expect(page.locator("[data-mobile-route-node]")).toHaveCount(3);
+			await expect(page.locator("[data-mobile-route-base]")).toHaveCount(1);
+			await expect(page.locator("[data-mobile-route-node]")).toHaveCount(2);
 
 			const routeBox = await page
 				.locator('[data-mobile-route-active="erp-varejo"]')
@@ -417,8 +417,8 @@ test("desenha as rotas locais e replica a viagem do desktop no mobile", async ({
 
 	const activeRoute = page.locator('[data-mobile-route-active="erp-varejo"]');
 	await expect(activeRoute).toHaveCount(1);
-	await expect(page.locator("[data-mobile-route-base]")).toHaveCount(2);
-	await expect(page.locator("[data-mobile-route-node]")).toHaveCount(3);
+	await expect(page.locator("[data-mobile-route-base]")).toHaveCount(1);
+	await expect(page.locator("[data-mobile-route-node]")).toHaveCount(2);
 
 	const animation = await activeRoute.evaluate((element) => {
 		const [routeAnimation] = element.getAnimations();
@@ -432,10 +432,6 @@ test("desenha as rotas locais e replica a viagem do desktop no mobile", async ({
 	expect(animation.name).toContain("journeyRouteDraw");
 	expect(animation.duration).toBe(1100);
 	expect(["running", "finished"]).toContain(animation.playState);
-
-	await page.locator('[data-mobile-project-id="site-adv"]').click();
-	await expect(page.locator('[data-mobile-route-active="site-adv"]')).toHaveCount(1);
-	await expect(page.locator("[data-mobile-route-base]")).toHaveCount(2);
 
 	await page.locator('[data-mobile-project-id="app-bank"]').click();
 	const journeyRoute = page.locator('[data-world-journey-route="app-bank"]');
@@ -464,7 +460,7 @@ test("desenha as rotas locais e replica a viagem do desktop no mobile", async ({
 			})),
 		]);
 	expect(routeAnimation.name).toContain("journeyRouteDraw");
-	// Vem de site-adv (outro ponto do Brasil): voo de conexão, então a rota de
+	// Vem de erp-varejo (outro ponto do Brasil): voo de conexão, então a rota de
 	// Fortaleza desenha 1 s mais devagar, esperando o avião.
 	expect(routeAnimation.duration).toBe(3800);
 	expect(routeAnimation.delay).toBe(0);

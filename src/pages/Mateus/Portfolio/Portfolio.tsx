@@ -12,6 +12,7 @@ import { useLocation } from "react-router-dom";
 import { getSectionIdByPath } from "@/features/navigation/landingSections";
 import useLandingSectionNavigation from "@/features/navigation/useLandingSectionNavigation";
 
+import flagChina from "../../../assets/Mateus/portfolio/flags/china-semicircle-realistic-v1.webp";
 import flagBrazil from "../../../assets/Mateus/portfolio/flags/brasil-semicircle-realistic-v4.webp";
 import flagUnitedStates from "../../../assets/Mateus/portfolio/flags/estados-unidos-semicircle-realistic-v3.webp";
 import flagGuineaBissau from "../../../assets/Mateus/portfolio/flags/guine-bissau-semicircle-realistic-v3.webp";
@@ -37,6 +38,7 @@ import { worldAtlasTiles } from "./worldAtlasTiles";
 const PORTFOLIO_AUTOPLAY_INTERVAL_MS = 6200;
 const COUNTRY_FLAGS: Readonly<Record<string, string>> = {
 	Brasil: flagBrazil,
+	China: flagChina,
 	México: flagMexico,
 	"Guiné-Bissau": flagGuineaBissau,
 	"Estados Unidos": flagUnitedStates,
@@ -55,7 +57,7 @@ const PROJECT_DESCRIPTIONS: Record<PortfolioProjectId, string> = {
 	"central-clube-livro":
 		"Experiência editorial para um clube de leitura, com narrativas imersivas, encontros e descoberta de livros.",
 	"site-adv":
-		"Presença institucional elegante, com conteúdo jurídico acessível e canais de contato fáceis de encontrar.",
+		"Aplicativo de leilão ao vivo de gemas e plantas ultrarraras, com lances em tempo real e a abertura da pedra na transmissão.",
 	"site-cabeleireira":
 		"Vitrine digital para serviços, identidade de marca e captação de clientes em uma experiência local acolhedora.",
 };
@@ -68,7 +70,6 @@ const WORLD_MAP_POINTS: ReadonlyArray<
 	}>
 > = [
 	{ id: "erp-varejo", x: 35.9326, y: 61.8116 },
-	{ id: "site-adv", x: 37.0463, y: 63.0836 },
 	{ id: "site-cabeleireira", x: 39.2981, y: 52.0733 },
 ];
 
@@ -86,6 +87,8 @@ const WORLD_JOURNEY_DESTINATIONS: Partial<
 	// Coimbra (Região Centro): projeção direta de 40,2033°N 8,4103°O. A costa
 	// do atlas bate com a real (~0,1°), então não precisa de ajuste.
 	"central-clube-livro": { x: 47.6638, y: 27.6648 },
+	// Hong Kong: projeção direta de 22,3193°N 114,1694°L.
+	"site-adv": { x: 81.7137, y: 37.6004 },
 };
 const WORLD_ASPECT_RATIO = 2;
 
@@ -862,7 +865,7 @@ export default function Portfolio() {
 				</div>
 
 				{/* Com painel em camadas (ProjectStage), o card antigo só guarda o
-				    lugar na grade; o Wagner Adv continua com o card. */}
+				    lugar na grade; o Gemarium continua com o card. */}
 				<article
 					ref={detailCardRef}
 					className={styles.detailCard}

@@ -3,14 +3,14 @@ import imagem2 from "../../../assets/Mateus/portfolio/innomof-banking-app-premiu
 import imagemGuineBissauCommerce from "../../../assets/Mateus/portfolio/bideiras-marketplace-preview-v2.webp";
 import imagemClockRight from "../../../assets/Mateus/portfolio/clockright-home-preview-v1.webp";
 import imagemCentralClube from "../../../assets/Mateus/portfolio/entre-paginas-home-preview-v2.webp";
-import imagem4 from "../../../assets/Mateus/portfolio/imagem4-wagner-v2.webp";
+import imagem4 from "../../../assets/Mateus/portfolio/imagem4-gemarium-v1.webp";
 import imagem5 from "../../../assets/Mateus/portfolio/imagem5-fran-v4.webp";
 import mobileNexovare from "../../../assets/Mateus/portfolio/mobile-summary/nexovare-mobile-summary-v1.webp";
 import mobileBank from "../../../assets/Mateus/portfolio/mobile-summary/app-banco-mobile-summary-v1.webp";
 import mobileBideiras from "../../../assets/Mateus/portfolio/mobile-summary/bideiras-mobile-summary-v2.webp";
 import mobileClockRight from "../../../assets/Mateus/portfolio/mobile-summary/clockright-mobile-summary-v2.webp";
 import mobileEntrePaginas from "../../../assets/Mateus/portfolio/mobile-summary/entre-paginas-mobile-summary-v2.webp";
-import mobileWalter from "../../../assets/Mateus/portfolio/mobile-summary/walter-adv-mobile-summary-v1.webp";
+import mobileWalter from "../../../assets/Mateus/portfolio/mobile-summary/gemarium-mobile-summary-v1.webp";
 import mobileFran from "../../../assets/Mateus/portfolio/mobile-summary/fran-studio-mobile-summary-v2.webp";
 
 import logoNexovare from "../../../assets/Mateus/portfolio/logos/refined/nexovare-nx-mark-v2-trim.webp";
@@ -18,7 +18,7 @@ import logo2 from "../../../assets/Mateus/portfolio/logos/logo2-trim.webp";
 import logoGuineBissauCommerce from "../../../assets/Mateus/portfolio/logos/refined/bideiras-turban-icon-v1-trim.webp";
 import logoClockRight from "../../../assets/Mateus/portfolio/logos/refined/clockright-app-icon-v2-trim.webp";
 import logoCentralClube from "../../../assets/Mateus/portfolio/logos/refined/entre-paginas-mark-v3-trim.webp";
-import logo4 from "../../../assets/Mateus/portfolio/logos/refined/wagner-advocacia-lockup-v3-trim.webp";
+import logo4 from "../../../assets/Mateus/portfolio/logos/refined/gemarium-emblema-v1.webp";
 import logo5 from "../../../assets/Mateus/portfolio/logos/refined/fran-site-lockup-v4-trim.webp";
 
 import type {
@@ -192,31 +192,31 @@ export const portfolioProjects: ReadonlyArray<PortfolioProject> = [
   },
   {
     id: "site-adv",
-    name: "Wagner Adv",
+    name: "Gemarium",
     year: "2021",
     imageSrc: imagem4,
     mobileImageSrc: mobileWalter,
-    imageAlt: "Preview do projeto Wagner Adv",
+    imageAlt: "Preview do projeto Gemarium",
     logoSrc: logo4,
-    logoAspect: 1.015,
-    logoAlt: "Logo do projeto Wagner Adv",
+    logoAspect: 1.208,
+    logoAlt: "Logo do projeto Gemarium",
     projectLabel: "Projeto em destaque",
-    subtitle: "Presença institucional",
+    subtitle: "Leilão de gemas e plantas raras",
     statusLabel: "SELECIONAR",
     counterLabel: "06",
     accent: "platinum",
-    tags: ["Institucional", "Branding", "Landing"],
-    technologies: ["Angular", "Go", "PostgreSQL"],
+    tags: ["Leilão", "Gemas", "Plantas raras"],
+    technologies: ["Flutter", "Go", "PostgreSQL"],
     media: {
       ...defaultProjectMedia,
       position: "50% 8%",
     },
     worldLocation: {
-      country: "Brasil",
-      city: "São Paulo",
-      region: "São Paulo",
-      lat: -23.5505,
-      lng: -46.6333,
+      country: "China",
+      city: "Hong Kong",
+      region: "Hong Kong",
+      lat: 22.3193,
+      lng: 114.1694,
     },
   },
   {
