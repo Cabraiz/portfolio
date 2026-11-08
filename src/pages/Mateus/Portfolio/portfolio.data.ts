@@ -58,7 +58,7 @@ export const portfolioProjects: ReadonlyArray<PortfolioProject> = [
     counterLabel: "01",
     accent: "gold",
     tags: ["ERP", "Varejo", "Backoffice"],
-    technologies: ["Angular", "Node.js", "Cassandra"],
+    technologies: ["Angular", "Java", "Cassandra"],
     media: {
       ...defaultProjectMedia,
       position: "center 8%",
@@ -147,7 +147,7 @@ export const portfolioProjects: ReadonlyArray<PortfolioProject> = [
     counterLabel: "04",
     accent: "orange",
     tags: ["Ponto eletrônico", "Reconhecimento facial", "LGPD"],
-    technologies: ["Angular", "Rust", "Neo4j"],
+    technologies: ["Angular", "Go", "Neo4j"],
     media: {
       ...defaultProjectMedia,
       position: "center 30%",
@@ -177,7 +177,7 @@ export const portfolioProjects: ReadonlyArray<PortfolioProject> = [
     counterLabel: "05",
     accent: "burgundy",
     tags: ["Editorial", "Comunidade", "Leitura"],
-    technologies: ["React", "Go", "Qdrant"],
+    technologies: ["React", "Node.js", "Qdrant"],
     media: {
       ...defaultProjectMedia,
       position: "center top",
@@ -236,7 +236,7 @@ export const portfolioProjects: ReadonlyArray<PortfolioProject> = [
     counterLabel: "07",
     accent: "neutral",
     tags: ["Studio", "Serviços", "Conversão"],
-    technologies: ["React", "Java", "Qdrant"],
+    technologies: ["React", "Node.js", "Qdrant"],
     media: {
       ...defaultProjectMedia,
       position: "58% 14%",
