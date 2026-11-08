@@ -93,7 +93,7 @@ const STAGES: Partial<Record<PortfolioProjectId, StageConfig>> = {
 		circle: { x: 236, y: 80, d: 250 },
 		scene: clockrightCena,
 		person: { src: clockrightPessoa, right: 34, top: 96, h: 392, full: true },
-		screens: [{ src: clockrightTela1, x: 14, y: 300, w: 280, radius: 14, alt: "Menu do ClockRight" }],
+		screens: [{ src: clockrightTela1, x: 20, y: 300, w: 212, radius: 14, alt: "Menu do ClockRight" }],
 		caption: { x: 22, y: 96, w: 210 },
 	},
 	"central-clube-livro": {
@@ -102,7 +102,7 @@ const STAGES: Partial<Record<PortfolioProjectId, StageConfig>> = {
 		person: { src: entrePessoa, right: 28, top: 320, h: 190, full: true },
 		screens: [
 			{ src: entreTela1, x: 14, y: 80, w: 472, alt: "Página inicial do Entre Paginas" },
-			{ src: entreTela2, x: 10, y: 418, w: 264, bare: true, alt: "Planos do Entre Paginas" },
+			{ src: entreTela2, x: 4, y: 418, w: 271, bare: true, alt: "Planos do Entre Paginas" },
 		],
 		caption: { x: 22, y: 262, w: 200 },
 		logo: false,
@@ -112,9 +112,9 @@ const STAGES: Partial<Record<PortfolioProjectId, StageConfig>> = {
 		scene: franCena,
 		person: { src: franPessoa, right: 30, top: 104, h: 384, full: true },
 		screens: [
-			{ src: franTela1, x: 14, y: 80, w: 270, rot: -3, alt: "Página inicial do Fran Studio" },
+			{ src: franTela1, x: 18, y: 304, w: 206, rot: -3, alt: "Página inicial do Fran Studio" },
 		],
-		caption: { x: 22, y: 404, w: 200 },
+		caption: { x: 22, y: 96, w: 200 },
 	},
 };
 

@@ -45,7 +45,7 @@ export const portfolioProjects: ReadonlyArray<PortfolioProject> = [
   {
     id: "erp-varejo",
     name: "NEXOVARE",
-    year: "2021",
+    year: "2022",
     imageSrc: imagemNexovare,
     mobileImageSrc: mobileNexovare,
     imageAlt: "Preview do painel de gestão Nexovare",
@@ -58,7 +58,7 @@ export const portfolioProjects: ReadonlyArray<PortfolioProject> = [
     counterLabel: "01",
     accent: "gold",
     tags: ["ERP", "Varejo", "Backoffice"],
-    technologies: ["Java", "React", "PostgreSQL"],
+    technologies: ["Angular", "Node.js", "Cassandra"],
     media: {
       ...defaultProjectMedia,
       position: "center 8%",
@@ -74,7 +74,7 @@ export const portfolioProjects: ReadonlyArray<PortfolioProject> = [
   {
     id: "app-bank",
     name: "APP BANCO",
-    year: "2022",
+    year: "2020",
     imageSrc: imagem2,
     mobileImageSrc: mobileBank,
     imageAlt: "Preview do projeto APP BANCO",
@@ -87,7 +87,7 @@ export const portfolioProjects: ReadonlyArray<PortfolioProject> = [
     counterLabel: "02",
     accent: "amber",
     tags: ["Mobile", "Finance", "Dashboard"],
-    technologies: ["React", "Node.js", "TypeScript"],
+    technologies: ["Flutter", "Rust", "MongoDB"],
     media: {
       ...defaultProjectMedia,
       position: "50% 14%",
@@ -103,7 +103,7 @@ export const portfolioProjects: ReadonlyArray<PortfolioProject> = [
   {
     id: "guine-bissau-commerce",
     name: "BIDEIRAS",
-    year: "2024",
+    year: "2025",
     imageSrc: imagemGuineBissauCommerce,
     mobileImageSrc: mobileBideiras,
     imageAlt: "Preview do marketplace Bideiras em Guiné-Bissau",
@@ -117,7 +117,7 @@ export const portfolioProjects: ReadonlyArray<PortfolioProject> = [
     counterLabel: "03",
     accent: "coral",
     tags: ["E-commerce", "Catálogo", "Checkout"],
-    technologies: ["React", "Node.js", "PostgreSQL"],
+    technologies: ["React", ".NET", "MongoDB"],
     media: {
       ...defaultProjectMedia,
       position: "center center",
@@ -133,7 +133,7 @@ export const portfolioProjects: ReadonlyArray<PortfolioProject> = [
   {
     id: "clockright",
     name: "ClockRight",
-    year: "2026",
+    year: "2024",
     imageSrc: imagemClockRight,
     mobileImageSrc: mobileClockRight,
     imageAlt: "Tela inicial do ClockRight, ponto eletrônico por reconhecimento facial",
@@ -147,7 +147,7 @@ export const portfolioProjects: ReadonlyArray<PortfolioProject> = [
     counterLabel: "04",
     accent: "orange",
     tags: ["Ponto eletrônico", "Reconhecimento facial", "LGPD"],
-    technologies: ["React", "GSAP", "Cloudflare"],
+    technologies: ["Angular", "Rust", "Neo4j"],
     media: {
       ...defaultProjectMedia,
       position: "center 30%",
@@ -163,7 +163,7 @@ export const portfolioProjects: ReadonlyArray<PortfolioProject> = [
   {
     id: "central-clube-livro",
     name: "Entre Paginas",
-    year: "2026",
+    year: "2020",
     imageSrc: imagemCentralClube,
     mobileImageSrc: mobileEntrePaginas,
     imageAlt: "Página inicial do projeto Entre Paginas",
@@ -177,7 +177,7 @@ export const portfolioProjects: ReadonlyArray<PortfolioProject> = [
     counterLabel: "05",
     accent: "burgundy",
     tags: ["Editorial", "Comunidade", "Leitura"],
-    technologies: ["Next.js", "TypeScript", "GSAP"],
+    technologies: ["React", "Go", "Qdrant"],
     media: {
       ...defaultProjectMedia,
       position: "center top",
@@ -193,7 +193,7 @@ export const portfolioProjects: ReadonlyArray<PortfolioProject> = [
   {
     id: "site-adv",
     name: "Wagner Adv",
-    year: "2020",
+    year: "2021",
     imageSrc: imagem4,
     mobileImageSrc: mobileWalter,
     imageAlt: "Preview do projeto Wagner Adv",
@@ -206,7 +206,7 @@ export const portfolioProjects: ReadonlyArray<PortfolioProject> = [
     counterLabel: "06",
     accent: "platinum",
     tags: ["Institucional", "Branding", "Landing"],
-    technologies: ["React", "TypeScript", "CSS Modules"],
+    technologies: ["Angular", "Go", "PostgreSQL"],
     media: {
       ...defaultProjectMedia,
       position: "50% 8%",
@@ -222,7 +222,7 @@ export const portfolioProjects: ReadonlyArray<PortfolioProject> = [
   {
     id: "site-cabeleireira",
     name: "Fran Studio",
-    year: "2021",
+    year: "2023",
     imageSrc: imagem5,
     mobileImageSrc: mobileFran,
     imageAlt: "Preview do projeto Fran Studio",
@@ -236,7 +236,7 @@ export const portfolioProjects: ReadonlyArray<PortfolioProject> = [
     counterLabel: "07",
     accent: "neutral",
     tags: ["Studio", "Serviços", "Conversão"],
-    technologies: ["React", "JavaScript", "UI Design"],
+    technologies: ["React", "Java", "Qdrant"],
     media: {
       ...defaultProjectMedia,
       position: "58% 14%",

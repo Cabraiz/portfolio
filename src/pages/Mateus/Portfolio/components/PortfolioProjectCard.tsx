@@ -139,6 +139,10 @@ function PortfolioProjectCardComponent({
                       loading="lazy"
                       decoding="async"
                       draggable={false}
+                      // Sem ícone para essa tecnologia: fica só o nome.
+                      onError={(event) => {
+                        event.currentTarget.hidden = true;
+                      }}
                     />
 
                     <span className={styles.portfolioProjectCardTechLabel}>
