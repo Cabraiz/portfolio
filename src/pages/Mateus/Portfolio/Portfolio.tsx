@@ -87,8 +87,8 @@ const WORLD_JOURNEY_DESTINATIONS: Partial<
 	// Coimbra (Região Centro): projeção direta de 40,2033°N 8,4103°O. A costa
 	// do atlas bate com a real (~0,1°), então não precisa de ajuste.
 	"central-clube-livro": { x: 47.6638, y: 27.6648 },
-	// Hong Kong: projeção direta de 22,3193°N 114,1694°L.
-	"site-adv": { x: 81.7137, y: 37.6004 },
+	// Hong Kong: a costa do atlas é simplificada e a projeção direta cai na água; ajuste visual para a ponta de Kowloon.
+	"site-adv": { x: 81.7, y: 37.47 },
 };
 const WORLD_ASPECT_RATIO = 2;
 

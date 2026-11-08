@@ -93,8 +93,8 @@
 }
 
 .portfolioRoot[data-map-view="site-adv"] {
-	--atlas-camera-x: -81.7137%;
-	--atlas-camera-y: -37.6004%;
+	--atlas-camera-x: -81.7%;
+	--atlas-camera-y: -37.47%;
 }
 
 .backdropViewport {
