@@ -12,7 +12,7 @@ import { useLocation } from "react-router-dom";
 import { getSectionIdByPath } from "@/features/navigation/landingSections";
 import useLandingSectionNavigation from "@/features/navigation/useLandingSectionNavigation";
 
-import flagChina from "../../../assets/Mateus/portfolio/flags/china-semicircle-realistic-v1.webp";
+import flagHongKong from "../../../assets/Mateus/portfolio/flags/hong-kong-semicircle-realistic-v1.webp";
 import flagBrazil from "../../../assets/Mateus/portfolio/flags/brasil-semicircle-realistic-v4.webp";
 import flagUnitedStates from "../../../assets/Mateus/portfolio/flags/estados-unidos-semicircle-realistic-v3.webp";
 import flagGuineaBissau from "../../../assets/Mateus/portfolio/flags/guine-bissau-semicircle-realistic-v3.webp";
@@ -38,7 +38,8 @@ import { worldAtlasTiles } from "./worldAtlasTiles";
 const PORTFOLIO_AUTOPLAY_INTERVAL_MS = 6200;
 const COUNTRY_FLAGS: Readonly<Record<string, string>> = {
 	Brasil: flagBrazil,
-	China: flagChina,
+	// O único projeto na China é em Hong Kong, que tem bandeira própria.
+	China: flagHongKong,
 	México: flagMexico,
 	"Guiné-Bissau": flagGuineaBissau,
 	"Estados Unidos": flagUnitedStates,

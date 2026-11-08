@@ -152,7 +152,10 @@ export function useDocumentVisibilitySync(): void {
         // O resize chega antes do evento de scroll do último quadro: o scrollY ao
         // vivo ainda é o de antes do resize, a não ser que a página tenha
         // encolhido e o navegador limitado o scroll no fim do documento.
-        const liveScrollY = globalThis.window.scrollY;
+        // O limite do documento pode ter cortado o scrollY antes deste evento, e o
+        // último evento de scroll atrasa com a página ocupada: o Lenis, que escreve
+        // o scroll, ainda sabe a posição de antes do corte.
+        const liveScrollY = Math.max(globalThis.window.scrollY, lenis.animatedScroll);
         const maxScrollY = document.documentElement.scrollHeight - globalThis.window.innerHeight;
         const wasClamped = liveScrollY >= maxScrollY - 1 && desktopStableScrollY > liveScrollY;
         desktopResizeAnchor = anchorFromStableGeometry(pendingTarget ?? (wasClamped ? desktopStableScrollY : liveScrollY));
