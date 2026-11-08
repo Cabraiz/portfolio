@@ -108,7 +108,9 @@ async function openPage(browser, baseUrl, pathname, language) {
 	page.on("pageerror", (error) => errors.push(error.message));
 	await page.goto(`${baseUrl}${pathname}`, { waitUntil: "networkidle" });
 	await page.waitForSelector("main[data-landing-viewport] h1", { timeout: 30_000 });
-	await page.waitForSelector(`${DESKTOP_CARD} h2`, { timeout: 30_000 });
+	// No desktop o card fica escondido atrás do painel em camadas, mas segue no DOM
+	// com os dados de cada projeto: basta estar montado.
+	await page.waitForSelector(`${DESKTOP_CARD} h2`, { state: "attached", timeout: 30_000 });
 	await page.waitForTimeout(800);
 	if (errors.length > 0) {
 		throw new Error(`Erros ao renderizar ${pathname}: ${errors.join(" | ")}`);
