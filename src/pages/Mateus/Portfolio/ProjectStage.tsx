@@ -7,6 +7,7 @@ import nexovareTela1 from "../../../assets/Mateus/portfolio/stage/nexovare-tela1
 import bancoPessoa from "../../../assets/Mateus/portfolio/stage/banco-pessoa.webp";
 import bancoCena from "../../../assets/Mateus/portfolio/stage/banco-cena.webp";
 import bancoTela1 from "../../../assets/Mateus/portfolio/stage/banco-tela1.webp";
+import bancoTela2 from "../../../assets/Mateus/portfolio/stage/banco-tela2.webp";
 import bideirasPessoa from "../../../assets/Mateus/portfolio/stage/bideiras-pessoa.webp";
 import bideirasCena from "../../../assets/Mateus/portfolio/stage/bideiras-cena.webp";
 import bideirasTela1 from "../../../assets/Mateus/portfolio/stage/bideiras-tela1.webp";
@@ -58,6 +59,8 @@ type Person = Readonly<{
 	bottom?: number;
 	/** Corpo inteiro: sem o degradê que some com as pernas. */
 	full?: boolean;
+	/** Altura do quadro em que o corpo termina, escondido atrás da peça da frente. */
+	until?: number;
 }>;
 
 type StageConfig = Readonly<{
@@ -79,11 +82,14 @@ const STAGES: Partial<Record<PortfolioProjectId, StageConfig>> = {
 		caption: { x: 22, y: 100, w: 160 },
 	},
 	"app-bank": {
-		circle: { x: 204, y: 150, d: 286 },
+		circle: { x: 208, y: 70, d: 286 },
 		scene: bancoCena,
-		person: { src: bancoPessoa, right: -8, bottom: 112, h: 330 },
-		screens: [{ src: bancoTela1, x: 16, y: 84, w: 300, rot: -3, radius: 18, alt: "Saldo no App Banco" }],
-		caption: { x: 22, y: 300, w: 170 },
+		person: { src: bancoPessoa, right: 12, top: 56, h: 600, until: 530 },
+		screens: [
+			{ src: bancoTela1, x: 150, y: 392, w: 320, rot: -3, radius: 18, alt: "Saldo no App Banco" },
+			{ src: bancoTela2, x: 24, y: 282, w: 140, bare: true, alt: "Tela de acesso do App Banco" },
+		],
+		caption: { x: 22, y: 96, w: 165 },
 	},
 	"guine-bissau-commerce": {
 		circle: { x: 186, y: 84, d: 300 },
@@ -93,10 +99,10 @@ const STAGES: Partial<Record<PortfolioProjectId, StageConfig>> = {
 		caption: { x: 22, y: 96, w: 152 },
 	},
 	clockright: {
-		circle: { x: 236, y: 80, d: 250 },
+		circle: { x: 206, y: 70, d: 280 },
 		scene: clockrightCena,
-		person: { src: clockrightPessoa, right: 34, top: 96, h: 392, full: true },
-		screens: [{ src: clockrightTela1, x: 20, y: 300, w: 212, radius: 14, alt: "Menu do ClockRight" }],
+		person: { src: clockrightPessoa, right: 88, top: 90, h: 580, until: 566 },
+		screens: [{ src: clockrightTela1, x: 112, y: 346, w: 300, radius: 14, alt: "Menu do ClockRight" }],
 		caption: { x: 22, y: 96, w: 210 },
 	},
 	"central-clube-livro": {
@@ -111,25 +117,46 @@ const STAGES: Partial<Record<PortfolioProjectId, StageConfig>> = {
 		logo: false,
 	},
 	"site-adv": {
-		circle: { x: 216, y: 80, d: 268 },
+		circle: { x: 180, y: 70, d: 280 },
 		scene: gemariumCena,
-		person: { src: gemariumPessoa, right: 44, top: 92, h: 452, full: true },
-		screens: [{ src: gemariumTela1, x: 34, y: 286, w: 146, bare: true, alt: "Aplicativo do Gemarium" }],
-		caption: { x: 22, y: 96, w: 190 },
+		person: { src: gemariumPessoa, right: 90, top: 86, h: 560, until: 576 },
+		screens: [{ src: gemariumTela1, x: 248, y: 292, w: 145, bare: true, alt: "Aplicativo do Gemarium" }],
+		caption: { x: 22, y: 96, w: 155 },
 	},
 	"site-cabeleireira": {
-		circle: { x: 226, y: 96, d: 262 },
+		circle: { x: 208, y: 70, d: 288 },
 		scene: franCena,
-		person: { src: franPessoa, right: 30, top: 104, h: 384, full: true },
+		person: { src: franPessoa, right: 58, top: 86, h: 590, until: 576 },
 		screens: [
-			{ src: franTela1, x: 18, y: 304, w: 206, rot: -3, alt: "Página inicial do Fran Studio" },
+			{ src: franTela1, x: 178, y: 320, w: 250, rot: -3, alt: "Página inicial do Fran Studio" },
 		],
-		caption: { x: 22, y: 96, w: 200 },
+		caption: { x: 32, y: 96, w: 165 },
 	},
 };
 
 export const hasProjectStage = (projectId: PortfolioProjectId) =>
 	Boolean(STAGES[projectId]);
+
+// Mantém as referências: sem elas o navegador pode descartar o que já decodificou.
+const preloadedStageImages: HTMLImageElement[] = [];
+
+/** Baixa as imagens de todas as cenas em segundo plano (só o desktop usa o painel). */
+export function preloadProjectStages() {
+	if (preloadedStageImages.length > 0 || !globalThis.matchMedia("(min-width: 992px)").matches) return;
+	const sources = new Set(
+		Object.values(STAGES).flatMap((stage) => [
+			stage.scene,
+			stage.person.src,
+			...stage.screens.map((screen) => screen.src),
+		]),
+	);
+	for (const src of sources) {
+		const image = new Image();
+		image.src = src;
+		image.decode().catch(() => undefined);
+		preloadedStageImages.push(image);
+	}
+}
 
 type StageStyle = CSSProperties & Record<`--${string}`, string>;
 
@@ -140,7 +167,8 @@ export default function ProjectStage({ project }: Readonly<{ project: PortfolioP
 	if (!stage) return null;
 
 	const { circle, person, caption } = stage;
-	const location = project.worldLocation;
+	const city = project.worldLocation?.city ?? "Fortaleza";
+	const country = project.worldLocation?.country ?? "Brasil";
 	const stageStyle: StageStyle = {
 		"--circle-x": px(circle.x),
 		"--circle-y": px(circle.y),
@@ -151,6 +179,7 @@ export default function ProjectStage({ project }: Readonly<{ project: PortfolioP
 		top: person.top === undefined ? undefined : px(person.top),
 		bottom: person.bottom === undefined ? undefined : px(person.bottom),
 		height: px(person.h),
+		clipPath: person.until === undefined ? undefined : `inset(0 0 ${(person.top ?? 0) + person.h - person.until}px 0)`,
 	};
 
 	return (
@@ -167,7 +196,7 @@ export default function ProjectStage({ project }: Readonly<{ project: PortfolioP
 				<img className={styles.scene} src={stage.scene} alt="" draggable={false} decoding="async" />
 			</div>
 			<img
-				className={`${styles.person} ${person.full ? "" : styles.personFade}`}
+				className={`${styles.person} ${person.full || person.until ? "" : styles.personFade}`}
 				style={personStyle}
 				src={person.src}
 				alt=""
@@ -218,7 +247,7 @@ export default function ProjectStage({ project }: Readonly<{ project: PortfolioP
 				<p>{localizeLabel(project.subtitle)}</p>
 				<ul>
 					<li>
-						{localizeLabel(location?.city ?? "Fortaleza")} · {localizeLabel(location?.country ?? "Brasil")}
+						{localizeLabel(city)}{city === country ? null : ` · ${localizeLabel(country)}`}
 					</li>
 					<li>{localizeLabel(project.year)}</li>
 					<li>{project.technologies.map((technology) => localizeLabel(technology)).join(" · ")}</li>

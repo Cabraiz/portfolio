@@ -29,7 +29,7 @@ import usePortfolioMotion from "./hooks/usePortfolioMotion";
 import { defaultPortfolioProjectId, portfolioProjects } from "./portfolio.data";
 import styles from "./Portfolio.module.css";
 import MobileProjectMeta from "./MobileProjectMeta";
-import ProjectStage, { hasProjectStage } from "./ProjectStage";
+import ProjectStage, { hasProjectStage, preloadProjectStages } from "./ProjectStage";
 import ProjectImageLightbox from "./ProjectImageLightbox";
 import { ProjectSiteBadge, toSiteLinkLabel } from "./ProjectSiteLink";
 import type { PortfolioProjectId } from "./types";
@@ -39,7 +39,7 @@ const PORTFOLIO_AUTOPLAY_INTERVAL_MS = 6200;
 const COUNTRY_FLAGS: Readonly<Record<string, string>> = {
 	Brasil: flagBrazil,
 	// O único projeto na China é em Hong Kong, que tem bandeira própria.
-	China: flagHongKong,
+	"Hong Kong": flagHongKong,
 	México: flagMexico,
 	"Guiné-Bissau": flagGuineaBissau,
 	"Estados Unidos": flagUnitedStates,
@@ -197,6 +197,12 @@ export default function Portfolio() {
 	const isPortfolioRoute = getSectionIdByPath(location.pathname) === "portfolio";
 	const isPortfolioActive = activeSectionId === "portfolio" || isPortfolioRoute;
 	const wasPortfolioActiveRef = useRef(false);
+
+	// Ao chegar no Portfólio, já baixa as cenas de todos os projetos: trocar de
+	// projeto não pode esperar o carregamento das imagens.
+	useEffect(() => {
+		if (isPortfolioActive) preloadProjectStages();
+	}, [isPortfolioActive]);
 
 	useEffect(() => {
 		const card = mobileDetailCardRef.current;
@@ -609,7 +615,7 @@ export default function Portfolio() {
 								type="button"
 								className={`${styles.journeyMarker} ${styles.journeyDestination}`}
 								style={toGeographicPositionStyle(worldJourneyDestination)}
-								aria-label={localizeLabel(`Destino atual: ${activeLocation?.city}, ${activeLocation?.country}`)}
+								aria-label={localizeLabel(`Destino atual: ${activeLocation?.city === activeLocation?.country ? activeLocation?.city : `${activeLocation?.city}, ${activeLocation?.country}`}`)}
 								aria-pressed="true"
 								onClick={() => setIsAutoplayPaused(true)}
 								data-world-journey-destination={activeProject.id}
@@ -628,7 +634,7 @@ export default function Portfolio() {
 			<div className={styles.mobilePortfolio} data-mobile-portfolio="true">
 				<div className={styles.mobileLocation} data-mobile-location="true">
 					<strong>{localizeLabel(activeLocation?.country ?? "Brasil")}</strong>
-					<span>{localizeLabel(activeLocation?.city ?? "Fortaleza")}</span>
+					{activeLocation?.city === activeLocation?.country ? null : <span>{localizeLabel(activeLocation?.city ?? "Fortaleza")}</span>}
 					<small>{localizeLabel(activeLocation?.region)}</small>
 				</div>
 
@@ -876,7 +882,7 @@ export default function Portfolio() {
 					<header className={styles.locationHeader}>
 						<strong>{localizeLabel(activeLocation?.country ?? "Brasil")}</strong>
 						<span>
-							{localizeLabel(activeLocation?.city ?? "Fortaleza")} · {localizeLabel(activeLocation?.region)}
+							{localizeLabel(activeLocation?.city ?? "Fortaleza")}{activeLocation?.region ? ` · ${localizeLabel(activeLocation.region)}` : null}
 						</span>
 					</header>
 

@@ -8,8 +8,8 @@ const projects = [
   {id:'guine-bissau-commerce',name:'BIDEIRAS',subtitle:'Comércio digital internacional',year:'2025',asset:'bideiras',assetVersion:2},
   {id:'clockright',name:'ClockRight',subtitle:'Ponto por biometria facial',year:'2024',asset:'clockright',assetVersion:2},
   {id:'central-clube-livro',name:'Entre Paginas',subtitle:'Comunidade editorial',year:'2020',asset:'entre-paginas',assetVersion:2},
-  {id:'site-adv',name:'Gemarium',subtitle:'Leilão de gemas e plantas raras',year:'2021',asset:'gemarium'},
   {id:'site-cabeleireira',name:'Fran Studio',subtitle:'Marca e captação local',year:'2023',asset:'fran-studio',assetVersion:2},
+  {id:'site-adv',name:'Gemarium',subtitle:'Leilão de gemas e plantas raras',year:'2021',asset:'gemarium'},
 ];
 const viewports = [{width:283,height:500},{width:320,height:568},{width:360,height:640},
   {width:390,height:844},{width:430,height:932},{width:667,height:375}];
