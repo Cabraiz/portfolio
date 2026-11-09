@@ -26,10 +26,10 @@ const CHECK_MS = 100;
 const SCROLL_REST_MS = 180;
 // A peça já começa fora da tela: espera o fade-in avançar para entrar visível.
 const FADE_LEAD_MS = 260;
-const REACH_MS = 130;
-const PULL_MS = 340;
-const STAGGER_MS = 70;
-const EXIT_MS = 170;
+const REACH_MS = 320;
+const PULL_MS = 760;
+const STAGGER_MS = 180;
+const EXIT_MS = 360;
 const MARGIN = 40;
 const EASE_OUT = "cubic-bezier(0.16, 1, 0.3, 1)";
 
@@ -39,12 +39,14 @@ const point = (x: number, y: number) => `translate(${x}px, ${y}px)`;
 function isReady(element: Element) {
 	if (element.closest(OFF_LIMITS)) return false;
 	if (element instanceof HTMLImageElement && !(element.complete && element.naturalWidth > 0)) return false;
-	if (element.tagName === "IMG" && element.closest("[data-agent-piece]")) return false;
+	const explicit = element.hasAttribute("data-agent-piece");
+	if (!explicit && element.closest("[data-agent-piece]")) return false;
 	const box = element.getBoundingClientRect();
 	const inside = box.top >= -40 && box.left >= -40 && box.right <= innerWidth + 40 && box.bottom <= innerHeight + 40;
-	if (!inside || box.width < 48 || box.height < 48) return false;
+	const minimum = explicit ? 10 : 48;
+	if (!inside || box.width < minimum || box.height < minimum) return false;
 	if (getComputedStyle(element).visibility !== "visible") return false;
-	if (element.hasAttribute("data-agent-piece")) return true;
+	if (explicit) return true;
 	// Ainda atrás da tela de carregamento ou de outra camada: espera aparecer.
 	const hit = document.elementFromPoint(box.left + box.width / 2, box.top + box.height / 2);
 	return Boolean(hit && (element === hit || element.contains(hit) || hit.contains(element)));
@@ -65,7 +67,8 @@ function startSwarm(root: HTMLElement) {
 	const frames = [...root.querySelectorAll<HTMLElement>("[data-agent-frame]")];
 	const motions = new Set<Animation>();
 	let lastScroll = 0;
-	let nextAgent = 0;
+	// Cada agente só pega a próxima peça depois de soltar a anterior.
+	const freeAt = AGENTS.map(() => 0);
 	let working = 0;
 
 	const track = (animation: Animation) => {
@@ -76,13 +79,15 @@ function startSwarm(root: HTMLElement) {
 
 	/** Agente busca a peça fora da tela e a arrasta até o lugar. */
 	const pull = (group: readonly Element[], order: number) => {
-		const index = nextAgent++ % AGENTS.length;
+		const now = performance.now();
+		const index = freeAt.indexOf(Math.min(...freeAt));
 		const cursor = cursors[index];
 		const frame = frames[index];
 		const main = group[0];
 		const box = main.getBoundingClientRect();
 		const offset = entryOffset(box);
-		const delay = FADE_LEAD_MS + order * STAGGER_MS;
+		const delay = Math.max(FADE_LEAD_MS + order * STAGGER_MS, freeAt[index] - now + 60);
+		freeAt[index] = now + delay + REACH_MS + PULL_MS + EXIT_MS;
 		const grabX = box.left + box.width * 0.5;
 		const grabY = box.top + box.height * 0.4;
 		const startX = grabX + offset.x;
@@ -132,9 +137,11 @@ function startSwarm(root: HTMLElement) {
 		if (ready.length === 0) return;
 		const groups = new Map<Element | string, Element[]>();
 		for (const element of ready) {
-			seen.add(element);
-			const name = element.getAttribute("data-agent-piece") || element;
-			groups.set(name, [...(groups.get(name) ?? []), element]);
+			const name = element.getAttribute("data-agent-piece");
+			// Peças com o mesmo nome entram juntas, mesmo a parte que sai da tela.
+			const members = name ? [...document.querySelectorAll(`[data-agent-piece="${CSS.escape(name)}"]`)] : [element];
+			for (const member of members) seen.add(member);
+			groups.set(name || element, members);
 		}
 		[...groups.values()].slice(0, AGENTS.length * 2).forEach((group, order) => pull(group, order));
 	};

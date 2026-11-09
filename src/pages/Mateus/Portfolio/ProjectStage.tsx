@@ -119,14 +119,14 @@ const STAGES: Partial<Record<PortfolioProjectId, StageConfig>> = {
 	"site-adv": {
 		circle: { x: 197, y: 70, d: 280 },
 		scene: gemariumCena,
-		person: { src: gemariumPessoa, right: 14, top: 46, h: 470 },
+		person: { src: gemariumPessoa, right: 14, top: 46, h: 848 },
 		screens: [{ src: gemariumTela1, x: 258, y: 225, w: 130, bare: true, alt: "Aplicativo do Gemarium" }],
 		caption: { x: 22, y: 96, w: 155 },
 	},
 	"site-cabeleireira": {
 		circle: { x: 206, y: 70, d: 288 },
 		scene: franCena,
-		person: { src: franPessoa, right: 0, top: 50, h: 444, still: true },
+		person: { src: franPessoa, right: -2, top: 47, h: 1050, still: true },
 		screens: [
 			{ src: franTela1, x: 270, y: 275, w: 152, bare: true, alt: "Página inicial do Fran Studio" },
 		],
@@ -239,21 +239,21 @@ export default function ProjectStage({ project }: Readonly<{ project: PortfolioP
 
 			<div
 				className={styles.caption}
-				data-agent-skip=""
 				style={{ left: px(caption.x), top: px(caption.y), width: px(caption.w) }}
 			>
 				{stage.logo === false ? null : (
-						<img className={styles.captionLogo} src={project.logoSrc} alt={localizeLabel(project.logoAlt)} />
+						<img className={styles.captionLogo} src={project.logoSrc} alt={localizeLabel(project.logoAlt)} data-agent-piece="nome" />
 					)}
-				<h2>{localizeLabel(project.name)}</h2>
-				<i aria-hidden="true" />
-				<p>{localizeLabel(project.subtitle)}</p>
+				{/* Cada linha da legenda é trazida por um agente diferente. */}
+				<h2 data-agent-piece="nome">{localizeLabel(project.name)}</h2>
+				<i aria-hidden="true" data-agent-piece="nome" />
+				<p data-agent-piece="">{localizeLabel(project.subtitle)}</p>
 				<ul>
-					<li>
+					<li data-agent-piece="">
 						{localizeLabel(city)}{city === country ? null : ` · ${localizeLabel(country)}`}
 					</li>
-					<li>{localizeLabel(project.year)}</li>
-					<li>{project.technologies.map((technology) => localizeLabel(technology)).join(" · ")}</li>
+					<li data-agent-piece="">{localizeLabel(project.year)}</li>
+					<li data-agent-piece="">{project.technologies.map((technology) => localizeLabel(technology)).join(" · ")}</li>
 				</ul>
 			</div>
 		</div>

@@ -62,7 +62,7 @@ function HomeMobile() {
           <span className={styles.titleAccent}>{localizeLabel(contactLanguage === "es" ? "IA & Full Stack" : "AI Engineer")}</span>
         </h1>
 
-        <div ref={identityRef} className={styles.identity} data-home-motion="identity">
+        <div ref={identityRef} className={styles.identity} data-home-motion="identity" data-agent-piece="">
           <strong>{localizeLabel("Mateus Cabral")}</strong>
           <span>{localizeLabel("Senior AI Engineer")}</span>
           <span className={styles.availability} data-home-availability="">{localizeLabel("Remoto · CLT ou PJ")}</span>
@@ -129,7 +129,7 @@ function HomeMobile() {
           draggable={false}
         />
 
-        <nav className={styles.actions} data-mobile-contact-actions aria-label={localizeLabel("Ações de contato")}>
+        <nav className={styles.actions} data-mobile-contact-actions data-agent-piece="" aria-label={localizeLabel("Ações de contato")}>
           <a href={getWhatsAppHref(contactLanguage)} target="_blank" rel="noreferrer noopener">
             <FaWhatsapp aria-hidden="true" />
             <span>{localizeLabel("WhatsApp")}</span>
