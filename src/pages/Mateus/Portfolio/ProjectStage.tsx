@@ -101,8 +101,8 @@ const STAGES: Partial<Record<PortfolioProjectId, StageConfig>> = {
 	clockright: {
 		circle: { x: 196, y: 70, d: 280 },
 		scene: clockrightCena,
-		person: { src: clockrightPessoa, right: 103, top: 100, h: 410 },
-		screens: [{ src: clockrightTela1, x: 335, y: 85, w: 159, bare: true, alt: "Menu do ClockRight" }],
+		person: { src: clockrightPessoa, right: 76, top: 100, h: 410 },
+		screens: [{ src: clockrightTela1, x: 362, y: 105, w: 135, bare: true, alt: "Menu do ClockRight" }],
 		caption: { x: 22, y: 96, w: 165 },
 	},
 	"central-clube-livro": {
