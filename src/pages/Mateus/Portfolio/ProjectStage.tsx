@@ -57,8 +57,6 @@ type Person = Readonly<{
 	right: number;
 	top?: number;
 	bottom?: number;
-	/** Corpo inteiro: sem o degradê que some com as pernas. */
-	full?: boolean;
 	/** Altura do quadro em que o corpo termina, escondido atrás da peça da frente. */
 	until?: number;
 	/** Não flutua: a peça da frente fica encaixada no que a pessoa segura. */
@@ -101,16 +99,16 @@ const STAGES: Partial<Record<PortfolioProjectId, StageConfig>> = {
 		caption: { x: 22, y: 96, w: 152 },
 	},
 	clockright: {
-		circle: { x: 214, y: 70, d: 280 },
+		circle: { x: 196, y: 70, d: 280 },
 		scene: clockrightCena,
-		person: { src: clockrightPessoa, right: 8, top: 50, h: 460 },
-		screens: [{ src: clockrightTela1, x: 330, y: 58, w: 165, bare: true, alt: "Menu do ClockRight" }],
+		person: { src: clockrightPessoa, right: 52, top: 100, h: 400 },
+		screens: [{ src: clockrightTela1, x: 340, y: 72, w: 155, bare: true, alt: "Menu do ClockRight" }],
 		caption: { x: 22, y: 96, w: 165 },
 	},
 	"central-clube-livro": {
 		circle: { x: 246, y: 250, d: 222 },
 		scene: entreCena,
-		person: { src: entrePessoa, right: 28, top: 320, h: 190, full: true },
+		person: { src: entrePessoa, right: 28, top: 320, h: 190 },
 		screens: [
 			{ src: entreTela1, x: 14, y: 80, w: 472, alt: "Página inicial do Entre Paginas" },
 			{ src: entreTela2, x: 4, y: 418, w: 205, bare: true, alt: "Planos do Entre Paginas" },
@@ -128,7 +126,7 @@ const STAGES: Partial<Record<PortfolioProjectId, StageConfig>> = {
 	"site-cabeleireira": {
 		circle: { x: 206, y: 70, d: 288 },
 		scene: franCena,
-		person: { src: franPessoa, right: 0, top: 50, h: 444, full: true, still: true },
+		person: { src: franPessoa, right: 0, top: 50, h: 444, still: true },
 		screens: [
 			{ src: franTela1, x: 270, y: 275, w: 152, bare: true, alt: "Página inicial do Fran Studio" },
 		],
@@ -198,7 +196,7 @@ export default function ProjectStage({ project }: Readonly<{ project: PortfolioP
 				<img className={styles.scene} src={stage.scene} alt="" draggable={false} decoding="async" />
 			</div>
 			<img
-				className={`${styles.person} ${person.full || person.until ? "" : styles.personFade} ${person.still ? styles.personStill : ""}`}
+				className={`${styles.person} ${person.still ? styles.personStill : ""}`}
 				style={personStyle}
 				data-agent-piece={person.still ? "pessoa-e-peca" : ""}
 				src={person.src}
