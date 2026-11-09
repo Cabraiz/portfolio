@@ -11,6 +11,7 @@ import "@fontsource/inter/700.css";
 
 import App from "./App/App";
 import FloatingChat from "./pages/Mateus/FloatingChat";
+import AgentCursors from "./features/agentCursors/AgentCursors";
 import RoadMapErrorBoundary from "./pages/Mateus/RoadMap/ui/chrome/RoadMapErrorBoundary";
 
 import { store } from "./redux/app/store";
@@ -284,6 +285,7 @@ const MainApp: React.FC = () => {
             <BrowserRouter>
               <App />
               <FloatingChat />
+              <AgentCursors />
             </BrowserRouter>
           </RoadMapErrorBoundary>
         </ChakraProvider>

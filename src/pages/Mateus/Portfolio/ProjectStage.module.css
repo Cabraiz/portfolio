@@ -1,5 +1,5 @@
 /* Painel em camadas da direita (desktop). O quadro é desenhado em 500×600 e
-   escalado para a altura da tela, sem passar de 39% da largura. */
+   escalado para a altura da tela, sem passar de 44% da largura. */
 
 .dock {
 	display: none;
@@ -7,7 +7,7 @@
 
 @media (min-width: 992px) {
 	.dock {
-		--stage-scale: min(tan(atan2(100dvh, 600px)), tan(atan2(39vw, 500px)));
+		--stage-scale: min(tan(atan2(100dvh, 600px)), tan(atan2(44vw, 500px)));
 		position: absolute;
 		inset: 0;
 		z-index: 6;

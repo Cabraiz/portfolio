@@ -101,10 +101,10 @@ const STAGES: Partial<Record<PortfolioProjectId, StageConfig>> = {
 		caption: { x: 22, y: 96, w: 152 },
 	},
 	clockright: {
-		circle: { x: 208, y: 70, d: 280 },
+		circle: { x: 214, y: 70, d: 280 },
 		scene: clockrightCena,
-		person: { src: clockrightPessoa, right: 18, top: 60, h: 440, until: 490 },
-		screens: [{ src: clockrightTela1, x: 182, y: 341, w: 200, radius: 14, alt: "Menu do ClockRight" }],
+		person: { src: clockrightPessoa, right: 8, top: 50, h: 460 },
+		screens: [{ src: clockrightTela1, x: 330, y: 58, w: 165, bare: true, alt: "Menu do ClockRight" }],
 		caption: { x: 22, y: 96, w: 165 },
 	},
 	"central-clube-livro": {
@@ -121,16 +121,16 @@ const STAGES: Partial<Record<PortfolioProjectId, StageConfig>> = {
 	"site-adv": {
 		circle: { x: 197, y: 70, d: 280 },
 		scene: gemariumCena,
-		person: { src: gemariumPessoa, right: 26, top: 60, h: 440 },
-		screens: [{ src: gemariumTela1, x: 247, y: 235, w: 125, bare: true, alt: "Aplicativo do Gemarium" }],
+		person: { src: gemariumPessoa, right: 14, top: 46, h: 470 },
+		screens: [{ src: gemariumTela1, x: 258, y: 225, w: 130, bare: true, alt: "Aplicativo do Gemarium" }],
 		caption: { x: 22, y: 96, w: 155 },
 	},
 	"site-cabeleireira": {
 		circle: { x: 206, y: 70, d: 288 },
 		scene: franCena,
-		person: { src: franPessoa, right: 4, top: 64, h: 430, full: true, still: true },
+		person: { src: franPessoa, right: 0, top: 50, h: 444, full: true, still: true },
 		screens: [
-			{ src: franTela1, x: 273, y: 282, w: 147, bare: true, alt: "Página inicial do Fran Studio" },
+			{ src: franTela1, x: 270, y: 275, w: 152, bare: true, alt: "Página inicial do Fran Studio" },
 		],
 		caption: { x: 22, y: 96, w: 165 },
 	},
@@ -194,12 +194,13 @@ export default function ProjectStage({ project }: Readonly<{ project: PortfolioP
 			data-project-stage={project.id}
 		>
 			<div className={styles.ring} aria-hidden="true" />
-			<div className={styles.circle} aria-hidden="true">
+			<div className={styles.circle} aria-hidden="true" data-agent-skip="">
 				<img className={styles.scene} src={stage.scene} alt="" draggable={false} decoding="async" />
 			</div>
 			<img
 				className={`${styles.person} ${person.full || person.until ? "" : styles.personFade} ${person.still ? styles.personStill : ""}`}
 				style={personStyle}
+				data-agent-piece={person.still ? "pessoa-e-peca" : ""}
 				src={person.src}
 				alt=""
 				aria-hidden="true"
@@ -211,6 +212,7 @@ export default function ProjectStage({ project }: Readonly<{ project: PortfolioP
 				<div
 					key={screen.src}
 					className={`${styles.screen} ${screen.bare ? styles.screenBare : ""}`}
+					data-agent-piece={person.still ? "pessoa-e-peca" : ""}
 					style={{
 						borderRadius: screen.radius ? px(screen.radius) : undefined,
 						left: px(screen.x),
@@ -239,6 +241,7 @@ export default function ProjectStage({ project }: Readonly<{ project: PortfolioP
 
 			<div
 				className={styles.caption}
+				data-agent-skip=""
 				style={{ left: px(caption.x), top: px(caption.y), width: px(caption.w) }}
 			>
 				{stage.logo === false ? null : (

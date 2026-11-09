@@ -1,0 +1,73 @@
+/* Camada dos cursores de agentes: nunca recebe clique nem cobre o chat. */
+
+.swarm {
+	position: fixed;
+	inset: 0;
+	z-index: 9000;
+	overflow: hidden;
+	pointer-events: none;
+	font-family: ui-monospace, "SF Mono", "Cascadia Mono", Consolas, monospace;
+}
+
+.cursor {
+	position: absolute;
+	top: 0;
+	left: 0;
+	opacity: 0;
+	will-change: transform;
+}
+
+.arrow {
+	display: block;
+	filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.45));
+}
+
+.tag {
+	position: absolute;
+	top: 20px;
+	left: 14px;
+	padding: 3px 7px;
+	border-radius: 5px;
+	background: currentColor;
+	box-shadow: 0 3px 10px rgba(0, 0, 0, 0.32);
+	font-size: 11px;
+	font-weight: 800;
+	line-height: 1.2;
+	white-space: nowrap;
+	-webkit-text-fill-color: #10131a;
+}
+
+.cursor[data-flip="true"] .tag {
+	right: 8px;
+	left: auto;
+}
+
+/* Moldura de seleção na cor do agente, no instante em que a peça encaixa. */
+.frame {
+	position: absolute;
+	top: 0;
+	left: 0;
+	border: 1.5px solid currentColor;
+	border-radius: 4px;
+	opacity: 0;
+}
+
+.frame::before,
+.frame::after {
+	content: "";
+	position: absolute;
+	width: 7px;
+	height: 7px;
+	background: currentColor;
+	box-shadow: 0 0 0 1px #10131a;
+}
+
+.frame::before {
+	top: -4px;
+	left: -4px;
+}
+
+.frame::after {
+	right: -4px;
+	bottom: -4px;
+}
