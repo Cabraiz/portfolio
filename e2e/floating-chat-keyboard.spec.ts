@@ -19,6 +19,8 @@ for (const viewport of sizes) {
 
 test('o chat continua no desktop', async ({page}) => {
   await page.setViewportSize({width:1366,height:720});
-  await page.goto('/contact',{waitUntil:'networkidle'});
-  await expect(page.getByRole('button',{name:'Abrir chat'})).toBeVisible();
+  for (const path of ['/contact','/portfolio']) {
+    await page.goto(path,{waitUntil:'networkidle'});
+    await expect(page.getByRole('button',{name:'Abrir chat'}),path).toBeVisible();
+  }
 });

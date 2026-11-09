@@ -61,6 +61,8 @@ type Person = Readonly<{
 	full?: boolean;
 	/** Altura do quadro em que o corpo termina, escondido atrás da peça da frente. */
 	until?: number;
+	/** Não flutua: a peça da frente fica encaixada no que a pessoa segura. */
+	still?: boolean;
 }>;
 
 type StageConfig = Readonly<{
@@ -99,11 +101,11 @@ const STAGES: Partial<Record<PortfolioProjectId, StageConfig>> = {
 		caption: { x: 22, y: 96, w: 152 },
 	},
 	clockright: {
-		circle: { x: 206, y: 70, d: 280 },
+		circle: { x: 208, y: 70, d: 280 },
 		scene: clockrightCena,
-		person: { src: clockrightPessoa, right: 88, top: 90, h: 500, until: 480 },
-		screens: [{ src: clockrightTela1, x: 122, y: 278, w: 280, radius: 14, alt: "Menu do ClockRight" }],
-		caption: { x: 22, y: 96, w: 210 },
+		person: { src: clockrightPessoa, right: 18, top: 60, h: 440, until: 490 },
+		screens: [{ src: clockrightTela1, x: 182, y: 341, w: 200, radius: 14, alt: "Menu do ClockRight" }],
+		caption: { x: 22, y: 96, w: 165 },
 	},
 	"central-clube-livro": {
 		circle: { x: 246, y: 250, d: 222 },
@@ -117,20 +119,20 @@ const STAGES: Partial<Record<PortfolioProjectId, StageConfig>> = {
 		logo: false,
 	},
 	"site-adv": {
-		circle: { x: 180, y: 70, d: 280 },
+		circle: { x: 197, y: 70, d: 280 },
 		scene: gemariumCena,
-		person: { src: gemariumPessoa, right: 112, top: 86, h: 430, until: 480 },
-		screens: [{ src: gemariumTela1, x: 258, y: 235, w: 125, bare: true, alt: "Aplicativo do Gemarium" }],
+		person: { src: gemariumPessoa, right: 26, top: 60, h: 440 },
+		screens: [{ src: gemariumTela1, x: 247, y: 235, w: 125, bare: true, alt: "Aplicativo do Gemarium" }],
 		caption: { x: 22, y: 96, w: 155 },
 	},
 	"site-cabeleireira": {
-		circle: { x: 208, y: 70, d: 288 },
+		circle: { x: 206, y: 70, d: 288 },
 		scene: franCena,
-		person: { src: franPessoa, right: 71, top: 86, h: 500, until: 480 },
+		person: { src: franPessoa, right: 4, top: 64, h: 430, full: true, still: true },
 		screens: [
-			{ src: franTela1, x: 180, y: 252, w: 225, rot: -3, alt: "Página inicial do Fran Studio" },
+			{ src: franTela1, x: 273, y: 282, w: 147, bare: true, alt: "Página inicial do Fran Studio" },
 		],
-		caption: { x: 32, y: 96, w: 165 },
+		caption: { x: 22, y: 96, w: 165 },
 	},
 };
 
@@ -179,7 +181,7 @@ export default function ProjectStage({ project }: Readonly<{ project: PortfolioP
 		top: person.top === undefined ? undefined : px(person.top),
 		bottom: person.bottom === undefined ? undefined : px(person.bottom),
 		height: px(person.h),
-		clipPath: person.until === undefined ? undefined : `inset(0 0 ${(person.top ?? 0) + person.h - person.until}px 0)`,
+		clipPath: person.until === undefined ? undefined : `inset(-40px -40px ${(person.top ?? 0) + person.h - person.until}px -40px)`,
 	};
 
 	return (
@@ -196,7 +198,7 @@ export default function ProjectStage({ project }: Readonly<{ project: PortfolioP
 				<img className={styles.scene} src={stage.scene} alt="" draggable={false} decoding="async" />
 			</div>
 			<img
-				className={`${styles.person} ${person.full || person.until ? "" : styles.personFade}`}
+				className={`${styles.person} ${person.full || person.until ? "" : styles.personFade} ${person.still ? styles.personStill : ""}`}
 				style={personStyle}
 				src={person.src}
 				alt=""

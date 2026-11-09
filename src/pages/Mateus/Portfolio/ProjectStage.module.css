@@ -282,6 +282,10 @@
 			stageIn 760ms 80ms cubic-bezier(0.22, 1, 0.36, 1) both,
 			stageFloat 7s 900ms ease-in-out infinite alternate;
 	}
+
+	:global([data-motion-idle="on"]) .personStill {
+		animation: stageIn 760ms 80ms cubic-bezier(0.22, 1, 0.36, 1) both;
+	}
 }
 
 @media (prefers-reduced-motion: reduce) {
