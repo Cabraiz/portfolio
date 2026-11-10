@@ -28,11 +28,12 @@ const OFF_LIMITS = "[data-chat-panel], [data-agent-skip], [data-agent-swarm]";
 const CHECK_MS = 100;
 const SCROLL_REST_MS = 180;
 // A peça já começa fora da tela: espera o fade-in avançar para entrar visível.
-const FADE_LEAD_MS = 260;
-const PULL_MS = 760;
-const STAGGER_MS = 70;
+const FADE_LEAD_MS = 80;
+const PULL_MS = 510;
+// Os agentes saem um de cada vez, com um intervalo que varia como o de gente.
+const LAUNCH_GAP_MS = [150, 260] as const;
 // Depois de encaixar, o agente segura a peça um instante com a moldura acesa.
-const HOLD_MS = 320;
+const HOLD_MS = 215;
 const MARGIN = 40;
 const PATH_STEPS = 16;
 
@@ -124,6 +125,7 @@ function startSwarm(root: HTMLElement) {
 	let lastScroll = 0;
 	// Cada agente só pega a próxima peça depois de soltar a anterior.
 	const freeAt = AGENTS.map(() => 0);
+	let lastLaunch = -Infinity;
 	let working = 0;
 
 	const track = (animation: Animation) => {
@@ -133,15 +135,25 @@ function startSwarm(root: HTMLElement) {
 	};
 
 	/** Agente busca a peça fora da tela e a arrasta até o lugar. */
-	const pull = (group: readonly Element[], order: number) => {
+	const pull = (group: readonly Element[]) => {
 		const now = performance.now();
 		const index = freeAt.indexOf(Math.min(...freeAt));
 		const cursor = cursors[index];
 		const frame = frames[index];
-		const main = group[0];
+		// Pega pela peça do grupo que mais aparece na tela.
+		const visibleArea = (element: Element) => {
+			const r = element.getBoundingClientRect();
+			return Math.max(0, Math.min(r.right, innerWidth) - Math.max(r.left, 0)) * Math.max(0, Math.min(r.bottom, innerHeight) - Math.max(r.top, 0));
+		};
+		const main = group.reduce((best, element) => (visibleArea(element) > visibleArea(best) ? element : best));
 		const box = main.getBoundingClientRect();
 		const offset = entryOffset(box);
-		const delay = Math.max(FADE_LEAD_MS + order * STAGGER_MS, freeAt[index] - now + 60);
+		const delay = Math.max(
+			FADE_LEAD_MS,
+			freeAt[index] - now + rand(40, 160),
+			lastLaunch + rand(...LAUNCH_GAP_MS) - now,
+		);
+		lastLaunch = now + delay;
 		// Ponto de pega dentro da parte visível da peça, guardado relativo a ela.
 		const visLeft = Math.max(box.left, 12);
 		const visRight = Math.min(box.right, innerWidth - 12);
@@ -159,8 +171,8 @@ function startSwarm(root: HTMLElement) {
 		const comeFrom = offscreenPoint();
 		const goTo = offscreenPoint();
 		const approach = bend(comeFrom, start, 0.35);
-		const reachMs = clamp(360 + distance(comeFrom, start) * 0.3, 480, 900);
-		const exitMs = clamp(380 + distance(rest, goTo) * 0.3, 520, 950);
+		const reachMs = clamp(240 + distance(comeFrom, start) * 0.2, 320, 600);
+		const exitMs = clamp(255 + distance(rest, goTo) * 0.2, 350, 635);
 		const t0 = now + delay;
 		const tGrab = t0 + reachMs;
 		const tRelease = tGrab + PULL_MS + HOLD_MS;
@@ -240,13 +252,16 @@ function startSwarm(root: HTMLElement) {
 
 		// A moldura acompanha a peça quadro a quadro (e o grupo inteiro), sem sair da tela.
 		const frameStart = delay + reachMs + PULL_MS * 0.6;
-		const frameMs = PULL_MS * 0.4 + HOLD_MS;
+		// Apaga um pouco antes de o agente soltar, para nunca ficar acesa sem ele.
+		const frameMs = PULL_MS * 0.4 + HOLD_MS - 90;
 		const follow = () => {
 			const boxes = group.map((element) => element.getBoundingClientRect());
 			const left = Math.max(2, Math.min(...boxes.map((item) => item.left)) - 5);
 			const top = Math.max(2, Math.min(...boxes.map((item) => item.top)) - 5);
 			const right = Math.min(innerWidth - 2, Math.max(...boxes.map((item) => item.right)) + 5);
 			const bottom = Math.min(innerHeight - 2, Math.max(...boxes.map((item) => item.bottom)) + 5);
+			// Enquanto a peça ainda está fora da tela, a moldura não aparece espremida na borda.
+			frame.style.visibility = right - left > 12 && bottom - top > 12 ? "visible" : "hidden";
 			frame.style.transform = point(left, top);
 			frame.style.width = `${Math.max(0, right - left)}px`;
 			frame.style.height = `${Math.max(0, bottom - top)}px`;
@@ -263,7 +278,10 @@ function startSwarm(root: HTMLElement) {
 	};
 
 	const check = () => {
-		if (document.hidden || document.getElementById("boot-curtain")) return;
+		if (document.hidden) return;
+		// Começa assim que a tela de carregamento começa a subir, sem esperar ela sumir.
+		const curtain = document.getElementById("boot-curtain");
+		if (curtain && !curtain.hasAttribute("data-lifted")) return;
 		if (performance.now() - lastScroll < SCROLL_REST_MS) return;
 		const ready = [...document.querySelectorAll(PIECES)].filter((element) => !seen.has(element) && isReady(element));
 		if (ready.length === 0) return;
@@ -277,7 +295,7 @@ function startSwarm(root: HTMLElement) {
 		}
 		// De cima para baixo: a legenda entra junto com as peças do projeto, não depois.
 		const top = (group: readonly Element[]) => Math.min(...group.map((element) => element.getBoundingClientRect().top));
-		[...groups.values()].sort((a, b) => top(a) - top(b)).forEach((group, order) => pull(group, order));
+		[...groups.values()].sort((a, b) => top(a) - top(b)).forEach((group) => pull(group));
 	};
 
 	const onScroll = () => {
