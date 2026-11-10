@@ -30,23 +30,28 @@ const REACH_MS = 320;
 const PULL_MS = 760;
 const STAGGER_MS = 180;
 const EXIT_MS = 360;
+const FRAME_MS = 480;
 const MARGIN = 40;
 const EASE_OUT = "cubic-bezier(0.16, 1, 0.3, 1)";
 
 const point = (x: number, y: number) => `translate(${x}px, ${y}px)`;
 
-/** Peça pronta para entrar: imagem carregada, inteira na tela e visível. */
+/** Peça pronta para entrar: imagem carregada e visível na tela. */
 function isReady(element: Element) {
 	if (element.closest(OFF_LIMITS)) return false;
 	if (element instanceof HTMLImageElement && !(element.complete && element.naturalWidth > 0)) return false;
 	const explicit = element.hasAttribute("data-agent-piece");
 	if (!explicit && element.closest("[data-agent-piece]")) return false;
 	const box = element.getBoundingClientRect();
+	if (explicit) {
+		// Peça marcada fica escondida até o agente trazê-la: basta aparecer na tela,
+		// mesmo que passe da borda (como as pessoas de corpo inteiro).
+		const onScreen = box.width > 0 && box.height > 0 && box.bottom > 0 && box.top < innerHeight && box.right > 0 && box.left < innerWidth;
+		return onScreen && getComputedStyle(element.parentElement ?? element).visibility === "visible";
+	}
 	const inside = box.top >= -40 && box.left >= -40 && box.right <= innerWidth + 40 && box.bottom <= innerHeight + 40;
-	const minimum = explicit ? 10 : 48;
-	if (!inside || box.width < minimum || box.height < minimum) return false;
+	if (!inside || box.width < 48 || box.height < 48) return false;
 	if (getComputedStyle(element).visibility !== "visible") return false;
-	if (explicit) return true;
 	// Ainda atrás da tela de carregamento ou de outra camada: espera aparecer.
 	const hit = document.elementFromPoint(box.left + box.width / 2, box.top + box.height / 2);
 	return Boolean(hit && (element === hit || element.contains(hit) || hit.contains(element)));
@@ -63,9 +68,13 @@ function entryOffset(box: DOMRect) {
 
 function startSwarm(root: HTMLElement) {
 	const seen = new WeakSet<Element>();
+	// Liga o CSS que esconde as peças marcadas até um agente trazê-las.
+	document.documentElement.dataset.agents = "on";
 	const cursors = [...root.querySelectorAll<HTMLElement>("[data-agent]")];
 	const frames = [...root.querySelectorAll<HTMLElement>("[data-agent-frame]")];
 	const motions = new Set<Animation>();
+	const timers = new Set<ReturnType<typeof setTimeout>>();
+	const frameLoops = new Set<number>();
 	let lastScroll = 0;
 	// Cada agente só pega a próxima peça depois de soltar a anterior.
 	const freeAt = AGENTS.map(() => 0);
@@ -95,6 +104,7 @@ function startSwarm(root: HTMLElement) {
 
 		for (const element of group) {
 			const html = element as HTMLElement;
+			element.setAttribute("data-agent-placed", "");
 			const scale = html.offsetWidth > 0 ? element.getBoundingClientRect().width / html.offsetWidth : 1;
 			track(element.animate(
 				{ translate: [`${offset.x / scale}px ${offset.y / scale}px`, "0px 0px"] },
@@ -119,10 +129,27 @@ function startSwarm(root: HTMLElement) {
 			{ delay, duration: total, easing: "ease-out", fill: "backwards" },
 		));
 
-		frame.style.transform = point(box.left - 5, box.top - 5);
-		frame.style.width = `${box.width + 10}px`;
-		frame.style.height = `${box.height + 10}px`;
-		track(frame.animate({ opacity: [0, 1, 0] }, { delay: delay + REACH_MS + PULL_MS * 0.7, duration: 300 }));
+		// A moldura acompanha a peça quadro a quadro (e o grupo inteiro), sem sair da tela.
+		const frameStart = delay + REACH_MS + PULL_MS * 0.7;
+		const follow = () => {
+			const boxes = group.map((element) => element.getBoundingClientRect());
+			const left = Math.max(2, Math.min(...boxes.map((item) => item.left)) - 5);
+			const top = Math.max(2, Math.min(...boxes.map((item) => item.top)) - 5);
+			const right = Math.min(innerWidth - 2, Math.max(...boxes.map((item) => item.right)) + 5);
+			const bottom = Math.min(innerHeight - 2, Math.max(...boxes.map((item) => item.bottom)) + 5);
+			frame.style.transform = point(left, top);
+			frame.style.width = `${Math.max(0, right - left)}px`;
+			frame.style.height = `${Math.max(0, bottom - top)}px`;
+		};
+		timers.add(setTimeout(() => {
+			const end = performance.now() + FRAME_MS;
+			const step = () => {
+				follow();
+				if (performance.now() < end) frameLoops.add(requestAnimationFrame(step));
+			};
+			step();
+		}, frameStart));
+		track(frame.animate({ opacity: [0, 1, 1, 0] }, { delay: frameStart, duration: FRAME_MS }));
 
 		flight.finished.catch(() => undefined).finally(() => {
 			working -= 1;
@@ -156,7 +183,10 @@ function startSwarm(root: HTMLElement) {
 		clearInterval(timer);
 		removeEventListener("scroll", onScroll, { capture: true });
 		for (const animation of motions) animation.cancel();
+		for (const id of timers) clearTimeout(id);
+		for (const id of frameLoops) cancelAnimationFrame(id);
 		root.dataset.working = "false";
+		delete document.documentElement.dataset.agents;
 	};
 }
 

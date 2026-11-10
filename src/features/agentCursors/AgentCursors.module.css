@@ -1,5 +1,10 @@
 /* Camada dos cursores de agentes: nunca recebe clique nem cobre o chat. */
 
+/* Com os agentes ligados, toda peça marcada espera escondida até ser trazida. */
+:global(html[data-agents="on"] [data-agent-piece]:not([data-agent-placed])) {
+	visibility: hidden;
+}
+
 .swarm {
 	position: fixed;
 	inset: 0;
