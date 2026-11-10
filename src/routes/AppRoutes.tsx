@@ -34,6 +34,8 @@ const HomeElevatorStandalonePage = lazy(
   () => import("../pages/Mateus/Home/Elevator/HomeElevatorStandalonePage"),
 );
 
+const PrivacyNotice = lazy(() => import("../pages/Privacy/PrivacyNotice"));
+
 const routeFallback = <LoadingStatus label="Carregando página" />;
 
 const AppRoutes = () => {
@@ -67,6 +69,11 @@ const AppRoutes = () => {
       <Route path="/pricing" element={<Navigate to="/technologies" replace />} />
       <Route path="/live" element={<Navigate to="/technologies" replace />} />
       <Route path="/contact" element={landingElement} />
+
+      {/* Aviso de privacidade (LGPD/GDPR), um endereço por idioma. */}
+      <Route path="/privacidade" element={<PrivacyNotice />} />
+      <Route path="/en/privacy" element={<PrivacyNotice />} />
+      <Route path="/es/privacidad" element={<PrivacyNotice />} />
 
       {/* Versão em inglês com endereço próprio (hreflang en). */}
       <Route path="/en" element={<Navigate to="/en/home" replace />} />

@@ -1,0 +1,136 @@
+/* Aviso de privacidade: documento de leitura, claro e sóbrio, nas cores do site. */
+.page {
+	--ink: #1c1714;
+	--muted: #5d534c;
+	--wine: #8a1228;
+	--paper: #f7f3ec;
+	--rule: rgba(28, 23, 20, 0.12);
+	min-height: 100dvh;
+	padding: 32px 16px 72px;
+	color: var(--ink);
+	background: var(--paper);
+	font-family: Georgia, "Times New Roman", serif;
+}
+
+.document {
+	max-width: 720px;
+	margin: 0 auto;
+}
+
+.top {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 12px;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 40px;
+	font-family: "Inter", Arial, sans-serif;
+	font-size: 14px;
+}
+
+.back {
+	color: var(--wine);
+	font-weight: 600;
+	text-decoration: none;
+}
+
+.back:hover,
+.back:focus-visible {
+	text-decoration: underline;
+}
+
+.languages {
+	display: inline-flex;
+	gap: 4px;
+	padding: 3px;
+	border: 1px solid var(--rule);
+	border-radius: 999px;
+}
+
+.language,
+.languageActive {
+	padding: 4px 10px;
+	border-radius: 999px;
+	font-size: 12px;
+	font-weight: 700;
+	letter-spacing: 0.06em;
+	text-decoration: none;
+}
+
+.language {
+	color: var(--muted);
+}
+
+.languageActive {
+	color: #fff;
+	background: var(--wine);
+}
+
+.header {
+	padding-bottom: 24px;
+	border-bottom: 2px solid var(--wine);
+}
+
+.header h1 {
+	margin: 0;
+	font-size: clamp(32px, 7vw, 48px);
+	line-height: 1.05;
+	letter-spacing: -0.02em;
+}
+
+.updated {
+	margin: 10px 0 0;
+	color: var(--muted);
+	font-family: "Inter", Arial, sans-serif;
+	font-size: 13px;
+}
+
+.intro {
+	margin: 18px 0 0;
+	font-size: 18px;
+	line-height: 1.6;
+}
+
+.section {
+	padding: 26px 0 4px;
+	border-bottom: 1px solid var(--rule);
+}
+
+.section:last-child {
+	border-bottom: 0;
+}
+
+.section h2 {
+	margin: 0 0 10px;
+	color: var(--wine);
+	font-size: 20px;
+	line-height: 1.3;
+}
+
+.section p,
+.section li {
+	font-size: 16px;
+	line-height: 1.7;
+}
+
+.section p {
+	margin: 0 0 14px;
+}
+
+.section ul {
+	margin: 0 0 14px;
+	padding-left: 20px;
+	list-style: disc;
+}
+
+.section li::marker {
+	color: var(--wine);
+}
+
+.section li {
+	margin-bottom: 8px;
+}
+
+.section a {
+	color: var(--wine);
+}

@@ -41,7 +41,7 @@ export default function HomeMobileSkeleton({className='',minHeight}:{className?:
         {['Transformando','ideias em','produtos reais,','do código ao','impacto.'].map(text=><Text key={text} text={text} className={home.introLine}/>)}
       </p>
       <div className={home.partners} data-home-skeleton-part="partners">
-        <div className={home.partnersHeading}><Text text="CLIENTES"/><Text text="E PARCEIROS"/></div>
+        <div className={home.partnersHeading}><Text text="CONTATO"/><Text text="E FERRAMENTAS"/></div>
         <div className={home.partnerLogos}>
           {['LinkedIn','Gmail','Claude','Codex'].map(text=><div key={text} className={home.partnerSignature}>
             <svg viewBox="0 0 24 24"><rect width="24" height="24" rx="4"/></svg><Text text={text}/>

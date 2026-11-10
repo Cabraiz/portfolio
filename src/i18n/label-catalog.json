@@ -26,9 +26,9 @@
   ["produtos reais,", "real products,"],
   ["do código ao", "from code to"],
   ["impacto.", "impact."],
-  ["Clientes e parceiros", "Clients and partners"],
-  ["CLIENTES", "CLIENTS"],
-  ["E PARCEIROS", "AND PARTNERS"],
+  ["Contato e ferramentas", "Contact and tools"],
+  ["CONTATO", "CONTACT"],
+  ["E FERRAMENTAS", "AND TOOLS"],
   ["Ações de contato", "Contact options"],
   ["Currículo", "Résumé"],
   ["Contato direto", "Direct contact"],
@@ -457,5 +457,7 @@
   ["Abrir site", "Visit site"],
   ["abre em nova aba", "opens in a new tab"],
   ["Fechar imagem ampliada", "Close enlarged image"],
-  ["Toque na imagem para aproximar ou afastar", "Tap the image to zoom in or out"]
+  ["Toque na imagem para aproximar ou afastar", "Tap the image to zoom in or out"],
+  ["Sua mensagem vai direto para o Mateus pelo Telegram. Não envie dados sensíveis.", "Your message goes straight to Mateus on Telegram. Please do not send sensitive data."],
+  ["Aviso de privacidade", "Privacy notice"]
 ]

@@ -92,9 +92,9 @@
     "ui_e893207a0004": "productos reales,",
     "ui_2d5550b1ca28": "del código al",
     "ui_bab97ef8b28c": "impacto.",
-    "ui_79a6bddac3d0": "Clientes y socios",
-    "ui_f5d2cee52c04": "CLIENTES",
-    "ui_a83ae4d35ab7": "Y SOCIOS",
+    "ui_16a4fa249cbb": "Contacto y herramientas",
+    "ui_5f1008a127a2": "CONTACTO",
+    "ui_ab7cb61d680b": "Y HERRAMIENTAS",
     "ui_de6e191e42b0": "Opciones de contacto",
     "ui_eb40a4364013": "Currículum",
     "ui_671a75ddb500": "Contacto directo",
@@ -525,6 +525,8 @@
     "ui_0133dc75fa91": "Abrir sitio",
     "ui_4efa3e144d57": "se abre en una pestaña nueva",
     "ui_e40040d16e35": "Cerrar imagen ampliada",
-    "ui_3c7f8ccb8059": "Toca la imagen para acercar o alejar"
+    "ui_3c7f8ccb8059": "Toca la imagen para acercar o alejar",
+    "ui_1c6e2ca76f83": "Tu mensaje va directo a Mateus por Telegram. No envíes datos sensibles.",
+    "ui_7f9181f13774": "Aviso de privacidad"
   }
 }

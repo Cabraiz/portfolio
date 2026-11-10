@@ -9,7 +9,8 @@ import lagArthurChat from "../../assets/Mateus/lag-arthur-chat-blank-eyes-closed
 import lagArthurIris from "../../assets/Mateus/lag-arthur-iris-anime-handpainted-v9.webp";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useTranslation } from "react-i18next";
-import { useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
+import { privacyPathFor } from "../Privacy/privacyNotice.text";
 
 import {
   getSectionIdByPath,
@@ -104,8 +105,12 @@ function subscribeToActiveLandingSection(onStoreChange: () => void) {
   return () => observer.disconnect();
 }
 
-function getOrCreateConversationId(): string {
-  const conversationId = window.crypto.randomUUID();
+/**
+ * Usa a conversa já guardada ou cria uma nova só na memória. Nada é gravado
+ * no navegador antes de a pessoa enviar a primeira mensagem (privacidade:
+ * quem só visita o site não deixa nada guardado no aparelho).
+ */
+function readOrCreateConversationId(): string {
   try {
     const storedConversationId = window.localStorage.getItem(
       CHAT_CONVERSATION_STORAGE_KEY
@@ -116,12 +121,18 @@ function getOrCreateConversationId(): string {
     ) {
       return storedConversationId;
     }
+  } catch {
+    // Sem armazenamento: a conversa vale só durante esta visita.
+  }
+  return window.crypto.randomUUID();
+}
 
+function persistConversationId(conversationId: string) {
+  try {
     window.localStorage.setItem(CHAT_CONVERSATION_STORAGE_KEY, conversationId);
   } catch {
     // A conversa continua durante esta visita quando o armazenamento é bloqueado.
   }
-  return conversationId;
 }
 
 function hasRecentConversationActivity(): boolean {
@@ -203,7 +214,7 @@ export default function FloatingChat() {
 
   const [isOpen, setIsOpen] = useState(false);
   const [inputValue, setInputValue] = useState("");
-  const [conversationId] = useState(getOrCreateConversationId);
+  const [conversationId] = useState(readOrCreateConversationId);
   const [messages, setMessages] = useState<ChatMessage[]>(() =>
     getStoredMessages(conversationId)
   );
@@ -228,6 +239,7 @@ export default function FloatingChat() {
   const isSendingRef = useRef(false);
 
   const { t, i18n } = useTranslation();
+  const privacyPath = privacyPathFor(i18n.resolvedLanguage);
   const phrases = t("floatingChat.phrases", {
     returnObjects: true,
   }) as string[];
@@ -266,7 +278,8 @@ export default function FloatingChat() {
   }, [isOpen, messages]);
 
   useEffect(() => {
-    storeMessages(conversationId, messages);
+    // Sem mensagens, nada vai para o navegador.
+    if (messages.length > 0) storeMessages(conversationId, messages);
   }, [conversationId, messages]);
 
   const triggerItems: TriggerAvatarItem[] = [
@@ -530,6 +543,7 @@ export default function FloatingChat() {
       ]);
       setInputValue("");
       setHasActiveConversation(true);
+      persistConversationId(conversationId);
       try {
         window.localStorage.setItem(
           CHAT_LAST_SENT_AT_STORAGE_KEY,
@@ -1156,6 +1170,25 @@ export default function FloatingChat() {
                   : t("floatingChat.send"))}
               </button>
             </div>
+
+            {/* Transparência (LGPD): para onde a mensagem vai e link para o aviso. */}
+            <p
+              data-chat-privacy-note="true"
+              style={{
+                margin: `${scale(0.55)}rem 0 0`,
+                color: "rgba(255, 255, 255, 0.62)",
+                fontSize: `${scale(0.72)}rem`,
+                lineHeight: 1.4,
+              }}
+            >
+              {localizeLabel("Sua mensagem vai direto para o Mateus pelo Telegram. Não envie dados sensíveis.")}{" "}
+              <Link
+                to={privacyPath}
+                style={{ color: "rgba(255, 255, 255, 0.86)", textDecoration: "underline" }}
+              >
+                {localizeLabel("Aviso de privacidade")}
+              </Link>
+            </p>
           </motion.div>
         )}
       </AnimatePresence>

@@ -26,9 +26,9 @@
   "produtos reais,": "productos reales,",
   "do código ao": "del código al",
   "impacto.": "impacto.",
-  "Clientes e parceiros": "Clientes y socios",
-  "CLIENTES": "CLIENTES",
-  "E PARCEIROS": "Y SOCIOS",
+  "Contato e ferramentas": "Contacto y herramientas",
+  "CONTATO": "CONTACTO",
+  "E FERRAMENTAS": "Y HERRAMIENTAS",
   "Ações de contato": "Opciones de contacto",
   "Currículo": "Currículum",
   "Contato direto": "Contacto directo",
@@ -457,5 +457,7 @@
   "Abrir site": "Abrir sitio",
   "abre em nova aba": "se abre en una pestaña nueva",
   "Fechar imagem ampliada": "Cerrar imagen ampliada",
-  "Toque na imagem para aproximar ou afastar": "Toca la imagen para acercar o alejar"
+  "Toque na imagem para aproximar ou afastar": "Toca la imagen para acercar o alejar",
+  "Sua mensagem vai direto para o Mateus pelo Telegram. Não envie dados sensíveis.": "Tu mensaje va directo a Mateus por Telegram. No envíes datos sensibles.",
+  "Aviso de privacidade": "Aviso de privacidad"
 }

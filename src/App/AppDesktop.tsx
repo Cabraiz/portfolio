@@ -136,7 +136,8 @@ export default function AppDesktop() {
     routeSectionId,
   ]);
 
-  useLandingSeoHead(resolvedActiveSectionId === "portfolio" ? "portfolio" : "home");
+  // Só nas páginas da landing: o aviso de privacidade cuida do próprio cabeçalho.
+  useLandingSeoHead(resolvedActiveSectionId === "portfolio" ? "portfolio" : "home", isCurrentRouteLanding);
 
   const handleNavigateToSection = useCallback(
     (sectionId: LandingSectionId) => {

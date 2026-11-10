@@ -54,8 +54,9 @@ function resolveCurrentSectionFromPathname(
 
 export function useSectionVisibility({
   defaultSectionId = "home",
-  navHiddenSections = ["enigma"],
-  floatingHiddenSections = ["enigma"],
+  // O aviso de privacidade é um documento: tem o próprio "voltar" e seletor de idioma.
+  navHiddenSections = ["enigma", "privacidade", "en/privacy", "es/privacidad"],
+  floatingHiddenSections = ["enigma", "privacidade", "en/privacy", "es/privacidad"],
   landingHiddenSections = ["enigma"],
   narrativeSections = ["enigma"],
 }: UseSectionVisibilityParams = {}): SectionVisibilityState {

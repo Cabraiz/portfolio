@@ -15,10 +15,12 @@ import { NAVBAR_HEIGHT_MOBILE } from './NavBar/navbar.constants';
 import "react-toastify/dist/ReactToastify.css";
 
 import useLandingSeoHead from "../features/seo/useLandingSeoHead";
+import { PRIVACY_PATHS } from "../pages/Privacy/privacyNotice.text";
 import { getLenisScrollSettings } from "../features/scroll/getLenisScrollSettings";
 import {
   getPathBySectionId,
   getSectionIdByPath,
+  isLandingPath,
   type LandingSectionId,
 } from "../features/navigation/landingSections";
 import type {
@@ -175,6 +177,9 @@ function AppMobile() {
       "/hublocal",
       "/drive",
       "/elevator",
+      "/privacidade",
+      "/en/privacy",
+      "/es/privacidad",
     ],
     [],
   );
@@ -183,6 +188,8 @@ function AppMobile() {
     return isHomeGameStandaloneHost() || isHomeGameRoutePath(location.pathname);
   }, [location.pathname]);
 
+  const isPrivacyRoute = Object.values(PRIVACY_PATHS).includes(location.pathname.replace(/\/+$/, ""));
+
   const isNavHidden =
     isGameStandaloneSurface || hiddenNavbarRoutes.includes(location.pathname);
 
@@ -190,9 +197,11 @@ function AppMobile() {
     return getSectionIdByPath(location.pathname) ?? "";
   }, [location.pathname]);
 
+  // Título, canonical e idioma da landing só nas páginas da landing (o aviso de
+  // privacidade cuida do próprio cabeçalho).
   useLandingSeoHead(
     activeSectionId === "portfolio" ? "portfolio" : "home",
-    !isGameStandaloneSurface,
+    !isGameStandaloneSurface && isLandingPath(location.pathname),
   );
 
   const handleNavigateToSection = useCallback(
@@ -383,12 +392,13 @@ function AppMobile() {
       minHeight: "0",
       // The portfolio header is an overlay. Its compact height must not resize
       // Home or shift every scene when the active section changes.
-      paddingTop: `${NAVBAR_HEIGHT_MOBILE}px`,
+      // O aviso de privacidade não tem navbar: sem a faixa reservada a ela.
+      paddingTop: isPrivacyRoute ? 0 : `${NAVBAR_HEIGHT_MOBILE}px`,
       paddingBottom: "var(--mobile-safe-bottom, 0px)",
       boxSizing: "border-box",
       background: activePageBackground,
     };
-  }, [activeSectionId, isHomeOnScreen]);
+  }, [activeSectionId, isHomeOnScreen, isPrivacyRoute]);
 
   return (
     <ReactLenis

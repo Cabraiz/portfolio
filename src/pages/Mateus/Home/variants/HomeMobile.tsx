@@ -95,7 +95,7 @@ function HomeMobile() {
         <div
           ref={partnersRef}
           className={styles.partners}
-          aria-label={localizeLabel("Clientes e parceiros")}
+          aria-label={localizeLabel("Contato e ferramentas")}
         >
           <div
             ref={partnersHeadingRef}
@@ -103,8 +103,8 @@ function HomeMobile() {
             data-mobile-partners-heading="true"
             data-agent-piece=""
           >
-            <span data-agent-piece="">{localizeLabel("CLIENTES")}</span>
-            <span data-agent-piece="">{localizeLabel("E PARCEIROS")}</span>
+            <span data-agent-piece="">{localizeLabel("CONTATO")}</span>
+            <span data-agent-piece="">{localizeLabel("E FERRAMENTAS")}</span>
           </div>
           <div className={styles.partnerLogos}>
             {MOBILE_PARTNERS.map(({ label, Icon }, index) => (

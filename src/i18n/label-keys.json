@@ -26,9 +26,9 @@
   "produtos reais,": "ui_e893207a0004",
   "do código ao": "ui_2d5550b1ca28",
   "impacto.": "ui_bab97ef8b28c",
-  "Clientes e parceiros": "ui_79a6bddac3d0",
-  "CLIENTES": "ui_f5d2cee52c04",
-  "E PARCEIROS": "ui_a83ae4d35ab7",
+  "Contato e ferramentas": "ui_16a4fa249cbb",
+  "CONTATO": "ui_5f1008a127a2",
+  "E FERRAMENTAS": "ui_ab7cb61d680b",
   "Ações de contato": "ui_de6e191e42b0",
   "Currículo": "ui_eb40a4364013",
   "Contato direto": "ui_671a75ddb500",
@@ -457,5 +457,7 @@
   "Abrir site": "ui_0133dc75fa91",
   "abre em nova aba": "ui_4efa3e144d57",
   "Fechar imagem ampliada": "ui_e40040d16e35",
-  "Toque na imagem para aproximar ou afastar": "ui_3c7f8ccb8059"
+  "Toque na imagem para aproximar ou afastar": "ui_3c7f8ccb8059",
+  "Sua mensagem vai direto para o Mateus pelo Telegram. Não envie dados sensíveis.": "ui_1c6e2ca76f83",
+  "Aviso de privacidade": "ui_7f9181f13774"
 }

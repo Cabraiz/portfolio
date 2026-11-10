@@ -1,5 +1,9 @@
 import { localizeLabel, useLabelLanguage } from '@/i18n/labels';
 import React, { type CSSProperties, useCallback } from "react";
+import { Link } from "react-router-dom";
+
+import i18n from "@/i18n/i18n";
+import { privacyPathFor } from "../../../pages/Privacy/privacyNotice.text";
 
 import logo from "../../../assets/icones/logo.svg";
 import {
@@ -155,6 +159,20 @@ const MobileNavbar: React.FC<MobileNavbarProps> = ({
 							/>
 						))}
 						<LanguageSwitcher style={{ alignSelf: "center", marginTop: "6px" }} />
+						{/* No celular o chat não aparece: o aviso de privacidade fica no menu. */}
+						<Link
+							to={privacyPathFor(i18n.resolvedLanguage)}
+							onClick={onToggle}
+							style={{
+								alignSelf: "center",
+								marginTop: "4px",
+								color: "rgba(255, 255, 255, 0.62)",
+								fontSize: "13px",
+								textDecoration: "underline",
+							}}
+						>
+							{localizeLabel("Aviso de privacidade")}
+						</Link>
 					</nav>
 
 					<button
