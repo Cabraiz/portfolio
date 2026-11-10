@@ -190,9 +190,9 @@ export default function ResumeDownloadButton({
     <>
       <span className={styles.srOnly}>{localizeLabel(accessibleLabel)}</span>
 
-      <span className={styles.surface} aria-hidden="true">
+      <span className={styles.surface} aria-hidden="true" data-agent-piece="">
         <span className={styles.iconRail}>
-          <span className={styles.icon}>
+          <span className={styles.icon} data-agent-piece="">
             <DownloadIcon />
           </span>
         </span>
@@ -202,6 +202,7 @@ export default function ResumeDownloadButton({
             styles.text,
             compact && styles.textCompact,
           )}
+          data-agent-piece=""
         >
           {localizeLabel(label)}
         </span>

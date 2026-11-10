@@ -18,6 +18,7 @@ function CornerItem({ className }: CornerItemProps) {
       aria-hidden="true"
       focusable="false"
       className={joinClasses(styles.corner, className)}
+      data-agent-piece=""
     >
       <path
         d="M34 6H16a10 10 0 0 0-10 10v18"

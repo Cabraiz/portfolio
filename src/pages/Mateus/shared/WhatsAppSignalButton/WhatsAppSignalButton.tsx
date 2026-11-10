@@ -222,6 +222,7 @@ function WhatsAppSignalButton({
         className={baseStyles.leadingIcon}
         aria-hidden="true"
         data-wa-signal-leading-icon="true"
+        data-agent-piece=""
       >
         {icon ?? <DefaultWhatsAppIcon />}
       </span>
@@ -230,7 +231,7 @@ function WhatsAppSignalButton({
         className={baseStyles.labelWrap}
         data-wa-signal-label-wrap="true"
       >
-        <span className={baseStyles.label} data-wa-signal-label="true">
+        <span className={baseStyles.label} data-wa-signal-label="true" data-agent-piece="">
           {localizeLabel(label)}
         </span>
       </span>
@@ -279,6 +280,7 @@ function WhatsAppSignalButton({
         <div
           className={baseStyles.button}
           data-wa-signal-button="true"
+          data-agent-piece=""
         >
           {localizeLabel(buttonContent)}
         </div>
