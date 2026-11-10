@@ -92,6 +92,11 @@
   display: block;
 }
 
+/* Cada palavra do título é uma peça: precisa ser caixa para poder se mover. */
+.title .titleWord {
+  display: inline-block;
+}
+
 .titleLead {
   color: var(--ink);
 }

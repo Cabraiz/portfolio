@@ -72,6 +72,8 @@ const BrandButton: React.FC<BrandButtonProps> = ({
       onClick={onClick}
       aria-label={localizeLabel("Ir para o início")}
       data-mobile-brand-pusher={mobile ? "true" : undefined}
+      // No celular o logo é uma peça trazida por um agente (no desktop é o slot).
+      data-agent-piece={mobile ? "" : undefined}
       style={{
         all: "unset",
         display: "inline-flex",

@@ -84,7 +84,8 @@ const MobileMenuToggleButton: React.FC<MobileMenuToggleButtonProps> = ({
       }}
     >
       {[0, 1, 2].map((index) => (
-        <span key={index} style={getBurgerLineStyle(index, menuOpen, lineColor)} />
+        // Cada traço do menu é trazido por um agente.
+        <span key={index} style={getBurgerLineStyle(index, menuOpen, lineColor)} data-agent-piece="" />
       ))}
     </button>
   );

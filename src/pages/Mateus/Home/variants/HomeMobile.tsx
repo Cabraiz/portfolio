@@ -1,5 +1,5 @@
 import { localizeLabel, useLabelLanguage } from '@/i18n/labels';
-import { useRef, useState } from "react";
+import { Fragment, useRef, useState } from "react";
 import { FaLinkedin, FaRegFileAlt, FaWhatsapp } from "react-icons/fa";
 import { SiAnthropic, SiGmail } from "react-icons/si";
 
@@ -28,6 +28,8 @@ const MOBILE_INTRO_LINES = [
 
 const PORTRAIT_REVEAL_MS = 700;
 
+const splitWords = (text: string) => text.split(/\s+/).filter(Boolean);
+
 function HomeMobile() {
   useLabelLanguage();
   const contactLanguage = resolveContactLanguage(i18n.resolvedLanguage);
@@ -50,22 +52,31 @@ function HomeMobile() {
   return (
     <main ref={pageRef} className={styles.page} data-mobile-editorial-home>
       <section className={styles.hero} aria-labelledby="mobile-home-title">
-        <div ref={eyebrowRef} className={styles.eyebrow}>
-          <span>{localizeLabel("TECNOLOGIA")}</span>
-          <span>{localizeLabel("PESSOAS")}</span>
-          <span>{localizeLabel("IMPACTO")}</span>
+        {/* Cada palavra, linha, ícone e traço é uma peça que um agente traz;
+            os blocos que têm o traço vinho também são peças (trazem o traço). */}
+        <div ref={eyebrowRef} className={styles.eyebrow} data-agent-piece="">
+          <span data-agent-piece="">{localizeLabel("TECNOLOGIA")}</span>
+          <span data-agent-piece="">{localizeLabel("PESSOAS")}</span>
+          <span data-agent-piece="">{localizeLabel("IMPACTO")}</span>
         </div>
 
         <h1 ref={titleRef} id="mobile-home-title" className={styles.title}>
           {/* Português e inglês usam o título de mercado em inglês. */}
-          <span className={styles.titleLead}>{localizeLabel(contactLanguage === "es" ? "Engenheiro" : "Senior")}</span>
-          <span className={styles.titleAccent}>{localizeLabel(contactLanguage === "es" ? "IA & Full Stack" : "AI Engineer")}</span>
+          <span className={styles.titleLead} data-agent-piece="">{localizeLabel(contactLanguage === "es" ? "Engenheiro" : "Senior")}</span>
+          <span className={styles.titleAccent}>
+            {splitWords(localizeLabel(contactLanguage === "es" ? "IA & Full Stack" : "AI Engineer")).map((word, index, words) => (
+              <Fragment key={word}>
+                <span className={styles.titleWord} data-agent-piece="">{word}</span>
+                {index < words.length - 1 ? " " : null}
+              </Fragment>
+            ))}
+          </span>
         </h1>
 
-        <div ref={identityRef} className={styles.identity} data-home-motion="identity" data-agent-piece="">
-          <strong>{localizeLabel("Mateus Cabral")}</strong>
-          <span>{localizeLabel("Senior AI Engineer")}</span>
-          <span className={styles.availability} data-home-availability="">{localizeLabel("Remoto · CLT ou PJ")}</span>
+        <div ref={identityRef} className={styles.identity} data-home-motion="identity">
+          <strong data-agent-piece="">{localizeLabel("Mateus Cabral")}</strong>
+          <span data-agent-piece="">{localizeLabel("Senior AI Engineer")}</span>
+          <span className={styles.availability} data-home-availability="" data-agent-piece="">{localizeLabel("Remoto · CLT ou PJ")}</span>
         </div>
 
         <p ref={introRef} className={styles.intro}>
@@ -74,6 +85,7 @@ function HomeMobile() {
               key={line}
               className={styles.introLine}
               data-mobile-intro-line={index + 1}
+              data-agent-piece=""
             >
               {localizeLabel(line)}{localizeLabel(index < MOBILE_INTRO_LINES.length - 1 ? " " : "")}
             </span>
@@ -89,9 +101,10 @@ function HomeMobile() {
             ref={partnersHeadingRef}
             className={styles.partnersHeading}
             data-mobile-partners-heading="true"
+            data-agent-piece=""
           >
-            <span>{localizeLabel("CLIENTES")}</span>
-            <span>{localizeLabel("E PARCEIROS")}</span>
+            <span data-agent-piece="">{localizeLabel("CLIENTES")}</span>
+            <span data-agent-piece="">{localizeLabel("E PARCEIROS")}</span>
           </div>
           <div className={styles.partnerLogos}>
             {MOBILE_PARTNERS.map(({ label, Icon }, index) => (
@@ -101,8 +114,8 @@ function HomeMobile() {
                 data-mobile-partner-item={label.toLowerCase()}
                 data-mobile-partner-order={index + 1}
               >
-                <Icon aria-hidden="true" />
-                <span>{localizeLabel(label)}</span>
+                <Icon aria-hidden="true" data-agent-piece="" />
+                <span data-agent-piece="">{localizeLabel(label)}</span>
               </div>
             ))}
           </div>
@@ -117,6 +130,7 @@ function HomeMobile() {
           width={1024}
           height={1536}
           data-reveal={portraitRevealed ? "done" : "pending"}
+          data-agent-piece=""
           onLoad={(event) => {
             const image = event.currentTarget;
             void image.decode().catch(() => undefined).then(() => {
@@ -130,14 +144,15 @@ function HomeMobile() {
         />
 
         <nav className={styles.actions} data-mobile-contact-actions data-agent-piece="" aria-label={localizeLabel("Ações de contato")}>
-          <a href={getWhatsAppHref(contactLanguage)} target="_blank" rel="noreferrer noopener">
-            <FaWhatsapp aria-hidden="true" />
-            <span>{localizeLabel("WhatsApp")}</span>
+          {/* Barra, contorno de cada botão, ícone, texto e divisória: peças separadas. */}
+          <a href={getWhatsAppHref(contactLanguage)} target="_blank" rel="noreferrer noopener" data-agent-piece="">
+            <FaWhatsapp aria-hidden="true" data-agent-piece="" />
+            <span data-agent-piece="">{localizeLabel("WhatsApp")}</span>
           </a>
-          <span className={styles.actionDivider} aria-hidden="true" />
-          <a href={RESUME_HREFS[contactLanguage]} target="_blank" rel="noreferrer noopener">
-            <FaRegFileAlt aria-hidden="true" />
-            <span>{localizeLabel("Currículo")}</span>
+          <span className={styles.actionDivider} aria-hidden="true" data-agent-piece="" />
+          <a href={RESUME_HREFS[contactLanguage]} target="_blank" rel="noreferrer noopener" data-agent-piece="">
+            <FaRegFileAlt aria-hidden="true" data-agent-piece="" />
+            <span data-agent-piece="">{localizeLabel("Currículo")}</span>
           </a>
         </nav>
       </section>
