@@ -31,7 +31,7 @@ const SCROLL_REST_MS = 180;
 const FADE_LEAD_MS = 260;
 const REACH_MS = 320;
 const PULL_MS = 760;
-const STAGGER_MS = 180;
+const STAGGER_MS = 70;
 const EXIT_MS = 360;
 const FRAME_MS = 480;
 const MARGIN = 40;
@@ -176,7 +176,9 @@ function startSwarm(root: HTMLElement) {
 			for (const member of members) seen.add(member);
 			groups.set(name || element, members);
 		}
-		[...groups.values()].forEach((group, order) => pull(group, order));
+		// De cima para baixo: a legenda entra junto com as peças do projeto, não depois.
+		const top = (group: readonly Element[]) => Math.min(...group.map((element) => element.getBoundingClientRect().top));
+		[...groups.values()].sort((a, b) => top(a) - top(b)).forEach((group, order) => pull(group, order));
 	};
 
 	const onScroll = () => {
