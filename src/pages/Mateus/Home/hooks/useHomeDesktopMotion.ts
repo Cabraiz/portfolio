@@ -25,7 +25,7 @@ export default function useHomeDesktopMotion(
 		const { gsap } = ensureGsapRuntime();
 		const mm = gsap.matchMedia(container);
 
-		mm.add(MOTION_QUERY, () => {
+		mm.add(MOTION_QUERY, (context) => {
 			const q = gsap.utils.selector(container);
 			const all = (name: string) => q(`[data-home-motion="${name}"]`);
 			const one = (name: string) => all(name)[0] as HTMLElement | undefined;
@@ -38,19 +38,26 @@ export default function useHomeDesktopMotion(
 				.filter((image): image is HTMLImageElement => image !== null);
 
 			// Entrada: a foto de fundo abre num zoom-out e o conteúdo sobe em sequência.
+			// O fim de cada entrada é explícito: visível e no lugar.
+			const shown = { x: 0, y: 0, autoAlpha: 1 };
 			gsap
-				.timeline({ defaults: { ease: "power3.out" }, delay: 0.15 })
+				.timeline({
+					defaults: { ease: "power3.out" },
+					delay: 0.15,
+					// A saída com a rolagem só nasce depois da entrada (ver createExit).
+					onComplete: () => context.add(() => createExit()),
+				})
 				.fromTo(
 					photoFrame ?? [],
 					{ scale: 1.14, transformOrigin: "62% 40%" },
 					{ scale: 1.04, duration: 1.8, ease: "expo.out" },
 					0
 				)
-				.from(all("eyebrow"), { y: 24, autoAlpha: 0, duration: 0.6 }, 0.1)
-				.from(all("role"), { y: 30, autoAlpha: 0, duration: 0.7 }, 0.18)
-				.from(seals, { y: 18, autoAlpha: 0, stagger: 0.08, duration: 0.5 }, 0.35)
-				.from(all("actions"), { y: 26, autoAlpha: 0, duration: 0.6 }, 0.45)
-				.from(phraseLines, { x: -22, autoAlpha: 0, stagger: 0.12, duration: 0.7 }, 0.4);
+				.fromTo(all("eyebrow"), { y: 24, autoAlpha: 0 }, { ...shown, duration: 0.6 }, 0.1)
+				.fromTo(all("role"), { y: 30, autoAlpha: 0 }, { ...shown, duration: 0.7 }, 0.18)
+				.fromTo(seals, { y: 18, autoAlpha: 0 }, { ...shown, stagger: 0.08, duration: 0.5 }, 0.35)
+				.fromTo(all("actions"), { y: 26, autoAlpha: 0 }, { ...shown, duration: 0.6 }, 0.45)
+				.fromTo(phraseLines, { x: -22, autoAlpha: 0 }, { ...shown, stagger: 0.12, duration: 0.7 }, 0.4);
 
 			// Idle: só enquanto o Início está na tela.
 			const idle = gsap.timeline({ paused: true });
@@ -125,7 +132,13 @@ export default function useHomeDesktopMotion(
 
 			// Saída em camadas ao rolar para o Portfólio (os elementos do fundo e o
 			// trilho de conteúdo já têm a própria saída em HomeDesktop).
-			gsap
+			// O ScrollTrigger guarda o estado "original" das peças na primeira vez que
+			// roda e o restaura a cada recálculo da rolagem. Criada junto com a
+			// entrada, com a página aberta já rolada (ex.: /portfolio), ele guardava
+			// selos e botões invisíveis e, ao voltar ao Início, eles sumiam. Por isso
+			// ela só é criada quando a entrada termina e tudo está visível.
+			const createExit = () =>
+				gsap
 				.timeline({
 					defaults: { ease: "none" },
 					scrollTrigger: {
@@ -136,10 +149,11 @@ export default function useHomeDesktopMotion(
 						invalidateOnRefresh: true,
 					},
 				})
-				.to(all("eyebrow"), { x: -36, autoAlpha: 0.2, duration: 1 }, 0)
-				.to(all("role"), { x: -22, duration: 1 }, 0)
-				.to(seals, { y: 24, autoAlpha: 0.15, stagger: 0.06, duration: 0.7 }, 0.05)
-				.to(all("actions"), { y: 28, autoAlpha: 0.3, duration: 0.8 }, 0.1);
+				// Ponto de partida explícito: no topo, tudo visível e no lugar.
+				.fromTo(all("eyebrow"), { x: 0, autoAlpha: 1 }, { x: -36, autoAlpha: 0.2, duration: 1, immediateRender: false }, 0)
+				.fromTo(all("role"), { x: 0 }, { x: -22, duration: 1, immediateRender: false }, 0)
+				.fromTo(seals, { y: 0, autoAlpha: 1 }, { y: 24, autoAlpha: 0.15, stagger: 0.06, duration: 0.7, immediateRender: false }, 0.05)
+				.fromTo(all("actions"), { y: 0, autoAlpha: 1 }, { y: 28, autoAlpha: 0.3, duration: 0.8, immediateRender: false }, 0.1);
 
 			return () => {
 				visibility.disconnect();
