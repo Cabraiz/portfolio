@@ -29,16 +29,53 @@ const CHECK_MS = 100;
 const SCROLL_REST_MS = 180;
 // A peça já começa fora da tela: espera o fade-in avançar para entrar visível.
 const FADE_LEAD_MS = 260;
-const REACH_MS = 320;
 const PULL_MS = 760;
 const STAGGER_MS = 70;
 // Depois de encaixar, o agente segura a peça um instante com a moldura acesa.
 const HOLD_MS = 320;
-const EXIT_MS = 420;
 const MARGIN = 40;
-const EASE_OUT = "cubic-bezier(0.16, 1, 0.3, 1)";
+const PATH_STEPS = 16;
+
+type Pt = { x: number; y: number };
 
 const point = (x: number, y: number) => `translate(${x}px, ${y}px)`;
+const rand = (min: number, max: number) => min + Math.random() * (max - min);
+const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
+const distance = (a: Pt, b: Pt) => Math.hypot(b.x - a.x, b.y - a.y);
+const easeInOut = (u: number) => (u < 0.5 ? 4 * u * u * u : 1 - (-2 * u + 2) ** 3 / 2);
+const easeOut = (u: number) => 1 - (1 - u) ** 4;
+const easeIn = (u: number) => u * u;
+
+/** Curva suave entre dois pontos, com a curvatura aleatória de uma mão de verdade. */
+function bend(from: Pt, to: Pt, wobble: number) {
+	const dx = to.x - from.x;
+	const dy = to.y - from.y;
+	const len = Math.hypot(dx, dy) || 1;
+	const px = -dy / len;
+	const py = dx / len;
+	const k1 = rand(-wobble, wobble) * len;
+	const k2 = rand(-wobble, wobble) * 0.6 * len;
+	const c1 = { x: from.x + dx * 0.3 + px * k1, y: from.y + dy * 0.3 + py * k1 };
+	const c2 = { x: from.x + dx * 0.72 + px * k2, y: from.y + dy * 0.72 + py * k2 };
+	return (t: number): Pt => {
+		const s = 1 - t;
+		const a = s * s * s;
+		const b = 3 * s * s * t;
+		const c = 3 * s * t * t;
+		const d = t * t * t;
+		return { x: a * from.x + b * c1.x + c * c2.x + d * to.x, y: a * from.y + b * c1.y + c * c2.y + d * to.y };
+	};
+}
+
+/** Um ponto qualquer logo fora da tela, em qualquer lado. */
+function offscreenPoint(): Pt {
+	const pad = 60;
+	const side = Math.floor(Math.random() * 4);
+	if (side === 0) return { x: rand(0, innerWidth), y: -pad };
+	if (side === 1) return { x: innerWidth + pad, y: rand(0, innerHeight) };
+	if (side === 2) return { x: rand(0, innerWidth), y: innerHeight + pad };
+	return { x: -pad, y: rand(0, innerHeight) };
+}
 
 /** Peça pronta para entrar: imagem carregada e visível na tela. */
 function isReady(element: Element) {
@@ -67,9 +104,11 @@ function entryOffset(box: DOMRect) {
 	const toRight = innerWidth - box.left + MARGIN;
 	const toBottom = innerHeight - box.top + MARGIN;
 	const toTop = box.bottom + MARGIN;
-	if (toTop < Math.min(toLeft, toRight, toBottom)) return { x: 0, y: -toTop };
-	if (toBottom < Math.min(toLeft, toRight)) return { x: 0, y: toBottom };
-	return toLeft < toRight ? { x: -toLeft, y: 0 } : { x: toRight, y: 0 };
+	// Um desvio de lado, para não entrar sempre em linha reta com a borda.
+	const side = (along: number) => rand(-1, 1) * Math.min(160, along * 0.3);
+	if (toTop < Math.min(toLeft, toRight, toBottom)) return { x: side(toTop), y: -toTop };
+	if (toBottom < Math.min(toLeft, toRight)) return { x: side(toBottom), y: toBottom };
+	return toLeft < toRight ? { x: -toLeft, y: side(toLeft) } : { x: toRight, y: side(toRight) };
 }
 
 function startSwarm(root: HTMLElement) {
@@ -103,7 +142,6 @@ function startSwarm(root: HTMLElement) {
 		const box = main.getBoundingClientRect();
 		const offset = entryOffset(box);
 		const delay = Math.max(FADE_LEAD_MS + order * STAGGER_MS, freeAt[index] - now + 60);
-		freeAt[index] = now + delay + REACH_MS + PULL_MS + HOLD_MS + EXIT_MS;
 		// Ponto de pega dentro da parte visível da peça, guardado relativo a ela.
 		const visLeft = Math.max(box.left, 12);
 		const visRight = Math.min(box.right, innerWidth - 12);
@@ -115,31 +153,33 @@ function startSwarm(root: HTMLElement) {
 			const live = main.getBoundingClientRect();
 			return { x: live.left + relX, y: live.top + relY };
 		};
-		const startX = box.left + relX + offset.x;
-		const startY = box.top + relY + offset.y;
+		const start = { x: box.left + relX + offset.x, y: box.top + relY + offset.y };
+		const rest = { x: box.left + relX, y: box.top + relY };
+		// Vem de um ponto qualquer fora da tela e vai embora para outro, sempre em curva.
+		const comeFrom = offscreenPoint();
+		const goTo = offscreenPoint();
+		const approach = bend(comeFrom, start, 0.35);
+		const reachMs = clamp(360 + distance(comeFrom, start) * 0.3, 480, 900);
+		const exitMs = clamp(380 + distance(rest, goTo) * 0.3, 520, 950);
+		const t0 = now + delay;
+		const tGrab = t0 + reachMs;
+		const tRelease = tGrab + PULL_MS + HOLD_MS;
+		const tEnd = tRelease + exitMs;
+		freeAt[index] = tEnd;
 
+		// A peça também faz curva até o lugar, desacelerando no fim como um arrasto de mão.
+		const drag = bend(offset, { x: 0, y: 0 }, 0.18);
+		const path = Array.from({ length: PATH_STEPS + 1 }, (_, step) => drag(easeOut(step / PATH_STEPS)));
 		for (const element of group) {
 			const html = element as HTMLElement;
 			element.setAttribute("data-agent-placed", "");
 			const scale = html.offsetWidth > 0 ? element.getBoundingClientRect().width / html.offsetWidth : 1;
 			track(element.animate(
-				{ translate: [`${offset.x / scale}px ${offset.y / scale}px`, "0px 0px"] },
-				{ delay: delay + REACH_MS, duration: PULL_MS, easing: EASE_OUT, fill: "backwards", composite: "add" },
+				{ translate: path.map((at) => `${at.x / scale}px ${at.y / scale}px`) },
+				{ delay: delay + reachMs, duration: PULL_MS, fill: "backwards", composite: "add" },
 			));
 		}
 
-		cursor.dataset.flip = String(box.left + relX > innerWidth - 230);
-		working += 1;
-		root.dataset.working = "true";
-		// 1) Chega até a peça, ainda fora da tela.
-		track(cursor.animate(
-			[
-				{ transform: point(startX, startY + 90), opacity: 0 },
-				{ transform: point(startX, startY), opacity: 1 },
-			],
-			{ delay, duration: REACH_MS, easing: "ease-out" },
-		));
-		// 2) Preso à peça quadro a quadro enquanto a arrasta e segura no lugar.
 		const later = (ms: number, run: () => void) => {
 			const id = setTimeout(() => {
 				timers.delete(id);
@@ -147,38 +187,59 @@ function startSwarm(root: HTMLElement) {
 			}, ms);
 			timers.add(id);
 		};
-		later(delay + REACH_MS, () => {
-			cursor.style.opacity = "1";
-			const end = performance.now() + PULL_MS + HOLD_MS;
-			const glue = () => {
-				const at = grabAt();
-				cursor.style.transform = point(at.x, at.y);
-				if (performance.now() < end) frameLoops.add(requestAnimationFrame(glue));
-				else leave(at);
-			};
-			glue();
-		});
-		// 3) Solta e sai pelo mesmo lado de onde veio.
-		const leave = (at: { x: number; y: number }) => {
-			cursor.style.opacity = "0";
-			const exitX = at.x + (offset.x === 0 ? 0 : Math.sign(offset.x) * (innerWidth + 120));
-			const exitY = at.y + (offset.y === 0 ? 0 : Math.sign(offset.y) * (innerHeight + 120));
-			const exit = track(cursor.animate(
-				[
-					{ transform: point(at.x, at.y), opacity: 1 },
-					{ transform: point(exitX, exitY), opacity: 1, offset: 0.85 },
-					{ transform: point(exitX, exitY), opacity: 0 },
-				],
-				{ duration: EXIT_MS, easing: "ease-in" },
-			));
-			exit.finished.catch(() => undefined).finally(() => {
-				working -= 1;
-				if (working === 0) root.dataset.working = "false";
+		const loop = (run: () => void) => {
+			const id = requestAnimationFrame(() => {
+				frameLoops.delete(id);
+				run();
 			});
+			frameLoops.add(id);
 		};
 
+		// Tremor leve de mão, diferente a cada viagem.
+		const phase = Array.from({ length: 4 }, () => rand(0, Math.PI * 2));
+		const shake = (t: number, amp: number): Pt => ({
+			x: amp * (2 * Math.sin(t / 180 + phase[0]) + Math.sin(t / 83 + phase[1])),
+			y: amp * (2 * Math.sin(t / 150 + phase[2]) + Math.sin(t / 71 + phase[3])),
+		});
+
+		working += 1;
+		root.dataset.working = "true";
+		let last = comeFrom;
+		let exitPath: ReturnType<typeof bend> | undefined;
+		const place = (at: Pt, opacity: number) => {
+			last = at;
+			cursor.style.transform = point(at.x, at.y);
+			cursor.style.opacity = String(opacity);
+			const flip = String(at.x > innerWidth - 230);
+			if (cursor.dataset.flip !== flip) cursor.dataset.flip = flip;
+		};
+		// O cursor inteiro anda quadro a quadro: chega em curva, arrasta preso à peça, sai em curva.
+		const fly = () => {
+			const t = performance.now();
+			if (t < tGrab) {
+				const u = clamp((t - t0) / reachMs, 0, 1);
+				place(approach(easeInOut(u)), Math.min(1, u * 5));
+			} else if (t < tRelease) {
+				const at = grabAt();
+				const amp = t < tGrab + PULL_MS ? 1 - (0.75 * (t - tGrab)) / PULL_MS : 0.25;
+				const wobble = shake(t, amp);
+				place({ x: at.x + wobble.x, y: at.y + wobble.y }, 1);
+			} else if (t < tEnd) {
+				exitPath ??= bend(last, goTo, 0.3);
+				const u = (t - tRelease) / exitMs;
+				place(exitPath(easeIn(u)), u > 0.85 ? (1 - u) / 0.15 : 1);
+			} else {
+				cursor.style.opacity = "0";
+				working -= 1;
+				if (working === 0) root.dataset.working = "false";
+				return;
+			}
+			loop(fly);
+		};
+		later(delay, fly);
+
 		// A moldura acompanha a peça quadro a quadro (e o grupo inteiro), sem sair da tela.
-		const frameStart = delay + REACH_MS + PULL_MS * 0.6;
+		const frameStart = delay + reachMs + PULL_MS * 0.6;
 		const frameMs = PULL_MS * 0.4 + HOLD_MS;
 		const follow = () => {
 			const boxes = group.map((element) => element.getBoundingClientRect());
@@ -194,7 +255,7 @@ function startSwarm(root: HTMLElement) {
 			const end = performance.now() + frameMs;
 			const step = () => {
 				follow();
-				if (performance.now() < end) frameLoops.add(requestAnimationFrame(step));
+				if (performance.now() < end) loop(step);
 			};
 			step();
 		});
