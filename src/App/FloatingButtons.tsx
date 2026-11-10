@@ -96,6 +96,7 @@ const FloatingButtons: React.FC<FloatingButtonsProps> = ({
     <aside
       aria-label={localizeLabel("Navegação lateral por seções")}
       data-section-dots=""
+      data-agent-piece=""
       style={
         activeSectionId === "portfolio"
           ? {

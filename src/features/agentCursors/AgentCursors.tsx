@@ -18,10 +18,13 @@ const AGENTS = [
 	{ name: "gfx-03", color: "#ff5ca8" },
 	{ name: "grade-04", color: "#a98bff" },
 	{ name: "qa-05", color: "#ffb23e" },
+	{ name: "motion-06", color: "#5ef0c8" },
+	{ name: "ux-07", color: "#ff7a59" },
+	{ name: "seo-08", color: "#f5e663" },
 ] as const;
 
 const PIECES = "[data-agent-piece], img";
-const OFF_LIMITS = "nav, header, aside, [data-chat-panel], [data-agent-skip], [data-agent-swarm]";
+const OFF_LIMITS = "[data-chat-panel], [data-agent-skip], [data-agent-swarm]";
 const CHECK_MS = 100;
 const SCROLL_REST_MS = 180;
 // A peça já começa fora da tela: espera o fade-in avançar para entrar visível.
@@ -62,6 +65,8 @@ function entryOffset(box: DOMRect) {
 	const toLeft = box.right + MARGIN;
 	const toRight = innerWidth - box.left + MARGIN;
 	const toBottom = innerHeight - box.top + MARGIN;
+	const toTop = box.bottom + MARGIN;
+	if (toTop < Math.min(toLeft, toRight, toBottom)) return { x: 0, y: -toTop };
 	if (toBottom < Math.min(toLeft, toRight)) return { x: 0, y: toBottom };
 	return toLeft < toRight ? { x: -toLeft, y: 0 } : { x: toRight, y: 0 };
 }
@@ -70,6 +75,7 @@ function startSwarm(root: HTMLElement) {
 	const seen = new WeakSet<Element>();
 	// Liga o CSS que esconde as peças marcadas até um agente trazê-las.
 	document.documentElement.dataset.agents = "on";
+	document.documentElement.dataset.agentsLive = "";
 	const cursors = [...root.querySelectorAll<HTMLElement>("[data-agent]")];
 	const frames = [...root.querySelectorAll<HTMLElement>("[data-agent-frame]")];
 	const motions = new Set<Animation>();
@@ -113,7 +119,7 @@ function startSwarm(root: HTMLElement) {
 		}
 
 		const exitX = grabX + (offset.x === 0 ? 0 : Math.sign(offset.x) * (innerWidth + 120));
-		const exitY = grabY + (offset.y === 0 ? 0 : innerHeight + 120);
+		const exitY = grabY + (offset.y === 0 ? 0 : Math.sign(offset.y) * (innerHeight + 120));
 		const total = REACH_MS + PULL_MS + EXIT_MS;
 		cursor.dataset.flip = String(grabX > innerWidth - 230);
 		working += 1;
@@ -170,7 +176,7 @@ function startSwarm(root: HTMLElement) {
 			for (const member of members) seen.add(member);
 			groups.set(name || element, members);
 		}
-		[...groups.values()].slice(0, AGENTS.length * 2).forEach((group, order) => pull(group, order));
+		[...groups.values()].forEach((group, order) => pull(group, order));
 	};
 
 	const onScroll = () => {
@@ -202,6 +208,7 @@ export default function AgentCursors() {
 		let stop: (() => void) | undefined;
 		const sync = () => {
 			stop?.();
+			if (!media.matches || navigator.webdriver) delete document.documentElement.dataset.agents;
 			const enabled = media.matches && !navigator.webdriver;
 			stop = enabled ? startSwarm(root) : undefined;
 			root.hidden = !enabled;
@@ -214,7 +221,10 @@ export default function AgentCursors() {
 		};
 	}, [blocked]);
 
-	if (blocked) return null;
+	if (blocked) {
+		if (typeof document !== "undefined") delete document.documentElement.dataset.agents;
+		return null;
+	}
 
 	return (
 		<div ref={rootRef} className={styles.swarm} data-agent-swarm="" data-working="false" aria-hidden="true" hidden>

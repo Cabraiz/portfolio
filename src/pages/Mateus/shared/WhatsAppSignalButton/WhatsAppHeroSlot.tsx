@@ -57,6 +57,7 @@ function WhatsAppHeroSlot({
               styles.primarySlot,
               primaryClassName
             )}
+            data-agent-piece=""
           >
             {localizeLabel(primary)}
           </div>
@@ -68,6 +69,7 @@ function WhatsAppHeroSlot({
                 styles.secondarySlot,
                 secondaryClassName
               )}
+              data-agent-piece=""
             >
               {localizeLabel(secondary)}
             </div>

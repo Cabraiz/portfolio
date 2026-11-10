@@ -575,6 +575,7 @@ function HomeDesktop() {
 			</div>
 			<div
 				ref={editorialPhraseRef}
+				data-agent-piece=""
 				style={editorialPhraseStyle}
 				aria-label={localizeLabel("Histórias também são feitas de código")}
 			>
@@ -585,7 +586,7 @@ function HomeDesktop() {
 			{/* H1 da página: nome e cargo (mesma identidade do título e dos dados
 			    estruturados), com o visual de assinatura de sempre; abaixo, a
 			    disponibilidade no formato que cada mercado procura. */}
-			<div ref={signatureRef} style={signatureStyle}>
+			<div ref={signatureRef} style={signatureStyle} data-agent-piece="">
 				<h1
 					style={signatureHeadingStyle}
 					aria-label={localizeLabel("Mateus Cabral, Senior AI Engineer")}

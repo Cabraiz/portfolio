@@ -611,6 +611,7 @@ export default function FloatingChat() {
         <button
           onClick={handleTriggerClick}
           className={styles.chatTrigger}
+          data-agent-piece=""
           data-mobile={isMobile ? "true" : "false"}
           data-home-active={isHomeSectionActive ? "true" : "false"}
           style={{

@@ -103,6 +103,7 @@ const DesktopNavItemButton: React.FC<DesktopNavItemButtonProps> = ({
       type="button"
       ref={navRef}
       data-nav-link={link}
+      data-agent-piece=""
       aria-current={isActive ? "page" : undefined}
       disabled={disabled}
       onClick={disabled ? undefined : onClick}

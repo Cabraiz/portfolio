@@ -127,7 +127,7 @@ const DesktopNavbar: React.FC<DesktopNavbarProps> = ({
 
   return (
     <>
-      <div style={brandSlotStyle}>
+      <div style={brandSlotStyle} data-agent-piece="">
         <BrandButton
           onClick={onBrandClick}
           compactDesktop={isCompactDesktop}
@@ -155,6 +155,7 @@ const DesktopNavbar: React.FC<DesktopNavbarProps> = ({
           ))}
 
           <div
+            data-agent-piece=""
             style={{
               ...baseUnderlineStyle,
               ...(goldTheme

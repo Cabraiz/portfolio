@@ -2,6 +2,11 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
+    <!-- Cursores de agentes: as peças marcadas já nascem escondidas até um agente
+         trazê-las. Fora para robôs, testes e quem pede menos movimento; se o app
+         não assumir em 12 s, tudo volta a aparecer. -->
+    <style>html[data-agents="on"] [data-agent-piece]:not([data-agent-placed]){visibility:hidden!important}</style>
+    <script>(function(){try{var d=document.documentElement;if(navigator.webdriver||/bot|crawl|spider|slurp|lighthouse|headless|preview/i.test(navigator.userAgent)||!matchMedia("(prefers-reduced-motion: no-preference)").matches)return;d.setAttribute("data-agents","on");setTimeout(function(){if(!d.hasAttribute("data-agents-live"))d.removeAttribute("data-agents")},12000)}catch(e){}})()</script>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#000000" />
     <meta name="color-scheme" content="dark light" />

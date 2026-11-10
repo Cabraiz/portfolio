@@ -2,7 +2,7 @@
 
 /* Com os agentes ligados, toda peça marcada espera escondida até ser trazida. */
 :global(html[data-agents="on"] [data-agent-piece]:not([data-agent-placed])) {
-	visibility: hidden;
+	visibility: hidden !important;
 }
 
 .swarm {

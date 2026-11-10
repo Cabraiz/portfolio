@@ -53,7 +53,7 @@ export default function LanguageSwitcher({
 	};
 
 	return (
-		<nav aria-label={localizeLabel("Idioma")} data-language-switcher="" style={style}>
+		<nav aria-label={localizeLabel("Idioma")} data-language-switcher="" data-agent-piece="" style={style}>
 			<ul style={listStyle}>
 				{LANDING_LANGUAGES.map((language) => {
 					const option = LANGUAGE_OPTIONS[language];
