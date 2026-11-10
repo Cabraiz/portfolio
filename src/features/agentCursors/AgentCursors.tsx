@@ -35,6 +35,8 @@ const LAUNCH_GAP_MS = [150, 260] as const;
 // Depois de encaixar, o agente segura a peça um instante com a moldura acesa.
 const HOLD_MS = 215;
 const MARGIN = 40;
+// Peça na tela há mais que isso sem agente aparece sozinha no lugar.
+const STUCK_MS = 3000;
 const PATH_STEPS = 16;
 
 type Pt = { x: number; y: number };
@@ -282,6 +284,7 @@ function startSwarm(root: HTMLElement) {
 		// Começa assim que a tela de carregamento começa a subir, sem esperar ela sumir.
 		const curtain = document.getElementById("boot-curtain");
 		if (curtain && !curtain.hasAttribute("data-lifted")) return;
+		rescue();
 		if (performance.now() - lastScroll < SCROLL_REST_MS) return;
 		const ready = [...document.querySelectorAll(PIECES)].filter((element) => !seen.has(element) && isReady(element));
 		if (ready.length === 0) return;
@@ -295,7 +298,44 @@ function startSwarm(root: HTMLElement) {
 		}
 		// De cima para baixo: a legenda entra junto com as peças do projeto, não depois.
 		const top = (group: readonly Element[]) => Math.min(...group.map((element) => element.getBoundingClientRect().top));
-		[...groups.values()].sort((a, b) => top(a) - top(b)).forEach((group) => pull(group));
+		for (const group of [...groups.values()].sort((a, b) => top(a) - top(b))) {
+			try {
+				pull(group);
+			} catch {
+				// Se a viagem falhar, a peça aparece no lugar em vez de ficar escondida.
+				for (const element of group) element.setAttribute("data-agent-placed", "");
+			}
+		}
+	};
+
+	/**
+	 * Rede de segurança: nenhuma peça fica escondida para sempre. A que já foi
+	 * vista e não recebeu agente aparece na hora; a que está na tela há alguns
+	 * segundos sem ficar pronta aparece no lugar, sem agente.
+	 */
+	const waitingSince = new WeakMap<Element, number>();
+	const rescue = () => {
+		const now = performance.now();
+		for (const element of document.querySelectorAll("[data-agent-piece]:not([data-agent-placed])")) {
+			if (seen.has(element)) {
+				element.setAttribute("data-agent-placed", "");
+				continue;
+			}
+			const box = element.getBoundingClientRect();
+			const onScreen = box.width > 0 && box.height > 0 && box.bottom > 0 && box.top < innerHeight && box.right > 0 && box.left < innerWidth;
+			// Imagem ainda baixando não conta: quando carregar, um agente a traz.
+			const loading = element instanceof HTMLImageElement && !(element.complete && element.naturalWidth > 0);
+			if (!onScreen || loading) {
+				waitingSince.delete(element);
+				continue;
+			}
+			const since = waitingSince.get(element) ?? now;
+			waitingSince.set(element, since);
+			if (now - since > STUCK_MS) {
+				seen.add(element);
+				element.setAttribute("data-agent-placed", "");
+			}
+		}
 	};
 
 	const onScroll = () => {
