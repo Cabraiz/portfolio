@@ -29,11 +29,11 @@ const CHECK_MS = 100;
 const SCROLL_REST_MS = 180;
 // A peça já começa fora da tela: espera o fade-in avançar para entrar visível.
 const FADE_LEAD_MS = 80;
-const PULL_MS = 510;
+const PULL_MS = 340;
 // Os agentes saem um de cada vez, com um intervalo que varia como o de gente.
 const LAUNCH_GAP_MS = [150, 260] as const;
 // Depois de encaixar, o agente segura a peça um instante com a moldura acesa.
-const HOLD_MS = 215;
+const HOLD_MS = 145;
 const MARGIN = 40;
 // Peça na tela há mais que isso sem agente aparece sozinha no lugar.
 const STUCK_MS = 3000;
@@ -173,8 +173,8 @@ function startSwarm(root: HTMLElement) {
 		const comeFrom = offscreenPoint();
 		const goTo = offscreenPoint();
 		const approach = bend(comeFrom, start, 0.35);
-		const reachMs = clamp(240 + distance(comeFrom, start) * 0.2, 320, 600);
-		const exitMs = clamp(255 + distance(rest, goTo) * 0.2, 350, 635);
+		const reachMs = clamp(160 + distance(comeFrom, start) * 0.135, 215, 400);
+		const exitMs = clamp(170 + distance(rest, goTo) * 0.135, 235, 425);
 		const t0 = now + delay;
 		const tGrab = t0 + reachMs;
 		const tRelease = tGrab + PULL_MS + HOLD_MS;
@@ -227,9 +227,37 @@ function startSwarm(root: HTMLElement) {
 			const flip = String(at.x > innerWidth - 230);
 			if (cursor.dataset.flip !== flip) cursor.dataset.flip = flip;
 		};
+		// A moldura acompanha a peça (e o grupo inteiro), sem sair da tela. Acende no
+		// fim do arrasto e apaga um pouco antes de o agente soltar. Anda no mesmo
+		// quadro do cursor: nunca aparece sozinha nem na posição da viagem anterior.
+		const tFrameStart = tGrab + PULL_MS * 0.6;
+		const tFrameEnd = tRelease - 60;
+		const follow = () => {
+			const boxes = group.map((element) => element.getBoundingClientRect());
+			const left = Math.max(2, Math.min(...boxes.map((item) => item.left)) - 5);
+			const top = Math.max(2, Math.min(...boxes.map((item) => item.top)) - 5);
+			const right = Math.min(innerWidth - 2, Math.max(...boxes.map((item) => item.right)) + 5);
+			const bottom = Math.min(innerHeight - 2, Math.max(...boxes.map((item) => item.bottom)) + 5);
+			// Enquanto a peça ainda está fora da tela, a moldura não aparece espremida na borda.
+			frame.style.visibility = right - left > 12 && bottom - top > 12 ? "visible" : "hidden";
+			frame.style.transform = point(left, top);
+			frame.style.width = `${Math.max(0, right - left)}px`;
+			frame.style.height = `${Math.max(0, bottom - top)}px`;
+		};
+		const frameAt = (t: number) => {
+			if (t < tFrameStart || t > tFrameEnd) {
+				frame.style.opacity = "0";
+				return;
+			}
+			follow();
+			const u = (t - tFrameStart) / (tFrameEnd - tFrameStart);
+			frame.style.opacity = String(Math.min(1, u / 0.15, (1 - u) / 0.15));
+		};
+
 		// O cursor inteiro anda quadro a quadro: chega em curva, arrasta preso à peça, sai em curva.
 		const fly = () => {
 			const t = performance.now();
+			frameAt(t);
 			if (t < tGrab) {
 				const u = clamp((t - t0) / reachMs, 0, 1);
 				place(approach(easeInOut(u)), Math.min(1, u * 5));
@@ -251,32 +279,6 @@ function startSwarm(root: HTMLElement) {
 			loop(fly);
 		};
 		later(delay, fly);
-
-		// A moldura acompanha a peça quadro a quadro (e o grupo inteiro), sem sair da tela.
-		const frameStart = delay + reachMs + PULL_MS * 0.6;
-		// Apaga um pouco antes de o agente soltar, para nunca ficar acesa sem ele.
-		const frameMs = PULL_MS * 0.4 + HOLD_MS - 90;
-		const follow = () => {
-			const boxes = group.map((element) => element.getBoundingClientRect());
-			const left = Math.max(2, Math.min(...boxes.map((item) => item.left)) - 5);
-			const top = Math.max(2, Math.min(...boxes.map((item) => item.top)) - 5);
-			const right = Math.min(innerWidth - 2, Math.max(...boxes.map((item) => item.right)) + 5);
-			const bottom = Math.min(innerHeight - 2, Math.max(...boxes.map((item) => item.bottom)) + 5);
-			// Enquanto a peça ainda está fora da tela, a moldura não aparece espremida na borda.
-			frame.style.visibility = right - left > 12 && bottom - top > 12 ? "visible" : "hidden";
-			frame.style.transform = point(left, top);
-			frame.style.width = `${Math.max(0, right - left)}px`;
-			frame.style.height = `${Math.max(0, bottom - top)}px`;
-		};
-		later(frameStart, () => {
-			const end = performance.now() + frameMs;
-			const step = () => {
-				follow();
-				if (performance.now() < end) loop(step);
-			};
-			step();
-		});
-		track(frame.animate({ opacity: [0, 1, 1, 0], offset: [0, 0.15, 0.85, 1] }, { delay: frameStart, duration: frameMs }));
 	};
 
 	const check = () => {
@@ -350,7 +352,7 @@ function startSwarm(root: HTMLElement) {
 		for (const animation of motions) animation.cancel();
 		for (const id of timers) clearTimeout(id);
 		for (const id of frameLoops) cancelAnimationFrame(id);
-		for (const cursor of cursors) cursor.style.opacity = "0";
+		for (const element of [...cursors, ...frames]) element.style.opacity = "0";
 		root.dataset.working = "false";
 		delete document.documentElement.dataset.agents;
 	};

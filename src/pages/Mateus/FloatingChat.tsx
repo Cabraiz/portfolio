@@ -1101,6 +1101,26 @@ export default function FloatingChat() {
               {localizeLabel(sendStatus === "error" && t(isMobile ? "floatingChat.sendErrorShort" : "floatingChat.sendError"))}
             </div>
 
+            {/* Transparência (LGPD): para onde a mensagem vai e link para o aviso.
+                Fica acima do campo, que continua colado na base do painel. */}
+            <p
+              data-chat-privacy-note="true"
+              style={{
+                margin: `${scale(0.3)}rem 0 0`,
+                color: "rgba(255, 255, 255, 0.62)",
+                fontSize: `${scale(0.72)}rem`,
+                lineHeight: 1.4,
+              }}
+            >
+              {localizeLabel("Sua mensagem vai direto para o Mateus pelo Telegram. Não envie dados sensíveis.")}{" "}
+              <Link
+                to={privacyPath}
+                style={{ color: "rgba(255, 255, 255, 0.86)", textDecoration: "underline" }}
+              >
+                {localizeLabel("Aviso de privacidade")}
+              </Link>
+            </p>
+
             <div
               data-chat-composer="true"
               className={styles.chatComposer}
@@ -1170,25 +1190,6 @@ export default function FloatingChat() {
                   : t("floatingChat.send"))}
               </button>
             </div>
-
-            {/* Transparência (LGPD): para onde a mensagem vai e link para o aviso. */}
-            <p
-              data-chat-privacy-note="true"
-              style={{
-                margin: `${scale(0.55)}rem 0 0`,
-                color: "rgba(255, 255, 255, 0.62)",
-                fontSize: `${scale(0.72)}rem`,
-                lineHeight: 1.4,
-              }}
-            >
-              {localizeLabel("Sua mensagem vai direto para o Mateus pelo Telegram. Não envie dados sensíveis.")}{" "}
-              <Link
-                to={privacyPath}
-                style={{ color: "rgba(255, 255, 255, 0.86)", textDecoration: "underline" }}
-              >
-                {localizeLabel("Aviso de privacidade")}
-              </Link>
-            </p>
           </motion.div>
         )}
       </AnimatePresence>
