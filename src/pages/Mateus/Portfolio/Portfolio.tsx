@@ -872,7 +872,7 @@ export default function Portfolio() {
 				</div>
 
 				{/* Com painel em camadas (ProjectStage), o card antigo só guarda o
-				    lugar na grade; o Gemarium continua com o card. */}
+				    lugar na grade; o Rag Everything continua com o card. */}
 				<article
 					ref={detailCardRef}
 					className={styles.detailCard}

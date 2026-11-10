@@ -110,7 +110,8 @@
 .worldSurface {
 	position: absolute;
 	top: calc(50% - var(--atlas-center-shift));
-	left: 50%;
+	/* O destino fica um pouco à esquerda do meio, longe da legenda do projeto. */
+	left: calc(50% - 4vw);
 	width: 401.7857%;
 	aspect-ratio: 2 / 1;
 	transform: translate(var(--atlas-camera-x), var(--atlas-camera-y));
@@ -330,7 +331,7 @@
 	text-overflow: ellipsis;
 	white-space: nowrap;
 	/* O overflow das reticências cortava a perna do "g"/"p" (ClockRight,
-	   Paginas, Gemarium): folga embaixo sem mudar o layout. */
+	   Paginas, Rag Everything): folga embaixo sem mudar o layout. */
 	padding-bottom: 0.18em;
 	margin-bottom: -0.18em;
 }

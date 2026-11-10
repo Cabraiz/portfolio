@@ -71,6 +71,8 @@ type StageConfig = Readonly<{
 	caption: Box & Readonly<{ w: number }>;
 	/** false: o nome já é a marca, então o logo não aparece em cima. */
 	logo?: boolean;
+	/** Nome comprido: fonte menor para caber numa linha sem invadir o círculo. */
+	titleSize?: number;
 }>;
 
 const STAGES: Partial<Record<PortfolioProjectId, StageConfig>> = {
@@ -120,8 +122,9 @@ const STAGES: Partial<Record<PortfolioProjectId, StageConfig>> = {
 		circle: { x: 197, y: 70, d: 280 },
 		scene: gemariumCena,
 		person: { src: gemariumPessoa, right: 14, top: 46, h: 848 },
-		screens: [{ src: gemariumTela1, x: 258, y: 225, w: 130, bare: true, alt: "Aplicativo do Gemarium" }],
+		screens: [{ src: gemariumTela1, x: 258, y: 225, w: 130, bare: true, alt: "Aplicativo do Rag Everything" }],
 		caption: { x: 22, y: 96, w: 155 },
+		titleSize: 20,
 	},
 	"site-cabeleireira": {
 		circle: { x: 206, y: 70, d: 288 },
@@ -245,7 +248,9 @@ export default function ProjectStage({ project }: Readonly<{ project: PortfolioP
 						<img className={styles.captionLogo} src={project.logoSrc} alt={localizeLabel(project.logoAlt)} data-agent-piece="nome" />
 					)}
 				{/* Cada linha da legenda é trazida por um agente diferente. */}
-				<h2 data-agent-piece="nome">{localizeLabel(project.name)}</h2>
+				<h2 data-agent-piece="nome" style={stage.titleSize ? { fontSize: px(stage.titleSize) } : undefined}>
+					{localizeLabel(project.name)}
+				</h2>
 				<i aria-hidden="true" data-agent-piece="nome" />
 				<p data-agent-piece="">{localizeLabel(project.subtitle)}</p>
 				<ul>
