@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 
-import { PRIVACY_CONTACT_EMAIL, PRIVACY_PATHS, PRIVACY_TEXT, type PrivacyLanguage } from "./privacyNotice.text";
+import { PRIVACY_LINKS, PRIVACY_PATHS, PRIVACY_TEXT, type PrivacyLanguage } from "./privacyNotice.text";
 import styles from "./PrivacyNotice.module.css";
 
 const LANGUAGE_LABELS: Record<PrivacyLanguage, string> = { pt: "PT", en: "EN", es: "ES" };
@@ -67,7 +67,7 @@ export default function PrivacyNotice() {
 					<section key={section.title} className={styles.section}>
 						<h2>{section.title}</h2>
 						{section.paragraphs.map((paragraph) => (
-							<p key={paragraph}>{withEmailLink(paragraph)}</p>
+							<p key={paragraph}>{withLinks(paragraph)}</p>
 						))}
 						{section.items ? (
 							<ul>
@@ -83,18 +83,18 @@ export default function PrivacyNotice() {
 	);
 }
 
-/** Troca o e-mail de contato no texto por um link clicável. */
-function withEmailLink(paragraph: string) {
-	const parts = paragraph.split(PRIVACY_CONTACT_EMAIL);
-	if (parts.length === 1) return paragraph;
-	return parts.flatMap((part, index) =>
-		index === 0
-			? [part]
-			: [
-					<a key={`email-${part}`} href={`mailto:${PRIVACY_CONTACT_EMAIL}`}>
-						{PRIVACY_CONTACT_EMAIL}
-					</a>,
-					part,
-				]
-	);
+/** Troca o e-mail de contato e o endereço da política geral por links clicáveis. */
+function withLinks(paragraph: string) {
+	const pattern = new RegExp(`(${PRIVACY_LINKS.map((link) => link.text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})`);
+	return paragraph.split(pattern).map((part) => {
+		const link = PRIVACY_LINKS.find((item) => item.text === part);
+		// Cada link aparece no máximo uma vez por parágrafo.
+		return link ? (
+			<a key={link.href} href={link.href}>
+				{part}
+			</a>
+		) : (
+			part
+		);
+	});
 }

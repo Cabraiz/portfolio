@@ -565,6 +565,13 @@ try {
 		await writeDist(path.join(retired, "index.html"), retiredPage(absolute(seo.pages.home.pt.path)));
 	}
 
+	// Aviso de privacidade do portfólio: documento direto (HTTP 200, sem passar
+	// pelo 404 do GitHub Pages); o app monta a página. Mesmos caminhos de
+	// src/pages/Privacy/privacyNotice.text.ts.
+	for (const privacyPath of ["/aviso-de-privacidade/", "/en/privacy-notice/", "/es/aviso-de-privacidad/"]) {
+		await writeDist(path.join(privacyPath, "index.html"), shellHtml);
+	}
+
 	await writeDist("sitemap.xml", sitemapXml());
 	await writeDist("llms.txt", llmsTxt(projectsByLanguage));
 

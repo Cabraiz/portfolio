@@ -71,9 +71,9 @@ const AppRoutes = () => {
       <Route path="/contact" element={landingElement} />
 
       {/* Aviso de privacidade (LGPD/GDPR), um endereço por idioma. */}
-      <Route path="/privacidade" element={<PrivacyNotice />} />
-      <Route path="/en/privacy" element={<PrivacyNotice />} />
-      <Route path="/es/privacidad" element={<PrivacyNotice />} />
+      <Route path="/aviso-de-privacidade" element={<PrivacyNotice />} />
+      <Route path="/en/privacy-notice" element={<PrivacyNotice />} />
+      <Route path="/es/aviso-de-privacidad" element={<PrivacyNotice />} />
 
       {/* Versão em inglês com endereço próprio (hreflang en). */}
       <Route path="/en" element={<Navigate to="/en/home" replace />} />

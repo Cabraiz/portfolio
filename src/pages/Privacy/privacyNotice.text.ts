@@ -3,11 +3,18 @@
 
 export type PrivacyLanguage = "pt" | "en" | "es";
 
+// /privacidade já é a política geral de cabraiz.com e subdomínios (anúncios),
+// servida pelo Cloudflare; este aviso é o do portfólio e tem endereço próprio.
+// Os mesmos caminhos estão em scripts/prerender-seo.mjs (documento direto).
 export const PRIVACY_PATHS: Record<PrivacyLanguage, string> = {
-	pt: "/privacidade",
-	en: "/en/privacy",
-	es: "/es/privacidad",
+	pt: "/aviso-de-privacidade",
+	en: "/en/privacy-notice",
+	es: "/es/aviso-de-privacidad",
 };
+
+/** Política geral de cabraiz.com e dos sites em subdomínios. */
+export const GENERAL_POLICY_URL = "https://cabraiz.com/privacidade";
+const GENERAL_POLICY_LABEL = "cabraiz.com/privacidade";
 
 /** Endereço do aviso no idioma atual do site (português quando não houver). */
 export function privacyPathFor(language: string | undefined): string {
@@ -16,6 +23,12 @@ export function privacyPathFor(language: string | undefined): string {
 }
 
 export const PRIVACY_CONTACT_EMAIL = "contact@cabraiz.com";
+
+/** Trechos do texto que viram link (e-mail de contato e política geral). */
+export const PRIVACY_LINKS: readonly Readonly<{ text: string; href: string }>[] = [
+	{ text: PRIVACY_CONTACT_EMAIL, href: `mailto:${PRIVACY_CONTACT_EMAIL}` },
+	{ text: GENERAL_POLICY_LABEL, href: GENERAL_POLICY_URL },
+];
 
 type Section = Readonly<{ title: string; paragraphs: readonly string[]; items?: readonly string[] }>;
 
@@ -88,6 +101,12 @@ export const PRIVACY_TEXT: Record<PrivacyLanguage, PrivacyText> = {
 				],
 			},
 			{
+				title: "Outros sites em cabraiz.com",
+				paragraphs: [
+					`Os sites em subdomínios (como a loja bideiras) e os anúncios do Google AdSense que alguns deles exibem seguem a política geral em ${GENERAL_POLICY_LABEL}. Este portfólio não exibe anúncios.`,
+				],
+			},
+			{
 				title: "Mudanças neste aviso",
 				paragraphs: ["Se este aviso mudar, a data no topo será atualizada."],
 			},
@@ -151,6 +170,12 @@ export const PRIVACY_TEXT: Record<PrivacyLanguage, PrivacyText> = {
 				],
 			},
 			{
+				title: "Other sites on cabraiz.com",
+				paragraphs: [
+					`Sites on subdomains (such as the bideiras store) and the Google AdSense ads some of them show follow the general policy at ${GENERAL_POLICY_LABEL} (in Portuguese). This portfolio does not show ads.`,
+				],
+			},
+			{
 				title: "Changes to this notice",
 				paragraphs: ["If this notice changes, the date at the top will be updated."],
 			},
@@ -211,6 +236,12 @@ export const PRIVACY_TEXT: Record<PrivacyLanguage, PrivacyText> = {
 				title: "Tus derechos",
 				paragraphs: [
 					`Puedes confirmar si hay datos tuyos, acceder a ellos, corregirlos, pedir su eliminación, saber con quién se compartieron y oponerte a su uso. Escribe a ${PRIVACY_CONTACT_EMAIL}. También puedes reclamar ante la autoridad de protección de datos de Brasil (ANPD) o, en la Unión Europea, ante tu autoridad local.`,
+				],
+			},
+			{
+				title: "Otros sitios en cabraiz.com",
+				paragraphs: [
+					`Los sitios en subdominios (como la tienda bideiras) y los anuncios de Google AdSense que algunos muestran siguen la política general en ${GENERAL_POLICY_LABEL} (en portugués). Este portafolio no muestra anuncios.`,
 				],
 			},
 			{

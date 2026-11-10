@@ -177,9 +177,7 @@ function AppMobile() {
       "/hublocal",
       "/drive",
       "/elevator",
-      "/privacidade",
-      "/en/privacy",
-      "/es/privacidad",
+      ...Object.values(PRIVACY_PATHS),
     ],
     [],
   );
