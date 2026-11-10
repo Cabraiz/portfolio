@@ -32,8 +32,9 @@ const FADE_LEAD_MS = 260;
 const REACH_MS = 320;
 const PULL_MS = 760;
 const STAGGER_MS = 70;
-const EXIT_MS = 360;
-const FRAME_MS = 480;
+// Depois de encaixar, o agente segura a peça um instante com a moldura acesa.
+const HOLD_MS = 320;
+const EXIT_MS = 420;
 const MARGIN = 40;
 const EASE_OUT = "cubic-bezier(0.16, 1, 0.3, 1)";
 
@@ -102,11 +103,20 @@ function startSwarm(root: HTMLElement) {
 		const box = main.getBoundingClientRect();
 		const offset = entryOffset(box);
 		const delay = Math.max(FADE_LEAD_MS + order * STAGGER_MS, freeAt[index] - now + 60);
-		freeAt[index] = now + delay + REACH_MS + PULL_MS + EXIT_MS;
-		const grabX = box.left + box.width * 0.5;
-		const grabY = box.top + box.height * 0.4;
-		const startX = grabX + offset.x;
-		const startY = grabY + offset.y;
+		freeAt[index] = now + delay + REACH_MS + PULL_MS + HOLD_MS + EXIT_MS;
+		// Ponto de pega dentro da parte visível da peça, guardado relativo a ela.
+		const visLeft = Math.max(box.left, 12);
+		const visRight = Math.min(box.right, innerWidth - 12);
+		const visTop = Math.max(box.top, 12);
+		const visBottom = Math.min(box.bottom, innerHeight - 12);
+		const relX = (visLeft + visRight) / 2 - box.left;
+		const relY = visTop + (visBottom - visTop) * 0.4 - box.top;
+		const grabAt = () => {
+			const live = main.getBoundingClientRect();
+			return { x: live.left + relX, y: live.top + relY };
+		};
+		const startX = box.left + relX + offset.x;
+		const startY = box.top + relY + offset.y;
 
 		for (const element of group) {
 			const html = element as HTMLElement;
@@ -118,25 +128,58 @@ function startSwarm(root: HTMLElement) {
 			));
 		}
 
-		const exitX = grabX + (offset.x === 0 ? 0 : Math.sign(offset.x) * (innerWidth + 120));
-		const exitY = grabY + (offset.y === 0 ? 0 : Math.sign(offset.y) * (innerHeight + 120));
-		const total = REACH_MS + PULL_MS + EXIT_MS;
-		cursor.dataset.flip = String(grabX > innerWidth - 230);
+		cursor.dataset.flip = String(box.left + relX > innerWidth - 230);
 		working += 1;
 		root.dataset.working = "true";
-		const flight = track(cursor.animate(
+		// 1) Chega até a peça, ainda fora da tela.
+		track(cursor.animate(
 			[
-				{ transform: point(startX, startY + 90), opacity: 0, offset: 0 },
-				{ transform: point(startX, startY), opacity: 1, offset: REACH_MS / total },
-				{ transform: point(grabX, grabY), opacity: 1, offset: (REACH_MS + PULL_MS * 0.8) / total },
-				{ transform: point(grabX, grabY), opacity: 1, offset: (REACH_MS + PULL_MS) / total },
-				{ transform: point(exitX, exitY), opacity: 1, offset: 1 },
+				{ transform: point(startX, startY + 90), opacity: 0 },
+				{ transform: point(startX, startY), opacity: 1 },
 			],
-			{ delay, duration: total, easing: "ease-out", fill: "backwards" },
+			{ delay, duration: REACH_MS, easing: "ease-out" },
 		));
+		// 2) Preso à peça quadro a quadro enquanto a arrasta e segura no lugar.
+		const later = (ms: number, run: () => void) => {
+			const id = setTimeout(() => {
+				timers.delete(id);
+				run();
+			}, ms);
+			timers.add(id);
+		};
+		later(delay + REACH_MS, () => {
+			cursor.style.opacity = "1";
+			const end = performance.now() + PULL_MS + HOLD_MS;
+			const glue = () => {
+				const at = grabAt();
+				cursor.style.transform = point(at.x, at.y);
+				if (performance.now() < end) frameLoops.add(requestAnimationFrame(glue));
+				else leave(at);
+			};
+			glue();
+		});
+		// 3) Solta e sai pelo mesmo lado de onde veio.
+		const leave = (at: { x: number; y: number }) => {
+			cursor.style.opacity = "0";
+			const exitX = at.x + (offset.x === 0 ? 0 : Math.sign(offset.x) * (innerWidth + 120));
+			const exitY = at.y + (offset.y === 0 ? 0 : Math.sign(offset.y) * (innerHeight + 120));
+			const exit = track(cursor.animate(
+				[
+					{ transform: point(at.x, at.y), opacity: 1 },
+					{ transform: point(exitX, exitY), opacity: 1, offset: 0.85 },
+					{ transform: point(exitX, exitY), opacity: 0 },
+				],
+				{ duration: EXIT_MS, easing: "ease-in" },
+			));
+			exit.finished.catch(() => undefined).finally(() => {
+				working -= 1;
+				if (working === 0) root.dataset.working = "false";
+			});
+		};
 
 		// A moldura acompanha a peça quadro a quadro (e o grupo inteiro), sem sair da tela.
-		const frameStart = delay + REACH_MS + PULL_MS * 0.7;
+		const frameStart = delay + REACH_MS + PULL_MS * 0.6;
+		const frameMs = PULL_MS * 0.4 + HOLD_MS;
 		const follow = () => {
 			const boxes = group.map((element) => element.getBoundingClientRect());
 			const left = Math.max(2, Math.min(...boxes.map((item) => item.left)) - 5);
@@ -147,20 +190,15 @@ function startSwarm(root: HTMLElement) {
 			frame.style.width = `${Math.max(0, right - left)}px`;
 			frame.style.height = `${Math.max(0, bottom - top)}px`;
 		};
-		timers.add(setTimeout(() => {
-			const end = performance.now() + FRAME_MS;
+		later(frameStart, () => {
+			const end = performance.now() + frameMs;
 			const step = () => {
 				follow();
 				if (performance.now() < end) frameLoops.add(requestAnimationFrame(step));
 			};
 			step();
-		}, frameStart));
-		track(frame.animate({ opacity: [0, 1, 1, 0] }, { delay: frameStart, duration: FRAME_MS }));
-
-		flight.finished.catch(() => undefined).finally(() => {
-			working -= 1;
-			if (working === 0) root.dataset.working = "false";
 		});
+		track(frame.animate({ opacity: [0, 1, 1, 0], offset: [0, 0.15, 0.85, 1] }, { delay: frameStart, duration: frameMs }));
 	};
 
 	const check = () => {
@@ -193,6 +231,7 @@ function startSwarm(root: HTMLElement) {
 		for (const animation of motions) animation.cancel();
 		for (const id of timers) clearTimeout(id);
 		for (const id of frameLoops) cancelAnimationFrame(id);
+		for (const cursor of cursors) cursor.style.opacity = "0";
 		root.dataset.working = "false";
 		delete document.documentElement.dataset.agents;
 	};
