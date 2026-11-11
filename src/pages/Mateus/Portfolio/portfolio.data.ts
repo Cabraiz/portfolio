@@ -45,7 +45,7 @@ export const portfolioProjects: ReadonlyArray<PortfolioProject> = [
   {
     id: "erp-varejo",
     name: "NEXOVARE",
-    year: "2022",
+    year: "2020",
     imageSrc: imagemNexovare,
     mobileImageSrc: mobileNexovare,
     imageAlt: "Preview do painel de gestão Nexovare",
@@ -74,7 +74,7 @@ export const portfolioProjects: ReadonlyArray<PortfolioProject> = [
   {
     id: "app-bank",
     name: "APP BANCO",
-    year: "2020",
+    year: "2022",
     imageSrc: imagem2,
     mobileImageSrc: mobileBank,
     imageAlt: "Preview do projeto APP BANCO",
@@ -103,7 +103,7 @@ export const portfolioProjects: ReadonlyArray<PortfolioProject> = [
   {
     id: "guine-bissau-commerce",
     name: "BIDEIRAS",
-    year: "2025",
+    year: "2021",
     imageSrc: imagemGuineBissauCommerce,
     mobileImageSrc: mobileBideiras,
     imageAlt: "Preview do marketplace Bideiras em Guiné-Bissau",
@@ -133,7 +133,7 @@ export const portfolioProjects: ReadonlyArray<PortfolioProject> = [
   {
     id: "clockright",
     name: "ClockRight",
-    year: "2024",
+    year: "2023",
     imageSrc: imagemClockRight,
     mobileImageSrc: mobileClockRight,
     imageAlt: "Tela inicial do ClockRight, ponto eletrônico por reconhecimento facial",
@@ -163,7 +163,7 @@ export const portfolioProjects: ReadonlyArray<PortfolioProject> = [
   {
     id: "central-clube-livro",
     name: "Entre Paginas",
-    year: "2020",
+    year: "2021",
     imageSrc: imagemCentralClube,
     mobileImageSrc: mobileEntrePaginas,
     imageAlt: "Página inicial do projeto Entre Paginas",
@@ -193,7 +193,7 @@ export const portfolioProjects: ReadonlyArray<PortfolioProject> = [
   {
     id: "site-cabeleireira",
     name: "Fran Studio",
-    year: "2023",
+    year: "2022",
     imageSrc: imagem5,
     mobileImageSrc: mobileFran,
     imageAlt: "Preview do projeto Fran Studio",
@@ -223,7 +223,7 @@ export const portfolioProjects: ReadonlyArray<PortfolioProject> = [
   {
     id: "site-adv",
     name: "Rag Everything",
-    year: "2021",
+    year: "2024",
     imageSrc: imagem4,
     mobileImageSrc: mobileWalter,
     imageAlt: "Preview do projeto Rag Everything",

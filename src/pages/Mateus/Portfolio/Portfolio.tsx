@@ -716,6 +716,8 @@ export default function Portfolio() {
 						>
 							<img
 								key={activeProject.id}
+								// Peça marcada: fica escondida até o agente trazê-la, sem piscar no lugar antes.
+								data-agent-piece=""
 								src={activeProject.mobileImageSrc ?? activeProject.imageSrc}
 								alt={localizeLabel(activeProject.imageAlt)}
 								draggable={false}
