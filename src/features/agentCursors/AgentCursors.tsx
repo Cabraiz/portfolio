@@ -43,6 +43,14 @@ const PATH_STEPS = 16;
 const DESKTOP_QUERY = "(min-width: 992px)";
 const DESKTOP_PACE = 1 / 1.5;
 const MOBILE_PACE = 1 / 1.75;
+/**
+ * Flag de teste (?agentes=metade): cada agente leva duas peças vizinhas de uma
+ * vez (metade das viagens) e anda na metade da velocidade. Lida uma vez ao
+ * abrir o site, então vale para toda a navegação dessa aba.
+ */
+const HALF_MODE = typeof location !== "undefined" && new URLSearchParams(location.search).get("agentes") === "metade";
+const HALF_PACE = 2;
+const LEFTOVER_CHECKS = 6;
 
 type Pt = { x: number; y: number };
 
@@ -119,6 +127,28 @@ function entryOffset(box: DOMRect) {
 	return toLeft < toRight ? { x: -toLeft, y: side(toLeft) } : { x: toRight, y: side(toRight) };
 }
 
+/** Junta cada grupo, em ordem de leitura, ao mais próximo na tela que ainda está livre. */
+function pairNearest(groups: readonly Element[][]) {
+	const center = (group: readonly Element[]): Pt => {
+		const boxes = group.map((element) => element.getBoundingClientRect());
+		return {
+			x: (Math.min(...boxes.map((box) => box.left)) + Math.max(...boxes.map((box) => box.right))) / 2,
+			y: (Math.min(...boxes.map((box) => box.top)) + Math.max(...boxes.map((box) => box.bottom))) / 2,
+		};
+	};
+	const pool = groups.map((group) => ({ group, at: center(group) }));
+	const paired: Element[][] = [];
+	while (pool.length > 0) {
+		const first = pool.shift()!;
+		let best = -1;
+		for (let index = 0; index < pool.length; index++) {
+			if (best < 0 || distance(first.at, pool[index].at) < distance(first.at, pool[best].at)) best = index;
+		}
+		paired.push(best < 0 ? first.group : [...first.group, ...pool.splice(best, 1)[0].group]);
+	}
+	return paired;
+}
+
 function startSwarm(root: HTMLElement) {
 	const seen = new WeakSet<Element>();
 	// Liga o CSS que esconde as peças marcadas até um agente trazê-las.
@@ -144,7 +174,8 @@ function startSwarm(root: HTMLElement) {
 	/** Agente busca a peça fora da tela e a arrasta até o lugar. */
 	const pull = (group: readonly Element[]) => {
 		const now = performance.now();
-		const pace = globalThis.matchMedia(DESKTOP_QUERY).matches ? DESKTOP_PACE : MOBILE_PACE;
+		const pace = (globalThis.matchMedia(DESKTOP_QUERY).matches ? DESKTOP_PACE : MOBILE_PACE) * (HALF_MODE ? HALF_PACE : 1);
+		root.dataset.pulled = String(Number(root.dataset.pulled ?? 0) + 1);
 		const pullMs = PULL_MS * pace;
 		const index = freeAt.indexOf(Math.min(...freeAt));
 		const cursor = cursors[index];
@@ -288,6 +319,8 @@ function startSwarm(root: HTMLElement) {
 		later(delay, fly);
 	};
 
+	let leftover: Element[] | undefined;
+	let leftoverAge = 0;
 	const check = () => {
 		if (document.hidden) return;
 		// Começa assim que a tela de carregamento começa a subir, sem esperar ela sumir.
@@ -296,7 +329,7 @@ function startSwarm(root: HTMLElement) {
 		rescue();
 		if (performance.now() - lastScroll < SCROLL_REST_MS) return;
 		const ready = [...document.querySelectorAll(PIECES)].filter((element) => !seen.has(element) && isReady(element));
-		if (ready.length === 0) return;
+		if (ready.length === 0 && !leftover) return;
 		const groups = new Map<Element | string, Element[]>();
 		for (const element of ready) {
 			const name = element.getAttribute("data-agent-piece");
@@ -307,7 +340,18 @@ function startSwarm(root: HTMLElement) {
 		}
 		// De cima para baixo: a legenda entra junto com as peças do projeto, não depois.
 		const top = (group: readonly Element[]) => Math.min(...group.map((element) => element.getBoundingClientRect().top));
-		for (const group of [...groups.values()].sort((a, b) => top(a) - top(b))) {
+		const left = (group: readonly Element[]) => Math.min(...group.map((element) => element.getBoundingClientRect().left));
+		let ordered = [...groups.values()].sort((a, b) => top(a) - top(b) || left(a) - left(b));
+		// Na flag "metade", vizinhas na ordem de leitura viajam juntas com o mesmo agente.
+		// A que sobra sozinha espera até LEFTOVER_CHECKS checagens para ganhar par.
+		if (HALF_MODE) {
+			if (leftover) ordered.unshift(leftover);
+			const keep = ordered.length % 2 === 1 && leftoverAge < LEFTOVER_CHECKS;
+			leftoverAge = keep ? leftoverAge + 1 : 0;
+			leftover = keep ? ordered.pop() : undefined;
+			ordered = pairNearest(ordered);
+		}
+		for (const group of ordered) {
 			try {
 				pull(group);
 			} catch {
@@ -327,6 +371,8 @@ function startSwarm(root: HTMLElement) {
 		const now = performance.now();
 		for (const element of document.querySelectorAll("[data-agent-piece]:not([data-agent-placed])")) {
 			if (seen.has(element)) {
+				// A peça guardada para ganhar par (flag "metade") ainda vai receber agente.
+				if (leftover?.includes(element)) continue;
 				element.setAttribute("data-agent-placed", "");
 				continue;
 			}
