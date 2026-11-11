@@ -38,6 +38,9 @@ const MARGIN = 40;
 // Peça na tela há mais que isso sem agente aparece sozinha no lugar.
 const STUCK_MS = 3000;
 const PATH_STEPS = 16;
+// No desktop (Início e Portfólio largos) os agentes andam 1,5x mais rápido.
+const DESKTOP_QUERY = "(min-width: 992px)";
+const DESKTOP_PACE = 1 / 1.5;
 
 type Pt = { x: number; y: number };
 
@@ -139,6 +142,8 @@ function startSwarm(root: HTMLElement) {
 	/** Agente busca a peça fora da tela e a arrasta até o lugar. */
 	const pull = (group: readonly Element[]) => {
 		const now = performance.now();
+		const pace = globalThis.matchMedia(DESKTOP_QUERY).matches ? DESKTOP_PACE : 1;
+		const pullMs = PULL_MS * pace;
 		const index = freeAt.indexOf(Math.min(...freeAt));
 		const cursor = cursors[index];
 		const frame = frames[index];
@@ -152,8 +157,8 @@ function startSwarm(root: HTMLElement) {
 		const offset = entryOffset(box);
 		const delay = Math.max(
 			FADE_LEAD_MS,
-			freeAt[index] - now + rand(40, 160),
-			lastLaunch + rand(...LAUNCH_GAP_MS) - now,
+			freeAt[index] - now + rand(40, 160) * pace,
+			lastLaunch + rand(...LAUNCH_GAP_MS) * pace - now,
 		);
 		lastLaunch = now + delay;
 		// Ponto de pega dentro da parte visível da peça, guardado relativo a ela.
@@ -173,11 +178,11 @@ function startSwarm(root: HTMLElement) {
 		const comeFrom = offscreenPoint();
 		const goTo = offscreenPoint();
 		const approach = bend(comeFrom, start, 0.35);
-		const reachMs = clamp(160 + distance(comeFrom, start) * 0.135, 215, 400);
-		const exitMs = clamp(170 + distance(rest, goTo) * 0.135, 235, 425);
+		const reachMs = clamp(160 + distance(comeFrom, start) * 0.135, 215, 400) * pace;
+		const exitMs = clamp(170 + distance(rest, goTo) * 0.135, 235, 425) * pace;
 		const t0 = now + delay;
 		const tGrab = t0 + reachMs;
-		const tRelease = tGrab + PULL_MS + HOLD_MS;
+		const tRelease = tGrab + pullMs + HOLD_MS * pace;
 		const tEnd = tRelease + exitMs;
 		freeAt[index] = tEnd;
 
@@ -190,7 +195,7 @@ function startSwarm(root: HTMLElement) {
 			const scale = html.offsetWidth > 0 ? element.getBoundingClientRect().width / html.offsetWidth : 1;
 			track(element.animate(
 				{ translate: path.map((at) => `${at.x / scale}px ${at.y / scale}px`) },
-				{ delay: delay + reachMs, duration: PULL_MS, fill: "backwards", composite: "add" },
+				{ delay: delay + reachMs, duration: pullMs, fill: "backwards", composite: "add" },
 			));
 		}
 
@@ -230,8 +235,8 @@ function startSwarm(root: HTMLElement) {
 		// A moldura acompanha a peça (e o grupo inteiro), sem sair da tela. Acende no
 		// fim do arrasto e apaga um pouco antes de o agente soltar. Anda no mesmo
 		// quadro do cursor: nunca aparece sozinha nem na posição da viagem anterior.
-		const tFrameStart = tGrab + PULL_MS * 0.6;
-		const tFrameEnd = tRelease - 60;
+		const tFrameStart = tGrab + pullMs * 0.6;
+		const tFrameEnd = tRelease - 60 * pace;
 		const follow = () => {
 			const boxes = group.map((element) => element.getBoundingClientRect());
 			const left = Math.max(2, Math.min(...boxes.map((item) => item.left)) - 5);
@@ -263,7 +268,7 @@ function startSwarm(root: HTMLElement) {
 				place(approach(easeInOut(u)), Math.min(1, u * 5));
 			} else if (t < tRelease) {
 				const at = grabAt();
-				const amp = t < tGrab + PULL_MS ? 1 - (0.75 * (t - tGrab)) / PULL_MS : 0.25;
+				const amp = t < tGrab + pullMs ? 1 - (0.75 * (t - tGrab)) / pullMs : 0.25;
 				const wobble = shake(t, amp);
 				place({ x: at.x + wobble.x, y: at.y + wobble.y }, 1);
 			} else if (t < tEnd) {
