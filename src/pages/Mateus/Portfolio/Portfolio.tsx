@@ -542,6 +542,8 @@ export default function Portfolio() {
 							className={styles.worldJourney}
 							key={`fortaleza-${activeProject.id}`}
 							data-world-journey={activeProject.id}
+							// O avião já voa sozinho: nenhum agente o arrasta.
+							data-agent-skip=""
 						>
 							<span
 								className={styles.journeyRoute}
