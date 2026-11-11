@@ -44,12 +44,18 @@ const DESKTOP_QUERY = "(min-width: 992px)";
 const DESKTOP_PACE = 1 / 1.5;
 const MOBILE_PACE = 1 / 1.75;
 /**
- * Flag de teste (?agentes=metade): cada agente leva duas peças vizinhas de uma
- * vez (metade das viagens) e anda na metade da velocidade. Lida uma vez ao
- * abrir o site, então vale para toda a navegação dessa aba.
+ * Flag de teste (?agentes=metade): cada agente leva várias peças vizinhas de
+ * uma vez e anda na metade da velocidade. Lida uma vez ao abrir o site, então
+ * vale para toda a navegação dessa aba.
  */
 const HALF_MODE = typeof location !== "undefined" && new URLSearchParams(location.search).get("agentes") === "metade";
 const HALF_PACE = 2;
+// Peças por viagem na flag: desktop leva 2 (metade das viagens); no celular a
+// média de 2,5 faz o Início (39 peças) sair em 16 viagens, com grupos de 2 e 3
+// (as peças ficam prontas em levas, e uma ou outra viagem sai incompleta).
+const DESKTOP_PER_TRIP = 2;
+const MOBILE_PER_TRIP = 2.5;
+// Quem não completou o grupo espera até isso de checagens por vizinhas novas.
 const LEFTOVER_CHECKS = 6;
 
 type Pt = { x: number; y: number };
@@ -127,26 +133,13 @@ function entryOffset(box: DOMRect) {
 	return toLeft < toRight ? { x: -toLeft, y: side(toLeft) } : { x: toRight, y: side(toRight) };
 }
 
-/** Junta cada grupo, em ordem de leitura, ao mais próximo na tela que ainda está livre. */
-function pairNearest(groups: readonly Element[][]) {
-	const center = (group: readonly Element[]): Pt => {
-		const boxes = group.map((element) => element.getBoundingClientRect());
-		return {
-			x: (Math.min(...boxes.map((box) => box.left)) + Math.max(...boxes.map((box) => box.right))) / 2,
-			y: (Math.min(...boxes.map((box) => box.top)) + Math.max(...boxes.map((box) => box.bottom))) / 2,
-		};
+/** Centro da caixa que envolve todas as peças do grupo. */
+function centerOf(group: readonly Element[]): Pt {
+	const boxes = group.map((element) => element.getBoundingClientRect());
+	return {
+		x: (Math.min(...boxes.map((box) => box.left)) + Math.max(...boxes.map((box) => box.right))) / 2,
+		y: (Math.min(...boxes.map((box) => box.top)) + Math.max(...boxes.map((box) => box.bottom))) / 2,
 	};
-	const pool = groups.map((group) => ({ group, at: center(group) }));
-	const paired: Element[][] = [];
-	while (pool.length > 0) {
-		const first = pool.shift()!;
-		let best = -1;
-		for (let index = 0; index < pool.length; index++) {
-			if (best < 0 || distance(first.at, pool[index].at) < distance(first.at, pool[best].at)) best = index;
-		}
-		paired.push(best < 0 ? first.group : [...first.group, ...pool.splice(best, 1)[0].group]);
-	}
-	return paired;
 }
 
 function startSwarm(root: HTMLElement) {
@@ -319,8 +312,35 @@ function startSwarm(root: HTMLElement) {
 		later(delay, fly);
 	};
 
-	let leftover: Element[] | undefined;
-	let leftoverAge = 0;
+	// Flag "metade": grupos que esperam vizinhas para completar a viagem.
+	let waiting: Element[][] = [];
+	let waitingAge = 0;
+	// Fração de peça que sobra de uma viagem para a próxima (grupos de 2 e 3 no celular).
+	let carry = 0;
+	/** Junta, em ordem de leitura, cada grupo às vizinhas mais próximas na tela. */
+	const bundle = (groups: Element[][]) => {
+		const perTrip = globalThis.matchMedia(DESKTOP_QUERY).matches ? DESKTOP_PER_TRIP : MOBILE_PER_TRIP;
+		const pool = groups.map((group) => ({ group, at: centerOf(group) }));
+		const trips: Element[][] = [];
+		while (pool.length > 0) {
+			const want = Math.floor(carry + perTrip);
+			if (pool.length < want && waitingAge < LEFTOVER_CHECKS) break;
+			const first = pool.shift()!;
+			const members = [first.group];
+			while (members.length < want && pool.length > 0) {
+				let best = 0;
+				for (let index = 1; index < pool.length; index++) {
+					if (distance(first.at, pool[index].at) < distance(first.at, pool[best].at)) best = index;
+				}
+				members.push(pool.splice(best, 1)[0].group);
+			}
+			carry = clamp(carry + perTrip - members.length, 0, 1.99);
+			trips.push(members.flat());
+		}
+		waiting = pool.map((item) => item.group);
+		waitingAge = waiting.length > 0 ? waitingAge + 1 : 0;
+		return trips;
+	};
 	const check = () => {
 		if (document.hidden) return;
 		// Começa assim que a tela de carregamento começa a subir, sem esperar ela sumir.
@@ -329,7 +349,7 @@ function startSwarm(root: HTMLElement) {
 		rescue();
 		if (performance.now() - lastScroll < SCROLL_REST_MS) return;
 		const ready = [...document.querySelectorAll(PIECES)].filter((element) => !seen.has(element) && isReady(element));
-		if (ready.length === 0 && !leftover) return;
+		if (ready.length === 0 && waiting.length === 0) return;
 		const groups = new Map<Element | string, Element[]>();
 		for (const element of ready) {
 			const name = element.getAttribute("data-agent-piece");
@@ -341,16 +361,9 @@ function startSwarm(root: HTMLElement) {
 		// De cima para baixo: a legenda entra junto com as peças do projeto, não depois.
 		const top = (group: readonly Element[]) => Math.min(...group.map((element) => element.getBoundingClientRect().top));
 		const left = (group: readonly Element[]) => Math.min(...group.map((element) => element.getBoundingClientRect().left));
-		let ordered = [...groups.values()].sort((a, b) => top(a) - top(b) || left(a) - left(b));
-		// Na flag "metade", vizinhas na ordem de leitura viajam juntas com o mesmo agente.
-		// A que sobra sozinha espera até LEFTOVER_CHECKS checagens para ganhar par.
-		if (HALF_MODE) {
-			if (leftover) ordered.unshift(leftover);
-			const keep = ordered.length % 2 === 1 && leftoverAge < LEFTOVER_CHECKS;
-			leftoverAge = keep ? leftoverAge + 1 : 0;
-			leftover = keep ? ordered.pop() : undefined;
-			ordered = pairNearest(ordered);
-		}
+		const byReading = (a: Element[], b: Element[]) => top(a) - top(b) || left(a) - left(b);
+		// Na flag "metade", vizinhas na tela viajam juntas com o mesmo agente.
+		const ordered = HALF_MODE ? bundle([...waiting, ...groups.values()].sort(byReading)) : [...groups.values()].sort(byReading);
 		for (const group of ordered) {
 			try {
 				pull(group);
@@ -372,7 +385,7 @@ function startSwarm(root: HTMLElement) {
 		for (const element of document.querySelectorAll("[data-agent-piece]:not([data-agent-placed])")) {
 			if (seen.has(element)) {
 				// A peça guardada para ganhar par (flag "metade") ainda vai receber agente.
-				if (leftover?.includes(element)) continue;
+				if (waiting.some((group) => group.includes(element))) continue;
 				element.setAttribute("data-agent-placed", "");
 				continue;
 			}
