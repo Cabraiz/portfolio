@@ -5,6 +5,11 @@
 	visibility: hidden !important;
 }
 
+/* Prévia de carregamento (foto desfocada): some enquanto os agentes montam a tela. */
+:global(html[data-agents="on"] [data-agent-placeholder]) {
+	visibility: hidden !important;
+}
+
 .swarm {
 	position: fixed;
 	inset: 0;

@@ -24,7 +24,7 @@ const AGENTS = [
 ] as const;
 
 const PIECES = "[data-agent-piece], img";
-const OFF_LIMITS = "[data-chat-panel], [data-agent-skip], [data-agent-swarm]";
+const OFF_LIMITS = "[data-chat-panel], [data-agent-skip], [data-agent-placeholder], [data-agent-swarm]";
 const CHECK_MS = 100;
 const SCROLL_REST_MS = 180;
 // A peça já começa fora da tela: espera o fade-in avançar para entrar visível.
@@ -38,9 +38,11 @@ const MARGIN = 40;
 // Peça na tela há mais que isso sem agente aparece sozinha no lugar.
 const STUCK_MS = 3000;
 const PATH_STEPS = 16;
-// No desktop (Início e Portfólio largos) os agentes andam 1,5x mais rápido.
+// Os tempos acima são a base: no desktop (Início e Portfólio largos) os agentes
+// andam 1,5x mais rápido e no celular 1,75x.
 const DESKTOP_QUERY = "(min-width: 992px)";
 const DESKTOP_PACE = 1 / 1.5;
+const MOBILE_PACE = 1 / 1.75;
 
 type Pt = { x: number; y: number };
 
@@ -142,7 +144,7 @@ function startSwarm(root: HTMLElement) {
 	/** Agente busca a peça fora da tela e a arrasta até o lugar. */
 	const pull = (group: readonly Element[]) => {
 		const now = performance.now();
-		const pace = globalThis.matchMedia(DESKTOP_QUERY).matches ? DESKTOP_PACE : 1;
+		const pace = globalThis.matchMedia(DESKTOP_QUERY).matches ? DESKTOP_PACE : MOBILE_PACE;
 		const pullMs = PULL_MS * pace;
 		const index = freeAt.indexOf(Math.min(...freeAt));
 		const cursor = cursors[index];

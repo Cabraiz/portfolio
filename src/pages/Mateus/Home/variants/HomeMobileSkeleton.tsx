@@ -18,7 +18,7 @@ function Text({text,className=''}:{text:string;className?:string}){
 export function HomeMobilePortraitSkeleton(){
   const {src,stage}=useProgressiveSource(MOBILE_PORTRAIT_LQIP,portraitPreview);
   return <img className={`${home.portrait} ${styles.portrait}`} src={src} alt="" aria-hidden="true" width={1024} height={1536}
-    draggable={false} data-home-portrait-skeleton="true" data-stage={stage}/>;
+    draggable={false} data-home-portrait-skeleton="true" data-agent-placeholder="" data-stage={stage}/>;
 }
 
 export default function HomeMobileSkeleton({className='',minHeight}:{className?:string;minHeight?:CSSProperties['minHeight']}){
