@@ -38,21 +38,15 @@ const MARGIN = 40;
 // Peça na tela há mais que isso sem agente aparece sozinha no lugar.
 const STUCK_MS = 3000;
 const PATH_STEPS = 16;
-// Os tempos acima são a base: no desktop (Início e Portfólio largos) os agentes
-// andam 1,5x mais rápido e no celular 1,75x.
+// Os tempos acima são a base. Cada agente leva várias peças vizinhas de uma vez
+// e anda devagar: no desktop (Início e Portfólio largos) a 1,5x da base dividido
+// por 2, e no celular a 1,75x dividido por 2.
 const DESKTOP_QUERY = "(min-width: 992px)";
-const DESKTOP_PACE = 1 / 1.5;
-const MOBILE_PACE = 1 / 1.75;
-/**
- * Flag de teste (?agentes=metade): cada agente leva várias peças vizinhas de
- * uma vez e anda na metade da velocidade. Lida uma vez ao abrir o site, então
- * vale para toda a navegação dessa aba.
- */
-const HALF_MODE = typeof location !== "undefined" && new URLSearchParams(location.search).get("agentes") === "metade";
-const HALF_PACE = 2;
-// Peças por viagem na flag: desktop leva 2 (metade das viagens); no celular a
-// média de 2,5 faz o Início (39 peças) sair em 16 viagens, com grupos de 2 e 3
-// (as peças ficam prontas em levas, e uma ou outra viagem sai incompleta).
+const DESKTOP_PACE = 2 / 1.5;
+const MOBILE_PACE = 2 / 1.75;
+// Peças por viagem: desktop leva 2 (metade das viagens); no celular a média de
+// 2,5 faz o Início (39 peças) sair em 16 viagens, com grupos de 2 e 3 (as peças
+// ficam prontas em levas, e uma ou outra viagem sai incompleta).
 const DESKTOP_PER_TRIP = 2;
 const MOBILE_PER_TRIP = 2.5;
 // Quem não completou o grupo espera até isso de checagens por vizinhas novas.
@@ -167,7 +161,7 @@ function startSwarm(root: HTMLElement) {
 	/** Agente busca a peça fora da tela e a arrasta até o lugar. */
 	const pull = (group: readonly Element[]) => {
 		const now = performance.now();
-		const pace = (globalThis.matchMedia(DESKTOP_QUERY).matches ? DESKTOP_PACE : MOBILE_PACE) * (HALF_MODE ? HALF_PACE : 1);
+		const pace = globalThis.matchMedia(DESKTOP_QUERY).matches ? DESKTOP_PACE : MOBILE_PACE;
 		root.dataset.pulled = String(Number(root.dataset.pulled ?? 0) + 1);
 		const pullMs = PULL_MS * pace;
 		const index = freeAt.indexOf(Math.min(...freeAt));
@@ -312,7 +306,7 @@ function startSwarm(root: HTMLElement) {
 		later(delay, fly);
 	};
 
-	// Flag "metade": grupos que esperam vizinhas para completar a viagem.
+	// Grupos que esperam vizinhas para completar a viagem.
 	let waiting: Element[][] = [];
 	let waitingAge = 0;
 	// Fração de peça que sobra de uma viagem para a próxima (grupos de 2 e 3 no celular).
@@ -362,8 +356,8 @@ function startSwarm(root: HTMLElement) {
 		const top = (group: readonly Element[]) => Math.min(...group.map((element) => element.getBoundingClientRect().top));
 		const left = (group: readonly Element[]) => Math.min(...group.map((element) => element.getBoundingClientRect().left));
 		const byReading = (a: Element[], b: Element[]) => top(a) - top(b) || left(a) - left(b);
-		// Na flag "metade", vizinhas na tela viajam juntas com o mesmo agente.
-		const ordered = HALF_MODE ? bundle([...waiting, ...groups.values()].sort(byReading)) : [...groups.values()].sort(byReading);
+		// Vizinhas na tela viajam juntas com o mesmo agente.
+		const ordered = bundle([...waiting, ...groups.values()].sort(byReading));
 		for (const group of ordered) {
 			try {
 				pull(group);
@@ -384,7 +378,7 @@ function startSwarm(root: HTMLElement) {
 		const now = performance.now();
 		for (const element of document.querySelectorAll("[data-agent-piece]:not([data-agent-placed])")) {
 			if (seen.has(element)) {
-				// A peça guardada para ganhar par (flag "metade") ainda vai receber agente.
+				// A peça guardada para ganhar par ainda vai receber agente.
 				if (waiting.some((group) => group.includes(element))) continue;
 				element.setAttribute("data-agent-placed", "");
 				continue;
