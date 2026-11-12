@@ -202,9 +202,9 @@ export default function ResumeDownloadButton({
             styles.text,
             compact && styles.textCompact,
           )}
-          data-agent-piece=""
         >
-          {localizeLabel(label)}
+          {/* A peça é só a palavra: a caixa em volta ocupa o botão todo. */}
+          <span data-agent-piece="">{localizeLabel(label)}</span>
         </span>
       </span>
     </>

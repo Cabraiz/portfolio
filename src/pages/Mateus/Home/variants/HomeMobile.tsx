@@ -114,8 +114,9 @@ function HomeMobile() {
                 data-mobile-partner-item={label.toLowerCase()}
                 data-mobile-partner-order={index + 1}
               >
-                <Icon aria-hidden="true" data-agent-piece="" />
-                <span data-agent-piece="">{localizeLabel(label)}</span>
+                {/* Ícone e nome com o mesmo nome de peça: viajam juntos, na mesma moldura. */}
+                <Icon aria-hidden="true" data-agent-piece={`contato-${label}`} />
+                <span data-agent-piece={`contato-${label}`}>{localizeLabel(label)}</span>
               </div>
             ))}
           </div>

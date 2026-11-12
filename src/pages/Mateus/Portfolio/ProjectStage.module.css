@@ -244,6 +244,14 @@
 	font-size: 11.5px;
 }
 
+/* Cada linha é uma peça trazida por agente: do tamanho do texto, para a moldura ficar justa. */
+.caption h2,
+.caption p,
+.caption li {
+	width: fit-content;
+	max-width: 100%;
+}
+
 @keyframes stageIn {
 	from {
 		opacity: 0;

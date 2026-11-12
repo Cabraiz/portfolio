@@ -44,13 +44,18 @@ const PATH_STEPS = 16;
 const DESKTOP_QUERY = "(min-width: 992px)";
 const DESKTOP_PACE = 2 / 1.5;
 const MOBILE_PACE = 2 / 1.75;
-// Peças por viagem: desktop leva 2 (metade das viagens); no celular a média de
-// 2,5 faz o Início (39 peças) sair em 16 viagens, com grupos de 2 e 3 (as peças
-// ficam prontas em levas, e uma ou outra viagem sai incompleta).
+// Peças por viagem, no máximo: desktop leva 2; no celular a média de 2,5 faz o
+// Início sair em 15 a 16 viagens, com grupos de 2 e 3. Peça sem vizinha colada
+// viaja sozinha, então o total varia um pouco com a ordem em que ficam prontas.
 const DESKTOP_PER_TRIP = 2;
 const MOBILE_PER_TRIP = 2.5;
-// Quem não completou o grupo espera até isso de checagens por vizinhas novas.
+// Peça sem vizinha espera até isso de checagens por uma vizinha nova.
 const LEFTOVER_CHECKS = 6;
+// Só viajam juntas peças coladas (até NEAR_PX de distância, como dois itens do menu) que formem um bloco
+// compacto: a moldura não pode passar de TIGHT vezes a área das peças. Assim
+// "Fotos" não vai junto com o seletor de idioma do outro lado do menu.
+const NEAR_PX = 30;
+const TIGHT = 2;
 
 type Pt = { x: number; y: number };
 
@@ -127,14 +132,22 @@ function entryOffset(box: DOMRect) {
 	return toLeft < toRight ? { x: -toLeft, y: side(toLeft) } : { x: toRight, y: side(toRight) };
 }
 
-/** Centro da caixa que envolve todas as peças do grupo. */
-function centerOf(group: readonly Element[]): Pt {
-	const boxes = group.map((element) => element.getBoundingClientRect());
+type Box = { left: number; top: number; right: number; bottom: number };
+
+/** Caixa que envolve todas as caixas dadas (a moldura de uma viagem). */
+function unionOf(boxes: readonly Box[]): Box {
 	return {
-		x: (Math.min(...boxes.map((box) => box.left)) + Math.max(...boxes.map((box) => box.right))) / 2,
-		y: (Math.min(...boxes.map((box) => box.top)) + Math.max(...boxes.map((box) => box.bottom))) / 2,
+		left: Math.min(...boxes.map((box) => box.left)),
+		top: Math.min(...boxes.map((box) => box.top)),
+		right: Math.max(...boxes.map((box) => box.right)),
+		bottom: Math.max(...boxes.map((box) => box.bottom)),
 	};
 }
+// Com a folga de 5 px da moldura: peças finas (os traços do ☰) contam como a moldura as vê.
+const areaOf = (box: Box) => (box.right - box.left + 10) * (box.bottom - box.top + 10);
+/** Distância entre as bordas de duas caixas (0 quando se tocam ou se cruzam). */
+const gapOf = (a: Box, b: Box) =>
+	Math.hypot(Math.max(0, a.left - b.right, b.left - a.right), Math.max(0, a.top - b.bottom, b.top - a.bottom));
 
 function startSwarm(root: HTMLElement) {
 	const seen = new WeakSet<Element>();
@@ -306,33 +319,50 @@ function startSwarm(root: HTMLElement) {
 		later(delay, fly);
 	};
 
-	// Grupos que esperam vizinhas para completar a viagem.
+	// Peças sozinhas que esperam uma vizinha aparecer, e há quantas checagens.
 	let waiting: Element[][] = [];
-	let waitingAge = 0;
+	const waitedChecks = new WeakMap<Element[], number>();
 	// Fração de peça que sobra de uma viagem para a próxima (grupos de 2 e 3 no celular).
 	let carry = 0;
-	/** Junta, em ordem de leitura, cada grupo às vizinhas mais próximas na tela. */
+	/** Junta, em ordem de leitura, cada grupo às vizinhas coladas que formam um bloco com ele. */
 	const bundle = (groups: Element[][]) => {
 		const perTrip = globalThis.matchMedia(DESKTOP_QUERY).matches ? DESKTOP_PER_TRIP : MOBILE_PER_TRIP;
-		const pool = groups.map((group) => ({ group, at: centerOf(group) }));
+		const pool = groups.map((group) => ({ group, box: unionOf(group.map((element) => element.getBoundingClientRect())) }));
 		const trips: Element[][] = [];
+		const stay: Element[][] = [];
 		while (pool.length > 0) {
 			const want = Math.floor(carry + perTrip);
-			if (pool.length < want && waitingAge < LEFTOVER_CHECKS) break;
 			const first = pool.shift()!;
 			const members = [first.group];
-			while (members.length < want && pool.length > 0) {
-				let best = 0;
-				for (let index = 1; index < pool.length; index++) {
-					if (distance(first.at, pool[index].at) < distance(first.at, pool[best].at)) best = index;
+			let frame = first.box;
+			let filled = areaOf(first.box);
+			while (members.length < want) {
+				let best = -1;
+				let bestGap = NEAR_PX;
+				for (let index = 0; index < pool.length; index++) {
+					const gap = gapOf(frame, pool[index].box);
+					if (gap > bestGap) continue;
+					if (areaOf(unionOf([frame, pool[index].box])) > TIGHT * (filled + areaOf(pool[index].box))) continue;
+					best = index;
+					bestGap = gap;
 				}
-				members.push(pool.splice(best, 1)[0].group);
+				if (best < 0) break;
+				const [next] = pool.splice(best, 1);
+				members.push(next.group);
+				frame = unionOf([frame, next.box]);
+				filled += areaOf(next.box);
+			}
+			// Sozinha: espera um pouco por uma vizinha que ainda vai ficar pronta.
+			const age = waitedChecks.get(first.group) ?? 0;
+			if (members.length === 1 && want > 1 && age < LEFTOVER_CHECKS) {
+				waitedChecks.set(first.group, age + 1);
+				stay.push(first.group);
+				continue;
 			}
 			carry = clamp(carry + perTrip - members.length, 0, 1.99);
 			trips.push(members.flat());
 		}
-		waiting = pool.map((item) => item.group);
-		waitingAge = waiting.length > 0 ? waitingAge + 1 : 0;
+		waiting = stay;
 		return trips;
 	};
 	const check = () => {
