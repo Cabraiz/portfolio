@@ -266,7 +266,7 @@
   position: absolute;
   right: 12px;
   bottom: 0;
-  left: calc(12px + var(--mobile-brand-push, 0px));
+  left: 12px;
   z-index: 5;
   display: grid;
   grid-template-columns: minmax(0, 1fr) 1px minmax(0, 1fr);
@@ -285,7 +285,7 @@
   min-width: 0;
   align-items: center;
   justify-content: center;
-  gap: calc(9px - 3px * var(--mobile-brand-contact, 0));
+  gap: 9px;
   min-height: 50px;
   border: 1px solid rgba(255, 248, 240, 0.78);
   color: inherit;
@@ -307,14 +307,130 @@
 
 .actions svg {
   flex-shrink: 0;
-  width: calc(20px - 2px * var(--mobile-brand-contact, 0));
-  height: calc(20px - 2px * var(--mobile-brand-contact, 0));
+  width: 20px;
+  height: 20px;
 }
 
 .actionDivider {
   width: 1px;
   height: 28px;
   background: rgba(255, 248, 240, 0.78);
+}
+
+/* Barra de verdade (o esqueleto usa só as regras acima). O layout nunca muda:
+   quando o logo desce ao lado, useMobileHomeBrandMotion estreita a barra só com
+   transform, no compositor. Fundo e contorno são feitos de pontas arredondadas
+   que deslizam e de um meio reto que encolhe a partir da direita, então os
+   cantos não se deformam. */
+.actions[data-mobile-contact-actions] {
+  container-type: inline-size;
+  background: none;
+  box-shadow: none;
+  isolation: isolate;
+}
+
+.actionsBackdrop,
+.actionOutline {
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.actionsBackdrop {
+  inset: 0;
+}
+
+.actionsBackdrop > i,
+.actionOutline > i {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  box-sizing: border-box;
+  will-change: transform;
+}
+
+.actionsBackdrop > i {
+  /* O degradê da barra inteira (100cqw = largura dela); cada parte mostra o
+     pedaço que lhe cabe, então as emendas não aparecem. */
+  background: linear-gradient(145deg, #95142e 0%, #811024 58%, #6f0b1e 100%);
+  background-size: calc(100vw - 24px) 100%;
+  background-size: 100cqw 100%;
+}
+
+.actionsBackdrop > [data-bar-part="cap"] {
+  left: 0;
+  width: 25px;
+  border-top-left-radius: 24px;
+  background-position: 0 0;
+}
+
+.actionsBackdrop > [data-bar-part="body"] {
+  right: 24px;
+  left: 24px;
+  background-position: -24px 0;
+  box-shadow: 0 -12px 34px rgba(103, 12, 33, 0.16);
+  transform-origin: 100% 50%;
+}
+
+.actionsBackdrop > [data-bar-part="end"] {
+  right: 0;
+  width: 25px;
+  border-top-right-radius: 24px;
+  background-position: 100% 0;
+}
+
+.actions[data-mobile-contact-actions] a {
+  position: relative;
+  border-color: transparent;
+  isolation: isolate;
+}
+
+/* Cobre a caixa da borda (transparente) do botão. Cor opaca equivalente ao
+   branco de 78 % sobre o vermelho, para a emenda das partes não acender. */
+.actionOutline {
+  inset: -1px;
+}
+
+.actionOutline > i {
+  border: 1px solid #e5c5c4;
+}
+
+.actionOutline > [data-pill-part="cap"] {
+  left: 0;
+  width: 26px;
+  border-right: 0;
+  border-radius: 999px 0 0 999px;
+}
+
+.actionOutline > [data-pill-part="end"] {
+  right: 0;
+  width: 26px;
+  border-left: 0;
+  border-radius: 0 999px 999px 0;
+}
+
+.actionOutline > [data-pill-part="band"] {
+  border-right: 0;
+  border-left: 0;
+  transform-origin: 100% 50%;
+}
+
+.actions a:first-of-type .actionOutline > [data-pill-part="band"] {
+  right: 0;
+  left: 25px;
+}
+
+.actions a:last-of-type .actionOutline > [data-pill-part="band"] {
+  right: 25px;
+  left: 0;
+}
+
+.actionContent {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  gap: inherit;
+  will-change: transform;
 }
 
 @media (max-height: 680px) {
@@ -389,7 +505,7 @@
 
   .actions {
     right: 8px;
-    left: calc(8px + var(--mobile-brand-push, 0px));
+    left: 8px;
     min-height: 54px;
     padding: 5px;
   }

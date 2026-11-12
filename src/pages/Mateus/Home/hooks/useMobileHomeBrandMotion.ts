@@ -21,9 +21,9 @@ const MIN_BOX_GAP = 4;
 // dele (e volta ao longo dos mesmos px depois que ele passa). Com poucos px
 // ela andava 40–60px num único quadro, como um salto.
 const ACTION_RAMP = 192;
-// A barra persegue a posição-alvo com uma pequena inércia, para não acompanhar
-// cada tranco da rolagem; a rampa começa cedo o bastante para cobrir o atraso.
-const ACTION_SMOOTHING_S = 0.24;
+// Pontas do fundo e do contorno da barra (px): o resto é o meio reto que encolhe.
+const BAR_CAP = 24;
+const PILL_CAP = 25;
 // Amostragem da curva do logo/textos para a ScrollTimeline (px de rolagem) e
 // tolerância da simplificação (px de desvio máximo da curva original).
 const SAMPLE_STEP = 2;
@@ -124,14 +124,38 @@ export default function useMobileHomeBrandMotion({
     const layout = { start: 0, end: 1, portfolioTop: 0, portfolioBottom: 1,
       navHeight: 72, restTop: 0, homeTop: 0, left: 0, width: 44, height: 44,
       viewportWidth: 0, viewportHeight: 0, actionsTop: 0, actionsBottom: 0,
-      actionsLeft: 0 };
+      actionsLeft: 0, barBody: 1, pillBand: 1 };
     let logoY = 0;
-    let actionPush = 0;
-    const actionState = { push: 0, contact: 0 };
-    const actionTarget = { push: 0, contact: 0 };
-    // Espaço mínimo enquanto o logo está na altura da barra: numa rolagem
-    // rápida a inércia não pode deixar a barra por baixo dele.
-    let actionFloor = 0;
+    // A barra de contato estreita para o logo passar sem mudar de layout: só
+    // transform (compositor). As pontas deslizam, os meios retos encolhem a
+    // partir da direita e o conteúdo de cada botão acompanha o centro dele.
+    const part = (selector: string) => actions.querySelector<HTMLElement>(selector);
+    const [firstButton, lastButton] = Array.from(actions.querySelectorAll<HTMLElement>(":scope > a"));
+    const barParts = {
+      cap: part('[data-bar-part="cap"]'),
+      body: part('[data-bar-part="body"]'),
+      firstCap: firstButton?.querySelector<HTMLElement>('[data-pill-part="cap"]') ?? null,
+      firstBand: firstButton?.querySelector<HTMLElement>('[data-pill-part="band"]') ?? null,
+      lastBand: lastButton?.querySelector<HTMLElement>('[data-pill-part="band"]') ?? null,
+      divider: part("[data-action-divider]"),
+      firstContent: firstButton?.querySelector<HTMLElement>("[data-action-content]") ?? null,
+      lastContent: lastButton?.querySelector<HTMLElement>("[data-action-content]") ?? null,
+    };
+    /** Transform de cada parte da barra para `push` px de estreitamento. */
+    const barTransforms = (push: number) => {
+      const half = push / 2;
+      const band = `scaleX(${Math.max(0, (layout.pillBand - half) / layout.pillBand).toFixed(5)})`;
+      return [
+        [barParts.cap, `translateX(${push.toFixed(3)}px)`],
+        [barParts.body, `scaleX(${Math.max(0, (layout.barBody - push) / layout.barBody).toFixed(5)})`],
+        [barParts.firstCap, `translateX(${push.toFixed(3)}px)`],
+        [barParts.firstBand, `translateX(${half.toFixed(3)}px) ${band}`],
+        [barParts.lastBand, band],
+        [barParts.divider, `translateX(${half.toFixed(3)}px)`],
+        [barParts.firstContent, `translateX(${(push * 0.75).toFixed(3)}px)`],
+        [barParts.lastContent, `translateX(${(push * 0.25).toFixed(3)}px)`],
+      ].filter((entry): entry is [HTMLElement, string] => entry[0] !== null);
+    };
     let refreshFrame: number | null = null;
     let disposed = false;
     const ease = gsap.parseEase("power2.out");
@@ -161,7 +185,10 @@ export default function useMobileHomeBrandMotion({
       layout.viewportHeight = window.innerHeight;
       layout.actionsTop = bar.top + scroll;
       layout.actionsBottom = bar.bottom + scroll;
-      layout.actionsLeft = bar.left - actionPush;
+      layout.actionsLeft = bar.left;
+      layout.barBody = Math.max(1, (barParts.body?.offsetWidth ?? 0) || bar.width - 2 * BAR_CAP);
+      layout.pillBand = Math.max(1, (barParts.firstBand?.offsetWidth ?? 0) ||
+        (firstButton?.offsetWidth ?? 0) - PILL_CAP);
       rows.forEach(row => {
         const box = row.element.getBoundingClientRect();
         const parentTransform = getComputedStyle(row.element.parentElement!).transform;
@@ -178,17 +205,6 @@ export default function useMobileHomeBrandMotion({
       gsap.set(rows.map(row => row.element), { autoAlpha: 1, willChange: "transform", force3D: true });
       gsap.set(titleRef.current, { transformOrigin: "left center" });
       const setLogoY = gsap.quickSetter(logo, "y", "px");
-      const applyActions = () => {
-        const push = Math.max(actionState.push, actionFloor);
-        const contactValue = actionFloor > 0 ? Math.max(actionState.contact, 1) : actionState.contact;
-        actionPush = push;
-        actions.style.setProperty("--mobile-brand-push", `${push.toFixed(2)}px`);
-        actions.style.setProperty("--mobile-brand-contact", Math.min(1, contactValue).toFixed(3));
-      };
-      const pushTo = gsap.quickTo(actionState, "push", {
-        duration: ACTION_SMOOTHING_S, ease: "power2.out", onUpdate: applyActions });
-      const contactTo = gsap.quickTo(actionState, "contact", {
-        duration: ACTION_SMOOTHING_S, ease: "power2.out", onUpdate: applyActions });
       measureLayout();
       const progressAt = (scroll: number) =>
         clamp((scroll - layout.start) / Math.max(1, layout.end - layout.start));
@@ -227,7 +243,13 @@ export default function useMobileHomeBrandMotion({
             (layout.viewportWidth - fittedRight - 8) / row.scale));
           return { x: distance * gain, fitScale };
         });
-        return { top, bottom, right, logoY: top - layout.restTop, rows: rowFrames };
+        // A barra abre espaço ACTION_RAMP px antes de o logo chegar nela e
+        // termina de abrir antes de ele cruzar a borda do fundo vermelho.
+        const contact = clamp((bottom + CONTACT_GAP + ACTION_RAMP - (layout.actionsTop - scroll)) / ACTION_RAMP);
+        const release = clamp((top - (layout.actionsBottom - scroll) - CONTACT_GAP) / ACTION_RAMP);
+        const push = Math.max(0, right + CONTACT_GAP - layout.actionsLeft) *
+          actionEase(contact) * (1 - actionEase(release));
+        return { top, bottom, right, logoY: top - layout.restTop, rows: rowFrames, push };
       };
       /** Curva amostrada → animações ligadas à rolagem (compositor). */
       const buildScrollAnimations = () => {
@@ -265,12 +287,20 @@ export default function useMobileHomeBrandMotion({
               (scaleCurve ? ` scaleX(${valueAt(scaleCurve, scroll).toFixed(4)})` : ""),
           })), options));
         });
+        const pushCurve = simplify(scrolls.map((scroll, index) => [scroll, frames[index].push] as const), SIMPLIFY_PX / 2);
+        const pushKeyframes = pushCurve.map(([scroll, push]) => ({ offset: scroll / maxScroll, parts: barTransforms(push) }));
+        barTransforms(0).forEach(([element], partIndex) => {
+          scrollAnimations.push(element.animate(pushKeyframes.map(({ offset, parts }) => ({
+            offset, transform: parts[partIndex][1],
+          })), options));
+        });
       };
       const update = (progress: number) => {
         const scroll = window.scrollY;
         const frame = frameAt(scroll, progress);
-        const { top, bottom, right } = frame;
+        const { bottom } = frame;
         if (!scrollDriven) {
+          barTransforms(frame.push).forEach(([element, transform]) => { element.style.transform = transform; });
           logoY = frame.logoY;
           setLogoY(logoY);
           rows.forEach((row, index) => {
@@ -282,20 +312,6 @@ export default function useMobileHomeBrandMotion({
         }
         logo.dataset.mobileBrandOwner = layout.portfolioBottom - scroll <= layout.navHeight
           ? "roadMap" : bottom + CONTACT_GAP >= layout.portfolioTop - scroll ? "portfolio" : "home";
-        // Starts ACTION_RAMP px early and finishes reserving space before the
-        // brand crosses the red container's edge.
-        const contact = clamp((bottom + CONTACT_GAP + ACTION_RAMP - (layout.actionsTop - scroll)) / ACTION_RAMP);
-        const release = clamp((top - (layout.actionsBottom - scroll) - CONTACT_GAP) / ACTION_RAMP);
-        const gain = actionEase(contact) * (1 - actionEase(release));
-        const fullPush = Math.max(0, right + CONTACT_GAP - layout.actionsLeft);
-        const besideBar = bottom + CONTACT_GAP > layout.actionsTop - scroll &&
-          top < layout.actionsBottom - scroll + CONTACT_GAP;
-        actionFloor = besideBar ? fullPush : 0;
-        actionTarget.push = fullPush * gain;
-        actionTarget.contact = gain;
-        pushTo(actionTarget.push);
-        contactTo(actionTarget.contact);
-        applyActions();
       };
       ScrollTrigger.create({ trigger: page, start: () => layout.start, end: () => layout.end,
         onRefreshInit: measureLayout,
@@ -325,8 +341,7 @@ export default function useMobileHomeBrandMotion({
       cancelScrollAnimations();
       context.revert();
       delete logo.dataset.mobileBrandOwner;
-      actions.style.removeProperty("--mobile-brand-push");
-      actions.style.removeProperty("--mobile-brand-contact");
+      barTransforms(0).forEach(([element]) => { element.style.removeProperty("transform"); });
     };
   }, [pageRef, eyebrowRef, titleRef, identityRef, introRef, partnersRef, partnersHeadingRef, portraitRef, prefersReducedMotion]);
 }
