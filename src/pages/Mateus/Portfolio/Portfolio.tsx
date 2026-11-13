@@ -31,6 +31,7 @@ import {
 import type { PortfolioRootStyle } from "./Portfolio.mapData";
 import {
 	useMobileProjectListCentering,
+	usePortfolioHalfVisibleEntries,
 	usePortfolioKeyboardNavigation,
 	usePortfolioMobileGeometry,
 } from "./Portfolio.effects";
@@ -114,6 +115,7 @@ export default function Portfolio() {
 	useMobileProjectListCentering(mobileProjectListRef, projectListRef, activeIndex);
 
 	usePortfolioMotion(rootRef, activeProject.id);
+	const journeyEntries = usePortfolioHalfVisibleEntries(rootRef);
 	useMapLabelSide(rootRef, activeProject.id, mobileMapZoom);
 
 	const activeLocation = activeProject.worldLocation;
@@ -278,6 +280,7 @@ export default function Portfolio() {
 				selectProject={selectProject}
 				setIsAutoplayPaused={setIsAutoplayPaused}
 				setFlight={setFlight}
+				journeyEntries={journeyEntries}
 			/>
 
 			<PortfolioMobile

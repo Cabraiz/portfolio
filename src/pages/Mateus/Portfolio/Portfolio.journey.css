@@ -46,6 +46,12 @@
 	pointer-events: none;
 }
 
+/* Até metade do Portfólio aparecer na tela, a rota e o avião esperam no
+   quadro inicial: o voo começa quando a pessoa chega (usePortfolioHalfVisibleEntries). */
+.worldJourney[data-world-journey-waiting] :is(.journeyRoute, .journeyTraveler *) {
+	animation-play-state: paused;
+}
+
 /* Avião que voa a rota (renderizado de cima a partir de um modelo 3D).
    Tudo aqui anima só transform e opacity, que o navegador roda na GPU (no
    compositor), sem depender da thread principal: a troca de projeto anima o

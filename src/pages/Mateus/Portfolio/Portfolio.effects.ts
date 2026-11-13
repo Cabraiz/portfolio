@@ -1,5 +1,5 @@
 // Efeitos do Portfolio: geometria do card no celular, teclado e lista centralizada.
-import { useEffect, type Dispatch, type RefObject, type SetStateAction } from "react";
+import { useEffect, useState, type Dispatch, type RefObject, type SetStateAction } from "react";
 
 export function usePortfolioMobileGeometry(
 	mobileDetailCardRef: RefObject<HTMLElement | null>,
@@ -100,4 +100,32 @@ export function useMobileProjectListCentering(
 				: "smooth",
 		});
 	}, [activeIndex]);
+}
+
+/**
+ * Quantas vezes o Portfólio entrou na tela com pelo menos metade dele visível
+ * (0 = ainda não). Seção mais alta que a tela conta pela altura da tela.
+ * O avião da rota espera em Fortaleza até isso acontecer e decola de novo a
+ * cada entrada; antes ele voava no carregamento da página, e quem rolava até
+ * o Portfólio já o encontrava pousado.
+ */
+export function usePortfolioHalfVisibleEntries(rootRef: RefObject<HTMLElement | null>) {
+	const [entries, setEntries] = useState(0);
+	useEffect(() => {
+		const root = rootRef.current;
+		if (!root) return undefined;
+		let visible = false;
+		const observer = new IntersectionObserver(
+			([entry]) => {
+				const full = Math.min(entry.boundingClientRect.height, entry.rootBounds?.height ?? globalThis.innerHeight);
+				const next = full > 0 && entry.intersectionRect.height / full >= 0.5;
+				if (next && !visible) setEntries((count) => count + 1);
+				visible = next;
+			},
+			{ threshold: Array.from({ length: 21 }, (_, step) => step / 20) }
+		);
+		observer.observe(root);
+		return () => observer.disconnect();
+	}, [rootRef]);
+	return entries;
 }

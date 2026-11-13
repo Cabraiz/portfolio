@@ -27,6 +27,8 @@ type PortfolioGeoViewportProps = Readonly<{
 	selectProject: (index: number) => void;
 	setIsAutoplayPaused: Dispatch<SetStateAction<boolean>>;
 	setFlight: Dispatch<SetStateAction<JourneyFlight>>;
+	/** Entradas do Portfólio com metade dele na tela (0 = o avião espera). */
+	journeyEntries: number;
 }>;
 
 // Mapa geográfico: rotas do Brasil, pontos dos projetos e a viagem pelo mundo.
@@ -40,6 +42,7 @@ export default function PortfolioGeoViewport({
 	selectProject,
 	setIsAutoplayPaused,
 	setFlight,
+	journeyEntries,
 }: PortfolioGeoViewportProps) {
 	return (
 			<div className={styles.geoViewport}>
@@ -120,8 +123,10 @@ export default function PortfolioGeoViewport({
 					{worldJourneyDestination ? (
 						<div
 							className={styles.worldJourney}
-							key={`fortaleza-${activeProject.id}`}
+							// Nova entrada no Portfólio = novo voo saindo de Fortaleza.
+							key={`fortaleza-${activeProject.id}-${journeyEntries}`}
 							data-world-journey={activeProject.id}
+							data-world-journey-waiting={journeyEntries === 0 ? "true" : undefined}
 							// O avião já voa sozinho: nenhum agente o arrasta.
 							data-agent-skip=""
 						>
