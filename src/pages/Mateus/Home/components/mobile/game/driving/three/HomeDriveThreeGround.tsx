@@ -1,6 +1,6 @@
 // src/pages/Mateus/Home/components/mobile/game/driving/three/HomeDriveThreeGround.tsx
 
-import React, { useMemo } from "react";
+import { useMemo } from "react";
 
 import { hashVector } from "../domain/homeDrive.math";
 import { isHomeDrivePositionBlockedByRoad } from "../domain/homeDrive.roadExclusion";

@@ -1,7 +1,7 @@
 // src/pages/Mateus/Home/components/mobile/game/driving/three/buildingCollisions/HomeDriveThreeBuildingCollisionMarks.tsx
 
 import { useFrame } from "@react-three/fiber";
-import React, { memo, useEffect, useMemo, useRef, useState } from "react";
+import { memo, useEffect, useMemo, useRef, useState } from "react";
 import { MeshBasicMaterial, PlaneGeometry } from "three";
 
 import type {

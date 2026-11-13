@@ -1,6 +1,6 @@
 // src/pages/Mateus/Home/components/mobile/game/driving/three/HomeDriveThreeRoadNetwork.tsx
 
-import React, { memo, useEffect, useMemo } from "react";
+import { memo, useEffect, useMemo } from "react";
 import type { BufferGeometry, Material } from "three";
 
 import { generateHomeDriveRoadSegments } from "../domain/homeDrive.roadGenerator";

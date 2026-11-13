@@ -1,6 +1,6 @@
 // src/pages/Mateus/Home/components/mobile/game/driving/three/pedestrians/HomeDriveThreePedestrianProps.tsx
 
-import React, { memo, useMemo } from "react";
+import { memo, useMemo } from "react";
 import { Vector3 } from "three";
 
 import type {

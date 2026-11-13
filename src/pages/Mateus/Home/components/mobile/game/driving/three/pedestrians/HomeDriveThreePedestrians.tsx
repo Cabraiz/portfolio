@@ -4,7 +4,7 @@
 
 import { useFrame } from "@react-three/fiber";
 
-import React, { memo, useMemo, useRef, useState } from "react";
+import { memo, useMemo, useRef, useState } from "react";
 
 
 

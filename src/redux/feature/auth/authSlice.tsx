@@ -4,7 +4,6 @@ import { DisplayUser } from "../../app/models/DisplayUser.interface";
 import { Jwt } from "../../app/models/Jwt";
 import { NewUser } from "../../app/models/NewUser";
 import authSevice from "../../app/services/auth.service";
-import { apiSlice } from "../../app/api/apiSlice";
 
 // TODO: move higher
 interface AsyncState {

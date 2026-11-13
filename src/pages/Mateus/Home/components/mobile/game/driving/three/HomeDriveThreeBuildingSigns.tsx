@@ -1,6 +1,6 @@
 // src/pages/Mateus/Home/components/mobile/game/driving/three/HomeDriveThreeBuildingSigns.tsx
 
-import React, { memo, useEffect, useMemo } from "react";
+import { memo, useEffect, useMemo } from "react";
 import {
   CanvasTexture,
   ClampToEdgeWrapping,

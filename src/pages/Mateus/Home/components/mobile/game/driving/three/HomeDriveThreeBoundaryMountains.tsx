@@ -1,6 +1,6 @@
 // src/pages/Mateus/Home/components/mobile/game/driving/three/HomeDriveThreeBoundaryMountains.tsx
 
-import React, { memo, useEffect, useMemo, useRef } from "react";
+import { memo, useEffect, useMemo, useRef } from "react";
 import {
   ConeGeometry,
   DodecahedronGeometry,

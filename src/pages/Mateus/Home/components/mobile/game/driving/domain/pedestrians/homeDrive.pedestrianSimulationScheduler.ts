@@ -1,6 +1,5 @@
 // src/pages/Mateus/Home/components/mobile/game/driving/domain/pedestrians/homeDrive.pedestrianSimulationScheduler.ts
 
-import type { HomeDriveVector2 } from "../homeDrive.types";
 import type { HomeDrivePedestrianAgent } from "./homeDrive.pedestrians.types";
 import type {
   HomeDrivePedestrianSimulationSchedule,

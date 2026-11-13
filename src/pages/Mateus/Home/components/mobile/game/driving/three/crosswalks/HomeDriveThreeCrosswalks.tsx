@@ -1,6 +1,6 @@
 // src/pages/Mateus/Home/components/mobile/game/driving/three/crosswalks/HomeDriveThreeCrosswalks.tsx
 
-import React, { memo, useEffect, useLayoutEffect, useMemo, useRef } from "react";
+import { memo, useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import {
   CylinderGeometry,
   InstancedMesh,

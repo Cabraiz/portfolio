@@ -1,10 +1,10 @@
-import React, { FC, useEffect, useState, FormEvent } from "react";
+import { useEffect, useState, FormEvent } from "react";
 
 import Login_Logo from "../../assets/HubLocal/Login_Logo.webp";
 import Login_Image from "../../assets/HubLocal/Login_Image.webp";
 
 import { toast } from "react-toastify";
-import { Button, InputGroup, Stack, Box, Text, Link } from "@chakra-ui/react";
+import { Button, Stack, Box, Text, Link } from "@chakra-ui/react";
 import { Field, Input } from "@chakra-ui/react";
 import {
   reset,
@@ -12,7 +12,6 @@ import {
   tokenReceived,
 } from "../../redux/feature/auth/authSlice";
 import {
-  LoginRequest,
   useLoginMutation,
 } from "../../redux/feature/auth/authApiSlice";
 import { isMobile } from "react-device-detect";
@@ -30,10 +29,9 @@ import {
   ModeloLadoDireitoPage,
   LoadingPage,
 } from "../Auxiliadores/ModeloJSXPage";
-import { useAppDispatch, useAppSelector } from "../../redux/hooks/hooks";
+import { useAppDispatch } from "../../redux/hooks/hooks";
 import { useNavigate } from "react-router-dom";
 
-import { ProtectedComponent } from "../../redux/feature/auth/ProtectedComponent";
 import "./Register.css";
 
 function NomeInput({

@@ -1,6 +1,6 @@
 // src/pages/Mateus/Home/components/mobile/game/driving/three/pedestrians/HomeDriveThreePedestrianDebug.tsx
 
-import React, { memo } from "react";
+import { memo } from "react";
 
 import type { HomeDrivePedestrianRuntimeState } from "../../domain/pedestrians";
 import { HOME_DRIVE_THREE_PEDESTRIAN_DEBUG_MATERIALS } from "./homeDriveThree.pedestrianMaterials";

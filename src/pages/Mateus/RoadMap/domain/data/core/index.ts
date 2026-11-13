@@ -5,7 +5,6 @@ import type {
 } from "../../model/roadmap.types";
 
 import {
-  fundamentalsRoadMapGraph,
   fundamentalsRoadMapSegment,
 } from "./fundamentals.data";
 

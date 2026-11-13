@@ -1,7 +1,7 @@
 import { localizeLabel, useLabelLanguage } from '@/i18n/labels';
 // src/pages/Mateus/Home/components/mobile/game/driving/view/HomeDriveSpeedometer.tsx
 
-import React, { memo, useMemo, useRef, type CSSProperties } from "react";
+import { memo, useMemo, useRef, type CSSProperties } from "react";
 
 import type { HomeDriveRuntimeImpactState } from "../domain/homeDrive.impact";
 import {

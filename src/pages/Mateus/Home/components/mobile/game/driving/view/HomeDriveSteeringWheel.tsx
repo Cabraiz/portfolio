@@ -1,7 +1,7 @@
 import { localizeLabel, useLabelLanguage } from '@/i18n/labels';
 // src/pages/Mateus/Home/components/mobile/game/driving/view/HomeDriveSteeringWheel.tsx
 
-import React, {
+import {
   memo,
   useCallback,
   useMemo,

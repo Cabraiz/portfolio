@@ -1,6 +1,6 @@
 // src/pages/Mateus/Home/components/mobile/game/driving/HomeDriveGame.tsx
 
-import React, { memo } from "react";
+import { memo } from "react";
 
 import HomeDriveGameView from "./view/HomeDriveGame";
 

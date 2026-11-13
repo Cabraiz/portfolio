@@ -1,7 +1,7 @@
 // src/pages/Mateus/Home/components/mobile/game/driving/three/buildingCollisions/HomeDriveThreeBuildingRubble.tsx
 
 import { useFrame } from "@react-three/fiber";
-import React, {
+import {
   memo,
   useEffect,
   useLayoutEffect,

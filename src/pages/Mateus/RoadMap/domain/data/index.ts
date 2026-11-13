@@ -13,7 +13,6 @@ import {
   coreRoadMapClusters,
   coreRoadMapEdges,
   coreRoadMapNodes,
-  coreRoadMapSegments,
   fundamentalsRoadMapGraph,
   fundamentalsRoadMapSegment,
   type RoadMapDataSegment,
