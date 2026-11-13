@@ -41,9 +41,13 @@ for (const viewport of [
 					'[data-mobile-brand-pusher="true"]'
 				)!;
 				const logo = el.getBoundingClientRect();
-				const actions = document
-					.querySelector('nav[aria-label="Ações de contato"]')!
-					.getBoundingClientRect();
+				// A barra estreita só com transform: a borda visível é a ponta
+				// esquerda do fundo, não a caixa de layout do <nav>.
+				const bar = document.querySelector('nav[aria-label="Ações de contato"]')!;
+				const actions = bar.getBoundingClientRect();
+				const visibleLeft = (
+					bar.querySelector('[data-bar-part="cap"]') ?? bar
+				).getBoundingClientRect().left;
 				const nav = document
 					.querySelector("nav.navbar")!
 					.getBoundingClientRect();
@@ -57,7 +61,7 @@ for (const viewport of [
 					restBottom,
 					actionsTop: actions.top,
 					actionsBottom: actions.bottom,
-					actionsLeft: actions.left,
+					actionsLeft: visibleLeft,
 					navBottom: nav.bottom,
 					owner: el.dataset.mobileBrandOwner,
 					opacity: Number(getComputedStyle(el).opacity),
