@@ -30,7 +30,6 @@ const appRoutes = [
   "registerhublocal",
   "loginhublocal",
   "doris",
-  "casanova",
   "surprise",
   "hublocal",
 ];

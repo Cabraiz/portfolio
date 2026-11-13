@@ -18,7 +18,6 @@ const LoginHubLocal = lazy(() => import("../pages/LoginHubLocal/login"));
 const Hublocal = lazy(() => import("../pages/Hublocal/Hublocal"));
 const Resume = lazy(() => import("../pages/Resume/Resume"));
 const Doris = lazy(() => import("../pages/Doris.mobi/principal"));
-const CasaNova = lazy(() => import("../pages/CasaNova/CasaNova"));
 const Surprise = lazy(() => import("../pages/Surprise/Surprise"));
 const Enigma = lazy(() => import("../pages/Enigma/Enigma"));
 const Libras = lazy(() => import("../pages/Libras/Libras"));
@@ -134,7 +133,6 @@ const AppRoutes = () => {
       <Route path="/resume" element={<Resume />} />
 
       <Route path="/doris" element={<Doris />} />
-      <Route path="/casanova" element={<CasaNova />} />
       <Route path="/surprise" element={<Surprise />} />
 
       <Route path="/hublocal" element={<PrivateOutlet />}>

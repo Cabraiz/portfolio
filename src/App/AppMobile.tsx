@@ -173,7 +173,6 @@ function AppMobile() {
       "/registerhublocal",
       "/resume",
       "/doris",
-      "/casanova",
       "/hublocal",
       "/drive",
       "/elevator",
