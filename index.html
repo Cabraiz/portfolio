@@ -71,10 +71,12 @@
         gap: 18px;
       }
 
+      /* Símbolo com fundo transparente: com mix-blend-mode o fundo preto do
+         ícone aparecia como um quadrado quando a marca subia (a animação a
+         isola numa camada e a mistura deixa de valer). */
       #boot-curtain img {
         width: 64px;
         height: 64px;
-        mix-blend-mode: lighten;
         animation: boot-curtain-breathe 1.6s ease-in-out infinite alternate;
       }
 
@@ -149,7 +151,7 @@
     </noscript>
     <div id="boot-curtain" aria-hidden="true">
       <div class="boot-curtain__mark">
-        <img src="/android-chrome-192x192.png" alt="" width="64" height="64" />
+        <img src="/boot-mark.png" alt="" width="64" height="64" />
         <div class="boot-curtain__bar"></div>
       </div>
     </div>
