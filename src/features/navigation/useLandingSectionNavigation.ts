@@ -1,6 +1,5 @@
 import {
   useCallback,
-  useEffect,
   useMemo,
   useRef,
   useSyncExternalStore,
@@ -10,373 +9,43 @@ import { useLocation, useNavigate } from "react-router-dom";
 
 import {
   DEFAULT_LANDING_SECTION_ID,
-  LANDING_SECTIONS,
   getPathBySectionId,
-  getSectionIdByPath,
   isLandingPath,
   normalizeLandingSectionId,
   type LandingSectionId,
 } from "./landingSections";
 import { getLandingUrlSyncEligibleSectionIds } from "../../pages/Mateus/LandingPage/landingSections.config";
 import { resolveLandingNavbarOffsetPx } from "../../pages/Mateus/LandingPage/landingLayout.tokens";
-import type { LandingActiveSectionCommitTokens } from "../../pages/Mateus/LandingPage/landingActiveSection.tokens";
 import useLandingActiveSection, {
   type ActiveSectionChangeReason,
-  type UseLandingActiveSectionSchedulingOptions,
 } from "../../pages/Mateus/LandingPage/hooks/useLandingActiveSection";
 import type { LandingSectionObservation } from "../../pages/Mateus/LandingPage/hooks/useLandingCommittedSection";
-import type { LandingSectionViewportMode } from "../../pages/Mateus/LandingPage/landing.types";
 import {
-  clearPendingLandingScrollTarget,
-  setPendingLandingScrollTarget,
-} from "../scroll/landingScrollTarget";
+  getStoreSnapshot,
+  patchStoreState,
+  subscribeToStore,
+  useLandingSectionNavigationStoreSync,
+} from "./useLandingSectionNavigation.store";
+import {
+  normalizePathname,
+  normalizeSectionIds,
+  resolveEligibleFallbackSectionId,
+  resolveRouteSectionIdFromPathname,
+  scrollToSectionTarget,
+  writeRoutePathToBrowserHistory,
+} from "./useLandingSectionNavigation.route";
+import type {
+  LandingSectionNavigationNavigateOptions,
+  LenisLike,
+  UseLandingSectionNavigationParams,
+  UseLandingSectionNavigationResult,
+} from "./useLandingSectionNavigation.types";
 
-type LenisLike =
-  | Readonly<{
-      scrollTo: (
-        target: number | HTMLElement,
-        options?: Readonly<{
-          offset?: number;
-          duration?: number;
-          easing?: (value: number) => number;
-          force?: boolean;
-          onComplete?: () => void;
-        }>,
-      ) => void;
-    }>
-  | null
-  | undefined;
-
-export type LandingSectionNavigationNavigateOptions = Readonly<{
-  replace?: boolean;
-  syncUrl?: boolean;
-  forceScroll?: boolean;
-  offsetPx?: number;
-  duration?: number;
-}>;
-
-export type UseLandingSectionNavigationParams = Readonly<{
-  containerRef?: Readonly<{ current: HTMLElement | null }>;
-  defaultSectionId?: LandingSectionId;
-  sectionIds?: readonly LandingSectionId[];
-  sectionSelector?: string;
-  viewportMode?: LandingSectionViewportMode;
-  navbarOffsetPx?: number;
-  activationViewportRatio?: number;
-  disabled?: boolean;
-  viewportWidth?: number | null;
-  tokens?: Partial<LandingActiveSectionCommitTokens>;
-  scheduling?: UseLandingActiveSectionSchedulingOptions;
-  urlSyncEligibleSectionIds?: readonly LandingSectionId[];
-  syncUrl?: boolean;
-  scrollDuration?: number;
-}>;
-
-export type UseLandingSectionNavigationResult = Readonly<{
-  activeSectionId: LandingSectionId;
-  observedSectionId: LandingSectionId;
-  committedSectionId: LandingSectionId;
-  routeSectionId: LandingSectionId;
-  observations: readonly LandingSectionObservation<LandingSectionId>[];
-  controllerReady: boolean;
-  navigateToSection: (
-    sectionId: LandingSectionId,
-    options?: LandingSectionNavigationNavigateOptions,
-  ) => void;
-  replaceRouteSection: (
-    sectionId: LandingSectionId,
-    options?: Readonly<{
-      replace?: boolean;
-    }>,
-  ) => void;
-  resolveRoutePath: (sectionId: LandingSectionId) => string;
-  isUrlSyncEligible: (sectionId: LandingSectionId) => boolean;
-  refreshActiveSection: (reason?: ActiveSectionChangeReason) => void;
-  resolveObservationBySectionId: (
-    sectionId: LandingSectionId,
-  ) => LandingSectionObservation<LandingSectionId> | null;
-  getSectionElement: (sectionId: LandingSectionId) => HTMLElement | null;
-  setActiveSectionId: (sectionId: LandingSectionId) => void;
-}>;
-
-type LandingSectionNavigationStoreState = Readonly<{
-  activeSectionId: LandingSectionId;
-  observedSectionId: LandingSectionId;
-  committedSectionId: LandingSectionId;
-  routeSectionId: LandingSectionId;
-  observations: readonly LandingSectionObservation<LandingSectionId>[];
-  controllerReady: boolean;
-  getSectionElement: ((sectionId: LandingSectionId) => HTMLElement | null) | null;
-  resolveObservationBySectionId:
-    | ((sectionId: LandingSectionId) => LandingSectionObservation<LandingSectionId> | null)
-    | null;
-  refreshActiveSection: ((reason?: ActiveSectionChangeReason) => void) | null;
-  setActiveSectionId: ((sectionId: LandingSectionId) => void) | null;
-}>;
-
-const DEFAULT_SECTION_IDS = LANDING_SECTIONS.map(
-  (section) => section.id,
-) as readonly LandingSectionId[];
-
-const INITIAL_STORE_STATE: LandingSectionNavigationStoreState = {
-  activeSectionId: DEFAULT_LANDING_SECTION_ID,
-  observedSectionId: DEFAULT_LANDING_SECTION_ID,
-  committedSectionId: DEFAULT_LANDING_SECTION_ID,
-  routeSectionId: DEFAULT_LANDING_SECTION_ID,
-  observations: [],
-  controllerReady: false,
-  getSectionElement: null,
-  resolveObservationBySectionId: null,
-  refreshActiveSection: null,
-  setActiveSectionId: null,
-};
-
-let storeState: LandingSectionNavigationStoreState = INITIAL_STORE_STATE;
-
-const storeListeners = new Set<() => void>();
-
-function subscribeToStore(listener: () => void): () => void {
-  storeListeners.add(listener);
-
-  return () => {
-    storeListeners.delete(listener);
-  };
-}
-
-function getStoreSnapshot(): LandingSectionNavigationStoreState {
-  return storeState;
-}
-
-function patchStoreState(
-  patch:
-    | Partial<LandingSectionNavigationStoreState>
-    | ((
-        current: LandingSectionNavigationStoreState,
-      ) => Partial<LandingSectionNavigationStoreState>),
-): void {
-  const resolvedPatch =
-    typeof patch === "function" ? patch(storeState) : patch;
-
-  if (Object.keys(resolvedPatch).length === 0) {
-    return;
-  }
-
-  const nextState: LandingSectionNavigationStoreState = {
-    ...storeState,
-    ...resolvedPatch,
-  };
-
-  const keys = Object.keys(nextState) as Array<
-    keyof LandingSectionNavigationStoreState
-  >;
-
-  const changed = keys.some((key) => !Object.is(storeState[key], nextState[key]));
-
-  if (!changed) {
-    return;
-  }
-
-  storeState = nextState;
-  storeListeners.forEach((listener) => listener());
-}
-
-function normalizePathname(pathname: string | null | undefined): string {
-  if (!pathname) {
-    return "/";
-  }
-
-  const withoutHash = pathname.split("#")[0] ?? "";
-  const withoutQuery = withoutHash.split("?")[0] ?? "";
-  const trimmed = withoutQuery.trim();
-
-  if (!trimmed) {
-    return "/";
-  }
-
-  const withLeadingSlash = trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
-  const collapsedSlashes = withLeadingSlash.replace(/\/{2,}/g, "/");
-
-  if (collapsedSlashes !== "/" && collapsedSlashes.endsWith("/")) {
-    return collapsedSlashes.slice(0, -1);
-  }
-
-  return collapsedSlashes;
-}
-
-function createEaseOutCubic(value: number): number {
-  return 1 - Math.pow(1 - value, 3);
-}
-
-function normalizeSectionIds(
-  sectionIds?: readonly LandingSectionId[],
-): readonly LandingSectionId[] {
-  const base = sectionIds?.length ? sectionIds : DEFAULT_SECTION_IDS;
-
-  return Array.from(new Set(base));
-}
-
-function resolveEligibleFallbackSectionId(
-  defaultSectionId: LandingSectionId,
-  sectionIds: readonly LandingSectionId[],
-): LandingSectionId {
-  if (sectionIds.includes(defaultSectionId)) {
-    return defaultSectionId;
-  }
-
-  return sectionIds[0] ?? DEFAULT_LANDING_SECTION_ID;
-}
-
-function resolveRouteSectionIdFromPathname(params: Readonly<{
-  pathname: string | null | undefined;
-  defaultSectionId: LandingSectionId;
-  eligibleSectionIds: readonly LandingSectionId[];
-}>): LandingSectionId {
-  const { pathname, defaultSectionId, eligibleSectionIds } = params;
-
-  const fallbackSectionId = resolveEligibleFallbackSectionId(
-    defaultSectionId,
-    eligibleSectionIds,
-  );
-
-  if (!isLandingPath(pathname)) {
-    return fallbackSectionId;
-  }
-
-  // getSectionIdByPath desconta o prefixo de idioma (/en, /es).
-  const nextSectionId = getSectionIdByPath(pathname);
-
-  if (nextSectionId && eligibleSectionIds.includes(nextSectionId)) {
-    return nextSectionId;
-  }
-
-  const normalizedPath = normalizePathname(pathname);
-
-  for (const section of LANDING_SECTIONS) {
-    if (normalizePathname(section.path) === normalizedPath) {
-      return eligibleSectionIds.includes(section.id)
-        ? section.id
-        : fallbackSectionId;
-    }
-  }
-
-  return fallbackSectionId;
-}
-
-function resolveExactWindowScrollTop(
-  target: HTMLElement,
-  offsetPx: number,
-): number | null {
-  if (typeof globalThis.window === "undefined") {
-    return null;
-  }
-
-  const browserWindow = globalThis.window;
-  const targetTop = browserWindow.scrollY + target.getBoundingClientRect().top;
-
-  return Math.max(0, Math.round(targetTop - offsetPx));
-}
-
-function scrollToSectionTarget(params: Readonly<{
-  target: HTMLElement;
-  lenis: LenisLike;
-  offsetPx: number;
-  duration: number;
-}>): void {
-  const { target, lenis, offsetPx, duration } = params;
-
-  const targetScrollTop = resolveExactWindowScrollTop(target, offsetPx);
-
-  if (targetScrollTop !== null) {
-    setPendingLandingScrollTarget(targetScrollTop);
-  }
-
-  if (targetScrollTop !== null && lenis) {
-    const browserWindow = globalThis.window;
-    // Na landing desktop a roda e o teclado só paginam (useDesktopSectionPaging)
-    // e não movem a página no meio da animação: lá eles não a interrompem, e
-    // o alvo pendente marca a navegação em curso até ela terminar.
-    const interruptionEvents = document.querySelector(
-      "main[data-landing-viewport='desktop']",
-    )
-      ? (["touchstart", "pointerdown"] as const)
-      : (["wheel", "touchstart", "pointerdown", "keydown"] as const);
-
-    // O Lenis não chama onComplete quando o usuário interrompe a animação;
-    // sem isso o alvo antigo ficaria pendente e seria reaplicado depois.
-    // Nem toda conclusão passa pelo onComplete (ex.: rolagem nativa do teclado
-    // em andamento), então a duração conhecida também libera o alvo.
-    let releaseTimerId: number | undefined;
-    const releaseTarget = () => {
-      interruptionEvents.forEach((eventName) => {
-        browserWindow?.removeEventListener(eventName, releaseTarget, true);
-      });
-      browserWindow?.clearTimeout(releaseTimerId);
-      clearPendingLandingScrollTarget(targetScrollTop);
-    };
-
-    interruptionEvents.forEach((eventName) => {
-      browserWindow?.addEventListener(eventName, releaseTarget, {
-        capture: true,
-        passive: true,
-      });
-    });
-    releaseTimerId = browserWindow?.setTimeout(
-      releaseTarget,
-      Math.max(250, duration * 1000 + 250),
-    );
-
-    lenis.scrollTo(targetScrollTop, {
-      duration,
-      easing: createEaseOutCubic,
-      // Uma navegação nova sempre vence a anterior, mesmo com o Lenis parado.
-      force: true,
-      onComplete: releaseTarget,
-    });
-    return;
-  }
-
-  if (targetScrollTop !== null && typeof globalThis.window !== "undefined") {
-    globalThis.window.scrollTo({
-      top: targetScrollTop,
-      behavior: "smooth",
-    });
-    globalThis.window.setTimeout(
-      () => clearPendingLandingScrollTarget(targetScrollTop),
-      Math.max(250, duration * 1000 + 100)
-    );
-    return;
-  }
-
-  target.scrollIntoView({
-    behavior: "smooth",
-    block: "start",
-  });
-}
-
-function writeRoutePathToBrowserHistory(params: Readonly<{
-  nextPath: string;
-  sectionId: LandingSectionId;
-  replace?: boolean;
-}>): void {
-  if (typeof globalThis.window === "undefined") {
-    return;
-  }
-
-  const { nextPath, sectionId, replace = true } = params;
-  const browserWindow = globalThis.window;
-  const normalizedNextPath = normalizePathname(nextPath);
-  const historyState = {
-    ...(browserWindow.history.state ?? {}),
-    landingSectionId: sectionId,
-  };
-
-  if (replace) {
-    browserWindow.history.replaceState(historyState, "", normalizedNextPath);
-    return;
-  }
-
-  browserWindow.history.pushState(historyState, "", normalizedNextPath);
-}
+export type {
+  LandingSectionNavigationNavigateOptions,
+  UseLandingSectionNavigationParams,
+  UseLandingSectionNavigationResult,
+} from "./useLandingSectionNavigation.types";
 
 export default function useLandingSectionNavigation(
   params: UseLandingSectionNavigationParams = {},
@@ -493,50 +162,11 @@ export default function useLandingSectionNavigation(
     [isUrlSyncEligible, resolvedDefaultSectionId],
   );
 
-  useEffect(() => {
-    patchStoreState({
-      routeSectionId: routeSectionIdFromLocation,
-    });
-  }, [routeSectionIdFromLocation]);
-
-  useEffect(() => {
-    if (!controllerEnabled) {
-      return;
-    }
-
-    patchStoreState({
-      controllerReady: true,
-      activeSectionId: activeSectionState.activeSectionId,
-      observedSectionId: activeSectionState.observedSectionId,
-      committedSectionId: activeSectionState.committedSectionId,
-      observations: activeSectionState.observations,
-      getSectionElement: activeSectionState.getSectionElement,
-      resolveObservationBySectionId:
-        activeSectionState.resolveObservationBySectionId,
-      refreshActiveSection: activeSectionState.refreshActiveSection,
-      setActiveSectionId: activeSectionState.setActiveSectionId,
-    });
-
-    return () => {
-      patchStoreState({
-        controllerReady: false,
-        getSectionElement: null,
-        resolveObservationBySectionId: null,
-        refreshActiveSection: null,
-        setActiveSectionId: null,
-      });
-    };
-  }, [
+  useLandingSectionNavigationStoreSync(
+    routeSectionIdFromLocation,
     controllerEnabled,
-    activeSectionState.activeSectionId,
-    activeSectionState.observedSectionId,
-    activeSectionState.committedSectionId,
-    activeSectionState.observations,
-    activeSectionState.getSectionElement,
-    activeSectionState.resolveObservationBySectionId,
-    activeSectionState.refreshActiveSection,
-    activeSectionState.setActiveSectionId,
-  ]);
+    activeSectionState,
+  );
 
   const replaceRouteSection = useCallback(
     (

@@ -1,10 +1,4 @@
-import {
-	Suspense,
-	createElement,
-	lazy,
-	type ComponentType,
-	type CSSProperties,
-} from "react";
+import { lazy } from "react";
 
 import {
 	VISIBLE_LANDING_SECTION_IDS,
@@ -12,20 +6,36 @@ import {
 	type LandingSectionId,
 } from "@/features/navigation/landingSections";
 
-import RoadMapErrorBoundary from "../RoadMap/ui/chrome/RoadMapErrorBoundary";
-
-import LandingSectionSkeleton from "./LandingSectionSkeleton";
+import type { LandingSectionViewportMode } from "./landing.types";
+import { resolveLandingSectionMinHeight } from "./landingLayout.tokens";
 import type {
-	LandingSectionBehavior,
-	LandingSectionDefinition,
-	LandingSectionViewportMode,
-} from "./landing.types";
+	LandingRenderPolicyOptions,
+	LandingSectionConfig,
+	LandingSectionResolvedDefinition,
+} from "./landingSections.config.types";
 import {
-	resolveLandingNavbarOffsetPx,
-	resolveLandingScrollMarginTop,
-	resolveLandingSectionMinHeight,
-	type LandingSectionHeightRole,
-} from "./landingLayout.tokens";
+	DESKTOP_CONTENT_VIRTUALIZED_BEHAVIOR,
+	DESKTOP_HERO_RENDER_HINTS,
+	DESKTOP_HERO_STABLE_BEHAVIOR,
+	DESKTOP_STABLE_CONTENT_RENDER_HINTS,
+	MOBILE_CONTENT_VIRTUALIZED_BEHAVIOR,
+	MOBILE_DEFAULT_RENDER_HINTS,
+	MOBILE_HERO_STABLE_BEHAVIOR,
+} from "./landingSections.config.behaviors";
+import {
+	ServicesDesktopEntry,
+	ServicesMobileEntry,
+	createViewportConfig,
+	normalizeConfigViewportMode,
+	toLandingSectionDefinition,
+} from "./landingSections.config.factory";
+
+export type {
+	LandingSectionRenderHints,
+	LandingSectionConfig,
+	LandingSectionResolvedDefinition,
+	LandingRenderPolicyOptions,
+} from "./landingSections.config.types";
 
 const ContactDesktop = lazy(() => import("../Contact/ContactDesktop"));
 const ContactMobile = lazy(() => import("../Contact/ContactMobile"));
@@ -33,299 +43,9 @@ const HomeDesktop = lazy(() => import("../Home/variants/HomeDesktop"));
 const HomeMobile = lazy(() => import("../Home/variants/HomeMobile"));
 const Live = lazy(() => import("../Live/Live"));
 const Portfolio = lazy(() => import("../Portfolio/Portfolio"));
-const RoadMap = lazy(() => import("../RoadMap/RoadMap"));
-const RoadMapMobile = lazy(() => import("../RoadMap/RoadMapMobile"));
-const Services = lazy(() => import("../Services/Services"));
 const CognitiveNetwork = lazy(
 	() => import("../CognitiveNetwork/CognitiveNetwork")
 );
-
-const SHOW_LEGACY_ROADMAP = false;
-
-type LandingRenderableViewportMode = "desktop" | "mobile";
-
-export type LandingSectionRenderHints = Readonly<{
-	alwaysMountedOnDesktop?: boolean;
-	prefersStableRender?: boolean;
-	urlSyncEligible?: boolean;
-	preferredNearDistance?: number;
-	disableFarOnDesktop?: boolean;
-}>;
-
-type LandingSectionViewportConfig = Readonly<{
-	Component: ComponentType;
-	sectionRole: LandingSectionHeightRole;
-	expectedMinHeight: CSSProperties["minHeight"];
-	navbarOffsetPx: number;
-	scrollMarginTop: CSSProperties["scrollMarginTop"];
-	behavior?: LandingSectionBehavior;
-	sectionStyle?: CSSProperties;
-	contentStyle?: CSSProperties;
-	renderHints?: LandingSectionRenderHints;
-}>;
-
-export type LandingSectionConfig = Readonly<{
-	id: LandingSectionId;
-	order: number;
-	desktop: LandingSectionViewportConfig;
-	mobile: LandingSectionViewportConfig;
-}>;
-
-export type LandingSectionResolvedDefinition = Readonly<
-	LandingSectionDefinition<LandingSectionId> &
-		LandingSectionRenderHints & {
-			order: number;
-			navbarOffsetPx: number;
-			expectedMinHeight: CSSProperties["minHeight"];
-			scrollMarginTop: CSSProperties["scrollMarginTop"];
-		}
->;
-
-export type LandingRenderPolicyOptions = Readonly<{
-	nearDistance: number;
-	stableNearDistance: number;
-	disableFar: boolean;
-	alwaysMountedSectionIds: readonly LandingSectionId[];
-	stableSectionIds: readonly LandingSectionId[];
-	urlSyncEligibleSectionIds: readonly LandingSectionId[];
-}>;
-
-const DESKTOP_HERO_STABLE_BEHAVIOR: LandingSectionBehavior = {
-	renderStrategy: "always-mounted",
-	measurementStrategy: "none",
-	cacheMeasurements: false,
-	keepMountedWhenNear: true,
-	placeholderFallbackMinHeight: resolveLandingSectionMinHeight("desktop", {
-		preferDynamicViewport: true,
-		sectionRole: "hero",
-	}),
-};
-
-const DESKTOP_CONTENT_VIRTUALIZED_BEHAVIOR: LandingSectionBehavior = {
-	renderStrategy: "placeholder-when-far",
-	measurementStrategy: "resize-observer",
-	cacheMeasurements: true,
-	keepMountedWhenNear: true,
-	placeholderFallbackMinHeight: resolveLandingSectionMinHeight("desktop", {
-		preferDynamicViewport: true,
-		sectionRole: "content",
-	}),
-};
-
-const MOBILE_HERO_STABLE_BEHAVIOR: LandingSectionBehavior = {
-	renderStrategy: "always-mounted",
-	measurementStrategy: "none",
-	cacheMeasurements: false,
-	keepMountedWhenNear: true,
-	placeholderFallbackMinHeight: resolveLandingSectionMinHeight("mobile", {
-		preferDynamicViewport: false,
-		sectionRole: "hero",
-	}),
-};
-
-const MOBILE_CONTENT_VIRTUALIZED_BEHAVIOR: LandingSectionBehavior = {
-	renderStrategy: "placeholder-when-far",
-	measurementStrategy: "resize-observer",
-	cacheMeasurements: true,
-	keepMountedWhenNear: true,
-	placeholderFallbackMinHeight: resolveLandingSectionMinHeight("mobile", {
-		preferDynamicViewport: false,
-		sectionRole: "content",
-	}),
-};
-
-const DESKTOP_HERO_RENDER_HINTS: LandingSectionRenderHints = {
-	alwaysMountedOnDesktop: true,
-	prefersStableRender: true,
-	urlSyncEligible: true,
-	preferredNearDistance: 1,
-	disableFarOnDesktop: false,
-};
-
-const DESKTOP_STABLE_CONTENT_RENDER_HINTS: LandingSectionRenderHints = {
-	alwaysMountedOnDesktop: false,
-	prefersStableRender: false,
-	urlSyncEligible: true,
-	preferredNearDistance: 1,
-	disableFarOnDesktop: false,
-};
-
-const MOBILE_DEFAULT_RENDER_HINTS: LandingSectionRenderHints = {
-	alwaysMountedOnDesktop: false,
-	prefersStableRender: false,
-	urlSyncEligible: true,
-	preferredNearDistance: 1,
-	disableFarOnDesktop: false,
-};
-
-function renderSuspenseFallback(
-	variant: "hero" | "hero-mobile" | "portfolio" | "roadmap" | "content",
-	minHeight: CSSProperties["minHeight"] = "100%"
-) {
-	return (
-		<LandingSectionSkeleton
-			variant={variant}
-			fullHeight
-			minHeight={minHeight}
-		/>
-	);
-}
-
-function RoadMapDesktopWithBoundary() {
-	return (
-		<RoadMapErrorBoundary
-			sectionLabel="RoadMap desktop"
-			fallbackTitle="A seção RoadMap desktop quebrou"
-			resetKey="roadmap-desktop"
-			fullHeight
-			minHeight="100%"
-		>
-			<Suspense fallback={renderSuspenseFallback("roadmap", "100%")}>
-				<RoadMap />
-			</Suspense>
-		</RoadMapErrorBoundary>
-	);
-}
-
-function RoadMapMobileWithBoundary() {
-	return (
-		<RoadMapErrorBoundary
-			sectionLabel="RoadMap mobile"
-			fallbackTitle="A seção RoadMap mobile quebrou"
-			resetKey="roadmap-mobile"
-			fullHeight
-			minHeight="100%"
-		>
-			<Suspense fallback={renderSuspenseFallback("roadmap", "100%")}>
-				<RoadMapMobile />
-			</Suspense>
-		</RoadMapErrorBoundary>
-	);
-}
-
-function ServicesDesktopEntry() {
-	return SHOW_LEGACY_ROADMAP ? <RoadMapDesktopWithBoundary /> : <Services />;
-}
-
-function ServicesMobileEntry() {
-	return SHOW_LEGACY_ROADMAP ? <RoadMapMobileWithBoundary /> : <Services />;
-}
-
-function createViewportConfig(
-	viewportMode: LandingRenderableViewportMode,
-	Component: ComponentType,
-	behavior: LandingSectionBehavior,
-	options?: Readonly<{
-		sectionRole?: LandingSectionHeightRole;
-                subtractNavbarOffset?: boolean;
-                preferDynamicViewport?: boolean;
-		sectionStyle?: CSSProperties;
-		contentStyle?: CSSProperties;
-		renderHints?: LandingSectionRenderHints;
-	}>
-): LandingSectionViewportConfig {
-	const sectionRole = options?.sectionRole ?? "content";
-
-	const expectedMinHeight = resolveLandingSectionMinHeight(viewportMode, {
-                preferDynamicViewport: options?.preferDynamicViewport ?? viewportMode === "desktop",
-		sectionRole,
-		subtractNavbarOffset: options?.subtractNavbarOffset,
-	});
-
-	const scrollMarginTop = resolveLandingScrollMarginTop(viewportMode);
-	const isHeroSection = sectionRole === "hero";
-
-	const defaultSectionStyle: CSSProperties = {
-		minHeight: expectedMinHeight,
-                height: isHeroSection || viewportMode === "mobile" ? expectedMinHeight : "auto",
-		scrollMarginTop,
-	};
-
-        const defaultContentStyle: CSSProperties = isHeroSection || viewportMode === "mobile"
-		? {
-				minHeight: "100%",
-				height: "100%",
-			}
-		: {
-				minHeight: "100%",
-				height: "auto",
-			};
-
-	return {
-		Component,
-		sectionRole,
-		expectedMinHeight,
-		navbarOffsetPx: resolveLandingNavbarOffsetPx(viewportMode),
-		scrollMarginTop,
-		behavior,
-		sectionStyle: {
-			...defaultSectionStyle,
-			...options?.sectionStyle,
-		},
-		contentStyle: {
-			...defaultContentStyle,
-			...options?.contentStyle,
-		},
-		renderHints:
-			viewportMode === "desktop"
-				? {
-						...DESKTOP_STABLE_CONTENT_RENDER_HINTS,
-						...options?.renderHints,
-					}
-				: {
-						...MOBILE_DEFAULT_RENDER_HINTS,
-						...options?.renderHints,
-					},
-	};
-}
-
-function normalizeConfigViewportMode(
-	viewportMode?: LandingSectionViewportMode
-): LandingRenderableViewportMode {
-	return viewportMode === "mobile" ? "mobile" : "desktop";
-}
-
-function toLandingSectionDefinition(
-	config: LandingSectionConfig,
-	viewportMode: LandingRenderableViewportMode
-): LandingSectionResolvedDefinition {
-	const viewportConfig = config[viewportMode];
-	const renderHints = viewportConfig.renderHints ?? {};
-
-	return {
-		id: config.id,
-		order: config.order,
-		viewportMode,
-		content: (
-			<Suspense
-				fallback={renderSuspenseFallback(
-					config.id === "home"
-						? viewportMode === "mobile" ? "hero-mobile" : "hero"
-						: config.id === "portfolio"
-							? "portfolio"
-							: config.id === "roadMap"
-								? "roadmap"
-								: "content",
-					viewportConfig.expectedMinHeight
-				)}
-			>
-				{createElement(viewportConfig.Component)}
-			</Suspense>
-		),
-		placeholderMinHeight: viewportConfig.expectedMinHeight,
-		sectionStyle: viewportConfig.sectionStyle,
-		contentStyle: viewportConfig.contentStyle,
-		behavior: viewportConfig.behavior,
-		navbarOffsetPx: viewportConfig.navbarOffsetPx,
-		expectedMinHeight: viewportConfig.expectedMinHeight,
-		scrollMarginTop: viewportConfig.scrollMarginTop,
-		alwaysMountedOnDesktop: renderHints.alwaysMountedOnDesktop,
-		prefersStableRender: renderHints.prefersStableRender,
-		urlSyncEligible: renderHints.urlSyncEligible,
-		preferredNearDistance: renderHints.preferredNearDistance,
-		disableFarOnDesktop: renderHints.disableFarOnDesktop,
-	};
-}
 
 export const LANDING_SECTIONS_CONFIG = [
 	{

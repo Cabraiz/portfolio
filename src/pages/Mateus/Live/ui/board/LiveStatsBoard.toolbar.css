@@ -1,0 +1,227 @@
+/* src/pages/Mateus/Live/ui/board/LiveStatsBoard.module.css */
+
+.root {
+  --live-board-surface:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01)),
+    linear-gradient(180deg, rgba(8, 10, 14, 0.94), rgba(5, 7, 10, 0.98));
+  --live-board-panel:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.028), rgba(255, 255, 255, 0.012)),
+    rgba(9, 13, 18, 0.88);
+  --live-board-border-soft: rgba(255, 255, 255, 0.08);
+  --live-board-border-strong: rgba(255, 255, 255, 0.14);
+  --live-board-text-strong: rgba(255, 255, 255, 0.96);
+  --live-board-text-base: rgba(255, 255, 255, 0.76);
+  --live-board-text-soft: rgba(255, 255, 255, 0.56);
+  --live-board-shadow: 0 28px 80px rgba(0, 0, 0, 0.28);
+  --live-board-radius-xl: clamp(24px, 2.4vw, 34px);
+  --live-board-radius-lg: clamp(18px, 1.8vw, 24px);
+  --live-board-radius-md: 16px;
+  --live-board-gap: clamp(14px, 1.8vw, 22px);
+
+  position: relative;
+  display: grid;
+  gap: var(--live-board-gap);
+  width: 100%;
+  padding: clamp(18px, 2vw, 28px);
+  border: 1px solid var(--live-board-border-soft);
+  border-radius: var(--live-board-radius-xl);
+  background: var(--live-board-surface);
+  box-shadow: var(--live-board-shadow);
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.root::before {
+  content: "";
+  position: absolute;
+  inset: -18% auto auto -10%;
+  width: 38%;
+  aspect-ratio: 1 / 1;
+  border-radius: 999px;
+  background: radial-gradient(
+    circle,
+    rgba(96, 165, 250, 0.16) 0%,
+    rgba(96, 165, 250, 0.08) 32%,
+    transparent 72%
+  );
+  filter: blur(16px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.root::after {
+  content: "";
+  position: absolute;
+  inset: auto -12% -26% auto;
+  width: 44%;
+  aspect-ratio: 1 / 1;
+  border-radius: 999px;
+  background: radial-gradient(
+    circle,
+    rgba(52, 211, 153, 0.12) 0%,
+    rgba(52, 211, 153, 0.04) 35%,
+    transparent 72%
+  );
+  filter: blur(20px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.toolbar,
+.heroGrid,
+.midRow,
+.secondaryGrid {
+  position: relative;
+  z-index: 1;
+}
+
+.toolbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(280px, 0.95fr);
+  gap: var(--live-board-gap);
+  align-items: start;
+}
+
+.toolbarMain {
+  display: grid;
+  gap: 14px;
+}
+
+.liveBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  width: fit-content;
+  padding: 8px 12px;
+  border: 1px solid var(--live-board-border-soft);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(10px);
+}
+
+.liveDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(248, 113, 113, 0.96);
+  box-shadow: 0 0 0 0 rgba(248, 113, 113, 0.42);
+}
+
+.liveDot[data-running="true"] {
+  animation: liveDotPulse 1.8s ease-out infinite;
+}
+
+.liveDot[data-running="false"] {
+  background: rgba(148, 163, 184, 0.9);
+  box-shadow: none;
+}
+
+.liveBadgeLabel {
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--live-board-text-strong);
+}
+
+.headlineBlock {
+  display: grid;
+  gap: 10px;
+}
+
+.title {
+  margin: 0;
+  font-size: clamp(1.36rem, 2vw, 2.18rem);
+  line-height: 1.02;
+  letter-spacing: -0.04em;
+  color: var(--live-board-text-strong);
+}
+
+.subtitle {
+  margin: 0;
+  max-width: 68ch;
+  font-size: 0.98rem;
+  line-height: 1.65;
+  color: var(--live-board-text-base);
+}
+
+.toolbarAside {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  align-content: start;
+}
+
+.commandInfo,
+.focusPanel,
+.signalStrip,
+.metricCard {
+  border: 1px solid var(--live-board-border-soft);
+  background: var(--live-board-panel);
+  backdrop-filter: blur(14px);
+}
+
+.commandInfo {
+  display: grid;
+  gap: 6px;
+  min-height: 84px;
+  padding: 14px 16px;
+  border-radius: var(--live-board-radius-lg);
+}
+
+.commandLabel {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--live-board-text-soft);
+}
+
+.commandValue {
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--live-board-text-strong);
+}
+
+.commandActions {
+  display: flex;
+  grid-column: 1 / -1;
+  gap: 10px;
+}
+
+.commandButton {
+  appearance: none;
+  border: 1px solid rgba(96, 165, 250, 0.24);
+  border-radius: 999px;
+  padding: 11px 16px;
+  background:
+    linear-gradient(180deg, rgba(96, 165, 250, 0.16), rgba(96, 165, 250, 0.08)),
+    rgba(255, 255, 255, 0.02);
+  color: var(--live-board-text-strong);
+  font: inherit;
+  font-size: 0.86rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    background-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.commandButton:hover,
+.commandButton:focus-visible {
+  transform: translateY(-1px);
+  border-color: rgba(96, 165, 250, 0.4);
+  box-shadow: 0 10px 22px rgba(59, 130, 246, 0.18);
+  outline: none;
+}
+
+.commandButtonGhost {
+  border-color: var(--live-board-border-soft);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02)),
+    rgba(255, 255, 255, 0.01);
+}

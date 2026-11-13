@@ -1,0 +1,203 @@
+
+@media (max-height: 720px) and (min-width: 1081px) {
+  .root {
+    --roadmap-page-max-width: min(1275px, 85vw);
+    --roadmap-page-padding-x: clamp(26px, 3.9vw, 48px);
+  }
+
+  .canvasBlock {
+    min-height: var(--roadmap-canvas-min-height-laptop);
+  }
+
+  .sideCollapsedTitleCard {
+    min-height: 156px;
+  }
+}
+
+@media (max-width: 1360px) and (min-width: 993px) {
+  .root {
+    --roadmap-page-padding-x: clamp(10px, 1.2vw, 18px);
+    --roadmap-side-expanded-width: var(--roadmap-side-expanded-width-compact);
+  }
+
+  .contentGridSideCollapsed {
+    grid-template-columns: minmax(0, 1fr) var(--roadmap-side-collapsed-width);
+  }
+
+  .contentGridSideExpanded {
+    grid-template-columns: minmax(0, 1fr) minmax(280px, var(--roadmap-side-expanded-width-compact));
+  }
+
+  .canvasBlock {
+    min-height: var(--roadmap-canvas-min-height-laptop);
+  }
+
+  .sideColumnCollapsed,
+  .sideColumnExpanded {
+    position: relative;
+    min-width: 0;
+    align-self: start;
+  }
+
+  .sideColumnCollapsed {
+    display: grid;
+    justify-items: end;
+    width: var(--roadmap-side-collapsed-width);
+  }
+
+  .sideColumnExpanded {
+    display: block;
+  }
+
+  .sideCollapsedRail {
+    width: var(--roadmap-side-collapsed-width);
+  }
+
+  .sideCollapsedTitleCard {
+    width: 44px;
+    min-height: 164px;
+  }
+}
+
+@media (max-width: 992px) {
+  .root {
+    --roadmap-page-padding-x: 12px;
+    --roadmap-page-padding-y: 14px;
+    padding: var(--roadmap-page-padding-y) var(--roadmap-page-padding-x);
+  }
+
+  .stack {
+    gap: 12px;
+  }
+
+  .contentGridSideCollapsed,
+  .contentGridSideExpanded {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .mainColumn {
+    order: 1;
+  }
+
+  .sideColumn,
+  .sideColumnCollapsed,
+  .sideColumnExpanded {
+    order: 2;
+    display: block;
+    position: relative;
+    min-width: 0;
+    width: 100%;
+  }
+
+  .canvasBlock {
+    min-height: var(--roadmap-canvas-min-height-tablet);
+    border-radius: 20px;
+    padding: 6px;
+  }
+
+  .sideCollapsedRail {
+    position: static;
+    width: 100%;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    justify-items: stretch;
+    align-items: start;
+  }
+
+  .sideCollapsedTitleCard {
+    width: 100%;
+    min-height: 44px;
+    padding: 10px 12px;
+    grid-auto-flow: column;
+    justify-content: start;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .sideCollapsedTitleEyebrow {
+    writing-mode: horizontal-tb;
+    transform: none;
+    min-width: unset;
+    min-height: 18px;
+    padding: 0 7px;
+    font-size: 0.58rem;
+  }
+
+  .sideCollapsedTitleText {
+    writing-mode: horizontal-tb;
+    transform: none;
+    text-align: left;
+    font-size: 0.82rem;
+    line-height: 1.1;
+  }
+
+  .sideCollapsedAction {
+    width: 44px;
+    height: 44px;
+  }
+
+  .sidePanelCard {
+    position: static;
+    max-height: none;
+    margin-top: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .canvasBlock {
+    min-height: var(--roadmap-canvas-min-height-mobile);
+    padding: 4px;
+    border-radius: 16px;
+  }
+
+  .mobileRoot {
+    padding: 12px 10px;
+  }
+
+  .mobileStack {
+    gap: 10px;
+  }
+
+  .mobileCanvasBlock {
+    min-height: clamp(620px, 70vh, 860px);
+    padding: 3px;
+    border-radius: 16px;
+  }
+
+  .sidePanelCard {
+    padding: 12px;
+    border-radius: 20px;
+  }
+
+  .sideTitleCard {
+    padding: 10px;
+    border-radius: 16px;
+  }
+
+  .sideTitleText {
+    font-size: 0.88rem;
+  }
+
+  .sidePanelToggles {
+    grid-template-columns: 1fr;
+  }
+
+  .chromeToggle {
+    min-height: 34px;
+    font-size: 11px;
+  }
+
+  .roadMapGraphEdge {
+    stroke-width: 2.2px;
+    opacity: 0.88;
+  }
+
+  .roadMapGraphEdgeFeatured {
+    opacity: 0.94;
+    stroke-width: 2.5px;
+  }
+
+  .roadMapGraphEdgeActive {
+    opacity: 1;
+    stroke-width: 2.8px;
+  }
+}

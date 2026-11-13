@@ -1,0 +1,147 @@
+.roadMapLayout {
+  grid-template-rows: auto 1fr;
+  gap: clamp(16px, 1.8vw, 24px);
+  min-width: 0;
+}
+
+.roadMapTopBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-width: 0;
+}
+
+.roadMapTopFilters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.filterPill {
+  width: 84px;
+  height: 30px;
+  border-radius: 999px;
+}
+
+.roadMapCanvas {
+  position: relative;
+  min-width: 0;
+  min-height: 460px;
+  padding: clamp(18px, 1.8vw, 24px);
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at 18% 22%, rgba(255, 215, 0, 0.05), transparent 0 20%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.roadMapClusterRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 26px;
+}
+
+.cluster {
+  width: clamp(140px, 16vw, 210px);
+  height: 44px;
+  border-radius: 16px;
+}
+
+.roadMapNodeGrid {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.node {
+  width: 100%;
+  min-width: 0;
+  height: 74px;
+  border-radius: 18px;
+}
+
+.connectionLayer {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.connectionA,
+.connectionB,
+.connectionC {
+  position: absolute;
+  display: block;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 215, 0, 0.06),
+    rgba(255, 255, 255, 0.08),
+    rgba(255, 215, 0, 0.03)
+  );
+  filter: blur(0.2px);
+  opacity: 0.7;
+}
+
+.connectionA {
+  top: 34%;
+  left: 16%;
+  width: 34%;
+  height: 2px;
+  transform: rotate(8deg);
+}
+
+.connectionB {
+  top: 54%;
+  left: 42%;
+  width: 24%;
+  height: 2px;
+  transform: rotate(-14deg);
+}
+
+.connectionC {
+  top: 66%;
+  left: 18%;
+  width: 42%;
+  height: 2px;
+  transform: rotate(-4deg);
+}
+
+.contentLayout {
+  grid-template-rows: auto 1fr;
+  gap: 18px;
+  min-width: 0;
+}
+
+.contentHeader {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+}
+
+.contentGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(16px, 1.8vw, 24px);
+  min-width: 0;
+}
+
+.panel {
+  min-width: 0;
+  min-height: 240px;
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  padding: clamp(18px, 1.8vw, 24px);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-sizing: border-box;
+}

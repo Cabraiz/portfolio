@@ -1,0 +1,65 @@
+
+@media (max-height: 680px) and (min-width: 992px) {
+	.heading {
+		top: 56px;
+		left: max(8px, calc((100vw - 1560px) / 2 + 8px));
+		inline-size: min(347px, 26vw);
+	}
+
+	.workbenchRig {
+		inline-size: max(71.4vw, 784px);
+	}
+}
+
+@media (max-width: 991px) {
+	.background {
+		object-position: 55% center;
+	}
+
+	.heading {
+		top: max(20px, calc(env(safe-area-inset-top) + 20px));
+		left: 8px;
+		right: auto;
+		align-items: flex-start;
+		inline-size: min(63.6vw, 376px);
+		margin-inline: 0;
+		text-align: left;
+	}
+
+	.workbenchRig {
+		inline-size: max(182vw, 644px);
+	}
+
+	.deviceRow {
+		left: 42%;
+		right: 1%;
+	}
+}
+
+@media (max-width: 420px) and (max-height: 700px) {
+	.heading {
+		top: max(20px, calc(env(safe-area-inset-top) + 20px));
+	}
+
+	.workbenchRig {
+		inline-size: max(164.5vw, 574px);
+	}
+
+	.deviceRow {
+		left: 36%;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.background,
+	.atmosphere,
+	.heading,
+	.title,
+	.workbenchRig {
+		animation: none;
+		transition: none;
+		transform: none !important;
+		opacity: 1 !important;
+		will-change: auto;
+	}
+}

@@ -1,0 +1,179 @@
+
+.secondaryGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.metricCard {
+  --live-board-accent: rgba(148, 163, 184, 0.88);
+
+  appearance: none;
+  display: grid;
+  gap: 14px;
+  width: 100%;
+  text-align: left;
+  color: inherit;
+  cursor: pointer;
+  padding: 18px;
+  border-radius: var(--live-board-radius-lg);
+  position: relative;
+  overflow: hidden;
+  transition:
+    transform 220ms ease,
+    border-color 220ms ease,
+    box-shadow 220ms ease,
+    background-color 220ms ease;
+}
+
+.metricCard::before {
+  content: "";
+  position: absolute;
+  inset: -28% auto auto -12%;
+  width: 180px;
+  height: 180px;
+  border-radius: 999px;
+  background: radial-gradient(circle, var(--live-board-accent) 0%, transparent 72%);
+  opacity: 0.12;
+  filter: blur(18px);
+  pointer-events: none;
+}
+
+.metricCard::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035);
+  pointer-events: none;
+}
+
+.metricCard:hover,
+.metricCard:focus-visible {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--live-board-accent) 32%, rgba(255, 255, 255, 0.1));
+  box-shadow:
+    0 20px 36px rgba(0, 0, 0, 0.2),
+    0 0 0 1px color-mix(in srgb, var(--live-board-accent) 24%, transparent);
+  outline: none;
+}
+
+.metricCard[data-selected="true"] {
+  border-color: color-mix(in srgb, var(--live-board-accent) 48%, rgba(255, 255, 255, 0.14));
+  box-shadow:
+    0 22px 40px rgba(0, 0, 0, 0.24),
+    0 0 0 1px color-mix(in srgb, var(--live-board-accent) 28%, transparent);
+}
+
+.metricCardHero {
+  min-height: 246px;
+  padding: 20px;
+}
+
+.metricCardCompact {
+  min-height: 188px;
+  padding: 16px;
+}
+
+.metricCardTopRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.metricEyebrow {
+  max-width: 60%;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--live-board-text-soft);
+}
+
+.metricTrend {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  padding: 7px 10px;
+  border: 1px solid var(--live-board-border-soft);
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--live-board-text-base);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.metricTrendGlyph {
+  font-size: 0.86rem;
+  color: var(--live-board-accent);
+}
+
+.metricValue {
+  font-size: clamp(1.92rem, 3vw, 3.24rem);
+  line-height: 0.95;
+  letter-spacing: -0.06em;
+  color: var(--live-board-text-strong);
+}
+
+.metricCardCompact .metricValue {
+  font-size: clamp(1.48rem, 2vw, 2.18rem);
+}
+
+.metricDescription {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.68;
+  color: var(--live-board-text-base);
+}
+
+.metricCardCompact .metricDescription {
+  font-size: 0.88rem;
+  line-height: 1.58;
+}
+
+.metricFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: auto;
+}
+
+.metricBadge,
+.metricBadgeMuted,
+.metricHint,
+.metricHintMuted {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 7px 10px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.metricBadge {
+  border: 1px solid color-mix(in srgb, var(--live-board-accent) 32%, transparent);
+  color: var(--live-board-text-strong);
+  background: color-mix(in srgb, var(--live-board-accent) 10%, transparent);
+}
+
+.metricBadgeMuted {
+  border: 1px solid var(--live-board-border-soft);
+  color: var(--live-board-text-base);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.metricHint {
+  color: var(--live-board-accent);
+}
+
+.metricHintMuted {
+  color: var(--live-board-text-soft);
+}

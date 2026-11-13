@@ -1,0 +1,90 @@
+
+.mobileRoot {
+  --roadmap-mobile-max-width: 860px;
+  --roadmap-mobile-padding-x: 12px;
+  --roadmap-mobile-padding-y: 14px;
+  --roadmap-mobile-gap: 12px;
+
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  padding: var(--roadmap-mobile-padding-y) var(--roadmap-mobile-padding-x);
+  box-sizing: border-box;
+}
+
+.mobileStack {
+  display: grid;
+  gap: var(--roadmap-mobile-gap);
+  width: min(100%, var(--roadmap-mobile-max-width));
+  margin: 0 auto;
+}
+
+.mobileChromeCard {
+  min-width: 0;
+  border: 1px solid var(--roadmap-surface-border);
+  border-radius: 18px;
+  background: #ffffff;
+  overflow: hidden;
+  box-shadow: var(--roadmap-shadow-soft);
+}
+
+.mobileCanvasBlock {
+  min-width: 0;
+  width: 100%;
+  min-height: clamp(720px, 76vh, 980px);
+  padding: 4px;
+  border: 1px solid var(--roadmap-surface-border);
+  border-radius: 18px;
+  background: #ffffff;
+  overflow: hidden;
+  box-shadow: var(--roadmap-shadow-soft);
+  box-sizing: border-box;
+}
+
+.mobileBottomPanel {
+  display: grid;
+  gap: 12px;
+}
+
+.mobileDetailsBlock {
+  min-width: 0;
+}
+
+.roadMapGraphEdge {
+  fill: none;
+  stroke: var(--roadmap-edge-color-base);
+  opacity: var(--roadmap-edge-opacity);
+  stroke-width: var(--roadmap-edge-stroke-width);
+  stroke-dasharray: var(--roadmap-edge-dasharray);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+  transition:
+    opacity 180ms ease,
+    stroke-width 180ms ease,
+    filter 180ms ease,
+    stroke 180ms ease;
+}
+
+.roadMapGraphEdgeRequires {
+  stroke: var(--roadmap-edge-requires);
+}
+
+.roadMapGraphEdgeBuildsOn {
+  stroke: var(--roadmap-edge-builds-on);
+}
+
+.roadMapGraphEdgeRelated {
+  stroke: var(--roadmap-edge-related);
+}
+
+.roadMapGraphEdgeFeatured {
+  opacity: var(--roadmap-edge-opacity-featured);
+  stroke-width: var(--roadmap-edge-stroke-width-featured);
+}
+
+.roadMapGraphEdgeActive {
+  opacity: var(--roadmap-edge-opacity-active);
+  stroke-width: var(--roadmap-edge-stroke-width-active);
+  filter: drop-shadow(0 0 6px rgba(59, 130, 246, 0.18));
+}

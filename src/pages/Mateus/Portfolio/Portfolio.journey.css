@@ -1,0 +1,268 @@
+.mapSceneActive {
+	opacity: 1;
+	transform: translateY(0) scale(1);
+}
+
+.mapSceneInactive {
+	opacity: 0;
+	transform: translateY(12%) scale(0.78);
+	pointer-events: none;
+}
+
+.worldJourney {
+	position: absolute;
+	inset: 0;
+	z-index: 5;
+	opacity: 1;
+}
+
+.journeyRoute,
+.journeyTraveler {
+	position: absolute;
+	top: var(--route-y);
+	left: var(--route-x);
+	width: var(--route-length);
+	height: 0;
+	transform: rotate(var(--route-angle));
+	transform-origin: left center;
+}
+
+.journeyRoute {
+	z-index: 2;
+	border-top: 2px dashed rgba(4, 82, 79, 0.88);
+	filter: drop-shadow(0 1px 2px rgba(255, 255, 245, 0.8));
+	animation: journeyRouteDraw var(--atlas-camera-duration) var(--atlas-camera-ease)
+		both;
+}
+
+/* Em voo de conexão o avião sai de outro país: a linha de Fortaleza desenha
+   1 s mais devagar para não chegar ao destino muito antes dele. */
+.journeyRoute[data-world-journey-route-pace="connection"] {
+	animation-duration: calc(var(--atlas-camera-duration) + 1s);
+}
+
+.journeyTraveler {
+	z-index: 7;
+	pointer-events: none;
+}
+
+/* Avião que voa a rota (renderizado de cima a partir de um modelo 3D).
+   Tudo aqui anima só transform e opacity, que o navegador roda na GPU (no
+   compositor), sem depender da thread principal: a troca de projeto anima o
+   card ao mesmo tempo e, com `left` e uma variável CSS animada, o avião
+   travava a cada quadro em que o card ocupava a thread.
+
+   O portador tem o comprimento da rota e o avião fica na ponta direita dele;
+   o voo é translateX(-100% → 0), em % do próprio portador. */
+.journeyTraveler > span {
+	--plane-w: 51px;
+	--plane-h: 40px;
+	position: absolute;
+	top: calc(var(--plane-h) / -2);
+	left: 0;
+	width: 100%;
+	height: var(--plane-h);
+	transform: translateX(0);
+	will-change: transform, opacity;
+	animation: journeyTravelerMove var(--atlas-camera-duration)
+		var(--atlas-camera-ease) both;
+}
+
+.journeyPlane {
+	position: absolute;
+	top: 0;
+	right: calc(var(--plane-w) / -2);
+	width: var(--plane-w);
+	height: var(--plane-h);
+}
+
+.journeyPlane img {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	object-fit: contain;
+	user-select: none;
+	pointer-events: none;
+}
+
+/* Altitude (decola, cruza, pousa): o avião cresce e a sombra se afasta e
+   clareia. Valores de repouso = em cruzeiro. */
+.journeyPlaneBody {
+	transform: scale(1);
+	filter: drop-shadow(0 0 0.6px rgba(2, 48, 46, 0.55));
+	will-change: transform;
+	animation: journeyPlaneBodyAltitude var(--atlas-camera-duration)
+		var(--atlas-camera-ease) both;
+}
+
+/* A sombra cai sempre para baixo e para a direita na tela, qualquer que seja
+   o rumo: desfaz a rotação da rota, desloca e volta a girar. O desfoque é
+   fixo (animar filter redesenha a cada quadro). */
+.journeyPlaneShadow {
+	transform: rotate(calc(-1 * var(--route-angle))) translate(8px, 11px)
+		rotate(var(--route-angle)) scale(0.82);
+	filter: brightness(0) blur(1.6px);
+	opacity: 0.24;
+	will-change: transform, opacity;
+	animation: journeyPlaneShadowAltitude var(--atlas-camera-duration)
+		var(--atlas-camera-ease) both;
+}
+
+.journeyMarker {
+	all: unset;
+	position: absolute;
+	z-index: 8;
+	display: grid;
+	place-items: center;
+	width: 34px;
+	height: 34px;
+	border-radius: 50%;
+	box-sizing: border-box;
+	cursor: default;
+}
+
+.journeyOrigin {
+	top: var(--geo-y);
+	left: var(--geo-x);
+	transform: translate(-50%, -50%);
+	animation: originAppear 360ms 80ms ease both;
+}
+
+.journeyDestination {
+	top: var(--geo-y);
+	left: var(--geo-x);
+	cursor: pointer;
+	pointer-events: auto;
+	transform: translate(-50%, -50%);
+	/* Aparece junto com o pouso (fim da câmera). */
+	animation: destinationAppear 520ms calc(var(--atlas-camera-duration) - 270ms)
+		cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.journeyMarkerDot {
+	width: 15px;
+	height: 15px;
+	border: 4px solid rgba(255, 255, 247, 0.96);
+	border-radius: 50%;
+	box-sizing: border-box;
+	background: #075c59;
+	box-shadow:
+		0 0 0 6px rgba(247, 251, 238, 0.46),
+		0 9px 20px rgba(2, 57, 56, 0.24);
+}
+
+.journeyDestination .journeyMarkerDot {
+	width: 19px;
+	height: 19px;
+	background: #fffdf1;
+	box-shadow:
+		0 0 0 3px #075c59,
+		0 0 0 9px rgba(247, 251, 238, 0.56),
+		0 10px 24px rgba(2, 57, 56, 0.3);
+}
+
+.journeyMarkerLabel {
+	position: absolute;
+	top: -11px;
+	left: 29px;
+	display: flex;
+	flex-direction: column;
+	width: max-content;
+	max-width: 150px;
+	padding: 8px 11px;
+	border-radius: 7px;
+	color: #f5f7ea;
+	background: linear-gradient(
+		135deg,
+		rgba(5, 79, 76, 0.97),
+		rgba(3, 54, 55, 0.97)
+	);
+	box-shadow: 0 10px 22px rgba(2, 53, 52, 0.2);
+	text-align: left;
+	pointer-events: none;
+}
+
+.journeyOrigin .journeyMarkerLabel {
+	right: 29px;
+	left: auto;
+}
+
+/* Sem espaço à direita (borda do mapa ou botões de zoom): useMapLabelSide
+   vira o balão para a esquerda do ponto. */
+[data-label-side="left"] > .journeyMarkerLabel {
+	right: 29px;
+	left: auto;
+}
+
+/* O ponto do Brasil tem halo maior: o balão fica um pouco mais longe. */
+[data-label-side="left"] > .mapPointLabel {
+	right: 32px;
+	left: auto;
+}
+
+.journeyMarkerLabel strong {
+	font-size: 11px;
+	line-height: 1.05;
+}
+
+.journeyMarkerLabel small {
+	margin-top: 3px;
+	font-size: 7px;
+	font-weight: 800;
+	letter-spacing: 0.07em;
+	opacity: 0.72;
+}
+
+.routeNetwork {
+	position: absolute;
+	inset: 0;
+	pointer-events: none;
+}
+
+.routeLine {
+	position: absolute;
+	top: var(--route-y);
+	left: var(--route-x);
+	width: var(--route-length);
+	height: 0;
+	border-top: 2px dashed rgba(247, 252, 241, 0.88);
+	transform: rotate(var(--route-angle));
+	transform-origin: left center;
+	filter: drop-shadow(0 1px 1px rgba(2, 65, 62, 0.18));
+	opacity: 0.82;
+	transition:
+		opacity 220ms ease,
+		border-color 220ms ease,
+		filter 220ms ease;
+}
+
+.routeLineActive {
+	border-color: rgba(2, 79, 76, 0.94);
+	filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.72));
+	opacity: 1;
+}
+
+.routeHub {
+	position: absolute;
+	top: var(--geo-y);
+	left: var(--geo-x);
+	z-index: 4;
+	width: 40px;
+	height: 40px;
+	border: 3px solid #f8fbef;
+	border-radius: 50%;
+	box-sizing: border-box;
+	background: rgba(5, 93, 88, 0.9);
+	box-shadow:
+		0 0 0 7px rgba(247, 251, 238, 0.52),
+		0 10px 24px rgba(1, 70, 67, 0.24);
+	transform: translate(-50%, -50%);
+}
+
+.routeHub span {
+	position: absolute;
+	inset: 9px;
+	border-radius: 50%;
+	background: #fffdf1;
+}

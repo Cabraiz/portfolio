@@ -22,79 +22,18 @@ import {
 } from "./domains/homeElevator.runtime";
 import type { HomeElevatorRuntimeState } from "./domains/homeElevator.types";
 import styles from "./HomeElevatorGame.module.css";
+import {
+	type PendingCommand,
+	FLOOR_NUMBERS,
+	clamp,
+	formatScore,
+	getDoorOpenRatio,
+	getStatusText,
+} from "./HomeElevatorGame.helpers";
 
 export type HomeElevatorGameProps = Readonly<{
   onClose?: () => void;
 }>;
-
-type PendingCommand = Readonly<{
-  selectedTargetFloor?: number;
-  requestDoorToggle?: boolean;
-  forceSpawn?: boolean;
-}>;
-
-const FLOOR_NUMBERS = Array.from(
-  { length: HOME_ELEVATOR_FLOOR_COUNT },
-  (_, index) => HOME_ELEVATOR_TOP_FLOOR - index,
-);
-
-function clamp(value: number, min: number, max: number): number {
-  if (!Number.isFinite(value)) {
-    return min;
-  }
-
-  return Math.max(min, Math.min(max, value));
-}
-
-function formatScore(score: number): string {
-  return Math.round(score).toLocaleString("pt-BR");
-}
-
-function getDoorOpenRatio(doorState: HomeElevatorRuntimeState["cabin"]["doorState"]): number {
-  switch (doorState) {
-    case "opening":
-    case "open":
-      return 1;
-    case "closing":
-    case "closed":
-    default:
-      return 0;
-  }
-}
-
-function getStatusText(state: HomeElevatorRuntimeState): string {
-  const { cabin, waiting } = state;
-
-  if (state.energy <= 0) {
-    return "Energia zerada. Segure o prédio e reinicie a operação.";
-  }
-
-  if (cabin.doorState === "open") {
-    return "Portas abertas: entregando passageiros e embarcando quem está no andar.";
-  }
-
-  if (cabin.doorState === "opening") {
-    return "Abrindo portas.";
-  }
-
-  if (cabin.doorState === "closing") {
-    return "Fechando portas.";
-  }
-
-  if (Math.abs(cabin.targetFloor - cabin.yFloor) > 0.05) {
-    return `Indo para o ${cabin.targetFloor}º andar.`;
-  }
-
-  if (cabin.onboard.length > 0) {
-    return "Escolha o destino mais próximo para manter sequência de entrega.";
-  }
-
-  if (waiting.length > 0) {
-    return "Há chamadas ativas. Toque em um andar com ponto vermelho.";
-  }
-
-  return "Prédio sob controle. Aguarde a próxima chamada.";
-}
 
 export default function HomeElevatorGame({ onClose }: HomeElevatorGameProps) {
   useLabelLanguage();

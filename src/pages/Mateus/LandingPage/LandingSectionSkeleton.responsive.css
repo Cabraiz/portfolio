@@ -1,0 +1,229 @@
+@keyframes landing-skeleton-shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@media (max-width: 1600px) {
+  .heroLayout {
+    --hero-layout-max-width: clamp(1060px, 86vw, 1240px);
+    --hero-layout-gap: clamp(16px, 1.5vw, 24px);
+    --hero-main-max-width: clamp(500px, 36vw, 590px);
+    --hero-aside-max-width: clamp(350px, 29vw, 450px);
+
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 0.88fr);
+  }
+
+  .heroSignalColumn {
+    width: min(100%, 252px);
+  }
+}
+
+@media (max-width: 1440px) {
+  .heroLayout {
+    --hero-layout-max-width: min(100%, 1120px);
+    --hero-layout-gap: clamp(14px, 1.4vw, 20px);
+    --hero-main-max-width: clamp(470px, 35vw, 540px);
+    --hero-aside-max-width: clamp(330px, 28vw, 410px);
+
+    grid-template-columns: minmax(0, 1fr) minmax(300px, 390px);
+    padding-inline: 0;
+  }
+
+  .heroSignalColumn {
+    width: min(100%, 236px);
+  }
+}
+
+@media (max-width: 1280px) {
+  .heroLayout {
+    --hero-layout-max-width: min(100%, 1000px);
+    --hero-layout-gap: 16px;
+    --hero-main-max-width: 500px;
+    --hero-aside-max-width: 360px;
+
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
+  }
+
+  .heroSignalColumn {
+    width: min(100%, 220px);
+  }
+}
+
+@media (max-width: 1180px) {
+  .heroLayout {
+    --hero-layout-max-width: min(100%, 940px);
+    --hero-layout-gap: 14px;
+    --hero-main-max-width: 470px;
+    --hero-aside-max-width: 330px;
+
+    grid-template-columns: minmax(0, 1fr) minmax(260px, 330px);
+  }
+
+  .heroSignalColumn {
+    width: min(100%, 200px);
+  }
+}
+
+/* ajuste fino para notebooks 720p / 1366x768 e faixas próximas */
+@media (max-height: 820px) and (min-width: 1181px) and (max-width: 1500px) {
+  .heroLayout {
+    --hero-layout-max-width: min(100%, 980px);
+    --hero-layout-gap: 18px;
+    --hero-main-max-width: 500px;
+    --hero-aside-max-width: 340px;
+
+    grid-template-columns: minmax(0, 500px) minmax(280px, 340px);
+    justify-content: center;
+  }
+
+  .heroMainColumn {
+    max-width: 500px;
+  }
+
+  .heroHeadlineBlock {
+    max-width: 500px;
+  }
+
+  .heroAsideColumn {
+    max-width: 340px;
+  }
+
+  .heroOrb {
+    max-width: 340px;
+  }
+
+  .heroSignalColumn {
+    width: min(100%, 196px);
+  }
+}
+
+/* ajuste ainda mais firme para 1366x768 e similares */
+@media (max-height: 760px) and (min-width: 1181px) and (max-width: 1500px) {
+  .heroLayout {
+    --hero-layout-max-width: min(100%, 940px);
+    --hero-layout-gap: 14px;
+    --hero-main-max-width: 480px;
+    --hero-aside-max-width: 320px;
+
+    grid-template-columns: minmax(0, 480px) minmax(260px, 320px);
+  }
+
+  .heroMainColumn {
+    gap: 16px;
+  }
+
+  .heroHeadlineBlock {
+    max-width: 480px;
+  }
+
+  .heroAsideColumn {
+    max-width: 320px;
+  }
+
+  .heroOrb {
+    max-width: 320px;
+  }
+
+  .heroSignalColumn {
+    width: min(100%, 184px);
+  }
+}
+
+@media (max-width: 1100px) {
+  .heroLayout {
+    width: 100%;
+    max-width: 760px;
+    grid-template-columns: 1fr;
+    row-gap: 20px;
+    column-gap: 0;
+    align-items: start;
+    justify-content: stretch;
+    padding-inline: 0;
+  }
+
+  .heroMainColumn {
+    max-width: none;
+    width: 100%;
+  }
+
+  .heroHeadlineBlock {
+    max-width: none;
+    width: 100%;
+  }
+
+  .heroAsideColumn {
+    max-width: 420px;
+    width: 100%;
+    justify-items: stretch;
+    justify-self: start;
+  }
+
+  .heroOrb {
+    width: min(100%, 420px);
+    justify-self: start;
+  }
+
+  .heroSignalColumn {
+    width: min(100%, 280px);
+    justify-self: start;
+  }
+
+  .portfolioCards,
+  .roadMapNodeGrid,
+  .contentGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .inner {
+    padding: 16px;
+  }
+
+  .portfolioLayout {
+    grid-template-columns: 1fr;
+  }
+
+  .portfolioRail {
+    display: none;
+  }
+
+  .portfolioCards,
+  .roadMapNodeGrid,
+  .contentGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .roadMapTopBar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .roadMapTopFilters {
+    justify-content: flex-start;
+  }
+
+  .card {
+    min-height: 320px;
+  }
+
+  .roadMapCanvas {
+    min-height: 360px;
+  }
+
+  .heroAsideColumn,
+  .heroOrb,
+  .heroSignalColumn {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shimmerSurface::after {
+    animation: none;
+    transform: translateX(0);
+    opacity: 0.2;
+  }
+}

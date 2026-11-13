@@ -2,237 +2,42 @@
 
 import { HOME_DRIVE_ENGINE_AUDIO_ASSETS } from "./homeDrive.engineAudioAssets";
 import {
-  attachHomeDriveEngineAudioDiagnostics,
-  getHomeDriveEngineAudioMediaErrorMessage,
-  isHomeDriveEngineAudioDebugEnabled,
-  logHomeDriveEngineAudioDiagnostic,
-  logHomeDriveEngineAudioElementDiagnostic,
-  normalizeHomeDriveEngineAudioErrorMessage,
+	isHomeDriveEngineAudioDebugEnabled,
+	logHomeDriveEngineAudioElementDiagnostic,
+	normalizeHomeDriveEngineAudioErrorMessage,
 } from "./homeDrive.engineAudioDiagnostics";
 import { runHomeDriveEngineAudioPreflight } from "./homeDrive.engineAudioPreflight";
 import type {
-  HomeDriveEngineAudioAssetMap,
-  HomeDriveEngineAudioController,
-  HomeDriveEngineAudioControllerState,
-  HomeDriveEngineAudioPlaybackStatus,
-  HomeDriveEngineAudioRuntimeSnapshot,
-  HomeDriveEngineAudioSettings,
-  HomeDriveEngineAudioTrackKey,
-  HomeDriveEngineAudioTrackState,
+	HomeDriveEngineAudioAssetMap,
+	HomeDriveEngineAudioController,
+	HomeDriveEngineAudioControllerState,
+	HomeDriveEngineAudioPlaybackStatus,
+	HomeDriveEngineAudioRuntimeSnapshot,
+	HomeDriveEngineAudioSettings,
+	HomeDriveEngineAudioTrackKey,
 } from "./homeDrive.engineAudio.types";
-
-const DEFAULT_ENGINE_AUDIO_SETTINGS: HomeDriveEngineAudioSettings = {
-  masterVolume: 0.72,
-
-  idleVolume: 0.26,
-  lowVolume: 0.42,
-  highVolume: 0.34,
-
-  minPlaybackRate: 0.82,
-  maxPlaybackRate: 1.42,
-
-  speedForFullBlendMps: 34,
-  highLayerStartRatio: 0.48,
-
-  throttleGain: 0.18,
-  brakeDucking: 0.32,
-
-  fadeLerp: 0.095,
-  preload: "auto",
-};
-
-type InternalTrack = {
-  key: HomeDriveEngineAudioTrackKey;
-  audio: HTMLAudioElement;
-  source: string;
-  volume: number;
-  targetVolume: number;
-  playbackRate: number;
-  playPromise: Promise<void> | null;
-  lastErrorMessage?: string;
-  detachDiagnostics: () => void;
-};
-
-function canUseAudio(): boolean {
-  return typeof window !== "undefined" && typeof Audio !== "undefined";
-}
-
-function clampNumber(value: number, min: number, max: number): number {
-  if (!Number.isFinite(value)) {
-    return min;
-  }
-
-  return Math.min(Math.max(value, min), max);
-}
-
-function lerpNumber(from: number, to: number, amount: number): number {
-  return from + (to - from) * clampNumber(amount, 0, 1);
-}
-
-function normalizeVolume(value: number): number {
-  return clampNumber(value, 0, 1);
-}
-
-function safePlaybackRate(value: number): number {
-  return clampNumber(value, 0.25, 4);
-}
-
-function areAllEngineAssetsTheSame(
-  assets: HomeDriveEngineAudioAssetMap,
-): boolean {
-  return assets.idle === assets.low && assets.low === assets.high;
-}
-
-function getMediaElementErrorMessage(audio: HTMLAudioElement): string | undefined {
-  return getHomeDriveEngineAudioMediaErrorMessage(audio.error);
-}
-
-function createAudioElement(
-  key: HomeDriveEngineAudioTrackKey,
-  source: string,
-  preload: HomeDriveEngineAudioSettings["preload"],
-): InternalTrack {
-  const audio = new Audio(source);
-
-  audio.loop = true;
-  audio.preload = preload;
-  audio.volume = 0;
-  audio.playbackRate = 1;
-  audio.muted = false;
-  audio.crossOrigin = "anonymous";
-
-  audio.setAttribute("data-home-drive-engine-track", key);
-
-  const detachDiagnostics = attachHomeDriveEngineAudioDiagnostics(audio, key);
-
-  return {
-    key,
-    audio,
-    source,
-    volume: 0,
-    targetVolume: 0,
-    playbackRate: 1,
-    playPromise: null,
-    detachDiagnostics,
-  };
-}
-
-function createTrackStates(
-  tracks: ReadonlyMap<HomeDriveEngineAudioTrackKey, InternalTrack>,
-): readonly HomeDriveEngineAudioTrackState[] {
-  return Array.from(tracks.values()).map((track) => ({
-    key: track.key,
-    source: track.source,
-    currentSource: track.audio.currentSrc || track.audio.src,
-    volume: track.volume,
-    targetVolume: track.targetVolume,
-    playbackRate: track.playbackRate,
-    isPlaying: !track.audio.paused,
-    isPaused: track.audio.paused,
-    readyState: track.audio.readyState,
-    networkState: track.audio.networkState,
-    errorMessage: track.lastErrorMessage ?? getMediaElementErrorMessage(track.audio),
-  }));
-}
-
-function getIdleTargetVolume(
-  speedRatio: number,
-  throttle: number,
-  settings: HomeDriveEngineAudioSettings,
-): number {
-  const stoppedWeight = 1 - speedRatio;
-  const throttleLift = throttle * settings.throttleGain;
-
-  return (
-    settings.idleVolume *
-    clampNumber(0.42 + stoppedWeight * 0.58 + throttleLift, 0, 1.15)
-  );
-}
-
-function getLowTargetVolume(
-  speedRatio: number,
-  throttle: number,
-  settings: HomeDriveEngineAudioSettings,
-): number {
-  const movementWeight = clampNumber(speedRatio * 1.25, 0, 1);
-  const throttleLift = throttle * settings.throttleGain;
-
-  return (
-    settings.lowVolume *
-    clampNumber(0.16 + movementWeight + throttleLift, 0, 1.25)
-  );
-}
-
-function getHighTargetVolume(
-  speedRatio: number,
-  throttle: number,
-  settings: HomeDriveEngineAudioSettings,
-): number {
-  const denominator = Math.max(0.001, 1 - settings.highLayerStartRatio);
-  const highRatio = clampNumber(
-    (speedRatio - settings.highLayerStartRatio) / denominator,
-    0,
-    1,
-  );
-
-  const throttleLift = throttle * settings.throttleGain;
-
-  return (
-    settings.highVolume *
-    clampNumber(highRatio + throttleLift * 0.72, 0, 1.18)
-  );
-}
-
-function getSingleSourceTargetVolume(
-  speedRatio: number,
-  throttle: number,
-  brake: number,
-  settings: HomeDriveEngineAudioSettings,
-): number {
-  const speedLift = speedRatio * 0.42;
-  const throttleLift = throttle * 0.18;
-  const brakeDrop = brake * 0.16;
-
-  return (
-    settings.idleVolume *
-    clampNumber(0.58 + speedLift + throttleLift - brakeDrop, 0, 1.22)
-  );
-}
-
-function applyTrackAudioState(track: InternalTrack, muted: boolean): void {
-  track.audio.volume = muted ? 0 : normalizeVolume(track.volume);
-  track.audio.playbackRate = safePlaybackRate(track.playbackRate);
-}
-
-function isBlockedPlayError(error: unknown): boolean {
-  return error instanceof DOMException && error.name === "NotAllowedError";
-}
-
-function isAbortPlayError(error: unknown): boolean {
-  return error instanceof DOMException && error.name === "AbortError";
-}
-
-function restoreSourceIfNeeded(track: InternalTrack): void {
-  if (track.audio.src) {
-    return;
-  }
-
-  track.audio.src = track.source;
-  track.audio.load();
-}
-
-function pauseTrack(track: InternalTrack): void {
-  track.audio.pause();
-  track.playPromise = null;
-}
-
-function resetTrackTime(track: InternalTrack): void {
-  try {
-    track.audio.currentTime = 0;
-  } catch {
-    // Some browsers can throw if metadata is not ready. Safe to ignore.
-  }
-}
+import {
+	DEFAULT_ENGINE_AUDIO_SETTINGS,
+	type InternalTrack,
+	canUseAudio,
+	normalizeVolume,
+	areAllEngineAssetsTheSame,
+	createAudioElement,
+	createTrackStates,
+	applyTrackAudioState,
+	isBlockedPlayError,
+	isAbortPlayError,
+	restoreSourceIfNeeded,
+	pauseTrack,
+	resetTrackTime,
+	logEngineAudioPlayFailed,
+} from "./homeDrive.engineAudioController.tracks";
+import {
+	type EngineAudioMixContext,
+	primeTracksForAudibleStart,
+	updateSingleSharedSource,
+	updateLayeredSources,
+} from "./homeDrive.engineAudioController.mix";
 
 export function createHomeDriveEngineAudioController(
   options: Partial<{
@@ -317,31 +122,16 @@ export function createHomeDriveEngineAudioController(
     setStatus("ready");
   }
 
-  function primeTracksForAudibleStart(): void {
-    for (const track of tracks.values()) {
-      if (track.key !== "idle" && useSingleSharedSource) {
-        continue;
-      }
-
-      if (track.volume > 0) {
-        continue;
-      }
-
-      const baseVolume =
-        track.key === "idle"
-          ? settings.idleVolume
-          : track.key === "low"
-            ? settings.lowVolume
-            : settings.highVolume;
-
-      const initialVolume =
-        track.key === "idle"
-          ? Math.max(0.18, baseVolume * masterVolume)
-          : Math.max(0, baseVolume * masterVolume * 0.18);
-
-      track.volume = normalizeVolume(initialVolume);
-      track.targetVolume = track.volume;
-    }
+  function getMixContext(): EngineAudioMixContext {
+    return {
+      tracks,
+      settings,
+      useSingleSharedSource,
+      masterVolume,
+      isMuted,
+      isStarted,
+      attemptTrackPlay,
+    };
   }
 
   function attemptTrackPlay(track: InternalTrack): void {
@@ -402,26 +192,7 @@ export function createHomeDriveEngineAudioController(
           setStatus("error");
         }
 
-        logHomeDriveEngineAudioDiagnostic(
-          isAbortPlayError(error) ? "debug" : "warn",
-          {
-            event: "play-failed",
-            key: track.key,
-            src: track.audio.currentSrc || track.audio.src || track.source,
-            status,
-            readyState: track.audio.readyState,
-            networkState: track.audio.networkState,
-            paused: track.audio.paused,
-            muted: track.audio.muted,
-            volume: track.audio.volume,
-            playbackRate: track.audio.playbackRate,
-            error,
-            errorMessage,
-            details: {
-              mediaError: getMediaElementErrorMessage(track.audio),
-            },
-          },
-        );
+        logEngineAudioPlayFailed(track, status, error, errorMessage);
       });
   }
 
@@ -462,7 +233,7 @@ export function createHomeDriveEngineAudioController(
     }
 
     clearLastError();
-    primeTracksForAudibleStart();
+    primeTracksForAudibleStart(getMixContext());
 
     for (const track of tracks.values()) {
       attemptTrackPlay(track);
@@ -568,107 +339,6 @@ export function createHomeDriveEngineAudioController(
     }
   }
 
-  function updateSingleSharedSource(
-    snapshot: HomeDriveEngineAudioRuntimeSnapshot,
-  ): void {
-    const track = tracks.get("idle");
-
-    if (!track) {
-      return;
-    }
-
-    const speedMps = Math.max(0, snapshot.speedMps || 0);
-    const throttle = clampNumber(snapshot.throttle, 0, 1);
-    const brake = clampNumber(snapshot.brake, 0, 1);
-    const speedRatio = clampNumber(speedMps / settings.speedForFullBlendMps, 0, 1);
-
-    const brakeDucking = 1 - brake * settings.brakeDucking;
-    const effectiveMasterVolume = masterVolume * brakeDucking;
-
-    track.targetVolume =
-      getSingleSourceTargetVolume(speedRatio, throttle, brake, settings) *
-      effectiveMasterVolume;
-
-    track.volume = lerpNumber(track.volume, track.targetVolume, settings.fadeLerp);
-
-    /*
-      Quando só existe 1 arquivo longo, não altere playbackRate.
-      Alterar playbackRate faz o áudio terminar antes/depois e dá sensação
-      de loop prematuro.
-    */
-    track.playbackRate = 1;
-
-    applyTrackAudioState(track, isMuted);
-
-    if (isStarted && !isMuted) {
-      attemptTrackPlay(track);
-    }
-  }
-
-  function updateLayeredSources(
-    snapshot: HomeDriveEngineAudioRuntimeSnapshot,
-  ): void {
-    const speedMps = Math.max(0, snapshot.speedMps || 0);
-    const throttle = clampNumber(snapshot.throttle, 0, 1);
-    const brake = clampNumber(snapshot.brake, 0, 1);
-    const speedRatio = clampNumber(speedMps / settings.speedForFullBlendMps, 0, 1);
-
-    const brakeDucking = 1 - brake * settings.brakeDucking;
-    const effectiveMasterVolume = masterVolume * brakeDucking;
-
-    const idleTarget = getIdleTargetVolume(speedRatio, throttle, settings);
-    const lowTarget = getLowTargetVolume(speedRatio, throttle, settings);
-    const highTarget = getHighTargetVolume(speedRatio, throttle, settings);
-
-    const basePlaybackRate = lerpNumber(
-      settings.minPlaybackRate,
-      settings.maxPlaybackRate,
-      speedRatio,
-    );
-
-    const throttlePlaybackLift = throttle * 0.08;
-    const brakePlaybackDrop = brake * 0.05;
-
-    const idle = tracks.get("idle");
-    const low = tracks.get("low");
-    const high = tracks.get("high");
-
-    if (idle) {
-      idle.targetVolume = idleTarget * effectiveMasterVolume;
-      idle.volume = lerpNumber(idle.volume, idle.targetVolume, settings.fadeLerp);
-      idle.playbackRate = safePlaybackRate(
-        basePlaybackRate * 0.88 + throttlePlaybackLift,
-      );
-      applyTrackAudioState(idle, isMuted);
-    }
-
-    if (low) {
-      low.targetVolume = lowTarget * effectiveMasterVolume;
-      low.volume = lerpNumber(low.volume, low.targetVolume, settings.fadeLerp);
-      low.playbackRate = safePlaybackRate(
-        basePlaybackRate + throttlePlaybackLift - brakePlaybackDrop,
-      );
-      applyTrackAudioState(low, isMuted);
-    }
-
-    if (high) {
-      high.targetVolume = highTarget * effectiveMasterVolume;
-      high.volume = lerpNumber(high.volume, high.targetVolume, settings.fadeLerp);
-      high.playbackRate = safePlaybackRate(
-        basePlaybackRate * 1.08 + throttlePlaybackLift - brakePlaybackDrop,
-      );
-      applyTrackAudioState(high, isMuted);
-    }
-
-    if (!isStarted || isMuted) {
-      return;
-    }
-
-    for (const track of tracks.values()) {
-      attemptTrackPlay(track);
-    }
-  }
-
   function update(snapshot: HomeDriveEngineAudioRuntimeSnapshot): void {
     if (!canUseAudio() || isDisposed || !isStarted) {
       return;
@@ -677,11 +347,11 @@ export function createHomeDriveEngineAudioController(
     ensureTracks();
 
     if (useSingleSharedSource) {
-      updateSingleSharedSource(snapshot);
+      updateSingleSharedSource(getMixContext(), snapshot);
       return;
     }
 
-    updateLayeredSources(snapshot);
+    updateLayeredSources(getMixContext(), snapshot);
   }
 
   function getState(): HomeDriveEngineAudioControllerState {

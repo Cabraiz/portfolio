@@ -1,0 +1,97 @@
+
+@media (max-width: 1180px) {
+  .metricsRow {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .spotlightPanel {
+    position: relative;
+    top: auto;
+    min-height: auto;
+  }
+}
+
+@media (max-width: 980px) {
+  .heroShell {
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .heroCopy {
+    min-height: auto;
+    align-content: start;
+    padding-block: 0;
+    gap: 10px;
+  }
+
+  .heroMedia {
+    justify-self: stretch;
+    justify-items: start;
+    align-self: start;
+  }
+
+  .title {
+    max-width: 11ch;
+  }
+}
+
+@media (max-width: 680px) {
+  .section {
+    min-height: auto;
+    padding:
+      clamp(20px, 5dvh, 34px)
+      14px
+      clamp(18px, 4dvh, 26px);
+  }
+
+  .content {
+    gap: 14px;
+  }
+
+  .metricsRow {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .heroShell {
+    padding: 18px;
+  }
+
+  .heroCopy {
+    gap: 8px;
+  }
+
+  .eyebrowRow {
+    gap: 8px;
+    min-height: 28px;
+  }
+
+  .filtersRow,
+  .canvasInner,
+  .spotlightPanel,
+  .supportingContent {
+    padding: 14px;
+  }
+
+  .title {
+    font-size: clamp(1.82rem, 8vw, 3rem);
+    line-height: 0.98;
+  }
+
+  .description,
+  .caption,
+  .emptyStateDescription {
+    line-height: 1.58;
+  }
+
+  .metricCardTopRow {
+    align-items: flex-start;
+  }
+
+  .metricBadge {
+    font-size: 0.64rem;
+  }
+}

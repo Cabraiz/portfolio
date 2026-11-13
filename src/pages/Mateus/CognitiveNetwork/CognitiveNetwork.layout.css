@@ -1,0 +1,339 @@
+.section {
+	--cyan: #47f5ff;
+	--violet: #b961ff;
+	--pink: #ff4fba;
+	--lime: #9cff57;
+	--gold: #ffd84a;
+	position: relative;
+	width: 100%;
+	height: 100dvh;
+	min-height: 0;
+	max-height: 100dvh;
+	margin-top: 0;
+	padding: calc(var(--landing-navbar-offset-desktop, 72px) + 5px) 7px 4px;
+	box-sizing: border-box;
+	display: grid;
+	grid-template-rows: 25px minmax(0, 1fr) 52px;
+	gap: 4px;
+	color: #d8faff;
+	background:
+		radial-gradient(
+			circle at 33% 48%,
+			rgba(72, 25, 114, 0.16),
+			transparent 35%
+		),
+		linear-gradient(180deg, #02040b 0%, #050612 55%, #010208 100%);
+	overflow: hidden;
+	isolation: isolate;
+	font-family: "Courier New", monospace;
+}
+
+.section::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	background-image:
+		linear-gradient(rgba(100, 184, 255, 0.035) 1px, transparent 1px),
+		linear-gradient(90deg, rgba(100, 184, 255, 0.035) 1px, transparent 1px);
+	background-size: 21px 21px;
+	pointer-events: none;
+}
+
+.srOnly {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border: 0;
+}
+
+.scanline {
+	position: absolute;
+	inset: 0;
+	z-index: 20;
+	background: repeating-linear-gradient(
+		to bottom,
+		transparent 0 3px,
+		rgba(255, 255, 255, 0.014) 4px
+	);
+	pointer-events: none;
+	mix-blend-mode: screen;
+}
+
+.commandBar {
+	position: relative;
+	z-index: 3;
+	min-width: 0;
+	display: grid;
+	grid-template-columns: 1fr auto;
+	align-items: center;
+	gap: 12px;
+	padding: 0 7px;
+	border: 1px solid rgba(115, 194, 255, 0.13);
+	background: rgba(2, 5, 13, 0.8);
+	color: rgba(180, 221, 239, 0.46);
+	font-size: 0.54rem;
+	letter-spacing: 0.09em;
+	white-space: nowrap;
+}
+
+.commandIdentity,
+.clockReadout {
+	min-width: 0;
+	display: flex;
+	align-items: center;
+	gap: 7px;
+	overflow: hidden;
+}
+
+.commandIdentity i {
+	width: 16px;
+	height: 1px;
+	background: rgba(71, 245, 255, 0.43);
+}
+
+.commandIdentity strong {
+	color: rgba(207, 250, 254, 0.7);
+}
+
+.clockReadout {
+	justify-content: flex-end;
+}
+
+.clockReadout strong {
+	color: rgba(255, 216, 74, 0.68);
+}
+
+.viewSelector {
+	display: flex;
+	align-items: center;
+	height: 19px;
+	border: 1px solid rgba(132, 204, 255, 0.18);
+	background: rgba(8, 13, 28, 0.9);
+}
+
+.viewButton {
+	height: 100%;
+	padding: 0 10px;
+	border: 0;
+	border-right: 1px solid rgba(132, 204, 255, 0.1);
+	color: rgba(180, 221, 239, 0.47);
+	background: transparent;
+	font:
+		700 0.5rem/1 "Courier New",
+		monospace;
+	letter-spacing: 0.05em;
+	cursor: pointer;
+}
+
+.viewButton:last-child {
+	border-right: 0;
+}
+
+.viewButton:hover,
+.viewButton[aria-selected="true"] {
+	color: #dffcff;
+	background: linear-gradient(
+		180deg,
+		rgba(69, 208, 255, 0.21),
+		rgba(86, 52, 193, 0.15)
+	);
+	box-shadow: inset 0 -1px var(--cyan);
+}
+
+.workspace {
+	position: relative;
+	z-index: 2;
+	min-height: 0;
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) clamp(220px, 17.5vw, 282px);
+	gap: 4px;
+}
+
+.graphPanel,
+.inspector {
+	position: relative;
+	min-width: 0;
+	min-height: 0;
+	border: 1px solid rgba(115, 194, 255, 0.16);
+	background: rgba(2, 4, 12, 0.74);
+	overflow: hidden;
+	box-shadow: inset 0 0 32px rgba(32, 76, 130, 0.05);
+}
+
+.graphPanel::before,
+.graphPanel::after {
+	content: "";
+	position: absolute;
+	z-index: 4;
+	width: 23px;
+	height: 23px;
+	pointer-events: none;
+}
+
+.graphPanel::before {
+	top: 7px;
+	left: 7px;
+	border-top: 1px solid rgba(71, 245, 255, 0.58);
+	border-left: 1px solid rgba(71, 245, 255, 0.58);
+}
+
+.graphPanel::after {
+	right: 7px;
+	bottom: 7px;
+	border-right: 1px solid rgba(185, 97, 255, 0.52);
+	border-bottom: 1px solid rgba(185, 97, 255, 0.52);
+}
+
+.graphGrid {
+	position: absolute;
+	inset: 11px;
+	z-index: 0;
+	background-image:
+		linear-gradient(rgba(116, 184, 255, 0.07) 1px, transparent 1px),
+		linear-gradient(90deg, rgba(116, 184, 255, 0.07) 1px, transparent 1px),
+		linear-gradient(rgba(116, 184, 255, 0.025) 1px, transparent 1px),
+		linear-gradient(90deg, rgba(116, 184, 255, 0.025) 1px, transparent 1px);
+	background-size:
+		84px 84px,
+		84px 84px,
+		21px 21px,
+		21px 21px;
+	mask-image: radial-gradient(
+		ellipse at 45% 50%,
+		black 28%,
+		rgba(0, 0, 0, 0.64) 72%,
+		transparent 100%
+	);
+}
+
+.coreCanvas {
+	position: absolute;
+	inset: 0;
+	z-index: 1;
+	width: 100%;
+	height: 100%;
+	cursor: crosshair;
+	touch-action: none;
+	background: radial-gradient(circle at 48% 51%, rgba(73, 23, 118, 0.2), transparent 48%);
+}
+
+.webglCanvas {
+	position: absolute !important;
+	inset: 0;
+	width: 100% !important;
+	height: 100% !important;
+}
+
+@media (min-width: 1200px) and (min-height: 900px) {
+	.webglCanvas {
+		inset: auto;
+		left: 14% !important;
+		top: 16% !important;
+		width: 72% !important;
+		height: 68% !important;
+	}
+}
+
+.modelLoader {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+	color: rgba(109, 237, 255, 0.74);
+	font-size: 0.5rem;
+	letter-spacing: 0.14em;
+	animation: thinkingPulse 1.15s ease-out infinite;
+	pointer-events: none;
+}
+
+.axisLabels {
+	position: absolute;
+	inset: 19px;
+	z-index: 3;
+	pointer-events: none;
+	color: rgba(161, 211, 233, 0.3);
+	font-size: 0.46rem;
+	letter-spacing: 0.14em;
+}
+
+.axisY {
+	position: absolute;
+	left: -4px;
+	top: 50%;
+	transform: rotate(-90deg) translateX(-50%);
+	transform-origin: left top;
+}
+
+.axisX {
+	position: absolute;
+	bottom: -3px;
+	left: 50%;
+	transform: translateX(-50%);
+}
+
+.routeCard {
+	position: absolute;
+	z-index: 5;
+	overflow: hidden;
+	top: 19%;
+	left: 55%;
+	width: clamp(156px, 15vw, 222px);
+	padding: 6px 8px;
+	border: 1px solid rgba(255, 104, 63, 0.66);
+	background: rgba(9, 8, 17, 0.86);
+	box-shadow:
+		0 0 0 1px rgba(255, 104, 63, 0.08),
+		0 8px 18px rgba(0, 0, 0, 0.4);
+	font-size: 0.51rem;
+	line-height: 1.4;
+	pointer-events: none;
+}
+
+.routeCard span,
+.routeCard strong,
+.routeCard small {
+	display: block;
+}
+
+.routeCard span {
+	color: #ff8a65;
+	font-weight: 700;
+}
+
+.routeCard strong {
+	color: rgba(236, 243, 255, 0.84);
+}
+
+.routeCard small {
+	color: rgba(167, 197, 217, 0.52);
+}
+
+.routeCard::after {
+	content: "";
+	position: absolute;
+	inset: 0 auto 0 -28%;
+	width: 22%;
+	background: linear-gradient(
+		90deg,
+		transparent,
+		rgba(255, 126, 82, 0.18),
+		transparent
+	);
+	animation: routeScan 2.2s linear infinite;
+	pointer-events: none;
+}
+
+.scoreTag {
+	position: absolute;
+	z-index: 4;
+	top: 27%;
+	right: 14px;
+	color: rgba(71, 245, 255, 0.64);
+	font-size: 0.48rem;
+	letter-spacing: 0.1em;
+}

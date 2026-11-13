@@ -1,0 +1,116 @@
+.thoughtLog {
+	position: absolute;
+	z-index: 5;
+	top: 18px;
+	left: 18px;
+	width: clamp(250px, 20vw, 300px);
+	padding: 6px 7px 7px;
+	border: 1px solid rgba(111, 211, 255, 0.2);
+	background: linear-gradient(135deg, rgba(2, 6, 16, 0.9), rgba(5, 5, 14, 0.7));
+	box-shadow: 0 12px 30px rgba(0, 0, 0, 0.24);
+	pointer-events: none;
+}
+
+.thoughtLog header,
+.thoughtLog > div {
+	display: grid;
+	grid-template-columns: 24px minmax(0, 1fr) minmax(58px, auto);
+	align-items: center;
+	gap: 5px;
+}
+
+.thoughtLog header {
+	grid-template-columns: 1fr auto;
+	margin-bottom: 4px;
+	padding-bottom: 4px;
+	border-bottom: 1px solid rgba(114, 196, 238, 0.12);
+	color: rgba(173, 224, 242, 0.47);
+	font-size: 0.43rem;
+	letter-spacing: 0.08em;
+}
+
+.thoughtLog header strong {
+	color: rgba(255, 216, 74, 0.72);
+}
+
+.thoughtLog > div {
+	min-height: 15px;
+	color: rgba(147, 184, 204, 0.35);
+	font-size: 0.44rem;
+	transition:
+		color 160ms ease,
+		background 160ms ease;
+}
+
+.thoughtLog > div i {
+	font-style: normal;
+	color: rgba(126, 186, 212, 0.32);
+}
+
+.thoughtLog > div strong {
+	color: rgba(158, 202, 218, 0.3);
+	font-weight: 700;
+	text-align: right;
+}
+
+.thoughtLog > .activeThought {
+	color: rgba(232, 251, 255, 0.9);
+	background: linear-gradient(90deg, rgba(255, 91, 183, 0.12), transparent);
+}
+
+.thoughtLog > .activeThought i {
+	color: var(--pink);
+}
+
+.thoughtLog > .activeThought strong {
+	color: var(--cyan);
+	text-shadow: 0 0 7px rgba(71, 245, 255, 0.55);
+}
+
+.coreCaption {
+	position: absolute;
+	z-index: 5;
+	left: 25px;
+	bottom: 22px;
+	display: grid;
+	gap: 2px;
+	pointer-events: none;
+}
+
+.coreCaption span {
+	color: var(--pink);
+	font-size: 0.5rem;
+	letter-spacing: 0.12em;
+}
+
+.coreCaption .thinkingStatus {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.thinkingStatus i {
+	width: 6px;
+	height: 6px;
+	border-radius: 50%;
+	background: var(--pink);
+	box-shadow: 0 0 0 0 rgba(255, 79, 186, 0.75);
+	animation: thinkingPulse 1.15s ease-out infinite;
+}
+
+.coreCaption strong {
+	color: rgba(229, 247, 255, 0.82);
+	font-size: clamp(0.8rem, 1vw, 1rem);
+	letter-spacing: 0.08em;
+}
+
+.coreCaption small {
+	color: rgba(140, 198, 221, 0.43);
+	font-size: 0.46rem;
+	letter-spacing: 0.08em;
+}
+
+.coreCaption .interactionHint {
+	margin-top: 3px;
+	color: rgba(71, 245, 255, 0.62);
+}

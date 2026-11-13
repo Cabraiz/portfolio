@@ -1,0 +1,204 @@
+
+.metricsRow {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.metricCard {
+  --live-metric-accent: var(--live-shell-accent);
+
+  position: relative;
+  min-width: 0;
+  display: grid;
+  gap: 8px;
+  padding: 15px 15px 14px;
+  border-radius: 20px;
+  border: 1px solid var(--live-shell-soft-border);
+  background: var(--live-shell-panel-bg);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.16);
+  overflow: hidden;
+}
+
+.metricCard::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background:
+    linear-gradient(
+      180deg,
+      var(--live-metric-accent),
+      rgba(255, 255, 255, 0)
+    );
+  opacity: 0.9;
+}
+
+.metricCardInfo {
+  --live-metric-accent: #38bdf8;
+}
+
+.metricCardSuccess {
+  --live-metric-accent: #34d399;
+}
+
+.metricCardWarning {
+  --live-metric-accent: #fbbf24;
+}
+
+.metricCardTopRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.metricLabel {
+  color: var(--live-shell-text-soft);
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.metricBadge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  padding: 0 9px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.metricValue {
+  color: var(--live-shell-text-strong);
+  font-size: clamp(1.24rem, 1.8vw, 1.66rem);
+  line-height: 1;
+  font-weight: 780;
+  letter-spacing: -0.04em;
+}
+
+.metricHelper {
+  color: var(--live-shell-text-base);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.body {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(300px, 0.8fr);
+  gap: var(--live-shell-gap);
+  align-items: start;
+}
+
+.mainColumn,
+.asideColumn {
+  min-width: 0;
+  display: grid;
+  gap: 14px;
+}
+
+.filtersRow {
+  min-width: 0;
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border-radius: var(--live-shell-panel-radius);
+  border: 1px solid var(--live-shell-soft-border);
+  background: var(--live-shell-panel-bg);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.16);
+}
+
+.canvasPanel,
+.spotlightPanel,
+.supportingContent {
+  min-width: 0;
+  border-radius: var(--live-shell-surface-radius);
+  border: 1px solid var(--live-shell-soft-border);
+  background: var(--live-shell-surface-bg);
+  box-shadow: var(--live-shell-shadow-panel);
+  backdrop-filter: blur(14px);
+  overflow: hidden;
+}
+
+.canvasInner {
+  min-width: 0;
+  min-height: clamp(440px, 64dvh, 880px);
+  padding: clamp(16px, 1.8vw, 22px);
+}
+
+.sceneArea {
+  min-width: 0;
+  min-height: 100%;
+  display: grid;
+  align-content: stretch;
+}
+
+.spotlightPanel {
+  min-height: clamp(440px, 64dvh, 880px);
+  padding: clamp(16px, 1.8vw, 22px);
+  position: sticky;
+  top: calc(var(--app-navbar-height, 70px) + 16px);
+}
+
+.supportingContent {
+  padding: clamp(16px, 1.8vw, 22px);
+}
+
+.emptyState {
+  position: relative;
+  min-height: 100%;
+  display: grid;
+  place-items: center;
+  padding: clamp(24px, 4vw, 48px);
+  text-align: center;
+  overflow: hidden;
+}
+
+.emptyStateOrb {
+  position: absolute;
+  width: clamp(190px, 26vw, 300px);
+  aspect-ratio: 1 / 1;
+  border-radius: 999px;
+  border: 1px solid rgba(56, 189, 248, 0.18);
+  background:
+    radial-gradient(circle at center, rgba(56, 189, 248, 0.12), transparent 62%);
+  opacity: 0.8;
+}
+
+.emptyStateContent {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 10px;
+  max-width: 560px;
+}
+
+.emptyStateEyebrow {
+  color: var(--live-shell-text-soft);
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.emptyStateTitle {
+  margin: 0;
+  color: var(--live-shell-text-strong);
+  font-size: clamp(1.28rem, 2vw, 1.72rem);
+  line-height: 1.1;
+  font-weight: 800;
+}
+
+.emptyStateDescription {
+  margin: 0;
+  color: var(--live-shell-text-base);
+  font-size: 0.98rem;
+  line-height: 1.7;
+}

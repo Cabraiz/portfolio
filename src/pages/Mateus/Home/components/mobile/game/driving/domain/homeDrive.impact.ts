@@ -1,239 +1,48 @@
 // src/pages/Mateus/Home/components/mobile/game/driving/domain/homeDrive.impact.ts
 
+import type { HomeDriveCarState } from "./homeDrive.types";
 import type {
-  HomeDriveCarState,
-  HomeDriveVector2,
-} from "./homeDrive.types";
-
-export type HomeDriveRuntimeImpactState = Readonly<{
-  recoilVelocity: HomeDriveVector2;
-  spinVelocityRadps: number;
-  visualRollRad: number;
-  visualPitchRad: number;
-  cameraShake: number;
-  collisionImpulse: number;
-  controlLockSeconds: number;
-  elapsedSinceImpactSeconds: number;
-  lastCollisionAt: number;
-  serial: number;
-}>;
-
-export type HomeDriveImpactCollisionInput = Readonly<{
-  car: HomeDriveCarState;
-  normal: HomeDriveVector2;
-  relativeSpeedMps: number;
-  impulse?: number;
-  occurredAt: number;
-  brutality?: number;
-}>;
-
-export type HomeDriveImpactTickOptions = Readonly<{
-  recoilDampingPerSecond?: number;
-  spinDampingPerSecond?: number;
-  cameraShakeDampingPerSecond?: number;
-  visualDampingPerSecond?: number;
-  collisionImpulseDampingPerSecond?: number;
-}>;
-
-export type HomeDriveImpactApplicationOptions = Readonly<{
-  allowReverseKick?: boolean;
-  maxRecoilSpeedMps?: number;
-  maxSpinVelocityRadps?: number;
-}>;
-
-const DEFAULT_RECOIL_DAMPING_PER_SECOND = 5.8;
-const DEFAULT_SPIN_DAMPING_PER_SECOND = 4.25;
-const DEFAULT_CAMERA_SHAKE_DAMPING_PER_SECOND = 8.8;
-const DEFAULT_VISUAL_DAMPING_PER_SECOND = 7.2;
-
-/**
- * Antes o collisionImpulse morria muito rápido.
- * Agora ele dura mais para a física conseguir usar como sinal de recuperação
- * pós-impacto.
- */
-const DEFAULT_COLLISION_IMPULSE_DAMPING_PER_SECOND = 1.05;
-
-const DEFAULT_MAX_RECOIL_SPEED_MPS = 42;
-const DEFAULT_MAX_SPIN_VELOCITY_RADPS = 34;
-
-const MIN_ACTIVE_RECOIL_MPS = 0.025;
-const MIN_ACTIVE_SPIN_RADPS = 0.025;
-const MIN_ACTIVE_SHAKE = 0.003;
-const MIN_ACTIVE_VISUAL_RAD = 0.003;
-
-function clamp(value: number, min: number, max: number): number {
-  if (!Number.isFinite(value)) {
-    return min;
-  }
-
-  return Math.max(min, Math.min(max, value));
-}
-
-function clampAbs(value: number, maxAbs: number): number {
-  return clamp(value, -maxAbs, maxAbs);
-}
-
-function damp(
-  value: number,
-  dampingPerSecond: number,
-  deltaSeconds: number,
-): number {
-  if (Math.abs(value) <= 0.000001) {
-    return 0;
-  }
-
-  const factor = Math.exp(-Math.max(0, dampingPerSecond) * deltaSeconds);
-  const nextValue = value * factor;
-
-  return Math.abs(nextValue) <= 0.000001 ? 0 : nextValue;
-}
-
-function dampVector(
-  vector: HomeDriveVector2,
-  dampingPerSecond: number,
-  deltaSeconds: number,
-): HomeDriveVector2 {
-  return {
-    x: damp(vector.x, dampingPerSecond, deltaSeconds),
-    z: damp(vector.z, dampingPerSecond, deltaSeconds),
-  };
-}
-
-function getVectorLength(vector: HomeDriveVector2): number {
-  return Math.hypot(vector.x, vector.z);
-}
-
-function normalizeVectorOrFallback(
-  vector: HomeDriveVector2,
-  fallback: HomeDriveVector2,
-): HomeDriveVector2 {
-  const length = getVectorLength(vector);
-
-  if (length <= 0.000001) {
-    return fallback;
-  }
-
-  return {
-    x: vector.x / length,
-    z: vector.z / length,
-  };
-}
-
-function clampVectorMagnitude(
-  vector: HomeDriveVector2,
-  maxMagnitude: number,
-): HomeDriveVector2 {
-  const magnitude = getVectorLength(vector);
-
-  if (magnitude <= maxMagnitude || magnitude <= 0.000001) {
-    return vector;
-  }
-
-  const scale = maxMagnitude / magnitude;
-
-  return {
-    x: vector.x * scale,
-    z: vector.z * scale,
-  };
-}
-
-function dot(first: HomeDriveVector2, second: HomeDriveVector2): number {
-  return first.x * second.x + first.z * second.z;
-}
-
-function getCarForwardVector(headingRad: number): HomeDriveVector2 {
-  return {
-    x: Math.sin(headingRad),
-    z: Math.cos(headingRad),
-  };
-}
-
-function getCarRightVector(headingRad: number): HomeDriveVector2 {
-  return {
-    x: Math.cos(headingRad),
-    z: -Math.sin(headingRad),
-  };
-}
-
-function getSignedFallback(value: number, fallback: number): number {
-  if (Math.abs(value) > 0.08) {
-    return Math.sign(value);
-  }
-
-  return fallback >= 0 ? 1 : -1;
-}
-
-function getEstimatedImpulse(relativeSpeedMps: number): number {
-  return clamp(2.4 + relativeSpeedMps * 1.18, 2.4, 28);
-}
-
-export function createHomeDriveImpactState(): HomeDriveRuntimeImpactState {
-  return {
-    recoilVelocity: {
-      x: 0,
-      z: 0,
-    },
-    spinVelocityRadps: 0,
-    visualRollRad: 0,
-    visualPitchRad: 0,
-    cameraShake: 0,
-    collisionImpulse: 0,
-    controlLockSeconds: 0,
-    elapsedSinceImpactSeconds: Number.POSITIVE_INFINITY,
-    lastCollisionAt: Number.NEGATIVE_INFINITY,
-    serial: 0,
-  };
-}
-
-export function normalizeHomeDriveImpactState(
-  impact?: Partial<HomeDriveRuntimeImpactState> | null,
-): HomeDriveRuntimeImpactState {
-  const empty = createHomeDriveImpactState();
-
-  if (!impact) {
-    return empty;
-  }
-
-  return {
-    recoilVelocity: {
-      x: Number.isFinite(impact.recoilVelocity?.x)
-        ? Number(impact.recoilVelocity?.x)
-        : empty.recoilVelocity.x,
-      z: Number.isFinite(impact.recoilVelocity?.z)
-        ? Number(impact.recoilVelocity?.z)
-        : empty.recoilVelocity.z,
-    },
-    spinVelocityRadps: Number.isFinite(impact.spinVelocityRadps)
-      ? Number(impact.spinVelocityRadps)
-      : empty.spinVelocityRadps,
-    visualRollRad: Number.isFinite(impact.visualRollRad)
-      ? Number(impact.visualRollRad)
-      : empty.visualRollRad,
-    visualPitchRad: Number.isFinite(impact.visualPitchRad)
-      ? Number(impact.visualPitchRad)
-      : empty.visualPitchRad,
-    cameraShake: Number.isFinite(impact.cameraShake)
-      ? Number(impact.cameraShake)
-      : empty.cameraShake,
-    collisionImpulse: Number.isFinite(impact.collisionImpulse)
-      ? Number(impact.collisionImpulse)
-      : empty.collisionImpulse,
-    controlLockSeconds: Number.isFinite(impact.controlLockSeconds)
-      ? Number(impact.controlLockSeconds)
-      : empty.controlLockSeconds,
-    elapsedSinceImpactSeconds: Number.isFinite(
-      impact.elapsedSinceImpactSeconds,
-    )
-      ? Number(impact.elapsedSinceImpactSeconds)
-      : empty.elapsedSinceImpactSeconds,
-    lastCollisionAt: Number.isFinite(impact.lastCollisionAt)
-      ? Number(impact.lastCollisionAt)
-      : empty.lastCollisionAt,
-    serial: Number.isFinite(impact.serial)
-      ? Number(impact.serial)
-      : empty.serial,
-  };
-}
+  HomeDriveRuntimeImpactState,
+  HomeDriveImpactCollisionInput,
+  HomeDriveImpactTickOptions,
+  HomeDriveImpactApplicationOptions,
+} from "./homeDrive.impact.types";
+import {
+  DEFAULT_RECOIL_DAMPING_PER_SECOND,
+  DEFAULT_SPIN_DAMPING_PER_SECOND,
+  DEFAULT_CAMERA_SHAKE_DAMPING_PER_SECOND,
+  DEFAULT_VISUAL_DAMPING_PER_SECOND,
+  DEFAULT_COLLISION_IMPULSE_DAMPING_PER_SECOND,
+  DEFAULT_MAX_RECOIL_SPEED_MPS,
+  DEFAULT_MAX_SPIN_VELOCITY_RADPS,
+  MIN_ACTIVE_RECOIL_MPS,
+  MIN_ACTIVE_SPIN_RADPS,
+  MIN_ACTIVE_SHAKE,
+  MIN_ACTIVE_VISUAL_RAD,
+  clamp,
+  clampAbs,
+  damp,
+  dampVector,
+  getVectorLength,
+  normalizeVectorOrFallback,
+  clampVectorMagnitude,
+  dot,
+  getCarForwardVector,
+  getCarRightVector,
+  getSignedFallback,
+  getEstimatedImpulse,
+} from "./homeDrive.impact.helpers";
+import { normalizeHomeDriveImpactState } from "./homeDrive.impact.state";
+export type {
+  HomeDriveRuntimeImpactState,
+  HomeDriveImpactCollisionInput,
+  HomeDriveImpactTickOptions,
+  HomeDriveImpactApplicationOptions,
+} from "./homeDrive.impact.types";
+export {
+  createHomeDriveImpactState,
+  normalizeHomeDriveImpactState,
+} from "./homeDrive.impact.state";
 
 export function createHomeDriveImpactFromCollision({
   car,

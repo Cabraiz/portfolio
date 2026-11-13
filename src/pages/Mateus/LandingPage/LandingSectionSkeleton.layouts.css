@@ -1,0 +1,303 @@
+.root {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+  overflow: hidden;
+  isolation: isolate;
+  display: flex;
+  align-items: stretch;
+  justify-content: stretch;
+  border-radius: clamp(24px, 2vw, 32px);
+  background:
+    radial-gradient(circle at 12% 16%, rgba(255, 215, 0, 0.08), transparent 0 28%),
+    radial-gradient(circle at 86% 20%, rgba(255, 215, 0, 0.05), transparent 0 24%),
+    linear-gradient(135deg, rgba(10, 10, 10, 0.94), rgba(19, 19, 19, 0.9));
+  box-sizing: border-box;
+  pointer-events: none;
+  user-select: none;
+}
+
+.fullHeight {
+  min-height: 100%;
+}
+
+.inner {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+  min-height: inherit;
+  padding:
+    clamp(16px, 1.5vw, 24px)
+    clamp(18px, 2vw, 30px)
+    clamp(16px, 1.6vw, 24px)
+    clamp(18px, 2vw, 30px);
+  display: flex;
+  align-items: stretch;
+  justify-content: stretch;
+  box-sizing: border-box;
+}
+
+.backdropGlow,
+.backdropGlowSecondary {
+  position: absolute;
+  inset: auto;
+  border-radius: 999px;
+  filter: blur(42px);
+  opacity: 0.75;
+  pointer-events: none;
+}
+
+.backdropGlow {
+  top: 10%;
+  left: -6%;
+  width: clamp(160px, 18vw, 300px);
+  height: clamp(160px, 18vw, 300px);
+  background: rgba(255, 215, 0, 0.08);
+}
+
+.backdropGlowSecondary {
+  right: -4%;
+  bottom: 8%;
+  width: clamp(140px, 16vw, 260px);
+  height: clamp(140px, 16vw, 260px);
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.shimmerSurface {
+  position: relative;
+  overflow: hidden;
+  border-radius: 999px;
+  background:
+    linear-gradient(
+      100deg,
+      rgba(255, 255, 255, 0.04) 0%,
+      rgba(255, 255, 255, 0.07) 18%,
+      rgba(255, 255, 255, 0.12) 33%,
+      rgba(255, 255, 255, 0.07) 48%,
+      rgba(255, 255, 255, 0.04) 100%
+    );
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-sizing: border-box;
+}
+
+.shimmerSurface::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    105deg,
+    transparent 0%,
+    transparent 35%,
+    rgba(255, 255, 255, 0.18) 50%,
+    transparent 65%,
+    transparent 100%
+  );
+  animation: landing-skeleton-shimmer 2.3s ease-in-out infinite;
+}
+
+.line {
+  display: block;
+  max-width: 100%;
+  min-width: 48px;
+}
+
+.heroLayout,
+.portfolioLayout,
+.roadMapLayout,
+.contentLayout {
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+  min-height: inherit;
+  display: grid;
+  box-sizing: border-box;
+}
+
+.heroLayout {
+  --hero-layout-max-width: clamp(1120px, 88vw, 1360px);
+  --hero-layout-gap: clamp(16px, 1.8vw, 30px);
+  --hero-main-max-width: clamp(520px, 37vw, 640px);
+  --hero-aside-max-width: clamp(360px, 30vw, 490px);
+
+  width: min(100%, var(--hero-layout-max-width));
+  min-width: 0;
+  min-height: inherit;
+  margin: 0 auto;
+  padding-inline: clamp(8px, 1vw, 18px);
+  grid-template-columns: minmax(0, 1.04fr) minmax(340px, 0.9fr);
+  column-gap: var(--hero-layout-gap);
+  align-items: center;
+  justify-content: center;
+}
+
+.heroMainColumn {
+  min-width: 0;
+  width: 100%;
+  max-width: var(--hero-main-max-width);
+  display: grid;
+  gap: clamp(18px, 1.8vw, 24px);
+  align-content: center;
+  justify-items: start;
+  justify-self: start;
+  padding-top: clamp(4px, 0.6vh, 12px);
+}
+
+.heroHeadlineBlock {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+  width: 100%;
+  max-width: var(--hero-main-max-width);
+}
+
+.heroActionsRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  align-items: center;
+}
+
+.heroMetaRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.cta,
+.ctaMuted {
+  height: 48px;
+  border-radius: 16px;
+}
+
+.cta {
+  width: clamp(148px, 17vw, 198px);
+}
+
+.ctaMuted {
+  width: clamp(124px, 14vw, 172px);
+  opacity: 0.72;
+}
+
+.pill {
+  width: 86px;
+  height: 32px;
+  border-radius: 999px;
+  opacity: 0.92;
+}
+
+.heroAsideColumn {
+  min-width: 0;
+  width: 100%;
+  max-width: var(--hero-aside-max-width);
+  height: 100%;
+  display: grid;
+  gap: 12px;
+  align-content: center;
+  justify-items: end;
+  justify-self: end;
+}
+
+.heroOrb {
+  width: 100%;
+  max-width: var(--hero-aside-max-width);
+  aspect-ratio: 1 / 1;
+  border-radius: 28px;
+  justify-self: end;
+}
+
+.heroSignalColumn {
+  width: min(100%, 270px);
+  display: grid;
+  gap: 10px;
+  justify-self: end;
+  margin-top: 2px;
+}
+
+.signalBar {
+  width: 100%;
+  height: 12px;
+  border-radius: 999px;
+}
+
+.portfolioLayout {
+  grid-template-columns: 52px minmax(0, 1fr);
+  gap: clamp(18px, 2vw, 28px);
+  align-items: stretch;
+}
+
+.portfolioRail {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  gap: 20px;
+  padding-top: 8px;
+}
+
+.railLine {
+  width: 6px;
+  min-width: 6px;
+  height: min(100%, 320px);
+  min-height: 220px;
+  border-radius: 999px;
+}
+
+.railDot {
+  width: 18px;
+  height: 18px;
+  min-width: 18px;
+  border-radius: 999px;
+}
+
+.portfolioCards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(16px, 1.6vw, 22px);
+  min-width: 0;
+}
+
+.card {
+  min-width: 0;
+  min-height: 380px;
+  display: grid;
+  grid-template-rows: 1.1fr auto;
+  border-radius: 26px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  box-sizing: border-box;
+}
+
+.cardMedia {
+  width: 100%;
+  min-width: 0;
+  min-height: 190px;
+  border-radius: 20px;
+}
+
+.cardBody {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+  padding-top: 16px;
+  min-width: 0;
+}
+
+.cardTagRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 6px;
+}
+
+.tag {
+  width: 78px;
+  height: 28px;
+  border-radius: 999px;
+}

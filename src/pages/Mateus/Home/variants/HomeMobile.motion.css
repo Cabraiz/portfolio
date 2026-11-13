@@ -1,0 +1,78 @@
+
+/* Movimento do Início no celular (useHomeMobileMotion). O logo empurra os
+   textos e mede título, identidade, introdução e a barra de contato; nenhum
+   deles muda de posição aqui (só opacidade, recorte e os ícones da barra).
+   A foto já sobe com a rolagem em useMobileHomeBrandMotion. */
+@media (prefers-reduced-motion: no-preference) {
+  .page[data-motion-idle="on"] .portrait {
+    transform-origin: 50% 100%;
+    animation: homePortraitBreath 9s ease-in-out infinite alternate;
+  }
+
+  .page[data-motion-idle="on"] .titleAccent {
+    animation: homeAccentGlow 3.8s ease-in-out infinite;
+  }
+
+  .page[data-motion-idle="on"] .actions svg {
+    animation: homeActionWiggle 4.6s ease-in-out infinite;
+  }
+
+  .page[data-motion-idle="on"] .actions a:last-child svg {
+    animation-delay: 0.7s;
+  }
+
+  .page[data-motion-idle="on"] .actionDivider {
+    animation: homeDividerPulse 2.6s ease-in-out infinite;
+  }
+}
+
+@keyframes homePortraitBreath {
+  from {
+    scale: 1;
+  }
+  to {
+    scale: 1.035;
+  }
+}
+
+@keyframes homeAccentGlow {
+  0%,
+  100% {
+    text-shadow: 0 0 0 rgba(255, 255, 255, 0);
+  }
+  50% {
+    text-shadow: 0 0 14px rgba(255, 255, 255, 0.55);
+  }
+}
+
+@keyframes homeActionWiggle {
+  0%,
+  78%,
+  100% {
+    rotate: 0deg;
+    scale: 1;
+  }
+  84% {
+    rotate: -14deg;
+    scale: 1.15;
+  }
+  90% {
+    rotate: 10deg;
+    scale: 1.1;
+  }
+  95% {
+    rotate: -4deg;
+  }
+}
+
+@keyframes homeDividerPulse {
+  0%,
+  100% {
+    scale: 1 1;
+    opacity: 1;
+  }
+  50% {
+    scale: 1 0.55;
+    opacity: 0.6;
+  }
+}

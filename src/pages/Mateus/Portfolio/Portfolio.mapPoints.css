@@ -1,0 +1,159 @@
+.mapPoint {
+	position: absolute;
+	top: var(--point-y);
+	left: var(--point-x);
+	z-index: 5;
+	display: grid;
+	place-items: center;
+	width: 30px;
+	height: 30px;
+	padding: 0;
+	border: 0;
+	background: transparent;
+	cursor: pointer;
+	pointer-events: auto;
+	transform: translate(-50%, -50%);
+}
+
+.mapPointDot {
+	width: 10px;
+	height: 10px;
+	border: 3px solid rgba(255, 255, 248, 0.94);
+	border-radius: 50%;
+	box-sizing: border-box;
+	background: #0a6662;
+	box-shadow: 0 0 0 2px rgba(6, 83, 80, 0.24);
+	transition:
+		transform 180ms ease,
+		box-shadow 180ms ease;
+}
+
+.mapPoint:hover .mapPointDot,
+.mapPointActive .mapPointDot {
+	transform: scale(1.35);
+	box-shadow:
+		0 0 0 5px rgba(255, 255, 246, 0.52),
+		0 0 0 7px rgba(6, 83, 80, 0.22);
+}
+
+.mapPointLabel {
+	position: absolute;
+	top: -12px;
+	left: 26px;
+	display: flex;
+	flex-direction: column;
+	width: max-content;
+	max-width: 150px;
+	padding: 8px 11px;
+	border-radius: 7px;
+	color: #f5f7ea;
+	background: linear-gradient(
+		135deg,
+		rgba(5, 79, 76, 0.96),
+		rgba(3, 54, 55, 0.96)
+	);
+	box-shadow: 0 10px 22px rgba(2, 53, 52, 0.2);
+	text-align: left;
+	pointer-events: none;
+}
+
+.mapPointLabel strong {
+	font-size: 11px;
+	line-height: 1.05;
+}
+
+.mapPointLabel small {
+	margin-top: 2px;
+	font-size: 7px;
+	font-weight: 700;
+	letter-spacing: 0.06em;
+	opacity: 0.72;
+}
+
+.atlasPager {
+	position: absolute;
+	right: 0;
+	bottom: 6px;
+	left: 0;
+	z-index: 7;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 13px;
+}
+
+.atlasPager button {
+	display: grid;
+	place-items: center;
+	width: 42px;
+	height: 42px;
+	padding: 0;
+	border: 1px solid rgba(6, 67, 65, 0.72);
+	border-radius: 50%;
+	color: #f4f6e9;
+	background: #075653;
+	box-shadow: 0 8px 18px rgba(4, 62, 61, 0.16);
+	font-size: 20px;
+	cursor: pointer;
+	transition:
+		transform 180ms ease,
+		background 180ms ease;
+}
+
+.atlasPager button:hover {
+	background: #033f3e;
+	transform: translateY(-2px);
+}
+
+.detailCard {
+	position: relative;
+	z-index: 5;
+	align-self: center;
+	min-width: 0;
+}
+
+@media (min-width: 992px) {
+	/* O layout desktop é desenhado para 1280×600 (720p). Em telas maiores o
+	   atlas inteiro cresce na mesma proporção em vez de sobrar espaço vazio.
+	   tan(atan2(a, b)) devolve a razão a/b sem unidade. */
+	.portfolioRoot {
+		--atlas-scale: max(
+			1,
+			min(tan(atan2(100vw, 1280px)), tan(atan2(100dvh, 600px)))
+		);
+	}
+
+	/* Marcadores e rotas do mapa ficam em % da viewport; o zoom só aumenta
+	   o tamanho deles, sem mudar a posição. */
+	.atlasFrame,
+	.journeyRoute,
+	.journeyTraveler,
+	.journeyMarker,
+	.routeLine,
+	.routeHub,
+	.mapPoint {
+		zoom: var(--atlas-scale);
+	}
+
+	.indexPanel {
+		transform: translateY(
+			clamp(
+				-84px,
+				calc(-84px + (720px - 100 * var(--atlas-vh)) * 0.3),
+				-20px
+			)
+		);
+	}
+
+	/* Sem a subida antiga de 44px: a posição e o tamanho finais do card são
+	   ajustados por useDesktopDetailCardFit (entre a barra, o chat e os
+	   pontos laterais). */
+	.detailCard {
+		align-self: end;
+	}
+
+	/* O painel em camadas (ProjectStage.module.css) toma o lugar do card. */
+	.detailCard[data-stage="on"] {
+		visibility: hidden;
+	}
+}

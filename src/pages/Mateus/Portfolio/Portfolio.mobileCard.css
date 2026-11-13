@@ -1,0 +1,253 @@
+/* Continua o @media (max-width: 991px) de Portfolio.mobileMap.css. */
+@media (max-width: 991px) {
+        .mobileDetailCard {
+                position: absolute;
+                right: 4px;
+		bottom: 0;
+                left: calc(4px + var(--mobile-brand-push, 0px));
+		z-index: 6;
+		display: grid;
+           grid-template-columns: clamp(90px, 36vw, 160px) minmax(0, 1fr);
+           grid-template-rows: auto auto auto;
+		column-gap: 10px;
+		height: auto;
+		min-height: 0;
+		max-height: none;
+		padding: 18px 12px 9px;
+		padding-bottom: max(9px, env(safe-area-inset-bottom));
+                padding-left: calc(12px + var(--mobile-brand-clearance, 0px));
+		border: 1px solid rgba(7, 78, 75, 0.12);
+		border-radius: 22px 22px 0 0;
+		box-sizing: border-box;
+		overflow: hidden;
+		color: #083f40;
+		background: rgba(250, 253, 247, 0.96);
+		box-shadow: 0 -10px 28px rgba(26, 83, 78, 0.13);
+                pointer-events: auto;
+        }
+
+        .mobileDetailCard[data-mobile-brand-contact="true"] .mobileFeatureCopy h2,
+        .mobileDetailCard[data-mobile-brand-contact="true"] .mobileFeatureCopy p {
+                white-space: normal;
+                overflow-wrap: anywhere;
+                text-overflow: clip;
+        }
+
+	.mobileCardHandle {
+		position: absolute;
+		top: 6px;
+		left: 50%;
+		width: 26px;
+		height: 3px;
+		border-radius: 999px;
+		background: rgba(7, 76, 74, 0.58);
+		transform: translateX(-50%);
+	}
+
+	.mobileFeatureDetails {
+		grid-column: 2;
+		grid-row: 1;
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) 36px;
+		column-gap: 4px;
+		min-width: 0;
+		align-self: center;
+	}
+
+	.mobileFeatureCopy {
+		grid-column: 1;
+		grid-row: 1;
+		min-width: 0;
+	}
+
+	.mobileFeatureDetails > .mobileMeta {
+		grid-column: 1;
+		grid-row: 2;
+	}
+
+        .mobileFeatureCopy h2 {
+                margin: 0;
+		font-family: "Arial Narrow", "Roboto Condensed", sans-serif;
+                font-size: clamp(18px, 4.8vw, 22px);
+		font-weight: 900;
+                line-height: 1.08;
+		letter-spacing: 0.015em;
+                overflow-wrap: anywhere;
+	}
+
+	.mobileFeatureCopy p {
+		margin: 4px 0 0;
+                font-size: clamp(11px, 2.9vw, 13px);
+                font-weight: 600;
+                line-height: 1.2;
+                overflow-wrap: anywhere;
+	}
+
+        .mobileProjectPreview {
+                position: relative;
+                grid-column: 1;
+		grid-row: 1;
+                height: clamp(88px, 12svh, 100px);
+		align-self: start;
+                min-width: 0;
+	}
+
+	.mobileProjectSiteLink {
+		display: flex;
+	}
+
+	.mobileProjectPreviewButton {
+		display: block;
+		width: 100%;
+		height: 100%;
+		padding: 0;
+		border: 0;
+		border-radius: 12px;
+		background: none;
+		cursor: zoom-in;
+		-webkit-tap-highlight-color: transparent;
+	}
+
+	.mobileProjectPreviewButton:focus-visible {
+		outline: 2px solid currentColor;
+		outline-offset: 2px;
+	}
+
+	.mobileProjectPreview img {
+		display: block;
+		width: 100%;
+		height: 100%;
+                object-fit: contain;
+                object-position: center;
+	}
+
+	.mobileMeta,
+	.mobileTechnologies {
+                display: flex;
+                flex-wrap: wrap;
+		min-width: 0;
+		align-items: center;
+		gap: 5px;
+		margin-top: 6px;
+	}
+
+        .mobileTechnologies {
+                flex-wrap: nowrap;
+                overflow: hidden;
+                justify-content: flex-start;
+        }
+
+        .mobileTechnologies span[data-overflow-hidden="true"] {
+                visibility: hidden;
+        }
+
+	.mobileMeta span,
+	.mobileTechnologies span {
+                flex: 0 0 auto;
+		padding: 4px 7px;
+		border: 1px solid rgba(7, 82, 79, 0.1);
+		border-radius: 999px;
+		color: #075653;
+		background: rgba(7, 103, 98, 0.07);
+                font-size: clamp(9px, 2.3vw, 10px);
+		font-weight: 800;
+		line-height: 1;
+		white-space: nowrap;
+	}
+
+        .mobileProjectsHeading {
+                grid-column: 1 / -1;
+                grid-row: 2;
+		margin: 8px 0 5px;
+		font-size: 8px;
+		font-weight: 900;
+		line-height: 1;
+	}
+
+        .mobileProjectsRow {
+		grid-column: 1 / -1;
+                grid-row: 3;
+		display: grid;
+		grid-template-columns: minmax(0, 1fr);
+		min-width: 0;
+	}
+
+	.mobileProjectList {
+		display: flex;
+		min-width: 0;
+		gap: 6px;
+		overflow-x: auto;
+		overscroll-behavior-x: contain;
+		scrollbar-width: none;
+		scroll-snap-type: x proximity;
+	}
+
+	.mobileProjectList::-webkit-scrollbar {
+		display: none;
+	}
+
+	.mobileProjectButton {
+		display: grid;
+		width: 54px;
+		min-width: 54px;
+		height: 52px;
+		/* Linha fixa para o logo: os nomes ficam alinhados, seja qual for a
+		   altura de cada logo. */
+		grid-template-rows: 26px auto;
+		place-items: center;
+		align-content: center;
+		gap: 2px;
+		padding: 3px;
+		border: 1px solid rgba(7, 82, 79, 0.08);
+		border-radius: 9px;
+		color: #083f40;
+		background: rgba(232, 244, 240, 0.78);
+		scroll-snap-align: start;
+		cursor: pointer;
+	}
+
+	.mobileProjectButtonActive {
+		border-color: #075e5a;
+		background: #ffffff;
+		box-shadow: inset 0 0 0 1px rgba(7, 94, 90, 0.13);
+	}
+
+	.mobileProjectButton img {
+		--logo-unit: 23px;
+		--logo-max-w: 40px;
+		--logo-max-h: 26px;
+		display: block;
+		width: min(calc(var(--logo-unit) * sqrt(var(--logo-aspect, 1))), var(--logo-max-w));
+		height: min(calc(var(--logo-unit) / sqrt(var(--logo-aspect, 1))), var(--logo-max-h));
+		object-fit: contain;
+	}
+
+	.mobileProjectButton span {
+		width: 100%;
+		overflow: hidden;
+		font-size: 5px;
+		font-weight: 900;
+		line-height: 1;
+		text-align: center;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.mobileNextProject {
+		grid-column: 2;
+		grid-row: 1 / 3;
+		align-self: center;
+		display: grid;
+		width: 36px;
+		height: 44px;
+		place-items: center;
+		padding: 0;
+		border: 1px solid rgba(7, 82, 79, 0.1);
+		border-radius: 999px;
+		color: #075653;
+		background: rgba(232, 244, 240, 0.9);
+		font-size: 24px;
+		line-height: 1;
+		cursor: pointer;
+	}
+}

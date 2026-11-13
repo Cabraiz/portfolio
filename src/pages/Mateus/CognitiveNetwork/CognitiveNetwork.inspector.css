@@ -1,0 +1,278 @@
+.inspector {
+	display: grid;
+	grid-template-rows:
+		29px minmax(86px, 0.88fr) minmax(112px, 1.12fr)
+		49px minmax(92px, 0.8fr) 24px;
+	border-color: rgba(185, 97, 255, 0.19);
+}
+
+.inspectorTitle,
+.panelLabel {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+	padding: 0 8px;
+	border-bottom: 1px solid rgba(115, 194, 255, 0.12);
+	color: rgba(169, 211, 231, 0.48);
+	font-size: 0.48rem;
+	letter-spacing: 0.08em;
+}
+
+.inspectorTitle strong {
+	color: var(--cyan);
+	font-size: 0.56rem;
+}
+
+.signalStack {
+	min-height: 0;
+	padding: 5px 7px;
+	display: grid;
+	grid-template-rows: repeat(3, minmax(0, 1fr));
+	gap: 2px;
+	border-bottom: 1px solid rgba(115, 194, 255, 0.1);
+}
+
+.signalChart {
+	position: relative;
+	min-height: 0;
+	border-left: 2px solid rgba(71, 245, 255, 0.23);
+	background: linear-gradient(90deg, rgba(24, 40, 73, 0.19), transparent);
+	overflow: hidden;
+}
+
+.signalChart span,
+.signalChart strong {
+	position: absolute;
+	top: 2px;
+	z-index: 2;
+	font-size: 0.44rem;
+}
+
+.signalChart span {
+	left: 5px;
+	color: rgba(167, 210, 231, 0.48);
+}
+
+.signalChart strong {
+	right: 4px;
+	color: rgba(111, 255, 229, 0.76);
+}
+
+.signalChart svg {
+	position: absolute;
+	inset: 9px 3px 1px;
+	width: calc(100% - 6px);
+	height: calc(100% - 10px);
+}
+
+.signalChart path {
+	fill: none;
+	stroke-width: 1.3;
+	stroke-dasharray: 5 2;
+	vector-effect: non-scaling-stroke;
+	filter: drop-shadow(0 0 3px currentColor);
+	animation: signalTravel 1.25s linear infinite;
+}
+
+.signalLine1 {
+	stroke: var(--cyan);
+	color: var(--cyan);
+}
+.signalLine2 {
+	stroke: var(--violet);
+	color: var(--violet);
+}
+.signalLine3 {
+	stroke: var(--lime);
+	color: var(--lime);
+}
+
+.histogramPanel {
+	min-height: 0;
+	display: grid;
+	grid-template-rows: 24px minmax(0, 1fr);
+	border-bottom: 1px solid rgba(115, 194, 255, 0.11);
+}
+
+.panelLabel {
+	padding-inline: 6px;
+	font-size: 0.43rem;
+}
+
+.panelLabel strong {
+	color: rgba(255, 108, 166, 0.68);
+}
+
+.histogram {
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-evenly;
+	padding: 4px 7px;
+}
+
+.histogram i {
+	display: block;
+	width: var(--bar-width);
+	height: 3px;
+	background: hsl(calc(326 - var(--bar-index) * 10) 92% 61%);
+	box-shadow: 0 0 5px currentColor;
+	transform-origin: left center;
+	animation: histogramThink 1.7s ease-in-out infinite alternate;
+	animation-delay: calc(var(--bar-index) * -90ms);
+}
+
+.splitPanel {
+	display: grid;
+	grid-template-rows: 23px 1fr;
+	border-bottom: 1px solid rgba(115, 194, 255, 0.11);
+}
+
+.splitBar {
+	display: grid;
+	grid-template-columns: 22% 58% 20%;
+	gap: 2px;
+	padding: 7px;
+}
+
+.splitBar i:nth-child(1) {
+	background: #9b67ff;
+}
+.splitBar i:nth-child(2) {
+	background: #a9e547;
+}
+.splitBar i:nth-child(3) {
+	background: #f0cc35;
+}
+
+.readoutPanel {
+	min-height: 0;
+	padding: 6px 8px;
+	border-bottom: 1px solid rgba(115, 194, 255, 0.11);
+	font-size: 0.44rem;
+}
+
+.readoutPanel > span {
+	color: rgba(188, 223, 240, 0.47);
+	letter-spacing: 0.1em;
+}
+
+.readoutPanel dl {
+	display: grid;
+	gap: 3px;
+	margin: 6px 0 0;
+}
+
+.readoutPanel dl div {
+	display: grid;
+	grid-template-columns: 1fr auto;
+	gap: 8px;
+}
+
+.readoutPanel dt {
+	color: rgba(139, 184, 204, 0.45);
+}
+
+.readoutPanel dd {
+	margin: 0;
+	color: rgba(219, 242, 250, 0.68);
+}
+
+.readoutPanel dl div:nth-child(2) dd {
+	color: var(--pink);
+}
+.readoutPanel dl div:nth-child(3) dd {
+	color: var(--lime);
+}
+.readoutPanel dl div:nth-child(5) dd {
+	color: #ff784f;
+}
+
+.statusKey {
+	display: flex;
+	align-items: center;
+	justify-content: space-around;
+	gap: 4px;
+	padding: 0 5px;
+	font-size: 0.39rem;
+	color: rgba(164, 205, 224, 0.45);
+}
+
+.statusKey span {
+	display: inline-flex;
+	align-items: center;
+	gap: 3px;
+}
+
+.statusKey i {
+	width: 4px;
+	height: 4px;
+	border-radius: 50%;
+	background: var(--cyan);
+}
+
+.statusKey span:nth-child(2) i {
+	background: var(--gold);
+}
+.statusKey span:nth-child(3) i {
+	background: var(--pink);
+}
+.statusKey span:nth-child(4) i {
+	background: var(--lime);
+}
+
+.timeline {
+	position: relative;
+	z-index: 3;
+	min-width: 0;
+	border: 1px solid rgba(115, 194, 255, 0.14);
+	background: rgba(3, 5, 14, 0.87);
+	overflow: hidden;
+}
+
+.timeline svg {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+}
+
+.timeline path {
+	opacity: 0.74;
+	mix-blend-mode: screen;
+	transform-origin: center;
+	animation: timelineThink 2.8s ease-in-out infinite alternate;
+}
+
+.timelineViolet {
+	fill: #6f44d8;
+}
+.timelineCyan {
+	fill: #18cfd2;
+}
+.timelineGold {
+	fill: #b3c63d;
+}
+
+.timelineLabels,
+.simulationNote {
+	position: absolute;
+	z-index: 2;
+	font-size: 0.43rem;
+	letter-spacing: 0.08em;
+}
+
+.timelineLabels {
+	top: 3px;
+	left: 7px;
+	display: flex;
+	gap: 32px;
+	color: rgba(232, 241, 251, 0.72);
+}
+
+.simulationNote {
+	right: 7px;
+	bottom: 3px;
+	color: rgba(184, 218, 232, 0.38);
+}

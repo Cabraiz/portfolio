@@ -8,6 +8,8 @@ import {
   LIVE_INTERACTION_LABELS,
 } from "../../domain/live.constants";
 import type { LiveInteractionMode } from "../../domain/live.types";
+import { getNarrative, joinClassNames } from "./LiveInteractionHint.narrative";
+import { LiveInteractionHintSteps } from "./LiveInteractionHint.steps";
 
 export type LiveInteractionHintProps = Readonly<{
   className?: string;
@@ -30,76 +32,6 @@ export type LiveInteractionHintProps = Readonly<{
 type HintCssVariables = CSSProperties & {
   "--live-hint-accent"?: string;
 };
-
-type InteractionNarrative = Readonly<{
-  label: string;
-  heading: string;
-  description: string;
-  steps: readonly string[];
-}>;
-
-function joinClassNames(
-  ...classNames: Array<string | false | null | undefined>
-): string {
-  return classNames.filter(Boolean).join(" ");
-}
-
-function getNarrative(mode: LiveInteractionMode): InteractionNarrative {
-  switch (mode) {
-    case "hover":
-      return {
-        label: LIVE_INTERACTION_LABELS.hover,
-        heading: "Leitura por aproximação",
-        description:
-          "A cena responde quando o cursor se aproxima, destacando sinais e abrindo foco sem exigir clique.",
-        steps: [
-          "Passe o cursor pelos nós para revelar prioridade, estado e contexto.",
-          "Use o placar para cruzar volume com o radar visual.",
-          "A leitura fica mais limpa quando o foco se concentra em um cluster.",
-        ],
-      };
-
-    case "drag":
-      return {
-        label: LIVE_INTERACTION_LABELS.drag,
-        heading: "Exploração manual",
-        description:
-          "O visitante pode empurrar o campo visual para investigar relações de forma mais tátil.",
-        steps: [
-          "Arraste para deslocar o plano e tensionar a leitura espacial.",
-          "Pare sobre um ponto importante para estabilizar a observação.",
-          "Combine com o placar para validar o que está em primeiro plano.",
-        ],
-      };
-
-    case "spotlight":
-      return {
-        label: LIVE_INTERACTION_LABELS.spotlight,
-        heading: "Foco editorial",
-        description:
-          "Cada aproximação funciona como um spotlight, isolando o que merece atenção no momento.",
-        steps: [
-          "Use o cursor para acender um nó e reduzir ruído periférico.",
-          "Leia o destaque atual como um recorte editorial do radar.",
-          "Saia do alvo para devolver equilíbrio à cena.",
-        ],
-      };
-
-    case "magnetic":
-    default:
-      return {
-        label: LIVE_INTERACTION_LABELS.magnetic,
-        heading: "Campo magnético",
-        description:
-          "Os elementos reagem ao cursor como um painel vivo, com atração sutil e sensação de sistema em operação.",
-        steps: [
-          "Mova o mouse lentamente para perceber a atração entre cursor e nós.",
-          "Aproxime-se dos pontos mais fortes para abrir detalhes do fluxo.",
-          "Use o painel como uma vitrine operacional, não como um gráfico estático.",
-        ],
-      };
-  }
-}
 
 export default function LiveInteractionHint({
   className,
@@ -307,108 +239,12 @@ export default function LiveInteractionHint({
         </div>
       ) : null}
 
-      <section
-        style={{
-          position: "relative",
-          zIndex: 1,
-          display: "grid",
-          gap: "12px",
-          padding: compact ? "14px" : "16px",
-          borderRadius: "20px",
-          border: "1px solid rgba(255,255,255,0.08)",
-          background:
-            "linear-gradient(180deg, rgba(255,255,255,0.028), rgba(255,255,255,0.012)), rgba(9,13,18,0.72)",
-          backdropFilter: "blur(14px)",
-        }}
-      >
-        <div
-          style={{
-            display: "grid",
-            gap: "6px",
-          }}
-        >
-          <span
-            style={{
-              fontSize: "0.64rem",
-              fontWeight: 800,
-              letterSpacing: "0.18em",
-              textTransform: "uppercase",
-              color: "rgba(255,255,255,0.5)",
-            }}
-          >
-            leitura recomendada
-          </span>
-
-          <strong
-            style={{
-              fontSize: "1rem",
-              lineHeight: 1.12,
-              letterSpacing: "-0.03em",
-              color: "rgba(255,255,255,0.92)",
-            }}
-          >
-            {narrative.heading}
-          </strong>
-
-          <span
-            style={{
-              fontSize: "0.82rem",
-              lineHeight: 1.6,
-              color: "rgba(255,255,255,0.64)",
-            }}
-          >
-            {narrative.description}
-          </span>
-        </div>
-
-        <div
-          style={{
-            display: "grid",
-            gap: "8px",
-          }}
-        >
-          {narrative.steps.map((step, index) => (
-            <div
-              key={`${interactionMode}-${index + 1}`}
-              style={{
-                display: "grid",
-                gridTemplateColumns: "28px 1fr",
-                gap: "10px",
-                alignItems: "start",
-              }}
-            >
-              <span
-                aria-hidden="true"
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  width: "28px",
-                  height: "28px",
-                  borderRadius: "999px",
-                  border: `1px solid ${accentColor}2f`,
-                  background: `${accentColor}10`,
-                  fontSize: "0.72rem",
-                  fontWeight: 800,
-                  color: "rgba(255,255,255,0.82)",
-                }}
-              >
-                {index + 1}
-              </span>
-
-              <span
-                style={{
-                  fontSize: "0.78rem",
-                  lineHeight: 1.55,
-                  color: "rgba(255,255,255,0.72)",
-                }}
-              >
-                {step}
-              </span>
-            </div>
-          ))}
-        </div>
-      </section>
+      <LiveInteractionHintSteps
+        narrative={narrative}
+        interactionMode={interactionMode}
+        compact={compact}
+        accentColor={accentColor}
+      />
 
       <footer
         style={{

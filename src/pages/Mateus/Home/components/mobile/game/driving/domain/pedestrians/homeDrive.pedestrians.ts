@@ -1,7 +1,5 @@
 // src/pages/Mateus/Home/components/mobile/game/driving/domain/pedestrians/homeDrive.pedestrians.ts
 
-
-
 import {
 
   createInitialHomeDrivePedestrianPopulationRuntime,
@@ -22,15 +20,7 @@ import type {
 
 } from "./homeDrive.pedestrians.types";
 
-import {
-
-  shouldHomeDrivePedestrianMove,
-
-} from "./homeDrive.pedestrianBehaviors";
-
 import { dedupeHomeDrivePedestrianAgentsById } from "./homeDrive.pedestrianIdentity";
-
-import { shouldTickHomeDrivePedestrianAgent } from "./homeDrive.pedestrianSimulationScheduler";
 
 import { clamp } from "./homeDrive.pedestrianRandom";
 import {
@@ -39,28 +29,15 @@ import {
 } from "./homeDrive.pedestrianCollision";
 
 import {
-
   buildHomeDrivePedestrianSidewalkZones,
-
-  getHomeDrivePedestrianHeadingRadians,
-
-  getHomeDrivePedestrianPointOnSidewalk,
-
-  getHomeDrivePedestrianZoneById,
-
-  resolveHomeDrivePedestrianSidewalkProgressAfterDistance,
-
 } from "./homeDrive.pedestrianSidewalks";
-
-
+import { tickAgentIfScheduled } from "./homeDrive.pedestrians.agentTick";
 
 const DEFAULT_SEED = 7429;
 
 const DEFAULT_MAX_DELTA_SECONDS = 1 / 24;
 
 const DEFAULT_MIN_ROAD_LENGTH_METERS = 28;
-
-
 
 const IMPACT_CLOCK_EPSILON_SECONDS = 0.0001;
 
@@ -93,8 +70,6 @@ function getHomeDrivePedestrianTickClockSeconds(
   );
 }
 
-
-
 function getDistanceSquared(
 
   first: Readonly<{ x: number; z: number }>,
@@ -107,161 +82,9 @@ function getDistanceSquared(
 
   const dz = first.z - second.z;
 
-
-
   return dx * dx + dz * dz;
 
 }
-
-
-
-function tickSidewalkAgent(
-
-  agent: HomeDrivePedestrianAgent,
-
-  pedestrians: HomeDrivePedestrianRuntimeState,
-
-  deltaSeconds: number,
-
-): HomeDrivePedestrianAgent {
-
-  const zone = getHomeDrivePedestrianZoneById(pedestrians.zones, agent.zoneId);
-
-
-
-  if (!zone || !shouldHomeDrivePedestrianMove(agent.behavior)) {
-
-    return {
-
-      ...agent,
-
-      behaviorElapsedSeconds:
-
-        (agent.behaviorElapsedSeconds + deltaSeconds) %
-
-        Math.max(0.01, agent.behaviorDurationSeconds),
-
-      animationPhase:
-
-        (agent.animationPhase + deltaSeconds * Math.max(0.2, agent.speedMps) * 5.4) %
-
-        (Math.PI * 2),
-
-    };
-
-  }
-
-
-
-  const speedMps = clamp(
-
-    agent.speedMps + (agent.targetSpeedMps - agent.speedMps) * 0.08,
-
-    0,
-
-    3.2,
-
-  );
-
-  const moved = resolveHomeDrivePedestrianSidewalkProgressAfterDistance(
-
-    zone,
-
-    agent.progress,
-
-    agent.directionSign,
-
-    speedMps * deltaSeconds,
-
-  );
-
-  const position = getHomeDrivePedestrianPointOnSidewalk(
-
-    zone,
-
-    moved.progress,
-
-    agent.lateralOffsetMeters,
-
-  );
-
-
-
-  return {
-
-    ...agent,
-
-    progress: moved.progress,
-
-    directionSign: moved.directionSign,
-
-    position,
-
-    headingRad: getHomeDrivePedestrianHeadingRadians(zone, moved.directionSign),
-
-    speedMps,
-
-    behaviorElapsedSeconds:
-
-      (agent.behaviorElapsedSeconds + deltaSeconds) %
-
-      Math.max(0.01, agent.behaviorDurationSeconds),
-
-    animationPhase:
-
-      (agent.animationPhase + deltaSeconds * Math.max(0.25, speedMps) * 5.4) %
-
-      (Math.PI * 2),
-
-  };
-
-}
-
-
-
-function tickAgentIfScheduled(
-
-  agent: HomeDrivePedestrianAgent,
-
-  pedestrians: HomeDrivePedestrianRuntimeState,
-
-  deltaSeconds: number,
-
-  options: HomeDrivePedestrianTickOptions,
-
-): HomeDrivePedestrianAgent {
-
-  if (
-
-    !shouldTickHomeDrivePedestrianAgent(agent, {
-
-      activeCenter: options.activeCenter,
-
-      hotRadiusMeters: options.activeRadiusMeters,
-
-      warmRadiusMeters: options.warmRadiusMeters,
-
-      warmModulo: options.warmTickModulo,
-
-      coldModulo: options.coldTickModulo,
-
-      tickIndex: options.tickIndex,
-
-    })
-
-  ) {
-
-    return agent;
-
-  }
-
-
-
-  return tickSidewalkAgent(agent, pedestrians, deltaSeconds);
-
-}
-
-
 
 export function createInitialHomeDrivePedestrianState(
 
@@ -282,8 +105,6 @@ export function createInitialHomeDrivePedestrianState(
     density: options.density,
 
   });
-
-
 
   return {
 
@@ -307,8 +128,6 @@ export function createInitialHomeDrivePedestrianState(
 
 }
 
-
-
 export function tickHomeDrivePedestrians(
 
   pedestrians: HomeDrivePedestrianRuntimeState,
@@ -324,8 +143,6 @@ export function tickHomeDrivePedestrians(
     return pedestrians;
 
   }
-
-
 
   const safeDeltaSeconds = clamp(
 
@@ -399,8 +216,6 @@ export function tickHomeDrivePedestrians(
 
   });
 
-
-
   return {
 
     ...pedestrians,
@@ -415,8 +230,6 @@ export function tickHomeDrivePedestrians(
 
 }
 
-
-
 export function getHomeDrivePedestrianAgentsNearPosition(
 
   pedestrians: HomeDrivePedestrianRuntimeState,
@@ -428,8 +241,6 @@ export function getHomeDrivePedestrianAgentsNearPosition(
 ): readonly HomeDrivePedestrianAgent[] {
 
   const radiusSquared = radiusMeters * radiusMeters;
-
-
 
   return pedestrians.agents.filter((agent) => {
 

@@ -1,0 +1,252 @@
+@keyframes thinkingPulse {
+	0% {
+		box-shadow: 0 0 0 0 rgba(255, 79, 186, 0.75);
+	}
+	75%,
+	100% {
+		box-shadow: 0 0 0 7px rgba(255, 79, 186, 0);
+	}
+}
+
+@keyframes attentionWireDriftA {
+	from { transform: translate(-0.8px, 0.45px) rotate(-1.25deg) scale(0.988, 1.012); }
+	to { transform: translate(0.9px, -0.55px) rotate(1.35deg) scale(1.014, 0.986); }
+}
+
+@keyframes attentionWireDriftB {
+	from { transform: translate(0.65px, 0.8px) rotate(1.1deg) scale(1.01, 0.99); }
+	to { transform: translate(-0.75px, -0.7px) rotate(-1.4deg) scale(0.987, 1.013); }
+}
+
+@keyframes attentionWireDriftC {
+	from { transform: translate(-0.45px, -0.75px) rotate(-0.9deg) scale(1.012, 0.988); }
+	to { transform: translate(0.7px, 0.65px) rotate(1.2deg) scale(0.989, 1.011); }
+}
+
+@keyframes routeScan {
+	to {
+		left: 108%;
+	}
+}
+
+@keyframes signalTravel {
+	to {
+		stroke-dashoffset: -28;
+	}
+}
+
+@keyframes histogramThink {
+	0% {
+		transform: scaleX(0.76);
+		opacity: 0.65;
+	}
+	100% {
+		transform: scaleX(1.04);
+		opacity: 1;
+	}
+}
+
+@keyframes timelineThink {
+	0% {
+		transform: scaleY(0.82) translateY(3px);
+	}
+	100% {
+		transform: scaleY(1.08) translateY(-1px);
+	}
+}
+
+@media (max-width: 991px) {
+        .section {
+                height: 100%;
+                max-height: 100%;
+                margin-top: 0;
+                padding: 5px 7px 4px;
+        }
+}
+
+@media (max-width: 900px) {
+	.section {
+		grid-template-rows: 25px minmax(0, 1fr) 43px;
+	}
+
+	.commandBar {
+		grid-template-columns: 1fr auto;
+	}
+
+	.clockReadout {
+		display: none;
+	}
+
+	.workspace {
+		grid-template-columns: minmax(0, 1fr) 205px;
+	}
+
+	.routeCard {
+		left: auto;
+		right: 16px;
+	}
+
+	.thoughtLog {
+		width: 218px;
+		font-size: 0.4rem;
+	}
+}
+
+@media (max-width: 767px) {
+        .section {
+                height: 100%;
+                max-height: 100%;
+                margin-top: 0;
+		grid-template-rows: 28px minmax(0, 1fr) 33px;
+                padding: 4px;
+	}
+
+	.commandBar {
+		grid-template-columns: 1fr;
+		padding-inline: 3px;
+	}
+
+	.commandIdentity {
+		display: none;
+	}
+
+	.viewSelector {
+		width: 100%;
+		height: 22px;
+	}
+
+	.viewButton {
+		flex: 1;
+		font-size: 0.53rem;
+	}
+
+        .workspace {
+                grid-template-columns: 1fr;
+                grid-template-rows: minmax(0, 1fr) min(122px, 50%);
+	}
+
+	.inspector {
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		grid-template-rows: minmax(0, 1fr);
+		gap: 4px;
+		padding: 4px;
+	}
+
+	.insightCard {
+		grid-template-rows: 22px minmax(0, 1fr);
+		border-radius: 6px;
+	}
+
+	.insightHeader {
+		padding-inline: 5px;
+		font-size: 0.39rem;
+	}
+
+	.insightHeader strong {
+		display: none;
+	}
+
+	.attentionLayout {
+		grid-template-columns: 1fr;
+		padding: 0;
+	}
+
+	.attentionLegend {
+		display: none;
+	}
+
+	.scatterPlot,
+	.radarChart {
+		padding: 2px;
+	}
+
+	.scatterPlot text,
+	.radarChart text {
+		font-size: 5.5px;
+	}
+
+	.routeCard {
+		top: 12px;
+		right: 12px;
+		width: 135px;
+		font-size: 0.43rem;
+	}
+
+	.thoughtLog {
+		display: none;
+	}
+
+	.scoreTag,
+	.axisLabels {
+		display: none;
+	}
+
+	.coreCaption {
+		left: 15px;
+		bottom: 14px;
+	}
+
+	.coreCaption strong {
+		font-size: 0.72rem;
+	}
+
+	.coreCaption small {
+		display: none;
+	}
+
+	.coreCaption .interactionHint {
+		display: block;
+		font-size: 0.4rem;
+	}
+
+	.timelineLabels {
+		font-size: 0.37rem;
+	}
+
+	.simulationNote {
+		display: none;
+	}
+}
+
+@media (max-width: 390px) {
+	.routeCard {
+		width: 116px;
+		padding: 4px 5px;
+	}
+
+	.coreCaption span {
+		font-size: 0.43rem;
+	}
+}
+
+@media (max-height: 650px) and (min-width: 768px) {
+	.section {
+		grid-template-rows: 23px minmax(0, 1fr) 40px;
+	}
+
+	.inspector {
+		grid-template-rows: repeat(3, minmax(0, 1fr));
+		gap: 5px;
+		padding: 5px;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.viewButton,
+	.routeCard::after,
+	.thoughtLog > div,
+	.thinkingStatus i,
+	.signalChart path,
+	.histogram i,
+	.attentionSegment,
+	.attentionChord,
+	.attentionWireField,
+	.scatterCurve,
+	.scatterPoint,
+	.radarValue,
+	.radarPoint,
+	.timeline path {
+		animation: none;
+		transition: none;
+	}
+}

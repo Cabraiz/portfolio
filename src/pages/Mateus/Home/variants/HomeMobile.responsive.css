@@ -1,0 +1,117 @@
+
+@media (max-height: 680px) {
+  .hero {
+    padding: calc(5px + var(--home-room)) 18px 68px;
+  }
+
+  .title {
+    font-size: clamp(43px, 15.5vw, 56px);
+  }
+
+  .intro {
+    width: 100px;
+  }
+
+  .partnerSignature {
+    gap: 6px;
+  }
+
+  .portrait {
+    top: 150px;
+    right: -58px;
+    width: min(90vw, 330px);
+  }
+
+  .actions {
+    min-height: 64px;
+    padding: 7px 6px;
+  }
+
+  .actions a {
+    min-height: 42px;
+    font-size: 11px;
+  }
+}
+
+@media (min-width: 390px) {
+  .hero {
+    padding-right: 26px;
+    padding-left: 26px;
+  }
+
+  .portrait {
+    top: 174px;
+    right: -62px;
+    width: min(92vw, 390px);
+  }
+}
+
+@media (max-height: 520px) {
+  .hero {
+    padding: calc(5px + var(--home-room)) 14px 60px;
+  }
+
+  .title {
+    font-size: clamp(38px, 13vw, 48px);
+  }
+
+  .intro {
+    width: 90px;
+  }
+
+  .partnerSignature {
+    gap: 5px;
+  }
+
+  .portrait {
+    top: 110px;
+    right: -42px;
+    width: min(82vw, 300px);
+  }
+
+  .actions {
+    right: 8px;
+    left: 8px;
+    min-height: 54px;
+    padding: 5px;
+  }
+
+  .actions a {
+    min-height: 38px;
+    font-size: 10px;
+  }
+}
+
+/* Tela baixa e larga (deitada ou quase quadrada, ex.: 400x400): os contatos
+   sobem para a coluna do meio em vez de ficar atrás da barra de contato. */
+@media (min-aspect-ratio: 8/9) and (max-width: 991px) and (max-height: 520px) {
+  .partners {
+    position: absolute;
+    top: 5px;
+    left: min(max(40%, 280px), calc(100% - 138px));
+    margin-top: 0;
+  }
+}
+
+@media (orientation: landscape) and (max-width: 991px) and (max-height: 360px) {
+  .hero {
+    padding-top: 3px;
+  }
+
+  .eyebrow {
+    padding-bottom: 4px;
+  }
+
+  .title {
+    margin-top: 3px;
+  }
+
+  .identity {
+    margin-top: 4px;
+  }
+
+  .intro {
+    margin-top: 3px;
+    line-height: 1.1em;
+  }
+}

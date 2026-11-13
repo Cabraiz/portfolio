@@ -1,6 +1,30 @@
 // src/pages/Mateus/Home/components/mobile/game/driving/view/speedometer/homeDriveSpeedometerImpact.ts
 
 import type { HomeDriveRuntimeImpactState } from "../../domain/homeDrive.impact";
+import {
+	MIN_IMPACT_IMPULSE,
+	MIN_CAMERA_SHAKE,
+	MIN_ACTIVE_SPEED_DELTA_KMH,
+	IMPULSE_FOR_FULL_SHOCK,
+	CAMERA_SHAKE_FOR_FULL_SHOCK,
+	PITCH_FOR_FULL_SHOCK_RAD,
+	ROLL_FOR_FULL_SHOCK_RAD,
+	MIN_DROP_RATIO,
+	MAX_DROP_RATIO,
+	MIN_HOLD_SECONDS,
+	MAX_HOLD_SECONDS,
+	MAX_IMPACT_TARGET_SPEED_KMH,
+	STRONG_IMPACT_TARGET_SPEED_KMH,
+	MIN_RECOVERY_KMH_PER_SECOND,
+	MAX_RECOVERY_KMH_PER_SECOND,
+	DOWNWARD_FOLLOW_KMH_PER_SECOND,
+	MAX_VISUAL_EXTRA_DROP_KMH,
+	clampNumber,
+	lerpNumber,
+	moveTowards,
+	getFiniteNumber,
+	getSafeDeltaSeconds,
+} from "./homeDriveSpeedometerImpact.helpers";
 
 export type HomeDriveSpeedometerImpactRuntimeState = Readonly<{
   initialized: boolean;
@@ -33,96 +57,6 @@ export type HomeDriveSpeedometerImpactResolveResult = Readonly<{
   shockRatio: number;
   isImpacting: boolean;
 }>;
-
-const DEFAULT_DELTA_SECONDS = 1 / 30;
-
-const MIN_IMPACT_IMPULSE = 0.75;
-const MIN_CAMERA_SHAKE = 0.035;
-const MIN_ACTIVE_SPEED_DELTA_KMH = 0.6;
-
-const IMPULSE_FOR_FULL_SHOCK = 18;
-const CAMERA_SHAKE_FOR_FULL_SHOCK = 1.75;
-const PITCH_FOR_FULL_SHOCK_RAD = 0.38;
-const ROLL_FOR_FULL_SHOCK_RAD = 0.42;
-
-const MIN_DROP_RATIO = 0.46;
-const MAX_DROP_RATIO = 0.985;
-
-const MIN_HOLD_SECONDS = 0.12;
-const MAX_HOLD_SECONDS = 0.38;
-
-/**
- * Teto visual depois da colisão.
- *
- * Se bater a 100 km/h, o ponteiro não fica mais em 70 km/h.
- * Ele cai para algo entre 3 e 22 km/h, conforme força da pancada.
- */
-const MAX_IMPACT_TARGET_SPEED_KMH = 22;
-const STRONG_IMPACT_TARGET_SPEED_KMH = 3;
-
-/**
- * Recuperação do ponteiro depois da pancada.
- *
- * Menor = volta mais devagar.
- * Maior = volta mais rápido.
- */
-const MIN_RECOVERY_KMH_PER_SECOND = 14;
-const MAX_RECOVERY_KMH_PER_SECOND = 44;
-
-/**
- * Quando a velocidade física cai naturalmente, o ponteiro pode acompanhar
- * mais rápido do que quando está subindo após batida.
- */
-const DOWNWARD_FOLLOW_KMH_PER_SECOND = 260;
-
-/**
- * Quanto maior, mais o ponteiro pode ser derrubado mesmo quando o snapshot
- * já chegou com velocidade baixa.
- */
-const MAX_VISUAL_EXTRA_DROP_KMH = 140;
-
-function clampNumber(value: number, min: number, max: number): number {
-  if (!Number.isFinite(value)) {
-    return min;
-  }
-
-  return Math.max(min, Math.min(max, value));
-}
-
-function lerpNumber(from: number, to: number, progress: number): number {
-  return from + (to - from) * clampNumber(progress, 0, 1);
-}
-
-function moveTowards(
-  current: number,
-  target: number,
-  maxDelta: number,
-): number {
-  if (!Number.isFinite(current)) {
-    return target;
-  }
-
-  if (!Number.isFinite(target)) {
-    return current;
-  }
-
-  const safeMaxDelta = Math.max(0, maxDelta);
-  const delta = target - current;
-
-  if (Math.abs(delta) <= safeMaxDelta) {
-    return target;
-  }
-
-  return current + Math.sign(delta) * safeMaxDelta;
-}
-
-function getFiniteNumber(value: unknown, fallback = 0): number {
-  return typeof value === "number" && Number.isFinite(value) ? value : fallback;
-}
-
-function getSafeDeltaSeconds(deltaSeconds: number | undefined): number {
-  return clampNumber(deltaSeconds ?? DEFAULT_DELTA_SECONDS, 1 / 120, 1 / 8);
-}
 
 /**
  * Velocímetro analógico mostra avanço.

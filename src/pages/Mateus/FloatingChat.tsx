@@ -1,15 +1,9 @@
-import { localizeLabel, useLabelLanguage } from '@/i18n/labels';
-import appI18n from "@/i18n/i18n";
+import { useLabelLanguage } from '@/i18n/labels';
 import type * as React from "react";
 import { useState, useRef, useEffect, useLayoutEffect, useSyncExternalStore } from "react";
-import msgIcon from "../../assets/Mateus/msgIcon.png";
-import mateusChatAvatar from "../../assets/Mateus/mateus-chat-avatar-v2.webp";
-import lagArthurSupport from "../../assets/Mateus/lag-arthur-support-wig-suit-v2.webp";
-import lagArthurChat from "../../assets/Mateus/lag-arthur-chat-blank-eyes-closed-mouth-v3.webp";
-import lagArthurIris from "../../assets/Mateus/lag-arthur-iris-anime-handpainted-v9.webp";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useTranslation } from "react-i18next";
-import { Link, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { privacyPathFor } from "../Privacy/privacyNotice.text";
 
 import {
@@ -26,184 +20,25 @@ import {
   isHomeGameStandaloneHost,
 } from "../../App/appHostRouting";
 
-type TriggerAvatarItem =
-  | {
-      type: "image";
-      src: string;
-      alt: string;
-    }
-  | {
-      type: "more";
-      label: string;
-      ariaLabel: string;
-    };
-
-type ChatMessage = {
-  id: string;
-  text: string;
-  author: "visitor" | "mateus";
-};
-
-type ContactReply = {
-  id: number;
-  text: string;
-};
-
-// O lagarto (Lag Arthur) em cima do botão do chat está escondido; sem ele o
-// botão abre o chat direto e os efeitos de olhar/fuga não rodam.
-const SHOW_CHAT_MASCOT = false;
-
-type MascotReaction = "idle" | "fleeing" | "hidden" | "returning";
-
-const CHAT_CONVERSATION_STORAGE_KEY = "cabraiz-chat-conversation-id";
-const CHAT_LAST_SENT_AT_STORAGE_KEY = "cabraiz-chat-last-sent-at";
-const CHAT_MESSAGES_STORAGE_KEY = "cabraiz-chat-messages";
-const CHAT_REPLY_RETENTION_MS = 24 * 60 * 60 * 1000;
-const CHAT_STORED_MESSAGE_LIMIT = 100;
-const CHAT_CONVERSATION_ID_PATTERN =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-const LOCAL_CONTACT_API_URL =
-  "https://cabraiz-telegram-relay.vercel.app/api/contact";
-const CONTACT_API_URL =
-  import.meta.env.VITE_CONTACT_API_URL?.trim() ||
-  (import.meta.env.DEV ? LOCAL_CONTACT_API_URL : "/api/contact");
-const WHATSAPP_SUPPORT_MESSAGES: Readonly<Record<string, string>> = {
-  pt: "Olá Mateus, vim pelo atendimento 24/7 da Cabraiz e quero falar sobre um projeto.",
-  en: "Hi Mateus, I came from the Cabraiz 24/7 chat and would like to talk about a project.",
-  es: "Hola Mateus, vengo del chat 24/7 de Cabraiz y me gustaría hablar sobre un proyecto.",
-};
-
-function getWhatsAppSupportUrl(): string {
-  const language = (appI18n.resolvedLanguage ?? "pt").split("-")[0];
-  const message = WHATSAPP_SUPPORT_MESSAGES[language] ?? WHATSAPP_SUPPORT_MESSAGES.pt;
-  return `https://wa.me/5585998575707?text=${encodeURIComponent(message)}`;
-}
-
-function getActiveLandingSectionSnapshot(): string | null {
-  if (typeof document === "undefined") return null;
-
-  return (
-    document
-      .querySelector<HTMLElement>('main[data-active-section]')
-      ?.dataset.activeSection ?? null
-  );
-}
-
-function subscribeToActiveLandingSection(onStoreChange: () => void) {
-  if (typeof document === "undefined" || typeof MutationObserver === "undefined") {
-    return () => undefined;
-  }
-
-  const observer = new MutationObserver(onStoreChange);
-  observer.observe(document.body, {
-    attributes: true,
-    attributeFilter: ["data-active-section"],
-    childList: true,
-    subtree: true,
-  });
-
-  return () => observer.disconnect();
-}
-
-/**
- * Usa a conversa já guardada ou cria uma nova só na memória. Nada é gravado
- * no navegador antes de a pessoa enviar a primeira mensagem (privacidade:
- * quem só visita o site não deixa nada guardado no aparelho).
- */
-function readOrCreateConversationId(): string {
-  try {
-    const storedConversationId = window.localStorage.getItem(
-      CHAT_CONVERSATION_STORAGE_KEY
-    );
-    if (
-      storedConversationId &&
-      CHAT_CONVERSATION_ID_PATTERN.test(storedConversationId)
-    ) {
-      return storedConversationId;
-    }
-  } catch {
-    // Sem armazenamento: a conversa vale só durante esta visita.
-  }
-  return window.crypto.randomUUID();
-}
-
-function persistConversationId(conversationId: string) {
-  try {
-    window.localStorage.setItem(CHAT_CONVERSATION_STORAGE_KEY, conversationId);
-  } catch {
-    // A conversa continua durante esta visita quando o armazenamento é bloqueado.
-  }
-}
-
-function hasRecentConversationActivity(): boolean {
-  if (typeof window === "undefined") return false;
-
-  try {
-    const lastSentAt = Number(
-      window.localStorage.getItem(CHAT_LAST_SENT_AT_STORAGE_KEY)
-    );
-
-    return (
-      Number.isFinite(lastSentAt) &&
-      lastSentAt > 0 &&
-      Date.now() - lastSentAt < CHAT_REPLY_RETENTION_MS
-    );
-  } catch {
-    return false;
-  }
-}
-
-function getStoredMessages(conversationId: string): ChatMessage[] {
-  if (typeof window === "undefined") return [];
-
-  try {
-    const rawMessages = window.localStorage.getItem(CHAT_MESSAGES_STORAGE_KEY);
-    if (!rawMessages) return [];
-
-    const stored = JSON.parse(rawMessages) as {
-      conversationId?: unknown;
-      updatedAt?: unknown;
-      messages?: unknown;
-    };
-    const updatedAt = Number(stored.updatedAt);
-    if (
-      stored.conversationId !== conversationId ||
-      !Number.isFinite(updatedAt) ||
-      Date.now() - updatedAt >= CHAT_REPLY_RETENTION_MS ||
-      !Array.isArray(stored.messages)
-    ) {
-      return [];
-    }
-
-    return stored.messages
-      .filter(
-        (message): message is ChatMessage =>
-          typeof message === "object" &&
-          message !== null &&
-          typeof (message as ChatMessage).id === "string" &&
-          typeof (message as ChatMessage).text === "string" &&
-          ["visitor", "mateus"].includes((message as ChatMessage).author)
-      )
-      .slice(-CHAT_STORED_MESSAGE_LIMIT);
-  } catch {
-    return [];
-  }
-}
-
-function storeMessages(conversationId: string, messages: ChatMessage[]) {
-  try {
-    window.localStorage.setItem(
-      CHAT_MESSAGES_STORAGE_KEY,
-      JSON.stringify({
-        conversationId,
-        updatedAt: Date.now(),
-        messages: messages.slice(-CHAT_STORED_MESSAGE_LIMIT),
-      })
-    );
-  } catch {
-    // A conversa continua durante esta visita quando o armazenamento é bloqueado.
-  }
-}
+import {
+  CHAT_LAST_SENT_AT_STORAGE_KEY,
+  CONTACT_API_URL,
+  getActiveLandingSectionSnapshot,
+  getStoredMessages,
+  hasRecentConversationActivity,
+  persistConversationId,
+  readOrCreateConversationId,
+  storeMessages,
+  subscribeToActiveLandingSection,
+} from "./FloatingChat.helpers";
+import type { ChatMessage, MascotReaction } from "./FloatingChat.helpers";
+import {
+  useChatPanelWheel,
+  useChatReplyPolling,
+  useMascotEyeTracking,
+} from "./FloatingChat.effects";
+import { FloatingChatPanelBody } from "./FloatingChat.panel";
+import { FloatingChatTrigger } from "./FloatingChat.trigger";
 
 export default function FloatingChat() {
   useLabelLanguage();
@@ -282,101 +117,7 @@ export default function FloatingChat() {
     if (messages.length > 0) storeMessages(conversationId, messages);
   }, [conversationId, messages]);
 
-  const triggerItems: TriggerAvatarItem[] = [
-    {
-      type: "image",
-      src: lagArthurSupport,
-      alt: "Lag Arthur, assistente da Cabraiz",
-    },
-    {
-      type: "image",
-      src: mateusChatAvatar,
-      alt: "Mateus Cabral",
-    },
-    {
-      type: "more",
-      label: "...",
-      ariaLabel: "Mais contatos",
-    },
-  ];
-
-  useEffect(() => {
-    const mascot = mascotRef.current;
-    const largeIris = largeIrisRef.current;
-    const smallIris = smallIrisRef.current;
-    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)");
-
-    if (
-      isOpen ||
-      isMobile ||
-      mascotReaction !== "idle" ||
-      reduceMotion.matches ||
-      !finePointer.matches ||
-      !mascot ||
-      !largeIris ||
-      !smallIris
-    ) {
-      return;
-    }
-
-    let animationFrame = 0;
-
-    const positionIrises = (clientX: number, clientY: number) => {
-      const bounds = mascot.getBoundingClientRect();
-      const deltaX = clientX - (bounds.left + bounds.width * 0.46);
-      const deltaY = clientY - (bounds.top + bounds.height * 0.48);
-      const directionX = Math.max(-1, Math.min(1, deltaX / 150));
-      const directionY = Math.max(-1, Math.min(1, deltaY / 115));
-      const offset = (direction: number, negative: number, positive: number) =>
-        direction < 0 ? direction * negative : direction * positive;
-
-      largeIris.style.setProperty(
-        "--eye-x",
-        `${offset(directionX, 3.1, 3.1)}px`
-      );
-      largeIris.style.setProperty(
-        "--eye-y",
-        `${offset(directionY, 1.8, 1.1)}px`
-      );
-      smallIris.style.setProperty(
-        "--eye-x",
-        `${offset(directionX, 1.4, 1.4)}px`
-      );
-      smallIris.style.setProperty(
-        "--eye-y",
-        `${offset(directionY, 0.75, 0.65)}px`
-      );
-    };
-
-    const resetIrises = () => {
-      largeIris.style.setProperty("--eye-x", "0px");
-      largeIris.style.setProperty("--eye-y", "0px");
-      smallIris.style.setProperty("--eye-x", "0px");
-      smallIris.style.setProperty("--eye-y", "0px");
-    };
-
-    const handlePointerMove = (event: PointerEvent) => {
-      if (event.pointerType === "touch") return;
-      window.cancelAnimationFrame(animationFrame);
-      animationFrame = window.requestAnimationFrame(() => {
-        positionIrises(event.clientX, event.clientY);
-      });
-    };
-
-    document.addEventListener("pointermove", handlePointerMove, {
-      passive: true,
-    });
-    document.documentElement.addEventListener("mouseleave", resetIrises);
-    window.addEventListener("blur", resetIrises);
-
-    return () => {
-      window.cancelAnimationFrame(animationFrame);
-      document.removeEventListener("pointermove", handlePointerMove);
-      document.documentElement.removeEventListener("mouseleave", resetIrises);
-      window.removeEventListener("blur", resetIrises);
-    };
-  }, [isMobile, isOpen, mascotReaction]);
+  useMascotEyeTracking(mascotRef, largeIrisRef, smallIrisRef, isOpen, isMobile, mascotReaction);
 
   useEffect(
     () => () => {
@@ -413,87 +154,9 @@ export default function FloatingChat() {
     if (isOpen && !isMobile) inputRef.current?.focus();
   }, [isOpen, isMobile]);
 
-  useEffect(() => {
-    if (!isOpen) return;
+  useChatPanelWheel(isOpen, chatRef, messagesScrollRef);
 
-    const panel = chatRef.current;
-    if (!panel) return;
-
-    const handleWheel = (event: WheelEvent) => {
-      if (event.ctrlKey) return;
-
-      const scrollArea = messagesScrollRef.current;
-      if (!scrollArea || event.deltaY === 0) return;
-
-      const deltaMultiplier =
-        event.deltaMode === WheelEvent.DOM_DELTA_LINE
-          ? 16
-          : event.deltaMode === WheelEvent.DOM_DELTA_PAGE
-            ? scrollArea.clientHeight
-            : 1;
-
-      event.preventDefault();
-      event.stopPropagation();
-      scrollArea.scrollTop += event.deltaY * deltaMultiplier;
-    };
-
-    panel.addEventListener("wheel", handleWheel, { passive: false });
-    return () => panel.removeEventListener("wheel", handleWheel);
-  }, [isOpen]);
-
-  useEffect(() => {
-    if (!isOpen || !hasActiveConversation) {
-      return;
-    }
-
-    let cancelled = false;
-    const readReplies = async () => {
-      try {
-        const url = new URL(CONTACT_API_URL, window.location.origin);
-        url.searchParams.set("conversationId", conversationId);
-        url.searchParams.set("after", String(replyCursorRef.current));
-        const response = await fetch(url);
-        if (!response.ok) return;
-
-        const payload = (await response.json()) as {
-          replies?: ContactReply[];
-          cursor?: number;
-        };
-        if (cancelled || !Array.isArray(payload.replies)) return;
-
-        if (Number.isSafeInteger(payload.cursor)) {
-          replyCursorRef.current = Math.max(
-            replyCursorRef.current,
-            Number(payload.cursor)
-          );
-        }
-
-        setMessages((currentMessages) => {
-          const knownIds = new Set(currentMessages.map((message) => message.id));
-          const newReplies = payload.replies!
-            .filter((reply) => !knownIds.has(`telegram-${reply.id}`))
-            .map((reply) => ({
-              id: `telegram-${reply.id}`,
-              text: reply.text,
-              author: "mateus" as const,
-            }));
-
-          return newReplies.length > 0
-            ? [...currentMessages, ...newReplies]
-            : currentMessages;
-        });
-      } catch {
-        // A próxima consulta automática tenta novamente sem interromper o chat.
-      }
-    };
-
-    void readReplies();
-    const interval = window.setInterval(() => void readReplies(), 4000);
-    return () => {
-      cancelled = true;
-      window.clearInterval(interval);
-    };
-  }, [conversationId, hasActiveConversation, isOpen]);
+  useChatReplyPolling(isOpen, hasActiveConversation, conversationId, replyCursorRef, setMessages);
 
   const openChat = () => {
     chatOpenedAtRef.current = Date.now();
@@ -622,255 +285,18 @@ export default function FloatingChat() {
       }}
     >
       {!isOpen && (
-        <button
-          onClick={handleTriggerClick}
-          className={styles.chatTrigger}
-          data-agent-piece=""
-          data-mobile={isMobile ? "true" : "false"}
-          data-home-active={isHomeSectionActive ? "true" : "false"}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: isMobile ? "center" : "flex-start",
-            gap: isMobile ? 0 : `${scale(0.55)}rem`,
-            background: "rgba(33, 35, 40, 0.92)",
-            color: "#fff",
-            border: "none",
-            padding: isMobile ? `${scale(1)}rem` : "16px 20px",
-            borderRadius: "50px",
-            boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-            fontWeight: "500",
-            fontSize: `${scale(1.1)}rem`,
-            cursor: "pointer",
-            width: isMobile ? "60px" : "auto",
-            height: isMobile ? "60px" : "auto",
-            minWidth: "unset",
-            maxWidth: isMobile ? "60px" : "none",
-          }}
-          aria-label={localizeLabel("Abrir chat")}
-        >
-          {SHOW_CHAT_MASCOT && (
-            <span
-              ref={mascotRef}
-              className={styles.mascot}
-              data-mascot-reaction={mascotReaction}
-              aria-hidden="true"
-            >
-              <img
-                className={styles.mascotImage}
-                src={lagArthurChat}
-                alt={localizeLabel("")}
-                draggable={false}
-              />
-              <img
-                ref={largeIrisRef}
-                className={`${styles.iris} ${styles.largeIris}`}
-                src={lagArthurIris}
-                alt={localizeLabel("")}
-                aria-hidden="true"
-                draggable={false}
-                loading="eager"
-                decoding="sync"
-                fetchPriority="high"
-              />
-              <img
-                ref={smallIrisRef}
-                className={`${styles.iris} ${styles.smallIris}`}
-                src={lagArthurIris}
-                alt={localizeLabel("")}
-                aria-hidden="true"
-                draggable={false}
-                loading="eager"
-                decoding="sync"
-                fetchPriority="high"
-              />
-            </span>
-          )}
-
-          {!isMobile ? (
-            <>
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: `${scale(0.65)}rem`,
-                  minWidth: 0,
-                  flex: "0 1 auto",
-                }}
-              >
-                <div
-                  style={{
-                    position: "relative",
-                    display: "flex",
-                    alignItems: "center",
-                    flexShrink: 0,
-                  }}
-                >
-                  <img
-                    src={msgIcon}
-                    alt={localizeLabel("Mensagem")}
-                    style={{
-                      width: 20,
-                      height: 20,
-                      objectFit: "contain",
-                      filter: "invert(1)",
-                    }}
-                  />
-
-                  <div
-                    style={{
-                      position: "absolute",
-                      top: -6,
-                      right: -6,
-                      backgroundColor: "red",
-                      color: "white",
-                      borderRadius: "50%",
-                      width: 16,
-                      height: 16,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontSize: "10px",
-                      fontWeight: "bold",
-                    }}
-                  >
-                    3
-                  </div>
-                </div>
-
-                <div
-                  style={{
-                    fontSize: "16px",
-                    fontFamily:
-                      "Khula, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif",
-                    fontWeight: 600,
-                    WebkitFontSmoothing: "antialiased",
-                    MozOsxFontSmoothing: "grayscale",
-                    whiteSpace: "nowrap",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                  }}
-                >
-                  {localizeLabel(phrases[currentPhraseIndex])}
-                </div>
-              </div>
-
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  flexShrink: 0,
-                  marginLeft: `${scale(0.9)}rem`,
-                  paddingRight: "2px",
-                }}
-              >
-                {triggerItems.map((item, index) => {
-                  const commonStyle: React.CSSProperties = {
-                    width: "28px",
-                    height: "28px",
-                    borderRadius: "50%",
-                    overflow: "hidden",
-                    border: "2px solid rgba(33, 35, 40, 1)",
-                    marginLeft: index === 0 ? "0" : "-10px",
-                    zIndex: triggerItems.length - index,
-                    backgroundColor: "#000",
-                    boxShadow: "0 2px 6px rgba(0,0,0,0.22)",
-                    flexShrink: 0,
-                  };
-
-                  if (item.type === "image") {
-                    return (
-                      <div
-                        key={item.alt}
-                        style={commonStyle}
-                      >
-                        <img
-                          src={item.src}
-                          alt={localizeLabel(item.alt)}
-                          style={{
-                            width: "100%",
-                            height: "100%",
-                            objectFit: "cover",
-                            display: "block",
-                          }}
-                        />
-                      </div>
-                    );
-                  }
-
-                  return (
-                    <div
-                      key={item.ariaLabel}
-                      aria-label={localizeLabel(item.ariaLabel)}
-                      title={localizeLabel(item.ariaLabel)}
-                      style={{
-                        ...commonStyle,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        background:
-                          "linear-gradient(180deg, rgba(56,58,64,0.98) 0%, rgba(28,30,34,1) 100%)",
-                        color: "rgba(255,255,255,0.92)",
-                        fontSize: "15px",
-                        fontWeight: 700,
-                        letterSpacing: "0.02em",
-                        lineHeight: 1,
-                      }}
-                    >
-                      <span
-                        style={{
-                          transform: "translateY(-1px)",
-                        }}
-                      >
-                        {localizeLabel(item.label)}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            </>
-          ) : (
-            <div
-              style={{
-                position: "relative",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <img
-                src={msgIcon}
-                alt={localizeLabel("Mensagem")}
-                style={{
-                  width: 24,
-                  height: 24,
-                  objectFit: "contain",
-                  filter: "invert(1)",
-                }}
-              />
-
-              <div
-                style={{
-                  position: "absolute",
-                  top: -6,
-                  right: -6,
-                  backgroundColor: "red",
-                  color: "white",
-                  borderRadius: "50%",
-                  width: 16,
-                  height: 16,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: "10px",
-                  fontWeight: "bold",
-                }}
-              >
-                3
-              </div>
-            </div>
-          )}
-        </button>
+        <FloatingChatTrigger
+          handleTriggerClick={handleTriggerClick}
+          isMobile={isMobile}
+          isHomeSectionActive={isHomeSectionActive}
+          scale={scale}
+          mascotRef={mascotRef}
+          largeIrisRef={largeIrisRef}
+          smallIrisRef={smallIrisRef}
+          mascotReaction={mascotReaction}
+          phrases={phrases}
+          currentPhraseIndex={currentPhraseIndex}
+        />
       )}
 
       <AnimatePresence>
@@ -933,268 +359,26 @@ export default function FloatingChat() {
                 "width 260ms cubic-bezier(0.22, 1, 0.36, 1), height 260ms cubic-bezier(0.22, 1, 0.36, 1)",
             }}
           >
-            <button
-              type="button"
-              className={styles.chatCloseButton}
-              aria-label={localizeLabel(t("floatingChat.close"))}
-              title={localizeLabel(t("floatingChat.close"))}
-              onClick={() => setIsOpen(false)}
-            >
-              {localizeLabel("×")}</button>
-
-            <div
-              className={styles.chatHeader}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "0.75rem",
-                marginBottom: `${scale(1)}rem`,
-                paddingRight: `${scale(3.5)}rem`,
-              }}
-            >
-              <img
-                src={lagArthurSupport}
-                alt={localizeLabel("Lag Arthur, assistente da Cabraiz")}
-                style={{
-                  width: "42px",
-                  height: "42px",
-                  borderRadius: "50%",
-                  objectFit: "cover",
-                  border: "2px solid rgba(224, 146, 70, 0.72)",
-                  boxShadow: "0 0 0 3px rgba(224, 146, 70, 0.1)",
-                }}
-              />
-              <div style={{ display: "flex", flexDirection: "column" }}>
-                <span style={{ fontWeight: 600, fontSize: `${scale(1.1)}rem` }}>
-                  {localizeLabel("Atendente")}</span>
-                <span style={{ fontSize: `${scale(0.9)}rem`, color: "#aaa" }}>
-                  {t("floatingChat.availability")}
-                </span>
-              </div>
-            </div>
-
-            <div
-              ref={messagesScrollRef}
-              data-chat-scroll-area="true"
-              className={styles.chatScrollArea}
-              onScroll={() => {
-                const area = messagesScrollRef.current;
-                if (area) followLatestRef.current = area.scrollHeight - area.scrollTop - area.clientHeight < 48;
-              }}
-              style={{
-                flex: 1,
-                fontSize: `${scale(1.05)}rem`,
-                lineHeight: scale(1.6),
-                display: "flex",
-                flexDirection: "column",
-                gap: `${scale(0.5)}rem`,
-                minHeight: 0,
-                overflowY: "auto",
-                paddingRight: `${scale(0.25)}rem`,
-              }}
-            >
-              <div className={styles.botIntro}>
-                <img
-                  src={lagArthurSupport}
-                  alt={localizeLabel("Lag Arthur, assistente da Cabraiz")}
-                  className={styles.botAvatar}
-                />
-                <div className={styles.botIntroContent}>
-                  <div className={styles.botIntroBubble}>
-                    {t("floatingChat.welcome")}
-                  </div>
-                  <div
-                    className={styles.quickActions}
-                    aria-label={localizeLabel(t("floatingChat.quickActionsLabel"))}
-                  >
-                    <a
-                      className={`${styles.quickAction} ${styles.quickActionPrimary}`}
-                      href={getWhatsAppSupportUrl()}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      {t("floatingChat.whatsappAction")}
-                    </a>
-                  </div>
-                </div>
-              </div>
-
-              {messages.map((message) =>
-                message.author === "visitor" ? (
-                  <div
-                    key={message.id}
-                    data-chat-author="visitor"
-                    className={styles.visitorMessage}
-                    style={{
-                      maxWidth: "88%",
-                    }}
-                  >
-                    <div
-                      className={styles.visitorMessageBubble}
-                      style={{
-                        padding: `${scale(0.6)}rem ${scale(1)}rem`,
-                        fontSize: `${scale(1)}rem`,
-                      }}
-                    >
-                      {message.text}
-                    </div>
-                    <span
-                      className={styles.visitorAvatar}
-                      data-chat-avatar="visitor"
-                      role="img"
-                      aria-label={localizeLabel(t("floatingChat.anonymousVisitor"))}
-                    />
-                  </div>
-                ) : (
-                  <div
-                    key={message.id}
-                    data-chat-author="mateus"
-                    style={{
-                      display: "flex",
-                      alignItems: "flex-end",
-                      maxWidth: "80%",
-                    }}
-                  >
-                    <img
-                      src={mateusChatAvatar}
-                      alt={localizeLabel("Mateus Cabral")}
-                      data-chat-avatar="mateus"
-                      style={{
-                        width: "30px",
-                        height: "30px",
-                        borderRadius: "50%",
-                        objectFit: "cover",
-                        border: "1px solid rgba(224, 146, 70, 0.58)",
-                        marginRight: "0.5rem",
-                        flexShrink: 0,
-                      }}
-                    />
-                    <div
-                      style={{
-                        background: "rgba(244, 17, 18, 0.18)",
-                        border: "1px solid rgba(244, 17, 18, 0.4)",
-                        padding: `${scale(0.6)}rem ${scale(1)}rem`,
-                        borderRadius: "12px",
-                        wordWrap: "break-word",
-                        color: "#fff",
-                        fontSize: `${scale(1)}rem`,
-                      }}
-                    >
-                      {message.text}
-                    </div>
-                  </div>
-                )
-              )}
-            </div>
-
-            <div
-              aria-live="polite"
-              className={styles.chatStatus}
-              style={{
-                minHeight: `${scale(1.25)}rem`,
-                marginTop: `${scale(0.4)}rem`,
-                color: sendStatus === "error" ? "#ffb4ab" : "#b9f6ca",
-                fontSize: `${scale(0.82)}rem`,
-              }}
-            >
-              {localizeLabel(sendStatus === "sent" && t(isMobile ? "floatingChat.sendSuccessShort" : "floatingChat.sendSuccess"))}
-              {localizeLabel(sendStatus === "error" && t(isMobile ? "floatingChat.sendErrorShort" : "floatingChat.sendError"))}
-            </div>
-
-            {/* Transparência (LGPD): para onde a mensagem vai e link para o aviso.
-                Fica acima do campo, que continua colado na base do painel. */}
-            <p
-              data-chat-privacy-note="true"
-              style={{
-                margin: `${scale(0.3)}rem 0 0`,
-                color: "rgba(255, 255, 255, 0.62)",
-                fontSize: `${scale(0.72)}rem`,
-                lineHeight: 1.4,
-              }}
-            >
-              {localizeLabel("Sua mensagem vai direto para o Mateus pelo Telegram. Não envie dados sensíveis.")}{" "}
-              <Link
-                to={privacyPath}
-                style={{ color: "rgba(255, 255, 255, 0.86)", textDecoration: "underline" }}
-              >
-                {localizeLabel("Aviso de privacidade")}
-              </Link>
-            </p>
-
-            <div
-              data-chat-composer="true"
-              className={styles.chatComposer}
-              style={{
-                display: "flex",
-                marginTop: `${scale(0.4)}rem`,
-                gap: `${scale(0.5)}rem`,
-              }}
-            >
-              <form autoComplete="off" style={{ flex: 1, minWidth: 0 }}>
-                <input
-                  ref={inputRef}
-                  type="text"
-                  name="message"
-                  inputMode="text"
-                  autoComplete="off"
-                  autoCorrect="off"
-                  spellCheck={false}
-                  enterKeyHint="send"
-                  placeholder={localizeLabel(t("floatingChat.placeholder"))}
-                  aria-label={localizeLabel(t("floatingChat.placeholder"))}
-                  value={inputValue}
-                  maxLength={1000}
-                  onChange={(e) => {
-                    setInputValue(e.target.value);
-                    if (sendStatus !== "sending") setSendStatus("idle");
-                  }}
-                  onKeyDown={handleKeyDown}
-                  style={{
-                    width: "100%",
-                    padding: `${scale(1)}rem`,
-                    borderRadius: "10px",
-                    border: "none",
-                    outline: "none",
-                    backgroundColor: "#2c2c2c",
-                    color: "white",
-                    fontSize: isMobile ? '16px' : `${scale(1)}rem`,
-                  }}
-                />
-              </form>
-
-              <button
-                type="button"
-                onClick={() => void sendMessage()}
-                onPointerDown={(event) => {
-                  if (isMobile && document.activeElement === inputRef.current) event.preventDefault();
-                }}
-                disabled={!inputValue.trim() || sendStatus === "sending"}
-                style={{
-                  padding: `0 ${scale(1)}rem`,
-                  backgroundColor: "#f41112",
-                  color: "#fff",
-                  border: "none",
-                  borderRadius: "8px",
-                  cursor:
-                    !inputValue.trim() || sendStatus === "sending"
-                      ? "not-allowed"
-                      : "pointer",
-                  fontWeight: "bold",
-                  fontSize: `${scale(1)}rem`,
-                  opacity:
-                    !inputValue.trim() || sendStatus === "sending" ? 0.65 : 1,
-                }}
-              >
-                {localizeLabel(sendStatus === "sending"
-                  ? t("floatingChat.sending")
-                  : t("floatingChat.send"))}
-              </button>
-            </div>
+            <FloatingChatPanelBody
+              t={t}
+              isMobile={isMobile}
+              scale={scale}
+              setIsOpen={setIsOpen}
+              messagesScrollRef={messagesScrollRef}
+              followLatestRef={followLatestRef}
+              messages={messages}
+              sendStatus={sendStatus}
+              setSendStatus={setSendStatus}
+              privacyPath={privacyPath}
+              inputRef={inputRef}
+              inputValue={inputValue}
+              setInputValue={setInputValue}
+              handleKeyDown={handleKeyDown}
+              sendMessage={sendMessage}
+            />
           </motion.div>
         )}
       </AnimatePresence>
     </div>
   );
 }
-
-

@@ -1,0 +1,117 @@
+
+.heroGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--live-board-gap);
+}
+
+.midRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.9fr);
+  gap: var(--live-board-gap);
+}
+
+.signalStrip {
+  display: grid;
+  gap: 14px;
+  padding: 16px 18px;
+  border-radius: var(--live-board-radius-lg);
+}
+
+.signalStripHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.signalStripLabel {
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--live-board-text-soft);
+}
+
+.signalStripValue {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--live-board-text-base);
+}
+
+.pillRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.statusPill {
+  display: inline-grid;
+  gap: 4px;
+  min-width: 132px;
+  padding: 10px 12px;
+  border: 1px solid var(--live-board-border-soft);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.statusPill[data-status="active"] {
+  border-color: rgba(52, 211, 153, 0.18);
+}
+
+.statusPill[data-status="monitoring"] {
+  border-color: rgba(96, 165, 250, 0.18);
+}
+
+.statusPill[data-status="incubating"] {
+  border-color: rgba(251, 191, 36, 0.18);
+}
+
+.statusPill[data-status="delivered"] {
+  border-color: rgba(167, 139, 250, 0.18);
+}
+
+.statusPillLabel {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--live-board-text-soft);
+}
+
+.statusPillValue {
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--live-board-text-strong);
+}
+
+.focusPanel {
+  display: grid;
+  gap: 8px;
+  align-content: start;
+  padding: 16px 18px;
+  border-radius: var(--live-board-radius-lg);
+}
+
+.focusLabel {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--live-board-text-soft);
+}
+
+.focusValue {
+  font-size: clamp(1.02rem, 1.4vw, 1.2rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--live-board-text-strong);
+}
+
+.focusDescription {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: var(--live-board-text-base);
+}

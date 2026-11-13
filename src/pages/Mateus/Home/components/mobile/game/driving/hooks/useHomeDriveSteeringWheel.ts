@@ -1,174 +1,36 @@
 // src/pages/Mateus/Home/components/mobile/game/driving/hooks/useHomeDriveSteeringWheel.ts
 
 import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type PointerEvent as ReactPointerEvent,
-  type RefObject,
+	useCallback,
+	useEffect,
+	useMemo,
+	useRef,
+	useState,
+	type PointerEvent as ReactPointerEvent,
 } from "react";
 
+import { normalizeDeltaDeg } from "../domain/homeDrive.math";
+import type {
+	ActivePointerState,
+	SteeringWheelViewState,
+	UseHomeDriveSteeringWheelOptions,
+	HomeDriveSteeringWheelController,
+} from "./useHomeDriveSteeringWheel.types";
 import {
-  FREE_DRIVE_WHEEL_VISUAL_MAX_ROTATION_DEG as HOME_DRIVE_WHEEL_VISUAL_MAX_ROTATION_DEG,
-} from "../domain/homeDrive.constants";
-import { clamp, normalizeDeltaDeg } from "../domain/homeDrive.math";
-
-type ActivePointerState = Readonly<{
-  pointerId: number;
-  startAngleDeg: number;
-  startRotationDeg: number;
-}>;
-
-type SteeringWheelViewState = Readonly<{
-  isDragging: boolean;
-}>;
-
-export type UseHomeDriveSteeringWheelOptions = Readonly<{
-  /**
-   * Callback imperativo para atualizar inputRef sem forçar render React
-   * a cada frame de arraste do volante.
-   */
-  onSteeringChange?: (steering: number) => void;
-}>;
-
-export type HomeDriveSteeringWheelController = Readonly<{
-  wheelRef: RefObject<HTMLDivElement | null>;
-  steering: number;
-  wheelRotationDeg: number;
-  isDragging: boolean;
-  handlers: Readonly<{
-    onPointerDown: (event: ReactPointerEvent<HTMLDivElement>) => void;
-    onPointerMove: (event: ReactPointerEvent<HTMLDivElement>) => void;
-    onPointerUp: (event: ReactPointerEvent<HTMLDivElement>) => void;
-    onPointerCancel: (event: ReactPointerEvent<HTMLDivElement>) => void;
-    onLostPointerCapture: (event: ReactPointerEvent<HTMLDivElement>) => void;
-  }>;
-}>;
-
-const ROTATION_EPSILON_DEG = 0.08;
-const STEERING_EPSILON = 0.001;
-const STEERING_CALLBACK_EPSILON = 0.0005;
-
-function isFiniteNumber(value: number): boolean {
-  return Number.isFinite(value);
-}
-
-function getPointerAngleDeg(
-  element: HTMLElement,
-  clientX: number,
-  clientY: number,
-): number | null {
-  const rect = element.getBoundingClientRect();
-
-  if (
-    rect.width <= 0 ||
-    rect.height <= 0 ||
-    !isFiniteNumber(rect.left) ||
-    !isFiniteNumber(rect.top) ||
-    !isFiniteNumber(clientX) ||
-    !isFiniteNumber(clientY)
-  ) {
-    return null;
-  }
-
-  const centerX = rect.left + rect.width / 2;
-  const centerY = rect.top + rect.height / 2;
-  const angleDeg =
-    (Math.atan2(clientY - centerY, clientX - centerX) * 180) / Math.PI;
-
-  return isFiniteNumber(angleDeg) ? angleDeg : null;
-}
-
-function setPointerCaptureSafely(
-  element: HTMLElement | null,
-  pointerId: number,
-): void {
-  if (!element) {
-    return;
-  }
-
-  try {
-    if (!element.hasPointerCapture(pointerId)) {
-      element.setPointerCapture(pointerId);
-    }
-  } catch {
-    /*
-      Alguns browsers mobile podem falhar se o pointer já foi finalizado
-      ou se o elemento perdeu o ciclo de interação. Nesse caso ignoramos.
-    */
-  }
-}
-
-function releasePointerCaptureSafely(
-  element: HTMLElement | null,
-  pointerId: number,
-): void {
-  if (!element) {
-    return;
-  }
-
-  try {
-    if (element.hasPointerCapture(pointerId)) {
-      element.releasePointerCapture(pointerId);
-    }
-  } catch {
-    /*
-      Evita crash quando o browser já liberou a captura automaticamente.
-    */
-  }
-}
-
-function clampWheelRotationDeg(rotationDeg: number): number {
-  if (!isFiniteNumber(rotationDeg)) {
-    return 0;
-  }
-
-  return clamp(
-    rotationDeg,
-    -HOME_DRIVE_WHEEL_VISUAL_MAX_ROTATION_DEG,
-    HOME_DRIVE_WHEEL_VISUAL_MAX_ROTATION_DEG,
-  );
-}
-
-function areRotationsEquivalent(first: number, second: number): boolean {
-  if (!isFiniteNumber(first) || !isFiniteNumber(second)) {
-    return false;
-  }
-
-  return Math.abs(first - second) <= ROTATION_EPSILON_DEG;
-}
-
-function areSteeringValuesEquivalent(first: number, second: number): boolean {
-  if (!isFiniteNumber(first) || !isFiniteNumber(second)) {
-    return false;
-  }
-
-  return Math.abs(first - second) <= STEERING_CALLBACK_EPSILON;
-}
-
-function getSteeringFromRotationDeg(rotationDeg: number): number {
-  if (
-    HOME_DRIVE_WHEEL_VISUAL_MAX_ROTATION_DEG <= 0 ||
-    !isFiniteNumber(rotationDeg)
-  ) {
-    return 0;
-  }
-
-  /*
-    Correção do volante invertido:
-    - wheelRotationDeg fica visualmente natural.
-    - steering é invertido para casar com a física/câmera do mundo 3D.
-  */
-  const steering = -clamp(
-    rotationDeg / HOME_DRIVE_WHEEL_VISUAL_MAX_ROTATION_DEG,
-    -1,
-    1,
-  );
-
-  return Math.abs(steering) <= STEERING_EPSILON ? 0 : steering;
-}
+	isFiniteNumber,
+	getPointerAngleDeg,
+	setPointerCaptureSafely,
+	releasePointerCaptureSafely,
+	clampWheelRotationDeg,
+	areRotationsEquivalent,
+	areSteeringValuesEquivalent,
+	getSteeringFromRotationDeg,
+} from "./useHomeDriveSteeringWheel.helpers";
+import { useHomeDriveSteeringWheelKeyboard } from "./useHomeDriveSteeringWheel.keyboard";
+export type {
+	UseHomeDriveSteeringWheelOptions,
+	HomeDriveSteeringWheelController,
+} from "./useHomeDriveSteeringWheel.types";
 
 export function useHomeDriveSteeringWheel(
   options: UseHomeDriveSteeringWheelOptions = {},
@@ -457,38 +319,7 @@ export function useHomeDriveSteeringWheel(
     [resetRotation],
   );
 
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") {
-        return;
-      }
-
-      event.preventDefault();
-
-      commitRotation(
-        event.key === "ArrowLeft"
-          ? -HOME_DRIVE_WHEEL_VISUAL_MAX_ROTATION_DEG * 0.72
-          : HOME_DRIVE_WHEEL_VISUAL_MAX_ROTATION_DEG * 0.72,
-      );
-    };
-
-    const handleKeyUp = (event: KeyboardEvent) => {
-      if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") {
-        return;
-      }
-
-      event.preventDefault();
-      resetRotation();
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    window.addEventListener("keyup", handleKeyUp);
-
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-      window.removeEventListener("keyup", handleKeyUp);
-    };
-  }, [commitRotation, resetRotation]);
+  useHomeDriveSteeringWheelKeyboard(commitRotation, resetRotation);
 
   useEffect(() => {
     mountedRef.current = true;

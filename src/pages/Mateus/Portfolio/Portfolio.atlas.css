@@ -1,0 +1,384 @@
+/* Variáveis animadas pelo GSAP (usePortfolioMotion) a cada quadro.
+   Registradas sem herança: sem isso, cada mudança (a flutuação do card roda
+   o tempo todo) recalculava o estilo de todo o card e dos filhos, ocupando a
+   thread principal e travando as animações do mapa. */
+@property --card-float-y {
+	syntax: "<length>";
+	inherits: false;
+	initial-value: 0px;
+}
+
+@property --card-enter-y {
+	syntax: "<length>";
+	inherits: false;
+	initial-value: 0px;
+}
+
+@property --card-turn {
+	syntax: "<angle>";
+	inherits: false;
+	initial-value: 0deg;
+}
+
+@property --card-enter-o {
+	syntax: "<number>";
+	inherits: false;
+	initial-value: 1;
+}
+
+@property --enter-x {
+	syntax: "<length>";
+	inherits: false;
+	initial-value: 0px;
+}
+
+@property --enter-o {
+	syntax: "<number>";
+	inherits: false;
+	initial-value: 1;
+}
+
+@property --enter-s {
+	syntax: "<number>";
+	inherits: false;
+	initial-value: 1;
+}
+
+.portfolioRoot {
+	--atlas-ink: #073c3d;
+	--atlas-deep: #064f4d;
+	--atlas-teal: #0b6662;
+	--atlas-paper: #edf7f4;
+	--atlas-navbar-overlap: 0px;
+	/* O mapa fica enquadrado sob o navbar sem invadir a seção anterior:
+	   antes o fundo crescia 78px para cima ao ativar e a borda pulava. */
+	--atlas-center-shift: calc((var(--app-navbar-height, 70px) + 8px) / 2);
+	--atlas-camera-x: -37.5%;
+	--atlas-camera-y: -57.2222%;
+	--atlas-scale: 1;
+	/* Ritmo da câmera do mapa (transição de .worldSurface). O voo do avião,
+	   o desenho das rotas e o pouso usam o mesmo ritmo: o avião anda junto
+	   com a câmera. */
+	--atlas-camera-duration: 2800ms;
+	--atlas-camera-ease: cubic-bezier(0.65, 0, 0.35, 1);
+	position: relative;
+	isolation: isolate;
+	width: 100%;
+	min-height: 100dvh;
+	overflow: visible;
+	color: var(--atlas-ink);
+	background: #dcefeb;
+	font-family: "Inter", Arial, sans-serif;
+	content-visibility: visible;
+}
+
+.portfolioRoot[data-map-view="app-bank"] {
+	--atlas-camera-x: -20.7708%;
+	--atlas-camera-y: -38.5259%;
+}
+
+.portfolioRoot[data-map-view="guine-bissau-commerce"] {
+	--atlas-camera-x: -45.6673%;
+	--atlas-camera-y: -43.4091%;
+}
+
+.portfolioRoot[data-map-view="clockright"] {
+	--atlas-camera-x: -19.05%;
+	--atlas-camera-y: -25.15%;
+}
+
+.portfolioRoot[data-map-view="central-clube-livro"] {
+	--atlas-camera-x: -47.6638%;
+	--atlas-camera-y: -27.6648%;
+}
+
+.portfolioRoot[data-map-view="site-adv"] {
+	--atlas-camera-x: -81.7%;
+	--atlas-camera-y: -37.47%;
+}
+
+.backdropViewport {
+	position: absolute;
+	inset: 0;
+	top: calc(-1 * var(--atlas-navbar-overlap));
+	z-index: 0;
+	overflow: hidden;
+	background: #dcefeb;
+	pointer-events: none;
+}
+
+.worldSurface {
+	position: absolute;
+	top: calc(50% - var(--atlas-center-shift));
+	/* O destino fica um pouco à esquerda do meio, longe da legenda do projeto. */
+	left: calc(50% - 4vw);
+	width: 401.7857%;
+	aspect-ratio: 2 / 1;
+	transform: translate(var(--atlas-camera-x), var(--atlas-camera-y));
+	transform-origin: top left;
+	transition: transform var(--atlas-camera-duration) var(--atlas-camera-ease);
+	will-change: transform;
+}
+
+.worldMapSurface {
+	display: grid;
+	grid-template-columns: repeat(4, 1fr);
+	grid-template-rows: repeat(4, 1fr);
+	overflow: hidden;
+	opacity: 0.86;
+	user-select: none;
+	pointer-events: none;
+}
+
+.worldMapSurface img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	border-radius: 0;
+	object-fit: cover;
+	user-select: none;
+	pointer-events: none;
+}
+
+.geoViewport {
+	position: absolute;
+	inset: 0;
+	top: calc(-1 * var(--atlas-navbar-overlap));
+	z-index: 3;
+	overflow: hidden;
+	pointer-events: none;
+}
+
+.worldGeoSurface {
+	z-index: 1;
+	pointer-events: none;
+}
+
+.paperTexture {
+	position: absolute;
+	inset: 0;
+	top: calc(-1 * var(--atlas-navbar-overlap));
+	z-index: 1;
+	pointer-events: none;
+	background:
+		radial-gradient(
+			circle at 0% 100%,
+			rgba(250, 241, 214, 0.74),
+			transparent 34%
+		),
+		linear-gradient(
+			90deg,
+			rgba(244, 248, 238, 0.74) 0%,
+			transparent 24% 76%,
+			rgba(225, 244, 244, 0.78) 100%
+		),
+		repeating-linear-gradient(
+			0deg,
+			transparent 0 5px,
+			rgba(20, 94, 91, 0.022) 6px
+		);
+}
+
+.atlasFrame {
+	position: relative;
+	z-index: auto;
+	display: grid;
+	grid-template-columns: minmax(260px, 300px) minmax(400px, 1fr) minmax(
+			350px,
+			410px
+		);
+	/* Unidades de viewport já compensadas pelo zoom do atlas. */
+	--atlas-vw: calc(1vw / var(--atlas-scale));
+	--atlas-vh: calc(1dvh / var(--atlas-scale));
+	--atlas-pad-inline: clamp(22px, calc(3 * var(--atlas-vw)), 48px);
+	gap: clamp(14px, calc(1.6 * var(--atlas-vw)), 26px);
+	align-items: center;
+	width: min(100%, 1560px);
+	min-height: calc(100 * var(--atlas-vh));
+	margin: 0 auto;
+	padding: clamp(28px, calc(4 * var(--atlas-vh)), 48px)
+		var(--atlas-pad-inline) clamp(18px, calc(3 * var(--atlas-vh)), 34px);
+	box-sizing: border-box;
+}
+
+.indexPanel {
+	position: relative;
+	z-index: 4;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	min-width: 0;
+	height: min(590px, calc(100 * var(--atlas-vh) - 112px));
+	min-height: 520px;
+}
+
+.projectList {
+	display: flex;
+	flex-direction: column;
+	gap: 7px;
+}
+
+/* Com o atlas escalado (ver .atlasFrame), a altura efetiva fica <= 820px
+   sempre que a viewport for mais larga que 1280/820. */
+@media (min-width: 992px) and (max-height: 820px),
+	(min-width: 992px) and (min-aspect-ratio: 64 / 41) {
+	.projectList {
+		transform: translateY(56px);
+	}
+}
+
+.projectButton {
+	position: relative;
+	display: grid;
+	grid-template-columns: 28px 72px minmax(0, 1fr);
+	gap: 9px;
+	align-items: center;
+	width: 100%;
+	min-height: 58px;
+	padding: 6px 46px 6px 10px;
+	border: 1px solid rgba(7, 76, 76, 0.12);
+	border-radius: 9px;
+	box-sizing: border-box;
+	color: var(--atlas-ink);
+	background: rgba(250, 253, 248, 0.84);
+	box-shadow: 0 8px 18px rgba(22, 76, 72, 0.07);
+	text-align: left;
+	cursor: pointer;
+	transition:
+		transform 180ms ease,
+		background 180ms ease,
+		color 180ms ease,
+		box-shadow 180ms ease;
+}
+
+.projectCountryBadge {
+	position: absolute;
+	top: 50%;
+	right: -1px;
+	display: grid;
+	place-items: center;
+	width: 38px;
+	height: 52px;
+	border: 0;
+	box-sizing: border-box;
+	overflow: visible;
+	color: #083f40;
+	background: transparent;
+	box-shadow: none;
+	transform: translateY(-50%);
+}
+
+.projectCountryBadge img {
+	position: absolute;
+	top: 0;
+	right: -6px;
+	display: block;
+	width: auto;
+	height: 100%;
+	object-fit: contain;
+}
+
+.projectButton:hover {
+	transform: translateX(3px);
+	box-shadow: 0 12px 24px rgba(22, 76, 72, 0.12);
+}
+
+.projectButtonActive {
+	color: #f4f6e8;
+	border-color: rgba(1, 55, 54, 0.74);
+	background: linear-gradient(135deg, #075c59, #063f40);
+	box-shadow: 0 12px 26px rgba(4, 66, 63, 0.22);
+}
+
+.projectOrdinal {
+	font-family: "Arial Narrow", "Roboto Condensed", sans-serif;
+	font-size: 12px;
+	font-weight: 800;
+	letter-spacing: 0.1em;
+	opacity: 0.82;
+}
+
+/* Logos com o mesmo peso visual: todos ocupam a mesma área (um quadrado de
+   --logo-unit de lado), com largura e altura tiradas da proporção do arquivo
+   (--logo-aspect, sem margens). Os largos ficam mais largos e baixos, os
+   altos mais estreitos; nenhum passa de --logo-max-w × --logo-max-h, o que
+   deixa folga até as bordas. */
+.projectLogo {
+	--logo-unit: 34px;
+	--logo-max-w: 62px;
+	--logo-max-h: 36px;
+	justify-self: center;
+	align-self: center;
+	width: min(calc(var(--logo-unit) * sqrt(var(--logo-aspect, 1))), var(--logo-max-w));
+	height: min(calc(var(--logo-unit) / sqrt(var(--logo-aspect, 1))), var(--logo-max-h));
+	object-fit: contain;
+	background: transparent;
+}
+
+.projectButtonCopy {
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+}
+
+.projectButtonCopy strong {
+	overflow: hidden;
+	font-family: "Arial Narrow", "Roboto Condensed", sans-serif;
+	font-size: 12px;
+	font-weight: 800;
+	line-height: 1.05;
+	letter-spacing: -0.01em;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	/* O overflow das reticências cortava a perna do "g"/"p" (ClockRight,
+	   Paginas, Rag Everything): folga embaixo sem mudar o layout. */
+	padding-bottom: 0.18em;
+	margin-bottom: -0.18em;
+}
+
+.projectButton[data-project-id="central-clube-livro"]
+	.projectButtonCopy
+	strong {
+	font-size: 10.5px;
+	line-height: 1.05;
+	white-space: normal;
+}
+
+.projectButton[data-project-id="site-adv"] .projectButtonCopy strong {
+	font-size: 10.2px;
+}
+
+/* Em inglês e espanhol o subtítulo é mais longo ("Comercio electrónico
+   internacional"): quebra em até duas linhas em vez de virar reticências. */
+.projectButtonCopy small {
+	display: -webkit-box;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: 2;
+	line-clamp: 2;
+	margin-top: 3px;
+	overflow: hidden;
+	font-size: 8px;
+	font-weight: 600;
+	line-height: 1.1;
+	text-wrap: balance;
+	opacity: 0.72;
+}
+
+.mapPanel {
+	position: relative;
+	z-index: 2;
+	align-self: stretch;
+	min-width: 0;
+	height: min(650px, calc(100 * var(--atlas-vh) - 142px));
+	min-height: 550px;
+}
+
+.mapScene {
+	position: absolute;
+	inset: 0;
+	z-index: 2;
+	transform-origin: 53% 44%;
+	transition:
+		opacity 460ms ease,
+		transform 900ms cubic-bezier(0.22, 1, 0.36, 1);
+}
