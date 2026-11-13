@@ -3,10 +3,7 @@ import {
   LANDING_LANGUAGES,
   type LandingLanguage,
 } from "../features/navigation/landingSections";
-import {
-  isHomeDriveStandaloneHost,
-  isHomeElevatorStandaloneHost,
-} from "../App/appHostRouting";
+import { isHomeElevatorStandaloneHost } from "../App/appHostRouting";
 
 // Idioma escolhido no seletor (EN · PT · ES); vale para as próximas visitas à raiz.
 export const PREFERRED_LANGUAGE_KEY = "cabraiz-preferred-language";
@@ -55,7 +52,7 @@ export function redirectRootToLanguage(): boolean {
 
   const { pathname, search, hash } = browserWindow.location;
   if (pathname !== "/" && pathname !== "/index.html") return false;
-  if (isHomeDriveStandaloneHost() || isHomeElevatorStandaloneHost()) return false;
+  if (isHomeElevatorStandaloneHost()) return false;
 
   const navigatorLanguages = browserWindow.navigator.languages?.length
     ? browserWindow.navigator.languages

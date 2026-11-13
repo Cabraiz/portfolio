@@ -3,9 +3,7 @@ import LoadingStatus from '../i18n/LoadingStatus';
 import { Navigate, Route, Routes } from "react-router-dom";
 import {
   getHomeGameLandingRedirectPath,
-  HOME_DRIVE_ROUTE_PATH,
   HOME_ELEVATOR_ROUTE_PATH,
-  isHomeDriveStandaloneHost,
   isHomeElevatorStandaloneHost,
 } from "../App/appHostRouting";
 
@@ -26,9 +24,6 @@ const Vinho = lazy(() => import("../pages/Vinho/Vinho"));
 const LandingRouterPage = lazy(
   () => import("../pages/Mateus/LandingPage/LandingRouterPage"),
 );
-const HomeDriveStandalonePage = lazy(
-  () => import("../pages/Mateus/Home/Drive/HomeDriveStandalonePage"),
-);
 const HomeElevatorStandalonePage = lazy(
   () => import("../pages/Mateus/Home/Elevator/HomeElevatorStandalonePage"),
 );
@@ -38,9 +33,7 @@ const PrivacyNotice = lazy(() => import("../pages/Privacy/PrivacyNotice"));
 const routeFallback = <LoadingStatus label="Carregando página" />;
 
 const AppRoutes = () => {
-  const landingElement = isHomeDriveStandaloneHost() ? (
-    <Navigate to={HOME_DRIVE_ROUTE_PATH} replace />
-  ) : isHomeElevatorStandaloneHost() ? (
+  const landingElement = isHomeElevatorStandaloneHost() ? (
     <Navigate to={HOME_ELEVATOR_ROUTE_PATH} replace />
   ) : (
     <LandingRouterPage />
@@ -54,7 +47,8 @@ const AppRoutes = () => {
         element={<Navigate to={getHomeGameLandingRedirectPath()} replace />}
       />
 
-      <Route path={HOME_DRIVE_ROUTE_PATH} element={<HomeDriveStandalonePage />} />
+      {/* O jogo de carro mudou para drive.cabraiz.com. */}
+      <Route path="/drive" element={<Navigate to="/home" replace />} />
       <Route
         path={HOME_ELEVATOR_ROUTE_PATH}
         element={<HomeElevatorStandalonePage />}

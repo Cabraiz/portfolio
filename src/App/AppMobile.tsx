@@ -62,7 +62,6 @@ const HIDDEN_NAVBAR_ROUTES: ReadonlySet<string> = new Set([
   "/resume",
   "/doris",
   "/hublocal",
-  "/drive",
   "/elevator",
   ...PRIVACY_ROUTES,
 ]);

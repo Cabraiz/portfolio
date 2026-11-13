@@ -18,7 +18,6 @@ const appRoutes = [
   "pricing",
   "live",
   "contact",
-  "drive",
   "elevator",
   "enigma",
   "libras-unlock",

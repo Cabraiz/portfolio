@@ -59,7 +59,6 @@
     "workbox-core": "7.4.1"
   },
   "scripts": {
-    "check:audio-assets": "node scripts/verify-home-drive-audio-assets.mjs",
     "preinstall": "node -e \"if(process.version !== 'v26.10.0'){console.error('Node 26.10.0 obrigatorio. Versao atual: ' + process.version); process.exit(1)}\"",
     "dev": "vite",
     "build": "tsc && vite build",

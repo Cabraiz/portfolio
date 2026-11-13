@@ -26,7 +26,7 @@ for(const key of new Set([...Object.keys(pt),...Object.keys(en)])){
  else if(tokens(pt[key])!==tokens(en[key]))failures.push(`${key}: interpolation mismatch`);
 }
 const references=new Map(),resourceReferences=new Map(),neutral=new Map(),rawUi=[];
-const neutralLabels=new Set(['Mateus Cabral','Mateus Cabraiz','Cabraiz','Logo','WhatsApp','Dev','Fortaleza','MS','×','Cabraiz Drive','CABRAIZ DRIVE','Cabraiz Elevator','Cabraiz Arcade']);
+const neutralLabels=new Set(['Mateus Cabral','Mateus Cabraiz','Cabraiz','Logo','WhatsApp','Dev','Fortaleza','MS','×','Cabraiz Elevator','Cabraiz Arcade']);
 const roots=['src/pages/Mateus','src/App/NavBar','src/features/navigation'];
 function files(root){return fs.readdirSync(root,{withFileTypes:true}).flatMap(entry=>entry.isDirectory()?files(path.join(root,entry.name)):/\.(ts|tsx)$/.test(entry.name)?[path.join(root,entry.name)]:[]);}
 const sourceFiles=[...roots.flatMap(files),'src/App/App.tsx','src/routes/AppRoutes.tsx','src/i18n/LoadingStatus.tsx'].filter(file=>!/[/\\](RoadMap|Live|Technologies)[/\\]/.test(file));

@@ -112,27 +112,3 @@ test('jogo do elevador mantém controles e nomes acessíveis nos dois idiomas',a
   await page.screenshot({path:test.info().outputPath('elevator-pt.png')});
   await context.close();
 });
-
-test('bússola acompanha o idioma e preserva o modo explícito',async({page})=>{
-  await page.goto('/contact',{waitUntil:'networkidle'});
-  await connectLanguageTest(page);
-  await page.evaluate(()=>Reflect.get(window,'labelTest').changeLanguage('en'));
-  await page.route('**/__compass-test.js',route=>route.fulfill({contentType:'text/javascript',body:`
-    import React from '/node_modules/.vite/deps/react.js';
-    import ReactDOM from '/node_modules/.vite/deps/react-dom_client.js';
-    import Compass from '/src/pages/Mateus/Home/components/mobile/game/driving/view/HomeDriveCompass.tsx';
-    const host=document.createElement('div');host.id='compass-test';document.body.append(host);
-    ReactDOM.createRoot(host).render(React.createElement(React.Fragment,null,
-      React.createElement(Compass,{headingRad:Math.PI/2}),
-      React.createElement(Compass,{headingRad:Math.PI*1.5}),
-      React.createElement(Compass,{headingRad:Math.PI*1.5,cardinalMode:'ptBR'})
-    ));
-  `}));
-  await page.addScriptTag({type:'module',url:'/__compass-test.js'});
-  const compass=page.locator('#compass-test');
-  await expect(compass.getByRole('status',{name:'Compass: heading E',exact:true})).toBeVisible();
-  await expect(compass.getByRole('status',{name:'Compass: heading W',exact:true})).toBeVisible();
-  await expect(compass.getByRole('status',{name:'Compass: heading O',exact:true})).toBeVisible();
-  await page.evaluate(()=>Reflect.get(window,'labelTest').changeLanguage('pt'));
-  await expect(compass.getByRole('status',{name:'Bússola: direção O',exact:true})).toHaveCount(2);
-});
