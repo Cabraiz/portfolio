@@ -73,7 +73,11 @@ function startSwarm(root: HTMLElement) {
 		};
 		const main = group.reduce((best, element) => (visibleArea(element) > visibleArea(best) ? element : best));
 		const box = main.getBoundingClientRect();
-		const offset = entryOffset(box);
+		// A peça já fica visível enquanto espera o agente, deslocada por este
+		// offset: ele tem de tirar da tela o grupo inteiro, não só a peça principal.
+		// Pela foto sozinha, a barra de contato que vinha junto ficava com uma
+		// ponta parada na borda até o agente chegar.
+		const offset = entryOffset(unionOf(group.map((element) => element.getBoundingClientRect())));
 		const delay = Math.max(
 			FADE_LEAD_MS,
 			freeAt[index] - now + rand(40, 160) * pace,
@@ -111,7 +115,10 @@ function startSwarm(root: HTMLElement) {
 		for (const element of group) {
 			const html = element as HTMLElement;
 			element.setAttribute("data-agent-placed", "");
-			const scale = html.offsetWidth > 0 ? element.getBoundingClientRect().width / html.offsetWidth : 1;
+			// Escala só quando a peça está de fato escalada: em peças de 1 px (a
+			// divisória da barra) o arredondamento dava 0,3 px de desvio do grupo.
+			const measured = html.offsetWidth > 0 ? element.getBoundingClientRect().width / html.offsetWidth : 1;
+			const scale = Math.abs(measured - 1) < 0.02 ? 1 : measured;
 			track(element.animate(
 				{ translate: path.map((at) => `${at.x / scale}px ${at.y / scale}px`) },
 				{ delay: delay + reachMs, duration: pullMs, fill: "backwards", composite: "add" },

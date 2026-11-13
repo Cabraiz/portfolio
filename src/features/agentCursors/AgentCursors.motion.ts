@@ -87,6 +87,20 @@ function offscreenPoint(): Pt {
 }
 
 /** Peça pronta para entrar: imagem carregada e visível na tela. */
+/**
+ * Alguma peça que contém esta ainda está sendo arrastada (ou esperando o agente)?
+ * O deslocamento de espera da filha é medido com a mãe fora do lugar; se a mãe
+ * ainda anda, a filha entra na tela junto com ela antes de o agente buscá-la.
+ */
+function isParentMoving(element: Element) {
+	for (let parent = element.parentElement?.closest("[data-agent-piece]"); parent; parent = parent.parentElement?.closest("[data-agent-piece]")) {
+		const moving = parent.getAnimations().some((animation) =>
+			animation.playState !== "finished" && animation.effect instanceof KeyframeEffect && "translate" in (animation.effect.getKeyframes()[0] ?? {}));
+		if (moving) return true;
+	}
+	return false;
+}
+
 function isReady(element: Element) {
 	if (element.closest(OFF_LIMITS)) return false;
 	if (element instanceof HTMLImageElement && !(element.complete && element.naturalWidth > 0)) return false;
@@ -97,7 +111,7 @@ function isReady(element: Element) {
 		// Peça marcada fica escondida até o agente trazê-la: basta aparecer na tela,
 		// mesmo que passe da borda (como as pessoas de corpo inteiro).
 		const onScreen = box.width > 0 && box.height > 0 && box.bottom > 0 && box.top < innerHeight && box.right > 0 && box.left < innerWidth;
-		return onScreen && getComputedStyle(element.parentElement ?? element).visibility === "visible";
+		return onScreen && getComputedStyle(element.parentElement ?? element).visibility === "visible" && !isParentMoving(element);
 	}
 	const inside = box.top >= -40 && box.left >= -40 && box.right <= innerWidth + 40 && box.bottom <= innerHeight + 40;
 	if (!inside || box.width < 48 || box.height < 48) return false;
@@ -108,7 +122,7 @@ function isReady(element: Element) {
 }
 
 /** Do lado de fora mais próximo até o lugar da peça, em px de tela. */
-function entryOffset(box: DOMRect) {
+function entryOffset(box: Box) {
 	const toLeft = box.right + MARGIN;
 	const toRight = innerWidth - box.left + MARGIN;
 	const toBottom = innerHeight - box.top + MARGIN;

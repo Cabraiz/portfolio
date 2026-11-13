@@ -145,7 +145,9 @@ function HomeMobile() {
         />
 
         <nav className={styles.actions} data-mobile-contact-actions data-agent-piece="" aria-label={localizeLabel("Ações de contato")}>
-          {/* Barra, contorno de cada botão, ícone, texto e divisória: peças separadas.
+          {/* A barra chega primeiro; depois o contorno dos dois botões e a divisória
+              juntos (o contorno pela metade parecia quebrado) e, por fim, o ícone e o
+              texto de cada botão juntos.
               Quando o logo desce ao lado, a barra estreita só com transform (no
               compositor): o fundo e o contorno são feitos de pontas que deslizam e
               de um meio que encolhe, e o conteúdo desliza (useMobileHomeBrandMotion). */}
@@ -154,25 +156,25 @@ function HomeMobile() {
             <i data-bar-part="body" />
             <i data-bar-part="end" />
           </span>
-          <a href={getWhatsAppHref(contactLanguage)} target="_blank" rel="noreferrer noopener" data-agent-piece="">
+          <a href={getWhatsAppHref(contactLanguage)} target="_blank" rel="noreferrer noopener" data-agent-piece="contato-barra">
             <span className={styles.actionOutline} aria-hidden="true">
               <i data-pill-part="cap" />
               <i data-pill-part="band" />
             </span>
             <span className={styles.actionContent} data-action-content="">
-              <FaWhatsapp aria-hidden="true" data-agent-piece="" />
-              <span data-agent-piece="">{localizeLabel("WhatsApp")}</span>
+              <FaWhatsapp aria-hidden="true" data-agent-piece="contato-whatsapp" />
+              <span data-agent-piece="contato-whatsapp">{localizeLabel("WhatsApp")}</span>
             </span>
           </a>
-          <span className={styles.actionDivider} aria-hidden="true" data-agent-piece="" data-action-divider="" />
-          <a href={RESUME_HREFS[contactLanguage]} target="_blank" rel="noreferrer noopener" data-agent-piece="">
+          <span className={styles.actionDivider} aria-hidden="true" data-agent-piece="contato-barra" data-action-divider="" />
+          <a href={RESUME_HREFS[contactLanguage]} target="_blank" rel="noreferrer noopener" data-agent-piece="contato-barra">
             <span className={styles.actionOutline} aria-hidden="true">
               <i data-pill-part="band" />
               <i data-pill-part="end" />
             </span>
             <span className={styles.actionContent} data-action-content="">
-              <FaRegFileAlt aria-hidden="true" data-agent-piece="" />
-              <span data-agent-piece="">{localizeLabel("Currículo")}</span>
+              <FaRegFileAlt aria-hidden="true" data-agent-piece="contato-curriculo" />
+              <span data-agent-piece="contato-curriculo">{localizeLabel("Currículo")}</span>
             </span>
           </a>
         </nav>
