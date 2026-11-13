@@ -1,8 +1,3 @@
-import { useSelector } from "react-redux";
-import {
-  selectCurrentUser,
-  selectCurrentToken,
-} from "../../redux/feature/auth/authSlice";
 import Perfil_Image from "../../assets/HubLocal/Perfil_Image.webp";
 
 import { ProtectedComponent } from "../../redux/feature/auth/ProtectedComponent";
@@ -10,8 +5,6 @@ import { ProtectedComponent } from "../../redux/feature/auth/ProtectedComponent"
 import { Flex, Grid, GridItem, Box, Image, Text } from "@chakra-ui/react";
 
 const Hublocal = () => {
-  const user = useSelector(selectCurrentUser);
-  const token = useSelector(selectCurrentToken);
 
   return (
     <Flex

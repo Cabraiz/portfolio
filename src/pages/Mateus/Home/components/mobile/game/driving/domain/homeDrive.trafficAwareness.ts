@@ -30,18 +30,6 @@ const STABILIZATION_EXTRA_BUMPER_GAP_METERS = 1.6;
 const STABILIZATION_START_MARGIN = 0.018;
 const STABILIZATION_END_MARGIN = 0.982;
 
-const DEFAULT_DECISION: Omit<
-  HomeDriveTrafficAwarenessDecision,
-  "targetLaneIndex" | "targetLaneOffsetMeters"
-> = Object.freeze({
-  speedFactor: 1,
-  laneChangeDirection: 0,
-  turnSignal: null,
-  brakeLightIntensity: 0,
-  followingVehicleId: null,
-  blockReason: "none",
-});
-
 type RoadMap = ReadonlyMap<string, HomeDriveGeneratedRoadSegment>;
 
 type LaneVehicle = Readonly<{
@@ -434,23 +422,6 @@ function findBestLaneChange(
     .sort((first, second) => second.score - first.score);
 
   return viable[0] ?? null;
-}
-
-function getDefaultDecision(
-  vehicle: HomeDriveTrafficVehicle,
-  road: HomeDriveGeneratedRoadSegment,
-): HomeDriveTrafficAwarenessDecision {
-  const lane = resolveHomeDriveTrafficLane(
-    road,
-    vehicle.directionSign,
-    vehicle.laneIndex,
-  );
-
-  return {
-    ...DEFAULT_DECISION,
-    targetLaneIndex: lane.laneIndex,
-    targetLaneOffsetMeters: lane.laneOffsetMeters,
-  };
 }
 
 function resolveVehicleDecision(

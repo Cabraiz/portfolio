@@ -129,8 +129,6 @@ type HomeDriveThreeWorldProps = Readonly<{
 const THREE_CLOCK_DEPRECATION_WARNING =
   "THREE.Clock: This module has been deprecated. Please use THREE.Timer instead.";
 
-const HOME_DRIVE_THREE_PEDESTRIAN_SCENE_DEBUG = true;
-
 let previousConsoleWarn: typeof console.warn | null = null;
 let clockWarningFilterInstallCount = 0;
 

@@ -23,110 +23,14 @@ import {
 import { validateEmail } from "../../redux/shared/utils/validation/email";
 import { NewUser } from "../../redux/app/models/NewUser";
 
-import { RegisterParams } from "../Auxiliadores/models/ModeloJSXPage.interface";
 import {
   ModeloLadoEsquerdoPage,
-  ModeloLadoDireitoPage,
   LoadingPage,
 } from "../Auxiliadores/ModeloJSXPage";
 import { useAppDispatch } from "../../redux/hooks/hooks";
 import { useNavigate } from "react-router-dom";
 
 import "./Register.css";
-
-function NomeInput({
-  value,
-  onChange,
-  onBlur,
-  error,
-  helperText,
-}: RegisterParams) {
-  return (
-    <>
-      {ModeloLadoDireitoPage({
-        value,
-        onChange,
-        onBlur,
-        error,
-        helperText,
-        type: "text",
-        name: "name",
-        id: "name",
-      })}
-    </>
-  );
-}
-
-function EmailInput({
-  value,
-  onChange,
-  onBlur,
-  error,
-  helperText,
-}: RegisterParams) {
-  return (
-    <>
-      {ModeloLadoDireitoPage({
-        value,
-        onChange,
-        onBlur,
-        error,
-        helperText,
-        type: "text",
-        name: "email",
-        id: "email",
-      })}
-    </>
-  );
-}
-
-function PasswordInput({
-  value,
-  onChange,
-  onBlur,
-  error,
-  helperText,
-}: RegisterParams) {
-  return (
-    <>
-      {ModeloLadoDireitoPage({
-        value,
-        onChange,
-        onBlur,
-        error,
-        helperText,
-        type: "password",
-        name: "password",
-        id: "password",
-        placeholder: "Mínimo de 6 caracteres",
-      })}
-    </>
-  );
-}
-
-function ConfirmPasswordInput({
-  value,
-  onChange,
-  onBlur,
-  error,
-  helperText,
-}: RegisterParams) {
-  return (
-    <>
-      {ModeloLadoDireitoPage({
-        value,
-        onChange,
-        onBlur,
-        error,
-        helperText,
-        type: "password",
-        name: "password",
-        id: "confirmpassword",
-        placeholder: "Mínimo de 6 caracteres",
-      })}
-    </>
-  );
-}
 
 function Register() {
   const {
@@ -194,7 +98,7 @@ function Register() {
       theme: "dark",
     });
 
-  const [login, { isLoading }] = useLoginMutation();
+  const [, { isLoading }] = useLoginMutation();
 
   const dispatch = useAppDispatch();
   const navigate = useNavigate();

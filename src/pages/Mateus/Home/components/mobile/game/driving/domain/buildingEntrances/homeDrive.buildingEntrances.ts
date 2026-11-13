@@ -561,7 +561,6 @@ function resolveSignKind(
 ): HomeDriveBuildingEntranceSignKind {
   const dense = isDenseUrban(input);
   const commercial = hasCommercialBias(input);
-  const service = hasServiceBias(input);
 
   if (entranceKind === "garage-door") {
     if (seed > 0.42 || dense) {

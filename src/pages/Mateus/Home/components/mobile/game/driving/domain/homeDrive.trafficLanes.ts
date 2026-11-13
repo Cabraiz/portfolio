@@ -187,7 +187,6 @@ export function getHomeDriveTrafficLaneOffsetMeters(
   const laneWidth = getHomeDriveTrafficLaneWidthMeters(road);
 
   if (!isHomeDriveTrafficRoadBidirectional(road)) {
-    const laneCount = getHomeDriveTrafficTotalLaneCount(road);
     const firstLaneCenter = -roadHalfWidth + laneWidth / 2;
 
     return firstLaneCenter + laneWidth * normalizedLaneIndex;

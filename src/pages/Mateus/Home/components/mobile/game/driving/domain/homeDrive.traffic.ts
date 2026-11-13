@@ -905,13 +905,6 @@ function getRoadBySegmentIdMap(
   return cachedTrafficRoadBySegmentId;
 }
 
-function getRoadBySegmentId(
-  roads: readonly HomeDriveGeneratedRoadSegment[],
-  segmentId: string,
-): HomeDriveGeneratedRoadSegment | undefined {
-  return getRoadBySegmentIdMap(roads).get(segmentId);
-}
-
 type TrafficRuntimePerformanceContext = Readonly<{
   activeCenter: HomeDriveVector2;
   activeHeadingRad: number;

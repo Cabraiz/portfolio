@@ -1051,7 +1051,6 @@ function pushFourWheelerBodyParts(
   vehicle: HomeDriveParkedVehicle,
   profile: VehicleDetailProfile,
 ): void {
-  const descriptor = getHomeDriveVehicleModelDescriptor(vehicle.modelKey);
   const bodyHeight = vehicle.heightMeters * profile.bodyHeightRatio;
   const bodyY = bodyHeight * 0.5 + 0.08;
   const lowerBodyPaint = getPaintMaterialKey(vehicle, 101);

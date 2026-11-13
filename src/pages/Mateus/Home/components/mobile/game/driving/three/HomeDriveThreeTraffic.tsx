@@ -1191,10 +1191,6 @@ function isLeftSidePart(part: TrafficPart): boolean {
   return part.includes("Left") || part.startsWith("left");
 }
 
-function isRightSidePart(part: TrafficPart): boolean {
-  return part.includes("Right") || part.startsWith("right");
-}
-
 function isFrontWheelPart(part: TrafficPart): boolean {
   return part.startsWith("front");
 }

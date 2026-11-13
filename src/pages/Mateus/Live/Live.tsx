@@ -41,14 +41,12 @@ export default function Live() {
     projectFilterCounts,
     spotlight,
     spotlightProject,
-    visibleNodeCountLabel,
     scene,
     globe,
     actions,
   } = useLiveExperience();
 
   const {
-    isReady: isSceneReady,
     refresh: refreshScene,
     replay: replayScene,
   } = useLiveGsapScene({
