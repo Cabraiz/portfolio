@@ -38,19 +38,19 @@ for(const viewport of [{width:390,height:844},{width:1366,height:720}]){
     else await expect(page.getByText('Ingeniero de IA',{exact:true}).filter({visible:true}).first()).toBeVisible();
     await page.evaluate(()=>Reflect.get(window,'labelTest').changeLanguage('en'));
     await page.goto('/en/portfolio',{waitUntil:'networkidle'});
-    if(viewport.width<992)await expect(page.locator('[data-mobile-feature-copy] h2')).toHaveText('NEXOVARE');
-    await expect(page.getByText('Business management platform',{exact:true}).filter({visible:true}).first()).toBeVisible();
+    if(viewport.width<992)await expect(page.locator('[data-mobile-feature-copy] h2')).toHaveText('APP BANCO');
+    await expect(page.getByText('Mobile banking experience',{exact:true}).filter({visible:true}).first()).toBeVisible();
     if(viewport.width<992){
       await expect(page.getByRole('button',{name:'Zoom in',exact:true})).toBeVisible();
-      await expect(page.locator('[data-mobile-location]').getByText('Brazil',{exact:true})).toBeVisible();
+      await expect(page.locator('[data-mobile-location]').getByText('Mexico',{exact:true})).toBeVisible();
       await expect(page.getByText('All projects',{exact:true})).toBeVisible();
     }
     await page.screenshot({path:test.info().outputPath('portfolio-en.png')});
     const next=page.getByRole('button',{name:'Next project',exact:true}).filter({visible:true}).first();
     await next.click();
-    await expect(page.getByText('Mobile banking experience',{exact:true}).filter({visible:true}).first()).toBeVisible();
-    await next.click();
     await expect(page.getByText('Cross-border e-commerce',{exact:true}).filter({visible:true}).first()).toBeVisible();
+    await next.click();
+    await expect(page.getByText('Face-recognition time clock',{exact:true}).filter({visible:true}).first()).toBeVisible();
     // Serviços e Rede IA saíram da landing: as rotas abrem o Início.
     for(const path of ['/servicos','/technologies']){
       await page.goto(path,{waitUntil:'networkidle'});

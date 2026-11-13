@@ -3,13 +3,13 @@ import { readFileSync } from 'node:fs';
 const catalog=JSON.parse(readFileSync('src/i18n/label-catalog.json','utf8')) as string[][];
 
 const projects = [
-  {id:'erp-varejo',name:'NEXOVARE',subtitle:'Ecossistema comercial',year:'2022',asset:'nexovare'},
   {id:'app-bank',name:'APP BANCO',subtitle:'Experiência bancária mobile',year:'2020',asset:'app-banco'},
   {id:'guine-bissau-commerce',name:'BIDEIRAS',subtitle:'Comércio digital internacional',year:'2025',asset:'bideiras',assetVersion:2},
   {id:'clockright',name:'ClockRight',subtitle:'Ponto por biometria facial',year:'2024',asset:'clockright',assetVersion:2},
   {id:'central-clube-livro',name:'Entre Paginas',subtitle:'Comunidade editorial',year:'2020',asset:'entre-paginas',assetVersion:2},
-  {id:'site-cabeleireira',name:'Fran Studio',subtitle:'Marca e captação local',year:'2023',asset:'fran-studio',assetVersion:2},
   {id:'site-adv',name:'Rag Everything',subtitle:'Leilão de gemas e plantas raras',year:'2021',asset:'gemarium'},
+  {id:'erp-varejo',name:'NEXOVARE',subtitle:'Ecossistema comercial',year:'2022',asset:'nexovare'},
+  {id:'site-cabeleireira',name:'Fran Studio',subtitle:'Marca e captação local',year:'2023',asset:'fran-studio',assetVersion:2},
 ];
 const viewports = [{width:283,height:500},{width:320,height:568},{width:360,height:640},
   {width:390,height:844},{width:430,height:932},{width:667,height:375}];
@@ -22,7 +22,7 @@ for (const viewport of viewports) for (const language of ['pt','en']) {
     await page.goto(language==='pt'?'/portfolio':'/en/portfolio',{waitUntil:'networkidle'});
     const card=page.locator('[data-mobile-detail-card]');
     for (const project of projects) {
-      if(project.id!=='erp-varejo')await card.getByRole('button',{name:language==='pt'?'Próximo projeto':'Next project',exact:true}).click();
+      if(project.id!=='app-bank')await card.getByRole('button',{name:language==='pt'?'Próximo projeto':'Next project',exact:true}).click();
       await expect(card.locator(`[data-mobile-project-id="${project.id}"]`)).toHaveAttribute('aria-pressed','true');
       await expect(card.locator('h2')).toHaveText(project.name);
       const next=card.getByRole('button',{name:language==='pt'?'Próximo projeto':'Next project',exact:true});

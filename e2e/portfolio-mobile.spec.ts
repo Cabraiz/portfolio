@@ -31,6 +31,14 @@ test("mantém o portfólio mobile completo dentro de diferentes telas", async ({
 			const page = await context.newPage();
 			await page.goto(new URL("/portfolio", baseURL).toString());
 
+			// O portfólio abre no primeiro projeto estrangeiro; estes passos partem do
+
+			// NEXOVARE (rota local do Brasil).
+
+			await page.locator('[data-mobile-project-id="erp-varejo"]').click();
+
+			await expect(page.locator('[data-mobile-project-id="erp-varejo"]')).toHaveAttribute("aria-pressed", "true");
+
 			const portfolioRoot = page.locator('[data-portfolio-root="true"]');
 			const stage = page.locator('[data-mobile-portfolio="true"]');
 			const navbar = page.locator(".navbar");
@@ -316,6 +324,14 @@ test("troca o projeto e mantém os controles do mapa funcionais", async ({
 	const baseURL = test.info().project.use.baseURL as string;
 	await page.goto(new URL("/portfolio", baseURL).toString());
 
+	// O portfólio abre no primeiro projeto estrangeiro; estes passos partem do
+
+	// NEXOVARE (rota local do Brasil).
+
+	await page.locator('[data-mobile-project-id="erp-varejo"]').click();
+
+	await expect(page.locator('[data-mobile-project-id="erp-varejo"]')).toHaveAttribute("aria-pressed", "true");
+
 	const root = page.locator('[data-portfolio-root="true"]');
 	const location = page.locator('[data-mobile-location="true"]');
 	const zoomValue = () =>
@@ -414,6 +430,14 @@ test("desenha as rotas locais e replica a viagem do desktop no mobile", async ({
 	const page = await context.newPage();
 	const baseURL = test.info().project.use.baseURL as string;
 	await page.goto(new URL("/portfolio", baseURL).toString());
+
+	// O portfólio abre no primeiro projeto estrangeiro; estes passos partem do
+
+	// NEXOVARE (rota local do Brasil).
+
+	await page.locator('[data-mobile-project-id="erp-varejo"]').click();
+
+	await expect(page.locator('[data-mobile-project-id="erp-varejo"]')).toHaveAttribute("aria-pressed", "true");
 
 	const activeRoute = page.locator('[data-mobile-route-active="erp-varejo"]');
 	await expect(activeRoute).toHaveCount(1);
