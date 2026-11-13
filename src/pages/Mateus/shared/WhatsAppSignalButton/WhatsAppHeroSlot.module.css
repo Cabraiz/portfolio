@@ -115,6 +115,9 @@
   .root {
     --hero-slot-cta-scale: 1.2;
     --hero-slot-offset-inline: clamp(24px, 2.5vw, 38px);
+    /* Com menos recuo, o e-mail (inglês, coluna inteira) ampliado cobriria o
+       Résumé: a largura base desconta a escala. */
+    --hero-slot-email-width: calc(100% / var(--hero-slot-cta-scale));
   }
 }
 

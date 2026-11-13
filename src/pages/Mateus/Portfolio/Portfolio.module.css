@@ -573,6 +573,19 @@
 	left: auto;
 }
 
+/* Sem espaço à direita (borda do mapa ou botões de zoom): useMapLabelSide
+   vira o balão para a esquerda do ponto. */
+[data-label-side="left"] > .journeyMarkerLabel {
+	right: 29px;
+	left: auto;
+}
+
+/* O ponto do Brasil tem halo maior: o balão fica um pouco mais longe. */
+[data-label-side="left"] > .mapPointLabel {
+	right: 32px;
+	left: auto;
+}
+
 .journeyMarkerLabel strong {
 	font-size: 11px;
 	line-height: 1.05;

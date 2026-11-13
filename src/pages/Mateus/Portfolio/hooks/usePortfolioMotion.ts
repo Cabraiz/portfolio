@@ -355,8 +355,11 @@ export default function usePortfolioMotion(
 					)
 					.fromTo(
 						q(`.${styles.mobileProjectPreview}`),
-						{ clipPath: "inset(0 0 0 100%)" },
-						{ clipPath: "inset(0 0 0 0%)", duration: 0.8, ease: "expo.out" },
+						// Folga de 24px fora da caixa: o selo "Abrir site" (right: -4px)
+						// e a sombra dele não ficam cortados durante a cortina.
+						// Começa em 125% para nem a folga aparecer antes da hora.
+						{ clipPath: "inset(-24px -24px -24px 125%)" },
+						{ clipPath: "inset(-24px -24px -24px 0%)", duration: 0.8, ease: "expo.out" },
 						0.05
 					)
 					.fromTo(

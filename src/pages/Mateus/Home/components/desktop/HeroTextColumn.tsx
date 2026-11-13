@@ -132,15 +132,18 @@ export default function HeroTextColumn({
 	}, [isCompactDesktop]);
 
 	const primaryActionOffsetStyle = useMemo<CSSProperties>(() => {
+		// O e-mail (inglês) ocupa a coluna inteira; onde a escala o faria passar
+		// por cima do Résumé, o WhatsAppHeroSlot encolhe a largura base.
+		const isFullWidthEmail = language === "en" && !isCompactDesktop;
 		return {
-			width: "100%",
+			width: isFullWidthEmail ? "var(--hero-slot-email-width, 100%)" : "100%",
 			maxWidth: "100%",
 			transform: isCompactDesktop
 				? "none"
 				: "translateX(clamp(-14px, -1vw, -24px)) scale(var(--hero-slot-cta-scale, 1.3))",
 			transformOrigin: "center left",
 		};
-	}, [isCompactDesktop]);
+	}, [isCompactDesktop, language]);
 
 	const primaryHeroAction = useMemo(() => {
 		// Brasil e América Latina falam por WhatsApp; para a gringa, e-mail.
