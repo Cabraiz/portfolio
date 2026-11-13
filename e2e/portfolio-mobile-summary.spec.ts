@@ -6,9 +6,9 @@ const projects = [
   {id:'app-bank',name:'APP BANCO',subtitle:'Experiência bancária mobile',year:'2020',asset:'app-banco'},
   {id:'guine-bissau-commerce',name:'BIDEIRAS',subtitle:'Comércio digital internacional',year:'2025',asset:'bideiras',assetVersion:2},
   {id:'clockright',name:'ClockRight',subtitle:'Ponto por biometria facial',year:'2024',asset:'clockright',assetVersion:2},
-  {id:'central-clube-livro',name:'Entre Paginas',subtitle:'Comunidade editorial',year:'2020',asset:'entre-paginas',assetVersion:2},
-  {id:'site-adv',name:'Rag Everything',subtitle:'Leilão de gemas e plantas raras',year:'2021',asset:'gemarium'},
   {id:'erp-varejo',name:'NEXOVARE',subtitle:'Ecossistema comercial',year:'2022',asset:'nexovare'},
+  {id:'site-adv',name:'Rag Everything',subtitle:'Leilão de gemas e plantas raras',year:'2021',asset:'gemarium'},
+  {id:'central-clube-livro',name:'Entre Paginas',subtitle:'Comunidade editorial',year:'2020',asset:'entre-paginas',assetVersion:2},
   {id:'site-cabeleireira',name:'Fran Studio',subtitle:'Marca e captação local',year:'2023',asset:'fran-studio',assetVersion:2},
 ];
 const viewports = [{width:283,height:500},{width:320,height:568},{width:360,height:640},

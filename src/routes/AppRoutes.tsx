@@ -1,4 +1,4 @@
-import { Suspense, lazy } from "react";
+import { Suspense, lazy, useEffect } from "react";
 import LoadingStatus from '../i18n/LoadingStatus';
 import { Navigate, Route, Routes } from "react-router-dom";
 import {
@@ -10,6 +10,16 @@ import {
 import { PrivateOutlet } from "../redux/shared/utils/PrivateOutlet";
 import { RouteGuard } from "../components/RouteGuard";
 import DigitalCodeUnlock from "../components/DigitalCodeUnlock";
+
+/** Links e QR codes antigos de /casanova seguem para o site novo. */
+function CasaNovaRedirect() {
+  useEffect(() => {
+    window.location.replace(
+      `https://casanova.cabraiz.com/${window.location.search}${window.location.hash}`,
+    );
+  }, []);
+  return null;
+}
 
 const RegisterHubLocal = lazy(() => import("../pages/RegisterHubLocal/Register"));
 const LoginHubLocal = lazy(() => import("../pages/LoginHubLocal/login"));
@@ -47,6 +57,8 @@ const AppRoutes = () => {
         element={<Navigate to={getHomeGameLandingRedirectPath()} replace />}
       />
 
+      {/* A lista de presentes Casa Nova mudou para casanova.cabraiz.com. */}
+      <Route path="/casanova/*" element={<CasaNovaRedirect />} />
       {/* O jogo de carro mudou para drive.cabraiz.com. */}
       <Route path="/drive" element={<Navigate to="/home" replace />} />
       <Route
