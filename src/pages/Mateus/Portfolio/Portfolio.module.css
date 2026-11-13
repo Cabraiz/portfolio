@@ -348,14 +348,19 @@
 	font-size: 10.2px;
 }
 
+/* Em inglês e espanhol o subtítulo é mais longo ("Comercio electrónico
+   internacional"): quebra em até duas linhas em vez de virar reticências. */
 .projectButtonCopy small {
+	display: -webkit-box;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: 2;
+	line-clamp: 2;
 	margin-top: 3px;
 	overflow: hidden;
 	font-size: 8px;
 	font-weight: 600;
 	line-height: 1.1;
-	text-overflow: ellipsis;
-	white-space: nowrap;
+	text-wrap: balance;
 	opacity: 0.72;
 }
 

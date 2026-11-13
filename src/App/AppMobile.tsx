@@ -79,6 +79,27 @@ function useHomeSectionOnScreen(activeSectionId: string): boolean {
 
 const links: readonly LandingSectionId[] = ["portfolio"];
 
+const PRIVACY_ROUTES: ReadonlySet<string> = new Set(Object.values(PRIVACY_PATHS));
+
+/** Páginas avulsas sem a barra da landing (o caminho chega sem a barra final). */
+const HIDDEN_NAVBAR_ROUTES: ReadonlySet<string> = new Set([
+  "/enigma",
+  "/libras-unlock",
+  "/libras",
+  "/rosa-unlock",
+  "/rosa",
+  "/vinho-unlock",
+  "/vinho",
+  "/loginhublocal",
+  "/registerhublocal",
+  "/resume",
+  "/doris",
+  "/hublocal",
+  "/drive",
+  "/elevator",
+  ...PRIVACY_ROUTES,
+]);
+
 function getBrowserWindow(): Window | null {
   if (globalThis.window === undefined) {
     return null;
@@ -160,35 +181,15 @@ function AppMobile() {
     buildSmoothSettings(),
   );
 
-  const hiddenNavbarRoutes = useMemo(
-    () => [
-      "/enigma",
-      "/libras-unlock",
-      "/libras",
-      "/rosa-unlock",
-      "/rosa",
-      "/vinho-unlock",
-      "/vinho",
-      "/loginhublocal",
-      "/registerhublocal",
-      "/resume",
-      "/doris",
-      "/hublocal",
-      "/drive",
-      "/elevator",
-      ...Object.values(PRIVACY_PATHS),
-    ],
-    [],
-  );
-
   const isGameStandaloneSurface = useMemo(() => {
     return isHomeGameStandaloneHost() || isHomeGameRoutePath(location.pathname);
   }, [location.pathname]);
 
-  const isPrivacyRoute = Object.values(PRIVACY_PATHS).includes(location.pathname.replace(/\/+$/, ""));
+  // O site publicado serve as páginas com barra no fim (/doris/): compara sem ela.
+  const routePath = location.pathname.replace(/\/+$/, "") || "/";
+  const isPrivacyRoute = PRIVACY_ROUTES.has(routePath);
 
-  const isNavHidden =
-    isGameStandaloneSurface || hiddenNavbarRoutes.includes(location.pathname);
+  const isNavHidden = isGameStandaloneSurface || HIDDEN_NAVBAR_ROUTES.has(routePath);
 
   const activeSectionId = useMemo<LandingSectionId | "">(() => {
     return getSectionIdByPath(location.pathname) ?? "";

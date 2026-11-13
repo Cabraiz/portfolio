@@ -8,6 +8,8 @@
 
   --hero-slot-primary-scale: 1;
   --hero-slot-primary-shift-inline: 0px;
+  /* Escala do WhatsApp do herói (aplicada no wrapper do HeroTextColumn). */
+  --hero-slot-cta-scale: 1.3;
 
   position: relative;
   z-index: var(--hero-slot-z-root, 6);
@@ -46,7 +48,9 @@
 .grid {
   position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 1.08fr) minmax(0, 1fr);
+  /* A coluna do botão principal nunca fica menor que o conteúdo dele: o
+     WhatsApp não corta em "WHAT…" entre 1280 e 1440 px; o Currículo cede. */
+  grid-template-columns: minmax(min-content, 1.08fr) minmax(0, 1fr);
   align-items: start;
   column-gap: var(--hero-slot-gap);
   row-gap: 12px;
@@ -102,6 +106,15 @@
   .root {
     --hero-slot-primary-scale: 1.375;
     --hero-slot-primary-shift-inline: -76px;
+  }
+}
+
+/* Entre 961 e 1599 px a 1.3x o "WhatsApp" inteiro não cabe ao lado do
+   Currículo: escala um pouco menor e menos recuo, sem cortar nem encostar. */
+@media (min-width: 961px) and (max-width: 1599px) {
+  .root {
+    --hero-slot-cta-scale: 1.2;
+    --hero-slot-offset-inline: clamp(24px, 2.5vw, 38px);
   }
 }
 

@@ -79,6 +79,12 @@
   /* Contexto de bleed/stacking pertence ao wrapper externo. */
 }
 
+/* No herói o botão tem no mínimo a largura do conteúdo (ícone + nome
+   inteiro): a coluna em volta cresce em vez de cortar o nome. */
+.hero .frame {
+  min-width: max-content;
+}
+
 .heroCompact {
   /* Mantido apenas por compatibilidade de API visual. */
 }

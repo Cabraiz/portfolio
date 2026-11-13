@@ -137,7 +137,7 @@ export default function HeroTextColumn({
 			maxWidth: "100%",
 			transform: isCompactDesktop
 				? "none"
-				: "translateX(clamp(-14px, -1vw, -24px)) scale(1.3)",
+				: "translateX(clamp(-14px, -1vw, -24px)) scale(var(--hero-slot-cta-scale, 1.3))",
 			transformOrigin: "center left",
 		};
 	}, [isCompactDesktop]);
