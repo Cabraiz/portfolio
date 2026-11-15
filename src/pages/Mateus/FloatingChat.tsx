@@ -338,7 +338,10 @@ export default function FloatingChat() {
               height: "80dvh",
               maxHeight: "80dvh",
               boxSizing: "border-box",
-              background: "rgba(255, 255, 255, 0.06)",
+              // Vidro 30% menos transparente: camada escura de 0.3 por baixo do
+              // brilho branco, para o fundo não brigar com o texto branco.
+              background:
+                "linear-gradient(rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.06)), rgba(22, 25, 29, 0.3)",
               backdropFilter: "blur(18px)",
               WebkitBackdropFilter: "blur(18px)",
               border: "1px solid rgba(255, 255, 255, 0.15)",
