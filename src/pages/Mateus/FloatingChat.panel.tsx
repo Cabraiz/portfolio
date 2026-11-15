@@ -3,7 +3,7 @@ import type * as React from "react";
 import type { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import mateusChatAvatar from "../../assets/Mateus/mateus-chat-avatar-v2.webp";
-import lagArthurSupport from "../../assets/Mateus/lag-arthur-support-wig-suit-v2.webp";
+import assistantAvatar from "../../assets/Mateus/chat-pessoa-3d-v1.webp";
 
 import styles from "./FloatingChat.module.css";
 import { getWhatsAppSupportUrl } from "./FloatingChat.helpers";
@@ -69,7 +69,7 @@ export function FloatingChatPanelBody({
               }}
             >
               <img
-                src={lagArthurSupport}
+                src={assistantAvatar}
                 alt={localizeLabel("Lag Arthur, assistente da Cabraiz")}
                 style={{
                   width: "42px",
@@ -111,7 +111,7 @@ export function FloatingChatPanelBody({
             >
               <div className={styles.botIntro}>
                 <img
-                  src={lagArthurSupport}
+                  src={assistantAvatar}
                   alt={localizeLabel("Lag Arthur, assistente da Cabraiz")}
                   className={styles.botAvatar}
                 />
