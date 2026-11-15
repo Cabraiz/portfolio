@@ -338,14 +338,17 @@ export default function FloatingChat() {
               height: "80dvh",
               maxHeight: "80dvh",
               boxSizing: "border-box",
-              // Vidro quase opaco: camada escura de 0.85 por baixo do brilho
-              // branco, para o fundo não brigar com o texto branco.
+              // Vidro escuro: camada de 0.7 por baixo do brilho branco, para o
+              // fundo não brigar com o texto branco.
               background:
-                "linear-gradient(rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.06)), rgba(22, 25, 29, 0.85)",
+                "linear-gradient(rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.06)), rgba(22, 25, 29, 0.7)",
               backdropFilter: "blur(24px)",
               WebkitBackdropFilter: "blur(24px)",
+              // Encostado na borda direita da tela: só o canto de cima à
+              // esquerda é arredondado, e não há borda à direita.
               border: "1px solid rgba(255, 255, 255, 0.15)",
-              borderRadius: "20px",
+              borderRight: isMobile ? undefined : "none",
+              borderRadius: "20px 0 0 0",
               boxShadow: "0 12px 32px rgba(0, 0, 0, 0.35)",
               display: "flex",
               flexDirection: "column",
@@ -356,7 +359,7 @@ export default function FloatingChat() {
               position: "fixed",
               overscrollBehavior: "contain",
               bottom: "20px",
-              right: "20px",
+              right: 0,
               transformOrigin: "calc(100% - 28px) calc(100% - 28px)",
               transition:
                 "width 260ms cubic-bezier(0.22, 1, 0.36, 1), height 260ms cubic-bezier(0.22, 1, 0.36, 1)",
