@@ -56,7 +56,16 @@ export function FloatingChatPanelBody({
               title={localizeLabel(t("floatingChat.close"))}
               onClick={() => setIsOpen(false)}
             >
-              {localizeLabel("×")}</button>
+              {/* X desenhado (o glifo "×" da fonte ficava baixo no círculo). */}
+              <svg
+                className={styles.chatCloseIcon}
+                viewBox="0 0 22 22"
+                aria-hidden="true"
+                focusable="false"
+              >
+                <path d="M1.6 1.6 20.4 20.4M20.4 1.6 1.6 20.4" />
+              </svg>
+            </button>
 
             <div
               className={styles.chatHeader}

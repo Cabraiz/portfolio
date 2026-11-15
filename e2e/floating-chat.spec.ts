@@ -259,7 +259,7 @@ test("keeps the open chat and its controls inside short viewports", async ({
 			exact: true,
 		});
 		await expect(closeButton).toBeVisible();
-		await expect(closeButton).toHaveText("×");
+		await expect(closeButton.locator("svg")).toBeVisible();
 		await expect(page.getByText("Atendente", { exact: true })).toBeVisible();
 		await expect(page.getByText("Online", { exact: true })).toBeVisible();
 		const closeButtonBox = await closeButton.boundingBox();
