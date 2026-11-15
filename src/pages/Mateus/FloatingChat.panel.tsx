@@ -3,7 +3,7 @@ import type * as React from "react";
 import type { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import mateusChatAvatar from "../../assets/Mateus/mateus-chat-avatar-v2.webp";
-import assistantAvatar from "../../assets/Mateus/chat-pessoa-3d-v1.webp";
+import assistantAvatar from "../../assets/Mateus/chat-atendente-fone-3d-v1.webp";
 
 import styles from "./FloatingChat.module.css";
 import { getWhatsAppSupportUrl } from "./FloatingChat.helpers";

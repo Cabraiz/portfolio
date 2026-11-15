@@ -2,7 +2,7 @@ import { localizeLabel } from '@/i18n/labels';
 import type * as React from "react";
 import msgIcon from "../../assets/Mateus/msgIcon.png";
 import mateusChatAvatar from "../../assets/Mateus/mateus-chat-avatar-v2.webp";
-import assistantAvatar from "../../assets/Mateus/chat-pessoa-3d-v1.webp";
+import assistantAvatar from "../../assets/Mateus/chat-atendente-fone-3d-v1.webp";
 import lagArthurChat from "../../assets/Mateus/lag-arthur-chat-blank-eyes-closed-mouth-v3.webp";
 import lagArthurIris from "../../assets/Mateus/lag-arthur-iris-anime-handpainted-v9.webp";
 
