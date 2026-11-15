@@ -48,7 +48,7 @@ export const PRIVACY_TEXT: Record<PrivacyLanguage, PrivacyText> = {
 		htmlLang: "pt-BR",
 		documentTitle: "Aviso de privacidade · Mateus Cabral",
 		title: "Aviso de privacidade",
-		updated: "Atualizado em 10 de novembro de 2026",
+		updated: "Atualizado em 15 de novembro de 2026",
 		intro:
 			"Este aviso explica, de forma direta, quais dados este site trata, para quê e quais são os seus direitos, conforme a Lei Geral de Proteção de Dados (Lei nº 13.709/2018, LGPD).",
 		sections: [
@@ -64,6 +64,7 @@ export const PRIVACY_TEXT: Record<PrivacyLanguage, PrivacyText> = {
 				items: [
 					"Mensagens do chat: o texto que você escreve, a página de onde enviou, o idioma do site e um identificador aleatório da conversa. Nome, e-mail ou telefone não são pedidos; envie apenas se quiser ser respondido por outro canal.",
 					"Estatísticas de acesso: o site usa o Cloudflare Web Analytics, que conta visitas de forma agregada, sem cookies e sem identificar quem visita.",
+					"Contador próprio de acessos: um servidor de Mateus Cabral (acessos.cabraiz.com) recebe a página vista, o site de origem, o idioma, se o aparelho é celular ou computador, o país (informado pelo Cloudflare) e a posição dos cliques e do mouse na página, para contar visitas e montar um mapa de calor. Um identificador aleatório da visita fica só na aba (sessionStorage) e some ao fechá-la. Não há cookies, e o endereço IP, o texto digitado e os dados de formulários não são guardados.",
 					"Dados técnicos da conexão: a hospedagem (GitHub Pages) e a rede de entrega (Cloudflare) recebem dados como endereço IP e tipo de navegador para entregar e proteger o site.",
 					"WhatsApp, e-mail e currículo: ao clicar nesses botões, o contato acontece fora deste site, sob as regras de cada serviço.",
 				],
@@ -118,7 +119,7 @@ export const PRIVACY_TEXT: Record<PrivacyLanguage, PrivacyText> = {
 		htmlLang: "en",
 		documentTitle: "Privacy notice · Mateus Cabral",
 		title: "Privacy notice",
-		updated: "Last updated November 10, 2026",
+		updated: "Last updated November 15, 2026",
 		intro:
 			"This notice explains plainly what data this website handles, why, and what your rights are, under Brazil's General Data Protection Law (Law 13,709/2018, LGPD) and, for visitors in the European Union, the GDPR.",
 		sections: [
@@ -134,6 +135,7 @@ export const PRIVACY_TEXT: Record<PrivacyLanguage, PrivacyText> = {
 				items: [
 					"Chat messages: the text you write, the page you sent it from, the site language and a random conversation identifier. Your name, email or phone number are not requested; share them only if you want a reply through another channel.",
 					"Visit statistics: the site uses Cloudflare Web Analytics, which counts visits in aggregate, without cookies and without identifying visitors.",
+					"Own visit counter: a server run by Mateus Cabral (acessos.cabraiz.com) receives the page viewed, the referring site, the language, whether the device is a phone or a computer, the country (provided by Cloudflare) and the position of clicks and mouse movement on the page, to count visits and build a heatmap. A random visit identifier stays only in the tab (sessionStorage) and is gone when it is closed. There are no cookies, and the IP address, typed text and form data are not stored.",
 					"Technical connection data: the host (GitHub Pages) and the delivery network (Cloudflare) receive data such as IP address and browser type to deliver and protect the site.",
 					"WhatsApp, email and résumé: when you click these buttons, the contact happens outside this site, under each service's own terms.",
 				],
@@ -187,7 +189,7 @@ export const PRIVACY_TEXT: Record<PrivacyLanguage, PrivacyText> = {
 		htmlLang: "es",
 		documentTitle: "Aviso de privacidad · Mateus Cabral",
 		title: "Aviso de privacidad",
-		updated: "Actualizado el 10 de noviembre de 2026",
+		updated: "Actualizado el 15 de noviembre de 2026",
 		intro:
 			"Este aviso explica, de forma directa, qué datos trata este sitio, para qué y cuáles son tus derechos, conforme a la Ley General de Protección de Datos de Brasil (Ley 13.709/2018, LGPD) y, para visitantes de la Unión Europea, al RGPD.",
 		sections: [
@@ -203,6 +205,7 @@ export const PRIVACY_TEXT: Record<PrivacyLanguage, PrivacyText> = {
 				items: [
 					"Mensajes del chat: el texto que escribes, la página desde la que lo enviaste, el idioma del sitio y un identificador aleatorio de la conversación. No se piden nombre, correo ni teléfono; compártelos solo si quieres respuesta por otro canal.",
 					"Estadísticas de visitas: el sitio usa Cloudflare Web Analytics, que cuenta visitas de forma agregada, sin cookies y sin identificar a quien visita.",
+					"Contador propio de visitas: un servidor de Mateus Cabral (acessos.cabraiz.com) recibe la página vista, el sitio de origen, el idioma, si el dispositivo es móvil o computadora, el país (informado por Cloudflare) y la posición de los clics y del ratón en la página, para contar visitas y crear un mapa de calor. Un identificador aleatorio de la visita queda solo en la pestaña (sessionStorage) y desaparece al cerrarla. No hay cookies, y no se guardan la dirección IP, el texto escrito ni los datos de formularios.",
 					"Datos técnicos de la conexión: el alojamiento (GitHub Pages) y la red de entrega (Cloudflare) reciben datos como la dirección IP y el tipo de navegador para entregar y proteger el sitio.",
 					"WhatsApp, correo y currículum: al hacer clic en esos botones, el contacto ocurre fuera de este sitio, bajo las reglas de cada servicio.",
 				],

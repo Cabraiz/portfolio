@@ -22,6 +22,7 @@ import "lenis/dist/lenis.css";
 import "./index.css";
 import "./i18n/i18n";
 import { redirectRootToLanguage } from "./i18n/languageRedirect";
+import { iniciarAcessos } from "./features/acessos/acessos";
 
 const GLOBAL_RUNTIME_FALLBACK_ID = "global-runtime-fallback";
 
@@ -303,6 +304,12 @@ const isRedirectingToLanguage = redirectRootToLanguage();
 if (isRedirectingToLanguage) {
   // Sem montar nem mostrar erro: o navegador já está carregando /…/home/.
 } else if (rootElement) {
+  try {
+    // Contador de acessos próprio (acessos.cabraiz.com); nunca derruba o site.
+    iniciarAcessos();
+  } catch (error) {
+    console.warn("[acessos]", error);
+  }
   try {
     ReactDOM.createRoot(rootElement).render(<MainApp />);
   } catch (error) {
