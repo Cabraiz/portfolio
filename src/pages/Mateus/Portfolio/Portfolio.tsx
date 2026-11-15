@@ -31,7 +31,7 @@ import {
 import type { PortfolioRootStyle } from "./Portfolio.mapData";
 import {
 	useMobileProjectListCentering,
-	usePortfolioHalfVisibleEntries,
+	usePortfolioArrivalFlight,
 	usePortfolioKeyboardNavigation,
 	usePortfolioMobileGeometry,
 } from "./Portfolio.effects";
@@ -115,8 +115,9 @@ export default function Portfolio() {
 	useMobileProjectListCentering(mobileProjectListRef, projectListRef, activeIndex);
 
 	usePortfolioMotion(rootRef, activeProject.id);
-	const journeyEntries = usePortfolioHalfVisibleEntries(rootRef);
-	useMapLabelSide(rootRef, activeProject.id, mobileMapZoom);
+	const arrival = usePortfolioArrivalFlight(rootRef);
+	// O balão do destino é medido de novo quando a câmera sai de Fortaleza.
+	useMapLabelSide(rootRef, `${activeProject.id}-${arrival.entries}`, mobileMapZoom);
 
 	const activeLocation = activeProject.worldLocation;
 	const worldJourneyDestination = WORLD_JOURNEY_DESTINATIONS[activeProject.id];
@@ -241,6 +242,8 @@ export default function Portfolio() {
 			data-portfolio-active={isPortfolioActive ? "true" : "false"}
 			data-portfolio-autoplay={isAutoplayPaused ? "paused" : "running"}
 			data-map-view={worldJourneyDestination ? activeProject.id : "brazil"}
+			// Câmera parada em Fortaleza até a pessoa chegar (usePortfolioArrivalFlight).
+			data-map-camera={worldJourneyDestination && arrival.home ? "fortaleza" : undefined}
 			onMouseEnter={() => setIsAutoplayPaused(true)}
 			onMouseLeave={() => {
 				if (isPortfolioActive) setIsAutoplayPaused(false);
@@ -280,7 +283,8 @@ export default function Portfolio() {
 				selectProject={selectProject}
 				setIsAutoplayPaused={setIsAutoplayPaused}
 				setFlight={setFlight}
-				journeyEntries={journeyEntries}
+				journeyKey={`${arrival.entries}-${arrival.home ? "espera" : "voa"}`}
+				journeyWaiting={arrival.home}
 			/>
 
 			<PortfolioMobile

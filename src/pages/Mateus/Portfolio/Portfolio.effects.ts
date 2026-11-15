@@ -103,14 +103,18 @@ export function useMobileProjectListCentering(
 }
 
 /**
- * Quantas vezes o Portfólio entrou na tela com pelo menos metade dele visível
- * (0 = ainda não). Seção mais alta que a tela conta pela altura da tela.
- * O avião da rota espera em Fortaleza até isso acontecer e decola de novo a
- * cada entrada; antes ele voava no carregamento da página, e quem rolava até
- * o Portfólio já o encontrava pousado.
+ * Voo de chegada ao Portfólio. O avião e a câmera do mapa esperam em Fortaleza
+ * (`home`) até pelo menos metade da seção aparecer na tela (seção mais alta
+ * que a tela conta pela altura da tela); aí os dois saem juntos para o destino,
+ * e quem chega vê a decolagem. Antes o voo acontecia no carregamento da página
+ * e a câmera já abria no destino: no celular, com o mapa ampliado, Fortaleza
+ * nem aparecia.
+ * Quando a seção sai inteira da tela, os dois voltam para Fortaleza sem
+ * ninguém ver, prontos para a próxima entrada. `entries` conta as entradas e
+ * serve de chave para reiniciar o voo.
  */
-export function usePortfolioHalfVisibleEntries(rootRef: RefObject<HTMLElement | null>) {
-	const [entries, setEntries] = useState(0);
+export function usePortfolioArrivalFlight(rootRef: RefObject<HTMLElement | null>) {
+	const [flight, setFlight] = useState({ entries: 0, home: true });
 	useEffect(() => {
 		const root = rootRef.current;
 		if (!root) return undefined;
@@ -119,13 +123,16 @@ export function usePortfolioHalfVisibleEntries(rootRef: RefObject<HTMLElement | 
 			([entry]) => {
 				const full = Math.min(entry.boundingClientRect.height, entry.rootBounds?.height ?? globalThis.innerHeight);
 				const next = full > 0 && entry.intersectionRect.height / full >= 0.5;
-				if (next && !visible) setEntries((count) => count + 1);
+				if (next && !visible) setFlight(({ entries }) => ({ entries: entries + 1, home: false }));
+				else if (!entry.isIntersecting) setFlight((current) => (current.home ? current : { ...current, home: true }));
 				visible = next;
 			},
-			{ threshold: Array.from({ length: 21 }, (_, step) => step / 20) }
+			// A tela encolhida em 1 px: com a borda da seção encostada na da tela (o
+			// Início inteiro à vista), o navegador ainda a conta como na tela.
+			{ rootMargin: "-1px 0px", threshold: [0, ...Array.from({ length: 20 }, (_, step) => (step + 1) / 20)] }
 		);
 		observer.observe(root);
 		return () => observer.disconnect();
 	}, [rootRef]);
-	return entries;
+	return flight;
 }
