@@ -166,6 +166,12 @@
   box-sizing: border-box;
 }
 
+/* Dica do campo mais branca: o cinza padrão sumia no fundo #2c2c2c. */
+.chatComposer input::placeholder {
+  color: rgba(255, 255, 255, 0.78);
+  opacity: 1;
+}
+
 .chatPanel[data-mobile="true"] .chatComposer button {
   min-height: 44px;
   flex-shrink: 0;
