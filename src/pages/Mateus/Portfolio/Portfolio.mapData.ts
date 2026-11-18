@@ -37,7 +37,7 @@ const PROJECT_DESCRIPTIONS: Record<PortfolioProjectId, string> = {
 	"central-clube-livro":
 		"Experiência editorial para um clube de leitura, com narrativas imersivas, encontros e descoberta de livros.",
 	"site-adv":
-		"Aplicativo de leilão ao vivo de gemas e plantas ultrarraras, com lances em tempo real e a abertura da pedra na transmissão.",
+		"Aplicativo que lê documentos fotografados ou enviados e responde em linguagem simples, citando a página e o trecho exato da fonte.",
 	"site-cabeleireira":
 		"Vitrine digital para serviços, identidade de marca e captação de clientes em uma experiência local acolhedora.",
 };

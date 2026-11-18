@@ -171,11 +171,11 @@ export const portfolioProjects: ReadonlyArray<PortfolioProject> = [
     logoAspect: 1.208,
     logoAlt: "Logo do projeto Rag Everything",
     projectLabel: "Projeto em destaque",
-    subtitle: "Leilão de gemas e plantas raras",
+    subtitle: "Respostas com fonte citada",
     statusLabel: "SELECIONAR",
     counterLabel: "05",
     accent: "platinum",
-    tags: ["Leilão", "Gemas", "Plantas raras"],
+    tags: ["RAG", "Documentos", "IA"],
     technologies: ["Flutter", "Go", "PostgreSQL"],
     media: {
       ...defaultProjectMedia,
