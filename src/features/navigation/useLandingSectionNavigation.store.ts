@@ -1,6 +1,6 @@
 // Store compartilhado da navegação por seções (movido do useLandingSectionNavigation).
 
-import { useEffect } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 
 import {
   DEFAULT_LANDING_SECTION_ID,
@@ -76,6 +76,16 @@ function patchStoreState(
   storeListeners.forEach((listener) => listener());
 }
 
+/**
+ * Só "a seção ativa é esta?": re-renderiza quando a resposta vira, não a cada
+ * mudança do store (as notas das seções mudam a cada quadro da troca).
+ */
+function useIsLandingSectionActive(sectionId: LandingSectionId): boolean {
+  const read = () => storeState.activeSectionId === sectionId;
+
+  return useSyncExternalStore(subscribeToStore, read, read);
+}
+
 // Espelha o controlador no store compartilhado (mesmos efeitos, mesma ordem).
 function useLandingSectionNavigationStoreSync(
   routeSectionIdFromLocation: LandingSectionId,
@@ -133,5 +143,6 @@ export {
   getStoreSnapshot,
   patchStoreState,
   subscribeToStore,
+  useIsLandingSectionActive,
   useLandingSectionNavigationStoreSync,
 };

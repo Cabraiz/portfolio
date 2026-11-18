@@ -265,7 +265,7 @@ const LandingPage: React.FC = () => {
 
   const renderAnchorSectionId = observedSectionId || committedSectionId;
 
-  const { registerSectionElement, getPlaceholderMinHeight } =
+  const { getSectionRef, getPlaceholderMinHeight } =
     useLandingSectionMeasurements({
       defaultPlaceholderMinHeight: resolveLandingSectionMinHeight("desktop", {
         preferDynamicViewport: true,
@@ -359,9 +359,7 @@ const LandingPage: React.FC = () => {
             contentStyle={resolvedContentStyle}
           >
             <div
-              ref={(element) => {
-                registerSectionElement(section.id, element);
-              }}
+              ref={getSectionRef(section.id)}
               style={contentMeasurementWrapperStyle}
               data-landing-section-content={section.id}
             >

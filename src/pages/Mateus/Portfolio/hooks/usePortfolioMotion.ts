@@ -1,4 +1,3 @@
-import type gsapLib from "gsap";
 import { useEffect, useLayoutEffect, useRef, type RefObject } from "react";
 
 import {
@@ -7,30 +6,14 @@ import {
 } from "@/features/scroll/gsapRuntime";
 
 import styles from "../Portfolio.module.css";
+import {
+	addScrubCascade,
+	startMobilePortfolioEntrance,
+} from "./portfolioMotion.entrance";
 
 const DESKTOP_QUERY = "(min-width: 992px)";
 const MOBILE_QUERY = "(max-width: 991px)";
 const MOTION_QUERY = "(prefers-reduced-motion: no-preference)";
-
-type TweenVars = Record<string, string | number>;
-
-/**
- * Cascata atrelada à rolagem: uma animação por item, para que todos já
- * comecem no estado inicial (numa animação única com stagger o GSAP só
- * aplica o estado inicial no primeiro item até a rolagem chegar aos outros).
- */
-function addScrubCascade(
-	timeline: ReturnType<typeof gsapLib.timeline>,
-	targets: Element[],
-	from: TweenVars,
-	to: TweenVars,
-	start: number,
-	each: number
-): void {
-	targets.forEach((target, index) => {
-		timeline.fromTo(target, { ...from }, { ...to }, start + index * each);
-	});
-}
 
 const TWEEN_CONTROL_KEYS = new Set([
 	"duration",
@@ -110,36 +93,8 @@ export default function usePortfolioMotion(
 
 				const q = gsap.utils.selector(root);
 
-				if (!desktop) {
-					// Celular: a lista de projetos entra deslizando e os controles do
-					// mapa aparecem conforme a seção sobe.
-					const mobileEntrance = gsap.timeline({
-						defaults: { ease: "none" },
-						scrollTrigger: {
-							trigger: root,
-							start: "top bottom",
-							end: "top 25%",
-							scrub: 0.5,
-							invalidateOnRefresh: true,
-						},
-					});
-					addScrubCascade(
-						mobileEntrance,
-						q(`.${styles.mobileProjectButton}`),
-						{ x: 56, autoAlpha: 0 },
-						{ x: 0, autoAlpha: 1, duration: 0.5 },
-						0,
-						0.06
-					);
-					mobileEntrance
-						.fromTo(
-							q(`.${styles.mobileMapControls}`),
-							{ autoAlpha: 0, y: 14 },
-							{ autoAlpha: 1, y: 0, duration: 0.5 },
-							0.1
-						);
-					return undefined;
-				}
+				// Celular: entrada da lista e dos controles do mapa (módulo próprio).
+				if (!desktop) return startMobilePortfolioEntrance(gsap, root, q);
 
 				const card = q(`.${styles.detailCard}`)[0] as HTMLElement | undefined;
 				const preview = q(`.${styles.projectPreview}`)[0] as HTMLElement | undefined;

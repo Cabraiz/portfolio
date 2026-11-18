@@ -50,7 +50,7 @@
    quadro inicial e a câmera fica em Fortaleza: o voo começa quando a pessoa
    chega, com a câmera acompanhando (usePortfolioArrivalFlight). O seletor tem
    um atributo a mais para valer sobre a câmera de cada destino. */
-.portfolioRoot[data-map-view][data-map-camera="fortaleza"] {
+.portfolioRoot[data-map-view][data-map-camera="fortaleza"] .worldSurface {
 	--atlas-camera-x: -39.2981%;
 	--atlas-camera-y: -52.0733%;
 }

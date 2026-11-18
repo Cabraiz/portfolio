@@ -1,6 +1,8 @@
 import { useLayoutEffect, type RefObject } from "react";
 import { ensureGsapRuntime } from "@/features/scroll/gsapRuntime";
 import usePrefersReducedMotion from "@/features/scroll/usePrefersReducedMotion";
+import { mergeScrolls, simplify, valueAt, type Sample } from "./mobileBrandCurve";
+import { createContactBar } from "./mobileBrandContactBar";
 
 type ElementRef = RefObject<HTMLElement | null>;
 type MotionRefs = {
@@ -21,61 +23,11 @@ const MIN_BOX_GAP = 4;
 // dele (e volta ao longo dos mesmos px depois que ele passa). Com poucos px
 // ela andava 40–60px num único quadro, como um salto.
 const ACTION_RAMP = 192;
-// Pontas do fundo e do contorno da barra (px): o resto é o meio reto que encolhe.
-const BAR_CAP = 24;
-const PILL_CAP = 25;
 // Amostragem da curva do logo/textos para a ScrollTimeline (px de rolagem) e
 // tolerância da simplificação (px de desvio máximo da curva original).
 const SAMPLE_STEP = 2;
 const SIMPLIFY_PX = 0.15;
 const SIMPLIFY_SCALE = 0.0005;
-
-type Sample = readonly [scroll: number, value: number];
-
-/** Ramer–Douglas–Peucker: menos keyframes, desvio máximo `tolerance`. */
-function simplify(points: readonly Sample[], tolerance: number): Sample[] {
-  if (points.length < 3) return [...points];
-  const keep = new Uint8Array(points.length);
-  keep[0] = 1;
-  keep[points.length - 1] = 1;
-  const stack: Array<[number, number]> = [[0, points.length - 1]];
-  while (stack.length > 0) {
-    const [first, last] = stack.pop()!;
-    const [x0, y0] = points[first];
-    const [x1, y1] = points[last];
-    let worst = -1;
-    let worstError = tolerance;
-    for (let index = first + 1; index < last; index += 1) {
-      const [x, y] = points[index];
-      const expected = y0 + ((y1 - y0) * (x - x0)) / Math.max(1e-9, x1 - x0);
-      const error = Math.abs(y - expected);
-      if (error > worstError) {
-        worstError = error;
-        worst = index;
-      }
-    }
-    if (worst > 0) {
-      keep[worst] = 1;
-      stack.push([first, worst], [worst, last]);
-    }
-  }
-  return points.filter((_, index) => keep[index] === 1);
-}
-
-/** Une duas séries simplificadas nos mesmos pontos de rolagem. */
-function mergeScrolls(...series: Sample[][]): number[] {
-  return [...new Set(series.flatMap((points) => points.map(([scroll]) => scroll)))]
-    .sort((a, b) => a - b);
-}
-
-function valueAt(points: readonly Sample[], scroll: number): number {
-  let index = 1;
-  while (index < points.length - 1 && points[index][0] < scroll) index += 1;
-  const [x0, y0] = points[index - 1];
-  const [x1, y1] = points[index];
-  if (x1 === x0) return y1;
-  return y0 + ((y1 - y0) * (scroll - x0)) / (x1 - x0);
-}
 
 export default function useMobileHomeBrandMotion({
   pageRef, eyebrowRef, titleRef, identityRef, introRef, partnersRef,
@@ -100,6 +52,15 @@ export default function useMobileHomeBrandMotion({
     const scrollDriven = "ScrollTimeline" in window &&
       typeof CSS !== "undefined" && typeof CSS.px === "function";
     let scrollAnimations: Animation[] = [];
+    // Curva atual do logo e o fim da faixa: o refresh só da barra deduz o
+    // deslocamento animado do logo sem cancelar as animações.
+    let logoCurve: Sample[] = [];
+    let animatedMaxScroll = 0;
+    // A barra só alterna entre dois tamanhos: guarda as curvas de cada
+    // geometria e, ao subir e descer de novo, só troca os keyframes.
+    type Curves = { effects: Array<[HTMLElement, Keyframe[]]>; logoCurve: Sample[] };
+    const curveCache = new Map<string, Curves>();
+    let appliedEffects: Curves["effects"] | null = null;
     const cancelScrollAnimations = () => {
       scrollAnimations.forEach((animation) => animation.cancel());
       scrollAnimations = [];
@@ -126,69 +87,58 @@ export default function useMobileHomeBrandMotion({
       viewportWidth: 0, viewportHeight: 0, actionsTop: 0, actionsBottom: 0,
       actionsLeft: 0, barBody: 1, pillBand: 1 };
     let logoY = 0;
-    // A barra de contato estreita para o logo passar sem mudar de layout: só
-    // transform (compositor). As pontas deslizam, os meios retos encolhem a
-    // partir da direita e o conteúdo de cada botão acompanha o centro dele.
-    const part = (selector: string) => actions.querySelector<HTMLElement>(selector);
-    const [firstButton, lastButton] = Array.from(actions.querySelectorAll<HTMLElement>(":scope > a"));
-    const barParts = {
-      cap: part('[data-bar-part="cap"]'),
-      body: part('[data-bar-part="body"]'),
-      firstCap: firstButton?.querySelector<HTMLElement>('[data-pill-part="cap"]') ?? null,
-      firstBand: firstButton?.querySelector<HTMLElement>('[data-pill-part="band"]') ?? null,
-      lastBand: lastButton?.querySelector<HTMLElement>('[data-pill-part="band"]') ?? null,
-      divider: part("[data-action-divider]"),
-      firstContent: firstButton?.querySelector<HTMLElement>("[data-action-content]") ?? null,
-      lastContent: lastButton?.querySelector<HTMLElement>("[data-action-content]") ?? null,
-    };
-    /** Transform de cada parte da barra para `push` px de estreitamento. */
-    const barTransforms = (push: number) => {
-      const half = push / 2;
-      const band = `scaleX(${Math.max(0, (layout.pillBand - half) / layout.pillBand).toFixed(5)})`;
-      return [
-        [barParts.cap, `translateX(${push.toFixed(3)}px)`],
-        [barParts.body, `scaleX(${Math.max(0, (layout.barBody - push) / layout.barBody).toFixed(5)})`],
-        [barParts.firstCap, `translateX(${push.toFixed(3)}px)`],
-        [barParts.firstBand, `translateX(${half.toFixed(3)}px) ${band}`],
-        [barParts.lastBand, band],
-        [barParts.divider, `translateX(${half.toFixed(3)}px)`],
-        [barParts.firstContent, `translateX(${(push * 0.75).toFixed(3)}px)`],
-        [barParts.lastContent, `translateX(${(push * 0.25).toFixed(3)}px)`],
-      ].filter((entry): entry is [HTMLElement, string] => entry[0] !== null);
-    };
+    const { measure: measureContactBar, transforms: barTransforms } = createContactBar(actions, layout);
     let refreshFrame: number | null = null;
+    let barOnlyRefresh = false;
+    const ownTriggers: ReturnType<typeof ScrollTrigger.create>[] = [];
     let disposed = false;
     const ease = gsap.parseEase("power2.out");
     const releaseEase = gsap.parseEase("power2.inOut");
     const actionEase = gsap.parseEase("sine.inOut");
     const clamp = (value: number) => Math.max(0, Math.min(1, value));
-    const measureLayout = () => {
-      // Mede a geometria sem as animações da rolagem aplicadas.
-      cancelScrollAnimations();
+    /** Barra e logo (mudam ao compactar a barra); `animatedY` é o y já aplicado. */
+    const measureBar = (animatedY: number) => {
       const scroll = window.scrollY;
       const nav = navbar.getBoundingClientRect();
       const brand = logo.getBoundingClientRect();
       const home = page.getBoundingClientRect();
       const projects = portfolio.getBoundingClientRect();
-      const bar = actions.getBoundingClientRect();
       layout.navHeight = nav.height;
       layout.start = home.top + scroll - nav.height;
       layout.end = projects.bottom + scroll - nav.height;
       layout.portfolioTop = projects.top + scroll;
       layout.portfolioBottom = projects.bottom + scroll;
-      layout.restTop = brand.top - logoY;
+      layout.restTop = brand.top - animatedY;
       layout.homeTop = layout.restTop + (72 - nav.height) / 2 - (44 - logo.offsetHeight) / 2;
       layout.left = brand.left;
       layout.width = logo.offsetWidth;
       layout.height = logo.offsetHeight;
+    };
+    /**
+     * Só a barra mudou (72→52): as linhas e a barra de contato ficam onde
+     * estavam. Sem cancelar as animações não há recálculo de estilo de todas
+     * as linhas no meio da rolagem (era ~16 ms a cada troca de seção).
+     */
+    const measureBarOnly = () => {
+      if (scrollAnimations.length === 0 || logoCurve.length < 2) {
+        measureLayout();
+        return;
+      }
+      const scroll = window.scrollY;
+      measureBar(valueAt(logoCurve, Math.min(scroll, animatedMaxScroll)));
+    };
+    const measureLayout = () => {
+      // Mede a geometria sem as animações da rolagem aplicadas.
+      cancelScrollAnimations();
+      const scroll = window.scrollY;
+      measureBar(logoY);
+      const bar = actions.getBoundingClientRect();
       layout.viewportWidth = window.innerWidth;
       layout.viewportHeight = window.innerHeight;
       layout.actionsTop = bar.top + scroll;
       layout.actionsBottom = bar.bottom + scroll;
       layout.actionsLeft = bar.left;
-      layout.barBody = Math.max(1, (barParts.body?.offsetWidth ?? 0) || bar.width - 2 * BAR_CAP);
-      layout.pillBand = Math.max(1, (barParts.firstBand?.offsetWidth ?? 0) ||
-        (firstButton?.offsetWidth ?? 0) - PILL_CAP);
+      measureContactBar(bar);
       rows.forEach(row => {
         const box = row.element.getBoundingClientRect();
         const parentTransform = getComputedStyle(row.element.parentElement!).transform;
@@ -251,16 +201,23 @@ export default function useMobileHomeBrandMotion({
           actionEase(contact) * (1 - actionEase(release));
         return { top, bottom, right, logoY: top - layout.restTop, rows: rowFrames, push };
       };
-      /** Curva amostrada → animações ligadas à rolagem (compositor). */
-      const buildScrollAnimations = () => {
+      /** Liga cada elemento à sua curva na rolagem. */
+      const applyEffects = (effects: Curves["effects"], scroller: Element, maxScroll: number) => {
+        // Mesma faixa e mesmos elementos: troca só os keyframes (sem cancelar
+        // e recriar, o que tirava o transform por um instante e recalculava o
+        // estilo de todos).
+        if (effects === appliedEffects && maxScroll === animatedMaxScroll &&
+          scrollAnimations.length === effects.length) return;
+        appliedEffects = effects;
+        if (maxScroll === animatedMaxScroll && scrollAnimations.length === effects.length &&
+          effects.every(([element], index) =>
+            (scrollAnimations[index].effect as KeyframeEffect | null)?.target === element)) {
+          effects.forEach(([, keyframes], index) => {
+            (scrollAnimations[index].effect as KeyframeEffect).setKeyframes(keyframes);
+          });
+          return;
+        }
         cancelScrollAnimations();
-        if (!scrollDriven) return;
-        const scroller = document.scrollingElement ?? document.documentElement;
-        const maxScroll = Math.max(1, scroller.scrollHeight - window.innerHeight);
-        const scrolls: number[] = [];
-        for (let scroll = 0; scroll < maxScroll; scroll += SAMPLE_STEP) scrolls.push(scroll);
-        scrolls.push(maxScroll);
-        const frames = scrolls.map(scroll => frameAt(scroll));
         const timeline = new ScrollTimeline({ source: scroller, axis: "block" });
         // Faixa em px (não em %): a barra de endereço do celular muda o
         // tamanho total da rolagem e deslocaria a curva.
@@ -268,11 +225,42 @@ export default function useMobileHomeBrandMotion({
           timeline, fill: "both", easing: "linear", duration: "auto",
           rangeStart: { offset: CSS.px(0) }, rangeEnd: { offset: CSS.px(maxScroll) },
         } as unknown as Parameters<Element["animate"]>[1];
-        const logoCurve = simplify(scrolls.map((scroll, index) => [scroll, frames[index].logoY] as const), SIMPLIFY_PX);
-        scrollAnimations.push(logo.animate(logoCurve.map(([scroll, y]) => ({
+        animatedMaxScroll = maxScroll;
+        scrollAnimations = effects.map(([element, keyframes]) => element.animate(keyframes, options));
+      };
+      /** Curva amostrada → animações ligadas à rolagem (compositor). */
+      const buildScrollAnimations = () => {
+        if (!scrollDriven) {
+          cancelScrollAnimations();
+          return;
+        }
+        const scroller = document.scrollingElement ?? document.documentElement;
+        const maxScroll = Math.max(1, scroller.scrollHeight - window.innerHeight);
+        // Depois do fim do Portfólio a curva é constante (logo em repouso, nada
+        // encosta): amostra só até ali e fecha em maxScroll. Amostrar a página
+        // toda a cada 2px custava ~70 ms no refresh ao cruzar as seções.
+        const sampleEnd = Math.min(maxScroll, Math.ceil(layout.portfolioBottom) + SAMPLE_STEP);
+        const geometryKey = [maxScroll, sampleEnd, ...Object.values(layout),
+          ...rows.flatMap(row => [row.top, row.bottom, row.left, row.right, row.scale])]
+          .map(value => value.toFixed(1)).join("|");
+        const cached = curveCache.get(geometryKey);
+        if (cached) {
+          logoCurve = cached.logoCurve;
+          applyEffects(cached.effects, scroller, maxScroll);
+          return;
+        }
+        const scrolls: number[] = [];
+        for (let scroll = 0; scroll < sampleEnd; scroll += SAMPLE_STEP) scrolls.push(scroll);
+        if (sampleEnd < maxScroll) scrolls.push(sampleEnd);
+        scrolls.push(maxScroll);
+        const frames = scrolls.map(scroll => frameAt(scroll));
+        // Elemento e keyframes de cada animação, na mesma ordem de sempre.
+        const effects: Array<[HTMLElement, Keyframe[]]> = [];
+        logoCurve = simplify(scrolls.map((scroll, index) => [scroll, frames[index].logoY] as const), SIMPLIFY_PX);
+        effects.push([logo, logoCurve.map(([scroll, y]) => ({
           offset: scroll / maxScroll,
           transform: `translate3d(${REST_X}px, ${y.toFixed(3)}px, 0px)`,
-        })), options));
+        }))]);
         rows.forEach((row, rowIndex) => {
           const xCurve = simplify(scrolls.map((scroll, index) =>
             [scroll, frames[index].rows[rowIndex].x] as const), SIMPLIFY_PX);
@@ -281,19 +269,22 @@ export default function useMobileHomeBrandMotion({
               [scroll, frames[index].rows[rowIndex].fitScale] as const), SIMPLIFY_SCALE)
             : null;
           const points = scaleCurve ? mergeScrolls(xCurve, scaleCurve) : xCurve.map(([scroll]) => scroll);
-          scrollAnimations.push(row.element.animate(points.map(scroll => ({
+          effects.push([row.element, points.map(scroll => ({
             offset: scroll / maxScroll,
             transform: `translate3d(${valueAt(xCurve, scroll).toFixed(3)}px, 0px, 0px)` +
               (scaleCurve ? ` scaleX(${valueAt(scaleCurve, scroll).toFixed(4)})` : ""),
-          })), options));
+          }))]);
         });
         const pushCurve = simplify(scrolls.map((scroll, index) => [scroll, frames[index].push] as const), SIMPLIFY_PX / 2);
         const pushKeyframes = pushCurve.map(([scroll, push]) => ({ offset: scroll / maxScroll, parts: barTransforms(push) }));
         barTransforms(0).forEach(([element], partIndex) => {
-          scrollAnimations.push(element.animate(pushKeyframes.map(({ offset, parts }) => ({
+          effects.push([element, pushKeyframes.map(({ offset, parts }) => ({
             offset, transform: parts[partIndex][1],
-          })), options));
+          }))]);
         });
+        if (curveCache.size >= 4) curveCache.clear();
+        curveCache.set(geometryKey, { effects, logoCurve });
+        applyEffects(effects, scroller, maxScroll);
       };
       const update = (progress: number) => {
         const scroll = window.scrollY;
@@ -310,35 +301,65 @@ export default function useMobileHomeBrandMotion({
             row.setter(row.x);
           });
         }
-        logo.dataset.mobileBrandOwner = layout.portfolioBottom - scroll <= layout.navHeight
+        const owner = layout.portfolioBottom - scroll <= layout.navHeight
           ? "roadMap" : bottom + CONTACT_GAP >= layout.portfolioTop - scroll ? "portfolio" : "home";
+        // Só escreve quando muda: o atributo invalida o estilo do logo.
+        if (logo.dataset.mobileBrandOwner !== owner) logo.dataset.mobileBrandOwner = owner;
       };
-      ScrollTrigger.create({ trigger: page, start: () => layout.start, end: () => layout.end,
-        onRefreshInit: measureLayout,
+      ownTriggers.push(ScrollTrigger.create({ trigger: page, start: () => layout.start, end: () => layout.end,
+        onRefreshInit: () => (barOnlyRefresh ? measureBarOnly() : measureLayout()),
         onRefresh: self => { buildScrollAnimations(); update(self.progress); },
-        onUpdate: self => update(self.progress) });
+        onUpdate: self => update(self.progress) }));
       // A foto só sobe com a rolagem, sem zoom: o zoom de 1,8% fazia o Início
       // parecer crescer enquanto o usuário descia para o Portfólio.
       // Valores de partida explícitos: se o ScrollTrigger refizer o tween enquanto
       // um agente arrasta a foto (translate), o GSAP não guarda esse desvio.
-      gsap.fromTo(portraitRef.current, { x: 0, y: 0, scale: 1 }, { x: 0, y: -22, scale: 1, ease: "none",
+      const portraitTrigger = gsap.fromTo(portraitRef.current, { x: 0, y: 0, scale: 1 }, { x: 0, y: -22, scale: 1, ease: "none",
         scrollTrigger: { trigger: page, start: () => `top top+=${layout.navHeight}`,
-          end: () => `bottom top+=${layout.navHeight}`, scrub: true, invalidateOnRefresh: true } });
+          end: () => `bottom top+=${layout.navHeight}`, scrub: true, invalidateOnRefresh: true } }).scrollTrigger;
+      if (portraitTrigger) ownTriggers.push(portraitTrigger);
     }, page);
 
     const scheduleRefresh = () => {
       if (disposed || refreshFrame !== null) return;
       refreshFrame = requestAnimationFrame(() => { refreshFrame = null; ScrollTrigger.refresh(); });
     };
+    // A barra compacta (72→52) e o logo menor (44→36) ao entrar no Portfólio
+    // mudam só a geometria deste efeito: refaz só os gatilhos dele. O refresh
+    // global media a página toda (~65 ms) bem no meio da rolagem.
+    let localFrame: number | null = null;
+    const scheduleLocalRefresh = () => {
+      if (disposed || localFrame !== null || refreshFrame !== null) return;
+      localFrame = requestAnimationFrame(() => {
+        localFrame = null;
+        // Só o gatilho do logo: o refresh dele já mede (onRefreshInit). A foto
+        // mudaria menos de 1 px (início 20 px adiante numa subida de 22 px).
+        barOnlyRefresh = true;
+        try {
+          ownTriggers[0]?.refresh();
+        } finally {
+          barOnlyRefresh = false;
+        }
+      });
+    };
     const observer = new ResizeObserver(scheduleRefresh);
-    [page, navbar, logo, portfolio].forEach(element => observer.observe(element));
+    [page, portfolio].forEach(element => observer.observe(element));
+    let barObserved = false;
+    const barObserver = new ResizeObserver(() => {
+      // A primeira entrega do ResizeObserver é só o tamanho inicial.
+      if (barObserved) scheduleLocalRefresh();
+      barObserved = true;
+    });
+    [navbar, logo].forEach(element => barObserver.observe(element));
     document.fonts.addEventListener("loadingdone", scheduleRefresh);
     void document.fonts.ready.then(scheduleRefresh);
     scheduleRefresh();
     return () => {
       disposed = true;
       if (refreshFrame !== null) cancelAnimationFrame(refreshFrame);
+      if (localFrame !== null) cancelAnimationFrame(localFrame);
       observer.disconnect();
+      barObserver.disconnect();
       document.fonts.removeEventListener("loadingdone", scheduleRefresh);
       cancelScrollAnimations();
       context.revert();

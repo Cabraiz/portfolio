@@ -69,9 +69,22 @@ const mappedKeys=new Set(Object.values(keys).map(key=>`labels.${key}`));
 for(const resourceKey of Object.keys(pt).filter(key=>!mappedKeys.has(key))){
  rows.push([resourceKey,pt[resourceKey],pt[resourceKey],en[resourceKey],resourceKey.startsWith('labels.')?'localized-plural':'localized-resource',(resourceReferences.get(resourceKey)??[]).join(' | ')]);
 }
-const csv=rows.map(row=>row.map(cell=>`"${String(cell).replaceAll('"','""')}"`).join(',')).join('\n')+'\n';
-fs.mkdirSync('reports',{recursive:true});
-fs.writeFileSync('reports/label-map.csv','\uFEFF'+csv);
+// Um CSV por \u00E1rea da p\u00E1gina (r\u00F3tulos traduzidos) e por classifica\u00E7\u00E3o (os demais):
+// cada arquivo fica pequeno o bastante para revisar.
+const toCsv=table=>'\uFEFF'+table.map(row=>row.map(cell=>`"${String(cell).replaceAll('"','""')}"`).join(',')).join('\n')+'\n';
+const groupOf=row=>{
+ if(row[4]!=='localized')return row[4];
+ const ref=String(row[5]).split(' | ')[0];
+ // Sem ":linha" nem extensão no nome: no Windows o ":" criaria um fluxo NTFS vazio.
+ const match=ref.match(/^src\/pages\/Mateus\/([^/:.]+)/)??ref.match(/^src\/([^/:.]+)/);
+ return match?match[1]:'sem-referencia';
+};
+const groups=new Map();
+for(const row of rows.slice(1)){const group=groupOf(row);if(!groups.has(group))groups.set(group,[]);groups.get(group).push(row);}
+fs.rmSync('reports/label-map',{recursive:true,force:true});
+fs.rmSync('reports/label-map.csv',{force:true});
+fs.mkdirSync('reports/label-map',{recursive:true});
+for(const [group,table] of groups)fs.writeFileSync(`reports/label-map/${group}.csv`,toCsv([rows[0],...table]));
 const summary={languages:['pt-BR','en-US','es'],catalogEntries:catalog.length,resourceLeaves:Object.keys(pt).length,connectedFiles:connectedFiles.length,neutralLabels:neutral.size,missing:failures,review:'Idiomatic English and Latin-American Spanish reviewed by AI; no human native-speaker certification',scope:'Public portfolio and standalone games. Inactive RoadMap/Live/Technologies variants excluded.',assets:'Proper names, company logos, project screenshots and text baked into artwork retain their original language.'};
 fs.writeFileSync('reports/label-map-summary.json',JSON.stringify(summary,null,2)+'\n');
 console.log(JSON.stringify(summary));

@@ -35,7 +35,7 @@ function upsertMeta(attribute: "name" | "property", key: string, content: string
 		element.setAttribute(attribute, key);
 		document.head.appendChild(element);
 	}
-	element.setAttribute("content", content);
+	if (element.getAttribute("content") !== content) element.setAttribute("content", content);
 }
 
 function upsertLink(selector: string, attributes: Record<string, string>): void {
@@ -44,7 +44,9 @@ function upsertLink(selector: string, attributes: Record<string, string>): void 
 		element = document.createElement("link");
 		document.head.appendChild(element);
 	}
-	Object.entries(attributes).forEach(([name, value]) => element.setAttribute(name, value));
+	Object.entries(attributes).forEach(([name, value]) => {
+		if (element.getAttribute(name) !== value) element.setAttribute(name, value);
+	});
 }
 
 /**
@@ -69,7 +71,11 @@ export default function useLandingSeoHead(
 		};
 		applyTitle();
 
-		document.documentElement.lang = HTML_LANG[language];
+		// Só escreve se mudou: reatribuir o lang do <html>, mesmo igual, invalida
+		// :lang() na página toda, e este efeito roda ao cruzar Início↔Portfólio.
+		if (document.documentElement.lang !== HTML_LANG[language]) {
+			document.documentElement.lang = HTML_LANG[language];
+		}
 		upsertMeta("name", "description", page.description);
 		upsertMeta("property", "og:title", page.title);
 		upsertMeta("property", "og:description", page.description);

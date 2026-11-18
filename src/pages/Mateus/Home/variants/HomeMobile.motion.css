@@ -3,12 +3,10 @@
    textos e mede título, identidade, introdução e a barra de contato; nenhum
    deles muda de posição aqui (só opacidade, recorte e os ícones da barra).
    A foto já sobe com a rolagem em useMobileHomeBrandMotion e não respira:
-   o zoom de 3,5% fazia o Início parecer crescer e voltava de uma vez. */
+   o zoom de 3,5% fazia o Início parecer crescer e voltava de uma vez.
+   O título também não brilha: text-shadow animado repintava o H1 em todo
+   quadro da rolagem. Aqui só rotate/scale/opacity, que a GPU anima. */
 @media (prefers-reduced-motion: no-preference) {
-  .page[data-motion-idle="on"] .titleAccent {
-    animation: homeAccentGlow 3.8s ease-in-out infinite;
-  }
-
   .page[data-motion-idle="on"] .actions svg {
     animation: homeActionWiggle 4.6s ease-in-out infinite;
   }
@@ -20,15 +18,11 @@
   .page[data-motion-idle="on"] .actionDivider {
     animation: homeDividerPulse 2.6s ease-in-out infinite;
   }
-}
 
-@keyframes homeAccentGlow {
-  0%,
-  100% {
-    text-shadow: 0 0 0 rgba(255, 255, 255, 0);
-  }
-  50% {
-    text-shadow: 0 0 14px rgba(255, 255, 255, 0.55);
+  /* Pausa enquanto rola (useHomeMobileMotion): sem recálculo de estilo por quadro. */
+  .page[data-scrolling="on"] .actions svg,
+  .page[data-scrolling="on"] .actionDivider {
+    animation-play-state: paused;
   }
 }
 

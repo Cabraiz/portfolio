@@ -42,6 +42,8 @@ export type UseLandingSectionMeasurementsResult<
     _sectionId: SectionId,
     _element: HTMLElement | null,
   ) => void;
+  /** Ref estável por seção (mesma função a cada render). */
+  getSectionRef: (_sectionId: SectionId) => (_element: HTMLElement | null) => void;
   getMeasuredHeight: (_sectionId: SectionId) => number | null;
   getPlaceholderMinHeight: (
     _sectionId: SectionId,
@@ -300,9 +302,28 @@ export default function useLandingSectionMeasurements<
     [defaultPlaceholderMinHeight, measurementState],
   );
 
+  // Uma ref nova a cada render faz o React soltar e religar o elemento, e
+  // cada religada mede a seção (layout forçado) no meio da rolagem.
+  const sectionRefs = useMemo(
+    () => new Map<SectionId, (element: HTMLElement | null) => void>(),
+    [registerSectionElement],
+  );
+  const getSectionRef = useCallback(
+    (sectionId: SectionId) => {
+      let callback = sectionRefs.get(sectionId);
+      if (callback === undefined) {
+        callback = (element) => registerSectionElement(sectionId, element);
+        sectionRefs.set(sectionId, callback);
+      }
+      return callback;
+    },
+    [registerSectionElement, sectionRefs],
+  );
+
   return {
     measurements,
     registerSectionElement,
+    getSectionRef,
     getMeasuredHeight,
     getPlaceholderMinHeight,
     hasMeasurement,

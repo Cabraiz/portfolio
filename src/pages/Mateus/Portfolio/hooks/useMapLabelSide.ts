@@ -10,6 +10,12 @@ const POINT_LABEL_OFFSET_PX = 26;
 const SAFE_GAP_PX = 8;
 /** Câmera do atlas (--atlas-camera-duration) + o balão aparecendo. */
 const CAMERA_SETTLE_MS = 3600;
+/**
+ * Intervalo entre medições enquanto a câmera anda. A cada quadro, medir
+ * forçava um layout no meio da rolagem (a câmera anda justamente quando o
+ * Portfólio entra na tela): ~70 ms de CPU por travessia.
+ */
+const FOLLOW_INTERVAL_MS = 120;
 
 type Box = Readonly<{ left: number; right: number; top: number; bottom: number }>;
 
@@ -34,9 +40,17 @@ export default function useMapLabelSide(
 		if (!root) return undefined;
 
 		let frameId = 0;
+		let timerId = 0;
 		let deadline = 0;
+		const stop = () => {
+			cancelAnimationFrame(frameId);
+			window.clearTimeout(timerId);
+		};
 
 		const place = () => {
+			// Lê tudo antes de escrever: escrever o atributo de um ponto e medir
+			// o próximo forçava um novo layout a cada ponto.
+			const sides: Array<[HTMLElement, boolean]> = [];
 			for (const marker of root.querySelectorAll<HTMLElement>(ACTIVE_MARKER_SELECTOR)) {
 				const label = marker.lastElementChild as HTMLElement | null;
 				if (!label) continue;
@@ -70,6 +84,10 @@ export default function useMapLabelSide(
 				const leftRoom = dot.right - offset - label.offsetWidth - rootBox.left;
 				const flip = (rightSide.right > limitRight || hitsControls) && leftRoom >= SAFE_GAP_PX;
 
+				sides.push([marker, flip]);
+			}
+			for (const [marker, flip] of sides) {
+				if (flip === (marker.dataset.labelSide === "left")) continue;
 				if (flip) marker.dataset.labelSide = "left";
 				else delete marker.dataset.labelSide;
 			}
@@ -77,19 +95,38 @@ export default function useMapLabelSide(
 
 		const follow = () => {
 			place();
-			if (performance.now() < deadline) frameId = requestAnimationFrame(follow);
+			if (performance.now() >= deadline) return;
+			timerId = window.setTimeout(() => {
+				frameId = requestAnimationFrame(follow);
+			}, FOLLOW_INTERVAL_MS);
 		};
 		const start = () => {
 			deadline = performance.now() + CAMERA_SETTLE_MS;
-			cancelAnimationFrame(frameId);
+			stop();
 			frameId = requestAnimationFrame(follow);
 		};
 
+		// No celular a barra de endereço some e volta durante a rolagem e cada
+		// vez dispara "resize" só de altura: aí basta reposicionar uma vez (o
+		// acompanhamento de 3,6 s mediria a página durante a rolagem).
+		let width = window.innerWidth;
+		const handleResize = () => {
+			if (window.innerWidth !== width) {
+				width = window.innerWidth;
+				start();
+				return;
+			}
+			if (performance.now() >= deadline) {
+				stop();
+				frameId = requestAnimationFrame(place);
+			}
+		};
+
 		start();
-		window.addEventListener("resize", start);
+		window.addEventListener("resize", handleResize);
 		return () => {
-			cancelAnimationFrame(frameId);
-			window.removeEventListener("resize", start);
+			stop();
+			window.removeEventListener("resize", handleResize);
 		};
 	}, [rootRef, activeProjectId, mapZoom]);
 }

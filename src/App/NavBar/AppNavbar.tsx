@@ -109,6 +109,7 @@ export default function AppNavbar({
 	const isNeuralTheme = activeSectionId === "technologies";
 	const navbarHeight =
 		isMobileView && isPortfolioTheme ? 52 : getNavbarHeight(isMobileView);
+	const rootNavbarHeight = isMobileView ? getNavbarHeight(true) : navbarHeight;
 	const isCompactDesktop =
 		!isMobileView && viewport.width <= NAVBAR_DESKTOP_COMPACT_BREAKPOINT;
 
@@ -164,12 +165,16 @@ export default function AppNavbar({
 			return;
 		}
 
-		root.style.setProperty(NAVBAR_HEIGHT_CSS_VAR, `${navbarHeight}px`);
+		// No celular o valor do <html> fica fixo: trocá-lo ao cruzar o Portfólio
+		// (72↔52) recalculava o estilo da página inteira no meio da rolagem.
+		// A barra compacta leva a variável no próprio estilo (menu) e o Portfólio
+		// do celular fixa 52px nele mesmo (Portfolio.mobileMap.css).
+		root.style.setProperty(NAVBAR_HEIGHT_CSS_VAR, `${rootNavbarHeight}px`);
 
 		return () => {
 			root.style.removeProperty(NAVBAR_HEIGHT_CSS_VAR);
 		};
-	}, [navbarHeight]);
+	}, [rootNavbarHeight]);
 
 	const handleBrandClick = useCallback(() => {
 		onNavigateToSection(NAVBAR_DEFAULT_HOME_SECTION);
@@ -225,8 +230,9 @@ export default function AppNavbar({
 		() => ({
 			...resolvedNavbarRootStyle,
 			height: `${navbarHeight}px`,
+			[NAVBAR_HEIGHT_CSS_VAR]: `${navbarHeight}px`,
 			padding: getNavbarPadding(isMobileView),
-		}),
+		}) as CSSProperties,
 		[isMobileView, navbarHeight, resolvedNavbarRootStyle]
 	);
 

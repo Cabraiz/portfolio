@@ -9,7 +9,7 @@ import {
 import { useLocation } from "react-router-dom";
 
 import { getSectionIdByPath } from "@/features/navigation/landingSections";
-import useLandingSectionNavigation from "@/features/navigation/useLandingSectionNavigation";
+import { useIsLandingSectionActive } from "@/features/navigation/useLandingSectionNavigation.store";
 
 import usePortfolioActiveItem from "./hooks/usePortfolioActiveItem";
 import useMobilePortfolioBrandPush from "./hooks/useMobilePortfolioBrandPush";
@@ -64,9 +64,9 @@ export default function Portfolio() {
 			projects: portfolioProjects,
 			defaultProjectId: defaultPortfolioProjectId,
 		});
-	const { activeSectionId } = useLandingSectionNavigation();
+	const isPortfolioSectionActive = useIsLandingSectionActive("portfolio");
 	const isPortfolioRoute = getSectionIdByPath(location.pathname) === "portfolio";
-	const isPortfolioActive = activeSectionId === "portfolio" || isPortfolioRoute;
+	const isPortfolioActive = isPortfolioSectionActive || isPortfolioRoute;
 	const wasPortfolioActiveRef = useRef(false);
 
 	// Ao chegar no Portfólio, já baixa as cenas de todos os projetos: trocar de

@@ -1,0 +1,5 @@
+﻿"key","source","pt-BR","en-US","classification","references"
+"labels.ui_325dfc37c9ba","Início","Início","Home","localized","src/features/navigation/landingSections.ts:24"
+"labels.ui_73522c685797","Rede IA","Rede IA","AI Network","localized","src/features/navigation/landingSections.ts:48"
+"labels.ui_f4f7456d8037","Ao Vivo","Ao Vivo","Live","localized","src/features/navigation/landingSections.ts:56"
+"labels.ui_28594e2a878c","Contato","Contato","Contact","localized","src/features/navigation/landingSections.ts:64"

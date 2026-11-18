@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { useLenis } from "lenis/react";
 
 import { refreshScrollRuntime, updateScrollRuntime } from "./gsapRuntime";
-import { captureLandingScrollAnchor, resolveLandingScrollAnchor, type LandingScrollAnchor } from './landingScrollAnchor';
+import { captureLandingScrollAnchor, createLandingScrollAnchorTracker, resolveLandingScrollAnchor, type LandingScrollAnchor } from './landingScrollAnchor';
 import {
   clearPendingLandingScrollTarget,
   readPendingLandingScrollTarget,
@@ -25,6 +25,9 @@ export function useDocumentVisibilitySync(): void {
     const currentDocument = globalThis.document;
     let visiblePosition = captureLandingScrollAnchor();
     let positionFrame: number | null = null;
+    // Mobile: a âncora de cada quadro vem da geometria em cache e do scroll que o
+    // Lenis já guarda (ler window.scrollY no quadro força o layout).
+    const anchorTracker = createLandingScrollAnchorTracker();
     let desktopResizeAnchor: LandingScrollAnchor | null = null;
     let desktopResizeFrame: number | null = null;
     let desktopResizeSettleTimer: number | null = null;
@@ -55,7 +58,7 @@ export function useDocumentVisibilitySync(): void {
       if (positionFrame !== null) return;
       positionFrame = requestAnimationFrame(() => {
         positionFrame = null;
-        if (!preservedPositionRef.current && refreshFrameRef.current === null) visiblePosition = captureLandingScrollAnchor();
+        if (!preservedPositionRef.current && refreshFrameRef.current === null) visiblePosition = anchorTracker.capture(lenis.scroll);
       });
     };
 
@@ -224,6 +227,7 @@ export function useDocumentVisibilitySync(): void {
       globalThis.window.removeEventListener('keydown', cancelDesktopResizeRestore);
       globalThis.window.removeEventListener('pointerdown', cancelDesktopResizeRestore);
       if (positionFrame !== null) cancelAnimationFrame(positionFrame);
+      anchorTracker.dispose();
       cancelDesktopResizeRestore();
       cancelPendingRefresh();
       preservedPositionRef.current = null;

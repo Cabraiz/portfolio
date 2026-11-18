@@ -1,0 +1,8 @@
+﻿"key","source","pt-BR","en-US","classification","references"
+"labels.ui_4222d444e8ce","Mais contatos","Mais contatos","More contact options","localized","src/pages/Mateus/FloatingChat.trigger.tsx:68"
+"labels.ui_46cfb1f2220f","Abrir chat","Abrir chat","Open chat","localized","src/pages/Mateus/FloatingChat.trigger.tsx:98"
+"labels.ui_322085898310","Mensagem","Mensagem","Message","localized","src/pages/Mateus/FloatingChat.trigger.tsx:159 | src/pages/Mateus/FloatingChat.trigger.tsx:291"
+"labels.ui_c18dedbcdd31","Lag Arthur, assistente da Cabraiz","Lag Arthur, assistente da Cabraiz","Lag Arthur, Cabraiz's assistant","localized","src/pages/Mateus/FloatingChat.panel.tsx:82 | src/pages/Mateus/FloatingChat.panel.tsx:124 | src/pages/Mateus/FloatingChat.trigger.tsx:58"
+"labels.ui_77c6a73723c3","Atendente","Atendente","Assistant","localized","src/pages/Mateus/FloatingChat.panel.tsx:94"
+"labels.ui_1c6e2ca76f83","Sua mensagem vai direto para o Mateus pelo Telegram. Não envie dados sensíveis.","Sua mensagem vai direto para o Mateus pelo Telegram. Não envie dados sensíveis.","Your message goes straight to Mateus on Telegram. Please do not send sensitive data.","localized","src/pages/Mateus/FloatingChat.panel.tsx:240"
+"labels.ui_7f9181f13774","Aviso de privacidade","Aviso de privacidade","Privacy notice","localized","src/pages/Mateus/FloatingChat.panel.tsx:245 | src/App/NavBar/components/MobileNavbar.tsx:174"

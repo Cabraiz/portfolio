@@ -1,5 +1,5 @@
 // Medição, sincronização e observação do deslocamento da navbar.
-import { NAVBAR_HEIGHT_CSS_VAR } from "../../../App/NavBar/navbar.constants";
+import { NAVBAR_HEIGHT_CSS_VAR, NAVBAR_HEIGHT_MOBILE } from "../../../App/NavBar/navbar.constants";
 import type { LandingSectionViewportMode } from "./landing.types";
 import {
   LANDING_NAVBAR_SCROLL_ALIGNMENT_PX,
@@ -133,9 +133,17 @@ function resolveMeasuredNavbarOffsetPx(
     const rect = navbarElement.getBoundingClientRect();
     const borderBottomWidth =
       parsePxValue(computedStyle.borderBottomWidth) ?? 0;
+    // No celular a barra encolhe (72→52) só sobre o Portfólio, que alinha sem
+    // deslocamento. Medir a barra compacta trocava a variável do <html> no meio
+    // da rolagem (recálculo de estilo da página toda) e daria o alvo errado
+    // para as outras seções, onde a barra volta a 72.
+    const navbarHeight =
+      normalizeLandingRenderableViewportMode(viewportMode) === "mobile"
+        ? Math.max(rect.height, NAVBAR_HEIGHT_MOBILE)
+        : rect.height;
 
     const measuredOffset = Math.ceil(
-      rect.height +
+      navbarHeight +
         borderBottomWidth +
         LANDING_NAVBAR_SCROLL_ALIGNMENT_PX,
     );

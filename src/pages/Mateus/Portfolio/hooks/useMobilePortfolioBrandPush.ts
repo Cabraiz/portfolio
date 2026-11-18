@@ -28,36 +28,45 @@ export default function useMobilePortfolioBrandPush(
       const leaving = gsap.utils.clamp(0, 1, (logoBox.top - box.bottom - 8) / 24);
       return ease(entering) * (1 - releaseEase(leaving));
     };
+    // Valores aplicados por último: sem getComputedStyle nem escrita repetida
+    // a cada quadro da rolagem (cada escrita invalidava o estilo do card).
+    const rowX = rows.map(() => 0);
+    let push = 0;
+    let clearance = 0;
+    let contact = "";
+    let padding: number | null = null;
     const update = () => {
       frame = null;
+      // Fora do Portfólio nada encosta: com tudo já em zero, nem mede.
+      if (logo.dataset.mobileBrandOwner !== "portfolio" && push === 0 && clearance === 0 &&
+        rowX.every(x => x === 0) && contact === "false") return;
       const logoBox = logo.getBoundingClientRect();
       rows.forEach((row, index) => {
         const box = row.getBoundingClientRect();
-        const currentX = Number(gsap.getProperty(row, "x")) || 0;
-        const restingLeft = box.left - currentX;
-        const restingRight = box.right - currentX;
+        const restingLeft = box.left - rowX[index];
+        const restingRight = box.right - rowX[index];
         const amount = Math.max(0, Math.min(32, window.innerWidth - restingRight - 8));
-        setters[index](amount * contactGain(box, logoBox, restingLeft, restingRight));
+        const x = Math.round(amount * contactGain(box, logoBox, restingLeft, restingRight) * 100) / 100;
+        if (x !== rowX[index]) { rowX[index] = x; setters[index](x); }
       });
       const box = card.getBoundingClientRect();
       const gain = contactGain(box, logoBox, 4, root.getBoundingClientRect().right - 4);
       const maxPush = window.innerWidth < 360 ? 20 : 28;
-      const amount = maxPush * gain;
-      const style = getComputedStyle(card);
-      const currentPush = Number.parseFloat(style.getPropertyValue("--mobile-brand-push")) || 0;
-      const currentClearance = Number.parseFloat(style.getPropertyValue("--mobile-brand-clearance")) || 0;
-      const padding = Number.parseFloat(style.paddingLeft) - currentClearance;
-      const clearance = Math.max(0, logoBox.right + 8 - (box.left - currentPush) - maxPush - padding);
-      card.style.setProperty("--mobile-brand-push", `${amount.toFixed(2)}px`);
-      card.style.setProperty("--mobile-brand-clearance", `${(clearance * gain).toFixed(2)}px`);
-      card.dataset.mobileBrandContact = amount > 0.01 ? "true" : "false";
+      const amount = Math.round(maxPush * gain * 100) / 100;
+      padding ??= Number.parseFloat(getComputedStyle(card).paddingLeft) - clearance;
+      const nextClearance = Math.round(Math.max(0, logoBox.right + 8 - (box.left - push) - maxPush - padding) * gain * 100) / 100;
+      if (amount !== push) { push = amount; card.style.setProperty("--mobile-brand-push", `${amount.toFixed(2)}px`); }
+      if (nextClearance !== clearance) { clearance = nextClearance; card.style.setProperty("--mobile-brand-clearance", `${nextClearance.toFixed(2)}px`); }
+      const nextContact = amount > 0.01 ? "true" : "false";
+      if (nextContact !== contact) { contact = nextContact; card.dataset.mobileBrandContact = nextContact; }
     };
     const schedule = () => {
       if (frame === null) frame = window.requestAnimationFrame(update);
     };
     const logoObserver = new MutationObserver(schedule);
     logoObserver.observe(logo, {attributes: true, attributeFilter: ["style", "data-mobile-brand-owner"]});
-    const resizeObserver = new ResizeObserver(schedule);
+    // O padding do card muda com a largura da tela: mede de novo no próximo update.
+    const resizeObserver = new ResizeObserver(() => { padding = null; schedule(); });
     [root, card, location, logo].forEach(element => resizeObserver.observe(element));
     const textObserver = new MutationObserver(schedule);
     textObserver.observe(location, {childList: true, characterData: true, subtree: true});

@@ -53,8 +53,6 @@
 	/* O mapa fica enquadrado sob o navbar sem invadir a seção anterior:
 	   antes o fundo crescia 78px para cima ao ativar e a borda pulava. */
 	--atlas-center-shift: calc((var(--app-navbar-height, 70px) + 8px) / 2);
-	--atlas-camera-x: -37.5%;
-	--atlas-camera-y: -57.2222%;
 	--atlas-scale: 1;
 	/* Ritmo da câmera do mapa (transição de .worldSurface). O voo do avião,
 	   o desenho das rotas e o pouso usam o mesmo ritmo: o avião anda junto
@@ -72,27 +70,27 @@
 	content-visibility: visible;
 }
 
-.portfolioRoot[data-map-view="app-bank"] {
+.portfolioRoot[data-map-view="app-bank"] .worldSurface {
 	--atlas-camera-x: -20.7708%;
 	--atlas-camera-y: -38.5259%;
 }
 
-.portfolioRoot[data-map-view="guine-bissau-commerce"] {
+.portfolioRoot[data-map-view="guine-bissau-commerce"] .worldSurface {
 	--atlas-camera-x: -45.6673%;
 	--atlas-camera-y: -43.4091%;
 }
 
-.portfolioRoot[data-map-view="clockright"] {
+.portfolioRoot[data-map-view="clockright"] .worldSurface {
 	--atlas-camera-x: -19.05%;
 	--atlas-camera-y: -25.15%;
 }
 
-.portfolioRoot[data-map-view="central-clube-livro"] {
+.portfolioRoot[data-map-view="central-clube-livro"] .worldSurface {
 	--atlas-camera-x: -47.6638%;
 	--atlas-camera-y: -27.6648%;
 }
 
-.portfolioRoot[data-map-view="site-adv"] {
+.portfolioRoot[data-map-view="site-adv"] .worldSurface {
 	--atlas-camera-x: -27.7245%;
 	--atlas-camera-y: -35.6879%;
 }
@@ -107,7 +105,24 @@
 	pointer-events: none;
 }
 
+/* A câmera fica na própria .worldSurface, e não herdável: trocar de destino
+   (ou a câmera de chegada em Fortaleza) re-estilizava o Portfólio inteiro
+   bem na travessia, porque variáveis no root descem para todos os filhos. */
+@property --atlas-camera-x {
+	syntax: "<length-percentage>";
+	inherits: false;
+	initial-value: 0%;
+}
+
+@property --atlas-camera-y {
+	syntax: "<length-percentage>";
+	inherits: false;
+	initial-value: 0%;
+}
+
 .worldSurface {
+	--atlas-camera-x: -37.5%;
+	--atlas-camera-y: -57.2222%;
 	position: absolute;
 	top: calc(50% - var(--atlas-center-shift));
 	/* O destino fica um pouco à esquerda do meio, longe da legenda do projeto. */

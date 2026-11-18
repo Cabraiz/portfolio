@@ -1,5 +1,7 @@
 @media (max-width: 991px) {
         .portfolioRoot {
+                /* Fixo na seção: o <html> não troca mais 72↔52 ao cruzar o Portfólio. */
+                --app-navbar-height: 52px;
                 --mobile-portfolio-height: 100dvh;
 		width: 100%;
 		height: var(--mobile-portfolio-height);
@@ -32,7 +34,7 @@
 		display: block;
 	}
 
-	.portfolioRoot[data-map-view="brazil"] {
+	.portfolioRoot[data-map-view="brazil"] .worldSurface {
 		--atlas-camera-x: -37.6154%;
 		--atlas-camera-y: -56.9425%;
 	}

@@ -1,4 +1,5 @@
 import {
+  startTransition,
   useCallback,
   useEffect,
   useMemo,
@@ -199,7 +200,10 @@ export default function useLandingCommittedSection({
       reason: LandingCommittedSectionReason,
       observationOverride?: LandingSectionObservation<LandingSectionId> | null,
     ): void => {
-      setCommittedSectionIdState((previousSectionId) => {
+      // A troca de seção pela rolagem re-renderiza a página (e a rota no
+      // mobile): como transição, o React fatia esse trabalho entre os quadros
+      // em vez de travar um quadro inteiro bem na travessia.
+      startTransition(() => setCommittedSectionIdState((previousSectionId) => {
         if (previousSectionId === nextSectionId) {
           return previousSectionId;
         }
@@ -219,7 +223,7 @@ export default function useLandingCommittedSection({
         });
 
         return nextSectionId;
-      });
+      }));
     },
     [observationLookup, onCommittedSectionChange],
   );

@@ -15,6 +15,15 @@ const patterns = Object.entries(keys).filter(([source]) => source.includes('{{')
   return { key, names, expression: new RegExp(`^${expression}$`) };
 });
 
+// Cada render da página traduz as mesmas centenas de textos (e testa os
+// padrões com {{}} nos que não têm chave): o resultado só muda com o idioma ou
+// com recursos novos, então fica guardado até um dos dois mudar.
+const cache = new Map<string, string>();
+const clearCache = () => cache.clear();
+i18n.on('languageChanged', clearCache);
+i18n.on('loaded', clearCache);
+i18n.store?.on('added', clearCache);
+
 /** Subscribe at the component boundary; data, IDs and layout stay language-neutral. */
 export function useLabelLanguage(): void {
   useTranslation();
@@ -25,6 +34,15 @@ export function localizeLabel<T extends ReactNode>(value: T): T {
   if (Array.isArray(value)) return value.map(item => localizeLabel(item)) as unknown as T;
   if (typeof value !== 'string') return value;
   if (!i18n.isInitialized) return value;
+  const cached = cache.get(value);
+  if (cached !== undefined) return cached as T;
+  if (cache.size > 4000) cache.clear();
+  const result = translateLabel(value);
+  cache.set(value, result);
+  return result as T;
+}
+
+function translateLabel(value: string): string {
   const source = value.replace(/\s+/g, ' ').trim();
   let key: string | undefined = keys[source];
   let lowercase = false;
@@ -47,5 +65,5 @@ export function localizeLabel<T extends ReactNode>(value: T): T {
   if (!key) return value;
   const message = i18n.t(`labels.${key}`, options);
   const translated = lowercase ? message.toLocaleLowerCase(i18n.resolvedLanguage ?? 'pt') : message;
-  return `${value.match(/^\s*/)?.[0] ?? ''}${translated}${value.match(/\s*$/)?.[0] ?? ''}` as T;
+  return `${value.match(/^\s*/)?.[0] ?? ''}${translated}${value.match(/\s*$/)?.[0] ?? ''}`;
 }

@@ -1,0 +1,3 @@
+﻿"key","source","pt-BR","en-US","classification","references"
+"labels.ui_db6ff88d3c75_one","{{count}} passageiro aguardando no {{floor}}º andar","{{count}} passageiro aguardando no {{floor}}º andar","{{count}} passenger waiting on floor {{floor}}","localized-plural",""
+"labels.ui_db6ff88d3c75_other","{{count}} passageiros aguardando no {{floor}}º andar","{{count}} passageiros aguardando no {{floor}}º andar","{{count}} passengers waiting on floor {{floor}}","localized-plural",""

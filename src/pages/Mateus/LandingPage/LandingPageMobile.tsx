@@ -214,7 +214,7 @@ const LandingPageMobile: React.FC = () => {
     };
   }, [lenis, navbarOffsetPx, refreshActiveSection, setActiveSectionId]);
 
-  const { registerSectionElement, getPlaceholderMinHeight } =
+  const { getSectionRef, getPlaceholderMinHeight } =
     useLandingSectionMeasurements({
       defaultPlaceholderMinHeight: resolveLandingSectionMinHeight("mobile", {
         preferDynamicViewport: false,
@@ -303,9 +303,7 @@ const LandingPageMobile: React.FC = () => {
             contentStyle={resolvedContentStyle}
           >
             <div
-              ref={(element) => {
-                registerSectionElement(section.id, element);
-              }}
+              ref={getSectionRef(section.id)}
               style={contentMeasurementWrapperStyle}
               data-landing-section-content={section.id}
             >

@@ -1,0 +1,5 @@
+﻿"key","source","pt-BR","en-US","classification","references"
+"labels.ui_68c3cfaf68fa","Dev Full Stack","Dev Full Stack","Full-Stack Developer","localized","src/pages/Mateus/RoleTitle.tsx:6"
+"labels.ui_a9cc756f6c0e","Back-End e APIs","Back-End e APIs","Backend & APIs","localized","src/pages/Mateus/RoleTitle.tsx:8"
+"labels.ui_40ca5e357735","Cloud e DevOps","Cloud e DevOps","Cloud & DevOps","localized","src/pages/Mateus/RoleTitle.tsx:9"
+"labels.ui_60ddc2f8bc04","LLMs, RAG e Agentes","LLMs, RAG e Agentes","LLMs, RAG & Agents","localized","src/pages/Mateus/RoleTitle.tsx:7"

@@ -120,6 +120,27 @@ export function useLenisEngine(): void {
     };
 
     lenis.on("scroll", onLenisScroll);
+
+    /**
+     * Com autoRaf (celular) o Lenis já roda o próprio requestAnimationFrame.
+     * Chamar lenis.raf() também pelo ticker abria uma cadeia nova de rAF a
+     * cada tique (60 por segundo, sem fim): em 6 s eram ~365 por quadro e a
+     * rolagem caía abaixo de 60 fps. Aí o ticker só sincroniza o ScrollTrigger.
+     */
+    const selfDriven = Boolean(
+      (lenis as { options?: { autoRaf?: boolean } }).options?.autoRaf,
+    );
+
+    if (selfDriven) {
+      debugLog("Lenis com autoRaf; ticker do GSAP não chama lenis.raf().");
+
+      return () => {
+        lenis.off("scroll", onLenisScroll);
+        boundLenisRef.current = null;
+        processingRef.current = false;
+      };
+    }
+
     addGsapTicker(rafCallback);
 
     /**

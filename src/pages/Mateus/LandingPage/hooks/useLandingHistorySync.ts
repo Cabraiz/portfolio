@@ -1,5 +1,5 @@
 // src/pages/Mateus/LandingPage/hooks/useLandingHistorySync.ts
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { startTransition, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from 'react-router-dom';
 
 import {
@@ -343,7 +343,9 @@ export default function useLandingHistorySync({
       return;
     }
 
-    writeHistory(committedSectionId, "commit");
+    // Transição: a rota nova re-renderiza o cabeçalho e o layout do mobile;
+    // fatiado, não trava a rolagem na troca de seção.
+    startTransition(() => writeHistory(committedSectionId, "commit"));
   }, [committedSectionId, disabled, writeHistory]);
 
   useEffect(() => {

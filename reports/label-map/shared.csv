@@ -1,0 +1,4 @@
+﻿"key","source","pt-BR","en-US","classification","references"
+"labels.ui_671a75ddb500","Contato direto","Contato direto","Direct contact","localized","src/pages/Mateus/shared/WhatsAppSignalButton/components/WhatsAppSignalDrawers.tsx:31 | src/pages/Mateus/shared/WhatsAppSignalButton/WhatsAppSignalButton.tsx:121"
+"labels.ui_5cf2eabe2f7e","Resposta rápida","Resposta rápida","Quick replies","localized","src/pages/Mateus/shared/WhatsAppSignalButton/components/WhatsAppSignalDrawers.tsx:32 | src/pages/Mateus/shared/WhatsAppSignalButton/WhatsAppSignalButton.tsx:122"
+"labels.ui_7946871d918f","CARREGANDO...","CARREGANDO...","LOADING...","localized","src/pages/Mateus/shared/CTAButton/CTAButton.tsx:189"

@@ -27,9 +27,24 @@ export default function useHomeMobileMotion(
 		);
 		observer.observe(page);
 
+		// Durante a rolagem o idle pausa: os ícones são SVG e a divisória anima
+		// no thread principal, que precisa ficar livre para a rolagem a 60 fps.
+		let resume = 0;
+		const onScroll = () => {
+			if (page.dataset.scrolling !== "on") page.dataset.scrolling = "on";
+			clearTimeout(resume);
+			resume = window.setTimeout(() => {
+				delete page.dataset.scrolling;
+			}, 200);
+		};
+		window.addEventListener("scroll", onScroll, { passive: true });
+
 		return () => {
 			observer.disconnect();
+			window.removeEventListener("scroll", onScroll);
+			clearTimeout(resume);
 			delete page.dataset.motionIdle;
+			delete page.dataset.scrolling;
 		};
 	}, [pageRef]);
 

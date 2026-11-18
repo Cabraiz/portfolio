@@ -1,0 +1,7 @@
+﻿"key","source","pt-BR","en-US","classification","references"
+"labels.ui_ef49e5940ae9","Ir para o início","Ir para o início","Go to home","localized","src/App/NavBar/components/BrandButton.tsx:73"
+"labels.ui_65dec4a23c0c","Navegação principal mobile","Navegação principal mobile","Mobile main navigation","localized","src/App/NavBar/components/MobileNavbar.tsx:149"
+"labels.ui_7ff31408d36a","Fechar menu","Fechar menu","Close menu","localized","src/App/NavBar/components/MobileMenuToggleButton.tsx:67 | src/App/NavBar/components/MobileNavbar.tsx:180"
+"labels.ui_7db0b2e89b4c","Abrir menu","Abrir menu","Open menu","localized","src/App/NavBar/components/MobileMenuToggleButton.tsx:67"
+"labels.ui_7dafb472b353","Carregando portfólio","Carregando portfólio","Loading portfolio","localized","src/App/App.tsx:16"
+"labels.ui_7ae9d418353b","Idioma","Idioma","Language","localized","src/App/NavBar/components/LanguageSwitcher.tsx:56"

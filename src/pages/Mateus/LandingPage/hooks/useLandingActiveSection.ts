@@ -49,6 +49,18 @@ export type {
 
 const DEFAULT_SECTION_SELECTOR = ":scope > section[data-page-section='true']";
 
+function haveSameSections(
+  left: readonly LandingSectionObservation<LandingSectionId>[],
+  right: readonly LandingSectionObservation<LandingSectionId>[],
+): boolean {
+  return (
+    left.length === right.length &&
+    left.every((entry) =>
+      right.some((other) => other.sectionId === entry.sectionId),
+    )
+  );
+}
+
 export default function useLandingActiveSection({
   containerRef,
   defaultSectionId = DEFAULT_LANDING_SECTION_ID,
@@ -165,6 +177,12 @@ export default function useLandingActiveSection({
     },
   });
 
+  const committedSectionIdRef = useRef<LandingSectionId>(committedSectionId);
+
+  useEffect(() => {
+    committedSectionIdRef.current = committedSectionId;
+  }, [committedSectionId]);
+
   const setActiveSectionId = useCallback(
     (sectionId: LandingSectionId): void => {
       setObservedSectionIdState((previousSectionId) => {
@@ -207,13 +225,27 @@ export default function useLandingActiveSection({
         tokens: resolvedTokens,
       });
 
+      observationsRef.current = nextComputation.observations;
+      // Parado numa seção (observada = confirmada) com as mesmas seções à vista,
+      // as notas novas não mudam nenhuma decisão de troca. Sem este corte, cada
+      // quadro da rolagem virava estado e re-renderizava a página inteira.
+      const settled =
+        nextObservedSectionId === committedSectionIdRef.current &&
+        nextObservedSectionId === observedSectionIdRef.current;
+
       setObservationsState((previousObservations) => {
-        return areObservationsEquivalent(
-          previousObservations,
-          nextComputation.observations,
-        )
-          ? previousObservations
-          : nextComputation.observations;
+        if (
+          areObservationsEquivalent(
+            previousObservations,
+            nextComputation.observations,
+          ) ||
+          (settled &&
+            haveSameSections(previousObservations, nextComputation.observations))
+        ) {
+          return previousObservations;
+        }
+
+        return nextComputation.observations;
       });
 
       setObservedSectionIdState((previousSectionId) => {
