@@ -10,7 +10,7 @@ import mobileBank from "../../../assets/Mateus/portfolio/mobile-summary/app-banc
 import mobileBideiras from "../../../assets/Mateus/portfolio/mobile-summary/bideiras-mobile-summary-v2.webp";
 import mobileClockRight from "../../../assets/Mateus/portfolio/mobile-summary/clockright-mobile-summary-v2.webp";
 import mobileEntrePaginas from "../../../assets/Mateus/portfolio/mobile-summary/entre-paginas-mobile-summary-v2.webp";
-import mobileWalter from "../../../assets/Mateus/portfolio/mobile-summary/rag-everything-mobile-summary-v1.webp";
+import mobileWalter from "../../../assets/Mateus/portfolio/mobile-summary/rag-everything-mobile-summary-v2.webp";
 import mobileFran from "../../../assets/Mateus/portfolio/mobile-summary/fran-studio-mobile-summary-v2.webp";
 
 import logoNexovare from "../../../assets/Mateus/portfolio/logos/refined/nexovare-nx-mark-v2-trim.webp";

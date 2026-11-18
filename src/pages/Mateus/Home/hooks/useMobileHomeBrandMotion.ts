@@ -317,9 +317,11 @@ export default function useMobileHomeBrandMotion({
         onRefreshInit: measureLayout,
         onRefresh: self => { buildScrollAnimations(); update(self.progress); },
         onUpdate: self => update(self.progress) });
+      // A foto só sobe com a rolagem, sem zoom: o zoom de 1,8% fazia o Início
+      // parecer crescer enquanto o usuário descia para o Portfólio.
       // Valores de partida explícitos: se o ScrollTrigger refizer o tween enquanto
       // um agente arrasta a foto (translate), o GSAP não guarda esse desvio.
-      gsap.fromTo(portraitRef.current, { x: 0, y: 0, scale: 1 }, { x: 0, y: -22, scale: 1.018, ease: "none",
+      gsap.fromTo(portraitRef.current, { x: 0, y: 0, scale: 1 }, { x: 0, y: -22, scale: 1, ease: "none",
         scrollTrigger: { trigger: page, start: () => `top top+=${layout.navHeight}`,
           end: () => `bottom top+=${layout.navHeight}`, scrub: true, invalidateOnRefresh: true } });
     }, page);

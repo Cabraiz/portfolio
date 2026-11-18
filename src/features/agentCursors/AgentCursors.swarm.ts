@@ -15,6 +15,8 @@ import {
 	DESKTOP_PER_TRIP,
 	MOBILE_PER_TRIP,
 	LEFTOVER_CHECKS,
+	AGENT_SHARE,
+	SKIP_MAX_AREA,
 	NEAR_PX,
 	TIGHT,
 	point,
@@ -50,6 +52,10 @@ function startSwarm(root: HTMLElement) {
 	const freeAt = AGENTS.map(() => 0);
 	let lastLaunch = -Infinity;
 	let working = 0;
+	// Crédito de viagens sem agente: sobe 1 − AGENT_SHARE por viagem.
+	// Começa na metade para a primeira peça sem agente vir na 3ª viagem, não na
+	// 5ª; assim as 15 do Início viram 12 com agente e 3 sem (20%).
+	let skipCredit = 0.5;
 
 	const track = (animation: Animation) => {
 		motions.add(animation);
@@ -282,6 +288,17 @@ function startSwarm(root: HTMLElement) {
 		// Vizinhas na tela viajam juntas com o mesmo agente.
 		const ordered = bundle([...waiting, ...groups.values()].sort(byReading));
 		for (const group of ordered) {
+			// Só no Início do celular: lá uma peça pequena com crédito sobrando entra
+			// sozinha, sem cursor. Desktop e as outras seções seguem com agente em tudo.
+			const homeMobile = !globalThis.matchMedia(DESKTOP_QUERY).matches && group.every((element) => element.closest("#home"));
+			if (homeMobile) skipCredit += 1 - AGENT_SHARE;
+			const small = areaOf(unionOf(group.map((element) => element.getBoundingClientRect()))) <= SKIP_MAX_AREA * innerWidth * innerHeight;
+			if (homeMobile && skipCredit >= 1 - 1e-9 && small) {
+				skipCredit -= 1;
+				root.dataset.skipped = String(Number(root.dataset.skipped ?? 0) + 1);
+				for (const element of group) element.setAttribute("data-agent-placed", "");
+				continue;
+			}
 			try {
 				pull(group);
 			} catch {

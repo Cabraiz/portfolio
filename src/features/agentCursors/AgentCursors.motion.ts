@@ -37,6 +37,11 @@ const MOBILE_PACE = 2 / 1.75;
 // viaja sozinha, então o total varia um pouco com a ordem em que ficam prontas.
 const DESKTOP_PER_TRIP = 2;
 const MOBILE_PER_TRIP = 2.5;
+// Só no Início do celular, 80% das viagens têm agente: a cada cinco, uma peça pequena (até
+// SKIP_MAX_AREA da tela) entra sozinha no lugar, sem cursor. O Início do
+// celular passa de 15 para 12 viagens com agente.
+const AGENT_SHARE = 0.8;
+const SKIP_MAX_AREA = 0.25;
 // Peça sem vizinha espera até isso de checagens por uma vizinha nova.
 const LEFTOVER_CHECKS = 6;
 // Só viajam juntas peças coladas (até NEAR_PX de distância, como dois itens do menu) que formem um bloco
@@ -168,6 +173,8 @@ export {
 	DESKTOP_PER_TRIP,
 	MOBILE_PER_TRIP,
 	LEFTOVER_CHECKS,
+	AGENT_SHARE,
+	SKIP_MAX_AREA,
 	NEAR_PX,
 	TIGHT,
 	point,

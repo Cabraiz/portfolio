@@ -14,11 +14,11 @@
 
 .hero {
   /* Vertical room sets the rhythm; width caps keep copy clear of the portrait. */
-  --home-room: clamp(0px, calc(2dvh - 8.62px), 9px);
-  --home-identity-size: clamp(9px, calc(1.43dvh + 2.84px), clamp(12px, 3.4vw, 13.2px));
-  --home-intro-size: clamp(7px, calc(1.13dvh + 2.13px), clamp(9.5px, 2.7vw, 10.5px));
-  --home-partner-size: clamp(8.5px, calc(0.9dvh + 4.62px), clamp(10.5px, calc(1.875vw + 4.7px), 12px));
-  --home-partner-icon: clamp(16px, calc(2dvh + 7.38px), clamp(20px, calc(3.8vw + 9.18px), 24px));
+  --home-room: clamp(0px, calc(2svh - 8.62px), 9px);
+  --home-identity-size: clamp(9px, calc(1.43svh + 2.84px), clamp(12px, 3.4vw, 13.2px));
+  --home-intro-size: clamp(7px, calc(1.13svh + 2.13px), clamp(9.5px, 2.7vw, 10.5px));
+  --home-partner-size: clamp(8.5px, calc(0.9svh + 4.62px), clamp(10.5px, calc(1.875vw + 4.7px), 12px));
+  --home-partner-icon: clamp(16px, calc(2svh + 7.38px), clamp(20px, calc(3.8vw + 9.18px), 24px));
   position: relative;
   isolation: isolate;
   width: 100%;
@@ -53,7 +53,7 @@
   padding-bottom: calc(6px + var(--home-room));
   color: var(--wine);
   font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(7px, calc(0.7dvh + 3.98px), 9px);
+  font-size: clamp(7px, calc(0.7svh + 3.98px), 9px);
   font-weight: 700;
   line-height: 1.16;
   letter-spacing: 0.31em;
@@ -184,7 +184,7 @@
   flex-direction: column;
   padding-top: calc(8px + var(--home-room));
   font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(6.5px, calc(0.5dvh + 4.345px), 8.8px);
+  font-size: clamp(6.5px, calc(0.5svh + 4.345px), 8.8px);
   font-weight: 700;
   line-height: 1.35;
   letter-spacing: 0.28em;

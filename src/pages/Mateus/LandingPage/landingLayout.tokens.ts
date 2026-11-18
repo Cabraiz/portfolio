@@ -123,12 +123,18 @@ export function resolveLandingSectionMinHeight(
 
   const sectionRole = options?.sectionRole ?? "hero";
 
-  const baseMinHeight = resolveLandingBaseSectionMinHeight(
-    normalizedViewportMode,
-    {
-      preferDynamicViewport: options?.preferDynamicViewport,
-    },
-  );
+  // Início do celular: 100svh (altura com a barra de endereço aberta). Com
+  // 100dvh a seção crescia uns 7% quando a barra sumia na rolagem para o
+  // Portfólio e empurrava a página no meio do gesto.
+  const isFixedMobileHero =
+    normalizedViewportMode === "mobile" &&
+    sectionRole === "hero" &&
+    options?.preferDynamicViewport === false;
+  const baseMinHeight = isFixedMobileHero
+    ? "100svh"
+    : resolveLandingBaseSectionMinHeight(normalizedViewportMode, {
+        preferDynamicViewport: options?.preferDynamicViewport,
+      });
 
   if (
     !shouldSubtractNavbarOffset(

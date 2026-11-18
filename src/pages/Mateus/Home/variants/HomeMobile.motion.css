@@ -2,13 +2,9 @@
 /* Movimento do Início no celular (useHomeMobileMotion). O logo empurra os
    textos e mede título, identidade, introdução e a barra de contato; nenhum
    deles muda de posição aqui (só opacidade, recorte e os ícones da barra).
-   A foto já sobe com a rolagem em useMobileHomeBrandMotion. */
+   A foto já sobe com a rolagem em useMobileHomeBrandMotion e não respira:
+   o zoom de 3,5% fazia o Início parecer crescer e voltava de uma vez. */
 @media (prefers-reduced-motion: no-preference) {
-  .page[data-motion-idle="on"] .portrait {
-    transform-origin: 50% 100%;
-    animation: homePortraitBreath 9s ease-in-out infinite alternate;
-  }
-
   .page[data-motion-idle="on"] .titleAccent {
     animation: homeAccentGlow 3.8s ease-in-out infinite;
   }
@@ -23,15 +19,6 @@
 
   .page[data-motion-idle="on"] .actionDivider {
     animation: homeDividerPulse 2.6s ease-in-out infinite;
-  }
-}
-
-@keyframes homePortraitBreath {
-  from {
-    scale: 1;
-  }
-  to {
-    scale: 1.035;
   }
 }
 

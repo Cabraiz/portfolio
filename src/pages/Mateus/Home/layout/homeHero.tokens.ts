@@ -168,9 +168,9 @@ export const homeHeroTokens = {
 
   mobileAttractMode: {
     cardMaxWidth: "468px",
-    cardMinHeight: "clamp(540px, 78dvh, 820px)",
+    cardMinHeight: "clamp(540px, 78svh, 820px)",
     cardRadius: "24px",
-    imageMinHeight: "clamp(320px, 50dvh, 560px)",
+    imageMinHeight: "clamp(320px, 50svh, 560px)",
     launcherWidth: "min(100%, 224px)",
     launcherMinHeight: "54px",
   },
