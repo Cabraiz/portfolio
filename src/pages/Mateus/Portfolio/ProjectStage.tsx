@@ -18,9 +18,8 @@ import entrePessoa from "../../../assets/Mateus/portfolio/stage/entrepaginas-pes
 import entreCena from "../../../assets/Mateus/portfolio/stage/entrepaginas-cena.webp";
 import entreTela1 from "../../../assets/Mateus/portfolio/stage/entrepaginas-tela1.webp";
 import entreTela2 from "../../../assets/Mateus/portfolio/stage/entrepaginas-tela2.webp";
-import gemariumPessoa from "../../../assets/Mateus/portfolio/stage/gemarium-pessoa.webp";
-import gemariumCena from "../../../assets/Mateus/portfolio/stage/gemarium-cena.webp";
-import gemariumTela1 from "../../../assets/Mateus/portfolio/stage/gemarium-tela1.webp";
+import ragPessoa from "../../../assets/Mateus/portfolio/stage/rag-pessoa.webp";
+import ragCena from "../../../assets/Mateus/portfolio/stage/rag-cena.webp";
 import franPessoa from "../../../assets/Mateus/portfolio/stage/fran-pessoa.webp";
 import franCena from "../../../assets/Mateus/portfolio/stage/fran-cena.webp";
 import franTela1 from "../../../assets/Mateus/portfolio/stage/fran-tela1.webp";
@@ -120,9 +119,10 @@ const STAGES: Partial<Record<PortfolioProjectId, StageConfig>> = {
 	},
 	"site-adv": {
 		circle: { x: 197, y: 70, d: 280 },
-		scene: gemariumCena,
-		person: { src: gemariumPessoa, right: 14, top: 46, h: 848 },
-		screens: [{ src: gemariumTela1, x: 258, y: 225, w: 130, bare: true, alt: "Aplicativo do Rag Everything" }],
+		scene: ragCena,
+		// Pessoa, celular, notebook e carrinho num recorte só (gerados juntos).
+		person: { src: ragPessoa, right: 6, top: 84, h: 500 },
+		screens: [],
 		caption: { x: 22, y: 96, w: 155 },
 		titleSize: 20,
 	},
