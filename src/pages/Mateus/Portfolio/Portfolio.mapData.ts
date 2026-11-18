@@ -5,7 +5,6 @@ import type {
 	RefObject,
 } from "react";
 
-import flagHongKong from "../../../assets/Mateus/portfolio/flags/hong-kong-semicircle-realistic-v1.webp";
 import flagBrazil from "../../../assets/Mateus/portfolio/flags/brasil-semicircle-realistic-v4.webp";
 import flagUnitedStates from "../../../assets/Mateus/portfolio/flags/estados-unidos-semicircle-realistic-v3.webp";
 import flagGuineaBissau from "../../../assets/Mateus/portfolio/flags/guine-bissau-semicircle-realistic-v3.webp";
@@ -17,8 +16,6 @@ import type { PortfolioProjectId } from "./types";
 const PORTFOLIO_AUTOPLAY_INTERVAL_MS = 6200;
 const COUNTRY_FLAGS: Readonly<Record<string, string>> = {
 	Brasil: flagBrazil,
-	// O único projeto na China é em Hong Kong, que tem bandeira própria.
-	"Hong Kong": flagHongKong,
 	México: flagMexico,
 	"Guiné-Bissau": flagGuineaBissau,
 	"Estados Unidos": flagUnitedStates,
@@ -67,8 +64,8 @@ const WORLD_JOURNEY_DESTINATIONS: Partial<
 	// Coimbra (Região Centro): projeção direta de 40,2033°N 8,4103°O. A costa
 	// do atlas bate com a real (~0,1°), então não precisa de ajuste.
 	"central-clube-livro": { x: 47.6638, y: 27.6648 },
-	// Hong Kong: a costa do atlas é simplificada e a projeção direta cai na água; ajuste visual para a ponta de Kowloon.
-	"site-adv": { x: 81.7, y: 37.47 },
+	// Miami (Flórida): projeção direta de 25,7617°N 80,1918°O.
+	"site-adv": { x: 27.7245, y: 35.6879 },
 };
 const WORLD_ASPECT_RATIO = 2;
 

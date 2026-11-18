@@ -182,10 +182,11 @@ export const portfolioProjects: ReadonlyArray<PortfolioProject> = [
       position: "50% 8%",
     },
     worldLocation: {
-      country: "Hong Kong",
-      city: "Hong Kong",
-      lat: 22.3193,
-      lng: 114.1694,
+      country: "Estados Unidos",
+      city: "Miami",
+      region: "Florida",
+      lat: 25.7617,
+      lng: -80.1918,
     },
   },
   {
