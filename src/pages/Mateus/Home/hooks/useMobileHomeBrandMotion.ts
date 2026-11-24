@@ -159,8 +159,8 @@ export default function useMobileHomeBrandMotion({
       measureLayout();
       const progressAt = (scroll: number) =>
         clamp((scroll - layout.start) / Math.max(1, layout.end - layout.start));
-      /** Posição do logo e de cada linha para uma rolagem (sem efeitos). */
-      const frameAt = (scroll: number, progress = progressAt(scroll)) => {
+      /** Topo do logo na tela para uma rolagem. */
+      const logoTopAt = (scroll: number, progress = progressAt(scroll)) => {
         const travel = layout.viewportHeight - layout.homeTop - layout.height - 16;
         // Join the incoming Portfolio top before starting its own downward phase.
         // At full entry (section top = viewport top), that phase is still at zero.
@@ -170,10 +170,31 @@ export default function useMobileHomeBrandMotion({
           ? Math.min(layout.homeTop + progress * travel,
             layout.portfolioTop - scroll + layout.restTop)
           : layout.restTop + portfolioProgress * travel;
-        const top = Math.max(layout.restTop, Math.min(
+        return Math.max(layout.restTop, Math.min(
           phaseTop,
           layout.portfolioBottom - scroll - layout.height - 12,
         ));
+      };
+      /**
+       * Rolagem em que o logo fica todo abaixo da barra de contato. A barra
+       * volta ao normal ao longo de ACTION_RAMP px de rolagem a partir dali.
+       * Pela distância entre o logo e a barra ela nunca voltava: o logo gruda
+       * no topo do Portfólio, logo abaixo da barra, e essa distância para em
+       * ~12 px, então o WhatsApp ficava empurrado até o fim da página.
+       */
+      let releaseScroll = Infinity;
+      const measureRelease = () => {
+        releaseScroll = Infinity;
+        for (let scroll = 0; scroll <= layout.portfolioBottom; scroll += 1) {
+          if (logoTopAt(scroll) >= layout.actionsBottom - scroll) {
+            releaseScroll = scroll;
+            return;
+          }
+        }
+      };
+      /** Posição do logo e de cada linha para uma rolagem (sem efeitos). */
+      const frameAt = (scroll: number, progress = progressAt(scroll)) => {
+        const top = logoTopAt(scroll, progress);
         const bottom = top + layout.height;
         const right = layout.left + layout.width;
         const rowFrames = rows.map(row => {
@@ -197,7 +218,7 @@ export default function useMobileHomeBrandMotion({
         // A barra abre espaço ACTION_RAMP px antes de o logo chegar nela e
         // termina de abrir antes de ele cruzar a borda do fundo vermelho.
         const contact = clamp((bottom + CONTACT_GAP + ACTION_RAMP - (layout.actionsTop - scroll)) / ACTION_RAMP);
-        const release = clamp((top - (layout.actionsBottom - scroll) - CONTACT_GAP) / ACTION_RAMP);
+        const release = clamp((scroll - releaseScroll) / ACTION_RAMP);
         const push = Math.max(0, right + CONTACT_GAP - layout.actionsLeft) *
           actionEase(contact) * (1 - actionEase(release));
         return { top, bottom, right, logoY: top - layout.restTop, rows: rowFrames, push };
@@ -309,7 +330,7 @@ export default function useMobileHomeBrandMotion({
       };
       ownTriggers.push(ScrollTrigger.create({ trigger: page, start: () => layout.start, end: () => layout.end,
         onRefreshInit: () => (barOnlyRefresh ? measureBarOnly() : measureLayout()),
-        onRefresh: self => { buildScrollAnimations(); update(self.progress); },
+        onRefresh: self => { measureRelease(); buildScrollAnimations(); update(self.progress); },
         onUpdate: self => update(self.progress) }));
       // A foto só sobe com a rolagem, sem zoom: o zoom de 1,8% fazia o Início
       // parecer crescer enquanto o usuário descia para o Portfólio.
