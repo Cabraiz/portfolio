@@ -63,6 +63,25 @@ function startSwarm(root: HTMLElement) {
 		return animation;
 	};
 
+	/**
+	 * Peça que entra sem agente (o pulo do Início do celular e o resgate):
+	 * acende. Antes ela surgia de uma vez; o "Currículo" aparecia do nada bem
+	 * quando o WhatsApp ao lado era arrastado. Com `inRhythm` ela espera a vez
+	 * como uma viagem. Só opacidade: um `translate` aqui faria as filhas
+	 * esperarem a mãe (isParentMoving) e cair no resgate sem agente.
+	 */
+	const appear = (group: readonly Element[], inRhythm: boolean) => {
+		const pace = globalThis.matchMedia(DESKTOP_QUERY).matches ? DESKTOP_PACE : MOBILE_PACE;
+		const now = performance.now();
+		const delay = inRhythm ? Math.max(FADE_LEAD_MS, lastLaunch + rand(...LAUNCH_GAP_MS) * pace - now) : 0;
+		if (inRhythm) lastLaunch = now + delay;
+		for (const element of group) {
+			element.setAttribute("data-agent-placed", "");
+			const timing = { delay, duration: 360 * pace, easing: "cubic-bezier(0.2, 0, 0, 1)", fill: "backwards" } as const;
+			track(element.animate({ opacity: [0, 1] }, timing));
+		}
+	};
+
 	/** Agente busca a peça fora da tela e a arrasta até o lugar. */
 	const pull = (group: readonly Element[]) => {
 		const now = performance.now();
@@ -296,7 +315,7 @@ function startSwarm(root: HTMLElement) {
 			if (homeMobile && skipCredit >= 1 - 1e-9 && small) {
 				skipCredit -= 1;
 				root.dataset.skipped = String(Number(root.dataset.skipped ?? 0) + 1);
-				for (const element of group) element.setAttribute("data-agent-placed", "");
+				appear(group, true);
 				continue;
 			}
 			try {
@@ -320,7 +339,7 @@ function startSwarm(root: HTMLElement) {
 			if (seen.has(element)) {
 				// A peça guardada para ganhar par ainda vai receber agente.
 				if (waiting.some((group) => group.includes(element))) continue;
-				element.setAttribute("data-agent-placed", "");
+				appear([element], false);
 				continue;
 			}
 			const box = element.getBoundingClientRect();
@@ -335,7 +354,7 @@ function startSwarm(root: HTMLElement) {
 			waitingSince.set(element, since);
 			if (now - since > STUCK_MS) {
 				seen.add(element);
-				element.setAttribute("data-agent-placed", "");
+				appear([element], false);
 			}
 		}
 	};

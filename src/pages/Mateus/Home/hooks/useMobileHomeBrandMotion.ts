@@ -3,6 +3,7 @@ import { ensureGsapRuntime } from "@/features/scroll/gsapRuntime";
 import usePrefersReducedMotion from "@/features/scroll/usePrefersReducedMotion";
 import { mergeScrolls, simplify, valueAt, type Sample } from "./mobileBrandCurve";
 import { createContactBar } from "./mobileBrandContactBar";
+import { restingRect } from "./restingRect";
 
 type ElementRef = RefObject<HTMLElement | null>;
 type MotionRefs = {
@@ -100,7 +101,7 @@ export default function useMobileHomeBrandMotion({
     const measureBar = (animatedY: number) => {
       const scroll = window.scrollY;
       const nav = navbar.getBoundingClientRect();
-      const brand = logo.getBoundingClientRect();
+      const brand = restingRect(logo);
       const home = page.getBoundingClientRect();
       const projects = portfolio.getBoundingClientRect();
       layout.navHeight = nav.height;
@@ -132,7 +133,7 @@ export default function useMobileHomeBrandMotion({
       cancelScrollAnimations();
       const scroll = window.scrollY;
       measureBar(logoY);
-      const bar = actions.getBoundingClientRect();
+      const bar = restingRect(actions);
       layout.viewportWidth = window.innerWidth;
       layout.viewportHeight = window.innerHeight;
       layout.actionsTop = bar.top + scroll;
@@ -140,9 +141,9 @@ export default function useMobileHomeBrandMotion({
       layout.actionsLeft = bar.left;
       measureContactBar(bar);
       rows.forEach(row => {
-        const box = row.element.getBoundingClientRect();
         const parentTransform = getComputedStyle(row.element.parentElement!).transform;
         row.scale = new DOMMatrixReadOnly(parentTransform).a || 1;
+        const box = restingRect(row.element, row.scale);
         row.top = box.top + scroll;
         row.bottom = box.bottom + scroll;
         row.left = box.left - row.x * row.scale;
